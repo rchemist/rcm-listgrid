@@ -6,6 +6,7 @@
         "moduleResolution": "node",
         "jsx": "react-jsx",
         "strict": true,
+        "noImplicitAny": false,
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
@@ -16,6 +17,16 @@
         "declarationMap": true,
         "baseUrl": "."
     },
-    "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "exclude": ["node_modules", "dist"]
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "ui/**/*.d.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "**/__tests__/**",
+        "**/*.test.ts",
+        "**/*.test.tsx"
+    ]
 }

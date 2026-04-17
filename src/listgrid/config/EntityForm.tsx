@@ -774,9 +774,11 @@ export class EntityForm extends EntityFormExtensions {
         // 이렇게 해야 호출하는 쪽에서 에러 상태임을 인식할 수 있음
         const errors = [];
         if (errorMessage) {
+          // @ts-expect-error STAGE1-baseline: never[] inference; revisit in Stage 6
           errors.push(errorMessage);
         } else if (hasError) {
           // fieldError가 있지만 일반 메시지가 없는 경우, 빈 문자열이라도 추가하여 에러 상태임을 표시
+          // @ts-expect-error STAGE1-baseline: never[] inference; revisit in Stage 6
           errors.push('');
         }
 

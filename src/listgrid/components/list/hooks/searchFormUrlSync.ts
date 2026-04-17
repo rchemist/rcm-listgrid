@@ -44,6 +44,7 @@ export function searchFormToUrlState(
   const sorts = searchForm.getSorts();
   if (sorts.size > 0) {
     // Get the first sort (primary sort)
+    // @ts-expect-error STAGE1-baseline: Map.entries() typed as unknown from any-stub cascade; revisit in Stage 6
     const [field, direction] = Array.from(sorts.entries())[0];
     // Only include if not the default createdAt:DESC
     if (field !== 'createdAt' || direction !== 'DESC') {

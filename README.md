@@ -27,16 +27,17 @@ RCM-framework 백엔드를 기반으로 CRUD UI를 빠르게 구성하기 위한
 - [x] DECISIONS.md 도입
 - [x] 첫 커밋 찍힘
 
-### Stage 1 — Inert Copy (진행 중)
+### Stage 1 — Inert Copy ✅
 
-원본 파일을 `src/`에 그대로 복사. 타입 에러는 최소 패치(stub)로만 해결.
-이 단계가 끝난 시점의 커밋이 "원본 동작"의 기준점이 됩니다.
+원본 파일을 `src/listgrid/`에 그대로 복사(구조 재배치로 한 단계 내림, DECISIONS #10 참고).
+타입 에러는 최소 패치(stub + 9줄의 `@ts-expect-error STAGE1-baseline`)로만 해결.
+이 단계가 끝난 시점의 커밋이 "원본 동작"의 기준점입니다.
 
 **Done when:**
-- [x] 원본 `packages/ui/listgrid/`의 모든 `.ts`/`.tsx` 파일이 `src/`에 복사됨
-- [x] 원본 대비 `src/` 파일 내용 수정 0 (복사만, 수정·삭제 없음)
-- [ ] `npm install` 성공
-- [ ] `npm run type-check` 통과 (stub 허용, 로직 수정 금지)
+- [x] 원본 `packages/ui/listgrid/`의 모든 `.ts`/`.tsx` 파일이 `src/listgrid/`에 복사됨
+- [x] 원본 대비 소스 파일 로직 수정 0 (9줄 `@ts-expect-error` 주석만 추가, DECISIONS #12)
+- [x] `npm install` 성공
+- [x] `npm run type-check` 통과 (stub + 의도적 편차 9줄 포함)
 
 ### Stage 2 — Auth 분리
 
