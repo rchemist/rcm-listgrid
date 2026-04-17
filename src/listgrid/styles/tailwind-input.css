@@ -1,137 +1,27 @@
 /*
  * @rcm/listgrid — Tailwind 빌드 입력 파일.
  *
- * 라이브러리 빌드 시 Tailwind CLI가 이 파일을 처리해서 `dist/styles.css`를
- * 생성합니다. 소비자는 컴파일된 CSS만 import하면 되고, 소비자 쪽에서
+ * 라이브러리 빌드 시 Tailwind CLI가 이 파일을 처리해서 `dist/styles/tailwind.css`
+ * 를 생성합니다. 소비자는 컴파일된 CSS만 import하면 되고, 소비자 쪽에서
  * Tailwind를 설정할 필요가 없습니다.
  *
- * gjcu의 `packages/ui/styles/tailwind.css`를 기반으로, 라이브러리가
- * 실제로 쓰는 부분만 선택적으로 import:
- *   - preflight.css — base reset (* { border: 0 solid ... } 등)
- *   - dark-mode-variables.css — CSS 변수 정의 (--color-bg-panel 등,
- *     .panel / .btn 등의 component class가 이 변수들을 참조)
- *   - sidebar-variables.css — 사이드바 CSS 변수
- *   - form-elements.css — 폼 컨트롤 base 스타일
- *   - (기타 gjcu 전용 features는 생략: datatables, fullcalendar,
- *      sweetalert, scrumboard 등)
+ * **중요: 이 파일은 오직 utility class만 생성합니다.**
  *
- * 뒤이어 @tailwind 디렉티브와 component layer가 이어집니다.
+ * - `@tailwind base` 제외: preflight reset은 호스트가 자기 것을 이미 가지고
+ *   있음 (또는 가지지 않아도 브라우저 기본값으로 동작). 라이브러리가 중복
+ *   preflight를 주입하면 호스트 스타일이 깨짐.
+ * - `@tailwind components` 제외: 라이브러리는 자체 component class
+ *   (.panel, .btn-primary 등)를 정의하지 않음. gjcu 같은 호스트가 이미
+ *   정의한 것을 JSX에서 사용하되, 그 host CSS가 로드되어 있다고 가정.
+ * - `@tailwind utilities` 만 생성: flex, grid, p-*, text-*, md:* 등
+ *   라이브러리 JSX에서 사용하는 utility class CSS를 생성. 호스트가 같은
+ *   utility를 정의해도 동일 규칙이라 충돌 없음.
+ *
+ * gjcu 전용 class (`.panel`, `.btn-primary`, `.bg-dark` 등)는 라이브러리
+ * 출력에 포함되지 않음 — 이들은 gjcu 호스트가 이미 제공하므로 라이브러리
+ * JSX에서 그대로 사용하면 호스트의 CSS로 스타일링됨.
+ * gjcu가 아닌 호스트에서 라이브러리를 쓰면 이들 class는 동작 안 함 (별도
+ * 적용 필요). 그것이 라이브러리 자체의 gjcu 커스텀 클래스 coupling 최소화.
  */
 
-@import './gjcu/preflight.css';
-@import './gjcu/dark-mode-variables.css';
-@import './gjcu/sidebar-variables.css';
-@import './gjcu/form-elements.css';
-
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
-
-/*
- * @layer components — gjcu가 @apply로 합성한 컴포넌트 클래스들을 그대로 포함.
- * panel / btn-* / form-input 등.
- */
-@layer components {
-    html {
-        @apply scroll-smooth;
-    }
-
-    body {
-        background-color: var(--color-bg-secondary);
-        color: var(--color-text-primary);
-    }
-
-    body.dark {
-        background-color: var(--color-bg-primary);
-        color: var(--color-text-primary);
-    }
-
-    /* Panel */
-    .panel {
-        @apply relative rounded-lg p-5 border;
-        background-color: var(--color-bg-panel);
-        border-color: var(--color-border-primary);
-        color: var(--color-text-primary);
-    }
-
-    /* Buttons */
-    .btn {
-        @apply relative flex items-center justify-center rounded-md border px-5 py-2 text-sm font-semibold outline-none transition duration-300 hover:shadow-none !min-h-[36px];
-    }
-
-    .btn-lg {
-        @apply px-7 py-2.5 text-base;
-    }
-
-    .btn-sm {
-        @apply px-2.5 py-1.5 text-xs;
-    }
-
-    .btn[disabled] {
-        @apply cursor-not-allowed opacity-60;
-    }
-
-    .btn-primary {
-        @apply border-primary bg-primary text-white hover:bg-primary/85;
-    }
-
-    .btn-outline-primary {
-        @apply border-primary text-primary shadow-none hover:bg-primary/15 hover:text-primary;
-    }
-
-    .btn-secondary {
-        @apply border-secondary bg-secondary text-white hover:bg-secondary/85;
-    }
-
-    .btn-outline-secondary {
-        @apply border-secondary text-secondary shadow-none hover:bg-secondary/15;
-    }
-
-    .btn-success {
-        @apply border-success bg-success text-white hover:bg-success/85;
-    }
-
-    .btn-outline-success {
-        @apply border-success text-success shadow-none hover:bg-success/15;
-    }
-
-    .btn-danger {
-        @apply border-danger bg-danger text-white hover:bg-danger/85;
-    }
-
-    .btn-outline-danger {
-        @apply border-danger text-danger shadow-none hover:bg-danger/15;
-    }
-
-    .btn-warning {
-        @apply border-warning bg-warning text-white hover:bg-warning/85;
-    }
-
-    .btn-outline-warning {
-        @apply border-warning text-warning shadow-none hover:bg-warning/15;
-    }
-
-    .btn-info {
-        @apply border-info bg-info text-white hover:bg-info/85;
-    }
-
-    .btn-outline-info {
-        @apply border-info text-info shadow-none hover:bg-info/15;
-    }
-
-    .btn-dark {
-        @apply border-dark bg-dark text-white hover:bg-dark/85;
-    }
-
-    .btn-outline-dark {
-        @apply border-dark text-dark shadow-none hover:bg-dark/15;
-    }
-
-    .btn-default {
-        @apply border-white-light bg-white text-dark shadow-none hover:bg-white-dark/10 hover:text-dark;
-    }
-
-    .btn-icon {
-        @apply !p-0 min-h-[36px] w-[36px];
-    }
-}
