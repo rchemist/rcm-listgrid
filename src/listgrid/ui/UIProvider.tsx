@@ -87,6 +87,33 @@ export function useUI(): UIComponents {
 // at render time via Context lookup. Typed as `any` so wrappers can carry
 // compound sub-components (e.g. Table.Th) as static properties without TS
 // complaining, matching the original @gjcu/ui API surface.
+// React inspects components for these properties during rendering. If our
+// Proxy intercepts them and returns wrapper components, React mistakes the
+// function component for a class component and emits noisy warnings. Only
+// PascalCase names (conventional compound children like Table.Th) are
+// forwarded through the compound mechanism; everything else falls through
+// to the real wrapper function's own properties.
+const REACT_INTROSPECTION_PROPS = new Set<string | symbol>([
+    'childContextTypes',
+    'contextTypes',
+    'contextType',
+    'getDerivedStateFromProps',
+    'defaultProps',
+    'propTypes',
+    'displayName',
+    'render',
+    'type',
+    '$$typeof',
+    'compare',
+    'name',
+    'length',
+    'prototype',
+    'call',
+    'apply',
+    'bind',
+    'toString',
+]);
+
 function makeWrapper<K extends keyof UIComponents>(name: K): any {
     const Wrapper: any = (props: any) => {
         const comps = useUI();
@@ -99,28 +126,28 @@ function makeWrapper<K extends keyof UIComponents>(name: K): any {
     Wrapper.displayName = `rcm.${String(name)}`;
     return new Proxy(Wrapper, {
         get(target, prop, receiver) {
-            // Forward unknown static property access (Table.Th, Tooltip.Content, etc.)
-            // to the host-provided component when it has been looked up.
-            // We can't look up at import time, so we return a wrapper that does so lazily.
             if (prop in target) return Reflect.get(target, prop, receiver);
             if (typeof prop === 'symbol') return Reflect.get(target, prop, receiver);
-            // Return a sub-wrapper that resolves the compound on first render.
-            const subKey = prop as string;
+            if (REACT_INTROSPECTION_PROPS.has(prop)) return undefined;
+            // Only treat PascalCase names as compound children. Lowercase access
+            // (React internal checks, stray property access) returns undefined.
+            const key = prop as string;
+            if (!/^[A-Z]/.test(key)) return undefined;
             const SubWrapper: any = (subProps: any) => {
                 const comps = useUI();
                 const Parent: any = comps[name];
                 if (!Parent) {
                     throw new Error(`[@rcm/listgrid] UI component "${String(name)}" missing from UIProvider.`);
                 }
-                const Sub = Parent[subKey];
+                const Sub = Parent[key];
                 if (!Sub) {
                     throw new Error(
-                        `[@rcm/listgrid] Compound "${String(name)}.${subKey}" missing on host component.`
+                        `[@rcm/listgrid] Compound "${String(name)}.${key}" missing on host component.`
                     );
                 }
                 return <Sub {...subProps} />;
             };
-            SubWrapper.displayName = `rcm.${String(name)}.${subKey}`;
+            SubWrapper.displayName = `rcm.${String(name)}.${key}`;
             return SubWrapper;
         },
     });

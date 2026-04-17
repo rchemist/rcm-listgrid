@@ -325,3 +325,67 @@ framework-agnostic `createParser`와 `parseAsString`은 listgrid 내부에 단�
 - `@rcm/listgrid` core — peer: react, react-dom, @tabler/icons-react, @headlessui/react (+11 optional)
 - `@rcm/listgrid/next` — peer: next, nuqs 추가 요구
 - non-Next 프로젝트(예: Vite + 자체 Router)가 `RouterProvider`/`UrlStateProvider`에 자기 어댑터 주입하면 동작 가능한 구조
+
+---
+
+## 2026-04-17 (Stage 8)
+
+### #48 Stage 8 착수: 실전 소비자 연결로 검증
+Stage 7까지는 타입체크/구조 리팩토링만 했고 한 번도 실행한 적 없음. 실사용 가능성 검증을 위해 `~/dev/rcm-listgrid-sample` (Vite + React, non-Next)을 만들어 `file:../rcm-listgrid`로 연결.
+**Why**: "framework-free"가 이론인지 실재인지 증명 필요.
+
+### #49 Stage 8에서 발견된 실제 버그들
+**런타임에서만 보이는 플랫폼 결합이 여전히 존재했음.** Stage 7 완료라 선언했지만 검증 안 한 채였음:
+- `process.env.NEXT_PUBLIC_*` 7곳 — 브라우저에서 `process` undefined
+- `NodeJS.Timeout` 2곳 — 브라우저 TS lib에 없음
+- `require('officecrypto-tool')` + `Buffer.from()` — CJS require는 Vite/브라우저에서 fail
+- `*.module.css` import 4곳 — 산출물에 CSS 없음 (inert copy 때 .css 파일 미복사)
+- `UIProvider` Proxy가 React 내부 introspection(`childContextTypes`, `getDerivedStateFromProps` 등)까지 가로채 "class component" 오인시켜 경고 폭탄
+- 라이브러리가 non-standard 속성명(`readonly` vs `readOnly`, `placeHolder` vs `placeholder`)을 UI 킷에 전달 — DOM까지 누수 시 경고
+
+### #50 RuntimeConfig registry 도입
+`src/listgrid/config/RuntimeConfig.ts`: `configureRuntime({cacheControl, useServerSideCache, searchFormHashKey, debugListGridPerformance, isDevelopment, kakaoMapAppKey, cryptKey})`. 모든 `process.env.NEXT_PUBLIC_*` 접근을 이 registry 조회로 교체.
+**Why**: Next(`NEXT_PUBLIC_*`)·Vite(`import.meta.env`)·서버(`process.env`) 어떤 환경이든 host가 자기 방식으로 값을 읽어 `configureRuntime` 호출하면 됨. 라이브러리는 plain JS 런타임 값만 본다.
+
+### #51 ExcelProvider 리팩토링: Node-only 기능 lazy registry화
+`officecrypto-tool` (암호화 Excel)과 `Buffer`는 Node 전용. 모듈 최상단 `require()`를 제거하고 `registerExcelCrypto(impl)` + 런타임 `globalThis.Buffer` 조회로 lazy 전환. 비밀번호 없는 Excel 익스포트는 브라우저에서 정상 동작, 암호화는 host가 명시 등록 시에만 가능.
+**Why**: 원본이 require 호출을 최상단에 둬서 import만 해도 브라우저 번들 실패. 실사용 feature를 optional로 분리.
+
+### #52 UIProvider Proxy 개선: React introspection 차단
+`makeWrapper`의 Proxy `get` trap이 모든 property 접근을 compound child로 오해해서 `childContextTypes`, `getDerivedStateFromProps` 등 React 내부 체크에도 함수 반환 → React 경고. 수정:
+1. `REACT_INTROSPECTION_PROPS` Set으로 알려진 internal property 제외
+2. PascalCase로 시작하는 이름만 compound로 간주 (`Table.Th` OK, `childContextTypes` 거부)
+**Why**: Phase B 렌더링 실험 중 콘솔 에러 23개 관찰 → Proxy 디자인 결함 확인. 실전 검증 없이 Stage 3에서 넘겼을 결함.
+
+### #53 라이브러리 빌드 파이프라인 정식화
+- `tsconfig.build.json`: `noEmit=false`, `outDir=dist`, declaration·sourcemap 활성
+- `package.json`: `main`/`types`/`exports`가 `dist/` 가리키도록 변경. `files: ["dist"]` 추가.
+- `npm run build`로 6.1MB dist 산출 (.js + .d.ts + .js.map + .d.ts.map)
+- 소비자는 이제 `.ts` 소스를 재타입체크하지 않음 — `.d.ts`만 보므로 ambient stub이 소비자까지 흘러갈 필요 없음
+
+### #54 Stage 8 Phase B 실전 렌더 검증 결과
+`~/dev/rcm-listgrid-sample/src/App.tsx`에서:
+- `<AuthProvider>` + `<UIProvider components={minimalUIComponents}>` + `<RouterProvider value={minimalRouterServices}>` + `<UrlStateProvider value={minimalUrlStateServices}>` 래핑
+- `configureRuntime`/`configureApiClient`/`configureMessages` mock 주입
+- `new EntityForm('user', '/api/users').addFields([StringField('name'), StringField('email'), NumberField('age')])`
+- `<ViewEntityForm entityForm={form} />` 렌더
+
+**실측 결과** (Playwright headless 브라우저로 확인):
+- 페이지 로드 성공, 콘솔 **에러 0**
+- DOM에 "신규 입력" 타이틀, "저장"/"목록" 버튼, "기본 정보" 섹션
+- 실제 입력 가능한 `<input>` 3개 (이름/이메일/나이) 렌더
+- 남은 warning 1개: `xlsx-js-style`의 `stream` 모듈 browser externalization — Excel 익스포트 실사용 시에만 문제, smoke test 범위 밖
+
+### #55 host adapter 책임 문서화
+UIProvider 컴포넌트들이 받는 props 중 일부는 **library 내부 상태**(`entityForm`, `clearError`, `helpText`, `session`, `field`, `config`, `subCollectionEntity`, `updateEntityForm`, `resetEntityForm`, `onError`, `viewType`, `renderType`)로, **host 어댑터가 DOM에 흘려보내지 않고 걸러내거나 자체 로직에 사용할 책임**이 있음. 또한 `readonly`/`placeHolder` 등 non-standard casing을 받아 `readOnly`/`placeholder`로 매핑하는 것도 host 책임.
+**Why**: 원본 `@gjcu/ui`가 이런 UI 킷이었음. 범용 계약을 엄격히 하려면 prop 이름을 정규화할 수도 있지만, 그 작업은 수많은 call site 수정 필요. 지금은 "host는 자기 UI 킷에서 filter/rename 계층을 가진다"는 규약으로 정리.
+
+### #56 Stage 8 진정한 완료 판단
+- ✅ 라이브러리 빌드 성공 (`dist/` 생성)
+- ✅ 소비자 빌드 성공 (Vite production, 1.4MB 번들)
+- ✅ 소비자 dev 서버 정상 부팅
+- ✅ **실제 컴포넌트 렌더링 검증** — `<ViewEntityForm>` with 3 fields, DOM 확인 완료
+- ✅ 콘솔 에러 0 (warning 1: xlsx browser externalization, 예상됨)
+- ⚠️ 저장/fetch 플로우는 아직 구동 안 됨 — mock API만 연결, click + API round-trip 테스트는 안 함
+- ⚠️ UIProvider prop 필터 계약은 **host adapter 책임**으로 결정 (library가 강제 안 함)
+- ⚠️ 실 스타일링 없음 (Tailwind 등) — 입력은 되지만 예쁘지 않음

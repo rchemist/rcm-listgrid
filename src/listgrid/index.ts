@@ -25,6 +25,10 @@ export type { ModalOptions } from './store';
 // Field extension registry — host apps register domain-specific field classes.
 export { registerSmsHistoryField, createSmsHistoryField } from './extensions/FieldExtensions';
 
+// Runtime configuration — replaces hard-coded process.env.NEXT_PUBLIC_* access.
+export { configureRuntime, getRuntimeConfig } from './config/RuntimeConfig';
+export type { RuntimeConfig } from './config/RuntimeConfig';
+
 // Menu permission checker — host apps register a real checker that decides
 // whether the current session may access a given URL / menu alias.
 export { registerMenuPermissionChecker, checkAdminMenuPermission, DEFAULT_MENU_ALIAS } from './menu';
