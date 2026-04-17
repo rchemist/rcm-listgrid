@@ -219,20 +219,163 @@ export type Currency = any;
 export type Double = any;
 export type PasswordStrength = any;
 
-// FileFieldValue is used both as a type annotation AND with `instanceof` in the
-// original source (e.g., FileField.tsx). Ship a class so instanceof checks work;
-// the class itself is a minimal any-shape holder.
-export class FileFieldValue {
-    existFiles: any[] = [];
-    newFiles: any[] = [];
-    [key: string]: any;
+// FileFieldValue — full port of the class that library code (FileField.tsx,
+// FormField initialization, etc.) calls on at runtime. Previously stubbed as
+// a minimal any-shape holder, which broke `fileValue.isDirty()` / `.clone()` /
+// `.addNewValue()` at render time. Mirrors the original
+// `packages/ui/form/FileUploadInput.tsx` semantics exactly.
 
-    static create(...args: any[]): FileFieldValue {
-        const v = new FileFieldValue();
-        // Minimal behavior: host can override via subclass if richer factory
-        // semantics are needed. Args ignored here.
-        void args;
-        return v;
+export interface FileInfo {
+    url: string;
+    id: string;
+    deleteType?: 'new' | 'exist' | 'none';
+    fileSize?: number;
+    fileName?: string;
+}
+
+export interface IFileField {
+    existFiles?: FileInfo[];
+    newFiles?: FileInfo[];
+    deleteFiles?: FileInfo[];
+}
+
+export class FileFieldValue implements IFileField {
+    existFiles: FileInfo[] = [];
+    newFiles: FileInfo[] = [];
+    deleteFiles: FileInfo[] = [];
+
+    static create(data?: any): FileFieldValue {
+        const value = new FileFieldValue();
+        if (!data) return value;
+
+        if (data instanceof FileFieldValue) {
+            value.newFiles = [...(data.newFiles || [])];
+            value.existFiles = [...(data.existFiles || [])];
+            value.deleteFiles = [...(data.deleteFiles || [])];
+            return value;
+        }
+
+        value.newFiles = data.newFiles ?? [];
+        value.existFiles = data.existFiles ?? [];
+        value.deleteFiles = data.deleteFiles ?? [];
+        return value;
+    }
+
+    addNewValue(fileInfo: FileInfo): boolean {
+        if (fileInfo.id === undefined || fileInfo.id === null || fileInfo.id === '') return false;
+        const exist = this.newFiles.some(v => v.url === fileInfo.url);
+        if (!exist) {
+            this.newFiles.push(fileInfo);
+            return true;
+        }
+        return false;
+    }
+
+    addExistValue(fileInfo: FileInfo): boolean {
+        if (fileInfo.id === undefined || fileInfo.id === null || fileInfo.id === '') return false;
+        const inNew = this.newFiles.some(v => v.url === fileInfo.url);
+        if (inNew) return false;
+        const inExist = this.existFiles.some(v => v.url === fileInfo.url);
+        if (inExist) return false;
+        this.existFiles.push(fileInfo);
+        return true;
+    }
+
+    addDeleteValue(fileInfo: FileInfo): FileInfo | undefined {
+        const already = this.deleteFiles.some(v => v.url === fileInfo.url);
+        if (already) return undefined;
+
+        let exist = false;
+        let result: 'new' | 'exist' | 'none' = 'none';
+
+        for (let i = 0; i < this.existFiles.length; i++) {
+            if (this.existFiles[i]!.url === fileInfo.url) {
+                fileInfo.id = this.existFiles[i]!.id;
+                this.existFiles.splice(i, 1);
+                exist = true;
+                result = 'exist';
+                break;
+            }
+        }
+
+        for (let i = 0; i < this.newFiles.length; i++) {
+            if (this.newFiles[i]!.url === fileInfo.url) {
+                fileInfo.id = this.newFiles[i]!.id;
+                this.newFiles.splice(i, 1);
+                exist = true;
+                result = 'new';
+                break;
+            }
+        }
+
+        if (exist) {
+            this.deleteFiles.push({ ...fileInfo, deleteType: result });
+        }
+
+        return { ...fileInfo, deleteType: result };
+    }
+
+    getValue(): string {
+        try {
+            return JSON.stringify(this);
+        } catch {
+            return '';
+        }
+    }
+
+    getCurrentFileList(): FileInfo[] {
+        const all = [...this.existFiles, ...this.newFiles];
+        return all.filter(file => !this.deleteFiles.some(d => d.url === file.url));
+    }
+
+    isDirty(): boolean {
+        return (
+            this.newFiles.length > 0 ||
+            (this.deleteFiles.length > 0 && this.existFiles.length > 0)
+        );
+    }
+
+    hasValue(): boolean {
+        return (
+            this.existFiles.length > 0 ||
+            this.newFiles.length > 0 ||
+            this.deleteFiles.length > 0
+        );
+    }
+
+    rollbackDeleteFile(file: FileInfo): void {
+        for (let i = 0; i < this.deleteFiles.length; i++) {
+            if (this.deleteFiles[i]!.url === file.url) {
+                this.deleteFiles.splice(i, 1);
+                if (file.deleteType === 'new') {
+                    this.newFiles.push({ ...file, deleteType: undefined });
+                } else if (file.deleteType === 'exist') {
+                    this.existFiles.push({ ...file, deleteType: undefined });
+                }
+                break;
+            }
+        }
+    }
+
+    getRenderKey(): string {
+        let key = '';
+        this.existFiles.forEach(v => { key += 'exist_' + v.id; });
+        this.newFiles.forEach(v => { key += 'new_' + v.id; });
+        this.deleteFiles.forEach(v => { key += 'delete_' + v.id; });
+        let hash = 0;
+        for (let i = 0; i < key.length; i++) {
+            hash = ((hash << 5) - hash) + key.charCodeAt(i);
+            hash = hash & hash;
+        }
+        return String(hash);
+    }
+
+    clone(): FileFieldValue {
+        const c = new FileFieldValue();
+        c.deleteFiles = [...this.deleteFiles];
+        c.existFiles = [...this.existFiles];
+        c.newFiles = [...this.newFiles];
+        return c;
     }
 }
 
