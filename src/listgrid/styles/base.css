@@ -283,6 +283,53 @@
         gap: var(--rcm-space-sm);
     }
 
+    .rcm-gap-xs { gap: var(--rcm-space-xs); }
+    .rcm-gap-sm { gap: var(--rcm-space-sm); }
+    .rcm-gap-md { gap: var(--rcm-space-md); }
+
+    .rcm-ml-auto { margin-left: auto; }
+    .rcm-radius-full { border-radius: var(--rcm-radius-full); }
+    .rcm-bg-info-surface { background: var(--rcm-color-info-surface); }
+
+    .rcm-skeleton-search-input {
+        flex: 1 1 auto;
+        max-width: 28rem;
+    }
+
+    .rcm-skeleton-subcollection-bar {
+        margin-bottom: var(--rcm-space-md);
+        padding: 0 var(--rcm-space-sm);
+    }
+
+    .rcm-skeleton-popup-container {
+        max-height: 70vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .rcm-skeleton-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .rcm-skeleton-thead {
+        border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+    }
+
+    .rcm-skeleton-th-checkbox { width: 50px; padding: var(--rcm-space-sm); }
+    .rcm-skeleton-th { padding: var(--rcm-space-sm); text-align: left; }
+    .rcm-skeleton-tr { border-bottom: var(--rcm-border-width) solid var(--rcm-color-border); }
+    .rcm-skeleton-td-checkbox { width: 50px; padding: var(--rcm-space-sm); }
+    .rcm-skeleton-td { padding: var(--rcm-space-sm); }
+
+    .rcm-skeleton-pagination {
+        display: flex;
+        justify-content: center;
+        padding: var(--rcm-space-xl) 0;
+    }
+
     /* ------------------------------------------------------------------ *
      * Readonly helper (replaces packages/ui readonlyClass)
      * ------------------------------------------------------------------ */
