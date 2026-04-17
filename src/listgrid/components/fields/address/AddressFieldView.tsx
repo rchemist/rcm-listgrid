@@ -7,6 +7,7 @@ import {InputRendererProps} from '../../../config/Config';
 import {EntityForm} from '../../../config/EntityForm';
 import {useEffect, useState} from "react";
 import {Address} from "./AddressMapField";
+import {getRuntimeConfig} from '../../../config/RuntimeConfig';
 
 interface AddressFieldViewProps extends InputRendererProps {
   showMap?: boolean;
@@ -14,7 +15,7 @@ interface AddressFieldViewProps extends InputRendererProps {
   entityForm: EntityForm;
 }
 
-const kakaoMapApiKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY ?? '';
+const kakaoMapApiKey = getRuntimeConfig().kakaoMapAppKey;
 
 export const AddressFieldView = ({entityForm, onChange, ...props}: AddressFieldViewProps) => {
 

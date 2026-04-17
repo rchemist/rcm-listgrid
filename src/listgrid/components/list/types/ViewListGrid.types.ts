@@ -8,8 +8,9 @@ import {ListableFormField} from "../../fields/abstract";
 import {ListGridHeaderButtonProps} from "./ListGridHeader.types";
 import {ReactNode} from "react";
 import {Session} from '../../../auth/types';
+import {getRuntimeConfig} from '../../../config/RuntimeConfig';
 
-export const searchFormHashKey = process.env.NEXT_PUBLIC_SEARCHFORM_HASH ?? 'rcm-searchform'
+export const searchFormHashKey: string = getRuntimeConfig().searchFormHashKey;
 
 export interface SelectionActionButton {
   label: string | ((checkedItems: string[]) => string);

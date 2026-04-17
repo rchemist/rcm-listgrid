@@ -7,7 +7,8 @@ import {Flex} from "../../../ui";
 import {Grid} from "../../../ui";
 import {Modal} from "../../../ui";
 import clsx from "clsx";
-import classes from './AddressField.module.css';
+// CSS module removed in Stage 8 (host app supplies styling)
+const classes: Record<string, string> = {};
 import DaumPostcode from "react-daum-postcode";
 
 interface PostCodeSelectorProps {

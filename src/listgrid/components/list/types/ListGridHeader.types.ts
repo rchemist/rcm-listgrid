@@ -5,6 +5,7 @@ import {isTrue} from '../../../utils/BooleanUtil';
 import {ReactNode} from "react";
 import {SelectionOptions} from "./ViewListGrid.types";
 import {Session} from '../../../auth/types';
+import {getRuntimeConfig} from '../../../config/RuntimeConfig';
 
 export interface ListGridHeaderProps extends ListGridHeaderButtonProps {
     buttons?: ((props: ListGridHeaderButtonProps) => Promise<ReactNode>)[];
@@ -36,7 +37,4 @@ export interface ListGridHeaderProps extends ListGridHeaderButtonProps {
     checkedItems?: string[];
   }
   
-  export const useServerSideCache = isTrue(
-    process.env.NEXT_PUBLIC_USE_SERVERSIDE_CACHE,
-    true
-  );
+  export const useServerSideCache = isTrue(getRuntimeConfig().useServerSideCache, true);

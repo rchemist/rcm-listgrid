@@ -14,7 +14,8 @@ import {Flex} from "../ui";
 import {Grid} from "../ui";
 import {Paper} from "../ui";
 import {FC, ReactNode, useEffect, useState} from "react";
-import classes from "./DataImport.module.css";
+// CSS module removed in Stage 8 (host app supplies styling)
+const classes: Record<string, string> = {};
 import {DataField, DataRow, DataTransferResult} from '../transfer/Type';
 import {DataImportResultView, ImportErrorView} from '../transfer/DataImportResultView';
 import {defaultString} from '../utils/StringUtil';

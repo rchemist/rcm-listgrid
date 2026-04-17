@@ -2,6 +2,7 @@ import {EntityForm} from '../../../../config/EntityForm';
 import {showConfirm} from "../../../../message";
 import {isTrue} from '../../../../utils/BooleanUtil';
 import {getExternalApiData} from "../../../../misc";
+import {getRuntimeConfig} from '../../../../config/RuntimeConfig';
 
 interface CacheClearButtonProps {
   entityForm: EntityForm;
@@ -10,7 +11,7 @@ interface CacheClearButtonProps {
   onRefresh: () => void;
 }
 
-const cacheControl = isTrue(process.env.NEXT_PUBLIC_CACHE_CONTROL, false);
+const cacheControl = isTrue(getRuntimeConfig().cacheControl, false);
 
 export const CacheClearButton: React.FC<CacheClearButtonProps> = ({
   entityForm,

@@ -9,13 +9,14 @@
  * 2. Remove imports and usage from ViewListGrid.tsx and useListGridLogic.ts
  */
 
+import {getRuntimeConfig} from '../../../config/RuntimeConfig';
+
 const isEnabled = (): boolean => {
   if (typeof window === 'undefined') return false;
-  // 환경변수가 'false'로 명시된 경우에만 비활성화, 그 외에는 개발 환경에서 활성화
-  if (process.env.NEXT_PUBLIC_DEBUG_LISTGRID_PERFORMANCE === 'false') return false;
-  if (process.env.NEXT_PUBLIC_DEBUG_LISTGRID_PERFORMANCE === 'true') return true;
-  // 기본값: 개발 환경에서는 활성화
-  return process.env.NODE_ENV === 'development';
+  const cfg = getRuntimeConfig();
+  if (cfg.debugListGridPerformance === false) return false;
+  if (cfg.debugListGridPerformance === true) return true;
+  return cfg.isDevelopment;
 };
 
 const PREFIX = '[ListGrid Performance]';

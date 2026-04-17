@@ -9,11 +9,16 @@ import * as CryptoJS from 'crypto-js';
 
 import {isTrue} from "./BooleanUtil";
 import {stringify} from "./jsonUtils";
+import {getRuntimeConfig} from '../config/RuntimeConfig';
 
-const secretKey = process.env.NEXT_PUBLIC_SIMPLE_SECRET_KEY ?? 'rcm-token-secret'; // 사용할 비밀 키
+// Lazy-resolved: call getRuntimeConfig() at use time so host-side
+// configureRuntime({ cryptKey: ... }) can run after module import.
+function secretKey(): string {
+  return getRuntimeConfig().cryptKey || 'rcm-token-secret';
+}
 
 export function encrypt(input: string, compress?: boolean): string {
-  let value: string = CryptoJS.AES.encrypt(input, secretKey).toString();
+  let value: string = CryptoJS.AES.encrypt(input, secretKey()).toString();
 
   if (isTrue(compress)) {
   }
@@ -29,7 +34,7 @@ export function decrypt(ciphertext: string, decompress?: boolean): string {
   }
 
 
-  const bytes = CryptoJS.AES.decrypt(text, secretKey);
+  const bytes = CryptoJS.AES.decrypt(text, secretKey());
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 

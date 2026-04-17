@@ -39,7 +39,32 @@ export async function logExcelDownload(usePassword: boolean, condition?: Record<
   }
 }
 
-const officeCrypto = require('officecrypto-tool');
+// Password-protected Excel encryption is Node-only (officecrypto-tool + Buffer).
+// Lazy-resolved so browser bundles don't blow up on import; host apps that need
+// the feature install `officecrypto-tool` as a peer and call
+// `registerExcelCrypto(require('officecrypto-tool'))` at bootstrap.
+let officeCrypto: any = null;
+export function registerExcelCrypto(impl: any): void {
+  officeCrypto = impl;
+}
+function mustOfficeCrypto(): any {
+  if (!officeCrypto) {
+    throw new Error(
+      '[@rcm/listgrid] password-protected Excel export requires officecrypto-tool. ' +
+        "Install it and call registerExcelCrypto(require('officecrypto-tool'))."
+    );
+  }
+  return officeCrypto;
+}
+function toNodeBuffer(data: any): any {
+  const B: any = (globalThis as any).Buffer;
+  if (!B) {
+    throw new Error(
+      '[@rcm/listgrid] password-protected Excel export needs a Node Buffer polyfill in the browser.'
+    );
+  }
+  return B.from(data);
+}
 
 export const ExcelDownload = async (props: ExcelDownloadProps) => {
   try {
@@ -152,15 +177,15 @@ export const ExcelDownload = async (props: ExcelDownloadProps) => {
     let finalBlob: Blob;
     if (props.password) {
       // `officecrypto-tool`로 암호화
-      const buffer = Buffer.from(xlsx);
-      const encryptedData = await officeCrypto.encrypt(buffer, {
+      const buffer = toNodeBuffer(xlsx);
+      const encryptedData = await mustOfficeCrypto().encrypt(buffer, {
         password: props.password,
       });
       finalBlob = new Blob([encryptedData], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
 
-      const isEncrypted = await officeCrypto.isEncrypted(encryptedData);
+      const isEncrypted = await mustOfficeCrypto().isEncrypted(encryptedData);
 
       if (!isEncrypted) {
         throw new Error('Failed to encrypt the file');
@@ -194,12 +219,12 @@ export async function saveExcelFile(
   const xlsx = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   let finalBlob: Blob;
   if (password) {
-    const buffer = Buffer.from(xlsx);
-    const encryptedData = await officeCrypto.encrypt(buffer, { password });
+    const buffer = toNodeBuffer(xlsx);
+    const encryptedData = await mustOfficeCrypto().encrypt(buffer, { password });
     finalBlob = new Blob([encryptedData], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    const isEncrypted = await officeCrypto.isEncrypted(encryptedData);
+    const isEncrypted = await mustOfficeCrypto().isEncrypted(encryptedData);
     if (!isEncrypted) {
       throw new Error('Failed to encrypt the file');
     }

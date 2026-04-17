@@ -56,7 +56,7 @@ export const ViewListGridWrapper: React.FC<OptimizedViewListGridWrapperProps> = 
 
   useEffect(() => {
     let isMounted = true;
-    let timeoutId: NodeJS.Timeout | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     (async () => {
       if (anonymous) {

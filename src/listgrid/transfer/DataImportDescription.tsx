@@ -12,7 +12,8 @@ import {Flex} from "../ui";
 import {ReactNode} from "react";
 import {DataField} from '../transfer/Type';
 import {defaultString} from '../utils/StringUtil';
-import styles from './DataImportDescription.module.css';
+// CSS module removed in Stage 8 (host app supplies styling)
+const styles: Record<string, string> = {};
 import clsx from "clsx";
 import {Tooltip} from "../ui";
 

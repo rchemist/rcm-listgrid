@@ -18,8 +18,8 @@ import {FieldRenderParameters, FilterRenderParameters} from '../../config/Entity
 import {TagsInput} from "../../ui";
 import {TagValidationResult} from "../../form/TagsInput/types";
 import {isEmpty} from "../../utils";
-import classes from "./TagField.module.css";
-
+// CSS module removed in Stage 8 (host app supplies styling)
+const classes: Record<string, string> = {};
 interface TagFieldProps extends MultipleOptionalFieldProps {
   tagValidation?: (value: string) => TagValidationResult | Promise<TagValidationResult>;
 }

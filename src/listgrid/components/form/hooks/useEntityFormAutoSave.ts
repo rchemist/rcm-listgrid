@@ -37,7 +37,7 @@ export function useEntityFormAutoSave({
   enabled,
   autoSaveKey,
 }: UseEntityFormAutoSaveOptions) {
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRestoredRef = useRef(false);
 
   // 스토리지 키 생성
