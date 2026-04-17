@@ -194,6 +194,36 @@ Stage 3a 중 Python regex 치환에서 `match.group(2)`가 None일 때 문자열
 
 ---
 
+## 2026-04-17 (Stage 5)
+
+### #31 ApiClient 계약 확정 (src/listgrid/api/ApiClient.ts)
+```ts
+interface ApiClient {
+    callExternalHttpRequest<T>(options: ApiRequestOptions): Promise<ResponseData<T>>;
+    getExternalApiData<T>(urlOrOptions: string | ApiRequestOptions): Promise<ResponseData<T>>;
+    getExternalApiDataWithError<T>(urlOrOptions: string | ApiRequestOptions): Promise<ResponseData<T>>;
+}
+```
+`configureApiClient(client)` 호출로 주입. 미등록 시 호출 함수가 throw (디버깅성).
+**Why**:
+- 3개 메서드 모두 필요 — 원본 call site가 구분해 사용.
+- `string | ApiRequestOptions` 오버로드 — 원본 코드가 `getExternalApiDataWithError(url)`와 `getExternalApiDataWithError({url, method, formData})` 두 형태 혼용.
+- non-React 컨텍스트 호출이 많아 module-scope registry (signOut/Messages와 동일 패턴).
+
+### #32 ResponseData class 유지
+원본이 `new ResponseData()` 후 필드 세팅하는 패턴을 여러 곳에서 사용. interface가 아닌 class로 유지.
+**Why**: 원본 call site 6곳 이상이 `new ResponseData()` 호출. interface로 바꾸면 factory 함수 호출로 전부 리팩토링 필요 — 범위 밖.
+
+### #33 `IEntityErrorBody.fieldError` — Map과 Record 양쪽 수용
+원본 코드가 `fieldError` 를 `Map<string, string[]>` 이나 `Record<string, string[]>` 어느 쪽이든 처리. 파싱 로직(`processApiError`)이 `instanceof Map` 체크 후 분기.
+**Why**: 백엔드 응답 직렬화 방식에 따라 둘 다 나올 수 있음. 타입으로도 양쪽 허용해 call site 수정 없이 호환.
+
+### #34 src/api/ 형제 stub 제거
+Stage 1에서 만든 `src/api/types.d.ts`, `src/api/types/EntityError.d.ts`, `src/api/types/ResponseData.d.ts` 제거. 원본 파일들의 `../../api/types/*` 임포트를 `../../api` (새 위치 `src/listgrid/api/`)로 재작성. 한 `../` 레벨 감소 패턴(Stage 2 auth와 동일).
+**Why**: stub이 실타입 구현으로 대체됨. 여전히 남아있으면 타입 안전성 후퇴.
+
+---
+
 ## Open Questions
 
 작업 중 떠오른 미결 이슈. 결정되면 날짜 로그로 이동.

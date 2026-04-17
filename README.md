@@ -88,15 +88,21 @@ core / required peer / optional peer로 재분류.
 - `xlsx-js-style` + `file-saver`: Excel 익스포트 (`DataExporter`, `ExcelProvider`) 사용 시.
 - `sweetalert2` + `sweetalert2-react-content`: `ViewApiSpecification`, `XrefPriceMappingView`가 직접 사용. 향후 Stage 6에서 `MessageProvider`로 치환 예정.
 
-### Stage 5 — 백엔드 계약 명시화
+### Stage 5 — 백엔드 계약 명시화 ✅
 
 rcm-framework 백엔드의 요청/응답 스키마를 타입으로 고정. API 클라이언트를
-Provider로 주입 가능하게.
+registry로 주입 가능하게.
 
 **Done when:**
-- [ ] API 요청/응답 타입이 `src/` 내부에 명시적으로 정의됨(암묵적 `any` 제거)
-- [ ] `ApiClientProvider` 또는 동등한 주입 지점 존재
-- [ ] 백엔드 버전 호환 범위가 README에 명시됨
+- [x] API 요청/응답 타입이 `src/listgrid/api/types.ts`에 명시 — `IEntityError`, `IEntityErrorBody`, `ResponseData<T>` (class + `isError()` 메서드)
+- [x] `configureApiClient()` 주입 지점 존재 (`src/listgrid/api/ApiClient.ts`). `ApiClient` 인터페이스: `callExternalHttpRequest(options)`, `getExternalApiData(urlOrOptions)`, `getExternalApiDataWithError(urlOrOptions)`
+- [x] 백엔드 호환 범위 README에 명시 (아래)
+
+**백엔드 호환:**
+- `rcm-framework` Java 백엔드 (Spring Boot 3.x 기반) 프로젝트용으로 설계.
+- 요청은 JSON body 또는 SearchForm. 응답은 `{data, status, error?, entityError?}` 래퍼.
+- `IEntityError.fieldError`는 Map 또는 Record 양쪽 형태 모두 파싱 (호환).
+- host의 ApiClient 구현은 HTTP transport(fetch/axios/next-server-actions)·auth header·CSRF·재시도 정책을 책임짐. 라이브러리는 transport를 알지 않음.
 
 ### Stage 6 — 필드/폼 로직 정리
 

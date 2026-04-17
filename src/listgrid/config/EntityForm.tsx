@@ -27,7 +27,7 @@ import {
   isTrue,
   parse
 } from '../utils';
-import {ResponseData} from '../../api/types'
+import {ResponseData} from '../api'
 import {EntityTab} from './EntityTab';
 import {SubCollectionField} from './SubCollectionField';
 import {Session, useSession} from '../auth';

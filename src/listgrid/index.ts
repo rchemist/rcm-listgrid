@@ -25,6 +25,14 @@ export type { ModalOptions } from './store';
 // Field extension registry — host apps register domain-specific field classes.
 export { registerSmsHistoryField, createSmsHistoryField } from './extensions/FieldExtensions';
 
+// API client — host apps configure an ApiClient that fulfils RCM-framework
+// REST conventions. See src/listgrid/api/ApiClient.ts.
+export {
+    configureApiClient, callExternalHttpRequest, getExternalApiData, getExternalApiDataWithError,
+    ResponseData, createResponseData,
+} from './api';
+export type { ApiClient, ApiRequestOptions, ApiMethod, IEntityError, IEntityErrorBody } from './api';
+
 // Misc helpers & constants inherited from the original @gjcu/ui root barrel.
 export {
     RegexAlias, RegexEmailAddress, RegexLowerEnglishNumber, RegexPasswordNormal,

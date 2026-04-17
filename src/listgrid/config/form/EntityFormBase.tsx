@@ -1,6 +1,6 @@
 import {defaultString, isBlank, isEmpty, isTrue} from "../../utils";
 import {Session} from '../../auth';
-import {ResponseData} from "../../../api/types/ResponseData";
+import {ResponseData} from "../../api";
 import {ReactNode} from "react";
 import {FormField, ListableFormField, OptionalField} from '../../components/fields/abstract';
 import {PostFetchListData} from '../../components/list/types/ViewListGrid.types';

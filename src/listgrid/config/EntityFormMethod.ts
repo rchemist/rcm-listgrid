@@ -1,4 +1,4 @@
-import {IEntityError} from '../../api/types/EntityError';
+import {IEntityError} from '../api';
 import { isTrue } from '../utils/BooleanUtil';
 import { FieldError } from "./EntityFormTypes";
 import { parse } from '../utils/jsonUtils';

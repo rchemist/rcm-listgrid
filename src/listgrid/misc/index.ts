@@ -253,26 +253,20 @@ export function getDefinedDates(type: DefinedDateType): { start: Date; end: Date
     return { start, end };
 }
 
-// -- API stubs (real implementations from Stage 5 ApiClientProvider) -------
-export const callExternalHttpRequest: any = (..._args: any[]) => {
-    throw new Error('[@rcm/listgrid] callExternalHttpRequest not configured. Stage 5 ApiClientProvider will supply this.');
-};
-export const getExternalApiData: any = (..._args: any[]) => {
-    throw new Error('[@rcm/listgrid] getExternalApiData not configured. Stage 5.');
-};
-export const getExternalApiDataWithError: any = (..._args: any[]) => {
-    throw new Error('[@rcm/listgrid] getExternalApiDataWithError not configured. Stage 5.');
-};
+// -- API re-exports (host-supplied ApiClient; see src/listgrid/api) --------
+export {
+    callExternalHttpRequest,
+    getExternalApiData,
+    getExternalApiDataWithError,
+} from '../api';
 
 // -- Other -----------------------------------------------------------------
 export const RequestUtil: any = {};
 export type EntityError = any;
 export const EntityError: any = undefined;
 
-// ResponseData shape used by fetch helpers. Concrete implementation comes in
-// Stage 5 via ApiClientProvider.
-export type ResponseData = any;
-export const ResponseData: any = undefined;
+// ResponseData re-exported from the api module (Stage 5).
+export { ResponseData } from '../api';
 
 // Re-export common utils for convenience so downstream code that used
 // `from "../misc"` barrel-style still gets isEmpty etc. via our unified barrel.
