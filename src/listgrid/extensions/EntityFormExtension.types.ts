@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import { Session } from '@gjcu/ui/auth/types';
+import { Session } from '../auth/types';
 import { EntityForm } from '../config/EntityForm';
 
 /**

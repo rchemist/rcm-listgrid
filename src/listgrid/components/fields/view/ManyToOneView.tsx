@@ -22,7 +22,7 @@ import {getManyToOneEntityValue} from '../ManyToOneField';
 import {ViewEntityForm} from '../../form/ViewEntityForm';
 import {EntityForm} from '../../../config/EntityForm';
 import {useModalManagerStore} from '../../../../store';
-import {useSession} from '../../../../auth';
+import {useSession} from '../../../auth';
 
 // Value ID 추출 헬퍼
 function getValueId(val: any): string | undefined {

@@ -23,7 +23,7 @@ import {formatPrice} from "@gjcu/ui";
 import {IconCoin, IconHash} from "@tabler/icons-react";
 import {NumberFilter} from './filter/NumberFilter';
 import {EntityForm} from "../../config/EntityForm";
-import {Session} from "../../../auth/types";
+import {Session} from '../../auth/types';
 import {ValidateResult} from "../../validations/Validation";
 
 

@@ -17,7 +17,7 @@ import {EntityForm} from '../config/EntityForm';
 import {ValidateResult, Validation} from '../validations/Validation';
 import {QueryConditionType} from "@gjcu/ui/form/SearchForm";
 import {EntityItem} from '../config/EntityItem';
-import {Session} from '@gjcu/ui/auth/types';
+import {Session} from '../auth/types';
 
 
 export interface EntityField extends EntityItem {

@@ -15,7 +15,7 @@ import {showToast} from '@gjcu/ui/message/messageUtils';
 import {readonlyClass} from '@gjcu/ui/form/Style';
 import {formatPhoneNumber, removePhoneNumberHyphens} from '@gjcu/ui/utils/PhoneUtil';
 import {SmsModal} from './SmsModal';
-import {Session} from '@gjcu/ui/auth';
+import {Session} from '../../../auth';
 import {RenderType} from '../../../config/Config';
 
 interface PhoneNumberFieldViewProps {

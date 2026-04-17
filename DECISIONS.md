@@ -85,6 +85,50 @@ tsconfig에서 strict는 유지하면서 `noImplicitAny`만 false로 설정.
 
 ---
 
+## 2026-04-17 (Stage 2)
+
+### #16 AuthProvider 계약 확정
+`src/listgrid/auth/` 내부 모듈에 다음 공개 API:
+```ts
+// src/listgrid/auth/types.ts
+export interface SessionUser {
+    id?: string | number;
+    name?: string;
+    roles?: string[];
+    [key: string]: any;
+}
+export interface Session {
+    roles?: string[];
+    authentication?: { roles?: string[]; [key: string]: any };
+    getUser: () => SessionUser | null | undefined;  // required
+    [key: string]: any;
+}
+
+// src/listgrid/auth/AuthContext.tsx
+export function AuthProvider({ session, children }): JSX.Element;
+export function useSession(): Session | undefined;
+export function useAuth(): AuthContextValue;
+```
+**Why**:
+- `getUser`를 required로 둠 — 원본 listgrid는 `session.getUser()` 존재를 가정. plain 객체 host는 session을 wrap해야 함.
+- `roles`를 `readonly string[]`이 아닌 `string[]`으로 — 원본이 `isEqualsCollection(roles)` 같은 mutable 함수에 전달.
+- `useSession`이 `Session | undefined` 반환 — 원본 사용처가 `undefined` 가정(`null` 아님).
+- Provider 밖에서 훅 호출 시 throw — 조용한 `undefined` fallback보다 명시적 오류가 디버깅 이득.
+- `NO_PROVIDER` Symbol sentinel로 "Provider 없음"과 "session 없음" 구분.
+
+### #17 Stage 2 구조: 내부 모듈 + 상대경로 import
+`src/listgrid/auth/`에 실제 구현 배치. 원본 파일의 모든 auth import를 스크립트로 bulk 치환:
+- `@gjcu/ui/auth/types` / `@gjcu/ui/auth` → depth 기반 relative path
+- 기존 `../../../auth` (stub 가리킴) → `../../auth` (1 `..` 감소, 내부 모듈 가리킴)
+45개 파일에 import path만 변경(로직 수정 없음).
+**Why**: 경로 alias(`@rcm/listgrid/auth`)는 publish 시 package.json exports와 얽혀 복잡. 상대경로가 자기 참조 문제 회피하고 tsc만으로 동작.
+
+### #18 Stage 2 편차: 원본 import 경로 45파일 수정
+Stage 1 "원본 수정 0" 원칙에서 벗어남. 그러나 **의미 변경 없는 문자열 치환**(경로만 다름).
+**Why**: Stage 2는 의도적으로 원본 auth 결합을 제거하는 단계. import path 변경은 불가피. 로직은 그대로 유지.
+
+---
+
 ## Open Questions
 
 작업 중 떠오른 미결 이슈. 결정되면 날짜 로그로 이동.

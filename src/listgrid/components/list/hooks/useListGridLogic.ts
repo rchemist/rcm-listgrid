@@ -18,7 +18,7 @@ import {
   ExtensionPoint
 } from '../../../extensions/EntityFormExtension.types';
 import {hash} from '../../../../utils/simpleCrypt';
-import {useSession} from "../../../../auth";
+import {useSession} from '../../../auth';
 import {isTrue} from '../../../../utils/BooleanUtil';
 import {getListFieldsFromCache} from '../../../config/ListGridViewFieldCache';
 import {getGlobalPageSize} from "./useQuickSearchBar";

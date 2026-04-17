@@ -13,7 +13,7 @@ import {FieldRenderParameters, FilterRenderParameters} from '../../config/Entity
 import {SearchForm} from "@gjcu/ui/form/SearchForm";
 import {PageResult} from "@gjcu/ui/form/Type";
 import {useModalManagerStore} from '../../../store';
-import {useSession} from '../../../auth';
+import {useSession} from '../../auth';
 import {ViewEntityForm} from '../form/ViewEntityForm';
 import {IconHistory} from "@tabler/icons-react";
 import {fDateTime} from "@gjcu/ui";

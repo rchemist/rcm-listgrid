@@ -22,7 +22,7 @@ import {isTrue} from '../../../utils/BooleanUtil';
 import {isBlank} from '../../../utils/StringUtil';
 import {IconHelp} from "@tabler/icons-react";
 import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {Session} from "../../../auth/types";
+import {Session} from '../../auth/types';
 import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
 import {getTranslation} from "@gjcu/ui/utils/i18n";
 import {getManyToOneLink} from "../helper/FieldRendererHelper";

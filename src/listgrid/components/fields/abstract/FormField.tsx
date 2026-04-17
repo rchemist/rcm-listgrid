@@ -34,7 +34,7 @@ import {EntityField, FieldInfoParameters, FieldRenderParameters} from '../../../
 import {isEqualCollection, isEquals} from "@gjcu/ui";
 import {isTrue} from '../../../../utils/BooleanUtil';
 import {addKoreanWordPostfix} from '../../../../utils/StringUtil';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 
 /**
  * Card View 아이콘 타입

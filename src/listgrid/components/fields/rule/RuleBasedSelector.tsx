@@ -18,7 +18,7 @@ import {
 import {getConditionalReactNode, HelpTextType, LabelType} from '../../../config/Config';
 import {RuleBasedFieldsView} from './RuleBasedFieldView';
 import {EntityForm} from '../../../config/EntityForm';
-import {useSession} from '../../../../auth';
+import {useSession} from '../../../auth';
 
 
 interface RuleBasedSelectorProps extends RuleBasedFieldProps {

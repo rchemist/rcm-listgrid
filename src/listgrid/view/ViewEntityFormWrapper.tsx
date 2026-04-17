@@ -1,7 +1,7 @@
 'use client'
 
 import React, {Suspense, useEffect, useMemo, useState} from "react";
-import {useSession} from '@gjcu/ui/auth';
+import {useSession} from '../auth';
 import {usePathname, useSearchParams} from "next/navigation";
 import {Breadcrumb, BreadcrumbItem} from "@gjcu/ui/elements/breadcrumbs/Breadcrumb";
 import {PermissionType} from "../config/Config";

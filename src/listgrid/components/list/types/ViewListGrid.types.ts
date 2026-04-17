@@ -7,7 +7,7 @@ import {ListGrid, SubCollectionProps} from '../../../config/ListGrid';
 import {ListableFormField} from "../../fields/abstract";
 import {ListGridHeaderButtonProps} from "./ListGridHeader.types";
 import {ReactNode} from "react";
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 
 export const searchFormHashKey = process.env.NEXT_PUBLIC_SEARCHFORM_HASH ?? 'rcm-searchform'
 

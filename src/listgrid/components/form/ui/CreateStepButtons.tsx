@@ -1,6 +1,6 @@
 import React from "react";
 import {EntityForm} from "../../../config/EntityForm";
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {useEntityFormTheme} from "../context/EntityFormThemeContext";
 import {validateAndAdvanceStep} from "./CreateStepView";
 

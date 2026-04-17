@@ -19,7 +19,7 @@ import {EntityFormManageable} from './types/ViewEntityForm.types';
 import {getTranslation} from "../../../utils/i18n";
 import {isBlank} from '../../../utils/StringUtil';
 import {ViewHelpIcon} from './ui/ViewHelpIcon';
-import {Session} from "../../../auth/types";
+import {Session} from '../../auth/types';
 import {useEntityFormTheme} from "./context/EntityFormThemeContext";
 
 /**

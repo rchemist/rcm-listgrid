@@ -8,7 +8,7 @@
 import React from "react";
 import {EntityForm} from "../../../config/EntityForm";
 import {FormField} from "../../fields/abstract";
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {
   ListGridThemeVariant,
   ViewListGridClassNames

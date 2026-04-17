@@ -5,7 +5,7 @@
 import {EntityForm} from '../../../config/EntityForm';
 import {EntityFormButton} from '../../../config/EntityFormButton';
 import {EntityButtonLinkProps} from '../../../config/Config';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {Dispatch, ReactNode, SetStateAction} from "react";
 import {ApiSpecification} from "../../api/Type";
 

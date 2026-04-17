@@ -11,7 +11,7 @@ import {ReactNode, useCallback, useEffect, useMemo, useRef, useState} from "reac
 import {usePathname, useRouter} from "next/navigation";
 import {isTrue} from '../../../../utils/BooleanUtil';
 import {ModalOptions, useModalManagerStore} from '../../../../store';
-import {useSession} from '../../../../auth';
+import {useSession} from '../../../auth';
 import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
 // Dynamic import for getEntityFormButtons to reduce bundle size
 import {showSuccess} from "@gjcu/ui/message/messageUtils";
@@ -19,7 +19,7 @@ import {subStringBeforeLast} from '../../../../utils/StringUtil';
 import {EntityForm} from '../../../config/EntityForm';
 import {EntityTab} from '../../../config/EntityTab';
 import {RenderType} from '../../../config/Config';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {ViewEntityFormProps} from "../types/ViewEntityForm.types";
 import {useEntityFormInitializer} from "./useEntityFormInitializer";
 import {useEntityFormSave} from "./useEntityFormSave";

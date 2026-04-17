@@ -15,7 +15,7 @@ import {getTranslation} from "@gjcu/ui/utils/i18n";
 import {LoadingOverlay} from '@gjcu/ui/elements/indicator/LoadingOverlay';
 import {ViewHelpText} from './ui/ViewHelpText';
 import {isTrue} from '../../../utils/BooleanUtil';
-import {Session} from "../../../auth/types";
+import {Session} from '../../auth/types';
 
 /**
  * SubCollectionRenderer component

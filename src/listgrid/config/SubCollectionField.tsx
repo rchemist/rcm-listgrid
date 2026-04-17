@@ -28,7 +28,7 @@ import {ReactNode} from "react";
 import {ViewListGridOptionProps} from '../components/list/types/ViewListGrid.types';
 import {FilterItem} from "@gjcu/ui/form/SearchForm";
 import {FieldInfoParameters} from "./EntityField";
-import {Session} from '@gjcu/ui/auth/types';
+import {Session} from '../auth/types';
 import {ViewListGrid} from "../components/list/ViewListGrid";
 
 export class SubCollectionField implements EntityItem {

@@ -7,7 +7,7 @@ import {
   SelectionOptions,
   ViewFieldManageable
 } from "./ViewListGrid.types";
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 
 /** Inline expansion state for SubCollection */
 export interface InlineExpansionState {

@@ -2,7 +2,7 @@ import React from "react";
 import {Stepper} from "@gjcu/ui/elements/stepper/Stepper";
 import {Group} from "@gjcu/ui/elements/layout/Group";
 import {EntityForm} from '../../../config/EntityForm';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {useEntityFormTheme} from "../context/EntityFormThemeContext";
 
 /**

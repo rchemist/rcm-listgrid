@@ -3,7 +3,7 @@
 import React, { useMemo, useEffect, useState, useCallback, ReactNode } from 'react';
 import { EntityForm } from '../../../config/EntityForm';
 import { CardSubCollectionRelation, CardConfig } from '../../../config/CardSubCollectionField';
-import { Session } from '@gjcu/ui/auth/types';
+import { Session } from '../../../auth/types';
 import { IconPencil, IconTrash, IconChevronRight } from '@tabler/icons-react';
 import { EntityField } from '../../../config/EntityField';
 import { EntityFieldGroup } from '../../../config/EntityFieldGroup';

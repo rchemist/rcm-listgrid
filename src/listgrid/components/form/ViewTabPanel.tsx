@@ -11,7 +11,7 @@ import {Tab} from "@headlessui/react";
 import {ReactNode, useEffect, useState} from "react";
 import {ViewFieldGroup} from './ViewFieldGroup';
 import {EntityFormManageable, TabIndexable} from './types/ViewEntityForm.types';
-import {Session} from "../../../auth/types";
+import {Session} from '../../auth/types';
 import {useEntityFormTheme} from "./context/EntityFormThemeContext";
 
 interface ViewTabPanelProps extends TabIndexable, EntityFormManageable {

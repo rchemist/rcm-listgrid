@@ -12,7 +12,7 @@ import {IListConfig} from '../components/fields/abstract';
 import {MinMaxLimit, PageResult, SelectOption} from "@gjcu/ui/form/Type";
 import {TreeNodeData} from "@gjcu/ui/elements/tree";
 import {isEmpty} from "@gjcu/ui/utils";
-import {Session} from '@gjcu/ui/auth/types';
+import {Session} from '../auth/types';
 import {generateSlug, isBlank} from '@gjcu/ui/utils/StringUtil';
 import {ValidateResult} from "../validations/Validation";
 

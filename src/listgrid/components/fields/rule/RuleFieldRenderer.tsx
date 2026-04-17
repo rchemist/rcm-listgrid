@@ -10,7 +10,7 @@ import {FormField} from '../abstract';
 import React, {ReactNode, useEffect, useState} from "react";
 import {EntityForm} from '../../../config/EntityForm';
 import {FieldRenderParameters} from '../../../config/EntityField';
-import {useSession} from '../../../../auth';
+import {useSession} from '../../../auth';
 
 interface RuleFieldRendererProps {
   field: FormField<any>;

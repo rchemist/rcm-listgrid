@@ -16,7 +16,7 @@ import {
 } from './Config';
 import { ReactNode } from 'react';
 import { FieldInfoParameters } from './EntityField';
-import { Session } from '@gjcu/ui/auth/types';
+import { Session } from '../auth/types';
 import React from 'react';
 import { FilterItem, SearchForm } from '@gjcu/ui/form/SearchForm';
 import { SubCollectionField } from './SubCollectionField';

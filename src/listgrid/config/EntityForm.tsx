@@ -30,7 +30,7 @@ import {
 import {ResponseData} from '../../api/types'
 import {EntityTab} from './EntityTab';
 import {SubCollectionField} from './SubCollectionField';
-import {Session, useSession} from '../../auth';
+import {Session, useSession} from '../auth';
 import {CustomOptionField, getCustomOptionValues} from '../components/fields/CustomOptionField';
 import {delay, entityErrorToString} from './EntityFormMethod';
 import {EntityFormExtensions} from './form/EntityFormExtensions';

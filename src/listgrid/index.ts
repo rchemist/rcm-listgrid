@@ -2,6 +2,10 @@
 export { ViewListGridWrapper } from './view/ViewListGridWrapper';
 export { ViewEntityFormWrapper } from './view/ViewEntityFormWrapper';
 
+// Auth — host applications must wrap their tree with <AuthProvider> from here.
+export { AuthProvider, useSession, useAuth } from './auth';
+export type { Session, SessionUser, AuthContextValue, AuthProviderProps } from './auth';
+
 // Core Components
 export { ViewListGrid } from './components/list/ViewListGrid';
 export { ViewEntityForm } from './components/form/ViewEntityForm';

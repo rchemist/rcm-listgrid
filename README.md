@@ -39,14 +39,14 @@ RCM-framework 백엔드를 기반으로 CRUD UI를 빠르게 구성하기 위한
 - [x] `npm install` 성공
 - [x] `npm run type-check` 통과 (stub + 의도적 편차 9줄 포함)
 
-### Stage 2 — Auth 분리
+### Stage 2 — Auth 분리 ✅
 
-`@gjcu/ui/auth` 직접 의존을 제거하고 `AuthProvider` / `useAuth` 계약으로 주입.
+`@gjcu/ui/auth` 직접 의존을 제거하고 `AuthProvider` / `useSession` 계약으로 주입.
 
 **Done when:**
-- [ ] `src/` 내 `@gjcu/ui/auth` 직접 import 0개
-- [ ] `AuthProvider` 계약이 `DECISIONS.md`에 문서화됨
-- [ ] `npm run type-check` 통과
+- [x] `src/` 내 `@gjcu/ui/auth` 직접 import 0개 (45개 파일 bulk 치환)
+- [x] `AuthProvider` 계약이 `DECISIONS.md` #16에 문서화됨
+- [x] `npm run type-check` 통과
 
 ### Stage 3 — UI 프리미티브 추상화
 

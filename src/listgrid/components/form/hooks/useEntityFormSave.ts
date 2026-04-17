@@ -8,7 +8,7 @@ import {
 import {isEmpty} from "@gjcu/ui/utils";
 import {EntityButtonLinkProps, RenderType} from '../../../config/Config';
 import {openToast} from "@gjcu/ui/message/ToastMessage";
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 
 /**
  * Custom hook for handling save/delete logic of EntityForm.

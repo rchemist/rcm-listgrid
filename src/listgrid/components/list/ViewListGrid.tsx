@@ -24,7 +24,7 @@ import {ListableFormField} from "../fields/abstract";
 import {ShowNotifications} from '../helper/ShowNotifications';
 import {Stack} from "@gjcu/ui/elements/layout/Stack";
 import {SubCollectionViewModal} from "./ui/SubCollectionViewModal";
-import {useSession} from '../../../auth';
+import {useSession} from '../../auth';
 import {hasAnyRole} from "@gjcu/shared";
 import {perfLog} from './utils/performanceLogger';
 import {

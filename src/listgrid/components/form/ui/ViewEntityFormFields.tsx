@@ -6,7 +6,7 @@ import {ViewTab} from '../ViewTab';
 import {ViewTabPanel} from '../ViewTabPanel';
 import {EntityTab} from '../../../config/EntityTab';
 import {EntityForm} from '../../../config/EntityForm';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 
 /**
  * ViewEntityFormFields 컴포넌트

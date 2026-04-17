@@ -4,7 +4,7 @@ import {DataTransferConfig} from '../../../transfer/Type';
 import {isTrue} from '../../../../utils/BooleanUtil';
 import {ReactNode} from "react";
 import {SelectionOptions} from "./ViewListGrid.types";
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 
 export interface ListGridHeaderProps extends ListGridHeaderButtonProps {
     buttons?: ((props: ListGridHeaderButtonProps) => Promise<ReactNode>)[];

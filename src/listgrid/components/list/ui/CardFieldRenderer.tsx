@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { EntityForm } from '../../../config/EntityForm';
 import { EntityField, ViewValueResult } from '../../../config/EntityField';
 import { FieldType } from '../../../config/Config';
-import { Session } from '@gjcu/ui/auth/types';
+import { Session } from '../../../auth/types';
 
 // Field types that should span full width in the card grid
 const FULL_WIDTH_FIELD_TYPES: FieldType[] = [

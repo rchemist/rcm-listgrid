@@ -85,18 +85,6 @@ declare module '@gjcu/ui' {
     export type setSessionStorageItem = any;
 }
 
-declare module '@gjcu/ui/auth' {
-    export const Session: any;
-    export type Session = any;
-    export const useSession: any;
-    export type useSession = any;
-}
-
-declare module '@gjcu/ui/auth/types' {
-    export const Session: any;
-    export type Session = any;
-}
-
 declare module '@gjcu/ui/common/func' {
     export const getAdditionalColorClass: any;
     export type getAdditionalColorClass = any;

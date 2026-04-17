@@ -8,7 +8,7 @@ import {EntityForm} from '../../../config/EntityForm';
 import {EntityFormManageable} from "./ViewEntityForm.types";
 import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 import {EntityButtonLinkProps} from '../../../config/Config';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {EntityFormButton} from '../../../config/EntityFormButton';
 import {ModalOptions} from '../../../../store';
 import {ViewEntityFormClassNames} from './ViewEntityFormTheme.types';

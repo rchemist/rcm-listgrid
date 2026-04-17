@@ -5,7 +5,7 @@ import { EntityForm } from '../../../config/EntityForm';
 import { EntityField } from '../../../config/EntityField';
 import { EntityFieldGroup } from '../../../config/EntityFieldGroup';
 import { FormField } from '../../fields/abstract';
-import { Session } from '@gjcu/ui/auth/types';
+import { Session } from '../../../auth/types';
 import { IconChevronUp, IconInfoCircle, IconHelp } from '@tabler/icons-react';
 import { Tooltip } from '@gjcu/ui/elements/tooltip/Tooltip';
 import { Icon } from '@iconify/react';

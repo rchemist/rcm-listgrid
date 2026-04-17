@@ -20,7 +20,7 @@ import {EntityTab} from '../../../config/EntityTab';
 import {isEmpty} from "@gjcu/ui/utils";
 import {removeTrailingSeparator} from '../../../../utils/StringUtil';
 import {showAlert} from "@gjcu/ui/message/messageUtils";
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {EntityButtonLinkProps} from '../../../config/Config';
 import {isTrue} from '../../../../utils/BooleanUtil';
 

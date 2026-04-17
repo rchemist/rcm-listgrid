@@ -15,7 +15,7 @@ import {ComboProps, FieldType, RenderType} from '../../../config/Config';
 import {MinMaxLimit, SelectOption} from "@gjcu/ui/form/Type";
 import {ValidateResult} from '../../../validations/Validation';
 import {EntityForm} from '../../../config/EntityForm';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {hexHash} from "next/dist/shared/lib/hash";
 import {isEquals} from "@gjcu/ui";
 import {isTrue} from '../../../../utils/BooleanUtil';

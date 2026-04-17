@@ -16,7 +16,7 @@ import {
 } from './Config';
 import React, {ReactNode} from 'react';
 import {FieldInfoParameters} from './EntityField';
-import {Session} from '@gjcu/ui/auth/types';
+import {Session} from '../auth/types';
 import {FilterItem, SearchForm} from '@gjcu/ui/form/SearchForm';
 import {SubCollectionField} from './SubCollectionField';
 import {CardSubCollectionFetchOptions, CardSubCollectionRelation,} from './CardSubCollectionField';

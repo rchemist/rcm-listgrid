@@ -16,7 +16,7 @@
 import React, {useCallback} from "react";
 import {InputRendererProps} from '../../../config/Config';
 import {EntityForm} from '../../../config/EntityForm';
-import {Session} from "../../../../auth/types";
+import {Session} from '../../../auth/types';
 import {useContentAsset} from "./hooks/useContentAsset";
 import {ContentAssetItemUI} from './components/ContentAssetItemUI';
 import {AddContentDialog} from './components/AddContentDialog';
