@@ -486,7 +486,8 @@
     .rcm-listgrid-thead th {
         padding: var(--rcm-space-md) var(--rcm-space-md);
         font-weight: var(--rcm-font-weight-semibold);
-        color: var(--rcm-color-text-muted);
+        font-size: var(--rcm-font-size-sm);
+        color: var(--rcm-color-text);
         text-align: left;
         white-space: nowrap;
     }
