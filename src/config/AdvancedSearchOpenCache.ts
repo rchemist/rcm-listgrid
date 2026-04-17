@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) "2024". rchemist.io by Rchemist
+ * Licensed under the Rchemist Common License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License under controlled by Rchemist
+ */
+
+import {parse, stringify} from '@gjcu/ui/utils/jsonUtils';
+
+class CacheContext {
+  public static create(value: any): CacheContext {
+    const cache = new CacheContext();
+    const data = parse(value);
+
+    if (value) {
+      cache.data = new Map<string, boolean>(Object.entries(data.data));
+    }
+
+    return cache;
+  }
+
+  data: Map<string, boolean> = new Map<string, boolean>();
+
+  isOpened(key: string, postFix?: string): boolean {
+    const cacheKey = key + (postFix ? '_' + postFix : '');
+    return this.data.get(cacheKey) ?? false;
+  }
+
+  setOpened(key: string, postFix?: string, opened: boolean = true) {
+    const cacheKey = key + (postFix ? '_' + postFix : '');
+    this.data.set(cacheKey, opened);
+  }
+
+  setClosed(key: string, postFix?: string) {
+    this.setOpened(key, postFix, false);
+  }
+
+  toJson(): string {
+    return stringify(this);
+  }
+
+}
+
+export function isOpenedAdvancedSearch(key: string, postFix?: string): boolean {
+  if (typeof window === 'undefined')
+    return false;
+  const cache = CacheContext.create(localStorage.getItem('advancedSearchFormOpened'));
+  return cache.isOpened(key, postFix);
+}
+
+export function setOpenedAdvancedSearch(key: string, postFix?: string, opened: boolean = true) {
+  if (typeof window === 'undefined')
+    return;
+  const cache = CacheContext.create(localStorage.getItem('advancedSearchFormOpened'));
+  cache.setOpened(key, postFix, opened);
+  localStorage.setItem('advancedSearchFormOpened', cache.toJson());
+}
+
+export function setClosedAdvancedSearch(key: string, postFix?: string) {
+  if (typeof window === 'undefined')
+    return;
+  const cache = CacheContext.create(localStorage.getItem('advancedSearchFormOpened'));
+  cache.setClosed(key, postFix);
+  localStorage.setItem('advancedSearchFormOpened', cache.toJson());
+}

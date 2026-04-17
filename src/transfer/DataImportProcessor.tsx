@@ -1,0 +1,194 @@
+'use client';
+
+/*
+ * Copyright (c) "2024". rchemist.io by Rchemist
+ * Licensed under the Rchemist Common License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License under controlled by Rchemist
+ */
+
+import {Table} from "@gjcu/ui/elements/table/Table";
+import {SafePerfectScrollbar} from "@gjcu/ui/components/scrollbar/SafePerfectScrollbar";
+import {Box} from "@gjcu/ui/elements/layout/Box";
+import {Flex} from "@gjcu/ui/elements/layout/Flex";
+import {Grid} from "@gjcu/ui/elements/layout/Grid";
+import {Paper} from "@gjcu/ui/elements/Paper";
+import {FC, ReactNode, useEffect, useState} from "react";
+import classes from "./DataImport.module.css";
+import {DataField, DataRow, DataTransferResult} from '../transfer/Type';
+import {DataImportResultView, ImportErrorView} from '../transfer/DataImportResultView';
+import {defaultString} from '@gjcu/ui/utils/StringUtil';
+import {DataRowSet} from "./Type";
+import {isEmpty} from "@gjcu/ui/utils";
+
+interface DataImportPreviewViewerProps {
+  resultView: boolean;
+  data: DataRowSet;
+  fields: DataField[];
+  onSubmit: () => void;
+  cancelImport: () => void;
+  onImportSuccess?: () => void;
+  importResult?: DataTransferResult;
+  preview: boolean;
+  importError?: string;
+  errorMessage?: string;
+  viewError: boolean;
+  importErrorView?: ReactNode;
+}
+
+export const DataImportProcessor = ({resultView, data, importResult, onSubmit, cancelImport, onImportSuccess, viewError, importErrorView, importError, errorMessage, preview, ...props}: DataImportPreviewViewerProps) => {
+
+
+  const [fields, setFields] = useState<DataField[]>([]);
+
+  useEffect(() => {
+    if (data && !isEmpty(data) && props.fields && !isEmpty(props.fields)) {
+      const fields = props.fields.filter((field) => {
+        // 첫줄은 헤더로 {id: '아이디', name: '이름', ...} 형식으로 데이터가 들어 온다.
+        const header: any = data[0];
+        return header[field.getName()] !== undefined;;
+      });
+      setFields(fields);
+    }
+  }, [props.fields, data]);
+
+
+  if (isEmpty(fields)) {
+    return <></>;
+  }
+
+  return (
+    <>
+      <Box>
+        {resultView && <Box>
+          <Box style={{padding: `2rem`}}>
+            <DataImportResultView result={importResult!} fields={fields}/>
+          </Box>
+          <Flex align={'center'} style={{width: '100%', paddingTop: 2}}
+                justify={'center'}>
+            <button
+              type="button"
+              className="btn btn-outline-primary border border-blue-500 text-blue-500 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              onClick={() => {
+                cancelImport();
+                onImportSuccess?.call(this);
+              }}
+            >
+              확인
+            </button>
+          </Flex>
+        </Box>}
+        {!resultView && <Box>
+          {viewError && <Box style={{padding: `2rem`}}>
+            <ImportErrorView importError={importError} importErrorView={importErrorView} errorMessage={errorMessage}></ImportErrorView>
+            <Flex align={'center'} style={{width: '100%', marginTop: `2rem`}}
+                  justify={'center'}>
+              <button
+                type="button"
+                className="btn btn-outline-secondary border border-gray-500 text-gray-500 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                onClick={() => {
+                  cancelImport();
+                }}
+              >
+                닫기
+              </button>
+            </Flex>
+          </Box>}
+          {preview && <Box style={{padding: `2rem`}}>
+            <DataImportPreview data={data} fields={fields}/>
+            <Flex gap={10} align={'center'} style={{width: '100%', marginTop: `2rem`}}
+                  justify={'center'}>
+              <button
+                type="button"
+                className="btn btn-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                onClick={() => {
+                  onSubmit();
+                }}
+              >
+                업로드
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-primary border border-blue-500 text-blue-500 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                onClick={() => {
+                  cancelImport();
+                }}
+              >
+                취소
+              </button>
+            </Flex>
+          </Box>}
+        </Box>}
+      </Box>
+    </>
+  );
+}
+
+
+export interface DataImportPreviewProps {
+  fields: DataField[],
+  data: DataRowSet;
+}
+
+export const DataImportPreview: FC<DataImportPreviewProps> = ({fields, data}) => {
+
+  function showRows() {
+    let rowFields: ReactNode[] = [];
+    data?.forEach((row: DataRow, index: number) => {
+      if (index > 0) {
+        rowFields.push(
+          <Table.Tr
+            key={'row_' + index}>
+            <Table.Td className={classes.row} key={'cell_index_' + index}>
+              {index}
+            </Table.Td>
+            {(function () {
+              const cells: ReactNode[] = [];
+              fields.map((field, index) => {
+                const fieldName = field.getName();
+                cells.push(<Table.Td className={classes.row} key={'cell_' + fieldName + '_' + index}>
+                  {defaultString(row.find(r => r.name === fieldName)?.value)}
+                </Table.Td>);
+              });
+              return cells;
+            }())}
+          </Table.Tr>);
+      }
+    })
+    return rowFields;
+  }
+
+  return (<Grid>
+      <Grid.Col span={12}>
+        <Paper style={{padding: 2, width: '100%'}}>
+          <SafePerfectScrollbar>
+            <Table border={1} borderColor={'#ff0'}>
+              <Table.Thead>
+              <Table.Tr>
+                <Table.Th className={classes.header} key={'body_header_index'}>
+                  #
+                </Table.Th>
+                {fields.map((field, index) => (
+                  <th className={classes.header} key={'body_' + field + '_' + index}>
+                    <div>
+                    <div>
+                        [{field.getName()}]
+                      </div>
+                      {field.getLabel()}
+                    </div>
+                  </th>
+                ))}
+              </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+              <>
+                {showRows()}
+              </>
+              </Table.Tbody>
+            </Table>
+          </SafePerfectScrollbar>
+        </Paper>
+      </Grid.Col>
+    </Grid>
+  );
+}

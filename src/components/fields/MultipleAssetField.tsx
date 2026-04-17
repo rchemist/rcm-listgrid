@@ -1,0 +1,367 @@
+'use client';
+
+/*
+ * Copyright (c) "2024". rchemist.io by Rchemist
+ * Licensed under the Rchemist Common License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License under controlled by Rchemist
+ */
+
+import {FormField, FormFieldProps} from './abstract';
+import {FieldRenderParameters} from '../../config/EntityField';
+import React, {useEffect, useState} from "react";
+import {InputRendererProps} from '../../config/Config';
+import {getInputRendererParameters} from '../helper/FieldRendererHelper';
+import {Modal} from "@gjcu/ui/modals/Modal";
+import {Paper} from "@gjcu/ui/elements/Paper";
+import {Button} from "@gjcu/ui/elements/buttons/Button";
+import {TextInput} from "@gjcu/ui/form/TextInput";
+import {defaultString, isBlank} from '../../../utils/StringUtil';
+import {IconPhotoPlus, IconTrash} from "@tabler/icons-react";
+import {MultipleAssetUpload} from './view/MultipleAssetUpload';
+import {getAccessableAssetUrl} from "@gjcu/ui";
+import {RegexLowerEnglishNumber} from "@gjcu/ui";
+import {isTrue} from '../../../utils/BooleanUtil';
+import {ViewHelpText} from '../form/ui/ViewHelpText';
+import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+
+interface MultipleAssetFieldProps extends FormFieldProps {
+  tags?: string[];
+  fileTypes?: string[];
+}
+
+export class MultipleAssetField extends FormField<MultipleAssetField> {
+
+  tags?: string[];
+
+  fileTypes?: string[];
+
+  constructor(name: string, order: number, tags?: string[], fileTypes?: string[]) {
+    super(name, order, 'custom');
+    this.tags = tags;
+    this.fileTypes = fileTypes;
+  }
+
+  /**
+   * MultipleAssetField 핵심 렌더링 로직
+   */
+  protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
+    return (async () => {
+      return <MultipleAssetFieldView
+        fileTypes={this.fileTypes}
+        tags={this.tags} {...await getInputRendererParameters(this, params)}></MultipleAssetFieldView>;
+    })();
+  }
+
+  /**
+   * MultipleAssetField 인스턴스 생성
+   */
+  protected createInstance(name: string, order: number): MultipleAssetField {
+    return new MultipleAssetField(name, order, this.tags, this.fileTypes);
+  }
+
+  static create(props: MultipleAssetFieldProps): MultipleAssetField {
+    return new MultipleAssetField(props.name, props.order, props.tags, props.fileTypes)
+      .copyFields(props, true);
+  }
+}
+
+export interface MultipleAssetForm {
+  assets?: AssetItem[];
+  preferred?: string;
+}
+
+export interface AssetItem {
+  name?: string;
+  description?: string;
+  url: string;
+}
+
+function deepCopy(value?: MultipleAssetForm): MultipleAssetForm {
+
+  const newValue: MultipleAssetForm = {preferred: value?.preferred};
+
+  if (value?.assets !== undefined && value.assets.length > 0) {
+    const newAssets: AssetItem[] = [];
+    value.assets.forEach((asset) => {
+      newAssets.push({...asset});
+    })
+    newValue.assets = newAssets;
+  }
+
+  return newValue;
+
+}
+
+interface MultipleAssetFieldViewProps extends InputRendererProps {
+  tags?: string[];
+  fileTypes?: string[];
+}
+
+
+const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
+
+  const [value, setValue] = useState<MultipleAssetForm>();
+  const [openAdd, setOpenAdd] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [currentIndex, setCurrentIndex] = useState<number | undefined>();
+  const [currentEdit, setCurrentEdit] = useState<AssetItem>({url: ''});
+  const [tags, setTags] = useState<string[]>(props.tags ?? []);
+
+  useEffect(() => {
+    if (props.value) {
+      setValue(props.value);
+      const tags = props.tags ?? [];
+      if (props.value.assets) {
+        props.value?.assets.forEach((asset: AssetItem) => {
+          if (!tags.includes(asset.name ?? '')) {
+            tags.push(asset.name ?? '');
+          }
+        });
+      }
+      setTags(tags);
+    } else {
+      // new value
+      const newValue: MultipleAssetForm = {assets: [],};
+      if (props.tags) {
+        props.tags.forEach((tag) => {
+          newValue.assets?.push({name: tag, url: ''});
+        });
+        setValue(newValue);
+        setTags(props.tags);
+      }
+    }
+  }, [props.value]);
+
+  function openImageForm(currentIndex?: number) {
+    setError('');
+    setCurrentIndex(currentIndex);
+    setOpenAdd(true);
+
+    if (currentIndex === undefined) {
+      setCurrentEdit({url: ''});
+    } else {
+      setCurrentEdit(value?.assets?.[currentIndex]!);
+    }
+
+  }
+
+
+  function closeUpload() {
+    setCurrentEdit({url: ''});
+    setCurrentIndex(undefined);
+    setOpenAdd(false);
+  }
+
+  const readonly = isTrue(props.readonly);
+
+  return <React.Fragment>
+    <div
+      className={`flex flex-col gap-2.5 mt-2 py-4 p-2 border dark:border-[#17263c] rounded`}>
+      <div className={'table-responsive'}>
+        <div className={'grid grid-cols sm:grid-cols-2 gap-3 md:grid-cols-6 sm:min-w-[400px] md:min-w-[860px]'}>
+          {tags.map((tag, index) => {
+
+            const asset = value?.assets?.find((asset) => asset.name === tag);
+            if (!asset) {
+              return null;
+            }
+
+            const isPrimary = tag === 'Primary';
+
+            return <div key={`asset${index}`}>
+              <table className={'border rounded-b w-full'}>
+                <thead>
+                <tr>
+                  <th key={`th-${index}`}
+                      className={'px-2 dark:border-[#17263c] sm:w-50 md:w-20 md:max-w-20'}>
+                    <div className="flex justify-between items-center w-full">
+                      {/* 첫번째 div 가 최대한 많은 공간을 사용하고 */}
+                      <div className={`flex-grow ${!isPrimary ? 'max-w-[70%]' : ''}`}>
+                        <Tooltip label={`${asset.name}`}>
+                          <div className={'truncate'}>{asset.name}</div>
+                        </Tooltip></div>
+                      {/*두번째 div 는 딱 버튼 하나 들어갈 자리만 차지하면 좋겠어*/}
+                      {!isPrimary && <div className="flex-shrink-0 justify-end ml-2">
+                        {!readonly && <button
+                          type={'button'}
+                          className={'flex'}
+                          onClick={() => {
+                            const newValues: MultipleAssetForm = {assets: []};
+                            value!.assets?.forEach((asset, deleteIndex) => {
+                              if (index !== deleteIndex) {
+                                newValues.assets?.push(asset);
+                              }
+                            });
+
+                            if (props.tags?.includes(asset.name!)) {
+                              setTags(tags.filter((tag) => tag !== asset.name));
+                            }
+
+                            setValue(newValues);
+                            props.onChange(newValues, false);
+                          }}><IconTrash className="text-danger"/>{
+                        }</button>}
+                      </div>}
+                    </div>
+
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td key={`td-${index}`}
+                      className={'p-2 flex justify-center items-center dark:border-[#17263c] min-w-[120px] min-h-[120px]'}>
+                    <div className={'flex justify-center items-center overflow-hidden w-full h-full cursor-pointer'}
+                         onClick={() => {
+                           openImageForm(index);
+                         }}>
+                      <button className="flex justify-center items-center overflow-hidden w-full h-full">
+                        {function () {
+                          if (isBlank(value?.assets?.[index].url)) {
+                            // 데이터 없음
+                            if (readonly) {
+                              return null;
+                            } else {
+                              return <IconPhotoPlus className={'text-gray-500 font-light'}/>;
+                            }
+                          } else {
+
+                            const imgUrl = getAccessableAssetUrl(value!.assets![index].url);
+
+                            return <img className={'h-full w-auto object-cover max-w-24'}
+                                        alt={`${value?.assets?.[index].description ?? ''}`}
+                                        onError={(event) => {
+                                          event.currentTarget.src = '/assets/images/no-image.png'
+                                        }}
+                                        src={`${imgUrl}`}/>;
+                          }
+                        }()}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          })}
+          {!readonly && <div className={'h-full'}>
+            <table className={'max-w-[210px] md:max-w-[130px] h-full'}>
+              <tbody>
+              <tr>
+                <td
+                  className={'p-2 flex min-w-[120px] h-full items-center justify-center'}>
+                  <button
+                    type="button"
+                    className="flex whitespace-nowrap min-w-[95px] space-x-1 cursor-pointer items-center justify-center border border-secondary hover:bg-secondary/85 dark:border-[#17263c] h-[40px] bg-secondary px-3 font-semibold text-white rounded-md"
+                    onClick={() => {
+                      openImageForm();
+                    }}>
+                    + 추가
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>}
+        </div>
+      </div>
+    </div>
+    {openAdd && <Modal title={currentIndex === undefined ? '새 이미지 추가' : '이미지 수정'} size={'5xl'} position={'center'}
+                       opened={openAdd} onClose={() => {
+      closeUpload()
+    }}>
+      <Paper className={'space-y-4'} key={`image-upload${currentIndex}`}>
+        <div>
+          <div className={'font-bold !text-[0.7rem] ml-0.5 flex items-end space-x-1'}>
+            <div>이미지 유형</div>
+          </div>
+          <TextInput
+            placeHolder={'이미지 유형'}
+            value={currentIndex === undefined ? '' : defaultString(value?.assets?.[currentIndex].name)}
+            readonly={currentIndex !== undefined && tags.includes(defaultString(value?.assets?.[currentIndex ?? 0].name))}
+            onChange={(value) => {
+              setError('');
+              if (isBlank(value)) {
+                setError('이미지의 이름을 영문/숫자로 입력하세요.');
+              } else {
+                if (tags.includes(value)) {
+                  setError('중복된 이미지 이름이 존재합니다. 다른 이름을 입력해야 합니다.')
+                } else {
+
+                  if (!RegexLowerEnglishNumber.test(value)) {
+                    setError('영문 소문자/숫자만 입력할 수 있습니다')
+                    return;
+                  }
+
+                  const currentItem: AssetItem = {...currentEdit};
+                  currentItem.name = value;
+                  setCurrentEdit(currentItem);
+                }
+              }
+            }} name={`item`}></TextInput>
+          {currentIndex === undefined &&
+            <ViewHelpText helpText={'Front 에서 이 이미지를 식별하기 위한 Key입니다. 영문 소문자/숫자만 입력할 수 있습니다.'}></ViewHelpText>}
+        </div>
+        <div>
+          <div className={'font-bold !text-[0.7rem] ml-0.5 flex items-end space-x-1'}>
+            <div>Alt Tag</div>
+          </div>
+          <TextInput
+            placeHolder={'Alt tag'}
+            tooltip={{label: '이미지가 표시될 때 &lt;img> 태그에 alt 속성값을 정의할 수 있습니다.'}}
+            value={defaultString(value?.assets?.[currentIndex ?? 0].description)}
+            onChange={(value) => {
+              const currentItem: AssetItem = {...currentEdit};
+              currentItem.description = value;
+              setCurrentEdit(currentItem);
+            }} name={`description`}></TextInput>
+        </div>
+        <div>
+          <div className={'font-bold !text-[0.7rem] ml-0.5 flex items-end space-x-1'}>
+            <div>Image</div>
+          </div>
+          <MultipleAssetUpload
+            fileTypes={props.fileTypes}
+            url={currentEdit.url}
+            onChange={(url) => {
+              const currentItem: AssetItem = {...currentEdit};
+              currentItem.url = url;
+              setCurrentEdit(currentItem);
+            }}/>
+        </div>
+        <div className={'py-4 flex flex-col items-center justify-center'}>
+          {!isBlank(error) && <div className={'text-danger mb-2 text-[0.8rem]'}>{error}</div>}
+
+          <Button style={{marginLeft: 0.5}} color={'info'}
+                  disabled={isBlank(currentEdit.name) || isBlank(currentEdit.url)}
+                  variant="filled" onClick={() => {
+            if (isBlank(currentEdit.name)) {
+              setError('이미지 유형의 이름을 입력해야 합니다.')
+            } else if (isBlank(currentEdit.url)) {
+              setError('이미지를 업로드해 주세요.')
+            } else {
+              const values: MultipleAssetForm = deepCopy(value);
+              if (currentIndex === undefined) {
+                values.assets?.push(currentEdit);
+                setTags([...tags, currentEdit.name!]);
+              } else {
+                values.assets![currentIndex] = currentEdit;
+              }
+              setValue(values);
+              setOpenAdd(false);
+              props.onChange(values, currentEdit.name === 'Primary');
+
+              closeUpload();
+
+            }
+
+          }}>
+            {currentIndex === undefined ? '이미지 등록' : '이미지 수정'}
+          </Button>
+        </div>
+      </Paper>
+    </Modal>}
+  </React.Fragment>
+    ;
+};

@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) "2024". rchemist.io by Rchemist
+ * Licensed under the Rchemist Common License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License under controlled by Rchemist
+ */
+
+import {AlertMessage, AlertMessageLink} from '../../../config/EntityFormTypes';
+import {FC} from "react";
+
+export interface ViewEntityFormAlertsProps {
+  alertMessages: AlertMessage[];
+  onRemove?: (key: string) => void;
+  onTabChange?: (tabId: string) => void;
+  onFieldFocus?: (fieldName: string) => void;
+}
+
+export interface AlertStyles {
+  bg: string;
+  hoverBg: string;
+  text: string;
+  icon: FC<any>;
+}
+
+export interface AlertItemProps {
+  alert: AlertMessage;
+  onLinkClick: (link: AlertMessageLink) => void;
+  onClose: (key: string) => void;
+  t: (key: string) => string;
+}
+
+export type AlertColor = 'success' | 'danger' | 'warning' | 'info' | 'secondary' | 'primary' | 'dark';

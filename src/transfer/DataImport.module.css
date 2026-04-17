@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) "2023". rchemist.io by Rchemist
+ * Licensed under the Rchemist Common License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License under controlled by Rchemist
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.container {
+  margin: 0 0 2rem 0;
+}
+
+.title {
+  padding: 2rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.sampleDataButton {
+  margin-left: .5rem;
+}
+
+.header {
+  border: 1px solid var(--mantine-color-indigo-2);
+  white-space: nowrap;
+  text-align: center;
+  background-color: var(--mantine-color-indigo-5);
+  font-size: .9rem;
+  font-weight: 500;
+  padding: .5rem;
+  color: var(--mantine-color-white);
+}
+
+.row {
+  border: 1px solid var(--mantine-color-indigo-2);
+  white-space: nowrap;
+  font-size: .9rem;
+  padding: .5rem;
+}
+
+.required {
+  font-weight: bold;
+  font-size: .9rem;
+}
+
+.required::before {
+  content: '* ';
+  font-weight: bold;
+  color: var(--mantine-color-red-5);
+}
+
+.requiredText {
+  font-weight: normal !important;
+}
