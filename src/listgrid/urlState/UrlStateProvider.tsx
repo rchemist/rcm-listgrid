@@ -1,0 +1,37 @@
+import React, { createContext, useContext, ReactNode } from 'react';
+import type {
+    QueryStatesSetter,
+    UrlParser,
+    UrlStateServices,
+    UrlStateSetOptions,
+} from './types';
+
+const UrlStateContext = createContext<UrlStateServices | null>(null);
+
+export interface UrlStateProviderProps {
+    value: UrlStateServices;
+    children: ReactNode;
+}
+
+export function UrlStateProvider({ value, children }: UrlStateProviderProps) {
+    return <UrlStateContext.Provider value={value}>{children}</UrlStateContext.Provider>;
+}
+
+function mustUrlState(): UrlStateServices {
+    const ctx = useContext(UrlStateContext);
+    if (!ctx) {
+        throw new Error(
+            '[@rcm/listgrid] useQueryStates must be called within a <UrlStateProvider>. ' +
+                'Wrap your app with <UrlStateProvider value={...}> imported from @rcm/listgrid. ' +
+                'See @rcm/listgrid-next for a Next.js (nuqs) adapter.'
+        );
+    }
+    return ctx;
+}
+
+export function useQueryStates(
+    parsers: Record<string, UrlParser<any>>,
+    options?: UrlStateSetOptions
+): [Record<string, any>, QueryStatesSetter] {
+    return mustUrlState().useQueryStates(parsers, options);
+}

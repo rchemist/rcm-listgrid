@@ -104,6 +104,38 @@ registry로 주입 가능하게.
 - `IEntityError.fieldError`는 Map 또는 Record 양쪽 형태 모두 파싱 (호환).
 - host의 ApiClient 구현은 HTTP transport(fetch/axios/next-server-actions)·auth header·CSRF·재시도 정책을 책임짐. 라이브러리는 transport를 알지 않음.
 
+### Stage 7 — Framework-free + Next.js 어댑터 ✅
+
+Next.js 14/15/16 간의 파괴적 변경, 그리고 Python 백엔드 + Vite/Remix 등 non-Next 프로젝트 수요에 대응하기 위해 core를 framework-free로 만들고 Next.js 어댑터를 subpath로 분리.
+
+**Done when:**
+- [x] `grep next/dist src/listgrid = 0` — internal Next API (`hexHash`, `AppRouterInstance`, `unstable_noStore`) 모두 제거
+- [x] `grep next/dynamic src/listgrid = 0` — `React.lazy + Suspense` 기반 `utils/lazy.tsx`로 대체
+- [x] `grep next/navigation src/listgrid = 0` — `RouterProvider` + `useRouter/usePathname/useParams/useSearchParams/Link` (listgrid/router)
+- [x] `grep next/link src/listgrid = 0` — 동일하게 `Link`는 `RouterProvider`가 제공
+- [x] `grep nuqs src/listgrid = 0` — `UrlStateProvider` + `useQueryStates/createParser/parseAsString` (listgrid/urlState)
+- [x] `@rcm/listgrid-next` 어댑터 동작 — `src/adapters/next/` 에서 `next/navigation`, `next/link`, `nuqs` 바인딩. `@rcm/listgrid/next` subpath로 export
+- [x] `next`, `nuqs`가 **optional peer**로 이동 — non-Next 프로젝트는 `next`/`nuqs` 설치 불필요
+
+**Next.js 사용처:**
+```tsx
+import { RouterProvider, UrlStateProvider } from '@rcm/listgrid';
+import { nextRouterServices, nextUrlStateServices } from '@rcm/listgrid/next';
+
+<RouterProvider value={nextRouterServices}>
+    <UrlStateProvider value={nextUrlStateServices}>
+        <AuthProvider session={...}>
+            <UIProvider components={...}>
+                <YourApp />
+            </UIProvider>
+        </AuthProvider>
+    </UrlStateProvider>
+</RouterProvider>
+```
+
+**다른 프레임워크(React Router / Remix / Tanstack Router / 자체):**
+별도 어댑터를 만들어 `RouterProvider`와 `UrlStateProvider`에 주입하면 됩니다. 계약은 `RouterServices`, `UrlStateServices` 타입 참고.
+
 ### Stage 6 — 필드/폼 로직 정리 ✅ (실전 통합 검증 제외)
 
 마지막 단계. 껍질이 다 정리된 뒤 내부 로직 중복 제거, 공개 API 문서화.

@@ -17,7 +17,7 @@ import {StatusChangeReasonModal} from './StatusChangeReasonModal';
 import {showAlert, showConfirm, showSuccess} from '../../message';
 import {ValidateResult} from '../../validations/Validation';
 import {useLoadingStore} from '../../loading';
-import {useRouter} from 'next/navigation';
+import {useRouter} from "../../router";
 import {getExternalApiDataWithError, parse} from '../../utils';
 import type {ImmediateChangeProps} from './SelectField';
 

@@ -30,6 +30,16 @@ export { registerSmsHistoryField, createSmsHistoryField } from './extensions/Fie
 export { registerMenuPermissionChecker, checkAdminMenuPermission, DEFAULT_MENU_ALIAS } from './menu';
 export type { MenuPermissionChecker, MenuPermissionCheckArgs } from './menu';
 
+// Router — framework-agnostic navigation contract. Use @rcm/listgrid/next for
+// a Next.js adapter; other frameworks (Vite + React Router, Remix, etc.) can
+// supply their own RouterServices implementation.
+export { RouterProvider, useRouter, usePathname, useParams, useSearchParams, Link } from './router';
+export type { RouterServices, RouterApi, RouterLinkProps, RouterProviderProps } from './router';
+
+// URL state — framework-agnostic query-parameter sync contract.
+export { UrlStateProvider, useQueryStates, createParser, parseAsString } from './urlState';
+export type { UrlStateServices, UrlParser, UrlStateSetOptions, QueryStatesSetter, UrlStateProviderProps } from './urlState';
+
 // API client — host apps configure an ApiClient that fulfils RCM-framework
 // REST conventions. See src/listgrid/api/ApiClient.ts.
 export {

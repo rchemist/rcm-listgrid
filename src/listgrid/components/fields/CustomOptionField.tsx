@@ -11,7 +11,7 @@ import {SelectBox} from "../../ui";
 import {RadioInput} from "../../ui";
 import {getInputRendererParameters} from '../../components/helper/FieldRendererHelper';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {hexHash} from "next/dist/shared/lib/hash";
+import {hexHash} from "../../utils/hash";
 import {SelectOption} from "../../form/Type";
 import {getExternalApiDataWithError, isEmpty, isEquals} from "../../misc";
 import {CheckBox} from "../../ui";

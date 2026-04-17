@@ -14,7 +14,7 @@
  */
 
 import {useCallback} from "react";
-import {useRouter} from "next/navigation";
+import {useRouter} from "../../../router";
 import {EntityForm} from '../../../config/EntityForm';
 import {EntityTab} from '../../../config/EntityTab';
 import {isEmpty} from "../../../utils";

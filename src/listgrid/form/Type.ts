@@ -11,7 +11,6 @@ import {callExternalHttpRequest, ResponseData} from "../misc";
 import {isTrue} from '../utils/BooleanUtil';
 import {signOut} from "../auth/SessionProvider";
 import {showConfirm} from "../message";
-import {unstable_noStore as noStore} from 'next/cache';
 
 export interface SelectOption {
   // 옵션 라벨
@@ -85,8 +84,6 @@ export class PageResult {
     extensionPoint?: string;
   }, serverProxy: boolean = true) {
     // 정적 빌드 시 cookies 사용으로 인한 오류 방지
-    noStore();
-
     try {
 
       /**

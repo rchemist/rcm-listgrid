@@ -2,7 +2,7 @@
 
 import React, {Suspense, useEffect, useMemo, useState} from "react";
 import {useSession} from '../auth';
-import {usePathname, useSearchParams} from "next/navigation";
+import {usePathname, useSearchParams} from "../router";
 import {Breadcrumb, BreadcrumbItem} from "../ui";
 import {PermissionType} from "../config/Config";
 import {checkAdminMenuPermission, DEFAULT_MENU_ALIAS} from '../menu/MenuPermissionChecker';
@@ -10,7 +10,7 @@ import {LoadingOverlay} from "../ui";
 import {Skeleton} from "../ui";
 import {Alert} from "../ui";
 import {ViewEntityFormProps} from '../components/form/types/ViewEntityForm.types';
-import dynamic from "next/dynamic";
+import {dynamic} from "../utils/lazy";
 
 // Dynamic import with better optimization
 const ViewEntityForm = dynamic(

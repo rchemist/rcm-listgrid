@@ -273,3 +273,55 @@ Stage 3 끝에서 빈 주석 블록만 남았고, Stage 6에서 최종 삭제. a
 - **패키지 배포 채널**: 사내 npm registry / GitHub Packages / git submodule 중 선택. 첫 외부 소비자가 정해질 때 확정.
 - **테스트 전략**: `config/__tests__`, `list/context/EntityFormScopeContext.test.tsx` 등을 Jest로 되살릴지 Playwright 통합으로 갈지 미정. 현재 tsconfig exclude 상태.
 - **실전 통합 검증**: Stage 6 Done-when 체크리스트 중 "최소 1개 외부 프로젝트에 통합되어 실전 동작 확인"은 소비 프로젝트가 확정될 때 실행. 현재 **타입체크/패키지 구조**까지가 라이브러리의 책임 범위.
+
+---
+
+## 2026-04-17 (Stage 7)
+
+### #41 Stage 7 착수 사유: Next.js 14/15/16 버전 파편화 + non-Next 수요
+사내 프로젝트가 Next 15/16 혼용, 그리고 Python 백엔드 기반 프로젝트가 이 라이브러리를 쓰고 싶어하지만 Next.js 결합 때문에 막혀있음. `peer next >= 14`는 실제로는 internal API(`hexHash`, `AppRouterInstance`) 의존 때문에 15/16에서 깨질 가능성 높음 — 진짜 framework-free로 가야 함.
+
+### #42 `next/dist/*` internal API 제거 (Phase 7a)
+- `hexHash` (`next/dist/shared/lib/hash`) → 자체 FNV-1a 구현으로 교체 (`src/listgrid/utils/hash.ts`, 10줄). Output 형식(unsigned 32-bit hex) 원본과 동일해 cache key·React `key` 호환.
+- `AppRouterInstance` (`next/dist/shared/lib/app-router-context.shared-runtime`) 타입 import → `any /* AppRouterInstance */` inline 주석으로 교체. 실제 사용처는 `router` 파라미터 1곳. Stage 7c에서 `RouterApi`로 대체되면 자연 소멸.
+- `unstable_noStore()` 호출 1곳 (`PageResult.fetchListData`) 제거 — Next 15+에선 caching opt-in 기본이라 불필요.
+
+### #43 `next/dynamic` → `React.lazy` (Phase 7b)
+`src/listgrid/utils/lazy.tsx`에 `lazyImport`(별칭 `dynamic`) 구현. API 호환을 위해 `{ loading, ssr }` 옵션을 받고 `loading`은 Suspense fallback으로, `ssr`은 무시.
+**Why SSR 무시**: React.lazy는 SSR이 제한적. 기존 call site 중 `ssr: false`를 명시한 곳은 문제없음. SSR이 필요한 host는 어댑터에서 `utils/lazy`를 자기 구현으로 overlay 가능(추후 과제).
+
+### #44 RouterProvider 계약 설계 (Phase 7c)
+```ts
+interface RouterServices {
+    useRouter: () => RouterApi;  // {push, replace, refresh?, back?, forward?, prefetch?}
+    usePathname: () => string;
+    useParams: () => Record<string, string | string[] | undefined>;
+    useSearchParams: () => URLSearchParams;
+    Link: ComponentType<RouterLinkProps>;
+}
+```
+Context 값에 hook 함수들을 담는 **Option A** 선택 (vs. Provider에서 hook 결과를 snapshot으로 담는 Option B).
+**Why**: host 어댑터가 thin(next hook을 thin wrap). state 분리 slice별 재렌더는 이 context 자체 재렌더와 동등 — listgrid가 router 상태에 민감하게 반응하지 않기에 충분.
+
+### #45 UrlStateProvider 계약 + 타입 완화
+```ts
+interface UrlStateServices {
+    useQueryStates(parsers: Record<string, UrlParser<any>>, options?: UrlStateSetOptions)
+        : [Record<string, any>, QueryStatesSetter];
+}
+interface UrlParser<T> { parse: (v: string) => T | null; serialize: (v: T) => string; eq?(a, b): boolean; }
+```
+framework-agnostic `createParser`와 `parseAsString`은 listgrid 내부에 단순 구현. Next 어댑터(`nuqsCreateParser` 래핑)가 실제 nuqs와 연결.
+**Why 타입 완화**: nuqs의 `SetValues` 타입이 `Promise<URLSearchParams>` 반환해 library 계약 `Promise<void>`와 호환 안 됨. 반환 타입을 `any`로 완화해 어댑터 호환성 확보. 반환값 사용 안 하는 library call site는 영향 없음.
+
+### #46 Subpath 어댑터 `@rcm/listgrid/next` (Phase 7e)
+- `package.json` `exports` field로 `"./next": "./src/adapters/next/index.ts"` 노출.
+- `next`, `nuqs`가 **optional peer**로 이동 — non-Next 프로젝트는 설치 불필요. 어댑터 import(`@rcm/listgrid/next`) 시에만 번들에 포함.
+- 별도 npm 패키지 대신 subpath 선택. 단일 리포 유지 + 단일 install.
+**Why**: 초기에 별도 패키지(`@rcm/listgrid-next`) 분리는 overhead. subpath가 실사용성 동일하면서 관리 부담 최소. 향후 별도 리포가 필요해지면 그때 분리(이때 현 subpath는 re-export shim으로 유지).
+
+### #47 Stage 7 완료 검증
+- `grep -rn "next/\|nuqs" src/listgrid` = 0 (주석 제외)
+- `@rcm/listgrid` core — peer: react, react-dom, @tabler/icons-react, @headlessui/react (+11 optional)
+- `@rcm/listgrid/next` — peer: next, nuqs 추가 요구
+- non-Next 프로젝트(예: Vite + 자체 Router)가 `RouterProvider`/`UrlStateProvider`에 자기 어댑터 주입하면 동작 가능한 구조

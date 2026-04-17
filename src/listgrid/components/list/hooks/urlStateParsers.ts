@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {createParser} from 'nuqs';
+import {createParser} from "../../../urlState";
 import {Direction, FilterItem, QueryConditionType} from '../../../form/SearchForm';
 
 /**

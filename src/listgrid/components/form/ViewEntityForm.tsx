@@ -13,7 +13,7 @@ import {ViewEntityFormButtons} from "./ui/ViewEntityFormButtons";
 import {ViewEntityFormSkeleton} from "./ui/ViewEntityFormSkeleton";
 import {Tab} from '@headlessui/react';
 // Dynamic imports to reduce bundle size
-import dynamic from "next/dynamic";
+import {dynamic} from "../../utils/lazy";
 import {useEntityFormLogic} from "./hooks/useEntityFormLogic";
 import {clearAllToasts} from "../../message";
 // Theme system

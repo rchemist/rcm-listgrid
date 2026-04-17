@@ -16,7 +16,7 @@ import {MinMaxLimit, SelectOption} from "../../../form/Type";
 import {ValidateResult} from '../../../validations/Validation';
 import {EntityForm} from '../../../config/EntityForm';
 import {Session} from '../../../auth/types';
-import {hexHash} from "next/dist/shared/lib/hash";
+import {hexHash} from "../../../utils/hash";
 import {isEquals} from "../../../misc";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {Badge} from "../../../ui";

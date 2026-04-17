@@ -2,14 +2,14 @@
 
 import React, {Suspense, useEffect, useMemo, useState} from "react";
 import {useSession} from '../auth';
-import {usePathname} from "next/navigation";
+import {usePathname} from "../router";
 import {Breadcrumb, BreadcrumbItem} from "../ui";
 import {PermissionType} from "../config/Config";
 
 import {LoadingOverlay} from "../ui";
 import {Skeleton} from "../ui";
 import {ViewListGridProps} from '../components/list/types/ViewListGrid.types';
-import dynamic from "next/dynamic";
+import {dynamic} from "../utils/lazy";
 import {checkAdminMenuPermission, DEFAULT_MENU_ALIAS} from '../menu/MenuPermissionChecker';
 
 // Dynamic import with better optimization

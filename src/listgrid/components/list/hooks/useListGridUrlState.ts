@@ -8,7 +8,7 @@
  */
 
 import {useCallback, useRef} from 'react';
-import {parseAsString, useQueryStates} from 'nuqs';
+import {parseAsString, useQueryStates} from "../../../urlState";
 import {SearchForm} from '../../../form/SearchForm';
 import {
   hasUrlParams,

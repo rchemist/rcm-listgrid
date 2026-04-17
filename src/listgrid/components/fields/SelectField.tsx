@@ -6,7 +6,7 @@
  */
 
 import React from "react";
-import {hexHash} from "next/dist/shared/lib/hash";
+import {hexHash} from "../../utils/hash";
 import {CheckBoxChip} from "../../ui";
 import {MultiSelectBox} from "../../ui";
 import {RadioChip} from "../../ui";

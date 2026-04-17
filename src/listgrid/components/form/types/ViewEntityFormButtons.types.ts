@@ -6,7 +6,6 @@
  */
 import {EntityForm} from '../../../config/EntityForm';
 import {EntityFormManageable} from "./ViewEntityForm.types";
-import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-runtime";
 import {EntityButtonLinkProps} from '../../../config/Config';
 import {Session} from '../../../auth/types';
 import {EntityFormButton} from '../../../config/EntityFormButton';
@@ -20,7 +19,7 @@ export interface AbstractButtonProps extends EntityFormManageable {
   postSave?: (entityForm: EntityForm) => Promise<void>,
   postDelete?: (entityForm: EntityForm) => Promise<void>,
   pathname: any,
-  router: AppRouterInstance,
+  router: any /* AppRouterInstance */,
   buttonLinks?: EntityButtonLinkProps
   setErrors: (errors: string[]) => void;
   setNotifications: (notifications: string[]) => void;

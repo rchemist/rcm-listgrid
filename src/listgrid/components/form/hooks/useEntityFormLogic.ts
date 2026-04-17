@@ -8,7 +8,7 @@
  */
 
 import {ReactNode, useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {usePathname, useRouter} from "next/navigation";
+import {usePathname, useRouter} from "../../../router";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {ModalOptions, useModalManagerStore} from '../../../store';
 import {useSession} from '../../../auth';

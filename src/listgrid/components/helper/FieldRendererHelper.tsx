@@ -5,7 +5,7 @@ import {RenderType} from "../../config/Config";
 // Removed ManyToOneField and UserField imports to fix circular dependency
 import {isBlank} from '../../utils/StringUtil';
 import {Tooltip} from "../../ui";
-import Link from "next/link";
+import {Link} from "../../router";
 import {IconExternalLink} from "@tabler/icons-react";
 
 export async function getInputRendererParameters(field: FormField<any>, params: FieldRenderParameters, ...args: any[]) {

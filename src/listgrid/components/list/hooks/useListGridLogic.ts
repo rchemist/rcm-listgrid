@@ -8,7 +8,7 @@
  */
 
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {useParams, usePathname, useRouter} from "next/navigation";
+import {useParams, usePathname, useRouter} from "../../../router";
 import {getSessionStorageObject, isEmpty, isEqualCollection, setSessionStorageItem} from "../../../misc";
 import {SearchForm} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';

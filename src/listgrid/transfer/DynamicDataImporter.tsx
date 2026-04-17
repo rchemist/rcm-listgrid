@@ -1,6 +1,6 @@
 'use client';
 
-import dynamic from 'next/dynamic';
+import {dynamic} from "../utils/lazy";
 import {Skeleton} from '../ui';
 import {ComponentProps} from 'react';
 

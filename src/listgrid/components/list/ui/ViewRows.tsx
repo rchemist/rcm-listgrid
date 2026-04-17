@@ -11,7 +11,7 @@ import {
 import React, {ReactNode, useEffect, useState} from "react";
 import {InlineExpansionState, ViewRowItemProps} from "../types/RowItem.types";
 import {ViewColumn} from "./ViewColumn";
-import {usePathname, useRouter} from "next/navigation";
+import {usePathname, useRouter} from "../../../router";
 import {showAlert} from "../../../message";
 import {isTrue} from "../../../utils/BooleanUtil";
 import {useModalManagerStore} from "../../../store";
@@ -183,7 +183,7 @@ export const ViewRows = (props: ViewRowsProps) => {
           if (props.onRefresh) {
             props.onRefresh();
           } else {
-            router.refresh();
+            router.refresh?.();
             setTimeout(() => {
               setOpenBaseLoading(false);
             }, 100);
