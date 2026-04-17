@@ -10,7 +10,7 @@
 import {InputRendererProps} from '../../../config/Config';
 import {EntityForm} from '../../../config/EntityForm';
 import {useEffect, useState} from "react";
-import {Paper} from "@gjcu/ui/elements/Paper";
+import {Paper} from "../../../ui";
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
 import {FilterItem, SearchForm} from "../../../form/SearchForm";
@@ -18,8 +18,8 @@ import {isEmpty} from "../../../utils";
 import {isTrue} from '../../../utils/BooleanUtil';
 // TODO: Fix this import - should use ui package component
 // import Loading from "@/app/loading";
-import {LoadingOverlay as Loading} from "@gjcu/ui/elements/indicator/LoadingOverlay";
-import {useModalManagerStore} from '../../../../store';
+import {LoadingOverlay as Loading} from "../../../ui";
+import {useModalManagerStore} from '../../../store';
 
 interface XrefMappingViewProps extends InputRendererProps {
   entityForm: EntityForm;

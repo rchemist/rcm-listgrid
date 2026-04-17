@@ -8,7 +8,7 @@
  */
 
 import React, {useState} from 'react';
-import {Textarea} from '@gjcu/ui/form/Textarea';
+import {Textarea} from '../../ui';
 import {SelectOption} from '../../form/Type';
 import {FieldValue} from '../../config/Config';
 

@@ -15,7 +15,7 @@ import {
   SampleDataItem
 } from '../transfer/Type';
 import {PageResult} from "../form/Type";
-import {getPlainText} from "@gjcu/ui/form/Tiptap/TiptapEditor";
+import {getPlainText} from "../ui";
 import {isEmpty} from "../utils";
 
 /**

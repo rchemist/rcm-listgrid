@@ -10,13 +10,13 @@
 import {InputRendererProps} from '../../../config/Config';
 import {EntityForm} from '../../../config/EntityForm';
 import {useEffect, useState} from "react";
-import {Paper} from "@gjcu/ui/elements/Paper";
+import {Paper} from "../../../ui";
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
 import {FilterItem, SearchForm} from "../../../form/SearchForm";
 import {isEmpty} from "../../../utils";
 import {isTrue} from '../../../utils/BooleanUtil';
-import {useModalManagerStore} from '../../../../store';
+import {useModalManagerStore} from '../../../store';
 
 interface XrefPriorityMappingViewProps extends InputRendererProps {
   entityForm: EntityForm;

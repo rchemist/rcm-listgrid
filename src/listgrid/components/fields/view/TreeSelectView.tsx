@@ -9,12 +9,12 @@
 
 import {EntityForm} from '../../../config/EntityForm';
 import React, {useEffect, useState} from "react";
-import {Tree, TreeNodeData} from "@gjcu/ui/elements/tree";
-import {LoadingOverlay} from "@gjcu/ui/elements/indicator/LoadingOverlay";
+import {Tree, TreeNodeData} from "../../../ui";
+import {LoadingOverlay} from "../../../ui";
 import {ManyToOneTreeView} from '../../../config/Config';
-import {getExternalApiDataWithError} from "@gjcu/ui";
+import {getExternalApiDataWithError} from "../../../misc";
 import {isTrue} from '../../../utils/BooleanUtil';
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../ui";
 import {IconChevronDown, IconChevronRight} from "@tabler/icons-react";
 
 interface TreeSelectViewProps {

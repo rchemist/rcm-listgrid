@@ -9,7 +9,7 @@ import {EntityForm} from '../../../config/EntityForm';
 import {ViewEntityForm} from '../../form/ViewEntityForm';
 import React from "react";
 import {IconExternalLink} from "@tabler/icons-react";
-import {useModalManagerStore} from '../../../../store';
+import {useModalManagerStore} from '../../../store';
 
 interface ManyToOneListViewProps {
   id?: string;

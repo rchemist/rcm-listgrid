@@ -6,14 +6,14 @@
  */
 
 import {FC, ReactNode} from 'react';
-import {Alert} from "@gjcu/ui/elements/alerts/Alert";
-import {Table} from "@gjcu/ui/elements/table/Table";
-import {Box} from "@gjcu/ui/elements/layout/Box";
-import {Flex} from "@gjcu/ui/elements/layout/Flex";
-import {Paper} from "@gjcu/ui/elements/Paper";
+import {Alert} from "../ui";
+import {Table} from "../ui";
+import {Box} from "../ui";
+import {Flex} from "../ui";
+import {Paper} from "../ui";
 import {DataField, DataTransferResult} from '../transfer/Type';
 import {getTranslation} from "../utils/i18n";
-import {isEmpty, isPositive} from "@gjcu/ui";
+import {isEmpty, isPositive} from "../misc";
 
 export interface DataImportResultViewProps {
   result: DataTransferResult;

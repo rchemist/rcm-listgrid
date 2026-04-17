@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import {Skeleton} from '@gjcu/ui/elements/indicator/Skeleton';
+import {Skeleton} from '../ui';
 import {ComponentProps} from 'react';
 
 // DataImporter와 XLSX를 동적으로 로드

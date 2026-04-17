@@ -7,10 +7,10 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 "use client";
-import {Pagination} from "@gjcu/ui/elements/pagination/Pagination";
+import {Pagination} from "../../ui";
 import React, {useCallback, useEffect, useId, useMemo, useRef} from "react";
 import {EntireChecker} from './ui/EntireChecker';
-import {LoadingOverlay} from "@gjcu/ui/elements/indicator/LoadingOverlay";
+import {LoadingOverlay} from "../../ui";
 import {HeaderField} from './ui/HeaderField';
 import {AdvancedSearchFormV2 as AdvancedSearchForm} from './AdvancedSearchFormV2';
 import {isTrue} from '../../utils/BooleanUtil';
@@ -22,10 +22,9 @@ import {ViewListGridProps} from "./types/ViewListGrid.types";
 import {useListGridLogic} from "./hooks/useListGridLogic";
 import {ListableFormField} from "../fields/abstract";
 import {ShowNotifications} from '../helper/ShowNotifications';
-import {Stack} from "@gjcu/ui/elements/layout/Stack";
+import {Stack} from "../../ui";
 import {SubCollectionViewModal} from "./ui/SubCollectionViewModal";
-import {useSession} from '../../auth';
-import {hasAnyRole} from "@gjcu/shared";
+import {hasAnyRole, useSession} from '../../auth';
 import {perfLog} from './utils/performanceLogger';
 import {
   getListGridThemeByVariant,

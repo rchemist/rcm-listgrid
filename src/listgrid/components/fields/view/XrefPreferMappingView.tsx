@@ -18,8 +18,8 @@ import {
 import {EntityForm} from '../../../config/EntityForm';
 import {SubmitFormData} from '../../../config/EntityFormTypes';
 import React, {useEffect, useState} from "react";
-import {Paper} from "@gjcu/ui/elements/Paper";
-import {useModalManagerStore} from '../../../../store';
+import {Paper} from "../../../ui";
+import {useModalManagerStore} from '../../../store';
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
 import {FilterItem, SearchForm} from "../../../form/SearchForm";

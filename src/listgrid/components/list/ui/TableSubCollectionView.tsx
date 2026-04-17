@@ -10,7 +10,7 @@ import {
 import {TableConfig} from '../../../config/TableSubCollectionField';
 import {Session} from '../../../auth/types';
 import {SearchForm} from '../../../form/SearchForm';
-import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
+import {Tooltip} from '../../../ui';
 import {ListableFormField} from '../../fields/abstract';
 import {
   IconAlertCircle,

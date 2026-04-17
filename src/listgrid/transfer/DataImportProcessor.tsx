@@ -7,12 +7,12 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {Table} from "@gjcu/ui/elements/table/Table";
-import {SafePerfectScrollbar} from "@gjcu/ui/components/scrollbar/SafePerfectScrollbar";
-import {Box} from "@gjcu/ui/elements/layout/Box";
-import {Flex} from "@gjcu/ui/elements/layout/Flex";
-import {Grid} from "@gjcu/ui/elements/layout/Grid";
-import {Paper} from "@gjcu/ui/elements/Paper";
+import {Table} from "../ui";
+import {SafePerfectScrollbar} from "../ui";
+import {Box} from "../ui";
+import {Flex} from "../ui";
+import {Grid} from "../ui";
+import {Paper} from "../ui";
 import {FC, ReactNode, useEffect, useState} from "react";
 import classes from "./DataImport.module.css";
 import {DataField, DataRow, DataTransferResult} from '../transfer/Type';

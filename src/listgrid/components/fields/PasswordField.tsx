@@ -11,8 +11,8 @@ import {PasswordValidation} from '../../validations/PasswordValidation';
 import {FormField, FormFieldProps} from './abstract';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {FieldRenderParameters} from '../../config/EntityField';
-import {PasswordStrength, PasswordStrengthView} from "@gjcu/ui/form/PasswordStrength";
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {PasswordStrength, PasswordStrengthView} from "../../ui";
+import {TextInput} from "../../ui";
 import {RegexValidation} from "../../validations/RegexValidation";
 
 

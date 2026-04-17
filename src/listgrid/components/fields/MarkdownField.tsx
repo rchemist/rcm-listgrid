@@ -11,8 +11,8 @@ import React from "react";
 import {
   getInputRendererParameters
 } from '../helper/FieldRendererHelper';
-import {MarkdownEditor} from "@gjcu/ui/form/MarkdownEditor";
-import {isEquals} from "@gjcu/ui";
+import {MarkdownEditor} from "../../ui";
+import {isEquals} from "../../misc";
 import {isBlank} from '../../utils/StringUtil';
 
 interface MarkdownFieldProps extends FormFieldProps{

@@ -1,6 +1,6 @@
 'use client';
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
+import {Tooltip} from "../../../ui";
+import {useLoadingStore} from "../../../loading";
 import {Icon} from "@iconify/react";
 import {
   IconBaselineDensityMedium,
@@ -12,9 +12,9 @@ import React, {ReactNode, useEffect, useState} from "react";
 import {InlineExpansionState, ViewRowItemProps} from "../types/RowItem.types";
 import {ViewColumn} from "./ViewColumn";
 import {usePathname, useRouter} from "next/navigation";
-import {showAlert} from "@gjcu/ui/message/messageUtils";
+import {showAlert} from "../../../message";
 import {isTrue} from "../../../utils/BooleanUtil";
-import {useModalManagerStore} from "../../../../store";
+import {useModalManagerStore} from "../../../store";
 import {ViewEntityForm} from "../../form/ViewEntityForm";
 import {useListGridTheme} from "../context/ListGridThemeContext";
 import {SubCollectionInlineView} from "./SubCollectionInlineView";

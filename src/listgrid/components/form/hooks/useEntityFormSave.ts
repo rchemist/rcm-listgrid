@@ -7,7 +7,7 @@ import {
 } from '../../../extensions/EntityFormExtension.types';
 import {isEmpty} from "../../../utils";
 import {EntityButtonLinkProps, RenderType} from '../../../config/Config';
-import {openToast} from "@gjcu/ui/message/ToastMessage";
+import {openToast} from "../../../message";
 import {Session} from '../../../auth/types';
 
 /**

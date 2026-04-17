@@ -7,10 +7,10 @@
 
 import {AdditionalColorType, ColorType} from "../common/type";
 import {SearchForm} from './SearchForm';
-import {callExternalHttpRequest, ResponseData} from "@gjcu/ui";
+import {callExternalHttpRequest, ResponseData} from "../misc";
 import {isTrue} from '../utils/BooleanUtil';
 import {signOut} from "../auth/SessionProvider";
-import {showConfirm} from "@gjcu/ui/message/messageUtils";
+import {showConfirm} from "../message";
 import {unstable_noStore as noStore} from 'next/cache';
 
 export interface SelectOption {

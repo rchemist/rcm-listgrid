@@ -8,15 +8,15 @@
  */
 
 import React, {useCallback, useMemo, useState} from 'react';
-import {RadioChip} from '@gjcu/ui/form/RadioChip';
+import {RadioChip} from '../../ui';
 import {SelectOption} from '../../form/Type';
 import {FieldValue} from '../../config/Config';
 import {EntityForm} from '../../config/EntityForm';
-import {useModalManagerStore} from '../../../store';
+import {useModalManagerStore} from '../../store';
 import {StatusChangeReasonModal} from './StatusChangeReasonModal';
-import {showAlert, showConfirm, showSuccess} from '@gjcu/ui/message/messageUtils';
+import {showAlert, showConfirm, showSuccess} from '../../message';
 import {ValidateResult} from '../../validations/Validation';
-import {useLoadingStore} from '@gjcu/ui/layout/BaseLoading';
+import {useLoadingStore} from '../../loading';
 import {useRouter} from 'next/navigation';
 import {getExternalApiDataWithError, parse} from '../../utils';
 import type {ImmediateChangeProps} from './SelectField';

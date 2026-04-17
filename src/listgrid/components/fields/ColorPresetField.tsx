@@ -5,7 +5,7 @@ import {ListableFormField, ViewListProps, ViewListResult} from "./abstract";
 import {InputRendererProps} from "../../config/Config";
 import {AdditionalColorType, AllColorTypes, ColorType} from "../../common/type";
 import {getAdditionalColorClass, getOppositeTextColorClass} from "../../common/func";
-import {Popover} from "@gjcu/ui/elements/popover/Popover";
+import {Popover} from "../../ui";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 
 export class ColorPresetField extends ListableFormField<ColorPresetField> {

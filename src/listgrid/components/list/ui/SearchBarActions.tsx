@@ -1,10 +1,10 @@
 'use client';
 
 import {useEffect, useMemo} from "react";
-import {Indicator} from "@gjcu/ui/elements/indicator/Indicator";
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Indicator} from "../../../ui";
+import {Tooltip} from "../../../ui";
 import {SearchForm} from "../../../form/SearchForm";
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
+import {SelectBox} from "../../../ui";
 import {getTranslation} from "../../../utils/i18n";
 import {ListableFormField} from "../../fields/abstract";
 import {ViewFieldSelector} from "../ViewFieldSelector";

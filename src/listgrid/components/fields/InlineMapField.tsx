@@ -9,7 +9,7 @@ import {FormField, FormFieldProps} from './abstract';
 import React from "react";
 import {InlineMapConfig, MapKey} from '../../config/Config';
 import {FieldRenderParameters} from '../../config/EntityField';
-import {InlineMap, InlineMapPendingRef, KeyValue} from "@gjcu/ui/form/InlineMap";
+import {InlineMap, InlineMapPendingRef, KeyValue} from "../../ui";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {MinMaxLimit} from "../../form/Type";
 import {EntityForm} from '../../config/EntityForm';

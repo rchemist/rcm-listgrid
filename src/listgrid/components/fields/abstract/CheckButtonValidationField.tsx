@@ -10,7 +10,7 @@ import {ListableFormField, ListableFormFieldProps} from "./ListableFormField";
 import {ValidateResult} from '../../../validations/Validation';
 import {EntityForm} from '../../../config/EntityForm';
 import {FieldInfoParameters, FieldRenderParameters} from '../../../config/EntityField';
-import {CheckButtonValidationInput} from "@gjcu/ui/form/CheckButtonValidationInput";
+import {CheckButtonValidationInput} from "../../../ui";
 import {isEmpty} from "../../../utils";
 
 export interface CheckButtonValidationFieldProps extends ListableFormFieldProps {

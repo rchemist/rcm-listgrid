@@ -2,7 +2,7 @@ import React, {ReactNode} from "react";
 import {FieldRenderParameters} from "../../config/EntityField";
 import {FormField} from "./abstract";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {UserView} from "@gjcu/ui/user/UserView";
+import {UserView} from "../../ui";
 
 export class ProfileField extends FormField<ProfileField> {
 

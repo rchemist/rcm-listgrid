@@ -15,7 +15,7 @@ import {
 import React from "react";
 import {MinMaxLimit, SelectOption} from "../../form/Type";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {TagsInput} from "@gjcu/ui/form/TagsInput/index";
+import {TagsInput} from "../../ui";
 import {TagValidationResult} from "../../form/TagsInput/types";
 import {isEmpty} from "../../utils";
 import classes from "./TagField.module.css";

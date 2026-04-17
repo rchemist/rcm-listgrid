@@ -4,7 +4,7 @@ import {AbstractManyToOneField, FormField} from "../fields/abstract";
 import {RenderType} from "../../config/Config";
 // Removed ManyToOneField and UserField imports to fix circular dependency
 import {isBlank} from '../../utils/StringUtil';
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../ui";
 import Link from "next/link";
 import {IconExternalLink} from "@tabler/icons-react";
 

@@ -6,7 +6,7 @@
  */
 
 import {RegexValidation} from '../validations/RegexValidation';
-import {RegexTelephoneNumber} from "@gjcu/ui";
+import {RegexTelephoneNumber} from "../misc";
 import {ValidateResult} from '../validations/Validation';
 import {EntityForm} from '../config/EntityForm';
 import {FieldValue} from '../config/Config';

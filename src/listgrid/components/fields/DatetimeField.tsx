@@ -14,15 +14,15 @@ import {
 import React from "react";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {RenderType} from '../../config/Config';
-import {fDate, fDateTime, fToNow} from "@gjcu/ui";
+import {fDate, fDateTime, fToNow} from "../../misc";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {FlatPickrDateField} from "@gjcu/ui/form/FlatPickrDateField";
+import {FlatPickrDateField} from "../../ui";
 import {isTrue} from '../../utils/BooleanUtil';
 import {MinMaxStringLimit} from "../../form/Type";
 import {DatetimeFilter} from './filter/DatetimeFilter';
 import {isBlank} from '../../utils/StringUtil';
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {Tooltip} from "../../ui";
+import {TextInput} from "../../ui";
 
 
 interface DatetimeFieldProps extends AbstractDateFieldProps {

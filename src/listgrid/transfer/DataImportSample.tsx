@@ -8,15 +8,15 @@
  */
 
 import {FC, useEffect, useState} from 'react';
-import {Table} from "@gjcu/ui/elements/table/Table";
-import {SafePerfectScrollbar} from "@gjcu/ui/components/scrollbar/SafePerfectScrollbar";
-import {Modal} from "@gjcu/ui/modals";
+import {Table} from "../ui";
+import {SafePerfectScrollbar} from "../ui";
+import {Modal} from "../ui";
 import {IconFile, IconHelpCircle} from "@tabler/icons-react";
 import clsx from "clsx";
 import {DataField, SampleDataItem} from '../transfer/Type';
 import {DataExportProcessor} from '../transfer/DataExportProcessor';
 import {getTranslation} from "../utils/i18n";
-import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
+import {Tooltip} from '../ui';
 
 export interface DataImportSampleProps {
   sampleFileName?: string;

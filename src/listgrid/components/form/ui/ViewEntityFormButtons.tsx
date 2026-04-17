@@ -16,7 +16,7 @@ import {
 } from '../../../config/EntityFormButton';
 import {isTrue} from '../../../utils/BooleanUtil';
 import {ViewEntityFormButtonsProps} from "../types/ViewEntityFormButtons.types";
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../ui";
 import {useEntityFormTheme} from "../context/EntityFormThemeContext";
 
 /**

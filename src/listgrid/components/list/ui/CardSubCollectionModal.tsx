@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Modal } from '@gjcu/ui/modals';
+import { Modal } from '../../../ui';
 import { ViewEntityForm } from '../../form/ViewEntityForm';
 import { EntityForm } from '../../../config/EntityForm';
 import { CardSubCollectionRelation } from '../../../config/CardSubCollectionField';

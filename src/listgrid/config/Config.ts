@@ -10,7 +10,7 @@ import {EntityForm} from '../config/EntityForm';
 import {FilterItem, SearchForm, SearchValue} from "../form/SearchForm";
 import {IListConfig} from '../components/fields/abstract';
 import {MinMaxLimit, PageResult, SelectOption} from "../form/Type";
-import {TreeNodeData} from "@gjcu/ui/elements/tree";
+import {TreeNodeData} from "../ui";
 import {isEmpty} from "../utils";
 import {Session} from '../auth/types';
 import {generateSlug, isBlank} from '../utils/StringUtil';

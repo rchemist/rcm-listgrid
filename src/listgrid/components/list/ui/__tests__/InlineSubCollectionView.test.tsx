@@ -22,21 +22,21 @@ jest.mock('../../../../config/ListGrid', () => ({
 }));
 
 // Mock Tooltip component
-jest.mock('@gjcu/ui/elements/tooltip/Tooltip', () => ({
+jest.mock('../../../../ui', () => ({
   Tooltip: ({ children, label }: { children: React.ReactNode; label: string }) => (
     <div data-tooltip={label}>{children}</div>
   ),
 }));
 
 // Mock loading store
-jest.mock('@gjcu/ui/layout/BaseLoading', () => ({
+jest.mock('../../../../loading', () => ({
   useLoadingStore: () => ({
     setOpenBaseLoading: jest.fn(),
   }),
 }));
 
 // Mock showAlert
-jest.mock('@gjcu/ui/message/messageUtils', () => ({
+jest.mock('../../../../message', () => ({
   showAlert: jest.fn(),
 }));
 

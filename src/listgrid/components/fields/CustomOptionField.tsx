@@ -7,16 +7,16 @@ import {
 } from '../../components/fields/abstract';
 import React from "react";
 import {RenderType} from '../../config/Config';
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {RadioInput} from "@gjcu/ui/form/RadioInput";
+import {SelectBox} from "../../ui";
+import {RadioInput} from "../../ui";
 import {getInputRendererParameters} from '../../components/helper/FieldRendererHelper';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {hexHash} from "next/dist/shared/lib/hash";
 import {SelectOption} from "../../form/Type";
-import {getExternalApiDataWithError, isEmpty, isEquals} from "@gjcu/ui";
-import {CheckBox} from "@gjcu/ui/form/CheckBox";
+import {getExternalApiDataWithError, isEmpty, isEquals} from "../../misc";
+import {CheckBox} from "../../ui";
 import {isTrue} from '../../utils/BooleanUtil';
-import {MultiSelectBox} from "@gjcu/ui/form/MultiSelectBox";
+import {MultiSelectBox} from "../../ui";
 
 const customOptionFetchUrl = '/option/by-alias';
 const customOptionBulkFetchUrl = '/option/by-aliases';

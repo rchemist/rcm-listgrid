@@ -1,4 +1,4 @@
-import {Modal} from "@gjcu/ui/modals";
+import {Modal} from "../../../ui";
 import {isTrue} from '../../../utils/BooleanUtil';
 import React from "react";
 import {ViewEntityForm} from "../../form/ViewEntityForm";

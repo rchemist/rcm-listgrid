@@ -6,7 +6,7 @@
  */
 
 import {RegexValidation} from '../validations/RegexValidation';
-import {RegexEmailAddress} from "@gjcu/ui";
+import {RegexEmailAddress} from "../misc";
 
 export class EmailValidation extends RegexValidation {
   constructor(id?: string, regex?: RegExp, message?: string) {

@@ -78,7 +78,7 @@ const EntityFormThemeContext = createContext<EntityFormThemeContextValue>({
  * @example
  * ```tsx
  * // 사이트 A의 layout.tsx
- * import { EntityFormThemeProvider } from '@gjcu/ui/listgrid';
+ * import { EntityFormThemeProvider } from '../../../listgrid-compat';
  *
  * const siteATheme = {
  *   header: { container: 'mt-2 bg-blue-50 rounded-lg p-4' },

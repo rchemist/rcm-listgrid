@@ -1,7 +1,7 @@
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../../ui";
 import {EntityForm} from '../../../../config/EntityForm';
-import {showConfirm} from "@gjcu/ui/message/messageUtils";
-import {getExternalApiData} from "@gjcu/ui";
+import {showConfirm} from "../../../../message";
+import {getExternalApiData} from "../../../../misc";
 
 export interface PriorityButtonsProps {
     managePriority: boolean;

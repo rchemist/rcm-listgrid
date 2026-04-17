@@ -9,13 +9,13 @@ import {ListableFormField, ListableFormFieldProps, ViewListProps, ViewListResult
 import React from "react";
 import {IAssetConfig, RenderType} from '../../config/Config';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {FileFieldValue} from "@gjcu/ui/form/FileUploadInput";
-import {LazyFileUploadInput as FileUploadInput} from "@gjcu/ui/form/DynamicFileUpload";
+import {FileFieldValue} from "../../ui";
+import {LazyFileUploadInput as FileUploadInput} from "../../ui";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {isEmpty} from "../../utils";
-import {getAccessableAssetUrl} from "@gjcu/ui";
+import {getAccessableAssetUrl} from "../../misc";
 import {IconDeviceFloppy} from "@tabler/icons-react";
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {TextInput} from "../../ui";
 import {isBlank as isBlankString} from '../../utils/StringUtil';
 
 interface FileFieldProps extends ListableFormFieldProps {

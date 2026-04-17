@@ -1,5 +1,5 @@
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
+import {Tooltip} from "../../../ui";
+import {useLoadingStore} from "../../../loading";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {IconDownload, IconPlus, IconTrash, IconUpload} from "@tabler/icons-react";
 import {ReactNode} from "react";

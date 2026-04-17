@@ -31,7 +31,7 @@ import {ValidateResult, Validation} from '../../../validations/Validation';
 import {EntityForm} from '../../../config/EntityForm';
 import React, {ReactNode} from "react";
 import {EntityField, FieldInfoParameters, FieldRenderParameters} from '../../../config/EntityField';
-import {isEqualCollection, isEquals} from "@gjcu/ui";
+import {isEqualCollection, isEquals} from "../../../misc";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {addKoreanWordPostfix} from '../../../utils/StringUtil';
 import {Session} from '../../../auth/types';

@@ -6,10 +6,10 @@
  */
 
 import {FieldType,} from '../config/Config';
-import {fDate, fDateTime} from "@gjcu/ui";
+import {fDate, fDateTime} from "../misc";
 import {ReactNode} from "react";
 import {isTrue} from '../utils/BooleanUtil';
-import {getPlainText} from "@gjcu/ui/form/Tiptap/TiptapEditor";
+import {getPlainText} from "../ui";
 import {
   defaultString,
   isBlank,

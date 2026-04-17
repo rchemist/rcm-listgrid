@@ -9,10 +9,10 @@
 
 import React, {useEffect, useState} from 'react';
 import {IconCopy, IconMessage} from '@tabler/icons-react';
-import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
-import {useModalManagerStore} from '@gjcu/ui/store';
-import {showToast} from '@gjcu/ui/message/messageUtils';
-import {readonlyClass} from '@gjcu/ui/form/Style';
+import {Tooltip} from '../../../ui';
+import {useModalManagerStore} from '../../../store';
+import {showToast} from '../../../message';
+import {readonlyClass} from '../../../ui';
 import {formatPhoneNumber, removePhoneNumberHyphens} from '../../../utils/PhoneUtil';
 import {SmsModal} from './SmsModal';
 import {Session} from '../../../auth';

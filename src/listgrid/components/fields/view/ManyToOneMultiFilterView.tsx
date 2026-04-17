@@ -15,7 +15,7 @@ import {ListGrid} from '../../../config/ListGrid';
 import {TreeSelectView} from './TreeSelectView';
 import {SearchForm} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
-import {useModalManagerStore} from '../../../../store';
+import {useModalManagerStore} from '../../../store';
 
 interface SelectedItem {
   id: string;

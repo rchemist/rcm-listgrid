@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import { showConfirm } from "@gjcu/ui/message/messageUtils";
+import { showConfirm } from "../../../../message";
 import { isTrue } from '../../../../utils/BooleanUtil';
 import { ButtonProps } from "../../types/ViewEntityFormButtons.types";
 import { cn } from "../../../../utils/cn";

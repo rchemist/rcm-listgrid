@@ -1,8 +1,8 @@
 'use client';
 
 import React, {useState} from 'react';
-import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
-import {ShowError} from '@gjcu/ui/message/ShowMessage';
+import {Tooltip} from '../ui';
+import {ShowError} from '../message';
 import {getTranslation} from '../utils/i18n';
 
 interface ExcelPasswordFieldProps {

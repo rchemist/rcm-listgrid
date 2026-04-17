@@ -8,8 +8,8 @@
 'use client';
 
 import React, {useEffect, useState} from 'react';
-import {RequestUtil} from '@gjcu/ui';
-import {showAlert, showSuccess} from '@gjcu/ui/message/messageUtils';
+import {RequestUtil} from '../../../misc';
+import {showAlert, showSuccess} from '../../../message';
 
 interface PermittedPhoneNumber {
   name: string;

@@ -1,8 +1,8 @@
 'use client';
 import React, {ReactNode, useEffect, useState} from "react";
 import {ListGridHeaderProps} from "../types/ListGridHeader.types";
-import {showConfirm} from '@gjcu/ui/message/messageUtils';
-import {useLoadingStore} from '@gjcu/ui/layout/BaseLoading';
+import {showConfirm} from '../../../message';
+import {useLoadingStore} from '../../../loading';
 
 export const useListGridHeader = (props: ListGridHeaderProps) => {
     const { buttons, selectionOptions, entityForm, checkedItems, session } = props;

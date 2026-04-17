@@ -8,9 +8,9 @@
  */
 "use client";
 
-import {ASSET_SERVER_URL, removeAssetServerPrefix} from "@gjcu/ui";
+import {ASSET_SERVER_URL, removeAssetServerPrefix} from "../../../misc";
 import {getTranslation} from "../../../utils/i18n";
-import {FileFieldValue, FileUploadInput} from "@gjcu/ui/form/FileUploadInput";
+import {FileFieldValue, FileUploadInput} from "../../../ui";
 import {useEffect, useState} from "react";
 
 interface ProductAssetUploadProps {

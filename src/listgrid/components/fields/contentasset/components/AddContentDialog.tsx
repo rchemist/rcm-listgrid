@@ -14,9 +14,9 @@
  */
 
 import React, {useCallback, useState} from "react";
-import {TextInput} from "@gjcu/ui/form/TextInput";
-import {Textarea} from "@gjcu/ui/form/Textarea";
-import {useModalManagerStore} from '../../../../../store';
+import {TextInput} from "../../../../ui";
+import {Textarea} from "../../../../ui";
+import {useModalManagerStore} from '../../../../store';
 
 interface AddContentDialogProps {
   onAdd: (title: string, content?: string) => void;

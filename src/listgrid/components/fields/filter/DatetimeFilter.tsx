@@ -8,9 +8,9 @@
  */
 
 import React, {useEffect, useState} from "react";
-import {DefinedDateType, fDate, getDefinedDates} from "@gjcu/ui";
-import {FlatPickrDateField} from "@gjcu/ui/form/FlatPickrDateField";
-import { SafePerfectScrollbar } from "@gjcu/ui/components/scrollbar/SafePerfectScrollbar";
+import {DefinedDateType, fDate, getDefinedDates} from "../../../misc";
+import {FlatPickrDateField} from "../../../ui";
+import { SafePerfectScrollbar } from "../../../ui";
 import {FilterRenderParameters} from '../../../config/EntityField';
 import {MinMaxStringLimit} from "../../../form/Type";
 

@@ -16,7 +16,7 @@ import {
 } from './abstract'
 import { FieldRenderParameters } from '../../config/EntityField'
 import { getInputRendererParameters } from '../helper/FieldRendererHelper'
-import { readonlyClass } from "@gjcu/ui/form/Style"
+import { readonlyClass } from "../../ui"
 
 interface BirthdayFieldProps extends ListableFormFieldProps {
   /** 반환값에 하이픈(-) 포함 여부 (기본값: false) */

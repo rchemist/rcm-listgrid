@@ -8,11 +8,11 @@
 
 import {InputRendererProps} from '../../../config/Config';
 import React, {useEffect, useState} from "react";
-import {readonlyClass} from "@gjcu/ui/form/Style";
-import {Tooltip, TooltipColor} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {readonlyClass} from "../../../ui";
+import {Tooltip, TooltipColor} from "../../../ui";
 import {IconExternalLink} from "@tabler/icons-react";
 import {isBlank} from '../../../utils/StringUtil';
-import {normalizeUrl} from "@gjcu/ui";
+import {normalizeUrl} from "../../../misc";
 
 interface LinkFieldProps extends InputRendererProps {
   min?: string;

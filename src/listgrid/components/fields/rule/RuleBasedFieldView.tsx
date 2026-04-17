@@ -19,15 +19,15 @@ import {
 import {isEmpty} from "../../../utils";
 import {SelectOption} from "../../../form/Type";
 import {IconBox} from "@tabler/icons-react";
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
+import {SelectBox} from "../../../ui";
 import {isBlank} from '../../../utils/StringUtil';
 import {RuleCondition} from './RuleCondition';
 import {isTrue} from '../../../utils/BooleanUtil';
 import {FilterItem, getQueryConditionValueType, SearchForm} from "../../../form/SearchForm";
-import {getExternalApiDataWithError} from "@gjcu/ui";
+import {getExternalApiDataWithError} from "../../../misc";
 import {ViewHelpText} from "../../form/ui/ViewHelpText";
 import {ViewFieldError} from "../../form/ui/ViewFieldError";
-import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
+import {useLoadingStore} from "../../../loading";
 
 interface RuleBasedFieldViewProps extends RuleBasedFieldProps {
   onCancel: () => void;

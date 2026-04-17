@@ -2,7 +2,7 @@
 import {getTranslation} from "../../../utils/i18n";
 import {useCallback, useEffect, useState} from "react";
 import {QuickSearchBarProps} from "../QuickSearchBar";
-import {getLocalStorageItem, setLocalStorageItem} from "@gjcu/ui";
+import {getLocalStorageItem, setLocalStorageItem} from "../../../misc";
 import {QuickSearchProps} from '../../../config/ListGrid';
 import {ListableFormField} from "../../fields/abstract";
 import {QueryConditionType, SearchForm} from "../../../form/SearchForm";

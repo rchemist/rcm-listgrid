@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../../ui";
 import {EntityFormActionResult} from '../../../../config/Config';
-import {showConfirm, showSuccess} from "@gjcu/ui/message/messageUtils";
+import {showConfirm, showSuccess} from "../../../../message";
 import {isEmpty, isTrue} from "../../../../utils";
-import {EntityError, parse, removeTrailingSeparator} from "@gjcu/ui";
+import {EntityError, parse, removeTrailingSeparator} from "../../../../misc";
 import {ButtonProps} from "../../types/ViewEntityFormButtons.types";
 import {cn} from "../../../../utils/cn";
 

@@ -7,7 +7,7 @@
 import {useState} from "react";
 import {isEmpty} from "../../../../utils";
 import {ButtonProps} from "../../types/ViewEntityFormButtons.types";
-import {openToast} from "@gjcu/ui/message/ToastMessage";
+import {openToast} from "../../../../message";
 import {useEntityFormTheme} from "../../context/EntityFormThemeContext";
 
 export const SaveButton = ({

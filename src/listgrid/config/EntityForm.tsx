@@ -38,8 +38,8 @@ import {FieldError, SubmitFormData} from './EntityFormTypes';
 import {ExtensionPoint} from '../extensions/EntityFormExtension.types';
 import {ValidateResult} from '../validations/Validation';
 import {PhoneNumberField} from '../components/fields/PhoneNumberField';
-import {SmsHistoryField} from '@gjcu/entities/Academic/Common/fields/smshistory';
-import {hasAnyRole} from '@gjcu/shared';
+import {createSmsHistoryField} from '../extensions/FieldExtensions';
+import {hasAnyRole} from '../auth';
 
 export class EntityForm extends EntityFormExtensions {
 
@@ -242,19 +242,23 @@ export class EntityForm extends EntityFormExtensions {
             hidden: false
           };
 
-          const smsHistoryField = new SmsHistoryField(
+          const smsHistoryField = createSmsHistoryField(
             field.getName() + 'SmsHistory',
             field.getOrder() + 1,
             field.getName()
-          )
-            .withLabel('SMS 발송 이력')
-            .withModifyOnly()
-            .withHideLabel(true);
+          );
 
-          entityForm.addFields({
-            tab: SMS_HISTORY_TAB,
-            items: [smsHistoryField]
-          });
+          if (smsHistoryField) {
+            smsHistoryField
+              .withLabel('SMS 발송 이력')
+              .withModifyOnly()
+              .withHideLabel(true);
+
+            entityForm.addFields({
+              tab: SMS_HISTORY_TAB,
+              items: [smsHistoryField]
+            });
+          }
         }
       }
     }

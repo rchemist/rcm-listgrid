@@ -15,10 +15,10 @@ import {
 import React from "react";
 import {MinMaxLimit, SelectOption} from "../../form/Type";
 import {FieldRenderParameters} from '../../config/EntityField';
-import {CheckBoxChip} from "@gjcu/ui/form/CheckBoxChip";
-import {RadioInput} from "@gjcu/ui/form/RadioInput";
+import {CheckBoxChip} from "../../ui";
+import {RadioInput} from "../../ui";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {MultiSelectBox} from "@gjcu/ui/form/MultiSelectBox";
+import {MultiSelectBox} from "../../ui";
 import {StatusChangeReason, StatusChangeValidation} from './SelectField';
 
 export interface MultiSelectFieldProps extends MultipleOptionalFieldProps {

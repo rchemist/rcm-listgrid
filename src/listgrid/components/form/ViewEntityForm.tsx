@@ -15,7 +15,7 @@ import {Tab} from '@headlessui/react';
 // Dynamic imports to reduce bundle size
 import dynamic from "next/dynamic";
 import {useEntityFormLogic} from "./hooks/useEntityFormLogic";
-import {clearAllToasts} from "@gjcu/ui/message/messageUtils";
+import {clearAllToasts} from "../../message";
 // Theme system
 import {useEntityFormTheme} from "./context/EntityFormThemeContext";
 

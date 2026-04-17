@@ -11,7 +11,7 @@ import {
 } from './abstract';
 import React from "react";
 import {FieldRenderParameters} from '../../config/EntityField';
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {TextInput} from "../../ui";
 import {
   getInputRendererParameters
 } from '../helper/FieldRendererHelper';

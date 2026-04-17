@@ -7,11 +7,11 @@
 
 import React from "react";
 import {hexHash} from "next/dist/shared/lib/hash";
-import {CheckBoxChip} from "@gjcu/ui/form/CheckBoxChip";
-import {MultiSelectBox} from "@gjcu/ui/form/MultiSelectBox";
-import {RadioChip} from "@gjcu/ui/form/RadioChip";
-import {RadioInput} from "@gjcu/ui/form/RadioInput";
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
+import {CheckBoxChip} from "../../ui";
+import {MultiSelectBox} from "../../ui";
+import {RadioChip} from "../../ui";
+import {RadioInput} from "../../ui";
+import {SelectBox} from "../../ui";
 import {SelectOption} from "../../form/Type";
 import {FieldValue, RenderType} from '../../config/Config';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
@@ -29,7 +29,7 @@ import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {SelectFieldRenderer} from './SelectFieldRenderer';
 import {EntityForm} from '../../config/EntityForm';
 import {ValidateResult} from '../../validations/Validation';
-import {Badge} from "@gjcu/ui/elements/badges/Badge";
+import {Badge} from "../../ui";
 import {ColorType} from "../../common/type";
 import {DynamicSelectFieldView} from "./view/DynamicSelectFieldView";
 

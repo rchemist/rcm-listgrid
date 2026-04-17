@@ -8,7 +8,7 @@ import { EntityForm } from '../../../config/EntityForm';
 import { CardSubCollectionRelation, CardConfig, CardSubCollectionFetchOptions, ColumnsConfig } from '../../../config/CardSubCollectionField';
 import { Session } from '../../../auth/types';
 import { SearchForm } from '../../../form/SearchForm';
-import { Tooltip } from '@gjcu/ui/elements/tooltip/Tooltip';
+import { Tooltip } from '../../../ui';
 import { IconHelp, IconSearch, IconX, IconPlus, IconRefresh, IconLayoutGrid, IconAlertCircle, IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight } from '@tabler/icons-react';
 
 export interface CardSubCollectionViewProps {

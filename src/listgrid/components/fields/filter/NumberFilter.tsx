@@ -8,8 +8,8 @@
 
 import React, {useState} from "react";
 import {QueryConditionType} from "../../../form/SearchForm";
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {SelectBox} from "../../../ui";
+import {TextInput} from "../../../ui";
 import {isBlank} from '../../../utils/StringUtil';
 
 interface NumberFilterProps {

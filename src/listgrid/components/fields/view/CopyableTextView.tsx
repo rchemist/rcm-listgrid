@@ -9,8 +9,8 @@
 
 import React from 'react';
 import {IconCopy} from '@tabler/icons-react';
-import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
-import {showToast} from '@gjcu/ui/message/messageUtils';
+import {Tooltip} from '../../../ui';
+import {showToast} from '../../../message';
 
 interface CopyButtonProps {
   value: string;

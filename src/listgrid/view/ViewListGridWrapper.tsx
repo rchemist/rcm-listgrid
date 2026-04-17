@@ -3,11 +3,11 @@
 import React, {Suspense, useEffect, useMemo, useState} from "react";
 import {useSession} from '../auth';
 import {usePathname} from "next/navigation";
-import {Breadcrumb, BreadcrumbItem} from "@gjcu/ui/elements/breadcrumbs/Breadcrumb";
+import {Breadcrumb, BreadcrumbItem} from "../ui";
 import {PermissionType} from "../config/Config";
 
-import {LoadingOverlay} from "@gjcu/ui/elements/indicator/LoadingOverlay";
-import {Skeleton} from "@gjcu/ui/elements/indicator/Skeleton";
+import {LoadingOverlay} from "../ui";
+import {Skeleton} from "../ui";
 import {ViewListGridProps} from '../components/list/types/ViewListGrid.types';
 import dynamic from "next/dynamic";
 import {checkAdminMenuPermission, DEFAULT_MENU_ALIAS} from "../../menu/MenuPermissionChecker";

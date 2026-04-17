@@ -8,13 +8,13 @@
  */
 
 import {DataField, ExportTransferConfig} from '../transfer/Type';
-import {Modal} from "@gjcu/ui/modals/Modal";
+import {Modal} from "../ui";
 import {getTranslation} from "../utils/i18n";
 import {ReactNode, useEffect, useState} from "react";
-import {SimpleGrid} from "@gjcu/ui/elements/layout/SimpleGrid";
+import {SimpleGrid} from "../ui";
 import {SearchForm} from "../form/SearchForm";
 import {DataExportProcessor} from '../transfer/DataExportProcessor';
-import {Button} from "@gjcu/ui/elements/buttons/Button";
+import {Button} from "../ui";
 import {ExcelPasswordField} from '../transfer/ExcelPasswordField';
 
 interface ExporterProps {

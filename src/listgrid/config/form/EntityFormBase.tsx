@@ -26,7 +26,7 @@ import {AlertMessage, FieldError} from '../../config/EntityFormTypes';
 import {EntityTab} from '../../config/EntityTab';
 import {SubCollectionField} from '../../config/SubCollectionField';
 import {EntityFieldGroup} from '../../config/EntityFieldGroup';
-import {SelectOption} from "../../../form";
+import {SelectOption} from "../../form/Type";
 
 export abstract class EntityFormBase {
 

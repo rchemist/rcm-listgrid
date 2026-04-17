@@ -15,9 +15,9 @@ import {
 import {EntityForm} from '../../../config/EntityForm';
 import {SubmitFormData} from '../../../config/EntityFormTypes';
 import {useEffect, useState} from "react";
-import {Paper} from "@gjcu/ui/elements/Paper";
-import {LoadingOverlay} from "@gjcu/ui/elements/indicator/LoadingOverlay";
-import {useModalManagerStore} from '../../../../store';
+import {Paper} from "../../../ui";
+import {LoadingOverlay} from "../../../ui";
+import {useModalManagerStore} from '../../../store';
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
 import {FilterItem, SearchForm} from "../../../form/SearchForm";

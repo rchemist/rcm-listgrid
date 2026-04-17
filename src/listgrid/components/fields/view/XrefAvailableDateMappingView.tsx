@@ -11,8 +11,8 @@ import {InputRendererProps, ManyToOneConfig} from '../../../config/Config';
 import {EntityForm} from '../../../config/EntityForm';
 import {SubmitFormData} from '../../../config/EntityFormTypes';
 import {useEffect, useState} from "react";
-import {LoadingOverlay} from '@gjcu/ui/elements/indicator/LoadingOverlay';
-import {useModalManagerStore} from '../../../../store';
+import {LoadingOverlay} from '../../../ui';
+import {useModalManagerStore} from '../../../store';
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
 import {FilterItem, SearchForm} from "../../../form/SearchForm";
@@ -23,11 +23,11 @@ import {ViewEntityForm} from '../../form/ViewEntityForm';
 import {PageResult} from "../../../form/Type";
 import {StringField} from '../StringField';
 import {EntityFormButton} from '../../../config/EntityFormButton';
-import {fDate, fDateTime} from "@gjcu/ui";
+import {fDate, fDateTime} from "../../../misc";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {ViewListProps} from '../abstract';
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {Paper} from "@gjcu/ui/elements/Paper";
+import {Tooltip} from "../../../ui";
+import {Paper} from "../../../ui";
 
 
 interface XrefAvailableDateMappingViewProps extends InputRendererProps {

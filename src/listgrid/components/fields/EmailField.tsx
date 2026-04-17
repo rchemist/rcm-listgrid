@@ -11,12 +11,12 @@ import {ValidateResult, Validation} from '../../validations/Validation';
 import {EmailValidation} from '../../validations/EmailValidation';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {TextInput} from "../../ui";
 import {
   DEFAULT_EMAIL_DOMAINS,
   EmailDomainCheckButtonInput,
   EmailDomainInput
-} from "@gjcu/ui/form/EmailDomainInput";
+} from "../../ui";
 import {isEmpty} from "../../utils";
 
 interface EmailFieldProps extends CheckButtonValidationFieldProps {

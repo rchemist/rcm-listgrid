@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {TooltipCard} from "@gjcu/ui/elements/tooltipcard";
+import {TooltipCard} from "../../../ui";
 import {IconInfoCircle} from "@tabler/icons-react";
 import React from "react";
 import {isBlank} from '../../../utils/StringUtil';

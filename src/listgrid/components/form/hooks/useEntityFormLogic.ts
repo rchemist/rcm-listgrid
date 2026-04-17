@@ -10,11 +10,11 @@
 import {ReactNode, useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {usePathname, useRouter} from "next/navigation";
 import {isTrue} from '../../../utils/BooleanUtil';
-import {ModalOptions, useModalManagerStore} from '../../../../store';
+import {ModalOptions, useModalManagerStore} from '../../../store';
 import {useSession} from '../../../auth';
-import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
+import {useLoadingStore} from "../../../loading";
 // Dynamic import for getEntityFormButtons to reduce bundle size
-import {showSuccess} from "@gjcu/ui/message/messageUtils";
+import {showSuccess} from "../../../message";
 import {subStringBeforeLast} from '../../../utils/StringUtil';
 import {EntityForm} from '../../../config/EntityForm';
 import {EntityTab} from '../../../config/EntityTab';
@@ -360,7 +360,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
     const updateButtons = async () => {
       try {
         // Dynamic import to reduce initial bundle size
-        const { getEntityFormButtons } = await import("@gjcu/ui/listgrid/components/form/ui/ViewEntityFormButtons");
+        const { getEntityFormButtons } = await import("../ui/ViewEntityFormButtons");
         
         const newButtons = await getEntityFormButtons({
           readonly: readonly,

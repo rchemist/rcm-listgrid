@@ -2,10 +2,10 @@
 import {useEffect, useState} from "react";
 import {Address} from "./AddressMapField";
 import {isBlank} from '../../../utils/StringUtil';
-import {Box} from "@gjcu/ui/elements/layout/Box";
-import {Flex} from "@gjcu/ui/elements/layout/Flex";
-import {Grid} from "@gjcu/ui/elements/layout/Grid";
-import {Modal} from "@gjcu/ui/modals";
+import {Box} from "../../../ui";
+import {Flex} from "../../../ui";
+import {Grid} from "../../../ui";
+import {Modal} from "../../../ui";
 import clsx from "clsx";
 import classes from './AddressField.module.css';
 import DaumPostcode from "react-daum-postcode";

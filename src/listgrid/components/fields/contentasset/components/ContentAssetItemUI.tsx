@@ -13,11 +13,11 @@
 
 import React from "react";
 import {ContentAsset, ContentAssetError} from "../types";
-import {FileUploadInput} from "@gjcu/ui/form/FileUploadInput";
-import {TextInput} from "@gjcu/ui/form/TextInput";
-import {Textarea} from "@gjcu/ui/form/Textarea";
+import {FileUploadInput} from "../../../../ui";
+import {TextInput} from "../../../../ui";
+import {Textarea} from "../../../../ui";
 import {IconPlus, IconTrash} from "@tabler/icons-react";
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../../ui";
 
 interface ContentAssetItemUIProps {
   items: ContentAsset[];

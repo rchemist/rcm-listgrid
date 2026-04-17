@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 import React, {ReactNode} from "react";
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../ui";
 import {getTranslation} from "../../../utils/i18n";
 import {useEntityFormTheme} from "../context/EntityFormThemeContext";
 

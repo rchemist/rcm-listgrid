@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-import {showConfirm} from "@gjcu/ui/message/messageUtils";
+import {showConfirm} from "../../../../message";
 import {removeTrailingSeparator} from '../../../../utils/StringUtil';
 import {ButtonProps} from "../../types/ViewEntityFormButtons.types";
 import {isTrue} from '../../../../utils/BooleanUtil';

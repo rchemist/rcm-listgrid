@@ -4,7 +4,7 @@ import {FieldRenderParameters} from "../../config/EntityField";
 import {ListableFormField, ViewListProps, ViewListResult} from "./abstract";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {InputRendererProps} from "../../config/Config";
-import {ColorInput} from "@gjcu/ui/form/ColorInput";
+import {ColorInput} from "../../ui";
 
 export class ColorField extends ListableFormField<ColorField> {
 

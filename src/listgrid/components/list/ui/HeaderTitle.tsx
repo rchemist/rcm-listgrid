@@ -1,4 +1,4 @@
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../ui";
 import {getTranslation} from "../../../utils/i18n";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {useListGridTheme} from "../context/ListGridThemeContext";

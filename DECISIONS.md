@@ -129,6 +129,51 @@ Stage 1 "원본 수정 0" 원칙에서 벗어남. 그러나 **의미 변경 없�
 
 ---
 
+## 2026-04-17 (Stage 3)
+
+### #19 Stage 3 전략: inline + Provider 주입 혼합
+`@gjcu/ui/*` (약 450+ import site)를 (a) inline과 (b) Provider 주입 두 방식으로 분리:
+- **inline** (호스트와 무관한 순수 로직): `common/type`, `common/func`, `utils/*`, `form/Type`, `form/SearchForm`, `form/TagsInput/types`, `misc/*` (regex, format, storage, compare), `auth/hasAnyRole`
+- **Provider** (호스트가 구현 제공): `UIProvider` (컴포넌트 ~50개), `MessageProvider` (showAlert/showConfirm/showToast/showError), `LoadingStore` (configureLoading), `ModalManagerStore` (zustand 내장 구현)
+- **Registry** (정적 호출 컨텍스트용): `registerSignOut`, `registerSmsHistoryField`
+**Why**: 단일 거대 Provider는 host 설정이 벅참. 순수 로직은 라이브러리 소유, UI·메시징은 host 책임으로 분리해 계약 최소화.
+
+### #20 UIProvider 구현: Proxy 기반 compound 컴포넌트 지원
+`makeWrapper(name)`이 Proxy로 감싸 `Table.Th`, `Tooltip.Content` 같은 compound 접근을 동적으로 지원.
+**Why**: 원본 소스가 `<Table.Th>` 패턴을 사용. 각 wrapper가 단순 function이면 static 하위 컴포넌트 접근 불가. Proxy로 lazy 조회해 "host가 제공한 Table에 Th가 있으면 사용, 없으면 runtime error".
+
+### #21 UI 프리미티브 타입 전략: any prop + dual value/type 선언
+각 wrapper는 `ComponentType<any>`로 타입. 원본이 value + type 양쪽으로 쓰는 이름들(`BreadcrumbItem`, `Currency`, `Double`, `PasswordStrength`, `Tree`, `TreeNodeData`, `TooltipColor`, `InlineMapPendingRef`, `KeyValue`)은 `export const` + `export type` 동시 선언. `FileFieldValue`는 instanceof 체크되므로 class로 구현.
+**Why**: 정확한 per-component prop 타이핑은 Stage 6 정리. 지금은 원본 API 표면 호환성 우선.
+
+### #22 Modal manager: 원본 API 형태(modalId 기반) 유지
+`ModalOptions.modalId` (원본 필드명 유지, `id` 아님), `closeTopModal`/`findModal`/`updateModalData` 포함. `openModal`이 `string`(생성된 modalId) 반환.
+**Why**: 원본 call site가 `const modalId = openModal({...})`, `closeModal(modalId, true)` 패턴 사용. 계약 변경 없이 내부 zustand 구현으로 대체.
+
+### #23 SessionProvider + FieldExtensions: 모듈-스코프 registry
+non-React/정적 클래스 컨텍스트에서 호출되는 host 서비스들(`signOut`, SMS 필드 생성)은 React Context 접근 불가. 모듈-scope mutable registry로 대체.
+**Why**: `PageResult.fetchListData` 같은 static 메서드가 `signOut()` 호출. `EntityForm.initialize`도 클래스 내부. Context 훅 사용 불가 → registry 패턴.
+
+### #24 domain coupling 제거: SmsHistoryField → createSmsHistoryField()
+`@gjcu/entities/Academic/Common/fields/smshistory.SmsHistoryField` 하드 import 제거. `createSmsHistoryField(name, order, target)` factory로 교체, host가 `registerSmsHistoryField(Ctor)` 호출해 실제 구현 주입. 미등록 시 경고 로그만 남기고 skip.
+**Why**: 학사 도메인(SMS 발송 이력)이 범용 라이브러리에 박혀있는 건 부적절. host 확장 가능하도록 추상화.
+
+### #25 misc/index.ts: 원본 `@gjcu/ui` 루트 barrel의 37개 export 구현
+Regex 상수(Alias/Email/Password/Phone/Telephone/Url), 날짜 포맷(fDate/fDateTime/fToNow/getFormattedTime/formatPrice), 비교 헬퍼(isEmpty/isEquals/isEqualsIgnoreCase/isEqualCollection/isPositive), URL 유틸(normalizeUrl/removeTrailingSeparator), storage 래퍼(get/set LocalStorage/SessionStorage), 자산 서버 유틸(ASSET_SERVER_URL/configureAssetServerUrl/getAccessableAssetUrl/removeAssetServerPrefix), DefinedDate 헬퍼 등.
+API 호출 헬퍼(`callExternalHttpRequest`, `getExternalApiData*`)는 Stage 5 `ApiClientProvider`로 이관 예정이며 현재는 throw stub.
+**Why**: 원본 API 표면 그대로 유지해 call site 변경 최소화. 순수 유틸은 host-agnostic이라 inline이 자연스러움.
+
+### #26 `utilsNone` 버그 (내부 기록)
+Stage 3a 중 Python regex 치환에서 `match.group(2)`가 None일 때 문자열 합성으로 `utilsNone`이 생성되는 버그 발생, 2개 파일(`EntityForm.tsx`, `SelectFieldRenderer.tsx`)에서 sed로 복구.
+**Why**: 재발 방지 기록. Python bulk rewrite 시 `match.group(N) or ''` 사용 필수.
+
+### #27 Stage 3 완료 검증
+- `src/listgrid/` 내 `@gjcu/*` 직접 import **0건** (주석 제외)
+- 유일하게 남은 `declare module '@gjcu/ui/listgrid/*'`는 dynamic import catch-all이었으나 실제 import가 relative로 교체되어 현재 미사용 (삭제 가능, Stage 4에서 정리)
+- Stage 1의 `@ts-expect-error STAGE1-baseline` 9개는 남아있음 — stub 기반 narrowing 문제가 실제 타입 도입으로 상당수 해소되어 Stage 6에서 재확인
+
+---
+
 ## Open Questions
 
 작업 중 떠오른 미결 이슈. 결정되면 날짜 로그로 이동.

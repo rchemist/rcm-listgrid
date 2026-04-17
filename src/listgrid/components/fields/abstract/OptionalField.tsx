@@ -17,9 +17,9 @@ import {ValidateResult} from '../../../validations/Validation';
 import {EntityForm} from '../../../config/EntityForm';
 import {Session} from '../../../auth/types';
 import {hexHash} from "next/dist/shared/lib/hash";
-import {isEquals} from "@gjcu/ui";
+import {isEquals} from "../../../misc";
 import {isTrue} from '../../../utils/BooleanUtil';
-import {Badge} from "@gjcu/ui/elements/badges/Badge";
+import {Badge} from "../../../ui";
 import {isBlank} from '../../../utils/StringUtil';
 
 function isEqualOptions(a?: SelectOption[], b?: SelectOption[]) {

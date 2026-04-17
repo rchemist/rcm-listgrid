@@ -12,13 +12,13 @@ import {FormField, FormFieldProps} from '../fields/abstract';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {SearchForm} from "../../form/SearchForm";
 import {PageResult} from "../../form/Type";
-import {useModalManagerStore} from '../../../store';
+import {useModalManagerStore} from '../../store';
 import {useSession} from '../../auth';
 import {ViewEntityForm} from '../form/ViewEntityForm';
 import {IconHistory} from "@tabler/icons-react";
-import {fDateTime} from "@gjcu/ui";
+import {fDateTime} from "../../misc";
 import {EntityForm} from "../../config/EntityForm";
-import {Pagination} from "@gjcu/ui/elements/pagination/Pagination";
+import {Pagination} from "../../ui";
 import {getTranslation} from "../../utils/i18n";
 
 const revisionApiUrl = "/revision";

@@ -8,8 +8,8 @@ import {
 import {EntityForm} from '../EntityForm';
 
 // Mock getServerUrl to prevent import chain issues
-jest.mock('@gjcu/ui', () => ({
-  ...jest.requireActual('@gjcu/ui'),
+jest.mock('../../misc', () => ({
+  ...jest.requireActual('../../misc'),
   getServerUrl: jest.fn(() => ({
     assetServerUrl: 'http://test-server.com',
     processUrl: '/api/process',

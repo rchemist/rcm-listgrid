@@ -8,8 +8,8 @@
 'use client'
 
 import React, {ReactNode, useEffect, useState} from "react";
-import {Paper} from "@gjcu/ui/elements/Paper";
-import {Modal} from "@gjcu/ui/modals/Modal";
+import {Paper} from "../../../ui";
+import {Modal} from "../../../ui";
 import {
   ResultByCount,
   RuleBasedFieldProps,

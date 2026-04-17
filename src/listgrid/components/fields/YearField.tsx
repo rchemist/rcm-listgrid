@@ -10,9 +10,9 @@ import React from "react";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {MinMaxLimit, SelectOption} from "../../form/Type";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {NumberInput} from "@gjcu/ui/form/NumberInput";
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {MultiSelectBox} from "@gjcu/ui/form/MultiSelectBox";
+import {NumberInput} from "../../ui";
+import {SelectBox} from "../../ui";
+import {MultiSelectBox} from "../../ui";
 
 interface YearFieldProps extends ListableFormFieldProps {
   limit?: MinMaxLimit;

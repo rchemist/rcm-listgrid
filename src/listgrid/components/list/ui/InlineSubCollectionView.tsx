@@ -30,9 +30,9 @@ import {
   ViewListProps,
   ViewListResult
 } from '../../fields/abstract/ListableFormField';
-import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
-import {useLoadingStore} from '@gjcu/ui/layout/BaseLoading';
-import {showAlert} from '@gjcu/ui/message/messageUtils';
+import {Tooltip} from '../../../ui';
+import {useLoadingStore} from '../../../loading';
+import {showAlert} from '../../../message';
 import {FieldRenderParameters} from '../../../config/EntityField';
 
 export interface InlineSubCollectionViewProps {

@@ -15,7 +15,7 @@ import {
 import React from "react";
 import {MinMaxLimit, SelectOption} from "../../form/Type";
 import {FieldRenderParameters} from '../../config/EntityField';
-import {CheckBox} from "@gjcu/ui/form/CheckBox";
+import {CheckBox} from "../../ui";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 
 interface CheckboxFieldProps extends MultipleOptionalFieldProps {

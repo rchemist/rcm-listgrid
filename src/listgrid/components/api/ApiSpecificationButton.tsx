@@ -1,7 +1,7 @@
 'use client';
 import {ReactNode, useState} from "react";
 import {ApiSpecification, isApiSpecification} from "./Type";
-import {Modal} from "@gjcu/ui/modals/Modal";
+import {Modal} from "../../ui";
 import {ViewApiSpecification} from './ViewApiSpecification';
 import {IconApi} from "@tabler/icons-react";
 

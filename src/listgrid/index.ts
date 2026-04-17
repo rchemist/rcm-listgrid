@@ -3,8 +3,40 @@ export { ViewListGridWrapper } from './view/ViewListGridWrapper';
 export { ViewEntityFormWrapper } from './view/ViewEntityFormWrapper';
 
 // Auth — host applications must wrap their tree with <AuthProvider> from here.
-export { AuthProvider, useSession, useAuth } from './auth';
+export { AuthProvider, useSession, useAuth, hasAnyRole, registerSignOut, signOut } from './auth';
 export type { Session, SessionUser, AuthContextValue, AuthProviderProps } from './auth';
+
+// UI — host applications inject concrete UI primitives via <UIProvider>.
+export { UIProvider, useUI } from './ui';
+export type { UIComponents, UIProviderProps } from './ui';
+
+// Messaging — host applications configure toast/alert implementations.
+export { configureMessages, showAlert, showConfirm, showError, showSuccess, showToast, openToast, clearAllToasts } from './message';
+export type { MessageServices } from './message';
+
+// Loading — optional global loading overlay hook.
+export { configureLoading, useLoadingStore } from './loading';
+export type { LoadingStore } from './loading';
+
+// Modal manager store (zustand-based).
+export { useModalManagerStore, configureOverlayZIndex, getOverlayZIndex, POPOVER_Z_INDEX } from './store';
+export type { ModalOptions } from './store';
+
+// Field extension registry — host apps register domain-specific field classes.
+export { registerSmsHistoryField, createSmsHistoryField } from './extensions/FieldExtensions';
+
+// Misc helpers & constants inherited from the original @gjcu/ui root barrel.
+export {
+    RegexAlias, RegexEmailAddress, RegexLowerEnglishNumber, RegexPasswordNormal,
+    RegexPhoneNumber, RegexTelephoneNumber, RegexUrlBody,
+    fDate, fDateTime, fToNow, getFormattedTime, formatPrice,
+    isEmpty, isEquals, isEqualsIgnoreCase, isEqualCollection, isPositive,
+    normalizeUrl, removeTrailingSeparator, parse,
+    getLocalStorageItem, setLocalStorageItem, getSessionStorageObject, setSessionStorageItem,
+    ASSET_SERVER_URL, configureAssetServerUrl, getAccessableAssetUrl, removeAssetServerPrefix,
+    getDefinedDates,
+} from './misc';
+export type { DefinedDateType } from './misc';
 
 // Core Components
 export { ViewListGrid } from './components/list/ViewListGrid';

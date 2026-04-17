@@ -9,7 +9,7 @@ import {FormField, FormFieldProps} from './abstract';
 import React from "react";
 import {RenderType} from '../../config/Config';
 import {FieldRenderParameters} from '../../config/EntityField';
-import {Textarea} from "@gjcu/ui/form/Textarea";
+import {Textarea} from "../../ui";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {MinMaxLimit} from "../../form/Type";
 

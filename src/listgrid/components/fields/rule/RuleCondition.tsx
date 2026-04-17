@@ -15,9 +15,9 @@ import {
   getQueryConditionValueType,
   QueryConditionType
 } from "../../../form/SearchForm";
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
+import {SelectBox} from "../../../ui";
 import {isBlank} from '../../../utils/StringUtil';
-import {TagsInput} from "@gjcu/ui/form/TagsInput/index";
+import {TagsInput} from "../../../ui";
 import {IconCircleX} from "@tabler/icons-react";
 import {getConfiguredFields, RuleConditionValue, RuleFieldEntityForm, RuleFieldValue} from './Type';
 import {SelectOption} from "../../../form/Type";

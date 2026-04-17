@@ -12,18 +12,18 @@ import {FieldRenderParameters} from '../../config/EntityField';
 import React, {useEffect, useState} from "react";
 import {InputRendererProps} from '../../config/Config';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {Modal} from "@gjcu/ui/modals/Modal";
-import {Paper} from "@gjcu/ui/elements/Paper";
-import {Button} from "@gjcu/ui/elements/buttons/Button";
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {Modal} from "../../ui";
+import {Paper} from "../../ui";
+import {Button} from "../../ui";
+import {TextInput} from "../../ui";
 import {defaultString, isBlank} from '../../utils/StringUtil';
 import {IconPhotoPlus, IconTrash} from "@tabler/icons-react";
 import {MultipleAssetUpload} from './view/MultipleAssetUpload';
-import {getAccessableAssetUrl} from "@gjcu/ui";
-import {RegexLowerEnglishNumber} from "@gjcu/ui";
+import {getAccessableAssetUrl} from "../../misc";
+import {RegexLowerEnglishNumber} from "../../misc";
 import {isTrue} from '../../utils/BooleanUtil';
 import {ViewHelpText} from '../form/ui/ViewHelpText';
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../ui";
 
 interface MultipleAssetFieldProps extends FormFieldProps {
   tags?: string[];

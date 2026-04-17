@@ -48,15 +48,16 @@ RCM-framework 백엔드를 기반으로 CRUD UI를 빠르게 구성하기 위한
 - [x] `AuthProvider` 계약이 `DECISIONS.md` #16에 문서화됨
 - [x] `npm run type-check` 통과
 
-### Stage 3 — UI 프리미티브 추상화
+### Stage 3 — UI 프리미티브 추상화 ✅ (레퍼런스 어댑터 제외)
 
 `@gjcu/ui/elements/*`, `@gjcu/ui/form/*`, `@gjcu/ui/modals` 등 UI 킷 결합을
-`UIProvider` 계약으로 교체.
+`UIProvider` 계약으로 교체. 순수 로직·유틸·도메인 모델은 listgrid로 inline.
 
 **Done when:**
-- [ ] `src/` 내 `@gjcu/ui/*` 직접 import 0개
-- [ ] `UIProvider` 계약(Button / Modal / Table / Alert 등 최소 인터페이스) 문서화
-- [ ] 최소 1개 어댑터 레퍼런스 구현으로 동작 증명
+- [x] `src/` 내 `@gjcu/ui/*`·`@gjcu/shared`·`@gjcu/entities/*` 직접 import 0개 (검증: grep)
+- [x] `UIProvider` 계약(Alert/Badge/Button/Modal/Table/Tree 등 ~50개 컴포넌트) 문서화 (DECISIONS #19~#22)
+- [x] 보조 Provider: `MessageProvider`, `LoadingStore`, `ModalManagerStore`, `AuthProvider`(#16), SessionProvider·FieldExtensions registry
+- [ ] 최소 1개 어댑터 레퍼런스 구현 — **Stage 6/별도 후속**으로 미룸(계약과 레퍼런스 구현 분리)
 
 ### Stage 4 — 외부 라이브러리 정리
 

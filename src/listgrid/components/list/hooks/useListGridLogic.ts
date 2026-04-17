@@ -9,7 +9,7 @@
 
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useParams, usePathname, useRouter} from "next/navigation";
-import {getSessionStorageObject, isEmpty, isEqualCollection, setSessionStorageItem} from "@gjcu/ui";
+import {getSessionStorageObject, isEmpty, isEqualCollection, setSessionStorageItem} from "../../../misc";
 import {SearchForm} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
 import {DataTransferConfig} from '../../../transfer/Type';
@@ -23,8 +23,8 @@ import {isTrue} from '../../../utils/BooleanUtil';
 import {getListFieldsFromCache} from '../../../config/ListGridViewFieldCache';
 import {getGlobalPageSize} from "./useQuickSearchBar";
 import {isBlank} from '../../../utils/StringUtil';
-import {showConfirm} from "@gjcu/ui/message/messageUtils";
-import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
+import {showConfirm} from "../../../message";
+import {useLoadingStore} from "../../../loading";
 import {searchFormHashKey, ViewListGridProps} from "../types/ViewListGrid.types";
 import {parse, stringify} from '../../../utils/jsonUtils';
 import {EntityFormActionResult} from '../../../config/Config';

@@ -21,7 +21,7 @@ jest.mock('../CardItem', () => ({
 }));
 
 // Mock Tooltip component
-jest.mock('@gjcu/ui/elements/tooltip/Tooltip', () => ({
+jest.mock('../../../../ui', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 

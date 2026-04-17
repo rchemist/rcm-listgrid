@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {RegexPasswordNormal} from "@gjcu/ui";
+import {RegexPasswordNormal} from "../misc";
 import {RegexValidation} from '../validations/RegexValidation';
 
 export class PasswordValidation extends RegexValidation {

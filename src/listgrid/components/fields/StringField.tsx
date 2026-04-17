@@ -15,7 +15,7 @@ import {
   ViewRenderProps,
   ViewRenderResult
 } from '../../components/fields/abstract';
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {TextInput} from "../../ui";
 import {getInputRendererParameters} from '../../components/helper/FieldRendererHelper';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {CopyableTextView, CopyButton} from './view/CopyableTextView';

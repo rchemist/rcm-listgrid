@@ -9,9 +9,9 @@
 "use client";
 import {InputRendererProps, ManyToOneConfig, ManyToOneFilter,} from '../../../config/Config';
 import React, {useEffect, useRef, useState} from "react";
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../../ui";
 import {IconCircleX, IconPlus, IconSearch, IconSettings2} from "@tabler/icons-react";
-import Dropdown from "@gjcu/ui/elements/dropdowns/Dropdown";
+import {Dropdown} from "../../../ui";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {isBlank} from '../../../utils/StringUtil';
 import {ViewListGrid} from '../../list/ViewListGrid';
@@ -21,7 +21,7 @@ import {SearchForm} from "../../../form/SearchForm";
 import {getManyToOneEntityValue} from '../ManyToOneField';
 import {ViewEntityForm} from '../../form/ViewEntityForm';
 import {EntityForm} from '../../../config/EntityForm';
-import {useModalManagerStore} from '../../../../store';
+import {useModalManagerStore} from '../../../store';
 import {useSession} from '../../../auth';
 
 // Value ID 추출 헬퍼

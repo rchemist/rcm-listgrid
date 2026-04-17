@@ -17,12 +17,12 @@ import React from "react";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {RenderType} from '../../config/Config';
-import {fDate, fToNow} from "@gjcu/ui";
-import {FlatPickrDateField} from "@gjcu/ui/form/FlatPickrDateField";
+import {fDate, fToNow} from "../../misc";
+import {FlatPickrDateField} from "../../ui";
 import {IconCalendar} from "@tabler/icons-react";
 import {isTrue} from '../../utils/BooleanUtil';
 import {MinMaxStringLimit} from "../../form/Type";
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {TextInput} from "../../ui";
 
 interface DateFieldProps extends AbstractDateFieldProps {
 

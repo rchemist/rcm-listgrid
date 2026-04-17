@@ -23,7 +23,7 @@ import {
 } from "@tabler/icons-react";
 import {ViewListGrid} from "../../list/ViewListGrid";
 import {ListGrid} from "../../../config/ListGrid";
-import {useModalManagerStore} from "../../../../store";
+import {useModalManagerStore} from "../../../store";
 import {PageResult} from "../../../form/Type";
 
 /**

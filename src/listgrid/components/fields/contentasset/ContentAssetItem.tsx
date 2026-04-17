@@ -20,7 +20,7 @@ import {Session} from '../../../auth/types';
 import {useContentAsset} from "./hooks/useContentAsset";
 import {ContentAssetItemUI} from './components/ContentAssetItemUI';
 import {AddContentDialog} from './components/AddContentDialog';
-import {useModalManagerStore} from '../../../../store';
+import {useModalManagerStore} from '../../../store';
 
 interface ContentAssetItemProps extends InputRendererProps {
   entityForm: EntityForm;

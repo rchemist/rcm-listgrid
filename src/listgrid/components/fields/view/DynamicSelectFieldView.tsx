@@ -8,9 +8,9 @@
 
 import React, {useEffect, useMemo, useRef, useState} from "react";
 import {SelectOption} from "../../../form/Type";
-import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {RadioChip} from "@gjcu/ui/form/RadioChip";
-import {RadioInput} from "@gjcu/ui/form/RadioInput";
+import {SelectBox} from "../../../ui";
+import {RadioChip} from "../../../ui";
+import {RadioInput} from "../../../ui";
 import {EntityForm} from "../../../config/EntityForm";
 import {InputRendererProps} from "../../../config/Config";
 import {OptionsLoader} from "../SelectField";

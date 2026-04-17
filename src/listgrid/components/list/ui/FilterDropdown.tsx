@@ -11,7 +11,7 @@ import React, {Fragment, useCallback, useEffect, useRef, useState} from "react";
 import ReactDOM from "react-dom";
 import {Transition} from "@headlessui/react";
 import {IconX} from "@tabler/icons-react";
-import {getOverlayZIndex} from '../../../../store';
+import {getOverlayZIndex} from '../../../store';
 
 export type FilterDropdownSize = 'sm' | 'md' | 'lg';
 export type FilterDropdownPlacement = 'left' | 'right';

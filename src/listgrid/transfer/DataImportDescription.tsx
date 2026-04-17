@@ -5,16 +5,16 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {Table} from "@gjcu/ui/elements/table/Table";
-import { SafePerfectScrollbar } from "@gjcu/ui/components/scrollbar/SafePerfectScrollbar";
-import {Box} from "@gjcu/ui/elements/layout/Box";
-import {Flex} from "@gjcu/ui/elements/layout/Flex";
+import {Table} from "../ui";
+import { SafePerfectScrollbar } from "../ui";
+import {Box} from "../ui";
+import {Flex} from "../ui";
 import {ReactNode} from "react";
 import {DataField} from '../transfer/Type';
 import {defaultString} from '../utils/StringUtil';
 import styles from './DataImportDescription.module.css';
 import clsx from "clsx";
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../ui";
 
 interface DataImportDescriptionProps {
   title?: ReactNode;

@@ -15,8 +15,8 @@ import {
   ViewRenderProps,
   ViewRenderResult
 } from './abstract';
-import {BooleanRadio} from "@gjcu/ui/form/BooleanRadio";
-import {RadioChip} from "@gjcu/ui/form/RadioChip";
+import {BooleanRadio} from "../../ui";
+import {RadioChip} from "../../ui";
 import {
   FieldInfoParameters,
   FieldRenderParameters,

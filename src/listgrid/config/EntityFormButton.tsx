@@ -7,9 +7,9 @@
 
 import {EntityForm} from '../config/EntityForm';
 import {ReactNode} from "react";
-import {isEqualsIgnoreCase} from "@gjcu/ui";
+import {isEqualsIgnoreCase} from "../misc";
 import {LabelType} from '../config/Config';
-import {ModalOptions} from '@gjcu/ui/store';
+import {ModalOptions} from '../store';
 
 export interface EntityFormButtonStepInfo {
   useCreateStep: boolean;

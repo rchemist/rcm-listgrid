@@ -1,4 +1,4 @@
-import {ModalOptions} from '@gjcu/ui/store';
+import {ModalOptions} from '../store';
 import {ReactNode} from "react";
 import {CommonFieldProps} from "../components/fields/Preset";
 import {IDataTransferConfig} from "../transfer/Type";

@@ -1,6 +1,6 @@
 import React from "react";
 import {ApiSpecification} from './Type';
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Tooltip} from "../../ui";
 import Swal from "sweetalert2";
 import {IconCopyCheck} from "@tabler/icons-react";
 

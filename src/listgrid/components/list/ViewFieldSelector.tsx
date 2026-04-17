@@ -7,8 +7,8 @@
 
 import React from "react";
 import {ListableFormField} from '../fields/abstract';
-import {Popover} from "@gjcu/ui/elements/popover/Popover";
-import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
+import {Popover} from "../../ui";
+import {Tooltip} from "../../ui";
 import {getTranslation} from "../../utils/i18n";
 import {ViewFieldManageable} from "./types/ViewListGrid.types";
 import {setListFieldsToCache} from '../../config/ListGridViewFieldCache';

@@ -21,7 +21,7 @@ import {
   VIEW_HIDDEN
 } from '../../config/Config';
 import {RegexValidation} from '../../validations/RegexValidation';
-import {RegexAlias, RegexUrlBody} from "@gjcu/ui";
+import {RegexAlias, RegexUrlBody} from "../../misc";
 import {EntityForm} from '../../config/EntityForm';
 import {AddFieldItemProps} from '../../config/EntityFormTypes';
 import {SelectOption} from "../../form/Type";

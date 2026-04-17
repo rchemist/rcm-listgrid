@@ -9,10 +9,10 @@
 
 import React from 'react';
 import {IconCopy, IconDotsVertical, IconMessage} from '@tabler/icons-react';
-import {Popover} from '@gjcu/ui/elements/popover/Popover';
-import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
-import {getOverlayZIndex, POPOVER_Z_INDEX, useModalManagerStore} from '@gjcu/ui/store';
-import {showToast} from '@gjcu/ui/message/messageUtils';
+import {Popover} from '../../../ui';
+import {Tooltip} from '../../../ui';
+import {getOverlayZIndex, POPOVER_Z_INDEX, useModalManagerStore} from '../../../store';
+import {showToast} from '../../../message';
 import {SmsModal} from './SmsModal';
 import {Session} from '../../../auth';
 import {formatPhoneNumber} from '../../../utils/PhoneUtil';

@@ -16,10 +16,10 @@ import {
   ViewRenderResult
 } from './abstract';
 import {MinMaxLimit} from "../../form/Type";
-import {Currency, Double, NumberInput} from "@gjcu/ui/form/NumberInput";
+import {Currency, Double, NumberInput} from "../../ui";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {formatPrice} from "@gjcu/ui";
+import {formatPrice} from "../../misc";
 import {IconCoin, IconHash} from "@tabler/icons-react";
 import {NumberFilter} from './filter/NumberFilter';
 import {EntityForm} from "../../config/EntityForm";

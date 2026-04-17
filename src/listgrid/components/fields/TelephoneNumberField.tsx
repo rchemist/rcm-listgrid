@@ -18,7 +18,7 @@ import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import React, { useState, useEffect } from "react";
 import {Validation} from '../../validations/Validation';
 import {RegexValidation} from '../../validations/RegexValidation';
-import {readonlyClass} from "@gjcu/ui/form/Style";
+import {readonlyClass} from "../../ui";
 import {formatPhoneNumber, removePhoneNumberHyphens} from "../../utils/PhoneUtil";
 import {RenderType} from '../../config/Config';
 

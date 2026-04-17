@@ -12,13 +12,13 @@ import {
   ViewListProps,
   ViewListResult
 } from './abstract';
-import {TextInput} from "@gjcu/ui/form/TextInput";
+import {TextInput} from "../../ui";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {LinkFieldView} from "./view/LinkFieldView";
 import {IconExternalLink} from "@tabler/icons-react";
 import {isBlank} from '../../utils/StringUtil';
-import {normalizeUrl} from "@gjcu/ui";
+import {normalizeUrl} from "../../misc";
 
 interface LinkFieldProps extends CheckButtonValidationFieldProps {
 

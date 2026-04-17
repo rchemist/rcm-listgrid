@@ -1,6 +1,6 @@
 import {EntityForm} from '../../../config/EntityForm';
 import {CreateUpdateOptions} from "../types/ViewListGrid.types";
-import {Modal} from "@gjcu/ui/modals";
+import {Modal} from "../../../ui";
 import {ViewEntityForm} from "../../form/ViewEntityForm";
 
 export interface SubCollectionModalProps {

@@ -10,7 +10,7 @@ import {AppRouterInstance} from "next/dist/shared/lib/app-router-context.shared-
 import {EntityButtonLinkProps} from '../../../config/Config';
 import {Session} from '../../../auth/types';
 import {EntityFormButton} from '../../../config/EntityFormButton';
-import {ModalOptions} from '../../../../store';
+import {ModalOptions} from '../../../store';
 import {ViewEntityFormClassNames} from './ViewEntityFormTheme.types';
 
 export interface ButtonProps extends AbstractButtonProps {

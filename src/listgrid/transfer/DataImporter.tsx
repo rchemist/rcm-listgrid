@@ -22,11 +22,11 @@ import {isTrue} from '../utils/BooleanUtil';
 import {isBlank, subStringBetween} from '../utils/StringUtil';
 import {isEmpty} from "../utils";
 import * as XLSX from 'xlsx-js-style';
-import {getAccessableAssetUrl, getExternalApiDataWithError} from "@gjcu/ui";
+import {getAccessableAssetUrl, getExternalApiDataWithError} from "../misc";
 import DataImportSample from '../transfer/DataImportSample';
-import {Modal} from "@gjcu/ui/modals/Modal";
+import {Modal} from "../ui";
 import {DataImportProcessor} from '../transfer/DataImportProcessor';
-import {FileFieldValue, FileUploadInput} from "@gjcu/ui/form/FileUploadInput";
+import {FileFieldValue, FileUploadInput} from "../ui";
 
 interface ImporterProps {
   config?: ImportTransferConfig;

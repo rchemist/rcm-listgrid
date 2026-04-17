@@ -9,7 +9,7 @@
 
 import {useCallback, useEffect, useState} from 'react';
 import {AlertMessage, AlertMessageLink} from '../../../config/EntityFormTypes';
-import {ModalOptions, useModalManagerStore} from '../../../../store';
+import {ModalOptions, useModalManagerStore} from '../../../store';
 import {IconAlertTriangle, IconCheck, IconInfoCircle} from '@tabler/icons-react';
 import {AlertStyles} from '../types/ViewEntityFormAlerts.types';
 
