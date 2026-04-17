@@ -191,21 +191,21 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
       >
         <div className={cn(
           isInlineMode
-            ? "flex w-full max-w-full flex-col gap-1 pt-1 xl:flex-row"
-            : "flex w-full max-w-full flex-col gap-1.5 pt-3 xl:flex-row",
-          isInlineMode ? undefined : classNames.panel?.layoutWrapper
+            ? "rcm-form-layout-wrapper"
+            : "rcm-form-layout-wrapper",
+          isInlineMode ? '' : classNames.panel?.layoutWrapper
         )}>
           <div className={cn(
             isInlineMode
-              ? "panel w-full max-w-full flex-1 rounded-lg px-3 py-2 bg-white dark:bg-dark"
-              : "panel w-full max-w-full flex-1 rounded-xl px-0 pt-1",
-            isInlineMode ? undefined : classNames.panel?.container
+              ? "rcm-form-panel rcm-form-panel-inline"
+              : "rcm-form-panel",
+            isInlineMode ? '' : classNames.panel?.container
           )}>
             <div className={cn(
               isInlineMode
-                ? "w-full max-w-full"
-                : "w-full max-w-full pl-1.5 pr-1.5 md:pl-3 md:pr-3",
-              isInlineMode ? undefined : classNames.panel?.inner
+                ? "rcm-form-panel-inner"
+                : "rcm-form-panel-inner",
+              isInlineMode ? '' : classNames.panel?.inner
             )}>
               {/* Alert 메시지 영역: ViewEntityFormAlerts */}
               {/* Alert message area: ViewEntityFormAlerts */}

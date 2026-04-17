@@ -658,6 +658,55 @@
     }
 
     /* ------------------------------------------------------------------ *
+     * ViewEntityForm panel / layout
+     *
+     * Matches the original three-div structure:
+     *   <layoutWrapper>        (flex column, vertical pt)
+     *     <panel>              (border, bg, rounded, no horizontal padding)
+     *       <inner>            (horizontal padding lives here)
+     *         {children}
+     * ------------------------------------------------------------------ */
+    .rcm-form-layout-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: var(--rcm-space-xs);
+        padding-top: var(--rcm-space-md);
+        width: 100%;
+        max-width: 100%;
+    }
+
+    @media (min-width: 1280px) {
+        .rcm-form-layout-wrapper {
+            flex-direction: row;
+        }
+    }
+
+    .rcm-form-panel {
+        width: 100%;
+        max-width: 100%;
+        flex: 1;
+        background: var(--rcm-color-surface);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-radius: var(--rcm-radius-lg);
+        padding: var(--rcm-space-xs) 0;
+        box-shadow: var(--rcm-shadow-sm);
+    }
+
+    .rcm-form-panel-inner {
+        width: 100%;
+        max-width: 100%;
+        padding-left: var(--rcm-space-xs);
+        padding-right: var(--rcm-space-xs);
+    }
+
+    @media (min-width: 768px) {
+        .rcm-form-panel-inner {
+            padding-left: var(--rcm-space-md);
+            padding-right: var(--rcm-space-md);
+        }
+    }
+
+    /* ------------------------------------------------------------------ *
      * Field layout — responsive grid + col-span / col-start helpers.
      *
      * These replace Tailwind's `col-span-full` / `lg:col-start-1` /
