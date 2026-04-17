@@ -25,8 +25,8 @@ export const ExcelPasswordField: React.FC<ExcelPasswordFieldProps> = ({
   const passwordLabel = t('form.list.dataTransfer.tab.export.password.label') || '비밀번호';
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="rcm-panel rcm-panel-muted rcm-stack">
+      <div className="rcm-row-between">
         <Tooltip
           label={<div>파일에 비밀번호를 설정하는 경우 데이터 양이 많을 경우 암호화에 다소 시간이 소요될 수 있습니다.</div>}
           zIndex={1100}
@@ -34,10 +34,9 @@ export const ExcelPasswordField: React.FC<ExcelPasswordFieldProps> = ({
           withArrow={true}
           position="top-start"
         >
-          <label htmlFor="usePassword" className="flex items-center gap-2 cursor-pointer">
+          <label htmlFor="usePassword" className="rcm-row rcm-cursor-pointer">
             <input
               type="checkbox"
-              className="form-checkbox text-indigo-600 focus:ring-indigo-500"
               id="usePassword"
               name="usePassword"
               checked={usePassword}
@@ -50,18 +49,18 @@ export const ExcelPasswordField: React.FC<ExcelPasswordFieldProps> = ({
                 onErrorChange?.('');
               }}
             />
-            <span className="text-sm font-medium text-gray-700">{usePasswordLabel}</span>
+            <span className="rcm-text-sm rcm-text-emphasis">{usePasswordLabel}</span>
           </label>
         </Tooltip>
       </div>
       {usePassword && (
-        <div className="space-y-2 pl-6">
-          <label htmlFor="excelPassword" className="block text-sm font-medium text-gray-700">
+        <div className="rcm-field-root rcm-field-indent">
+          <label htmlFor="excelPassword" className="rcm-field-label">
             {passwordLabel}
           </label>
           <input
             type="text"
-            className="form-input max-w-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            className="rcm-field-input rcm-field-input-compact"
             id="excelPassword"
             name="excelPassword"
             maxLength={32}

@@ -215,6 +215,14 @@
         padding: var(--rcm-space-2xl);
     }
 
+    .rcm-skeleton-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--rcm-space-2xl);
+    }
+
     /* ------------------------------------------------------------------ *
      * Readonly helper (replaces packages/ui readonlyClass)
      * ------------------------------------------------------------------ */
@@ -285,6 +293,22 @@
         border: var(--rcm-border-width) solid var(--rcm-color-border);
         border-radius: var(--rcm-radius-md);
         padding: var(--rcm-space-lg);
+    }
+
+    .rcm-panel-muted {
+        background: var(--rcm-color-surface-muted);
+    }
+
+    .rcm-field-indent {
+        padding-left: var(--rcm-space-xl);
+    }
+
+    .rcm-field-input-compact {
+        max-width: 24rem;
+    }
+
+    .rcm-cursor-pointer {
+        cursor: pointer;
     }
 
     .rcm-dialog-body {

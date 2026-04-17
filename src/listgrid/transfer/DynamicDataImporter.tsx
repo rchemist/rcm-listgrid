@@ -9,10 +9,10 @@ const DynamicDataImporter = dynamic(
   () => import('./DataImporter').then(mod => ({ default: mod.DataImporter })),
   {
     loading: () => (
-      <div className="flex flex-col items-center justify-center p-8">
+      <div className="rcm-skeleton-stack">
         <Skeleton height={40} width={200} mb="md" />
         <Skeleton height={200} width="100%" mb="md" />
-        <div className="flex gap-2">
+        <div className="rcm-row">
           <Skeleton height={32} width={80} />
           <Skeleton height={32} width={80} />
         </div>
