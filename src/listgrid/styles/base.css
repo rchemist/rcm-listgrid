@@ -223,6 +223,66 @@
         padding: var(--rcm-space-2xl);
     }
 
+    /* Skeleton placeholder rects — size via inline style/width/height */
+    .rcm-skeleton {
+        background: var(--rcm-color-surface-hover);
+        border-radius: var(--rcm-radius-sm);
+        animation: rcm-pulse 1.5s ease-in-out infinite;
+    }
+
+    .rcm-skeleton-accent {
+        background: color-mix(in srgb, var(--rcm-color-primary) 30%, transparent);
+    }
+
+    .rcm-skeleton-danger {
+        background: color-mix(in srgb, var(--rcm-color-error) 30%, transparent);
+    }
+
+    .rcm-pulse {
+        animation: rcm-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes rcm-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .rcm-skeleton-row {
+        margin-bottom: var(--rcm-space-lg);
+    }
+
+    .rcm-skeleton-tab-bar {
+        gap: var(--rcm-space-sm);
+        padding-bottom: var(--rcm-space-sm);
+        margin-bottom: var(--rcm-space-lg);
+        border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+    }
+
+    .rcm-skeleton-tab-active {
+        border-bottom: 2px solid var(--rcm-color-primary);
+    }
+
+    .rcm-skeleton-panel {
+        width: 100%;
+        padding: var(--rcm-space-sm) 0 0;
+    }
+
+    .rcm-skeleton-inner {
+        width: 100%;
+        padding-left: var(--rcm-space-md);
+        padding-right: var(--rcm-space-md);
+    }
+
+    .rcm-panel-compact {
+        padding: var(--rcm-space-md);
+    }
+
+    .rcm-flex-1 {
+        flex: 1 1 auto;
+        display: flex;
+        gap: var(--rcm-space-sm);
+    }
+
     /* ------------------------------------------------------------------ *
      * Readonly helper (replaces packages/ui readonlyClass)
      * ------------------------------------------------------------------ */
