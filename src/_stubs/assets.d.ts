@@ -20,7 +20,4 @@ declare module '*.jpg';
 // Kakao Maps SDK injects a global `kakao` object when the script loads.
 declare const kakao: any;
 
-// Catch-all for dynamic deep paths under @gjcu/ui/listgrid/ and similar nested subpaths
 // that aren't listed in gjcu-ambient.d.ts (e.g., dynamic import() calls).
-declare module '@gjcu/ui/listgrid/*';
-declare module '@gjcu/ui/listgrid/**/*';

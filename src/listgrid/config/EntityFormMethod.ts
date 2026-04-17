@@ -8,8 +8,10 @@ export function entityErrorToString(entityError: IEntityError): string {
   if (entityError.error) {
     if (isTrue(entityError.error.error)) {
       if (entityError.error.fieldError) {
-        // @ts-expect-error STAGE1-baseline: Map.entries() result typed as unknown[]; revisit in Stage 6
-        return Array.from(entityError.error.fieldError.entries()).map(([key, value]) => `${key}: ${value.join(', ')}`).join(', ');
+        const entries = entityError.error.fieldError instanceof Map
+          ? Array.from(entityError.error.fieldError.entries())
+          : Object.entries(entityError.error.fieldError);
+        return entries.map(([key, value]) => `${key}: ${(value as string[]).join(', ')}`).join(', ');
       }
       if (entityError.error.message) {
         return entityError.error.message;

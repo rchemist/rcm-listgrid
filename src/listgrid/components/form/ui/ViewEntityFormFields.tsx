@@ -1,7 +1,7 @@
 'use client';
 import React, {Dispatch, SetStateAction} from "react";
 import {Tab} from '@headlessui/react';
-import { SafePerfectScrollbar } from "../../../../components/scrollbar/SafePerfectScrollbar";
+import { SafePerfectScrollbar } from '../../../ui';
 import {ViewTab} from '../ViewTab';
 import {ViewTabPanel} from '../ViewTabPanel';
 import {EntityTab} from '../../../config/EntityTab';

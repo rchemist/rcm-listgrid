@@ -25,6 +25,11 @@ export type { ModalOptions } from './store';
 // Field extension registry — host apps register domain-specific field classes.
 export { registerSmsHistoryField, createSmsHistoryField } from './extensions/FieldExtensions';
 
+// Menu permission checker — host apps register a real checker that decides
+// whether the current session may access a given URL / menu alias.
+export { registerMenuPermissionChecker, checkAdminMenuPermission, DEFAULT_MENU_ALIAS } from './menu';
+export type { MenuPermissionChecker, MenuPermissionCheckArgs } from './menu';
+
 // API client — host apps configure an ApiClient that fulfils RCM-framework
 // REST conventions. See src/listgrid/api/ApiClient.ts.
 export {

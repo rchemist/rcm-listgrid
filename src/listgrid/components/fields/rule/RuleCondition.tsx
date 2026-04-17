@@ -185,7 +185,7 @@ export const RuleCondition = (props: RuleConditionProps) => {
               </div>
               <div className={'w-full flex'}>
                 {function () {
-                  const fields = [];
+                  const fields: React.ReactNode[] = [];
 
 
                   if (field.type === 'manyToOne') {
@@ -199,7 +199,6 @@ export const RuleCondition = (props: RuleConditionProps) => {
                   if (currentValueType === 'SINGLE') {
                     const currentValue = fieldValue.values !== undefined && fieldValue.values.length > 0 ? fieldValue.values[0] : '';
                     fields.push(
-                      // @ts-expect-error STAGE1-baseline: fields inferred as never[]; revisit in Stage 6
                       <div key={`${fieldValue.name}_${index}`} className={'w-full'}>
                         <RuleFieldRenderer field={field.clone()
                           // required 를 넣어서 optional field 의 선택안함 옵션을 제거한다.
@@ -246,7 +245,6 @@ export const RuleCondition = (props: RuleConditionProps) => {
                     const currentValue = fieldValue.values !== undefined && fieldValue.values.length > 0 ? fieldValue.values : [];
 
                     fields.push(
-                      // @ts-expect-error STAGE1-baseline: fields inferred as never[]; revisit in Stage 6
                       <TagsInput
                         key={`${fieldValue.name}_${index}`}
                         size={'md'}

@@ -36,10 +36,13 @@ const ViewTabPanel = dynamic(() => import("./ViewTabPanel").then(mod => ({ defau
   loading: () => <div className="h-96 bg-gray-50 rounded animate-pulse"></div>
 });
 
-const SafePerfectScrollbar = dynamic(() => import("../../../components/scrollbar/SafePerfectScrollbar").then(mod => ({ default: mod.SafePerfectScrollbar })), {
-  ssr: false,
-  loading: () => <div className="w-full h-full"></div>
-});
+const SafePerfectScrollbar: React.ComponentType<any> = dynamic(
+  () => import('../../ui').then(mod => ({ default: mod.SafePerfectScrollbar as any })),
+  {
+    ssr: false,
+    loading: () => <div className="w-full h-full"></div>
+  }
+);
 
 const CreateStepView = dynamic(() => import("./ui/CreateStepView").then(mod => ({ default: mod.CreateStepView })), {
   loading: () => <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
@@ -183,7 +186,6 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
       )}
       {/* 필드(Tab/Panel) 영역: ViewEntityFormFields */}
       {/* Field(Tab/Panel) area: ViewEntityFormFields */}
-      {/* @ts-expect-error STAGE1-baseline: SafePerfectScrollbar any-stub doesn't accept children/className intrinsically; revisit in Stage 3 */}
       <SafePerfectScrollbar
         className={cn("relative h-full", classNames.panel?.scrollContainer)}
       >
@@ -308,7 +310,6 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                 )}
                 {/* 일반 모드: 기존 탭 레이아웃 (스테퍼 모드에서는 hidden 처리) */}
                 {!showButtonsInTabRow && tabs.length > 1 && (
-                  // @ts-expect-error STAGE1-baseline: SafePerfectScrollbar any-stub doesn't accept children/className intrinsically; revisit in Stage 3
                   <SafePerfectScrollbar className={cn("relative w-full whitespace-nowrap", useCreateStep ? "hidden" : undefined)}>
                     <Tab.List className={cn("mt-3 flex flex-row border-b border-white-light dark:border-[#191e3a] whitespace-nowrap", classNames.tabs?.list)}>
                       {function () {

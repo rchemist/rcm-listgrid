@@ -5,7 +5,7 @@ import {useSession} from '../auth';
 import {usePathname, useSearchParams} from "next/navigation";
 import {Breadcrumb, BreadcrumbItem} from "../ui";
 import {PermissionType} from "../config/Config";
-import {checkAdminMenuPermission, DEFAULT_MENU_ALIAS} from "../../menu/MenuPermissionChecker";
+import {checkAdminMenuPermission, DEFAULT_MENU_ALIAS} from '../menu/MenuPermissionChecker';
 import {LoadingOverlay} from "../ui";
 import {Skeleton} from "../ui";
 import {Alert} from "../ui";

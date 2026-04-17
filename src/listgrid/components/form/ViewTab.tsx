@@ -11,7 +11,7 @@ import React, {Fragment, useEffect, useState} from "react";
 import {Tab} from "@headlessui/react";
 import {TabIndexable} from './types/ViewEntityForm.types';
 import {EntityForm} from '../../config/EntityForm';
-import {Tooltip} from "../../../elements/tooltip/Tooltip";
+import {Tooltip} from '../../ui';
 import {getTranslation} from "../../utils/i18n";
 import {useEntityFormTheme} from "./context/EntityFormThemeContext";
 

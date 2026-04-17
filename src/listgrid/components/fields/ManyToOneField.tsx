@@ -165,8 +165,8 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
         return {result: ''};
       }
 
-      let value = undefined;
-      let id = undefined;
+      let value: any = undefined;
+      let id: any = undefined;
 
       if (this.config.field?.id) {
         id = targetEntity[fieldName]?.[this.config.field?.id];
@@ -174,7 +174,6 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
 
       if (this.config.field?.name) {
         if (this.config.field?.name instanceof Function) {
-          // @ts-expect-error STAGE1-baseline: string→undefined narrowing from any-stub cascade; revisit in Stage 6
           value = this.config.field?.name(targetEntity);
         } else {
           const displayProperty: string = this.config.field?.name ? this.config.field.name.toString() : 'name';

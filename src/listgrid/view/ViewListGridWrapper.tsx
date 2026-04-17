@@ -10,7 +10,7 @@ import {LoadingOverlay} from "../ui";
 import {Skeleton} from "../ui";
 import {ViewListGridProps} from '../components/list/types/ViewListGrid.types';
 import dynamic from "next/dynamic";
-import {checkAdminMenuPermission, DEFAULT_MENU_ALIAS} from "../../menu/MenuPermissionChecker";
+import {checkAdminMenuPermission, DEFAULT_MENU_ALIAS} from '../menu/MenuPermissionChecker';
 
 // Dynamic import with better optimization
 const ViewListGrid = dynamic(

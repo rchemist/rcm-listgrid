@@ -104,15 +104,67 @@ registry로 주입 가능하게.
 - `IEntityError.fieldError`는 Map 또는 Record 양쪽 형태 모두 파싱 (호환).
 - host의 ApiClient 구현은 HTTP transport(fetch/axios/next-server-actions)·auth header·CSRF·재시도 정책을 책임짐. 라이브러리는 transport를 알지 않음.
 
-### Stage 6 — 필드/폼 로직 정리
+### Stage 6 — 필드/폼 로직 정리 ✅ (실전 통합 검증 제외)
 
-마지막 단계. 껍질이 다 정리된 뒤 내부 로직 중복 제거, 공개 API 문서화,
-실전 검증.
+마지막 단계. 껍질이 다 정리된 뒤 내부 로직 중복 제거, 공개 API 문서화.
 
 **Done when:**
-- [ ] 공개 API가 `src/index.ts`에서 명시적으로 export되고 문서화됨
-- [ ] 최소 1개 외부 프로젝트에 통합되어 실전 동작 확인
-- [ ] `DECISIONS.md`의 Open Questions 남김 없이 정리됨
+- [x] 공개 API가 `src/listgrid/index.ts`에서 명시적으로 export되고 문서화됨 (`AuthProvider`, `UIProvider`, `configureMessages`, `configureApiClient`, `registerSignOut`, `registerSmsHistoryField`, `registerMenuPermissionChecker` 등 모든 host 주입 계약)
+- [ ] 최소 1개 외부 프로젝트에 통합되어 실전 동작 확인 — 소비 프로젝트 확정 시 실행 (후속 작업). 현재는 `npm run type-check` 통과까지가 라이브러리의 책임.
+- [x] `DECISIONS.md`의 Open Questions 중 Stage 작업으로 해소 가능한 것은 모두 정리됨 (배포 채널·테스트 전략·실전 검증 3개만 후속 파킹)
+
+## 사용 (Host 프로젝트 기준)
+
+```tsx
+import {
+    AuthProvider,
+    UIProvider,
+    configureMessages,
+    configureApiClient,
+    registerSignOut,
+    registerMenuPermissionChecker,
+    registerSmsHistoryField,
+    configureAssetServerUrl,
+} from '@rcm/listgrid';
+
+// 1. 부트스트랩 시 host-주입 계약 등록 (bootstrap.ts 등에서 한 번만)
+configureApiClient({
+    async callExternalHttpRequest(opts) { /* fetch/axios/... */ },
+    async getExternalApiData(urlOrOptions) { /* ... */ },
+    async getExternalApiDataWithError(urlOrOptions) { /* ... */ },
+});
+configureMessages({
+    showAlert: async (options) => { /* 커스텀 Alert */ },
+    showConfirm: async (options) => { /* 커스텀 Confirm, true/false 반환 */ },
+    // showError / showSuccess / showToast / openToast / clearAllToasts
+});
+registerSignOut(async () => { /* host의 signOut 로직 */ });
+registerMenuPermissionChecker(async ({ url, alias }) => 'ALL' /* 'READ' | 'NONE' */);
+configureAssetServerUrl('https://assets.example.com');
+
+// 2. 앱 트리 루트에서 Provider 래핑
+<AuthProvider session={mySession}>
+    <UIProvider components={{ Button, Modal, Table, Alert, /* ~50개 */ }}>
+        <YourApp />
+    </UIProvider>
+</AuthProvider>
+```
+
+공개 API 전체 목록: `src/listgrid/index.ts` 참고 (기존 ViewListGrid / ViewEntityForm / EntityForm / EntityField / SearchForm / PageResult 등 모든 기존 export 그대로 유지).
+
+## 주요 Provider/Registry 맵
+
+| 카테고리 | Provider/Registry | 설명 |
+|---------|-------------------|------|
+| Session/Role | `AuthProvider`, `useSession`, `useAuth`, `hasAnyRole` | 세션 상태, 역할 체크 |
+| UI 컴포넌트 | `UIProvider`, `useUI` | ~50개 UI 컴포넌트 주입 |
+| 메시지 | `configureMessages` + `showAlert`/`showConfirm`/... | 전역 토스트·알림·확인창 |
+| 로딩 | `configureLoading` + `useLoadingStore` | 전역 로딩 오버레이 |
+| 모달 | `useModalManagerStore` (zustand 내장) | 모달 스택 관리 |
+| API | `configureApiClient` + ApiClient 계약 | 백엔드 호출 추상 |
+| 인증 액션 | `registerSignOut` → `signOut()` | 세션 종료 |
+| 필드 확장 | `registerSmsHistoryField` → `createSmsHistoryField()` | 도메인 필드 주입 |
+| 메뉴 권한 | `registerMenuPermissionChecker` → `checkAdminMenuPermission()` | URL 기반 권한 게이팅 |
 
 ## 정책
 

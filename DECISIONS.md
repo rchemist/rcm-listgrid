@@ -224,12 +224,52 @@ Stage 1에서 만든 `src/api/types.d.ts`, `src/api/types/EntityError.d.ts`, `sr
 
 ---
 
+## 2026-04-17 (Stage 6)
+
+### #35 잔여 sibling stub 3개 제거
+`src/components/scrollbar/SafePerfectScrollbar.d.ts`, `src/elements/tooltip/Tooltip.d.ts`, `src/menu/MenuPermissionChecker.d.ts` 제거. 전자 2개는 UIProvider 소비(`../../ui`)로 치환, menu는 `src/listgrid/menu/MenuPermissionChecker.ts` 실구현(host-registered checker)으로 이동.
+**Why**: 원본 `packages/ui` 구조 재현을 위한 가짜 stub이 유일한 목적이었고, Provider/registry 계약이 갖춰져 제거 가능.
+
+### #36 `STAGE1-baseline` 9개 마커 전원 해소
+Stage 6에서 각각 실제 코드 수정으로 처리:
+- `EntityForm.tsx` 2개 → `const errors: string[] = []` 명시 타입
+- `EntityFormMethod.ts` 1개 → `instanceof Map` 분기 + `as string[]` cast
+- `ManyToOneField.tsx` 1개 → `let value: any = undefined`
+- `RuleCondition.tsx` 2개 → `const fields: React.ReactNode[] = []`
+- `ViewEntityForm.tsx` 2개 → `SafePerfectScrollbar: React.ComponentType<any>` 명시 + dynamic import cast
+
+`grep -rn "STAGE1-baseline" src`가 0을 반환. Stage 1 의도적 편차 #12 전원 해소.
+
+### #37 `MenuPermissionChecker` 계약 확정
+```ts
+type PermissionType = 'ALL' | 'READ' | 'NONE'; // config/Config.ts
+type MenuPermissionChecker = (args: { url: string; alias?: string; [k: string]: any })
+                               => PermissionType | Promise<PermissionType>;
+```
+default checker는 모두 `'ALL'` 반환(무제한 허용). host가 `registerMenuPermissionChecker(fn)`으로 덮어씀.
+**Why**: 원본 call site가 `{url, alias}` 객체 단일 인자, 반환은 config의 3-level enum. 다른 stub들(signOut, message, SmsHistoryField)과 동일한 module-scope registry 패턴.
+
+### #38 `src/_stubs/gjcu-ambient.d.ts` 완전 제거
+Stage 3 끝에서 빈 주석 블록만 남았고, Stage 6에서 최종 삭제. assets.d.ts의 `@gjcu/ui/listgrid/*` catch-all도 제거. 현재 남은 stub은 `src/_stubs/assets.d.ts`의 CSS/이미지 모듈 선언 + kakao 전역 뿐.
+**Why**: `@gjcu/*` 네임스페이스 완전 소멸 — Stage 3 DECISIONS #8의 "자연 소멸 예정"이 그대로 실현됨.
+
+### #39 공개 API 정비: src/listgrid/index.ts가 Provider 계약 전면 export
+모든 host-주입 계약(`AuthProvider`/`useSession`, `UIProvider`/`useUI`, `configureMessages`, `configureApiClient`, `registerSignOut`, `registerSmsHistoryField`, `registerMenuPermissionChecker`)과 핵심 유틸(`hasAnyRole`, `fDate*`, Regex, storage 등)을 index.ts에서 export. `ResponseData`, `SearchForm`, 필드 클래스 등 기존 export도 유지.
+**Why**: 라이브러리 API 표면을 한 파일에서 관찰 가능하게. 실제 소비 프로젝트의 첫 인상이 이 파일.
+
+### #40 Open Questions 결산
+- ✅ **UI 킷 어댑터**: 보류 해제. 계약(UIProvider interface)이 어떤 UI킷에도 대응 가능. 첫 어댑터 구현은 소비 프로젝트가 결정(HeroUI든 shadcn이든). 레퍼런스 어댑터는 별도 리포에서.
+- ✅ **외부 라이브러리 분류**: Stage 4 완료 (#28).
+- ✅ **rcm-framework API 계약**: Stage 5 완료 (#31). OpenAPI 생성은 추후 백엔드팀 협의.
+- 🟡 **패키지 배포 채널**: 미결. 사내 npm registry 최우선 고려, 첫 외부 소비자 정해질 때 결정. DECISIONS에 계속 파킹.
+- 🟡 **테스트 전략**: 미결. 현재 `__tests__`는 tsconfig exclude. Jest 재설정 + testing-library stub 결정은 별도 후속. DECISIONS에 계속 파킹.
+
+---
+
 ## Open Questions
 
 작업 중 떠오른 미결 이슈. 결정되면 날짜 로그로 이동.
 
-- **UI 킷 주입 계약**: 첫 어댑터를 HeroUI / shadcn / tailwind-only 중 어디로 만들지. Stage 3에서 결정.
-- **외부 라이브러리 분류**: flatpickr / tiptap / kakao-map / xlsx-js-style 등을 core 번들에 둘지 optional peer로 뺄지. Stage 4에서 결정.
-- **rcm-framework 백엔드 API 계약**: 응답/요청 스키마를 어디서 어떻게 타입화할지. 백엔드 OpenAPI/Swagger 스펙이 있으면 그걸로 생성, 없으면 수동 정의. Stage 5에서 결정.
-- **패키지 배포 채널**: 사내 npm registry / GitHub Packages / 그냥 git 의존성 중 무엇으로 배포할지. 첫 외부 소비자가 정해질 때 결정.
-- **테스트 전략**: 원본에 있던 `config/__tests__`를 그대로 가져왔음. jest 설정을 새로 구성할지, Stage 6에서 재작성할지 미정.
+- **패키지 배포 채널**: 사내 npm registry / GitHub Packages / git submodule 중 선택. 첫 외부 소비자가 정해질 때 확정.
+- **테스트 전략**: `config/__tests__`, `list/context/EntityFormScopeContext.test.tsx` 등을 Jest로 되살릴지 Playwright 통합으로 갈지 미정. 현재 tsconfig exclude 상태.
+- **실전 통합 검증**: Stage 6 Done-when 체크리스트 중 "최소 1개 외부 프로젝트에 통합되어 실전 동작 확인"은 소비 프로젝트가 확정될 때 실행. 현재 **타입체크/패키지 구조**까지가 라이브러리의 책임 범위.
