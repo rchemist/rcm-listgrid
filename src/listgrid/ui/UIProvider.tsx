@@ -15,7 +15,8 @@ export interface UIComponents {
     BooleanRadio: ComponentType<any>;
     Box: ComponentType<any>;
     Breadcrumb: ComponentType<any>;
-    BreadcrumbItem: ComponentType<any>;
+    /** Optional — library never renders it, type alias kept for host contracts. */
+    BreadcrumbItem?: ComponentType<any>;
     Button: ComponentType<any>;
     CheckBox: ComponentType<any>;
     CheckBoxChip: ComponentType<any>;
@@ -40,7 +41,8 @@ export interface UIComponents {
     NumberInput: ComponentType<any>;
     Pagination: ComponentType<any>;
     Paper: ComponentType<any>;
-    PasswordStrength: ComponentType<any>;
+    /** Optional — gjcu's kit exposes only PasswordStrengthView; type alias below. */
+    PasswordStrength?: ComponentType<any>;
     PasswordStrengthView: ComponentType<any>;
     Popover: ComponentType<any>;
     RadioChip: ComponentType<any>;
