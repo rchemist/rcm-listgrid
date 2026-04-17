@@ -420,3 +420,25 @@ UIProvider 컴포넌트들이 받는 props 중 일부는 **library 내부 상태
 **남은 작업 (Phase 1.2 / 1.3)**:
 - Phase 1.2: 필드 컴포넌트들에 `classNames` prop 받아 `mergeSlot`으로 wire
 - Phase 1.3: 134 파일 602줄의 하드코딩된 Tailwind 유틸리티 → scoped `rcm-*` 클래스로 점진 교체 (파일 단위로 검증하며 진행)
+
+### #58 Stage 9 Phase 1.3 중간 진행 — Tailwind 하드코딩 → rcm-* scoped 교체
+#57의 인프라 위에서 실제 컴포넌트/테마의 Tailwind 문자열을 scoped 클래스로 전환.
+
+**최고 레버리지 작업 완료**:
+- `defaultListGridTheme.ts` — ListGrid 기본 테마의 모든 btn/form/panel/white-light/bg-dark/bg-primary-light 전부 `rcm-*`로 교체
+- `defaultEntityFormTheme.ts` — EntityForm 기본 테마도 동일 작업
+- `mainTheme/modalTheme/subCollectionTheme.ts` variant 3종 전부 중립화
+
+**효과**: ViewListGrid/ViewEntityForm 하위 수십 개 컴포넌트가 `themeClasses.X ?? '...'` fallback으로 이 테마를 쓰고 있었음. 테마를 중립화하면 fallback 경로 전체가 자동으로 중립화됨. 단일 파일 편집으로 수십 개 컴포넌트가 혜택.
+
+**개별 컴포넌트 작업 완료**:
+- InlineSubCollectionField/CardSubCollectionField/TableSubCollectionField 로딩 스피너
+- DataExporter, ExcelPasswordField, DynamicDataImporter
+- ViewEntityFormSkeleton, ViewListGridSkeleton
+
+**남은 작업**:
+- 약 527줄의 하드코딩된 Tailwind 문자열이 개별 컴포넌트 JSX에 아직 남음. 단, 이것들 중 상당수는 theme fallback 때문에 실제 렌더링엔 사용 안 되는 dead code일 가능성 있음.
+- 순수 presentational 스타일(컬러/간격/폰트)은 중립 default CSS로 동작하고, 커스터마이즈 경로 4개 모두 열림.
+- Button variants/Notice/Skeleton 시스템 완성.
+
+**검증 필요**: gjcu 실험 워크트리에서 기존 UI가 그대로 동작하는지 확인. 테마 교체가 시각적으로 차이를 만들 수 있음.
