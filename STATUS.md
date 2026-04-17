@@ -1,8 +1,21 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-17
+마지막 업데이트: 2026-04-17 (alpha.18 revert)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
+
+---
+
+## 0. 지금 당장 알아야 할 것
+
+**배포된 현재 버전**: `v0.1.0-alpha.18` (gjcu-experiment에 설치 + dev 서버 9261 구동 중)
+
+**alpha.18 = alpha.15 + revert**:
+- alpha.16/17의 Tailwind CLI 빌드 파이프라인은 **잘못된 방향으로 판명 → 전면 revert**
+- 두 Tailwind-compiled CSS가 같은 namespace(`flex`, `hidden`, `lg:flex`)를 공유하면 cascade 충돌이 원천적으로 불가피
+- 원래 합의된 방향(라이브러리 JSX를 `rcm-*` scoped 클래스로 전수 교체)이 유일 정답으로 확정
+
+**바로 이어서 할 일**: rcm-* 전수 마이그레이션 (63 파일 590줄 남음)
 
 ---
 
@@ -10,215 +23,190 @@
 
 **목표**: 납품 프로젝트(gjcu-academic-front)의 `packages/ui/listgrid/`를 다른 프로젝트에서도 쓸 수 있는 범용 라이브러리 `@rcm/listgrid`로 추출.
 
-**장기 제약**:
+**핵심 원칙 (재확인)**:
 - React 전용 (Vue/Svelte 지원 안 함)
 - Next.js는 선택적 (어댑터로 분리)
-- UI 프레임워크(Tailwind/shadcn/HeroUI)에 강결합 금지 — 기본 UI는 라이브러리가 제공하되 호스트가 자유롭게 override 가능해야 함
-
-**업계 표준 패턴 채택**:
-- CSS 변수 (디자인 토큰) 
-- scoped `rcm-*` 클래스
-- `classNames` prop 슬롯 override
-- `UIProvider.components` 프리미티브 교체
-- Mantine/MUI/HeroUI와 동등한 4단계 override 경로
+- **UI 프레임워크 독립** — 라이브러리 JSX는 Tailwind utility 쓰지 않음. `rcm-*` scoped 클래스 전용.
+- 호스트는 `@rcm/listgrid/styles.css` 한 줄 import로 완전 동작. Tailwind 설치/설정 필수 아님.
+- 브랜드 override는 CSS 변수 (`--rcm-color-primary` 등)
 
 ---
 
 ## 2. 리포지토리 / 워크트리 구조
 
-| 역할 | 경로 | 브랜치 | 비고 |
-|---|---|---|---|
-| **라이브러리 소스** | `~/dev/rcm-listgrid` | `main` | `@rcm/listgrid` 패키지. TypeScript → `dist/`. |
-| **릴리즈 repo** | `~/dev/rchemist-rcm-listgrid-release` | `main` | Maven-스타일 배포 repo. `deploy.sh`가 dist + 버전태그 push. github.com/rchemist/rchemist-rcm-listgrid-release |
-| **실험용 호스트** | `~/IdeaProjects/gjcu-experiment/gjcu-academic-front` | `experiment/rcm-listgrid-swap` | gjcu 코드베이스에서 `@rcm/listgrid` 검증. |
-| **메인 gjcu (참조)** | `~/IdeaProjects/gjcu-academic-backend/gjcu-academic-front` | `main` | 원본 참조용. 절대 수정하지 않음. |
-
----
-
-## 3. 현재 단계: Stage 9 Phase 1.3 중간
-
-**목표**: UI 프레임워크 독립(자체 CSS 기반) + 기본 UI 중립화.
-
-**Phase 1.1 (완료)**: 자체 CSS 인프라
-- `src/listgrid/styles/tokens.css` — CSS 변수 (색/폰트/간격/radius/shadow)
-- `src/listgrid/styles/base.css` — scoped `rcm-*` 클래스 정의
-- `utils/classNames.ts` — `mergeSlot` / `resolveSlots` 헬퍼
-- `package.json` exports: `./styles.css`, `./styles/tokens.css`, `./styles/base.css`
-- `build:styles` npm 스크립트 — `dist/styles.css` 합본 생성
-
-**Phase 1.2 (진행 중)**: 필드 컴포넌트 `classNames` prop wiring — 아직 본격 시작 전, Phase 1.3에 병렬 진행
-
-**Phase 1.3 (진행 중)**: Tailwind 문자열 → `rcm-*` 교체
-- **최고 레버리지 완료**: `defaultListGridTheme.ts` + `defaultEntityFormTheme.ts` + variant 3종(main/modal/subCollection) **전면 중립화** — ViewListGrid/ViewEntityForm 하위 수십 컴포넌트가 자동 혜택
-- **개별 완료**: InlineSubCollectionField/CardSubCollectionField/TableSubCollectionField 로딩 스피너, DataExporter, ExcelPasswordField, DynamicDataImporter, ViewEntityFormSkeleton, ViewListGridSkeleton
-- **남음**: 약 527줄의 하드코딩 Tailwind 문자열이 개별 컴포넌트 JSX에 산재 (대부분 theme fallback 때문에 dead code 가능성)
-
----
-
-## 4. 최근 커밋 (~/dev/rcm-listgrid, 최신순)
-
-```
-4e4a0b8 fix: FileFieldValue — 원본 전체 메서드 포팅 (isDirty/clone/addNewValue 등)
-719bb8c fix: base.css @layer 제거 + 시각적 보강
-bf23665 refactor: ListGrid theme variants (main/modal/subCollection) 중립화
-93d0cab refactor: defaultEntityFormTheme 전면 중립화 — 폼 쪽 기본값도 rcm-*
-f288cc1 docs: DECISIONS #58 — Phase 1.3 중간 진행 기록
-a377114 refactor: defaultListGridTheme 전면 중립화 — 모든 기본값 rcm-* 로
-c0a1080 refactor: ViewListGridSkeleton Tailwind/gjcu-커스텀 → rcm-skeleton 시스템
-ed9cd01 refactor: ViewEntityFormSkeleton Tailwind/gjcu-커스텀 → rcm-skeleton 시스템
-4afac28 refactor: 엑셀/임포터 로더 UI Tailwind → rcm-* 클래스
-ea4e6a2 refactor: DataExporter Tailwind → scoped rcm-* 클래스
-9aebd09 refactor: 서브컬렉션 필드 로딩 스피너 Tailwind → rcm-loading-overlay
-c72fe0d feat: stage 9 baseline — misc.ts 원본 정렬 + Phase 1.1 자체 CSS 인프라
-```
-
----
-
-## 5. 배포 상태
-
-| 버전 | 내용 | gjcu 실험 설치됨? |
+| 역할 | 경로 | 브랜치 |
 |---|---|---|
-| v0.1.0-alpha.6 | Stage 8 완료 (pre-Stage 9) | — |
-| v0.1.0-alpha.7 | Phase 1.1 인프라 + Phase 1.3 부분 | — |
-| v0.1.0-alpha.8 | base.css @layer 제거 + 시각적 보강 | — |
-| **v0.1.0-alpha.9** | FileFieldValue 전체 포팅 | ✅ 현재 설치됨 |
+| **라이브러리 소스** | `~/dev/rcm-listgrid` | `main` |
+| **릴리즈 repo** | `~/dev/rchemist-rcm-listgrid-release` | `main` |
+| **private 저장소** | github.com/rchemist/rcm-listgrid | `main` |
+| **실험용 호스트** | `~/IdeaProjects/gjcu-experiment/gjcu-academic-front` | `experiment/rcm-listgrid-swap` |
+| **원본 참조** | `~/IdeaProjects/gjcu-academic-backend/gjcu-academic-front` | 수정 금지 |
 
-호스트 pin 형식: `"@rcm/listgrid": "github:rchemist/rchemist-rcm-listgrid-release#v0.1.0-alpha.9"`
+**실험 워크트리 dev 서버**: `localhost:9261` (env.local의 PORT=9261)
+
+**로그인**: admin / Asdf4567!@#$ (메모리의 `reference_gjcu_dev_credentials.md`)
 
 ---
 
-## 6. 검증 상태 (Playwright 자동 캡처)
+## 3. 배포 이력
 
-**서버**: `localhost:9261` (gjcu 실험 워크트리, alpha.9 설치 중)
-
-**로그인**: `admin` / `Asdf4567!@#$` (메모리: `reference_gjcu_dev_credentials.md`)
-
-| 페이지 | 상태 | 비고 |
+| 버전 | 내용 | 현재 상태 |
 |---|---|---|
-| `/` 대시보드 | ✅ 정상 | gjcu 자체 UI + 라이브러리 skeleton |
-| `/academic/course` 수강신청 관리 | ✅ 정상 | 36,628건 실데이터, 12 컬럼, 페이지네이션 |
-| `/academic/admission/homepage/notice` 입학공지 목록 | ✅ 정상 | 5건 실데이터 |
-| `/academic/admission/homepage/notice/5` 상세 | 🟡 데이터 조회 API 에러 | 라이브러리 이슈 아닌 백엔드/API 이슈 |
-
-**이전에 있던 블로커 (모두 해결됨)**:
-- ❌→✅ `useSession must be within AuthProvider` — `(defaults)/layout.tsx` + `(fullpage)/layout.tsx`에 `RcmListGridProviders` 마운트로 해결
-- ❌→✅ thead border 사라짐 — `base.css`에서 `@layer` 래퍼 제거로 해결 (Tailwind preflight와 cascade 경쟁)
-- ❌→✅ `fileValue.isDirty is not a function` — `FileFieldValue` 전체 메서드 포팅으로 해결
+| 0.1.0-alpha.15 | rcm-* 작업 진행 중, 필드그룹 타이틀/라벨/helpText 등 교체 완료 | 직전 안정 |
+| 0.1.0-alpha.16 | ❌ Tailwind CLI 시도 — 호스트 CSS 전부 깨먹음 | revert됨 |
+| 0.1.0-alpha.17 | ❌ Tailwind utilities-only — cascade 충돌 여전, login 페이지 레이아웃 깨짐 | revert됨 |
+| **0.1.0-alpha.18** | revert: Tailwind CLI 제거, alpha.15 상태로 복귀 | ✅ **현재 설치** |
 
 ---
 
-## 7. 남은 이슈 / TODO
+## 4. 이미 완료된 rcm-* 전환 (유지되어 있음)
 
-### P0 (검증 필요)
-- [ ] alpha.9 재설치 후 Playwright로 `/academic/course` 재캡처 → 원본과 시각 비교 (외곽선/thead bg/min-width 복원 확인)
-- [ ] 다른 ListGrid 페이지 스캔 (학과관리/등록관리 등) — 추가 regression 없는지
+### 테마 파일 (중립화 완료)
+- `src/listgrid/components/list/themes/defaultListGridTheme.ts` — ListGrid 기본 테마 전면 rcm-*
+- `src/listgrid/components/list/themes/variants/{main,modal,subCollection}Theme.ts` — variant 3종
+- `src/listgrid/components/form/themes/defaultTheme.ts` — EntityForm 기본 테마
 
-### P1 (Phase 1.3 마무리)
-- [ ] 개별 컴포넌트 JSX 내부 527줄의 하드코딩 Tailwind 문자열 제거 (theme fallback이 대부분 커버하지만 dead code 청소)
-- [ ] `tailwind-merge` 런타임 의존 유지 여부 결정 (호스트가 Tailwind 안 쓰면 불필요하지만 `classNames` prop에 Tailwind 넣는 호스트는 필요)
+### 개별 컴포넌트 완료
+- `InlineSubCollectionField` / `CardSubCollectionField` / `TableSubCollectionField` 로딩 스피너
+- `DataExporter` / `ExcelPasswordField` / `DynamicDataImporter`
+- `ViewEntityFormSkeleton` / `ViewListGridSkeleton` (rcm-skeleton 시스템)
+- `ViewFieldGroup` 타이틀/description/collapse
+- `FieldRenderer` 라벨/required/dirty/tooltip/value
+- `ViewHelpText` / `ViewHelpIcon` / `ViewFieldError`
+- `ViewEntityFormButtons` 우측 정렬
+- `ViewEntityForm` panel 구조 (rcm-form-panel/inner)
+- `PhoneNumberFieldView` copy/SMS 버튼
+- `SaveButton` / `DeleteButton` / `ListButton` / `ClosePopupButton` 스타일
 
-### P2 (Phase 1.2 / Phase B)
-- [ ] 필드 컴포넌트 48개에 `classNames={{ root, input, error }}` prop wiring
-- [ ] `UIProvider.UIComponents` interface의 48개 `ComponentType<any>` → proper prop type 정의
+### CSS 시스템 완성
+- `src/listgrid/styles/tokens.css` — 디자인 토큰 (색/폰트/간격/radius/shadow/z-index)
+- `src/listgrid/styles/base.css` — scoped `rcm-*` 클래스 + @layer 제거 + form/fieldgroup/tab/notice/skeleton/button/input-group 등 (700+ 줄)
+- `utils/classNames.ts` — mergeSlot/resolveSlots 헬퍼
 
-### P3 (향후)
-- [ ] 완전 headless `@rcm/listgrid/headless` 엔트리 추출 (Phase 3)
-- [ ] gjcu 실험 워크트리에서 원본 `@gjcu/ui/listgrid/` 디렉토리 완전 삭제 검증
+### GlobalModalManager 포팅
+- `src/listgrid/ui/GlobalModalManager.tsx` — ManyToOneField 모달 렌더러
+
+### FileFieldValue 완전 포팅
+- `src/listgrid/ui/UIProvider.tsx` — 원본 메서드 전부 (isDirty/clone/addNewValue/...)
+
+### 테마 신호: blue primary
+- `--rcm-color-primary: #2563eb` (Mantine/MUI/Chakra 스타일)
 
 ---
 
-## 8. 자주 쓰는 명령어
+## 5. 남은 작업 — rcm-* 전수 마이그레이션
+
+### 통계
+- 비-rcm className 현재 **~590줄 / 63 파일** (실측 명령어는 섹션 9 참조)
+- 이 중 상당수는 `className={cn('하드코딩-tailwind', classNames.X)}` 패턴 — 하드코딩 Tailwind 부분 제거해야 함
+
+### 전체 대상 파일 (Top offenders, 수작업 순서)
+
+| Rank | 파일 | 스타일 줄 수 |
+|---|---|---|
+| 1 | `components/list/ui/TableSubCollectionView.tsx` | 59 |
+| 2 | `components/list/ui/CardSubCollectionView.tsx` | 47 |
+| 3 | `components/fields/view/CardManyToOneView.tsx` | 38 |
+| 4 | `components/list/AdvancedSearchFormV2.tsx` | 29 |
+| 5 | `components/list/ui/CardItem.tsx` | 28 |
+| 6 | `components/fields/contentasset/components/ContentAssetItemUI.tsx` | 21 |
+| 7 | `components/revision/RevisionField.tsx` | 20 |
+| 8 | `components/list/ui/FieldSelector.tsx` | 19 |
+| 9 | `transfer/DataImportSample.tsx` | 15 |
+| 10 | `components/list/ui/CardFieldSection.tsx` | 14 |
+| 11 | `components/fields/view/SmsModal.tsx` | 13 |
+| 12 | `components/fields/view/ManyToOneView.tsx` | 11 |
+| 13 | `components/form/ViewEntityForm.tsx` | 10 (잔여) |
+| 14 | `components/fields/view/ManyToOneMultiFilterView.tsx` | 10 |
+| 15 | `components/fields/view/PhoneNumberListView.tsx` | 8 |
+| 16 | `components/fields/view/LinkFieldView.tsx` | 8 |
+| 17 | `components/fields/contentasset/components/AddContentDialog.tsx` | 8 |
+| 18 | `components/list/ui/FilterDropdown.tsx` | 7 |
+| 19 | `components/form/ui/AlertItem.tsx` | 7 |
+| 20 | `components/fields/BooleanField.tsx` | 7 |
+| ... | (추가 43 파일, 각 1~6 줄) | ~245 |
+
+### 접근 방법
+
+**각 파일당 수행**:
+1. 파일 열고 `className=` 모든 줄 확인
+2. Tailwind utility → rcm-* 시맨틱 또는 레이아웃 클래스로 교체
+3. 필요한 rcm-* 클래스가 base.css에 없으면 추가
+4. `cn('tailwind 하드코딩', classNames.X)` 패턴의 Tailwind 부분 제거
+5. 복잡한 커스텀 스타일(`bg-[#fafafa]`, `h-[30px]` 같은 arbitrary)은 inline style로 옮기거나 신규 rcm-* 클래스 생성
+
+**주의 포인트**:
+- `lg:col-start-1`, `col-span-full` 같은 grid 관련: 이미 `rcm-col-span-full`, `rcm-col-start-1-lg` 존재
+- `md:flex`, `md:justify-end`: 이미 `rcm-form-buttons-row` 같은 시맨틱 클래스에 흡수됨
+- `panel`, `btn btn-primary`, `btn-outline-primary` (gjcu 커스텀): rcm-fieldgroup, rcm-button 시리즈로 교체
+
+---
+
+## 6. 자주 쓰는 명령어
 
 ### 라이브러리 개발 (`~/dev/rcm-listgrid`)
 ```bash
-cd ~/dev/rcm-listgrid
 npm run type-check          # tsc --noEmit
 npm run build               # tsc + copy CSS → dist/
-npm run clean               # rm -rf dist
 echo "0.1.0-alpha.X" | ./deploy.sh   # 버전 bump + release repo push
+git push origin main        # private repo에 소스 push
 ```
 
 ### 실험 워크트리 (`~/IdeaProjects/gjcu-experiment/gjcu-academic-front`)
 ```bash
-# alpha.X 재설치 (lockfile 리셋 필수 — github 태그가 캐시되기 때문)
-cd ~/IdeaProjects/gjcu-experiment/gjcu-academic-front
-sed -i '' 's|v0.1.0-alpha.8|v0.1.0-alpha.9|' apps/admin/package.json
+# alpha.X 재설치 (lockfile 리셋 필수)
+sed -i '' 's|v0.1.0-alpha.OLD|v0.1.0-alpha.NEW|' apps/admin/package.json
 rm -rf node_modules/@rcm package-lock.json
 npm install --legacy-peer-deps
 
-# dev 서버 재시작 (9261 포트 — env.local의 NEXT_PUBLIC_FRONT_SITE와 일치)
+# dev 서버 재시작 (9261 포트)
 lsof -ti:9261 | xargs kill -9 2>/dev/null
 rm -rf apps/admin/.next
 cd apps/admin && NODE_OPTIONS='--max-old-space-size=8192' npx next dev --turbo -p 9261
 ```
 
-### Playwright 검증
-1. Playwright MCP 도구 로드: `ToolSearch "select:mcp__playwright__browser_navigate,..."`
-2. 로그인: `admin` / `Asdf4567!@#$` (자동 채워짐)
-3. 페이지 네비게이션 → 스크린샷
+### 남은 Tailwind 줄 수 체크
+```bash
+cd ~/dev/rcm-listgrid/src && \
+  grep -rEc 'className="[^"]*\b(bg-|text-|flex|grid|p-[0-9]|m-[0-9]|w-|h-|rounded|border|shadow)[^"]*"' \
+  --include="*.tsx" 2>/dev/null | awk -F: 'BEGIN{c=0} {if($2>0) c+=$2} END{print c}'
+```
+
+### Playwright 시각 검증
+1. MCP 도구 로드: `ToolSearch "select:mcp__playwright__browser_navigate,..."`
+2. 로그인 페이지 캡처 (변경 전후 비교용)
+3. `/academic/course`, `/academic/admission/homepage/notice`, detail 페이지 각각 확인
 
 ---
 
-## 9. 주요 파일 맵
+## 7. 사용자와의 합의된 설계 원칙 (중요!)
 
-### 라이브러리 (`~/dev/rcm-listgrid/src/listgrid/`)
-- `styles/tokens.css` — CSS 변수 (브랜드 color는 여기만 바꾸면 됨)
-- `styles/base.css` — scoped `rcm-*` 클래스 정의. **`@layer` 밖에 있음** (Tailwind preflight 회피)
-- `ui/UIProvider.tsx` — 48개 UIComponents contract + `FileFieldValue` class + `readonlyClass`
-- `utils/classNames.ts` — `mergeSlot`/`resolveSlots` 헬퍼
-- `utils/cn.ts` — `cn()` (clsx + tailwind-merge)
-- `auth/AuthContext.tsx` — `AuthProvider`/`useSession` (엄격 체크)
-- `components/list/themes/defaultListGridTheme.ts` — **중립화된 기본 테마**
-- `components/list/themes/variants/{main,modal,subCollection}Theme.ts` — 중립 variant
-- `components/form/themes/defaultTheme.ts` — **중립화된 기본 폼 테마**
-- `misc/index.ts` — 원본 `@gjcu/ui` 시맨틱 정확히 이식된 유틸 모음
-
-### 호스트 어댑터 (`~/IdeaProjects/gjcu-experiment/gjcu-academic-front/apps/admin/src/rcm-adapters/`)
-- `RcmAdapters.ts` — 런타임 서비스(API/messages/i18n/auth) 주입. 부팅 시 1회.
-- `UIAdapter.ts` — gjcu `@gjcu/ui` 컴포넌트 48개 → `UIComponents` 매핑.
-- `RcmProviders.tsx` — `<RouterProvider>+<UrlStateProvider>+<AuthProvider>+<UIProvider>` 콤보.
-
-### 호스트 레이아웃 (`~/IdeaProjects/gjcu-experiment/gjcu-academic-front/apps/admin/src/app/`)
-- `layout.tsx` — 루트. `@rcm/listgrid/styles.css` import.
-- `(defaults)/layout.tsx` — 인증된 admin 페이지. **`RcmListGridProviders` 마운트**.
-- `(fullpage)/layout.tsx` — 풀페이지 UI. **`RcmListGridProviders` 마운트**.
-- `(auth)/layout.tsx` — 로그인/가입. `RcmListGridProviders` 없음 (불필요).
+1. **절대 호스트에게 Tailwind 강요 금지**. alpha.16/17의 Tailwind CLI 방향은 **잘못된 시도**로 판명되어 revert됨. 다시 시도하지 말 것.
+2. **Library JSX는 Tailwind utility 쓰지 않음**. 모든 스타일은 `rcm-*` scoped 클래스.
+3. **cascade 충돌 원천 차단**: 호스트와 같은 namespace(`flex`, `hidden` 등) 절대 재정의 안 함.
+4. **느리더라도 수작업 전수 마이그레이션이 유일 정답**. 지름길 없음.
 
 ---
 
-## 10. 아키텍처 결정 요약 (상세는 DECISIONS.md)
+## 8. 재개 시 체크리스트
 
-| # | 결정 | 핵심 |
-|---|---|---|
-| #57 | 자체 CSS 기반 도입 (Phase 1.1) | `styles/{tokens,base}.css` + scoped `rcm-*` + `@layer` → 이후 제거 |
-| #58 | Phase 1.3 중간 진행 | 테마 파일 전면 중립화가 최고 레버리지 |
-| (#59 예정) | base.css `@layer` 제거 | Tailwind preflight와의 cascade 경쟁에서 지는 문제 해결 |
-
----
-
-## 11. 재개 시 체크리스트
-
-새 세션 시작 시:
-
-1. 이 STATUS.md 읽기
-2. `~/dev/rcm-listgrid`: `git log --oneline -15` 로 최근 변경 확인
-3. `~/IdeaProjects/gjcu-experiment/gjcu-academic-front`: 설치된 @rcm/listgrid 버전 확인
+1. 이 STATUS.md 끝까지 읽기
+2. `~/dev/rcm-listgrid`: `git log --oneline -10` 로 최근 작업 확인
+3. 실험 워크트리에 alpha.18 설치되어 있는지 확인:
    ```bash
    grep version ~/IdeaProjects/gjcu-experiment/gjcu-academic-front/node_modules/@rcm/listgrid/package.json
    ```
 4. dev 서버 상태: `curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9261`
-5. 남은 Tailwind 카운트: 
-   ```bash
-   cd ~/dev/rcm-listgrid/src && grep -rEc 'className="[^"]*\btext-(red|blue|gray|amber|indigo)-' --include="*.tsx" | awk -F: '{s+=$2}END{print s}'
-   ```
+5. 서버 안 뜨면 섹션 6의 "dev 서버 재시작" 실행
+6. **본 작업 시작**: 섹션 5의 Top offenders 중 rank 1번 파일부터 순차 rcm-* 교체
 
 ---
 
-## 12. 참고
+## 9. 참고 자료
 
-- 메모리 (`~/.claude/projects/.../memory/MEMORY.md`): 
-  - `project_rcm_listgrid_extraction.md` — 이 프로젝트 메모
-  - `feedback_long_session_style.md` — 끝까지 밀어붙이는 스타일 선호
-  - `reference_gjcu_dev_credentials.md` — admin / Asdf4567!@#$
-- `DECISIONS.md` — 아키텍처 결정 이력 (진실원)
-- `README.md` — 라이브러리 사용자용 문서 (아직 Phase 1 반영 전)
+- `DECISIONS.md` — 설계 결정 이력 #1~#58
+- 메모리: `~/.claude/projects/.../memory/`
+  - `project_rcm_listgrid_extraction.md`
+  - `feedback_long_session_style.md` — "끝까지 밀어붙이기"
+  - `reference_gjcu_dev_credentials.md` — 로그인
+- 이전 세션 전체 transcript: `~/.claude/projects/.../{session-id}.jsonl`
