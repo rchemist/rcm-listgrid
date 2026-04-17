@@ -45,7 +45,9 @@ fi
 # Build -------------------------------------------------------------------
 echo -e "${C_GREEN}[1/5] Cleaning + building...${C_OFF}"
 npm run clean
-npm version "$NEW_VERSION" --no-git-tag-version >/dev/null
+if [ "$CURRENT_VERSION" != "$NEW_VERSION" ]; then
+    npm version "$NEW_VERSION" --no-git-tag-version >/dev/null
+fi
 npm run build
 
 if [ ! -d dist ] || [ ! -f dist/index.js ]; then

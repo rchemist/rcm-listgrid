@@ -1,4 +1,5 @@
-import { SearchForm, PageResult } from "../../../../ui/form";
+import { SearchForm } from "../../form/SearchForm";
+import { PageResult } from "../../form/Type";
 import { ExtensionPoint, ClientExtensionFunction, ExtensionOptions, ClientExtensionConfig, ClientExtensionContext } from '../../extensions/EntityFormExtension.types';
 import { EntityFormActions } from '../../config/form/EntityFormActions';
 

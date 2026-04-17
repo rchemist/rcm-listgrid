@@ -29,6 +29,10 @@ export { registerSmsHistoryField, createSmsHistoryField } from './extensions/Fie
 export { configureRuntime, getRuntimeConfig } from './config/RuntimeConfig';
 export type { RuntimeConfig } from './config/RuntimeConfig';
 
+// i18n extension point — host injects a translator factory at bootstrap.
+export { configureTranslator, getTranslation } from './utils/i18n';
+export type { Translator, TranslatorI18n, TranslatorFactory } from './utils/i18n';
+
 // Menu permission checker — host apps register a real checker that decides
 // whether the current session may access a given URL / menu alias.
 export { registerMenuPermissionChecker, checkAdminMenuPermission, DEFAULT_MENU_ALIAS } from './menu';
@@ -236,6 +240,7 @@ export * from './validations/TelephoneNumberValidation';
 export * from './validations/PhoneNumberValidation';
 export * from './validations/PasswordValidation';
 export * from './validations/StringValidation';
+export * from './validations/IpAddressValidation';
 
 // Extension Types
 export * from './extensions/EntityFormExtension.types';
@@ -267,3 +272,26 @@ export * from './components/list/hooks/useListGridLogic';
 export * from './components/list/hooks/useListGridHeader';
 export * from './components/list/hooks/useQuickSearchBar';
 export * from './components/fields/contentasset/hooks/useContentAsset';
+// Stage 9: re-export the full surface of listgrid internals for
+// @gjcu migration compatibility (wildcard for files whose helper
+// functions and companion exports were previously hidden by a
+// narrower `export { X }` line).
+export * from './components/fields/abstract/ListableFormField';
+export * from './components/fields/abstract/OptionalField';
+export * from './components/fields/ApplyFullAddressFields';
+export * from './components/fields/CustomOptionField';
+export * from './components/fields/view/CardManyToOneView';
+export * from './components/form/context/EntityFormThemeContext';
+export * from './config/SubCollectionField';
+export * from './config/CardSubCollectionField';
+export * from './config/TableSubCollectionField';
+export * from './config/EntityFormButton';
+export * from './config/InlineSubCollectionField';
+export * from './transfer/DynamicDataImporter';
+export * from './transfer/ExcelPasswordField';
+
+// Styling helpers — `cn` (tailwind-merge + clsx) and the per-slot
+// `classNames` / `mergeSlot` / `resolveSlots` primitives hosts use when
+// overriding scoped `rcm-*` classes on field components.
+export * from './utils/cn';
+export * from './utils/classNames';

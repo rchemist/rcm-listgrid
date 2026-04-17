@@ -1,6 +1,6 @@
 {
     "name": "@rcm/listgrid",
-    "version": "0.0.0",
+    "version": "0.1.0-alpha.6",
     "private": true,
     "description": "Generic ListGrid engine — reusable CRUD UI engine for the RCM-framework backend",
     "license": "UNLICENSED",
@@ -14,7 +14,10 @@
         "./next": {
             "types": "./dist/adapters/next/index.d.ts",
             "default": "./dist/adapters/next/index.js"
-        }
+        },
+        "./styles.css": "./dist/styles.css",
+        "./styles/tokens.css": "./dist/styles/tokens.css",
+        "./styles/base.css": "./dist/styles/base.css"
     },
     "files": [
         "dist",
@@ -30,7 +33,8 @@
     },
     "scripts": {
         "type-check": "tsc --noEmit",
-        "build": "tsc -p tsconfig.build.json",
+        "build": "tsc -p tsconfig.build.json && npm run build:styles",
+        "build:styles": "mkdir -p dist/styles && cp src/listgrid/styles/tokens.css src/listgrid/styles/base.css dist/styles/ && cat src/listgrid/styles/tokens.css src/listgrid/styles/base.css > dist/styles.css",
         "clean": "rm -rf dist",
         "deploy": "./deploy.sh"
     },
@@ -45,6 +49,7 @@
         "@headlessui/react": "^2.0.0",
         "@iconify/react": "^4.0.0 || ^5.0.0",
         "@tabler/icons-react": "^2.30.0 || ^3.0.0",
+        "date-fns": "^2.0.0 || ^3.0.0 || ^4.0.0",
         "file-saver": "^2.0.5",
         "next": ">=14",
         "nuqs": ">=2.0.0",
@@ -114,6 +119,7 @@
         "@types/react-dom": "^19.2.0",
         "@types/sortablejs": "^1.15.9",
         "@types/uuid": "^9.0.0",
+        "date-fns": "^3.6.0",
         "file-saver": "^2.0.5",
         "next": "^15.0.0",
         "nuqs": "^2.0.0",

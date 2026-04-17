@@ -1,0 +1,304 @@
+/*
+ * @rcm/listgrid base stylesheet.
+ *
+ * All library styles live inside `@layer rcm-listgrid`. CSS declarations in
+ * host applications that are NOT inside a named layer automatically beat
+ * styles inside a named layer — so hosts override by simply writing normal
+ * CSS after importing this file:
+ *
+ *   @import "@rcm/listgrid/styles.css";
+ *
+ *   .rcm-button { border-radius: 20px; }     // wins without !important
+ *
+ * For deliberately-layered host overrides, declare a layer AFTER rcm-listgrid:
+ *
+ *   @layer rcm-listgrid, host-overrides;
+ *   @layer host-overrides { .rcm-button { ... } }
+ *
+ * Class-name contract: every class in this file uses the `rcm-` prefix and is
+ * part of the public contract. Host CSS that targets `rcm-*` selectors is a
+ * supported customization path.
+ */
+
+@layer rcm-listgrid {
+    /* ------------------------------------------------------------------ *
+     * Root / surfaces
+     * ------------------------------------------------------------------ */
+    .rcm-root {
+        font-family: var(--rcm-font-family);
+        font-size: var(--rcm-font-size-md);
+        line-height: var(--rcm-line-height-normal);
+        color: var(--rcm-color-text);
+    }
+
+    .rcm-surface {
+        background: var(--rcm-color-surface);
+        color: var(--rcm-color-text);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-radius: var(--rcm-radius-md);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Layout primitives
+     * ------------------------------------------------------------------ */
+    .rcm-stack {
+        display: flex;
+        flex-direction: column;
+        gap: var(--rcm-space-md);
+    }
+
+    .rcm-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--rcm-space-sm);
+    }
+
+    .rcm-row-center {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: var(--rcm-space-sm);
+    }
+
+    .rcm-row-between {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--rcm-space-sm);
+    }
+
+    .rcm-grid {
+        display: grid;
+        gap: var(--rcm-space-md);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Field — generic wrapper for every form field
+     * ------------------------------------------------------------------ */
+    .rcm-field-root {
+        display: flex;
+        flex-direction: column;
+        gap: var(--rcm-space-xs);
+    }
+
+    .rcm-field-label {
+        font-size: var(--rcm-font-size-sm);
+        font-weight: var(--rcm-font-weight-medium);
+        color: var(--rcm-color-text);
+    }
+
+    .rcm-field-label-required::after {
+        content: " *";
+        color: var(--rcm-color-error);
+    }
+
+    .rcm-field-description {
+        font-size: var(--rcm-font-size-xs);
+        color: var(--rcm-color-text-muted);
+    }
+
+    .rcm-field-error {
+        font-size: var(--rcm-font-size-xs);
+        color: var(--rcm-color-error);
+    }
+
+    .rcm-field-input {
+        box-sizing: border-box;
+        width: 100%;
+        height: var(--rcm-size-input-height);
+        padding: 0 var(--rcm-space-md);
+        font-family: inherit;
+        font-size: var(--rcm-font-size-md);
+        line-height: var(--rcm-line-height-normal);
+        color: var(--rcm-color-text);
+        background: var(--rcm-color-surface);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-radius: var(--rcm-radius-md);
+        transition: border-color var(--rcm-transition-fast);
+    }
+
+    .rcm-field-input:hover {
+        border-color: var(--rcm-color-border-hover);
+    }
+
+    .rcm-field-input:focus,
+    .rcm-field-input:focus-visible {
+        outline: none;
+        border-color: var(--rcm-color-border-focus);
+    }
+
+    .rcm-field-input[aria-invalid="true"] {
+        border-color: var(--rcm-color-error);
+    }
+
+    .rcm-field-input[disabled],
+    .rcm-field-input[readonly] {
+        background: var(--rcm-color-surface-disabled);
+        color: var(--rcm-color-text-disabled);
+        cursor: not-allowed;
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Buttons
+     * ------------------------------------------------------------------ */
+    .rcm-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--rcm-space-xs);
+        box-sizing: border-box;
+        height: var(--rcm-size-button-height);
+        padding: 0 var(--rcm-space-lg);
+        font-family: inherit;
+        font-size: var(--rcm-font-size-sm);
+        font-weight: var(--rcm-font-weight-medium);
+        color: var(--rcm-color-text);
+        background: var(--rcm-color-surface);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-radius: var(--rcm-radius-md);
+        cursor: pointer;
+        transition: background var(--rcm-transition-fast),
+            border-color var(--rcm-transition-fast);
+    }
+
+    .rcm-button:hover {
+        background: var(--rcm-color-surface-hover);
+        border-color: var(--rcm-color-border-hover);
+    }
+
+    .rcm-button:focus-visible {
+        outline: 2px solid var(--rcm-color-border-focus);
+        outline-offset: 2px;
+    }
+
+    .rcm-button[disabled] {
+        color: var(--rcm-color-text-disabled);
+        background: var(--rcm-color-surface-disabled);
+        cursor: not-allowed;
+    }
+
+    .rcm-button-primary {
+        color: var(--rcm-color-primary-text);
+        background: var(--rcm-color-primary);
+        border-color: var(--rcm-color-primary);
+    }
+
+    .rcm-button-primary:hover {
+        background: var(--rcm-color-primary-hover);
+        border-color: var(--rcm-color-primary-hover);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Loading / spinner / skeleton
+     * ------------------------------------------------------------------ */
+    .rcm-spinner {
+        display: inline-block;
+        width: var(--rcm-size-icon-md);
+        height: var(--rcm-size-icon-md);
+        border: 2px solid var(--rcm-color-border);
+        border-top-color: var(--rcm-color-primary);
+        border-radius: var(--rcm-radius-full);
+        animation: rcm-spin 0.8s linear infinite;
+    }
+
+    @keyframes rcm-spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .rcm-loading-overlay {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--rcm-space-2xl);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Readonly helper (replaces packages/ui readonlyClass)
+     * ------------------------------------------------------------------ */
+    .rcm-readonly {
+        background: var(--rcm-color-surface-disabled);
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Table (base reset; rich table UI comes from host via UIProvider.Table)
+     * ------------------------------------------------------------------ */
+    .rcm-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--rcm-font-size-sm);
+    }
+
+    .rcm-table th,
+    .rcm-table td {
+        padding: var(--rcm-space-sm) var(--rcm-space-md);
+        border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+        text-align: left;
+    }
+
+    .rcm-table th {
+        background: var(--rcm-color-surface-muted);
+        font-weight: var(--rcm-font-weight-semibold);
+        color: var(--rcm-color-text-muted);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Messaging (error / info boxes used in transfer, validators, etc.)
+     * ------------------------------------------------------------------ */
+    .rcm-notice {
+        display: flex;
+        gap: var(--rcm-space-sm);
+        padding: var(--rcm-space-md);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-radius: var(--rcm-radius-md);
+        background: var(--rcm-color-surface-muted);
+    }
+
+    .rcm-notice-info {
+        background: var(--rcm-color-info-surface);
+        border-color: color-mix(in srgb, var(--rcm-color-info) 30%, transparent);
+    }
+
+    .rcm-notice-warning {
+        background: var(--rcm-color-warning-surface);
+        border-color: color-mix(
+            in srgb,
+            var(--rcm-color-warning) 30%,
+            transparent
+        );
+    }
+
+    .rcm-notice-error {
+        background: var(--rcm-color-error-surface);
+        border-color: color-mix(in srgb, var(--rcm-color-error) 30%, transparent);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Utility helpers (sparingly — don't recreate Tailwind here)
+     * ------------------------------------------------------------------ */
+    .rcm-visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    .rcm-scroll-y {
+        overflow-y: auto;
+    }
+
+    .rcm-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

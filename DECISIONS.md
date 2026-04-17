@@ -389,3 +389,34 @@ UIProvider 컴포넌트들이 받는 props 중 일부는 **library 내부 상태
 - ⚠️ 저장/fetch 플로우는 아직 구동 안 됨 — mock API만 연결, click + API round-trip 테스트는 안 함
 - ⚠️ UIProvider prop 필터 계약은 **host adapter 책임**으로 결정 (library가 강제 안 함)
 - ⚠️ 실 스타일링 없음 (Tailwind 등) — 입력은 되지만 예쁘지 않음
+
+### #57 Stage 9 Phase 1.1 — UI 프레임워크 독립을 위한 자체 CSS 기반 도입
+**목표**: 라이브러리 소비자가 Tailwind/shadcn/HeroUI 등 특정 UI 프레임워크에 묶이지 않도록, 기본 UI는 라이브러리가 제공하되 override 경로를 전면 개방.
+
+**문제 인식** (사용자 질의 통해 확인):
+- 라이브러리는 `@heroui`/`@nextui`/`@shadcn`/`radix-ui`를 직접 import하는 곳 **없음** (확인 완료)
+- 유일한 UI 결합은 **JSX에 하드코딩된 Tailwind 유틸리티 문자열** (134 파일, 602줄)
+- 호스트가 Tailwind 설정 없으면 스타일 깨짐 — 이것이 마지막 누수
+
+**Phase 1.1 인프라 (이번 작업)**:
+1. `src/listgrid/styles/tokens.css` — CSS 변수로 디자인 토큰 노출 (색/폰트/간격/radius/shadow/z-index)
+2. `src/listgrid/styles/base.css` — `@layer rcm-listgrid`로 감싼 scoped 클래스 정의 (rcm-root, rcm-field-root, rcm-field-input, rcm-button, rcm-spinner, rcm-table, rcm-notice, rcm-readonly 등)
+3. `src/listgrid/styles/index.css` — 위 두 파일 `@import` 합본
+4. `package.json` exports에 `./styles.css`, `./styles/tokens.css`, `./styles/base.css` 추가
+5. `npm run build:styles`로 `dist/styles.css` (합본) + `dist/styles/{tokens,base}.css` 복사
+6. `utils/classNames.ts` — `mergeSlot(base, override?)` / `resolveSlots(defaults, overrides?)` / `ClassNamesMap<K>` 추가 (host 필드 커스터마이징용)
+7. `readonlyClass()`의 Tailwind 문자열(`bg-gray-100 opacity-60 cursor-not-allowed`) → `rcm-readonly` 스코프 클래스로 교체
+
+**Override 메커니즘 (4단계, Mantine/MUI와 동등)**:
+- (1) CSS 변수: `:root { --rcm-color-primary: ... }` — 전역 리브랜딩
+- (2) `@layer rcm-listgrid` 밖 CSS: `.rcm-button { ... }` — specificity 전쟁 없이 무조건 이김
+- (3) `classNames={{ root, input, error }}` prop — 인스턴스별 override (다음 Phase에서 필드별 wire)
+- (4) `UIProvider.components` — 프리미티브 완전 교체 (기존)
+
+**Neutral 디자인 원칙**: brand color 없음, system font, 4px 간격 grid, 기능적 accent color(success/warning/error/info)만 노출. gjcu 디자인 선택은 `UIAdapter.ts`에 갇혀 있고 라이브러리는 모름.
+
+**Why**: 수십 개 필드 재구현 강요(완전 headless)와 기본 디자인 강요(Tailwind 종속) 사이의 업계 표준 해법. Mantine `@layer mantine` + MUI `sx/slots` + HeroUI `classNames` 등과 동일한 패턴.
+
+**남은 작업 (Phase 1.2 / 1.3)**:
+- Phase 1.2: 필드 컴포넌트들에 `classNames` prop 받아 `mergeSlot`으로 wire
+- Phase 1.3: 134 파일 602줄의 하드코딩된 Tailwind 유틸리티 → scoped `rcm-*` 클래스로 점진 교체 (파일 단위로 검증하며 진행)
