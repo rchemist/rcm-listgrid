@@ -15,7 +15,7 @@ import {IconFile, IconHelpCircle} from "@tabler/icons-react";
 import clsx from "clsx";
 import {DataField, SampleDataItem} from '../transfer/Type';
 import {DataExportProcessor} from '../transfer/DataExportProcessor';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../utils/i18n";
 import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
 
 export interface DataImportSampleProps {

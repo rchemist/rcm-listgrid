@@ -14,14 +14,14 @@ import {
   getQueryConditionTypes,
   getQueryConditionValueType,
   QueryConditionType
-} from "@gjcu/ui/form/SearchForm";
+} from "../../../form/SearchForm";
 import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 import {TagsInput} from "@gjcu/ui/form/TagsInput/index";
 import {IconCircleX} from "@tabler/icons-react";
 import {getConfiguredFields, RuleConditionValue, RuleFieldEntityForm, RuleFieldValue} from './Type';
-import {SelectOption} from "@gjcu/ui/form/Type";
-import {isEmpty} from "@gjcu/ui/utils";
+import {SelectOption} from "../../../form/Type";
+import {isEmpty} from "../../../utils";
 import {RuleFieldRenderer} from './RuleFieldRenderer';
 import {ViewFieldError} from "../../form/ui/ViewFieldError";
 import {ViewHelpText} from "../../form/ui/ViewHelpText";

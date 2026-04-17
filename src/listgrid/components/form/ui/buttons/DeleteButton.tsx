@@ -7,10 +7,10 @@
 import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
 import {EntityFormActionResult} from '../../../../config/Config';
 import {showConfirm, showSuccess} from "@gjcu/ui/message/messageUtils";
-import {isEmpty, isTrue} from "@gjcu/ui/utils";
+import {isEmpty, isTrue} from "../../../../utils";
 import {EntityError, parse, removeTrailingSeparator} from "@gjcu/ui";
 import {ButtonProps} from "../../types/ViewEntityFormButtons.types";
-import {cn} from "../../../../../utils/cn";
+import {cn} from "../../../../utils/cn";
 
 export const DeleteButton = ({
   entityForm,

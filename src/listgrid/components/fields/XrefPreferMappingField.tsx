@@ -12,8 +12,8 @@ import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {EntityForm} from '../../config/EntityForm';
 import {XrefPreferMappingValue, XrefPreferMappingView} from './view/XrefPreferMappingView';
 import {RenderType} from '../../config/Config';
-import {isEmpty} from "@gjcu/ui/utils";
-import {FilterItem} from "@gjcu/ui/form/SearchForm";
+import {isEmpty} from "../../utils";
+import {FilterItem} from "../../form/SearchForm";
 
 export interface XrefPreferMappingFieldProps extends FormFieldProps {
   entityForm: EntityForm;

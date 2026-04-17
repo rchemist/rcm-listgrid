@@ -7,7 +7,7 @@
 "use client";
 
 import React, {useEffect, useMemo, useRef, useState} from "react";
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {SelectOption} from "../../../form/Type";
 import {SelectBox} from "@gjcu/ui/form/SelectBox";
 import {RadioChip} from "@gjcu/ui/form/RadioChip";
 import {RadioInput} from "@gjcu/ui/form/RadioInput";

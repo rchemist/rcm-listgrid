@@ -6,7 +6,7 @@
  */
 
 
-import {Direction, SearchForm} from "@gjcu/ui/form/SearchForm";
+import {Direction, SearchForm} from "../../../form/SearchForm";
 // import {SearchFormState} from '../state/State';
 import {
   IconSortAscendingLetters,

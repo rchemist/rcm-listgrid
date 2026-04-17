@@ -8,8 +8,8 @@
 import {TooltipCard} from "@gjcu/ui/elements/tooltipcard";
 import {IconInfoCircle} from "@tabler/icons-react";
 import React from "react";
-import {isBlank} from '../../../../utils/StringUtil';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {isBlank} from '../../../utils/StringUtil';
+import {getTranslation} from "../../../utils/i18n";
 
 interface ViewHelpIconProps {
   helpText?: string;

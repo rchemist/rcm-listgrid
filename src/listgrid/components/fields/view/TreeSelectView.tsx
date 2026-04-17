@@ -13,7 +13,7 @@ import {Tree, TreeNodeData} from "@gjcu/ui/elements/tree";
 import {LoadingOverlay} from "@gjcu/ui/elements/indicator/LoadingOverlay";
 import {ManyToOneTreeView} from '../../../config/Config';
 import {getExternalApiDataWithError} from "@gjcu/ui";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
 import {IconChevronDown, IconChevronRight} from "@tabler/icons-react";
 

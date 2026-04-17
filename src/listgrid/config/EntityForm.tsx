@@ -26,7 +26,7 @@ import {
   isEmpty,
   isTrue,
   parse
-} from '../../utils';
+} from '../utils';
 import {ResponseData} from '../../api/types'
 import {EntityTab} from './EntityTab';
 import {SubCollectionField} from './SubCollectionField';

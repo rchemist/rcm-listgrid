@@ -11,7 +11,7 @@ import {Box} from "@gjcu/ui/elements/layout/Box";
 import {Flex} from "@gjcu/ui/elements/layout/Flex";
 import {ReactNode} from "react";
 import {DataField} from '../transfer/Type';
-import {defaultString} from '@gjcu/ui/utils/StringUtil';
+import {defaultString} from '../utils/StringUtil';
 import styles from './DataImportDescription.module.css';
 import clsx from "clsx";
 import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";

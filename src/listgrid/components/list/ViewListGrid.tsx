@@ -13,7 +13,7 @@ import {EntireChecker} from './ui/EntireChecker';
 import {LoadingOverlay} from "@gjcu/ui/elements/indicator/LoadingOverlay";
 import {HeaderField} from './ui/HeaderField';
 import {AdvancedSearchFormV2 as AdvancedSearchForm} from './AdvancedSearchFormV2';
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {ListGridHeader} from './ListGridHeader';
 import {SubCollectionButtons} from './SubCollectionButtons';
 import {QuickSearchBar} from './QuickSearchBar';

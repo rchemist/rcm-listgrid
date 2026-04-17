@@ -12,15 +12,15 @@ import {
   ViewListProps
 } from "./ListableFormField";
 import {ComboProps, FieldType, RenderType} from '../../../config/Config';
-import {MinMaxLimit, SelectOption} from "@gjcu/ui/form/Type";
+import {MinMaxLimit, SelectOption} from "../../../form/Type";
 import {ValidateResult} from '../../../validations/Validation';
 import {EntityForm} from '../../../config/EntityForm';
 import {Session} from '../../../auth/types';
 import {hexHash} from "next/dist/shared/lib/hash";
 import {isEquals} from "@gjcu/ui";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 import {Badge} from "@gjcu/ui/elements/badges/Badge";
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 
 function isEqualOptions(a?: SelectOption[], b?: SelectOption[]) {
   if (a === undefined && b === undefined) {

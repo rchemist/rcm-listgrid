@@ -22,16 +22,16 @@ import {Paper} from "@gjcu/ui/elements/Paper";
 import {useModalManagerStore} from '../../../../store';
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
-import {FilterItem, SearchForm} from "@gjcu/ui/form/SearchForm";
-import {isEmpty} from "@gjcu/ui/utils";
+import {FilterItem, SearchForm} from "../../../form/SearchForm";
+import {isEmpty} from "../../../utils";
 import {ManyToOneField} from '../ManyToOneField';
 import {ViewEntityForm} from '../../form/ViewEntityForm';
-import {PageResult} from "@gjcu/ui/form/Type";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {PageResult} from "../../../form/Type";
+import {isTrue} from '../../../utils/BooleanUtil';
 import {BooleanField} from '../BooleanField';
 import {EntityFormButton} from '../../../config/EntityFormButton';
 import {ShowNotifications} from '../../helper/ShowNotifications';
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 
 interface XrefPreferMappingViewProps extends InputRendererProps {
   entityForm: EntityForm;

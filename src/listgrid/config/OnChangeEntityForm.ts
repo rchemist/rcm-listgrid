@@ -10,7 +10,7 @@ import {EntityForm} from '../config/EntityForm';
 import {OptionalField} from '../components/fields/abstract';
 import {EntityField} from '../config/EntityField';
 import {Validation} from '../validations/Validation';
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {SelectOption} from "../form/Type";
 
 export type ConditionalProps = { value: any, result: Map<string, boolean> };
 export type ConditionalSelectOptionProps = {value: any, result: Map<string, SelectOption[]>, defaultValue?: any};

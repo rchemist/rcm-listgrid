@@ -8,7 +8,7 @@
 import {ValidateResult, ValidationItem} from '../validations/Validation';
 import {EntityForm} from '../config/EntityForm';
 import {FieldValue,} from '../config/Config';
-import {MinMaxLimit} from "@gjcu/ui/form/Type";
+import {MinMaxLimit} from "../form/Type";
 
 export class StringValidation extends ValidationItem {
 

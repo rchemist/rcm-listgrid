@@ -8,7 +8,7 @@
 import {ValidateResult, ValidationItem} from '../validations/Validation';
 import {EntityForm} from '../config/EntityForm';
 import {FieldValue} from '../config/Config';
-import {isBlank} from '@gjcu/ui/utils/StringUtil';
+import {isBlank} from '../utils/StringUtil';
 
 // currentValue가 정규식 패턴인지 확인
 const regexPattern = /^\/.*\/[gimsuy]*$/;

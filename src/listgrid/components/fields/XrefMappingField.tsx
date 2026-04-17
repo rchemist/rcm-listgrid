@@ -11,11 +11,11 @@ import React from "react";
 import {XrefMappingValue, XrefMappingView} from './view/XrefMappingView';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {EntityForm} from '../../config/EntityForm';
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {XrefPriorityMappingValue, XrefPriorityMappingView} from './view/XrefPriorityMappingView';
 import {RenderType} from '../../config/Config';
-import {isEmpty} from "@gjcu/ui/utils";
-import {FilterItem} from "@gjcu/ui/form/SearchForm";
+import {isEmpty} from "../../utils";
+import {FilterItem} from "../../form/SearchForm";
 
 export interface XrefMappingFieldProps extends FormFieldProps {
   supportPriority?: boolean;

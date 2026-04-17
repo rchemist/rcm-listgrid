@@ -5,10 +5,10 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {QueryConditionType} from "@gjcu/ui/form/SearchForm";
+import {QueryConditionType} from "../../../form/SearchForm";
 import {FormField} from '../abstract';
 import {EntityForm} from '../../../config/EntityForm';
-import {parse, stringify} from '../../../../utils/jsonUtils';
+import {parse, stringify} from '../../../utils/jsonUtils';
 
 
 export interface RuleFieldValue {

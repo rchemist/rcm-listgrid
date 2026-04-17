@@ -15,7 +15,7 @@ import {
   XrefAvailableDateMappingView
 } from './view/XrefAvailableDateMappingView';
 import {RenderType} from '../../config/Config';
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../utils";
 
 export interface XrefAvailableDateMappingFieldProps extends FormFieldProps {
   entityForm: EntityForm;

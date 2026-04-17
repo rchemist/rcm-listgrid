@@ -9,7 +9,7 @@
 "use client";
 
 import {ASSET_SERVER_URL, removeAssetServerPrefix} from "@gjcu/ui";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../../utils/i18n";
 import {FileFieldValue, FileUploadInput} from "@gjcu/ui/form/FileUploadInput";
 import {useEffect, useState} from "react";
 

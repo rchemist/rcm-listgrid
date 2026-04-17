@@ -7,10 +7,10 @@
 'use client'
 
 import React, {useState} from "react";
-import {QueryConditionType} from "@gjcu/ui/form/SearchForm";
+import {QueryConditionType} from "../../../form/SearchForm";
 import {SelectBox} from "@gjcu/ui/form/SelectBox";
 import {TextInput} from "@gjcu/ui/form/TextInput";
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 
 interface NumberFilterProps {
   onRemove: () => void;

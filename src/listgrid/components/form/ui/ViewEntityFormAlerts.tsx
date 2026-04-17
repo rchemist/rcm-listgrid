@@ -7,7 +7,7 @@
 
 import React from "react";
 import {IconChevronDown, IconChevronUp} from "@tabler/icons-react";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../../utils/i18n";
 import {ViewEntityFormAlertsProps} from "../types/ViewEntityFormAlerts.types";
 import {getColorIndicator, useAlertManager} from "../hooks/useAlertManager";
 import {AlertItem} from "./AlertItem";

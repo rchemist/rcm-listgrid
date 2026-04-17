@@ -17,8 +17,8 @@ import {
 } from '../helper/FieldRendererHelper';
 import {EntityForm} from '../../config/EntityForm';
 import {ValidateResult} from '../../validations/Validation';
-import {isBlank} from '../../../utils/StringUtil';
-import {MinMaxStringLimit} from "@gjcu/ui/form/Type";
+import {isBlank} from '../../utils/StringUtil';
+import {MinMaxStringLimit} from "../../form/Type";
 
 interface MonthFieldProps extends ListableFormFieldProps {
   limit?: MinMaxStringLimit

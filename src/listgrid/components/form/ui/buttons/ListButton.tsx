@@ -5,10 +5,10 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 import {showConfirm} from "@gjcu/ui/message/messageUtils";
-import {removeTrailingSeparator} from '../../../../../utils/StringUtil';
+import {removeTrailingSeparator} from '../../../../utils/StringUtil';
 import {ButtonProps} from "../../types/ViewEntityFormButtons.types";
-import {isTrue} from '../../../../../utils/BooleanUtil';
-import {cn} from "../../../../../utils/cn";
+import {isTrue} from '../../../../utils/BooleanUtil';
+import {cn} from "../../../../utils/cn";
 
 export const ListButton = ({
   entityForm,

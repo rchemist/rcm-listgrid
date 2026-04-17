@@ -10,8 +10,8 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {AbstractManyToOneField} from "../abstract";
 import {CustomFieldRendererProps} from "../../form/types/ViewEntityFormTheme.types";
 import {ManyToOneConfig} from "../../../config/Config";
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
-import {isBlank} from "../../../../utils/StringUtil";
+import {SearchForm} from "../../../form/SearchForm";
+import {isBlank} from "../../../utils/StringUtil";
 import {getManyToOneEntityValue} from "../ManyToOneField";
 import {
   IconCheck,
@@ -24,7 +24,7 @@ import {
 import {ViewListGrid} from "../../list/ViewListGrid";
 import {ListGrid} from "../../../config/ListGrid";
 import {useModalManagerStore} from "../../../../store";
-import {PageResult} from "@gjcu/ui/form/Type";
+import {PageResult} from "../../../form/Type";
 
 /**
  * 카드 아이템의 스타일/렌더링 설정

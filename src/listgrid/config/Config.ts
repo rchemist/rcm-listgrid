@@ -7,13 +7,13 @@
 
 import React, {ReactNode} from "react";
 import {EntityForm} from '../config/EntityForm';
-import {FilterItem, SearchForm, SearchValue} from "@gjcu/ui/form/SearchForm";
+import {FilterItem, SearchForm, SearchValue} from "../form/SearchForm";
 import {IListConfig} from '../components/fields/abstract';
-import {MinMaxLimit, PageResult, SelectOption} from "@gjcu/ui/form/Type";
+import {MinMaxLimit, PageResult, SelectOption} from "../form/Type";
 import {TreeNodeData} from "@gjcu/ui/elements/tree";
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../utils";
 import {Session} from '../auth/types';
-import {generateSlug, isBlank} from '@gjcu/ui/utils/StringUtil';
+import {generateSlug, isBlank} from '../utils/StringUtil';
 import {ValidateResult} from "../validations/Validation";
 
 export type FieldType =

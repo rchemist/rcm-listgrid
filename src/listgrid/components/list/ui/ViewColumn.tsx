@@ -1,6 +1,6 @@
 'use client';
-import {getAlignClassName} from "@gjcu/ui/common/func";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {getAlignClassName} from "../../../common/func";
+import {isTrue} from '../../../utils/BooleanUtil';
 import {ReactNode, useEffect, useState} from "react";
 import {RowItemProps} from "../types/RowItem.types";
 import {useListGridTheme} from "../context/ListGridThemeContext";

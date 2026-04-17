@@ -17,7 +17,7 @@ import {
   EmailDomainCheckButtonInput,
   EmailDomainInput
 } from "@gjcu/ui/form/EmailDomainInput";
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../utils";
 
 interface EmailFieldProps extends CheckButtonValidationFieldProps {
   text?: boolean;

@@ -12,7 +12,7 @@ import {
   EntityFormThemeProviderProps,
   ViewEntityFormClassNames,
 } from "../types/ViewEntityFormTheme.types";
-import {cn as cnUtil} from "../../../../utils/cn";
+import {cn as cnUtil} from "../../../utils/cn";
 import {defaultEntityFormTheme} from "../themes/defaultTheme";
 
 /**

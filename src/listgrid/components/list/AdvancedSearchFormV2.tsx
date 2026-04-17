@@ -7,7 +7,7 @@
  * You may obtain a copy of the License under controlled by GJCU
  */
 
-import {QueryConditionType, SearchForm} from '@gjcu/ui/form/SearchForm';
+import {QueryConditionType, SearchForm} from '../../form/SearchForm';
 import {
   AbstractManyToOneField,
   ListableFormField,
@@ -16,9 +16,9 @@ import {
 } from '../fields/abstract';
 import {EntityForm} from '../../config/EntityForm';
 import React, {Fragment, useCallback, useEffect, useMemo, useReducer,} from 'react';
-import {getTranslation} from '@gjcu/ui/utils/i18n';
+import {getTranslation} from '../../utils/i18n';
 import {Transition} from '@headlessui/react';
-import {isBlank} from '../../../utils/StringUtil';
+import {isBlank} from '../../utils/StringUtil';
 import {MemoizedFilterField} from './ui/MemoizedFilterField';
 import {FieldSelector} from './ui/FieldSelector';
 import {IconLayoutGrid, IconLayoutList, IconRefresh, IconSearch, IconX} from '@tabler/icons-react';

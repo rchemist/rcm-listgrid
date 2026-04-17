@@ -11,7 +11,7 @@ import React, {useEffect, useState} from "react";
 import {readonlyClass} from "@gjcu/ui/form/Style";
 import {Tooltip, TooltipColor} from "@gjcu/ui/elements/tooltip/Tooltip";
 import {IconExternalLink} from "@tabler/icons-react";
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 import {normalizeUrl} from "@gjcu/ui";
 
 interface LinkFieldProps extends InputRendererProps {

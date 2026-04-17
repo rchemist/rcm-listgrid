@@ -12,7 +12,7 @@ import {
 } from "./Config";
 import {EntityForm} from "./EntityForm";
 import {EntityItem} from "./EntityItem";
-import {ColorType} from "@gjcu/ui/common/type";
+import {ColorType} from "../common/type";
 
 export type CopyEntityFormExplicitFieldType = string | CopyEntityFormOverrideFieldProps;
 

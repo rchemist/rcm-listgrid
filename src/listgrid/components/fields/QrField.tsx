@@ -3,7 +3,7 @@ import {ReactNode} from "react";
 import {FieldRenderParameters} from "../../config/EntityField";
 import {EntityForm} from '../../config/EntityForm';
 import QRCode from "qrcode.react";
-import {isBlank} from '../../../utils/StringUtil';
+import {isBlank} from '../../utils/StringUtil';
 
 export class QrField extends FormField<QrField> {
 

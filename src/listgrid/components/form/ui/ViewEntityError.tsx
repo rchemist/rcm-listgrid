@@ -8,10 +8,10 @@
  */
 
 import {FieldError} from '../../../config/EntityFormTypes';
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../../utils";
 import React, {ReactNode, useState} from "react";
 import {IconChevronDown, IconChevronUp, IconInfoTriangle} from "@tabler/icons-react";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../../utils/i18n";
 
 interface ViewEntityErrorProps {
   errors?: Map<string, FieldError[]>;

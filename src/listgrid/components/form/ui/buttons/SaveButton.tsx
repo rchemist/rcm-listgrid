@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 import {useState} from "react";
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../../../utils";
 import {ButtonProps} from "../../types/ViewEntityFormButtons.types";
 import {openToast} from "@gjcu/ui/message/ToastMessage";
 import {useEntityFormTheme} from "../../context/EntityFormThemeContext";

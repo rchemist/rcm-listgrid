@@ -12,7 +12,7 @@ import {DefinedDateType, fDate, getDefinedDates} from "@gjcu/ui";
 import {FlatPickrDateField} from "@gjcu/ui/form/FlatPickrDateField";
 import { SafePerfectScrollbar } from "@gjcu/ui/components/scrollbar/SafePerfectScrollbar";
 import {FilterRenderParameters} from '../../../config/EntityField';
-import {MinMaxStringLimit} from "@gjcu/ui/form/Type";
+import {MinMaxStringLimit} from "../../../form/Type";
 
 export interface DatetimeFilterProps extends FilterRenderParameters{
   name: string;

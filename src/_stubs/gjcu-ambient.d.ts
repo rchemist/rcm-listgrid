@@ -17,6 +17,10 @@ declare module '@gjcu/shared' {
 }
 
 declare module '@gjcu/ui' {
+    export const callExternalHttpRequest: any;
+    export type callExternalHttpRequest = any;
+    export const ResponseData: any;
+    export type ResponseData = any;
     export const ASSET_SERVER_URL: any;
     export type ASSET_SERVER_URL = any;
     export const DefinedDateType: any;
@@ -83,28 +87,6 @@ declare module '@gjcu/ui' {
     export type setLocalStorageItem = any;
     export const setSessionStorageItem: any;
     export type setSessionStorageItem = any;
-}
-
-declare module '@gjcu/ui/common/func' {
-    export const getAdditionalColorClass: any;
-    export type getAdditionalColorClass = any;
-    export const getAlignClassName: any;
-    export type getAlignClassName = any;
-    export const getOppositeTextColorClass: any;
-    export type getOppositeTextColorClass = any;
-}
-
-declare module '@gjcu/ui/common/type' {
-    export const AdditionalColorType: any;
-    export type AdditionalColorType = any;
-    export const AllColorTypes: any;
-    export type AllColorTypes = any;
-    export const ColorType: any;
-    export type ColorType = any;
-    export const SpanValue: any;
-    export type SpanValue = any;
-    export const TextAlignType: any;
-    export type TextAlignType = any;
 }
 
 declare module '@gjcu/ui/components/scrollbar/SafePerfectScrollbar' {
@@ -324,25 +306,6 @@ declare module '@gjcu/ui/form/RadioInput' {
     export type RadioInput = any;
 }
 
-declare module '@gjcu/ui/form/SearchForm' {
-    export const Direction: any;
-    export type Direction = any;
-    export const FilterItem: any;
-    export type FilterItem = any;
-    export const QueryConditionType: any;
-    export type QueryConditionType = any;
-    export const SearchForm: any;
-    export type SearchForm = any;
-    export const SearchValue: any;
-    export type SearchValue = any;
-    export const getQueryConditionHelpText: any;
-    export type getQueryConditionHelpText = any;
-    export const getQueryConditionTypes: any;
-    export type getQueryConditionTypes = any;
-    export const getQueryConditionValueType: any;
-    export type getQueryConditionValueType = any;
-}
-
 declare module '@gjcu/ui/form/SelectBox' {
     export const SelectBox: any;
     export type SelectBox = any;
@@ -358,11 +321,6 @@ declare module '@gjcu/ui/form/TagsInput/index' {
     export type TagsInput = any;
 }
 
-declare module '@gjcu/ui/form/TagsInput/types' {
-    export const TagValidationResult: any;
-    export type TagValidationResult = any;
-}
-
 declare module '@gjcu/ui/form/TextInput' {
     export const TextInput: any;
     export type TextInput = any;
@@ -376,17 +334,6 @@ declare module '@gjcu/ui/form/Textarea' {
 declare module '@gjcu/ui/form/Tiptap/TiptapEditor' {
     export const getPlainText: any;
     export type getPlainText = any;
-}
-
-declare module '@gjcu/ui/form/Type' {
-    export const MinMaxLimit: any;
-    export type MinMaxLimit = any;
-    export const MinMaxStringLimit: any;
-    export type MinMaxStringLimit = any;
-    export const PageResult: any;
-    export type PageResult = any;
-    export const SelectOption: any;
-    export type SelectOption = any;
 }
 
 declare module '@gjcu/ui/indicator/LinearIndicator' {
@@ -453,48 +400,3 @@ declare module '@gjcu/ui/user/UserView' {
     export type UserView = any;
 }
 
-declare module '@gjcu/ui/utils' {
-    export const isEmpty: any;
-    export type isEmpty = any;
-    export const isTrue: any;
-    export type isTrue = any;
-}
-
-declare module '@gjcu/ui/utils/BooleanUtil' {
-    export const isTrue: any;
-    export type isTrue = any;
-}
-
-declare module '@gjcu/ui/utils/PhoneUtil' {
-    export const formatPhoneNumber: any;
-    export type formatPhoneNumber = any;
-    export const removePhoneNumberHyphens: any;
-    export type removePhoneNumberHyphens = any;
-}
-
-declare module '@gjcu/ui/utils/StringUtil' {
-    export const defaultString: any;
-    export type defaultString = any;
-    export const generateSlug: any;
-    export type generateSlug = any;
-    export const isBlank: any;
-    export type isBlank = any;
-    export const subStringAfterLast: any;
-    export type subStringAfterLast = any;
-    export const subStringBeforeLast: any;
-    export type subStringBeforeLast = any;
-    export const subStringBetween: any;
-    export type subStringBetween = any;
-}
-
-declare module '@gjcu/ui/utils/i18n' {
-    export const getTranslation: any;
-    export type getTranslation = any;
-}
-
-declare module '@gjcu/ui/utils/jsonUtils' {
-    export const parse: any;
-    export type parse = any;
-    export const stringify: any;
-    export type stringify = any;
-}

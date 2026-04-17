@@ -13,9 +13,9 @@ import {useEffect, useState} from "react";
 import {Paper} from "@gjcu/ui/elements/Paper";
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
-import {FilterItem, SearchForm} from "@gjcu/ui/form/SearchForm";
-import {isEmpty} from "@gjcu/ui/utils";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {FilterItem, SearchForm} from "../../../form/SearchForm";
+import {isEmpty} from "../../../utils";
+import {isTrue} from '../../../utils/BooleanUtil';
 import {useModalManagerStore} from '../../../../store';
 
 interface XrefPriorityMappingViewProps extends InputRendererProps {

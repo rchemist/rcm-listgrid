@@ -6,7 +6,7 @@
  */
 
 import {createParser} from 'nuqs';
-import {Direction, FilterItem, QueryConditionType} from '@gjcu/ui/form/SearchForm';
+import {Direction, FilterItem, QueryConditionType} from '../../../form/SearchForm';
 
 /**
  * URL page parameter parser

@@ -16,14 +16,14 @@ import {
   RuleFieldEntityForm,
   RuleFieldType,
 } from './Type';
-import {isEmpty} from "@gjcu/ui/utils";
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {isEmpty} from "../../../utils";
+import {SelectOption} from "../../../form/Type";
 import {IconBox} from "@tabler/icons-react";
 import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 import {RuleCondition} from './RuleCondition';
-import {isTrue} from '../../../../utils/BooleanUtil';
-import {FilterItem, getQueryConditionValueType, SearchForm} from "@gjcu/ui/form/SearchForm";
+import {isTrue} from '../../../utils/BooleanUtil';
+import {FilterItem, getQueryConditionValueType, SearchForm} from "../../../form/SearchForm";
 import {getExternalApiDataWithError} from "@gjcu/ui";
 import {ViewHelpText} from "../../form/ui/ViewHelpText";
 import {ViewFieldError} from "../../form/ui/ViewFieldError";

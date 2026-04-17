@@ -11,7 +11,7 @@ import {RenderType} from '../../config/Config';
 import {FieldRenderParameters} from '../../config/EntityField';
 import {Textarea} from "@gjcu/ui/form/Textarea";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {MinMaxLimit} from "@gjcu/ui/form/Type";
+import {MinMaxLimit} from "../../form/Type";
 
 interface TextareaFieldProps extends FormFieldProps {
   rows?: number;

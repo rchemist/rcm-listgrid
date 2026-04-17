@@ -13,7 +13,7 @@ import {
 } from '../helper/FieldRendererHelper';
 import {MarkdownEditor} from "@gjcu/ui/form/MarkdownEditor";
 import {isEquals} from "@gjcu/ui";
-import {isBlank} from '../../../utils/StringUtil';
+import {isBlank} from '../../utils/StringUtil';
 
 interface MarkdownFieldProps extends FormFieldProps{
 

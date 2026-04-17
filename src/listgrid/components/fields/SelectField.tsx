@@ -12,7 +12,7 @@ import {MultiSelectBox} from "@gjcu/ui/form/MultiSelectBox";
 import {RadioChip} from "@gjcu/ui/form/RadioChip";
 import {RadioInput} from "@gjcu/ui/form/RadioInput";
 import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {SelectOption} from "../../form/Type";
 import {FieldValue, RenderType} from '../../config/Config';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {
@@ -30,7 +30,7 @@ import {SelectFieldRenderer} from './SelectFieldRenderer';
 import {EntityForm} from '../../config/EntityForm';
 import {ValidateResult} from '../../validations/Validation';
 import {Badge} from "@gjcu/ui/elements/badges/Badge";
-import {ColorType} from "@gjcu/ui/common/type";
+import {ColorType} from "../../common/type";
 import {DynamicSelectFieldView} from "./view/DynamicSelectFieldView";
 
 // SelectField loadOptions 캐시 (fieldName 기반, 동일 페이지 내에서 공유)

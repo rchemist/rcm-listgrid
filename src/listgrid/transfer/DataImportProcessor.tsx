@@ -17,9 +17,9 @@ import {FC, ReactNode, useEffect, useState} from "react";
 import classes from "./DataImport.module.css";
 import {DataField, DataRow, DataTransferResult} from '../transfer/Type';
 import {DataImportResultView, ImportErrorView} from '../transfer/DataImportResultView';
-import {defaultString} from '@gjcu/ui/utils/StringUtil';
+import {defaultString} from '../utils/StringUtil';
 import {DataRowSet} from "./Type";
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../utils";
 
 interface DataImportPreviewViewerProps {
   resultView: boolean;

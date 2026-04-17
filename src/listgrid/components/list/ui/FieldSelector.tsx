@@ -9,7 +9,7 @@
 
 import React, {memo, useCallback, useMemo, useState} from 'react';
 import {ListableFormField} from '../../fields/abstract';
-import {getTranslation} from '@gjcu/ui/utils/i18n';
+import {getTranslation} from '../../../utils/i18n';
 import {IconCheck, IconSearch} from '@tabler/icons-react';
 
 interface FieldSelectorProps {

@@ -12,9 +12,9 @@ import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {EntityForm} from '../../config/EntityForm';
 import {XrefPreferMappingValue} from './view/XrefPreferMappingView';
 import {RenderType} from '../../config/Config';
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../utils";
 import {XrefPriceMappingView} from './view/XrefPiceMappingView';
-import {FilterItem} from "@gjcu/ui/form/SearchForm";
+import {FilterItem} from "../../form/SearchForm";
 
 interface XrefPriceAdditionalProps {
   entityForm: EntityForm;

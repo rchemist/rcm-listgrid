@@ -1,6 +1,6 @@
 import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {getTranslation} from "../../../utils/i18n";
+import {isTrue} from '../../../utils/BooleanUtil';
 import {useListGridTheme} from "../context/ListGridThemeContext";
 
 export const HeaderTitle: React.FC<{ title: string; hideTitle?: boolean }> = ({ title, hideTitle }) => {

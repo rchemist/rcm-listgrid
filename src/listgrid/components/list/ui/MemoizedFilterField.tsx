@@ -8,10 +8,10 @@
  */
 
 import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
-import {QueryConditionType} from '@gjcu/ui/form/SearchForm';
+import {QueryConditionType} from '../../../form/SearchForm';
 import {EntityForm} from '../../../config/EntityForm';
 import {ListableFormField} from '../../fields/abstract';
-import {getTranslation} from '@gjcu/ui/utils/i18n';
+import {getTranslation} from '../../../utils/i18n';
 
 interface MemoizedFilterFieldProps {
   entityForm: EntityForm;

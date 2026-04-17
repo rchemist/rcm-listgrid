@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx-js-style';
 import {DataField, DataRowSet, isDataRowSet} from '../Type';
@@ -28,7 +28,7 @@ export async function logExcelDownload(usePassword: boolean, condition?: Record<
     const url = typeof window !== 'undefined' ? window.location.pathname : '';
     const raw = typeof condition === 'string' ? condition : JSON.stringify(condition || {});
     const conditionStr = raw.substring(0, 2000);
-    const { callExternalHttpRequest } = await import('../../../utils/RequestUtil');
+    const { callExternalHttpRequest } = await import('../../utils/RequestUtil');
     await callExternalHttpRequest({
       url: '/excel-download-history/add',
       method: 'POST',

@@ -1,7 +1,7 @@
 import {IEntityError} from '../../api/types/EntityError';
-import { isTrue } from '@gjcu/ui/utils/BooleanUtil';
+import { isTrue } from '../utils/BooleanUtil';
 import { FieldError } from "./EntityFormTypes";
-import { parse } from '@gjcu/ui/utils/jsonUtils';
+import { parse } from '../utils/jsonUtils';
 import { EntityForm } from "./EntityForm";
 
 export function entityErrorToString(entityError: IEntityError): string {

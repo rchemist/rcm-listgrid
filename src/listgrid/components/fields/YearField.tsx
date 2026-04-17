@@ -8,7 +8,7 @@
 import {ListableFormField, ListableFormFieldProps, UserListFieldProps} from './abstract';
 import React from "react";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {MinMaxLimit, SelectOption} from "@gjcu/ui/form/Type";
+import {MinMaxLimit, SelectOption} from "../../form/Type";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {NumberInput} from "@gjcu/ui/form/NumberInput";
 import {SelectBox} from "@gjcu/ui/form/SelectBox";

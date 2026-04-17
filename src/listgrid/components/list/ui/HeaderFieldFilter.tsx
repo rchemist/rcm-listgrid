@@ -11,12 +11,12 @@ import {useEffect, useRef, useState} from "react";
 import {FilterButton} from "./FilterButton";
 import {FilterDropdown, FilterDropdownPlacement, FilterDropdownSize} from "./FilterDropdown";
 import {FilterView} from "./FilterView";
-import {QueryConditionType, SearchForm} from "@gjcu/ui/form/SearchForm";
+import {QueryConditionType, SearchForm} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
 import {AbstractManyToOneField, ListableFormField, OptionalField} from '../../fields/abstract';
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 import {useHeaderFilterStore} from "./headerFilterStore";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 
 interface HeaderFieldFilterProps {
   field: ListableFormField<any>;

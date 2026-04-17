@@ -1,7 +1,7 @@
 'use client';
-import {QueryConditionType} from "@gjcu/ui/form/SearchForm";
+import {QueryConditionType} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 import {useEffect, useState} from "react";
 import {ListableFormField} from "../../fields/abstract";
 

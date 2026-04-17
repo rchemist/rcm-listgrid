@@ -1,10 +1,10 @@
 import {Modal} from "@gjcu/ui/modals";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 import React from "react";
 import {ViewEntityForm} from "../../form/ViewEntityForm";
 import {EntityForm} from '../../../config/EntityForm';
 import {ViewListGridProps} from "../types/ViewListGrid.types";
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 
 export const SubCollectionViewModal = ({entityForm, managedId, props, setManagedId, fetchData, setOpenBaseLoading, mappedBy}: {entityForm: EntityForm, managedId: any, props: ViewListGridProps, setManagedId: React.Dispatch<any>, fetchData: (form?: SearchForm) => void, setOpenBaseLoading: (open: boolean) => void, mappedBy?: string}) => {
     

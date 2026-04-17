@@ -8,7 +8,7 @@
  */
 
 
-import {QueryConditionType, SearchForm} from "@gjcu/ui/form/SearchForm";
+import {QueryConditionType, SearchForm} from "../../form/SearchForm";
 import {
   AbstractManyToOneField,
   ListableFormField,
@@ -17,11 +17,11 @@ import {
 } from '../fields/abstract';
 import {EntityForm} from '../../config/EntityForm';
 import React, {Fragment, useEffect, useState} from "react";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../utils/i18n";
 import {Transition} from "@headlessui/react";
-import {generateUUID} from '../../../utils/simpleCrypt';
+import {generateUUID} from '../../utils/simpleCrypt';
 // import {ManyToOneField} from '../components/fields/ManyToOneField'; // Removed - using AbstractManyToOneField instead
-import {isBlank} from '../../../utils/StringUtil';
+import {isBlank} from '../../utils/StringUtil';
 // import {UserField} from "../fields/UserField"; // Removed to fix circular dependency
 import {FilterView} from "./ui/FilterView";
 

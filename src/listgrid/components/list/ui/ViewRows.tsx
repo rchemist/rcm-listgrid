@@ -13,7 +13,7 @@ import {InlineExpansionState, ViewRowItemProps} from "../types/RowItem.types";
 import {ViewColumn} from "./ViewColumn";
 import {usePathname, useRouter} from "next/navigation";
 import {showAlert} from "@gjcu/ui/message/messageUtils";
-import {isTrue} from "../../../../utils/BooleanUtil";
+import {isTrue} from "../../../utils/BooleanUtil";
 import {useModalManagerStore} from "../../../../store";
 import {ViewEntityForm} from "../../form/ViewEntityForm";
 import {useListGridTheme} from "../context/ListGridThemeContext";

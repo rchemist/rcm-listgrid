@@ -11,10 +11,10 @@ import Select, {SingleValue} from "react-select";
 import {AbstractManyToOneField} from "../abstract";
 import {CustomFieldRendererProps} from "../../form/types/ViewEntityFormTheme.types";
 import {ManyToOneConfig} from "../../../config/Config";
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 import {getManyToOneEntityValue} from "../ManyToOneField";
-import {PageResult} from "@gjcu/ui/form/Type";
-import {isTrue} from "../../../../utils/BooleanUtil";
+import {PageResult} from "../../../form/Type";
+import {isTrue} from "../../../utils/BooleanUtil";
 
 interface SelectOption {
   label: string;

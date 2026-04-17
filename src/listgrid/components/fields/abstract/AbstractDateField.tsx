@@ -7,7 +7,7 @@
 
 import {ListableFormField, ListableFormFieldProps} from "./ListableFormField";
 import {FieldType} from '../../../config/Config';
-import {MinMaxStringLimit} from "@gjcu/ui/form/Type";
+import {MinMaxStringLimit} from "../../../form/Type";
 
 export interface AbstractDateFieldProps extends ListableFormFieldProps {
   limit?: MinMaxStringLimit;

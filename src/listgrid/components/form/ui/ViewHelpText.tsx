@@ -5,8 +5,8 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {isBlank} from '../../../../utils/StringUtil';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {isBlank} from '../../../utils/StringUtil';
+import {getTranslation} from "../../../utils/i18n";
 import {useEntityFormTheme} from "../context/EntityFormThemeContext";
 
 interface ViewHelpTextProps {

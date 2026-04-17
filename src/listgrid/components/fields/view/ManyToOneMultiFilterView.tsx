@@ -13,7 +13,7 @@ import {IconPlus, IconX} from "@tabler/icons-react";
 import {ViewListGrid} from '../../list/ViewListGrid';
 import {ListGrid} from '../../../config/ListGrid';
 import {TreeSelectView} from './TreeSelectView';
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
 import {useModalManagerStore} from '../../../../store';
 

@@ -17,7 +17,7 @@ import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {LinkFieldView} from "./view/LinkFieldView";
 import {IconExternalLink} from "@tabler/icons-react";
-import {isBlank} from '../../../utils/StringUtil';
+import {isBlank} from '../../utils/StringUtil';
 import {normalizeUrl} from "@gjcu/ui";
 
 interface LinkFieldProps extends CheckButtonValidationFieldProps {

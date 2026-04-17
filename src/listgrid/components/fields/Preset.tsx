@@ -24,10 +24,10 @@ import {RegexValidation} from '../../validations/RegexValidation';
 import {RegexAlias, RegexUrlBody} from "@gjcu/ui";
 import {EntityForm} from '../../config/EntityForm';
 import {AddFieldItemProps} from '../../config/EntityFormTypes';
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {SelectOption} from "../../form/Type";
 import {SelectField} from './SelectField';
 import {ReactNode} from "react";
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 
 /*
 

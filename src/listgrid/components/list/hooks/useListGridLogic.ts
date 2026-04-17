@@ -10,23 +10,23 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useParams, usePathname, useRouter} from "next/navigation";
 import {getSessionStorageObject, isEmpty, isEqualCollection, setSessionStorageItem} from "@gjcu/ui";
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
 import {DataTransferConfig} from '../../../transfer/Type';
 import {
   ClientExtensionContext,
   ExtensionPoint
 } from '../../../extensions/EntityFormExtension.types';
-import {hash} from '../../../../utils/simpleCrypt';
+import {hash} from '../../../utils/simpleCrypt';
 import {useSession} from '../../../auth';
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 import {getListFieldsFromCache} from '../../../config/ListGridViewFieldCache';
 import {getGlobalPageSize} from "./useQuickSearchBar";
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 import {showConfirm} from "@gjcu/ui/message/messageUtils";
 import {useLoadingStore} from "@gjcu/ui/layout/BaseLoading";
 import {searchFormHashKey, ViewListGridProps} from "../types/ViewListGrid.types";
-import {parse, stringify} from '../../../../utils/jsonUtils';
+import {parse, stringify} from '../../../utils/jsonUtils';
 import {EntityFormActionResult} from '../../../config/Config';
 import {CustomOptionField, prefetchCustomOptions} from '../../fields/CustomOptionField';
 import {prefetchSelectFieldOptions, SelectField} from '../../fields/SelectField';

@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FilterItem, SearchForm} from '@gjcu/ui/form/SearchForm';
+import {FilterItem, SearchForm} from '../../../form/SearchForm';
 import {FiltersState, hasUrlParams, ListGridUrlState} from './urlStateParsers';
 
 /**
@@ -44,7 +44,6 @@ export function searchFormToUrlState(
   const sorts = searchForm.getSorts();
   if (sorts.size > 0) {
     // Get the first sort (primary sort)
-    // @ts-expect-error STAGE1-baseline: Map.entries() typed as unknown from any-stub cascade; revisit in Stage 6
     const [field, direction] = Array.from(sorts.entries())[0];
     // Only include if not the default createdAt:DESC
     if (field !== 'createdAt' || direction !== 'DESC') {

@@ -9,7 +9,7 @@ import {
 } from '../../../config/CardSubCollectionField';
 import {TableConfig} from '../../../config/TableSubCollectionField';
 import {Session} from '../../../auth/types';
-import {SearchForm} from '@gjcu/ui/form/SearchForm';
+import {SearchForm} from '../../../form/SearchForm';
 import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
 import {ListableFormField} from '../../fields/abstract';
 import {

@@ -12,11 +12,11 @@ import {
 import React from "react";
 import {FieldRenderParameters} from '../../config/EntityField';
 import {RenderType} from '../../config/Config';
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {getFormattedTime} from "@gjcu/ui";
 import {FlatPickrDateField} from "@gjcu/ui/form/FlatPickrDateField";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {MinMaxStringLimit} from "@gjcu/ui/form/Type";
+import {MinMaxStringLimit} from "../../form/Type";
 
 interface TimeFieldProps extends AbstractDateFieldProps {
   

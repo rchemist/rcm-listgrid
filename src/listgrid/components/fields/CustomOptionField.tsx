@@ -12,10 +12,10 @@ import {RadioInput} from "@gjcu/ui/form/RadioInput";
 import {getInputRendererParameters} from '../../components/helper/FieldRendererHelper';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {hexHash} from "next/dist/shared/lib/hash";
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {SelectOption} from "../../form/Type";
 import {getExternalApiDataWithError, isEmpty, isEquals} from "@gjcu/ui";
 import {CheckBox} from "@gjcu/ui/form/CheckBox";
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {MultiSelectBox} from "@gjcu/ui/form/MultiSelectBox";
 
 const customOptionFetchUrl = '/option/by-alias';

@@ -8,16 +8,16 @@
 import {FieldType,} from '../config/Config';
 import {fDate, fDateTime} from "@gjcu/ui";
 import {ReactNode} from "react";
-import {isTrue} from '@gjcu/ui/utils/BooleanUtil';
+import {isTrue} from '../utils/BooleanUtil';
 import {getPlainText} from "@gjcu/ui/form/Tiptap/TiptapEditor";
 import {
   defaultString,
   isBlank,
   subStringAfterLast,
   subStringBeforeLast
-} from '@gjcu/ui/utils/StringUtil';
-import {isEmpty} from "@gjcu/ui/utils";
-import {SelectOption} from "@gjcu/ui/form/Type";
+} from '../utils/StringUtil';
+import {isEmpty} from "../utils";
+import {SelectOption} from "../form/Type";
 
 export interface IDataTransferProperty {
   name: string;

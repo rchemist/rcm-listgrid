@@ -20,8 +20,8 @@ import {RenderType} from '../../config/Config';
 import {fDate, fToNow} from "@gjcu/ui";
 import {FlatPickrDateField} from "@gjcu/ui/form/FlatPickrDateField";
 import {IconCalendar} from "@tabler/icons-react";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {MinMaxStringLimit} from "@gjcu/ui/form/Type";
+import {isTrue} from '../../utils/BooleanUtil';
+import {MinMaxStringLimit} from "../../form/Type";
 import {TextInput} from "@gjcu/ui/form/TextInput";
 
 interface DateFieldProps extends AbstractDateFieldProps {

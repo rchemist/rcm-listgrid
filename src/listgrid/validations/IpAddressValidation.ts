@@ -8,7 +8,7 @@
 import {ValidateResult, ValidationItem} from './Validation';
 import {EntityForm} from '../config/EntityForm';
 import {FieldValue} from '../config/Config';
-import {TagValidationResult} from '@gjcu/ui/form/TagsInput/types';
+import {TagValidationResult} from '../form/TagsInput/types';
 
 // IP 주소 검증 정규식: XXX.XXX.XXX.XXX, XXX.XXX.XXX.*, XXX.XXX.*, XXX.*
 const ipSegment = "(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])";

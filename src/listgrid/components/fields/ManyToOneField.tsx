@@ -22,11 +22,11 @@ import {FieldRenderParameters, FilterRenderParameters} from '../../config/Entity
 import {ManyToOneView} from './view/ManyToOneView';
 import {ManyToOneMultiFilterView} from './view/ManyToOneMultiFilterView';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {isBlank} from '../../../utils/StringUtil';
+import {isBlank} from '../../utils/StringUtil';
 import {ManyToOneListView} from "./view/ManyToOneListView";
 import {CardManyToOneView} from './view/CardManyToOneView';
 import {SelectBoxManyToOneView} from './view/SelectBoxManyToOneView';
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 
 // import {EntityForm} from "../../config/EntityForm"; // Removed - not used
 

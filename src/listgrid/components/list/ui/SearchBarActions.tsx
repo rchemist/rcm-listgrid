@@ -3,9 +3,9 @@
 import {useEffect, useMemo} from "react";
 import {Indicator} from "@gjcu/ui/elements/indicator/Indicator";
 import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 import {SelectBox} from "@gjcu/ui/form/SelectBox";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../../utils/i18n";
 import {ListableFormField} from "../../fields/abstract";
 import {ViewFieldSelector} from "../ViewFieldSelector";
 import {ViewFieldManageable} from "../types/ViewListGrid.types";

@@ -8,11 +8,11 @@
  */
 
 import {DataField, DataRow, DataRowSet, getExportFileName, SampleDataItem} from '../transfer/Type';
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../form/SearchForm";
 import {useEffect, useState} from "react";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../utils/i18n";
 import DataExportService from '../transfer/DataExportService';
-import {isBlank} from '@gjcu/ui/utils/StringUtil';
+import {isBlank} from '../utils/StringUtil';
 import {LinearIndicator} from "@gjcu/ui/indicator/LinearIndicator";
 import {Button} from "@gjcu/ui/elements/buttons/Button";
 import ExcelDownload from '../transfer/Provider/ExcelProvider';

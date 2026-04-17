@@ -6,13 +6,13 @@
  */
 
 
-import {getAlignClassName} from "@gjcu/ui/common/func";
+import {getAlignClassName} from "../../../common/func";
 import React from "react";
 import {ListableFormField} from '../../fields/abstract';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {getTranslation} from "../../../utils/i18n";
+import {isTrue} from '../../../utils/BooleanUtil';
 import {SortField} from './SortField';
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 import {ViewFieldManageable} from "../types/ViewListGrid.types";
 import {EntityForm} from '../../../config/EntityForm';
 import {HeaderFieldFilter} from './HeaderFieldFilter';

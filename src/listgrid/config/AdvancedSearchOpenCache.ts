@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {parse, stringify} from '@gjcu/ui/utils/jsonUtils';
+import {parse, stringify} from '../utils/jsonUtils';
 
 class CacheContext {
   public static create(value: any): CacheContext {

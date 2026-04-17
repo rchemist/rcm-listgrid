@@ -6,7 +6,7 @@
  */
 import React, {ReactNode} from "react";
 import {Tooltip} from "@gjcu/ui/elements/tooltip/Tooltip";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../../utils/i18n";
 import {useEntityFormTheme} from "../context/EntityFormThemeContext";
 
 /**

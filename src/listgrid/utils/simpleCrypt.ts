@@ -1,0 +1,89 @@
+/*
+ * Copyright (c) "2024". rchemist.io by Rchemist
+ * Licensed under the Rchemist Common License, Version 1.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License under controlled by Rchemist
+ */
+
+import * as CryptoJS from 'crypto-js';
+
+import {isTrue} from "./BooleanUtil";
+import {stringify} from "./jsonUtils";
+
+const secretKey = process.env.NEXT_PUBLIC_SIMPLE_SECRET_KEY ?? 'rcm-token-secret'; // 사용할 비밀 키
+
+export function encrypt(input: string, compress?: boolean): string {
+  let value: string = CryptoJS.AES.encrypt(input, secretKey).toString();
+
+  if (isTrue(compress)) {
+  }
+
+  return value;
+}
+
+export function decrypt(ciphertext: string, decompress?: boolean): string {
+
+  let text = ciphertext;
+
+  if (isTrue(decompress)) {
+  }
+
+
+  const bytes = CryptoJS.AES.decrypt(text, secretKey);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}
+
+export function hash(...input: any[]): string {
+
+  let inputs = '';
+  for (let i = 0; i < input.length; i++) {
+    // TODO stringify
+    if (input[i] === undefined || input[i] === null)
+      input[i] = '_NULL_'
+    else if (typeof input[i] === 'object')
+      input[i] = stringify(input[i])
+    else
+      input[i] = String(input[i])
+
+    inputs += input[i].trim();
+  }
+
+  return CryptoJS.SHA256(inputs).toString();
+}
+
+
+export // Generate a UUID v4
+function generateUUID(): string {
+  const bytes = CryptoJS.lib.WordArray.random(16).words;
+
+  // Convert WordArray to byte array
+  const byteArray: number[] = [];
+  for (let i = 0; i < bytes.length; i++) {
+    const word = bytes[i];
+    byteArray.push((word >> 24) & 0xff);
+    byteArray.push((word >> 16) & 0xff);
+    byteArray.push((word >> 8) & 0xff);
+    byteArray.push(word & 0xff);
+  }
+
+  // Set the version to 4 (0100)
+  byteArray[6] = (byteArray[6] & 0x0f) | 0x40;
+  // Set the variant to 8, 9, A, or B (10xx)
+  byteArray[8] = (byteArray[8] & 0x3f) | 0x80;
+
+  const byteToHex: string[] = [];
+  for (let i = 0; i < 256; ++i) {
+    byteToHex[i] = (i + 0x100).toString(16).substring(1);
+  }
+
+  return (
+    byteToHex[byteArray[0]] + byteToHex[byteArray[1]] +
+    byteToHex[byteArray[2]] + byteToHex[byteArray[3]] + '-' +
+    byteToHex[byteArray[4]] + byteToHex[byteArray[5]] + '-' +
+    byteToHex[byteArray[6]] + byteToHex[byteArray[7]] + '-' +
+    byteToHex[byteArray[8]] + byteToHex[byteArray[9]] + '-' +
+    byteToHex[byteArray[10]] + byteToHex[byteArray[11]] +
+    byteToHex[byteArray[12]] + byteToHex[byteArray[13]] +
+    byteToHex[byteArray[14]] + byteToHex[byteArray[15]]
+  );
+}

@@ -15,7 +15,7 @@ import {
   ViewRenderProps,
   ViewRenderResult
 } from './abstract';
-import {MinMaxLimit} from "@gjcu/ui/form/Type";
+import {MinMaxLimit} from "../../form/Type";
 import {Currency, Double, NumberInput} from "@gjcu/ui/form/NumberInput";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';

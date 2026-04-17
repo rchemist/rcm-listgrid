@@ -15,7 +15,7 @@ import {getOverlayZIndex, POPOVER_Z_INDEX, useModalManagerStore} from '@gjcu/ui/
 import {showToast} from '@gjcu/ui/message/messageUtils';
 import {SmsModal} from './SmsModal';
 import {Session} from '../../../auth';
-import {formatPhoneNumber} from '@gjcu/ui/utils/PhoneUtil';
+import {formatPhoneNumber} from '../../../utils/PhoneUtil';
 
 interface PhoneNumberListViewProps {
   phoneNumber: string;

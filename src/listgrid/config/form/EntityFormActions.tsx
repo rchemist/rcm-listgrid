@@ -6,11 +6,11 @@ import { EntityField } from '../../config/EntityField';
 import { AddFieldItemProps, AlertMessage, DataTransferConfigProps } from '../../config/EntityFormTypes';
 import { EntityTab } from '../../config/EntityTab';
 import { SubCollectionField } from '../../config/SubCollectionField';
-import { isTrue } from "../../../utils/BooleanUtil";
+import { isTrue } from "../../utils/BooleanUtil";
 import { StringField } from '../../components/fields/StringField'; 
 import { EntityForm } from '../../config/EntityForm';
 import { DataTransferConfig, DataTransferRule, DataField } from '../../transfer/Type';
-import { isEmpty } from '../../../utils/CompareUtil';
+import { isEmpty } from '../../utils/CompareUtil';
 
 export abstract class EntityFormActions extends EntityFormData {
 

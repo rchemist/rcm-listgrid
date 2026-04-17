@@ -10,8 +10,8 @@
 import React, {useEffect, useState} from "react";
 import {FormField, FormFieldProps} from '../fields/abstract';
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
-import {PageResult} from "@gjcu/ui/form/Type";
+import {SearchForm} from "../../form/SearchForm";
+import {PageResult} from "../../form/Type";
 import {useModalManagerStore} from '../../../store';
 import {useSession} from '../../auth';
 import {ViewEntityForm} from '../form/ViewEntityForm';
@@ -19,7 +19,7 @@ import {IconHistory} from "@tabler/icons-react";
 import {fDateTime} from "@gjcu/ui";
 import {EntityForm} from "../../config/EntityForm";
 import {Pagination} from "@gjcu/ui/elements/pagination/Pagination";
-import {getTranslation} from "../../../utils/i18n";
+import {getTranslation} from "../../utils/i18n";
 
 const revisionApiUrl = "/revision";
 

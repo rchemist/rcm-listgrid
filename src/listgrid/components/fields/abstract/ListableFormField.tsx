@@ -14,9 +14,9 @@ import {
 } from '../../../config/EntityField';
 import {EntityForm} from '../../../config/EntityForm';
 import {LabelType, RenderType} from '../../../config/Config';
-import {TextAlignType} from "@gjcu/ui/common/type";
-import {isTrue} from '../../../../utils/BooleanUtil';
-import {QueryConditionType} from "@gjcu/ui/form/SearchForm";
+import {TextAlignType} from "../../../common/type";
+import {isTrue} from '../../../utils/BooleanUtil';
+import {QueryConditionType} from "../../../form/SearchForm";
 
 /**
  * 중첩 객체에서 dot notation 경로로 값을 가져온다.

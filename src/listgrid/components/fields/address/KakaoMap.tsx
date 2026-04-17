@@ -9,7 +9,7 @@
 
 import {Map, MapMarker, useKakaoLoader} from 'react-kakao-maps-sdk';
 import {useState} from "react";
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 
 interface KakaoMapProps {
   latitude?: number;

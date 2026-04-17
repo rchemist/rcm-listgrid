@@ -1,6 +1,6 @@
 import { EntityFormBase } from '../../config/form/EntityFormBase';
 import { FieldError } from '../../config/EntityFormTypes';
-import { isEmpty } from "../../../utils";
+import { isEmpty } from "../../utils";
 import { mergeFieldErrors } from '../../config/EntityFormMethod';
 import { ManageEntityForm } from '../../config/Config';
 

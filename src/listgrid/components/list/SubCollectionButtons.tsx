@@ -10,7 +10,7 @@
 
 import React, {useEffect, useState} from "react";
 import {EntityForm} from '../../config/EntityForm';
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {useServerSideCache} from './types/ListGridHeader.types';
 import {SubCollectionButtonsProps} from "./types/SubCollectionButtons.type";
 import {PriorityButtons} from "./ui/buttons/PriorityButton";

@@ -1,6 +1,6 @@
-import {ColorType} from "@gjcu/ui/common/type";
-import {FilterItem, SearchForm} from "@gjcu/ui/form/SearchForm";
-import {PageResult} from "@gjcu/ui/form/Type";
+import {ColorType} from "../../../common/type";
+import {FilterItem, SearchForm} from "../../../form/SearchForm";
+import {PageResult} from "../../../form/Type";
 import {EntityFormActionResult} from '../../../config/Config';
 import {EntityForm} from '../../../config/EntityForm';
 import {ListGrid, SubCollectionProps} from '../../../config/ListGrid';

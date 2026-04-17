@@ -14,7 +14,7 @@ import {PhoneNumberValidation} from '../../validations/PhoneNumberValidation';
 import {RegexValidation} from '../../validations/RegexValidation';
 import {FieldRenderParameters} from '../../config/EntityField';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {formatPhoneNumber, removePhoneNumberHyphens} from "@gjcu/ui/utils/PhoneUtil";
+import {formatPhoneNumber, removePhoneNumberHyphens} from "../../utils/PhoneUtil";
 import {RenderType} from '../../config/Config';
 import {PhoneNumberFieldView} from './view/PhoneNumberFieldView';
 import {PhoneNumberListView} from './view/PhoneNumberListView';

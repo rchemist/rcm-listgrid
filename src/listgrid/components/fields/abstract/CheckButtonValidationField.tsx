@@ -11,7 +11,7 @@ import {ValidateResult} from '../../../validations/Validation';
 import {EntityForm} from '../../../config/EntityForm';
 import {FieldInfoParameters, FieldRenderParameters} from '../../../config/EntityField';
 import {CheckButtonValidationInput} from "@gjcu/ui/form/CheckButtonValidationInput";
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../../utils";
 
 export interface CheckButtonValidationFieldProps extends ListableFormFieldProps {
   checkButtonValidation?: (entityForm: EntityForm, value: string) => Promise<ValidateResult>;

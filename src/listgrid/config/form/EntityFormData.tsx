@@ -1,4 +1,4 @@
-import { isBlank, isEmpty, isTrue } from "../../../utils";
+import { isBlank, isEmpty, isTrue } from "../../utils";
 import { EntityFormBase } from './EntityFormBase';
 import { EntityFormValidation } from './EntityFormValidation';
 import { CopyEntityFormExplicitFieldType, CopyEntityFormToInnerFieldsProps } from '../../config/EntityFormTypes';

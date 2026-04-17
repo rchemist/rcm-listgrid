@@ -1,11 +1,11 @@
 'use client';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../../utils/i18n";
 import {useCallback, useEffect, useState} from "react";
 import {QuickSearchBarProps} from "../QuickSearchBar";
 import {getLocalStorageItem, setLocalStorageItem} from "@gjcu/ui";
 import {QuickSearchProps} from '../../../config/ListGrid';
 import {ListableFormField} from "../../fields/abstract";
-import {QueryConditionType, SearchForm} from "@gjcu/ui/form/SearchForm";
+import {QueryConditionType, SearchForm} from "../../../form/SearchForm";
 
 // NOT 계열 조건인지 확인하는 유틸리티 함수
 const isNotCondition = (queryConditionType?: QueryConditionType): boolean => {

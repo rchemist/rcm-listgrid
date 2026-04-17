@@ -9,8 +9,8 @@
 
 import {IconAlertTriangle, IconSquareRoundedX} from "@tabler/icons-react";
 import React, {ReactNode, useEffect, useState} from "react";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {ColorType} from "@gjcu/ui/common/type";
+import {isTrue} from '../../utils/BooleanUtil';
+import {ColorType} from "../../common/type";
 
 interface ListGridNotificationsProps {
   messages?: string[] | Map<string, string>

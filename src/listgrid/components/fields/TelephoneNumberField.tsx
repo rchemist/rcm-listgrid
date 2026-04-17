@@ -19,7 +19,7 @@ import React, { useState, useEffect } from "react";
 import {Validation} from '../../validations/Validation';
 import {RegexValidation} from '../../validations/RegexValidation';
 import {readonlyClass} from "@gjcu/ui/form/Style";
-import {formatPhoneNumber, removePhoneNumberHyphens} from "@gjcu/ui/utils/PhoneUtil";
+import {formatPhoneNumber, removePhoneNumberHyphens} from "../../utils/PhoneUtil";
 import {RenderType} from '../../config/Config';
 
 interface TelephoneNumberFieldProps extends ListableFormFieldProps {

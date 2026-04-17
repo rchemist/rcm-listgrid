@@ -11,7 +11,7 @@ import {QuickSearchProps} from '../../config/ListGrid';
 import {ViewFieldManageable} from "./types/ViewListGrid.types";
 import {ListableFormField} from '../fields/abstract';
 import {Transition} from "@headlessui/react";
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../form/SearchForm";
 import {SearchBarActions} from "./ui/SearchBarActions";
 import {QuickSearchInput} from "./ui/QuickSearchInput";
 import {useQuickSearchBar} from "./hooks/useQuickSearchBar";

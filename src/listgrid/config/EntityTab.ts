@@ -6,7 +6,7 @@
  */
 
 import {FieldGroupInfo, TabInfo} from '../config/Config';
-import {isTrue} from '@gjcu/ui/utils/BooleanUtil';
+import {isTrue} from '../utils/BooleanUtil';
 import {EntityFieldGroup} from '../config/EntityFieldGroup';
 import {EntityItem} from '../config/EntityItem';
 

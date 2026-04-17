@@ -17,10 +17,10 @@ import {
   ImportTransferConfig
 } from '../transfer/Type';
 import {ReactNode, useState} from "react";
-import {getTranslation} from "@gjcu/ui/utils/i18n";
-import {isTrue} from '@gjcu/ui/utils/BooleanUtil';
-import {isBlank, subStringBetween} from '@gjcu/ui/utils/StringUtil';
-import {isEmpty} from "@gjcu/ui/utils";
+import {getTranslation} from "../utils/i18n";
+import {isTrue} from '../utils/BooleanUtil';
+import {isBlank, subStringBetween} from '../utils/StringUtil';
+import {isEmpty} from "../utils";
 import * as XLSX from 'xlsx-js-style';
 import {getAccessableAssetUrl, getExternalApiDataWithError} from "@gjcu/ui";
 import DataImportSample from '../transfer/DataImportSample';

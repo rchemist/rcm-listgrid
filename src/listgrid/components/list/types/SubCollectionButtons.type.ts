@@ -1,4 +1,4 @@
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
 import {CreateUpdateOptions} from "./ViewListGrid.types";
 

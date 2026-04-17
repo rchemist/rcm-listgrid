@@ -15,7 +15,7 @@ import {
 import {ReactNode} from "react";
 import {EntityForm} from '../config/EntityForm';
 import {ValidateResult, Validation} from '../validations/Validation';
-import {QueryConditionType} from "@gjcu/ui/form/SearchForm";
+import {QueryConditionType} from "../form/SearchForm";
 import {EntityItem} from '../config/EntityItem';
 import {Session} from '../auth/types';
 

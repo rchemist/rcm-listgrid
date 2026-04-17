@@ -1,5 +1,5 @@
 // api spec 을 보여 주는 두 가지 방법
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {SelectOption} from "../../form/Type";
 
 export interface ApiSpecification {
   url: string;

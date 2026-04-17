@@ -12,7 +12,7 @@ import {Box} from "@gjcu/ui/elements/layout/Box";
 import {Flex} from "@gjcu/ui/elements/layout/Flex";
 import {Paper} from "@gjcu/ui/elements/Paper";
 import {DataField, DataTransferResult} from '../transfer/Type';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../utils/i18n";
 import {isEmpty, isPositive} from "@gjcu/ui";
 
 export interface DataImportResultViewProps {

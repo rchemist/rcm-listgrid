@@ -9,7 +9,7 @@ import { Session } from '../../../auth/types';
 import { IconChevronUp, IconInfoCircle, IconHelp } from '@tabler/icons-react';
 import { Tooltip } from '@gjcu/ui/elements/tooltip/Tooltip';
 import { Icon } from '@iconify/react';
-import { isBlank } from '../../../../utils/StringUtil';
+import { isBlank } from '../../../utils/StringUtil';
 
 /**
  * CardFieldRow - Horizontal label/value layout for card display

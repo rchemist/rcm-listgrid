@@ -3,8 +3,8 @@ import {ReactNode, useEffect, useState} from "react";
 import {FieldRenderParameters} from "../../config/EntityField";
 import {ListableFormField, ViewListProps, ViewListResult} from "./abstract";
 import {InputRendererProps} from "../../config/Config";
-import {AdditionalColorType, AllColorTypes, ColorType} from "@gjcu/ui/common/type";
-import {getAdditionalColorClass, getOppositeTextColorClass} from "@gjcu/ui/common/func";
+import {AdditionalColorType, AllColorTypes, ColorType} from "../../common/type";
+import {getAdditionalColorClass, getOppositeTextColorClass} from "../../common/func";
 import {Popover} from "@gjcu/ui/elements/popover/Popover";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 

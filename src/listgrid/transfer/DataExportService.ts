@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../form/SearchForm";
 import {
   createFieldMap,
   DataExportCount,
@@ -14,9 +14,9 @@ import {
   DataRowSet,
   SampleDataItem
 } from '../transfer/Type';
-import {PageResult} from "@gjcu/ui/form/Type";
+import {PageResult} from "../form/Type";
 import {getPlainText} from "@gjcu/ui/form/Tiptap/TiptapEditor";
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../utils";
 
 /**
  * 중첩 객체에서 dot notation 경로로 값을 가져온다.

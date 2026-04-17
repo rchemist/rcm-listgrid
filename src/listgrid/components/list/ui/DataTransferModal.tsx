@@ -1,8 +1,8 @@
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../../../form/SearchForm";
 import {DataExporter} from '../../../transfer/DataExporter';
 import {DataImporter} from '../../../transfer/DataImporter';
 import {DataTransferConfig} from '../../../transfer/Type';
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 
 export const DataTransferModals: React.FC<{
     openDownload: boolean;

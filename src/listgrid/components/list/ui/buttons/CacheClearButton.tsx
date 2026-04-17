@@ -1,6 +1,6 @@
 import {EntityForm} from '../../../../config/EntityForm';
 import {showConfirm} from "@gjcu/ui/message/messageUtils";
-import {isTrue} from '../../../../../utils/BooleanUtil';
+import {isTrue} from '../../../../utils/BooleanUtil';
 import {getExternalApiData} from "@gjcu/ui";
 
 interface CacheClearButtonProps {

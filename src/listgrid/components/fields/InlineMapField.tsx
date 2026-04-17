@@ -11,7 +11,7 @@ import {InlineMapConfig, MapKey} from '../../config/Config';
 import {FieldRenderParameters} from '../../config/EntityField';
 import {InlineMap, InlineMapPendingRef, KeyValue} from "@gjcu/ui/form/InlineMap";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {MinMaxLimit} from "@gjcu/ui/form/Type";
+import {MinMaxLimit} from "../../form/Type";
 import {EntityForm} from '../../config/EntityForm';
 import {RenderType} from '../../config/Config';
 

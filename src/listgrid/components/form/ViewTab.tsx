@@ -12,7 +12,7 @@ import {Tab} from "@headlessui/react";
 import {TabIndexable} from './types/ViewEntityForm.types';
 import {EntityForm} from '../../config/EntityForm';
 import {Tooltip} from "../../../elements/tooltip/Tooltip";
-import {getTranslation} from "../../../utils/i18n";
+import {getTranslation} from "../../utils/i18n";
 import {useEntityFormTheme} from "./context/EntityFormThemeContext";
 
 /**

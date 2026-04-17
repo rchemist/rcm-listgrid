@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {SelectOption} from "@gjcu/ui/form/Type";
+import {SelectOption} from "../form/Type";
 
 export const AdjustmentTypes : SelectOption[] = [
   {label: '고정 가격', value: 'FIXED_PRICE'},

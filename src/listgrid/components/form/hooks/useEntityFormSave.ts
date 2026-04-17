@@ -5,7 +5,7 @@ import {
   ClientExtensionContext,
   ExtensionPoint
 } from '../../../extensions/EntityFormExtension.types';
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../../utils";
 import {EntityButtonLinkProps, RenderType} from '../../../config/Config';
 import {openToast} from "@gjcu/ui/message/ToastMessage";
 import {Session} from '../../../auth/types';

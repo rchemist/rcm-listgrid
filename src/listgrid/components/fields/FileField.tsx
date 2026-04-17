@@ -12,11 +12,11 @@ import {FieldRenderParameters, FilterRenderParameters} from '../../config/Entity
 import {FileFieldValue} from "@gjcu/ui/form/FileUploadInput";
 import {LazyFileUploadInput as FileUploadInput} from "@gjcu/ui/form/DynamicFileUpload";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../utils";
 import {getAccessableAssetUrl} from "@gjcu/ui";
 import {IconDeviceFloppy} from "@tabler/icons-react";
 import {TextInput} from "@gjcu/ui/form/TextInput";
-import {isBlank as isBlankString} from '../../../utils/StringUtil';
+import {isBlank as isBlankString} from '../../utils/StringUtil';
 
 interface FileFieldProps extends ListableFormFieldProps {
   config?: IAssetConfig;

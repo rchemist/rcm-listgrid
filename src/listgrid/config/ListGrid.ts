@@ -6,11 +6,11 @@
  */
 
 import {EntityForm} from '../config/EntityForm';
-import {SearchForm} from "@gjcu/ui/form/SearchForm";
+import {SearchForm} from "../form/SearchForm";
 import {AbstractManyToOneField, ListableFormField} from '../components/fields/abstract';
 import {LabelType} from '../config/Config';
-import {isTrue} from '@gjcu/ui/utils/BooleanUtil';
-import {PageResult} from "@gjcu/ui/form/Type";
+import {isTrue} from '../utils/BooleanUtil';
+import {PageResult} from "../form/Type";
 import {ReactNode} from "react";
 import {SubCollectionBaseButtonProps} from '../components/list/types/SubCollectionButtons.type';
 

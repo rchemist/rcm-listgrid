@@ -12,7 +12,7 @@ import {
   ListGridThemeVariant,
   ListGridThemeContextValue,
 } from "../types/ViewListGridTheme.types";
-import { cn as cnUtil } from "../../../../utils/cn";
+import { cn as cnUtil } from "../../../utils/cn";
 import { defaultListGridTheme } from "../themes/defaultListGridTheme";
 import { mainListGridTheme } from "../themes/variants/mainTheme";
 import { subCollectionListGridTheme } from "../themes/variants/subCollectionTheme";

@@ -11,10 +11,10 @@ import {SubCollectionField} from '../../config/SubCollectionField';
 import React, {ReactNode, useEffect, useState} from "react";
 import {EntityForm} from '../../config/EntityForm';
 import {LabelType} from '../../config/Config';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {getTranslation} from "../../utils/i18n";
 import {LoadingOverlay} from '@gjcu/ui/elements/indicator/LoadingOverlay';
 import {ViewHelpText} from './ui/ViewHelpText';
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {Session} from '../../auth/types';
 
 /**

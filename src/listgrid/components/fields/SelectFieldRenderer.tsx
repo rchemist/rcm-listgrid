@@ -9,7 +9,7 @@
 
 import React, {useCallback, useMemo, useState} from 'react';
 import {RadioChip} from '@gjcu/ui/form/RadioChip';
-import {SelectOption} from '@gjcu/ui/form/Type';
+import {SelectOption} from '../../form/Type';
 import {FieldValue} from '../../config/Config';
 import {EntityForm} from '../../config/EntityForm';
 import {useModalManagerStore} from '../../../store';
@@ -18,7 +18,7 @@ import {showAlert, showConfirm, showSuccess} from '@gjcu/ui/message/messageUtils
 import {ValidateResult} from '../../validations/Validation';
 import {useLoadingStore} from '@gjcu/ui/layout/BaseLoading';
 import {useRouter} from 'next/navigation';
-import {getExternalApiDataWithError, parse} from '../../../utils';
+import {getExternalApiDataWithError, parse} from '../../utils';
 import type {ImmediateChangeProps} from './SelectField';
 
 interface StatusReason {

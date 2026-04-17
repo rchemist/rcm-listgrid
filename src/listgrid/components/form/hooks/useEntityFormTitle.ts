@@ -1,6 +1,6 @@
 import {EntityForm} from '../../../config/EntityForm';
-import {defaultString, isBlank} from '../../../../utils/StringUtil';
-import {getTranslation} from "@gjcu/ui/utils/i18n";
+import {defaultString, isBlank} from '../../../utils/StringUtil';
+import {getTranslation} from "../../../utils/i18n";
 import {ReactNode} from "react";
 
 /**

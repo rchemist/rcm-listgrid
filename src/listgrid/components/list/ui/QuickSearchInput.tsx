@@ -1,4 +1,4 @@
-import {isBlank} from '../../../../utils/StringUtil';
+import {isBlank} from '../../../utils/StringUtil';
 import {IconCircleX, IconSearch} from "@tabler/icons-react";
 
 export interface QuickSearchInputProps {

@@ -13,7 +13,7 @@ import {
   ViewListResult,
 } from './abstract';
 import React from "react";
-import {MinMaxLimit, SelectOption} from "@gjcu/ui/form/Type";
+import {MinMaxLimit, SelectOption} from "../../form/Type";
 import {FieldRenderParameters} from '../../config/EntityField';
 import {CheckBoxChip} from "@gjcu/ui/form/CheckBoxChip";
 import {RadioInput} from "@gjcu/ui/form/RadioInput";

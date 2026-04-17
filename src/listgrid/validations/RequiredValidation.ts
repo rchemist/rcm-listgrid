@@ -8,7 +8,7 @@
 import {ValidateResult, ValidationItem} from '../validations/Validation';
 import {EntityForm} from '../config/EntityForm';
 import {FieldValue} from '../config/Config';
-import {isBlank} from '@gjcu/ui/utils/StringUtil';
+import {isBlank} from '../utils/StringUtil';
 
 export class RequiredValidation extends ValidationItem {
   constructor(id: string, message?: string) {

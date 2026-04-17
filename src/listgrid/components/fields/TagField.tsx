@@ -13,11 +13,11 @@ import {
   ViewListResult,
 } from './abstract';
 import React from "react";
-import {MinMaxLimit, SelectOption} from "@gjcu/ui/form/Type";
+import {MinMaxLimit, SelectOption} from "../../form/Type";
 import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
 import {TagsInput} from "@gjcu/ui/form/TagsInput/index";
-import {TagValidationResult} from "@gjcu/ui/form/TagsInput/types";
-import {isEmpty} from "@gjcu/ui/utils";
+import {TagValidationResult} from "../../form/TagsInput/types";
+import {isEmpty} from "../../utils";
 import classes from "./TagField.module.css";
 
 interface TagFieldProps extends MultipleOptionalFieldProps {

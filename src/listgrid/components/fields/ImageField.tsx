@@ -12,7 +12,7 @@ import {FieldRenderParameters, FilterRenderParameters} from '../../config/Entity
 import {FileFieldValue} from "@gjcu/ui/form/FileUploadInput";
 import {LazyFileUploadInput as FileUploadInput} from "@gjcu/ui/form/DynamicFileUpload";
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../../utils";
 import {getAccessableAssetUrl} from "@gjcu/ui";
 import {TextInput} from "@gjcu/ui/form/TextInput";
 

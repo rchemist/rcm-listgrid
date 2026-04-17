@@ -6,9 +6,9 @@
  */
 
 import { showConfirm } from "@gjcu/ui/message/messageUtils";
-import { isTrue } from '../../../../../utils/BooleanUtil';
+import { isTrue } from '../../../../utils/BooleanUtil';
 import { ButtonProps } from "../../types/ViewEntityFormButtons.types";
-import { cn } from "../../../../../utils/cn";
+import { cn } from "../../../../utils/cn";
 
 /**
  * 새창(팝업) 모드 전용 닫기 버튼

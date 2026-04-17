@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { SearchForm } from '@gjcu/ui/form/SearchForm';
-import { PageResult } from '@gjcu/ui/form/Type';
+import { SearchForm } from '../../../form/SearchForm';
+import { PageResult } from '../../../form/Type';
 
 /**
  * Configuration for card subcollection data fetching

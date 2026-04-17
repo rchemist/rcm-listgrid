@@ -17,12 +17,12 @@ import {useCallback} from "react";
 import {useRouter} from "next/navigation";
 import {EntityForm} from '../../../config/EntityForm';
 import {EntityTab} from '../../../config/EntityTab';
-import {isEmpty} from "@gjcu/ui/utils";
-import {removeTrailingSeparator} from '../../../../utils/StringUtil';
+import {isEmpty} from "../../../utils";
+import {removeTrailingSeparator} from '../../../utils/StringUtil';
 import {showAlert} from "@gjcu/ui/message/messageUtils";
 import {Session} from '../../../auth/types';
 import {EntityButtonLinkProps} from '../../../config/Config';
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 
 /**
  * Custom hook for initializing EntityForm state and tabs.

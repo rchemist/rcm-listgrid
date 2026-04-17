@@ -10,8 +10,8 @@ import {RegexPhoneNumber} from "@gjcu/ui";
 import {ValidateResult} from '../validations/Validation';
 import {EntityForm} from '../config/EntityForm';
 import {FieldValue} from '../config/Config';
-import {removePhoneNumberHyphens} from "@gjcu/ui/utils/PhoneUtil";
-import {isBlank} from '@gjcu/ui/utils/StringUtil';
+import {removePhoneNumberHyphens} from "../utils/PhoneUtil";
+import {isBlank} from '../utils/StringUtil';
 
 export class PhoneNumberValidation extends RegexValidation {
   constructor(id?: string, regex?: RegExp, message?: string) {

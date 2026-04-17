@@ -10,10 +10,10 @@ import {AbstractAddFieldProps} from '../../config/EntityFormTypes';
 import {AddressMapField, appendLastDot} from './address/AddressMapField';
 import {NumberField} from './NumberField';
 import {FormField, IListConfig} from './abstract';
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {StringField} from './StringField';
 import {RequiredValidation} from '../../validations/RequiredValidation';
-import {isBlank} from '../../../utils/StringUtil';
+import {isBlank} from '../../utils/StringUtil';
 
 type AddressFieldType = 'state' | 'city' | 'address1' | 'address2' | 'postalCode' | 'longitude' | 'latitude'
 const AddressFieldTypes: AddressFieldType[] = ['state', 'city', 'address1', 'address2', 'postalCode', 'longitude', 'latitude'];

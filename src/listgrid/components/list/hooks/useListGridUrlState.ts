@@ -9,7 +9,7 @@
 
 import {useCallback, useRef} from 'react';
 import {parseAsString, useQueryStates} from 'nuqs';
-import {SearchForm} from '@gjcu/ui/form/SearchForm';
+import {SearchForm} from '../../../form/SearchForm';
 import {
   hasUrlParams,
   ListGridUrlState,

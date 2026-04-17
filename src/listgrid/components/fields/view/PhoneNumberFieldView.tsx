@@ -13,7 +13,7 @@ import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
 import {useModalManagerStore} from '@gjcu/ui/store';
 import {showToast} from '@gjcu/ui/message/messageUtils';
 import {readonlyClass} from '@gjcu/ui/form/Style';
-import {formatPhoneNumber, removePhoneNumberHyphens} from '@gjcu/ui/utils/PhoneUtil';
+import {formatPhoneNumber, removePhoneNumberHyphens} from '../../../utils/PhoneUtil';
 import {SmsModal} from './SmsModal';
 import {Session} from '../../../auth';
 import {RenderType} from '../../../config/Config';

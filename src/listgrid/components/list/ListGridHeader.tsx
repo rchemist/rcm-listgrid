@@ -8,7 +8,7 @@
  */
 "use client";
 import React, {useState} from "react";
-import {isTrue} from '../../../utils/BooleanUtil';
+import {isTrue} from '../../utils/BooleanUtil';
 import {useListGridHeader} from "./hooks/useListGridHeader";
 import {ListGridHeaderProps} from "./types/ListGridHeader.types";
 import {HeaderTitle} from "./ui/HeaderTitle";

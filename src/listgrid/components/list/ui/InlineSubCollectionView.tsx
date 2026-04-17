@@ -10,7 +10,7 @@
 import React, {ReactNode, useCallback, useMemo, useState} from 'react';
 import {EntityForm} from '../../../config/EntityForm';
 import {Session} from '../../../auth/types';
-import {FilterItem, SearchForm} from '@gjcu/ui/form/SearchForm';
+import {FilterItem, SearchForm} from '../../../form/SearchForm';
 import {ListGrid} from '../../../config/ListGrid';
 import {ViewListGrid} from '../ViewListGrid';
 import {ViewListGridOptionProps} from '../types/ViewListGrid.types';

@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {SpanValue} from "@gjcu/ui/common/type";
+import {SpanValue} from "../common/type";
 import {FieldGroupInfo, FieldGroupConfig} from '../config/Config';
 
 export class EntityFieldGroup {

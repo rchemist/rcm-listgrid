@@ -3,7 +3,7 @@
 import React, {useState} from 'react';
 import {Tooltip} from '@gjcu/ui/elements/tooltip/Tooltip';
 import {ShowError} from '@gjcu/ui/message/ShowMessage';
-import {getTranslation} from '@gjcu/ui/utils/i18n';
+import {getTranslation} from '../utils/i18n';
 
 interface ExcelPasswordFieldProps {
   password: string;

@@ -22,11 +22,11 @@ import {
   ViewPreset
 } from '../config/Config';
 import {ListGrid} from '../config/ListGrid';
-import {isEmpty} from "@gjcu/ui/utils";
+import {isEmpty} from "../utils";
 import {AbstractManyToOneField, ListableFormField} from '../components/fields/abstract';
 import {ReactNode} from "react";
 import {ViewListGridOptionProps} from '../components/list/types/ViewListGrid.types';
-import {FilterItem} from "@gjcu/ui/form/SearchForm";
+import {FilterItem} from "../form/SearchForm";
 import {FieldInfoParameters} from "./EntityField";
 import {Session} from '../auth/types';
 import {ViewListGrid} from "../components/list/ViewListGrid";

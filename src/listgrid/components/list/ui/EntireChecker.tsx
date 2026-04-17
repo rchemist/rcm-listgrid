@@ -6,7 +6,7 @@
  */
 
 import {ItemCheckable} from "../types/ViewListGrid.types";
-import {isTrue} from '../../../../utils/BooleanUtil';
+import {isTrue} from '../../../utils/BooleanUtil';
 import {v1} from "uuid";
 
 interface EntireCheckerProps extends ItemCheckable {
