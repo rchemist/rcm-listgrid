@@ -127,49 +127,48 @@ export const PhoneNumberFieldView = ({
   const showButtons = canCopy || canSendSms;
 
   return (
-    <div className="flex w-full">
-      <div className="flex w-full items-center">
-        <div className="group relative flex w-full">
-          <div className="dropdown flex w-full">
-            <input
-              type="text"
-              className={readonlyClass(readonly, `form-input ${showButtons ? 'rounded-r-none border-r-0' : ''}`)}
-              id={name}
-              value={displayValue}
-              placeholder={placeHolder}
-              disabled={readonly}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-          </div>
-        </div>
-        {showButtons && (
-          <div className="flex h-full items-center border border-white-light bg-[#fafafa] font-semibold text-secondary dark:border-[#17263c] dark:bg-[#1b2e4b] rounded-r-md border-l-0">
-            {canCopy && (
-              <Tooltip label="전화번호 복사">
-                <button
-                  type="button"
-                  className="flex h-[30px] w-[36px] items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={handleCopy}
-                >
-                  <IconCopy className="h-4 w-4" />
-                </button>
-              </Tooltip>
-            )}
-            {canSendSms && (
-              <Tooltip label="SMS 보내기">
-                <button
-                  type="button"
-                  className="flex h-[30px] w-[36px] items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={handleSms}
-                >
-                  <IconMessage className="h-4 w-4" />
-                </button>
-              </Tooltip>
-            )}
-          </div>
-        )}
+    <div className="rcm-input-group">
+      <div className="rcm-input-group-input">
+        <input
+          type="text"
+          className={readonlyClass(
+            readonly,
+            `rcm-field-input ${showButtons ? 'rcm-input-group-input-with-addon' : ''}`,
+          )}
+          id={name}
+          value={displayValue}
+          placeholder={placeHolder}
+          disabled={readonly}
+          onChange={handleChange}
+          onBlur={handleBlur}
+        />
       </div>
+      {showButtons && (
+        <div className="rcm-input-addon">
+          {canCopy && (
+            <Tooltip label="전화번호 복사">
+              <button
+                type="button"
+                className="rcm-input-addon-button"
+                onClick={handleCopy}
+              >
+                <IconCopy className="rcm-icon-sm" />
+              </button>
+            </Tooltip>
+          )}
+          {canSendSms && (
+            <Tooltip label="SMS 보내기">
+              <button
+                type="button"
+                className="rcm-input-addon-button"
+                onClick={handleSms}
+              >
+                <IconMessage className="rcm-icon-sm" />
+              </button>
+            </Tooltip>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -658,6 +658,60 @@
     }
 
     /* ------------------------------------------------------------------ *
+     * PhoneNumberField — input + copy/sms button group (addon suffix)
+     * ------------------------------------------------------------------ */
+    .rcm-input-group {
+        display: flex;
+        width: 100%;
+        align-items: center;
+    }
+
+    .rcm-input-group-input {
+        flex: 1;
+    }
+
+    .rcm-input-group-input-with-addon {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: 0;
+    }
+
+    .rcm-input-addon {
+        display: flex;
+        align-items: center;
+        height: var(--rcm-size-input-height);
+        background: var(--rcm-color-surface-muted);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-left: 0;
+        border-top-right-radius: var(--rcm-radius-md);
+        border-bottom-right-radius: var(--rcm-radius-md);
+    }
+
+    .rcm-input-addon-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 2.25rem;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        color: var(--rcm-color-text-muted);
+        cursor: pointer;
+        transition: background var(--rcm-transition-fast);
+    }
+
+    .rcm-input-addon-button:hover {
+        background: var(--rcm-color-surface-hover);
+        color: var(--rcm-color-text);
+    }
+
+    .rcm-icon-sm {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* ------------------------------------------------------------------ *
      * ViewEntityForm panel / layout
      *
      * Matches the original three-div structure:
@@ -695,15 +749,77 @@
     .rcm-form-panel-inner {
         width: 100%;
         max-width: 100%;
-        padding-left: var(--rcm-space-xs);
-        padding-right: var(--rcm-space-xs);
+        padding-left: var(--rcm-space-md);
+        padding-right: var(--rcm-space-md);
     }
 
     @media (min-width: 768px) {
         .rcm-form-panel-inner {
-            padding-left: var(--rcm-space-md);
-            padding-right: var(--rcm-space-md);
+            padding-left: var(--rcm-space-xl);
+            padding-right: var(--rcm-space-xl);
         }
+    }
+
+    /* Save/List/Delete button row at the top of ViewEntityForm.
+     * Replaces Tailwind's `md:flex md:justify-end md:w-full` which do not
+     * generate when library JSX is outside the host's tailwind content scan. */
+    .rcm-form-buttons-scroll {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    @media (min-width: 768px) {
+        .rcm-form-buttons-scroll {
+            overflow-x: visible;
+        }
+    }
+
+    .rcm-form-buttons-row {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--rcm-space-sm);
+        white-space: nowrap;
+    }
+
+    @media (min-width: 768px) {
+        .rcm-form-buttons-row {
+            display: flex;
+            flex-wrap: wrap;
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    /* ------------------------------------------------------------------ *
+     * FieldGroup container (replaces gjcu's .panel compound + responsive
+     * Tailwind utilities which don't generate for library JSX outside the
+     * host's content scan). Compact subCollection variant separate.
+     * ------------------------------------------------------------------ */
+    .rcm-fieldgroup {
+        position: relative;
+        margin-bottom: var(--rcm-space-md);
+        padding: var(--rcm-space-xs);
+        background: transparent;
+    }
+
+    @media (min-width: 768px) {
+        .rcm-fieldgroup {
+            margin-bottom: var(--rcm-space-lg);
+            padding: var(--rcm-space-lg);
+            background: var(--rcm-color-surface);
+            border: var(--rcm-border-width) solid var(--rcm-color-border);
+            border-radius: var(--rcm-radius-lg);
+            box-shadow: var(--rcm-shadow-md);
+        }
+    }
+
+    .rcm-fieldgroup-subcollection {
+        position: relative;
+        margin-bottom: var(--rcm-space-sm);
+        padding: var(--rcm-space-md);
+        background: var(--rcm-color-surface-muted);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-radius: var(--rcm-radius-md);
     }
 
     /* ------------------------------------------------------------------ *

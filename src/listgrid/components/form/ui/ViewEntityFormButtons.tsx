@@ -37,14 +37,14 @@ export const ViewEntityFormButtons = React.memo(function ViewEntityFormButtons({
 
   return (
     <div
-      className={`w-full overflow-x-auto md:overflow-visible ${classNames.buttons?.container ?? ''}`}
+      className={`rcm-form-buttons-scroll ${classNames.buttons?.container ?? ''}`}
       style={{
         WebkitOverflowScrolling: 'touch',
         direction: 'rtl'
       }}
     >
       <div
-        className={`inline-flex items-center gap-2 whitespace-nowrap md:flex md:flex-wrap md:w-full md:justify-end ${classNames.buttons?.innerWrapper ?? ''}`}
+        className={`rcm-form-buttons-row ${classNames.buttons?.innerWrapper ?? ''}`}
         style={{ direction: 'ltr' }}
       >
         {buttons}

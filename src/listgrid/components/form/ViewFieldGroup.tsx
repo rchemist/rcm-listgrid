@@ -200,8 +200,8 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
   // SubCollection 인라인 모드: 컴팩트한 패널 박스 스타일
   // SubCollection inline mode: compact panel box style
   const containerClass = subCollectionEntity
-    ? 'relative mb-2 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/50 dark:bg-gray-800/50'
-    : cn('panel mb-3 md:mb-4 border-0 md:border shadow-none md:shadow-md bg-transparent md:bg-white dark:md:bg-dark px-1 md:px-4', classNames.fieldGroup?.container);
+    ? 'rcm-fieldgroup-subcollection'
+    : cn('rcm-fieldgroup', classNames.fieldGroup?.container);
 
   return <>
     <div className={containerClass}>
