@@ -1,0 +1,22 @@
+{
+    "name": "@rcm/listgrid",
+    "version": "0.0.0",
+    "private": true,
+    "description": "Generic ListGrid engine — reusable CRUD UI engine for the RCM-framework backend",
+    "license": "UNLICENSED",
+    "main": "./src/index.ts",
+    "types": "./src/index.ts",
+    "scripts": {
+        "type-check": "tsc --noEmit",
+        "build": "tsc"
+    },
+    "peerDependencies": {
+        "react": ">=18",
+        "react-dom": ">=18"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "typescript": "^5.5.0"
+    }
+}
