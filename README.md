@@ -59,15 +59,34 @@ RCM-framework 백엔드를 기반으로 CRUD UI를 빠르게 구성하기 위한
 - [x] 보조 Provider: `MessageProvider`, `LoadingStore`, `ModalManagerStore`, `AuthProvider`(#16), SessionProvider·FieldExtensions registry
 - [ ] 최소 1개 어댑터 레퍼런스 구현 — **Stage 6/별도 후속**으로 미룸(계약과 레퍼런스 구현 분리)
 
-### Stage 4 — 외부 라이브러리 정리
+### Stage 4 — 외부 라이브러리 정리 ✅
 
-flatpickr / tiptap / kakao-map / xlsx-js-style 등 무거운 의존성을 검토해
-`dependencies` / `peerDependencies` / optional로 재분류.
+원본 `packages/ui` `dependencies` 60개 중 실제 사용되는 것만 남기고, 사용처 폭에 따라
+core / required peer / optional peer로 재분류.
 
 **Done when:**
-- [ ] 모든 외부 의존성이 core / peer / optional 중 하나로 명시적으로 분류됨
-- [ ] optional 의존성은 README에 사용법과 함께 명시
-- [ ] core 번들 크기가 측정·기록됨
+- [x] 모든 외부 의존성이 core / peer / optional 중 하나로 명시적으로 분류됨
+- [x] optional 의존성은 README에 사용법과 함께 명시 (아래)
+- [x] core 번들 크기가 측정·기록됨 (src 2.3M, `node_modules` 180 패키지로 축소; 원본 기준 321 패키지에서 141개 제거)
+
+**분류:**
+
+| 범주 | 항목 | 목적 |
+|------|------|------|
+| **dependencies** (core, 5) | `clsx`, `tailwind-merge`, `uuid`, `zustand`, `crypto-js` | 라이브러리 자체 구현에 직접 사용되는 유틸/상태 |
+| **peerDependencies (required, 6)** | `react`, `react-dom`, `next`, `nuqs`, `@tabler/icons-react`, `@headlessui/react` | 호스트 앱이 반드시 제공. React/Next 런타임 + 아이콘/헤드리스 UI 토대 |
+| **peerDependencies (optional, 10)** | `@iconify/react`, `react-select`, `react-sortablejs`, `qrcode.react`, `react-kakao-maps-sdk`, `react-daum-postcode`, `xlsx-js-style`, `file-saver`, `sweetalert2`, `sweetalert2-react-content` | 특정 필드·트랜스퍼 기능 사용 시에만 필요 |
+
+**제거된 44개 의존성:** `@floating-ui/react`, `@fullcalendar/*`, `@tippyjs/react`, `@tiptap/*`, `apexcharts`, `axios`, `dompurify`, `flatpickr`, `lucide-react`, `nprogress`, `quill`, `react-animate-height`, `react-apexcharts`, `react-flatpickr`, `react-perfect-scrollbar`, `react-popper`, `react-quilljs`, `react-to-print`, `sortablejs`, `tippy.js`, 기타 — 원본 `packages/ui` 전체가 쓰던 의존성이지만 listgrid 내부에선 참조 없음.
+
+**Optional peer 사용 가이드:**
+- `@iconify/react`: 일부 필드의 icon prop으로 사용 가능.
+- `react-select`, `react-sortablejs`: 필드 내부 UI (host가 UIProvider로 다른 구현을 내려주면 불필요).
+- `qrcode.react`: `QrField` 사용 시.
+- `react-kakao-maps-sdk`: `AddressMapField` / 지도 필드 사용 시.
+- `react-daum-postcode`: 한국 주소 우편번호 검색 사용 시.
+- `xlsx-js-style` + `file-saver`: Excel 익스포트 (`DataExporter`, `ExcelProvider`) 사용 시.
+- `sweetalert2` + `sweetalert2-react-content`: `ViewApiSpecification`, `XrefPriceMappingView`가 직접 사용. 향후 Stage 6에서 `MessageProvider`로 치환 예정.
 
 ### Stage 5 — 백엔드 계약 명시화
 

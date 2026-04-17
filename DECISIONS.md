@@ -174,6 +174,26 @@ Stage 3a 중 Python regex 치환에서 `match.group(2)`가 None일 때 문자열
 
 ---
 
+## 2026-04-17 (Stage 4)
+
+### #28 의존성 분류: core / required-peer / optional-peer 3분할
+원본 `packages/ui/package.json`의 60개 `dependencies`를 실제 listgrid 사용처 분석(AST-level import scan) 후 재분류.
+- **core (5)**: `clsx`, `tailwind-merge`, `uuid`, `zustand`, `crypto-js` — 내부 구현에 직접 사용
+- **required peer (6)**: `react`, `react-dom`, `next`, `nuqs`, `@tabler/icons-react`(43회 사용), `@headlessui/react`(8회)
+- **optional peer (10)**: 특정 필드/트랜스퍼에만 사용 — `@iconify/react`, `react-select`, `react-sortablejs`, `qrcode.react`, `react-kakao-maps-sdk`, `react-daum-postcode`, `xlsx-js-style`, `file-saver`, `sweetalert2`, `sweetalert2-react-content`
+- **제거 (44)**: `@floating-ui/react`, `@tiptap/*`, `@fullcalendar/*`, `apexcharts`, `axios`, `dompurify`, `flatpickr`, `lucide-react`, `nprogress`, `quill`, `react-animate-height`, `react-apexcharts`, `react-flatpickr`, `react-perfect-scrollbar`, `react-popper`, `react-quilljs`, `react-to-print`, `sortablejs`, `tippy.js`, `@tippyjs/react` 등
+**Why**: 원본 `packages/ui`는 listgrid뿐 아니라 다른 UI 영역도 포괄했기에 의존성이 넓었음. listgrid만 추출한 이상 실제 쓰지 않는 의존성을 끌고 다닐 이유 없음. required peer와 optional peer 구분은 host가 "없이 써도 되는 기능"을 알 수 있게.
+
+### #29 sweetalert2 — optional peer 유지 (Stage 6에서 MessageProvider로 치환 예정)
+`ViewApiSpecification.tsx`, `XrefPriceMappingView.tsx` 2곳이 아직 `import Swal from 'sweetalert2'` 직접 사용. MessageProvider로 치환하는 리팩토링은 Stage 6 범위.
+**Why**: Stage 4의 목적은 의존성 분류이지 호출부 리팩토링이 아님. 2개 파일의 직접 호출을 Provider 호출로 바꾸는 건 별도 작업. optional peer로 기록해 host에게 선택권 제공.
+
+### #30 `node_modules` 패키지 수 감소 (321 → 180)
+`npm install` 기준 설치 패키지 수가 약 44% 감소. 번들 크기(dist)는 Stage 6에서 bundle analyzer로 측정 예정.
+**Why**: 측정 가능한 성과. "라이브러리가 가벼워졌다"는 주장의 근거.
+
+---
+
 ## Open Questions
 
 작업 중 떠오른 미결 이슈. 결정되면 날짜 로그로 이동.
