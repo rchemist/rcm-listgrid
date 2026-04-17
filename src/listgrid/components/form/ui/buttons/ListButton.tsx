@@ -40,7 +40,7 @@ export const ListButton = ({
 
   return (
     <button
-      className={cn("btn btn-outline-primary gap-2", buttonClassNames?.list)}
+      className={cn("rcm-button rcm-button-outline", buttonClassNames?.list)}
       key={"button_list"}
       onClick={(e) => {
         (async () => {

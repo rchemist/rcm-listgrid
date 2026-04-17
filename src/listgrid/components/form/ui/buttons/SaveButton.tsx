@@ -30,7 +30,7 @@ export const SaveButton = ({
       type="button"
       disabled={isSaving}
       className={cn(
-        "btn btn-primary text-[13px] disabled:opacity-50 disabled:cursor-not-allowed",
+        "rcm-button rcm-button-primary",
         buttonClassNames?.save ?? classNames.buttons?.save
       )}
       key={"button_save"}

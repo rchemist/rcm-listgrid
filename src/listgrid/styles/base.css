@@ -617,6 +617,47 @@
     }
 
     /* ------------------------------------------------------------------ *
+     * Tabs (EntityForm + ListGrid)
+     * ------------------------------------------------------------------ */
+    .rcm-tab-list {
+        display: flex;
+        flex-direction: row;
+        white-space: nowrap;
+        border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+        margin-top: var(--rcm-space-md);
+        margin-bottom: var(--rcm-space-sm);
+    }
+
+    .rcm-tab {
+        display: block;
+        padding: var(--rcm-space-sm) var(--rcm-space-md);
+        margin-bottom: -1px;
+        font-size: var(--rcm-font-size-sm);
+        color: var(--rcm-color-text-muted);
+        background: transparent;
+        border: var(--rcm-border-width) solid transparent;
+        cursor: pointer;
+        transition: color var(--rcm-transition-fast);
+    }
+
+    .rcm-tab:hover {
+        color: var(--rcm-color-primary);
+    }
+
+    .rcm-tab-selected {
+        color: var(--rcm-color-primary);
+        background: var(--rcm-color-surface);
+        border-color: var(--rcm-color-border);
+        border-bottom-color: var(--rcm-color-surface);
+        outline: none;
+    }
+
+    .rcm-tab-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* ------------------------------------------------------------------ *
      * Readonly helper (replaces packages/ui readonlyClass)
      * ------------------------------------------------------------------ */
     .rcm-readonly {

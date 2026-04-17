@@ -34,7 +34,7 @@ export const DeleteButton = ({
           <button
             type="button"
             disabled
-            className={cn("btn btn-outline-danger gap-2", buttonClassNames?.delete)}
+            className={cn("rcm-button rcm-button-danger", buttonClassNames?.delete)}
             key={"button_delete"}
           >
             사용 안 함
@@ -52,7 +52,7 @@ export const DeleteButton = ({
   return (
     <button
       type="button"
-      className={cn("btn btn-outline-danger gap-2", buttonClassNames?.delete)}
+      className={cn("rcm-button rcm-button-danger", buttonClassNames?.delete)}
       key={"button_delete"}
       onClick={() => {
         (async () => {

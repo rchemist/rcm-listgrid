@@ -93,10 +93,10 @@ export const defaultEntityFormTheme: ViewEntityFormClassNames = {
   },
 
   tabs: {
-    list: "rcm-listgrid-thead rcm-row",
-    tab: "rcm-button",
-    tabSelected: "rcm-button-primary",
-    tabDisabled: "",
+    list: "rcm-tab-list",
+    tab: "rcm-tab",
+    tabSelected: "rcm-tab-selected",
+    tabDisabled: "rcm-tab-disabled",
   },
 
   tabPanel: {

@@ -37,9 +37,12 @@
     --rcm-font-weight-semibold: 600;
     --rcm-font-weight-bold: 700;
 
-    /* Colors — neutral grayscale + functional accents ------------------ */
-    --rcm-color-primary: #374151;          /* neutral slate */
-    --rcm-color-primary-hover: #1f2937;
+    /* Colors — functional primary + neutral surfaces -------------------- */
+    /* Primary defaults to a universal blue matching common UI libraries
+     * (Mantine, MUI, Chakra all use blue defaults). Hosts rebrand by
+     * overriding --rcm-color-primary / -hover / -text in their own CSS. */
+    --rcm-color-primary: #2563eb;          /* blue-600 */
+    --rcm-color-primary-hover: #1d4ed8;    /* blue-700 */
     --rcm-color-primary-text: #ffffff;
 
     --rcm-color-surface: #ffffff;
