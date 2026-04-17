@@ -28,12 +28,12 @@ export const ViewHelpIcon = (props: ViewHelpIconProps) => {
 
   return <TooltipCard width={280} shadow="md">
     <TooltipCard.Target>
-      <div className="text-white-dark">
+      <div className="rcm-text-muted">
         <IconInfoCircle width={18} color={'#808080'}/>
       </div>
     </TooltipCard.Target>
     <TooltipCard.Dropdown>
-      <div className="text-white-dark text-[11px] inline-block mt-1"
+      <div className="rcm-field-help"
            dangerouslySetInnerHTML={{__html: value}}
       ></div>
     </TooltipCard.Dropdown>

@@ -398,13 +398,13 @@ export const FieldRenderer = (props: FieldRendererProps) => {
     >
       <div
         id={`field-${instanceId}-${name}-${version}`}
-        className={cn(`flex items-center ${showTooltip ? "justify-between" : ""} -mb-0.5`, classNames.field?.labelWrapper)}
+        className={cn(`rcm-field-label-wrapper ${showTooltip ? 'rcm-field-label-wrapper-with-tooltip' : ''}`, classNames.field?.labelWrapper)}
       >
-        <div className={"flex items-center"}>
+        <div className="rcm-row">
           {/* 라벨 렌더링: 숨김 설정이 아니면 표시 */}
           {/* Render label: show unless hideLabel is true */}
           {!hideLabel && (
-            <label className={cn("text-gray-500 dark:text-gray-400 text-xs md:text-sm", classNames.field?.label)}>
+            <label className={cn('rcm-field-label', classNames.field?.label)}>
               {viewLabel(label)}
             </label>
           )}
@@ -415,10 +415,10 @@ export const FieldRenderer = (props: FieldRendererProps) => {
           {/* Required icon */}
           {required && (
             <Tooltip label={"필수값"} color={"red"} withArrow={true}>
-              <div className={"mb-0.5 md:mb-1"}>
+              <div className="rcm-field-icon-wrap">
                 <Icon
                   icon="healthicons:star-small"
-                  className={cn("cursor-help text-red-600 w-2.5 h-2.5 md:w-3 md:h-3", classNames.field?.requiredIcon)}
+                  className={cn('rcm-field-icon rcm-field-icon-required', classNames.field?.requiredIcon)}
                 />
               </div>
             </Tooltip>
@@ -427,10 +427,10 @@ export const FieldRenderer = (props: FieldRendererProps) => {
           {/* Dirty icon */}
           {dirty && (
             <Tooltip label={"수정됨"} color={"yellow"} withArrow={true} key={`tooltip-${name}-${version}-dirty`}>
-              <div className={"mb-0.5 md:mb-1"}>
+              <div className="rcm-field-icon-wrap">
                 <Icon
                   icon="healthicons:star-small-outline"
-                  className={cn("cursor-help text-yellow-600 w-2.5 h-2.5 md:w-3 md:h-3", classNames.field?.dirtyIcon)}
+                  className={cn('rcm-field-icon rcm-field-icon-dirty', classNames.field?.dirtyIcon)}
                 />
               </div>
             </Tooltip>
@@ -439,15 +439,15 @@ export const FieldRenderer = (props: FieldRendererProps) => {
         {/* 툴팁 아이콘: tooltip이 있을 때만 표시 */}
         {/* Tooltip icon: only show if tooltip exists */}
         {showTooltip && (
-          <div className={"flex items-center"}>
+          <div className="rcm-row">
             <Tooltip
               label={tooltip}
               color={"gray"}
               withArrow={true}
               position={"top-end"}
             >
-              <div className={cn("text-[11px] text-white-dark", classNames.field?.tooltipIcon)}>
-                <IconHelp className={"h-2.5 w-2.5 md:h-3 md:w-3"} />
+              <div className={cn('rcm-field-tooltip-icon', classNames.field?.tooltipIcon)}>
+                <IconHelp className="rcm-field-icon" />
               </div>
             </Tooltip>
           </div>
@@ -455,7 +455,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
       </div>
       {/* 필드 값 뷰 렌더링 */}
       {/* Render field value view */}
-      <div className={cn("max-w-full text-wrap", classNames.field?.valueContainer)}>
+      <div className={cn('rcm-field-value', classNames.field?.valueContainer)}>
         {CustomFieldRenderer ? (
           <CustomFieldRenderer
             field={field}

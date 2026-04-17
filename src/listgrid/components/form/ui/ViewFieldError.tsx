@@ -21,7 +21,7 @@ export const ViewFieldError = (props: ViewErrorProps) => {
 
   const errors: ReactNode[] = [];
   props.errors?.forEach((error, index) => {
-    errors.push(<div key={index} className="text-danger text-[11px] mt-1">{t(error ?? '')}</div>);
+    errors.push(<div key={index} className="rcm-field-error">{t(error ?? '')}</div>);
   })
   return <>
     {errors}</>;

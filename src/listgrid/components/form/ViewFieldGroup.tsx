@@ -205,21 +205,21 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
 
   return <>
     <div className={containerClass}>
-      <div className={cn(open ? (subCollectionEntity ? 'mb-1' : 'mb-2.5 md:mb-3') : '', subCollectionEntity ? undefined : classNames.fieldGroup?.header)}>
-        <div className="flex items-center justify-between">
-          <h5 className={cn(subCollectionEntity ? 'text-sm font-semibold dark:text-white-light flex flex-1 items-center justify-between' : 'text-sm md:text-base font-semibold dark:text-white-light flex flex-1 items-center justify-between', subCollectionEntity ? undefined : classNames.fieldGroup?.title)}>
+      <div className={cn(open ? 'rcm-fieldgroup-header' : '', subCollectionEntity ? '' : classNames.fieldGroup?.header)}>
+        <div className="rcm-row-between">
+          <h5 className={cn('rcm-fieldgroup-title', subCollectionEntity ? '' : classNames.fieldGroup?.title)}>
             {fieldGroup.label}
-            <div className={cn('flex items-center gap-2 justify-end', subCollectionEntity ? undefined : classNames.fieldGroup?.actions)}>
+            <div className={cn('rcm-row rcm-gap-sm', subCollectionEntity ? '' : classNames.fieldGroup?.actions)}>
               {/* 도움말 아이콘: 그룹 설명이 있을 때만 표시 */}
               {/* Help icon: only show if group has description */}
               {!isBlank(helpText) && <ViewHelpIcon helpText={helpText}/>}
               {/* 접기/펼치기 토글: collapsable일 때만 표시 */}
               {/* Collapse/expand toggle: only show if collapsable */}
-            {collapsable && <span className={cn('text-sm color-secondary cursor-pointer', subCollectionEntity ? undefined : classNames.fieldGroup?.collapseToggle)} onClick={() => {
+            {collapsable && <span className={cn('rcm-fieldgroup-collapse', subCollectionEntity ? '' : classNames.fieldGroup?.collapseToggle)} onClick={() => {
               setOpen(!open)
             }}>
 
-              <div className={open ? '' : '-rotate-180'}>
+              <div className={open ? '' : 'rcm-rotate-180'}>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
                                      fill="none">
                                   <path stroke="#5B6B79" strokeLinecap="round" strokeLinejoin="round"

@@ -20,5 +20,5 @@ export const ViewHelpText = (props: ViewHelpTextProps) => {
 
   const helpText = typeof props.helpText === "string" ? t(props.helpText) : props.helpText;
 
-  return isBlank(props.helpText) ? null : <div className={cn("text-white-dark text-[11px] inline-block mt-1", classNames.helpText?.text)}>{helpText}</div>
+  return isBlank(props.helpText) ? null : <div className={cn('rcm-field-help', classNames.helpText?.text)}>{helpText}</div>
 }

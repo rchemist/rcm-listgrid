@@ -822,6 +822,117 @@
         border-radius: var(--rcm-radius-md);
     }
 
+    .rcm-fieldgroup-header {
+        margin-bottom: var(--rcm-space-sm);
+    }
+
+    @media (min-width: 768px) {
+        .rcm-fieldgroup-header {
+            margin-bottom: var(--rcm-space-md);
+        }
+    }
+
+    .rcm-fieldgroup-title {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        justify-content: space-between;
+        font-size: var(--rcm-font-size-sm);
+        font-weight: var(--rcm-font-weight-semibold);
+        color: var(--rcm-color-text);
+        margin: 0;
+    }
+
+    @media (min-width: 768px) {
+        .rcm-fieldgroup-title {
+            font-size: var(--rcm-font-size-md);
+        }
+    }
+
+    .rcm-fieldgroup-collapse {
+        font-size: var(--rcm-font-size-sm);
+        color: var(--rcm-color-text-muted);
+        cursor: pointer;
+    }
+
+    .rcm-rotate-180 {
+        transform: rotate(180deg);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * FieldRenderer — label, required/dirty icons, tooltip, value, help
+     * ------------------------------------------------------------------ */
+    .rcm-field-label-wrapper {
+        display: flex;
+        align-items: center;
+        margin-bottom: -2px;
+    }
+
+    .rcm-field-label-wrapper-with-tooltip {
+        justify-content: space-between;
+    }
+
+    .rcm-field-label {
+        font-size: var(--rcm-font-size-xs);
+        color: var(--rcm-color-text-muted);
+        font-weight: var(--rcm-font-weight-normal);
+    }
+
+    @media (min-width: 768px) {
+        .rcm-field-label {
+            font-size: var(--rcm-font-size-sm);
+        }
+    }
+
+    .rcm-field-icon-wrap {
+        margin-bottom: 2px;
+    }
+
+    @media (min-width: 768px) {
+        .rcm-field-icon-wrap {
+            margin-bottom: 4px;
+        }
+    }
+
+    .rcm-field-icon {
+        width: 0.625rem;
+        height: 0.625rem;
+        cursor: help;
+    }
+
+    @media (min-width: 768px) {
+        .rcm-field-icon {
+            width: 0.75rem;
+            height: 0.75rem;
+        }
+    }
+
+    .rcm-field-icon-required {
+        color: var(--rcm-color-error);
+    }
+
+    .rcm-field-icon-dirty {
+        color: var(--rcm-color-warning);
+    }
+
+    .rcm-field-tooltip-icon {
+        font-size: 11px;
+        color: var(--rcm-color-text-muted);
+        cursor: help;
+    }
+
+    .rcm-field-value {
+        max-width: 100%;
+        text-wrap: wrap;
+    }
+
+    .rcm-field-help {
+        display: inline-block;
+        font-size: 11px;
+        color: var(--rcm-color-text-muted);
+        margin-top: var(--rcm-space-xs);
+    }
+
     /* ------------------------------------------------------------------ *
      * Field layout — responsive grid + col-span / col-start helpers.
      *
