@@ -278,6 +278,84 @@
     }
 
     /* ------------------------------------------------------------------ *
+     * Panels / containers (surface with padding, used for dialog sections)
+     * ------------------------------------------------------------------ */
+    .rcm-panel {
+        background: var(--rcm-color-surface);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-radius: var(--rcm-radius-md);
+        padding: var(--rcm-space-lg);
+    }
+
+    .rcm-dialog-body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--rcm-space-xl);
+        padding: var(--rcm-space-xl);
+    }
+
+    .rcm-action-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: var(--rcm-space-xl);
+    }
+
+    .rcm-action-bar-end {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: var(--rcm-space-sm);
+        padding-top: var(--rcm-space-lg);
+    }
+
+    /* ------------------------------------------------------------------ *
+     * Text utilities (size + color, kept minimal)
+     * ------------------------------------------------------------------ */
+    .rcm-heading-sm {
+        font-size: var(--rcm-font-size-sm);
+        font-weight: var(--rcm-font-weight-medium);
+        color: var(--rcm-color-text);
+        margin: 0 0 var(--rcm-space-lg) 0;
+    }
+
+    .rcm-text-xs { font-size: var(--rcm-font-size-xs); }
+    .rcm-text-sm { font-size: var(--rcm-font-size-sm); }
+    .rcm-text-muted { color: var(--rcm-color-text-muted); }
+    .rcm-text-emphasis {
+        color: var(--rcm-color-text);
+        font-weight: var(--rcm-font-weight-medium);
+    }
+    .rcm-text-info { color: var(--rcm-color-info); }
+    .rcm-text-warning { color: var(--rcm-color-warning); }
+    .rcm-text-error { color: var(--rcm-color-error); }
+
+    /* ------------------------------------------------------------------ *
+     * Checkable row (used in data-export field selector and similar lists)
+     * ------------------------------------------------------------------ */
+    .rcm-checkbox-row {
+        display: flex;
+        align-items: center;
+        gap: var(--rcm-space-sm);
+        padding: var(--rcm-space-sm);
+        border-radius: var(--rcm-radius-md);
+        cursor: pointer;
+        transition: background var(--rcm-transition-fast);
+    }
+
+    .rcm-checkbox-row:hover {
+        background: var(--rcm-color-surface-hover);
+    }
+
+    .rcm-checkbox-label {
+        font-size: var(--rcm-font-size-sm);
+        color: var(--rcm-color-text);
+        cursor: pointer;
+        user-select: none;
+        margin: 0;
+    }
+
+    /* ------------------------------------------------------------------ *
      * Utility helpers (sparingly — don't recreate Tailwind here)
      * ------------------------------------------------------------------ */
     .rcm-visually-hidden {

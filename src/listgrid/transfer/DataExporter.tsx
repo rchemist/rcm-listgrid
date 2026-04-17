@@ -58,15 +58,15 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
       closeOnEscape={false}
       opened={true}
       onClose={() => { onClose() }}>
-      <div className={'p-6 w-full space-y-6'}>
-        <div className={'space-y-4'}>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
-            <label className={'text-sm text-blue-800 font-medium'}>
+      <div className="rcm-dialog-body">
+        <div className="rcm-stack">
+          <div className="rcm-notice rcm-notice-info" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
+            <label className="rcm-text-sm rcm-text-info rcm-text-emphasis">
               {instruction}
             </label>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-4">다운로드할 필드 선택</h3>
+          <div className="rcm-panel">
+            <h3 className="rcm-heading-sm">다운로드할 필드 선택</h3>
             <SimpleGrid cols={{ base: 2, xs: 2, sm: 3, md: 4, lg: 5 }}
               spacing="md">
             {(function () {
@@ -77,9 +77,8 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
                   return;
                 }
                 forms.push(
-                  <div className={'flex items-center gap-2 p-2 rounded hover:bg-gray-50 transition-colors'} key={`fields_${fieldName}`}>
-                    <input type={'checkbox'}
-                      className={'form-checkbox text-indigo-600 focus:ring-indigo-500'}
+                  <div className="rcm-checkbox-row" key={`fields_${fieldName}`}>
+                    <input type="checkbox"
                       key={fieldName}
                       id={fieldName}
                       name={fieldName}
@@ -87,7 +86,7 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
                       onChange={(event) => {
                         handleTargetFieldChange(field, event)
                       }} />
-                    <label htmlFor={`${fieldName}`} className="mb-0 cursor-pointer text-sm text-gray-700 select-none">{field.getLabel()}</label>
+                    <label htmlFor={`${fieldName}`} className="rcm-checkbox-label">{field.getLabel()}</label>
                   </div>
                 );
               });
@@ -103,16 +102,16 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
           onErrorChange={setError}
         />
         {description && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <div className="text-sm text-amber-800">{description}</div>
+          <div className="rcm-notice rcm-notice-warning">
+            <div className="rcm-text-sm rcm-text-warning">{description}</div>
           </div>
         )}
 
-        <div className={'w-full flex items-center justify-center pt-6'}>
-          <Button 
-            variant="filled" 
-            disabled={!ableToExport} 
-            className="px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        <div className="rcm-action-bar">
+          <Button
+            variant="filled"
+            disabled={!ableToExport}
+            className="rcm-button rcm-button-primary"
             onClick={() => {
               handleExport();
             }}>
