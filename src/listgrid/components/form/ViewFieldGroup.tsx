@@ -54,13 +54,17 @@ interface ViewFieldGroupProps extends EntityFormManageable {
 }
 
 /**
- * Determine grid col-span class based on field layout type
+ * Determine grid col-span class based on field layout type.
+ * Uses library-owned `rcm-col-span-full` (defined in base.css) instead of
+ * Tailwind's `col-span-full` — the host's Tailwind content scanner does not
+ * include @rcm/listgrid sources in node_modules, so Tailwind utilities
+ * placed inside library JSX never get generated.
  */
 function getFieldColSpanClass(field: FormField<any>): string {
-  if (field.layout === 'full') return 'col-span-full';
+  if (field.layout === 'full') return 'rcm-col-span-full';
   if (field.layout === 'half') return '';
   // auto: FULL_WIDTH_FIELD_TYPES get full width
-  if (FULL_WIDTH_FIELD_TYPES.includes(field.type)) return 'col-span-full';
+  if (FULL_WIDTH_FIELD_TYPES.includes(field.type)) return 'rcm-col-span-full';
   return '';
 }
 
@@ -229,7 +233,7 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
           </h5>
         </div>
       </div>
-      {open && <div className={cn(subCollectionEntity ? 'space-y-2' : 'grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-x-4 gap-y-3.5 md:gap-y-4', subCollectionEntity ? undefined : classNames.fieldGroup?.content)}>
+      {open && <div className={cn(subCollectionEntity ? 'rcm-stack' : 'rcm-field-grid', subCollectionEntity ? undefined : classNames.fieldGroup?.content)}>
         {/* 필드 렌더링: FormField만 FieldRenderer로 출력 (hideMappedByFields로 필터링됨) */}
         {/* Render fields: only FormField is rendered by FieldRenderer (filtered by hideMappedByFields) */}
         {filteredFields?.map((field, index) => {
@@ -241,7 +245,7 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
             const prevField = index > 0 ? filteredFields?.[index - 1] : null;
             const forceNewRow = prevField instanceof FormField && prevField.lineBreak;
             const colSpanClass = getFieldColSpanClass(field);
-            const className = forceNewRow ? `${colSpanClass} lg:col-start-1` : colSpanClass;
+            const className = forceNewRow ? `${colSpanClass} rcm-col-start-1-lg` : colSpanClass;
             return <div key={field.getName()} className={className}>
               <FieldRenderer field={field} entityForm={entityForm}
                                   setEntityForm={setEntityForm} subCollectionEntity={subCollectionEntity}

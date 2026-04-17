@@ -9,6 +9,7 @@ export type { Session, SessionUser, AuthContextValue, AuthProviderProps } from '
 // UI — host applications inject concrete UI primitives via <UIProvider>.
 export { UIProvider, useUI } from './ui';
 export type { UIComponents, UIProviderProps } from './ui';
+export { GlobalModalManager } from './ui';
 
 // Messaging — host applications configure toast/alert implementations.
 export { configureMessages, showAlert, showConfirm, showError, showSuccess, showToast, openToast, clearAllToasts } from './message';

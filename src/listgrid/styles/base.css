@@ -658,6 +658,47 @@
     }
 
     /* ------------------------------------------------------------------ *
+     * Field layout — responsive grid + col-span / col-start helpers.
+     *
+     * These replace Tailwind's `col-span-full` / `lg:col-start-1` /
+     * `grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3` utilities that
+     * would otherwise require host's Tailwind scanner to include
+     * `node_modules/@rcm/listgrid/**` — which isn't realistic for library
+     * consumers. These scoped rules ship with our stylesheet directly.
+     * ------------------------------------------------------------------ */
+    .rcm-field-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        column-gap: var(--rcm-space-lg);
+        row-gap: var(--rcm-space-md);
+    }
+
+    @media (min-width: 1024px) {
+        .rcm-field-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1536px) {
+        .rcm-field-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    .rcm-col-span-full {
+        grid-column: 1 / -1;
+    }
+
+    /* Forces a field to start at column 1 on lg+ breakpoints so a previous
+     * field's `lineBreak` actually breaks the row. Below lg the grid is
+     * 1-column anyway so no col-start override is needed. */
+    @media (min-width: 1024px) {
+        .rcm-col-start-1-lg {
+            grid-column-start: 1;
+        }
+    }
+
+    /* ------------------------------------------------------------------ *
      * Readonly helper (replaces packages/ui readonlyClass)
      * ------------------------------------------------------------------ */
     .rcm-readonly {
