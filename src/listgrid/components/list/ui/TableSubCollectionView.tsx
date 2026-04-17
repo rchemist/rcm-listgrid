@@ -249,17 +249,17 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-4">
-          <div className="h-9 w-64 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-16 animate-pulse rounded-lg bg-gray-100 dark:bg-gray-800" />
+      <div className="rcm-subcollection-skeleton">
+        <div className="rcm-subcollection-skeleton-toolbar">
+          <div className="rcm-subcollection-skeleton-search" />
+          <div className="rcm-subcollection-skeleton-actions">
+            <div className="rcm-subcollection-skeleton-pill" />
           </div>
         </div>
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="h-10 bg-gray-50 dark:bg-gray-800 animate-pulse" />
+        <div className="rcm-subcollection-skeleton-table">
+          <div className="rcm-subcollection-skeleton-thead" />
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-10 border-t border-gray-100 dark:border-gray-800 animate-pulse bg-white dark:bg-gray-900" />
+            <div key={i} className="rcm-subcollection-skeleton-tr" />
           ))}
         </div>
       </div>
@@ -269,41 +269,46 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
   // Error state
   if (error) {
     return (
-      <div className="relative overflow-hidden rounded-xl border border-red-200/80 bg-gradient-to-br from-red-50 to-red-50/50 p-6 dark:border-red-900/50 dark:from-red-950/50 dark:to-red-900/20">
-        <div className="flex items-start gap-4">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-red-100 to-red-50 dark:from-red-900/50 dark:to-red-800/30">
-            <IconAlertCircle className="h-6 w-6 text-red-500 dark:text-red-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h4 className="text-base font-semibold text-red-800 dark:text-red-200">
-              데이터를 불러오는 중 오류가 발생했습니다
-            </h4>
-            <p className="mt-1 text-sm text-red-600/90 dark:text-red-300/90 line-clamp-2">
-              {error.message}
-            </p>
-            <button
-              onClick={() => refresh()}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-white text-red-700 border border-red-200 hover:bg-red-50 hover:border-red-300 transition-colors duration-150 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800 dark:hover:bg-red-900/50 dark:hover:border-red-700"
-            >
-              <IconRefresh className="h-4 w-4" />
-              다시 시도
-            </button>
-          </div>
+      <div className="rcm-subcollection-error">
+        <div className="rcm-subcollection-error-icon">
+          <IconAlertCircle size={24} />
+        </div>
+        <div className="rcm-subcollection-error-body">
+          <h4 className="rcm-subcollection-error-title">
+            데이터를 불러오는 중 오류가 발생했습니다
+          </h4>
+          <p className="rcm-subcollection-error-message">
+            {error.message}
+          </p>
+          <button
+            type="button"
+            onClick={() => refresh()}
+            className="rcm-subcollection-error-retry"
+          >
+            <IconRefresh size={16} />
+            다시 시도
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="rcm-subcollection">
       {/* Header Bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="rcm-subcollection-toolbar">
         {/* Search */}
         {isQuickSearchEnabled && (
-          <div className="relative flex-1 max-w-md group">
-            <div className={`pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 transition-colors duration-150 ${isSearchFocused ? 'text-primary' : 'text-gray-400'}`}>
-              <IconSearch className="h-[18px] w-[18px]" stroke={2} />
-            </div>
+          <div className="rcm-subcollection-search">
+            <span
+              className={
+                isSearchFocused
+                  ? 'rcm-subcollection-search-icon rcm-subcollection-search-icon-focused'
+                  : 'rcm-subcollection-search-icon'
+              }
+            >
+              <IconSearch size={18} stroke={2} />
+            </span>
             <input
               type="text"
               value={searchQuery}
@@ -311,23 +316,28 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
               placeholder={searchPlaceholder}
-              className="block w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-10 text-sm text-gray-900 placeholder-gray-400 shadow-sm transition-all duration-200 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/10 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-primary dark:focus:ring-primary/20"
+              className="rcm-subcollection-search-input"
             />
             {searchQuery && (
-              <button onClick={clearSearch} className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 transition-colors dark:hover:text-gray-300">
-                <IconX className="h-4 w-4" />
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="rcm-subcollection-search-clear"
+                aria-label="검색어 지우기"
+              >
+                <IconX size={16} />
               </button>
             )}
           </div>
         )}
 
         {/* Right Actions */}
-        <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100/80 text-gray-600 text-sm font-medium dark:bg-gray-800 dark:text-gray-400">
+        <div className="rcm-subcollection-actions">
+          <div className="rcm-subcollection-count">
             {searchQuery ? (
               <>
-                <span className="text-primary font-semibold">{filteredData.length}</span>
-                <span className="text-gray-400 dark:text-gray-500">/</span>
+                <span className="rcm-subcollection-count-accent">{filteredData.length}</span>
+                <span className="rcm-subcollection-count-sep">/</span>
                 <span>{data.length}</span>
               </>
             ) : (
@@ -336,17 +346,18 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
           </div>
 
           <button
+            type="button"
             onClick={() => refresh()}
-            className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 bg-gray-100/80 hover:bg-gray-200/80 hover:text-gray-700 transition-all duration-150 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+            className="rcm-subcollection-icon-btn"
             title="새로고침"
           >
-            <IconRefresh className="h-4 w-4" stroke={2} />
+            <IconRefresh size={16} stroke={2} />
           </button>
 
           {tooltip && (
             <Tooltip label={tooltip} color="gray" withArrow={true} position="top-end">
-              <div className="flex items-center justify-center w-9 h-9 rounded-lg cursor-help text-gray-400 bg-gray-100/80 hover:bg-gray-200/80 hover:text-gray-600 transition-all duration-150 dark:bg-gray-800 dark:hover:bg-gray-700 dark:hover:text-gray-300">
-                <IconHelp className="h-4 w-4" stroke={2} />
+              <div className="rcm-subcollection-icon-btn rcm-subcollection-icon-btn-help">
+                <IconHelp size={16} stroke={2} />
               </div>
             </Tooltip>
           )}
@@ -355,25 +366,29 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
 
       {/* Table Content */}
       {filteredData.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50/50 to-transparent py-16 dark:border-gray-700 dark:from-gray-800/30">
+        <div className="rcm-subcollection-empty">
           {searchQuery ? (
             <>
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 mb-4">
-                <IconSearch className="h-8 w-8 text-gray-300 dark:text-gray-600" />
+              <div className="rcm-subcollection-empty-icon">
+                <IconSearch size={32} />
               </div>
-              <p className="text-base font-medium text-gray-600 dark:text-gray-400">
+              <p className="rcm-subcollection-empty-title">
                 &apos;{searchQuery}&apos;에 대한 검색 결과가 없습니다
               </p>
-              <button onClick={clearSearch} className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-primary bg-primary/5 hover:bg-primary/10 transition-colors duration-150">
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="rcm-subcollection-empty-action"
+              >
                 검색 초기화
               </button>
             </>
           ) : (
             <>
-              <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 mb-4">
-                <IconTable className="h-8 w-8 text-gray-300 dark:text-gray-600" />
+              <div className="rcm-subcollection-empty-icon">
+                <IconTable size={32} />
               </div>
-              <p className="text-base font-medium text-gray-600 dark:text-gray-400">
+              <p className="rcm-subcollection-empty-title">
                 표시할 항목이 없습니다
               </p>
             </>
@@ -381,47 +396,30 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-            <table className="w-full border-collapse text-sm">
+          <div className="rcm-subcollection-table-wrapper">
+            <table className="rcm-subcollection-table">
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800/80">
+                <tr>
                   {showRowNumbers && (
-                    <th className="border-b border-gray-200 dark:border-gray-700 py-3 px-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-12">
-                      No
-                    </th>
+                    <th className="rcm-subcollection-th-no">No</th>
                   )}
                   {columns.map((col) => (
-                    <th
-                      key={col.name}
-                      className="border-b border-gray-200 dark:border-gray-700 py-3 px-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400"
-                    >
-                      {col.label}
-                    </th>
+                    <th key={col.name}>{col.label}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              <tbody>
                 {paginatedData.map((item, index) => {
                   const rowNumber = isPaginationEnabled
                     ? (currentPage - 1) * pageSize + index + 1
                     : index + 1;
                   return (
-                    <tr
-                      key={item.id || index}
-                      className="bg-white dark:bg-gray-900 hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors"
-                    >
+                    <tr key={item.id || index}>
                       {showRowNumbers && (
-                        <td className="py-2.5 px-3 text-center text-gray-400 dark:text-gray-500 tabular-nums">
-                          {rowNumber}
-                        </td>
+                        <td className="rcm-subcollection-td-no">{rowNumber}</td>
                       )}
                       {columns.map((col) => (
-                        <td
-                          key={col.name}
-                          className="py-2.5 px-3 text-center text-gray-700 dark:text-gray-300"
-                        >
-                          {getCellDisplay(item, col)}
-                        </td>
+                        <td key={col.name}>{getCellDisplay(item, col)}</td>
                       ))}
                     </tr>
                   );
@@ -432,25 +430,49 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
 
           {/* Pagination */}
           {isPaginationEnabled && totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-2">
-              <button onClick={() => goToPage(1)} disabled={currentPage === 1} className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" title="첫 페이지">
-                <IconChevronsLeft className="h-4 w-4" stroke={2} />
+            <div className="rcm-subcollection-pagination">
+              <button
+                type="button"
+                onClick={() => goToPage(1)}
+                disabled={currentPage === 1}
+                className="rcm-subcollection-page-btn"
+                title="첫 페이지"
+              >
+                <IconChevronsLeft size={16} stroke={2} />
               </button>
-              <button onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1} className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" title="이전 페이지">
-                <IconChevronLeft className="h-4 w-4" stroke={2} />
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="rcm-subcollection-page-btn"
+                title="이전 페이지"
+              >
+                <IconChevronLeft size={16} stroke={2} />
               </button>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400">
-                <span className="text-primary font-semibold">{currentPage}</span>
-                <span className="text-gray-400 dark:text-gray-500">/</span>
+              <div className="rcm-subcollection-page-info">
+                <span className="rcm-subcollection-page-info-current">{currentPage}</span>
+                <span className="rcm-subcollection-count-sep">/</span>
                 <span>{totalPages}</span>
               </div>
-              <button onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages} className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" title="다음 페이지">
-                <IconChevronRight className="h-4 w-4" stroke={2} />
+              <button
+                type="button"
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="rcm-subcollection-page-btn"
+                title="다음 페이지"
+              >
+                <IconChevronRight size={16} stroke={2} />
               </button>
-              <button onClick={() => goToPage(totalPages)} disabled={currentPage === totalPages} className="flex items-center justify-center w-8 h-8 rounded-lg text-gray-500 bg-white border border-gray-200 hover:bg-gray-50 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" title="마지막 페이지">
-                <IconChevronsRight className="h-4 w-4" stroke={2} />
+              <button
+                type="button"
+                onClick={() => goToPage(totalPages)}
+                disabled={currentPage === totalPages}
+                className="rcm-subcollection-page-btn"
+                title="마지막 페이지"
+              >
+                <IconChevronsRight size={16} stroke={2} />
               </button>
-              <div className="ml-2 px-2 py-1 rounded-md text-xs text-gray-400 bg-gray-50 dark:text-gray-500 dark:bg-gray-800/50">
+              <div className="rcm-subcollection-page-size-badge">
                 {pageSize}개씩
               </div>
             </div>
