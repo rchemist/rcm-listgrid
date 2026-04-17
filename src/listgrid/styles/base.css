@@ -1,26 +1,22 @@
 /*
  * @rcm/listgrid base stylesheet.
  *
- * All library styles live inside `@layer rcm-listgrid`. CSS declarations in
- * host applications that are NOT inside a named layer automatically beat
- * styles inside a named layer — so hosts override by simply writing normal
- * CSS after importing this file:
+ * Rules are declared unlayered so they beat Tailwind's preflight universal
+ * reset (`*, ::before, ::after { border: 0 solid ... }`) which would otherwise
+ * zero out our borders. Host apps override by writing CSS AFTER this file
+ * loads — plain cascade order handles it without `!important`:
  *
- *   @import "@rcm/listgrid/styles.css";
+ *   import "@rcm/listgrid/styles.css";
  *
- *   .rcm-button { border-radius: 20px; }     // wins without !important
- *
- * For deliberately-layered host overrides, declare a layer AFTER rcm-listgrid:
- *
- *   @layer rcm-listgrid, host-overrides;
- *   @layer host-overrides { .rcm-button { ... } }
+ *   // In your own stylesheet, loaded after the import above:
+ *   .rcm-button { border-radius: 20px; }     // wins by cascade order
  *
  * Class-name contract: every class in this file uses the `rcm-` prefix and is
  * part of the public contract. Host CSS that targets `rcm-*` selectors is a
  * supported customization path.
  */
 
-@layer rcm-listgrid {
+/* BEGIN — unlayered (see top comment for rationale) */
     /* ------------------------------------------------------------------ *
      * Root / surfaces
      * ------------------------------------------------------------------ */
@@ -356,10 +352,6 @@
         overflow: hidden;
     }
 
-    .rcm-skeleton-table-wrapper {
-        width: 100%;
-        overflow-x: auto;
-    }
 
     .rcm-skeleton-thead {
         border-top: var(--rcm-border-width) solid var(--rcm-color-border);
@@ -423,13 +415,17 @@
 
     .rcm-listgrid-panel-main {
         margin-top: var(--rcm-space-xl);
+        padding: var(--rcm-space-md) var(--rcm-space-lg);
+        background: var(--rcm-color-surface);
         border: var(--rcm-border-width) solid var(--rcm-color-border);
         border-radius: var(--rcm-radius-lg);
+        box-shadow: var(--rcm-shadow-sm);
     }
 
     .rcm-listgrid-panel-sub {
         margin-top: var(--rcm-space-sm);
         padding: var(--rcm-space-lg) 0;
+        background: var(--rcm-color-surface);
         border: var(--rcm-border-width) solid var(--rcm-color-border);
         border-radius: var(--rcm-radius-md);
     }
@@ -482,12 +478,26 @@
     }
 
     .rcm-listgrid-thead {
+        background: var(--rcm-color-surface-muted);
         border-top: var(--rcm-border-width) solid var(--rcm-color-border);
         border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
     }
 
+    .rcm-listgrid-thead th {
+        padding: var(--rcm-space-md) var(--rcm-space-md);
+        font-weight: var(--rcm-font-weight-semibold);
+        color: var(--rcm-color-text-muted);
+        text-align: left;
+        white-space: nowrap;
+    }
+
     .rcm-listgrid-tbody {
         overflow: auto;
+    }
+
+    .rcm-listgrid-tbody td {
+        padding: var(--rcm-space-md);
+        border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
     }
 
     .rcm-listgrid-row-hover:hover {
@@ -620,6 +630,7 @@
      * ------------------------------------------------------------------ */
     .rcm-table {
         width: 100%;
+        min-width: 48rem;
         border-collapse: collapse;
         font-size: var(--rcm-font-size-sm);
     }
@@ -635,6 +646,15 @@
         background: var(--rcm-color-surface-muted);
         font-weight: var(--rcm-font-weight-semibold);
         color: var(--rcm-color-text-muted);
+        white-space: nowrap;
+    }
+
+    /* Responsive wrapper — keep min-width on the table inside an overflow-x
+     * container so narrow viewports scroll horizontally instead of wrapping. */
+    .rcm-skeleton-table-wrapper {
+        width: 100%;
+        min-height: 400px;
+        overflow-x: auto;
     }
 
     /* ------------------------------------------------------------------ *
@@ -786,4 +806,4 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
-}
+/* END — unlayered */
