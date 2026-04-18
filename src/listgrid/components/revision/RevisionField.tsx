@@ -80,7 +80,12 @@ const RevisionDiffWrapper: React.FC<{
           `}</style>
           <div className="rcm-revision-diff-banner rcm-revision-diff-banner-changed">
             <div className="rcm-revision-diff-banner-row">
-              <span className="rcm-revision-diff-indicator"></span>
+              <span
+                className="rcm-icon-frame"
+                data-shape="circle"
+                data-size="xs"
+                data-color="warning"
+              ></span>
               <span>이전 버전 대비 <strong>{changedFields.size}개</strong> 필드가 변경되었습니다</span>
             </div>
             {changedFieldLabels.length > 0 && (
@@ -270,8 +275,12 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
   if (loading) {
     return (
       <div className="rcm-revision-state">
-        <IconHistory className="rcm-revision-state-icon rcm-revision-state-icon-spin" />
-        <span className="rcm-revision-state-text">변경 내역을 불러오는 중...</span>
+        <IconHistory
+          className="rcm-icon rcm-revision-state-icon-spin"
+          data-size="lg"
+          data-tone="disabled"
+        />
+        <span className="rcm-text" data-size="sm" data-tone="muted">변경 내역을 불러오는 중...</span>
       </div>
     );
   }
@@ -279,8 +288,8 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
   if (revisions.length === 0) {
     return (
       <div className="rcm-revision-state rcm-revision-state-empty">
-        <IconHistory className="rcm-revision-state-icon" />
-        <span className="rcm-revision-state-text">변경 내역이 없습니다.</span>
+        <IconHistory className="rcm-icon" data-size="lg" data-tone="disabled" />
+        <span className="rcm-text" data-size="sm" data-tone="muted">변경 내역이 없습니다.</span>
       </div>
     );
   }
@@ -306,8 +315,8 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
                 onClick={isClickable ? () => handleRevisionClick(revision, index) : undefined}
               >
                 <div className="rcm-revision-item-row">
-                  <span className="rcm-revision-item-name">{revision.name}</span>
-                  <span className="rcm-revision-item-date">
+                  <span className="rcm-text" data-weight="medium">{revision.name}</span>
+                  <span className="rcm-text" data-size="xs" data-tone="muted">
                     {fDateTime(revision.createdAt, 'yyyy-MM-dd HH:mm:ss')}
                   </span>
                   {isLatest && (

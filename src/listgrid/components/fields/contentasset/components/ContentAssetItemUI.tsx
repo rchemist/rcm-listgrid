@@ -66,7 +66,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
 }) => {
   // 로딩 중일 때
   if (loading) {
-    return <div className="rcm-ca-loading">로딩 중...</div>;
+    return <div className="rcm-ca-loading"><span className="rcm-text" data-tone="muted">로딩 중...</span></div>;
   }
 
   // 아이템이 없을 때
@@ -74,7 +74,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
     return (
       <div className="rcm-ca-wrap">
         <div className="rcm-ca-empty">
-          <p className="rcm-ca-empty-text">등록된 컨텐츠가 없습니다.</p>
+          <p className="rcm-text" data-tone="muted">등록된 컨텐츠가 없습니다.</p>
           {!readonly && canAddMore && (
             <button
               type="button"
@@ -82,7 +82,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
               className="rcm-ca-add-btn"
             >
               <IconPlus size={16}/>
-              <span className="rcm-ca-add-btn-text">컨텐츠 추가</span>
+              <span>컨텐츠 추가</span>
             </button>
           )}
         </div>
@@ -90,7 +90,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
         {fieldErrors && fieldErrors.length > 0 && (
           <div className="rcm-ca-errors">
             {fieldErrors.map((error, index) => (
-              <p key={index} className="rcm-ca-error">{error}</p>
+              <p key={index} className="rcm-text" data-color="error" data-size="sm">{error}</p>
             ))}
           </div>
         )}
@@ -111,8 +111,8 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
           >
             <div className="rcm-ca-item-header">
               <div className="rcm-ca-item-title-col">
-                <label className="rcm-ca-item-label">
-                  제목 <span className="rcm-ca-required">*</span>
+                <label className="rcm-label">
+                  제목 <span className="rcm-text" data-color="error">*</span>
                 </label>
                 <div onBlur={(e: React.FocusEvent<HTMLDivElement>) => {
                   const target = e.target as HTMLInputElement;
@@ -130,7 +130,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
                   />
                 </div>
                 {titleErrors[index] && (
-                  <p className="rcm-ca-item-error-msg">{titleErrors[index]}</p>
+                  <p className="rcm-text" data-color="error" data-size="sm">{titleErrors[index]}</p>
                 )}
               </div>
 
@@ -152,8 +152,8 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
             </div>
 
             <div>
-              <label className="rcm-ca-item-label">
-                설명 <span className="rcm-ca-optional">(선택사항)</span>
+              <label className="rcm-label">
+                설명 <span className="rcm-text" data-tone="muted" data-size="xs">(선택사항)</span>
               </label>
               <Textarea
                 name={`content_${index}`}
@@ -166,8 +166,8 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
             </div>
 
             <div>
-              <label className="rcm-ca-item-label">
-                파일 <span className="rcm-ca-required">*</span>
+              <label className="rcm-label">
+                파일 <span className="rcm-text" data-color="error">*</span>
               </label>
               <FileUploadInput
                 name={`asset_${index}`}
@@ -184,7 +184,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
                 }}
               />
               {itemErrors.filter(err => err.field === 'assetUrl').map((err, errIndex) => (
-                <p key={errIndex} className="rcm-ca-item-error-msg">{err.message}</p>
+                <p key={errIndex} className="rcm-text" data-color="error" data-size="sm">{err.message}</p>
               ))}
             </div>
           </div>
@@ -199,7 +199,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
             className="rcm-ca-add-btn"
           >
             <IconPlus size={16}/>
-            <span className="rcm-ca-add-btn-text">컨텐츠 추가</span>
+            <span>컨텐츠 추가</span>
           </button>
         </div>
       )}
@@ -207,7 +207,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
       {fieldErrors && fieldErrors.length > 0 && (
         <div className="rcm-ca-errors">
           {fieldErrors.map((error, index) => (
-            <p key={index} className="rcm-ca-error">{error}</p>
+            <p key={index} className="rcm-text" data-color="error" data-size="sm">{error}</p>
           ))}
         </div>
       )}

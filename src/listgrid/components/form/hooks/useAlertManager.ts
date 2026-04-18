@@ -93,27 +93,45 @@ export const useAlertManager = (
   };
 };
 
-// 알림 스타일 가져오기 — rcm-notice 변형으로 통일
+// 알림 스타일 가져오기 — rcm-notice 기본 + data-tone 반환
+// Phase 6: className/dataTone 을 분리하여 consumer 에서 data 속성으로 전달하도록 변경.
+// `bg` 는 deprecated — 'rcm-notice' 만 반환되며 기존 호출자도 동작은 유지됩니다.
 export const getAlertStyles = (color: AlertMessage['color']): AlertStyles => {
+  const base = { bg: 'rcm-notice', className: 'rcm-notice', hoverBg: '', text: '' };
   switch (color) {
     case 'success':
-      return { bg: 'rcm-notice rcm-notice-success', hoverBg: '', text: '', icon: IconCheck };
+      return { ...base, dataTone: 'success', icon: IconCheck };
     case 'danger':
-      return { bg: 'rcm-notice rcm-notice-error', hoverBg: '', text: '', icon: IconAlertTriangle };
+      return { ...base, dataTone: 'error', icon: IconAlertTriangle };
     case 'warning':
-      return { bg: 'rcm-notice rcm-notice-warning', hoverBg: '', text: '', icon: IconAlertTriangle };
+      return { ...base, dataTone: 'warning', icon: IconAlertTriangle };
     case 'info':
-      return { bg: 'rcm-notice rcm-notice-info', hoverBg: '', text: '', icon: IconInfoCircle };
+      return { ...base, dataTone: 'info', icon: IconInfoCircle };
     case 'secondary':
     case 'primary':
     case 'dark':
-      return { bg: 'rcm-notice', hoverBg: '', text: '', icon: IconInfoCircle };
+      return { ...base, dataTone: undefined, icon: IconInfoCircle };
     default:
-      return { bg: 'rcm-notice rcm-notice-info', hoverBg: '', text: '', icon: IconInfoCircle };
+      return { ...base, dataTone: 'info', icon: IconInfoCircle };
   }
 };
 
-// 색상별 인디케이터 스타일 (알림 요약 헤더의 점)
+// 색상 → data-tone 값 매핑 (알림 요약 헤더의 인디케이터 점)
+export const getIndicatorTone = (color: string): 'info' | 'success' | 'warning' | 'error' => {
+  switch (color) {
+    case 'danger':
+      return 'error';
+    case 'warning':
+      return 'warning';
+    case 'success':
+      return 'success';
+    default:
+      return 'info';
+  }
+};
+
+// Deprecated: legacy class-name mapping, kept for backward-compat of public API.
+// JSX now prefers `getIndicatorTone` + `data-tone`.
 export const getColorIndicator = (color: string): string => {
   switch (color) {
     case 'danger':

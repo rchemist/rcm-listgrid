@@ -376,8 +376,8 @@ export const CardItem: React.FC<CardItemProps> = ({
       `}>
         <div className="rcm-card-item-body">
           <div className="rcm-card-item-skel-stack">
-            <div className="rcm-card-item-skel-line rcm-card-item-skel-line-title" />
-            <div className="rcm-card-item-skel-line rcm-card-item-skel-line-subtitle" />
+            <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-title" data-shape="line" />
+            <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-subtitle" data-shape="line" />
           </div>
         </div>
       </article>
@@ -397,7 +397,7 @@ export const CardItem: React.FC<CardItemProps> = ({
         <div className="rcm-card-item-header-row">
           <div className="rcm-card-item-header-left">
             <div className="rcm-card-item-title-row">
-              <h3 className={`rcm-card-item-title ${cardConfig?.titleClassName ?? ''}`}>
+              <h3 className={`rcm-text rcm-card-item-title ${cardConfig?.titleClassName ?? ''}`} data-weight="semibold">
                 {title}
               </h3>
               {statusInfo && (
@@ -431,7 +431,7 @@ export const CardItem: React.FC<CardItemProps> = ({
             )}
             {onClick && (
               <div className="rcm-card-item-chevron-wrap">
-                <IconChevronRight className="rcm-card-item-chevron-icon" stroke={2} />
+                <IconChevronRight className="rcm-icon" data-size="md" data-tone="disabled" stroke={2} />
               </div>
             )}
           </div>
@@ -461,12 +461,12 @@ export const CardItem: React.FC<CardItemProps> = ({
           <div className="rcm-card-item-skel-stack">
             {[1, 2].map((i) => (
               <div key={i} className="rcm-card-item-skel-group">
-                <div className="rcm-card-item-skel-line rcm-card-item-skel-line-title" />
+                <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-title" data-shape="line" />
                 <div className="rcm-card-item-skel-rows">
                   {[1, 2, 3].map((j) => (
                     <div key={j} className="rcm-card-item-skel-row">
-                      <div className="rcm-card-item-skel-line rcm-card-item-skel-line-label" />
-                      <div className="rcm-card-item-skel-line rcm-card-item-skel-line-value" />
+                      <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-label" data-shape="line" />
+                      <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-value" data-shape="line" />
                     </div>
                   ))}
                 </div>
@@ -474,7 +474,7 @@ export const CardItem: React.FC<CardItemProps> = ({
             ))}
           </div>
         ) : fieldGroups.length === 0 && subCollections.length === 0 ? (
-          <p className="rcm-card-item-empty">
+          <p className="rcm-text rcm-card-item-empty" data-tone="disabled">
             표시할 필드가 없습니다
           </p>
         ) : (
@@ -503,7 +503,7 @@ export const CardItem: React.FC<CardItemProps> = ({
                     <div key={`subcollection_${collection.getName()}`} className="rcm-card-item-sub">
                       {/* SubCollection Label */}
                       {!hideLabel && label && (
-                        <h4 className="rcm-card-item-sub-label">
+                        <h4 className="rcm-text rcm-card-item-sub-label" data-weight="semibold">
                           {typeof label === 'string' ? label : label}
                         </h4>
                       )}

@@ -96,7 +96,7 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
   return (
     <div className="rcm-import-sample">
       <div className="rcm-import-sample-guide">
-        <p className="rcm-import-sample-guide-text">
+        <p className="rcm-text" data-size="sm" data-tone="muted">
           {t('form.list.dataTransfer.tab.import.messages.guide')}
         </p>
         <SampleDataButton exportKey={exportKey} setExportKey={setExportKey}
@@ -144,7 +144,7 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
                         <Table.Td align="center" key={`body_${field.getName()}_${index + 1}`}
                           className="rcm-import-sample-td">
                           <div className='rcm-import-sample-td-id'>
-                            <span className="rcm-import-sample-td-id-label">{`ID 값`}</span>
+                            <span className="rcm-text" data-size="sm" data-tone="muted" style={{whiteSpace: 'nowrap'}}>{`ID 값`}</span>
                             <Tooltip zIndex={10000} label='값이 있으면 UPDATE, 없으면 INSERT'>
                               <IconHelpCircle className='rcm-import-sample-td-id-help' />
                             </Tooltip>

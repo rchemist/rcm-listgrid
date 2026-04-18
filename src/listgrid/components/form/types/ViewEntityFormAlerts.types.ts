@@ -16,10 +16,18 @@ export interface ViewEntityFormAlertsProps {
 }
 
 export interface AlertStyles {
+  /**
+   * @deprecated Use `className` + `dataTone`. Kept for backward-compatibility;
+   * now returns `'rcm-notice'` without tone modifier classes.
+   */
   bg: string;
   hoverBg: string;
   text: string;
   icon: FC<any>;
+  /** Primitive class to apply on the alert root (`rcm-notice`). */
+  className: string;
+  /** Value for the `data-tone` attribute on the alert root, or undefined for neutral. */
+  dataTone?: 'info' | 'success' | 'warning' | 'error';
 }
 
 export interface AlertItemProps {

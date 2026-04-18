@@ -70,24 +70,27 @@ const FieldSelectorInner = ({
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="rcm-field-selector-header-left">
-          <span className="rcm-field-selector-title">검색 필드 선택</span>
-          <span className="rcm-field-selector-count">
+          <span className="rcm-text" data-weight="medium">검색 필드 선택</span>
+          <span className="rcm-badge" data-color="primary" data-size="sm">
             {selectedCount}/{totalCount}
           </span>
         </div>
         <div className="rcm-field-selector-header-right">
           {!isExpanded && selectedCount > 0 && (
-            <span className="rcm-field-selector-hint">
+            <span className="rcm-text" data-size="xs" data-tone="muted">
               {selectedCount}개 선택됨
             </span>
           )}
           <button
             type="button"
-            className="rcm-field-selector-toggle"
+            className="rcm-icon-btn"
+            data-size="sm"
             aria-label={isExpanded ? '접기' : '펼치기'}
           >
             <svg
-              className={`rcm-field-selector-chevron ${isExpanded ? 'rcm-rotate-180' : ''}`}
+              className={`rcm-icon ${isExpanded ? 'rcm-rotate-180' : ''}`}
+              data-size="sm"
+              data-tone="muted"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -109,26 +112,31 @@ const FieldSelectorInner = ({
           {/* Search and actions */}
           <div className="rcm-field-selector-search-row">
             <div className="rcm-field-selector-search-input-wrap">
-              <IconSearch className="rcm-field-selector-search-icon" />
+              <IconSearch className="rcm-icon rcm-field-selector-search-icon" data-size="sm" data-tone="muted" />
               <input
                 type="text"
                 placeholder="필드 검색..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="rcm-field-selector-search-input"
+                className="rcm-input"
+                data-size="sm"
               />
             </div>
             <button
               type="button"
               onClick={onSelectAll}
-              className="rcm-field-selector-action rcm-field-selector-action-primary"
+              className="rcm-button"
+              data-variant="ghost"
+              data-size="sm"
             >
               전체 선택
             </button>
             <button
               type="button"
               onClick={onDeselectAll}
-              className="rcm-field-selector-action rcm-field-selector-action-muted"
+              className="rcm-button"
+              data-variant="ghost"
+              data-size="sm"
             >
               전체 해제
             </button>
@@ -146,10 +154,12 @@ const FieldSelectorInner = ({
                     key={fieldName}
                     type="button"
                     onClick={() => onToggleField(fieldName)}
-                    className={`rcm-field-selector-chip ${isSelected ? 'rcm-field-selector-chip-selected' : ''}`}
+                    className="rcm-chip"
+                    data-interactive
+                    data-state={isSelected ? 'selected' : undefined}
                   >
                     <span className={`rcm-field-selector-chip-check ${isSelected ? 'rcm-field-selector-chip-check-selected' : ''}`}>
-                      {isSelected && <IconCheck className="rcm-field-selector-chip-check-icon" />}
+                      {isSelected && <IconCheck className="rcm-icon rcm-field-selector-chip-check-icon" data-size="xs" />}
                     </span>
                     <span className="rcm-truncate">{field.viewLabel(t)}</span>
                   </button>
@@ -158,9 +168,9 @@ const FieldSelectorInner = ({
             </div>
 
             {filteredFields.length === 0 && (
-              <div className="rcm-field-selector-empty">
+              <span className="rcm-text rcm-field-selector-empty" data-tone="muted">
                 검색 결과가 없습니다
-              </div>
+              </span>
             )}
           </div>
         </div>

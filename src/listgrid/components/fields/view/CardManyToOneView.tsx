@@ -490,9 +490,13 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
           className={cardConfig?.selectedContainerClassName ?? "rcm-card-m2o rcm-card-m2o-selected"}
         >
           {/* 선택 체크 아이콘 */}
-          <div className={cardConfig?.checkIconClassName ?? "rcm-card-m2o-check"}>
+          <span
+            className={cardConfig?.checkIconClassName ?? "rcm-card-m2o-check rcm-icon-frame"}
+            data-shape="circle"
+            data-color="success"
+          >
             <IconCheck size={14} />
-          </div>
+          </span>
 
           {/* 이미지 영역 */}
           {image && (
@@ -503,19 +507,29 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
 
           {/* 라벨(뱃지) */}
           {!isBlank(label) && (
-            <span className={cardConfig?.labelClassName ?? "rcm-card-m2o-badge rcm-card-m2o-badge-primary"}>
+            <span
+              className={cardConfig?.labelClassName ?? "rcm-badge"}
+              data-color="primary"
+            >
               {label}
             </span>
           )}
 
           {/* 타이틀 */}
-          <h4 className={cardConfig?.titleClassName ?? "rcm-card-m2o-title"}>
+          <h4
+            className={cardConfig?.titleClassName ?? "rcm-text"}
+            data-weight="semibold"
+          >
             {getTitle(item)}
           </h4>
 
           {/* 설명 */}
           {!isBlank(description) && (
-            <p className={cardConfig?.descriptionClassName ?? "rcm-card-m2o-description"}>
+            <p
+              className={cardConfig?.descriptionClassName ?? "rcm-card-m2o-description rcm-text"}
+              data-tone="muted"
+              data-size="sm"
+            >
               {description}
             </p>
           )}
@@ -549,9 +563,13 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
         >
           {/* 선택 체크 아이콘 */}
           {selected && (
-            <div className={cardConfig?.checkIconClassName ?? "rcm-card-m2o-check"}>
+            <span
+              className={cardConfig?.checkIconClassName ?? "rcm-card-m2o-check rcm-icon-frame"}
+              data-shape="circle"
+              data-color="success"
+            >
               <IconCheck size={14} />
-            </div>
+            </span>
           )}
 
           {/* 이미지 영역 */}
@@ -563,19 +581,29 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
 
           {/* 라벨(뱃지) */}
           {!isBlank(label) && (
-            <span className={cardConfig?.labelClassName ?? "rcm-card-m2o-badge rcm-card-m2o-badge-neutral"}>
+            <span
+              className={cardConfig?.labelClassName ?? "rcm-badge"}
+              data-color="neutral"
+            >
               {label}
             </span>
           )}
 
           {/* 타이틀 */}
-          <h4 className={cardConfig?.titleClassName ?? "rcm-card-m2o-title rcm-card-m2o-title-sm"}>
+          <h4
+            className={cardConfig?.titleClassName ?? "rcm-card-m2o-title-sm rcm-text"}
+            data-weight="semibold"
+          >
             {getTitle(item)}
           </h4>
 
           {/* 설명 */}
           {!isBlank(description) && (
-            <p className={cardConfig?.descriptionClassName ?? "rcm-card-m2o-description rcm-card-m2o-description-clamp"}>
+            <p
+              className={cardConfig?.descriptionClassName ?? "rcm-card-m2o-description rcm-card-m2o-description-clamp rcm-text"}
+              data-tone="muted"
+              data-size="sm"
+            >
               {description}
             </p>
           )}
@@ -632,7 +660,9 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
           <button
             type="button"
             onClick={handleToggleChange}
-            className="rcm-card-m2o-action-btn rcm-card-m2o-action-btn-primary"
+            className="rcm-button"
+            data-variant="outline"
+            data-size="sm"
           >
             <IconEdit size={16} />
             변경
@@ -640,7 +670,8 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
           <button
             type="button"
             onClick={handleClear}
-            className="rcm-card-m2o-action-btn rcm-card-m2o-action-btn-muted"
+            className="rcm-button"
+            data-size="sm"
           >
             <IconX size={16} />
             선택 해제
@@ -656,11 +687,15 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
       {/* 변경 모드 헤더 */}
       {isChanging && selectedItem && (
         <div className="rcm-card-m2o-change-header">
-          <span className="rcm-card-m2o-change-title">다른 항목을 선택해주세요</span>
+          <h4 className="rcm-text" data-weight="semibold">
+            다른 항목을 선택해주세요
+          </h4>
           <button
             type="button"
             onClick={handleToggleChange}
-            className="rcm-card-m2o-change-cancel"
+            className="rcm-button"
+            data-variant="ghost"
+            data-size="sm"
           >
             취소
           </button>
@@ -672,20 +707,27 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
         <div className="rcm-card-m2o-search-section">
           <div className="rcm-card-m2o-search-row">
             <div className="rcm-card-m2o-search-input-wrap">
-              <IconSearch size={18} className="rcm-card-m2o-search-icon" />
+              <IconSearch
+                size={18}
+                className="rcm-card-m2o-search-icon rcm-icon"
+                data-size="sm"
+                data-tone="muted"
+              />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
                 placeholder={searchPlaceholder ?? "검색어를 입력하세요..."}
-                className="rcm-card-m2o-search-input"
+                className="rcm-card-m2o-search-input rcm-input"
+                data-size="sm"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => { setSearchQuery(""); setItems([]); setHasSearched(false); setCurrentPage(0); }}
-                  className="rcm-card-m2o-search-clear"
+                  className="rcm-card-m2o-search-clear rcm-icon-btn"
+                  data-size="sm"
                 >
                   <IconX size={16} />
                 </button>
@@ -695,7 +737,9 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
               type="button"
               onClick={() => handleServerSearch(searchQuery)}
               disabled={isSearching || isBlank(searchQuery.trim())}
-              className="rcm-card-m2o-search-submit"
+              className="rcm-button"
+              data-variant="primary"
+              data-size="sm"
             >
               {isSearching ? (
                 <div className="rcm-card-m2o-spinner rcm-card-m2o-spinner-inverse" />
@@ -706,9 +750,9 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
             </button>
           </div>
           {(hasSearched || isSearching) && (
-            <div className="rcm-card-m2o-search-status">
+            <span className="rcm-card-m2o-search-status rcm-text" data-size="xs" data-tone="muted">
               {isSearching ? '검색 중...' : `검색 결과: ${items.length}건`}
-            </div>
+            </span>
           )}
         </div>
       )}
@@ -717,27 +761,34 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
       {!searchFirst && needsPagination && (
         <div className="rcm-card-m2o-search-section">
           <div className="rcm-card-m2o-search-input-wrap">
-            <IconSearch size={18} className="rcm-card-m2o-search-icon" />
+            <IconSearch
+              size={18}
+              className="rcm-card-m2o-search-icon rcm-icon"
+              data-size="sm"
+              data-tone="muted"
+            />
             <input
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
               placeholder="이름으로 검색..."
-              className="rcm-card-m2o-search-input"
+              className="rcm-card-m2o-search-input rcm-input"
+              data-size="sm"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => { setSearchQuery(""); setCurrentPage(0); }}
-                className="rcm-card-m2o-search-clear"
+                className="rcm-card-m2o-search-clear rcm-icon-btn"
+                data-size="sm"
               >
                 <IconX size={16} />
               </button>
             )}
           </div>
-          <div className="rcm-card-m2o-search-status">
+          <span className="rcm-card-m2o-search-status rcm-text" data-size="xs" data-tone="muted">
             총 {filteredItems.length}개 {searchQuery && `(검색결과)`}
-          </div>
+          </span>
         </div>
       )}
 
@@ -745,8 +796,15 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
       {/* searchFirst 모드: 검색 전에는 안내 메시지 표시 */}
       {searchFirst && !hasSearched ? (
         <div className="rcm-card-m2o-search-empty">
-          <IconSearch size={32} className="rcm-card-m2o-search-empty-icon" />
-          <p className="rcm-card-m2o-search-empty-text">검색어를 입력하고 검색 버튼을 클릭하세요</p>
+          <IconSearch
+            size={32}
+            className="rcm-card-m2o-search-empty-icon rcm-icon"
+            data-size="lg"
+            data-tone="disabled"
+          />
+          <p className="rcm-text" data-tone="muted">
+            검색어를 입력하고 검색 버튼을 클릭하세요
+          </p>
         </div>
       ) : paginatedItems.length > 0 ? (
         <div
@@ -793,27 +851,34 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
             type="button"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 0}
-            className="rcm-card-m2o-page-nav"
+            className="rcm-icon-btn"
+            data-size="sm"
           >
             <IconChevronLeft size={18} />
           </button>
           <div className="rcm-card-m2o-page-numbers">
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => handlePageChange(i)}
-                className={`rcm-card-m2o-page ${currentPage === i ? 'rcm-card-m2o-page-active' : ''}`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            {Array.from({ length: totalPages }, (_, i) => {
+              const isActive = currentPage === i;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handlePageChange(i)}
+                  className="rcm-button"
+                  data-variant={isActive ? 'primary' : 'ghost'}
+                  data-size="sm"
+                >
+                  {i + 1}
+                </button>
+              );
+            })}
           </div>
           <button
             type="button"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage >= totalPages - 1}
-            className="rcm-card-m2o-page-nav"
+            className="rcm-icon-btn"
+            data-size="sm"
           >
             <IconChevronRight size={18} />
           </button>

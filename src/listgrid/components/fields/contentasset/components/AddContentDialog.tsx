@@ -105,8 +105,8 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
   return (
     <div className="rcm-ca-dialog">
       <div>
-        <label className="rcm-ca-item-label">
-          제목 <span className="rcm-ca-required">*</span>
+        <label className="rcm-label">
+          제목 <span className="rcm-text" data-color="error">*</span>
         </label>
         <div onBlur={handleTitleBlur} onKeyPress={handleKeyPress}>
           <TextInput
@@ -118,13 +118,13 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
           />
         </div>
         {titleError && (
-          <p className="rcm-ca-item-error-msg">{titleError}</p>
+          <p className="rcm-text" data-color="error" data-size="sm">{titleError}</p>
         )}
       </div>
 
       <div>
-        <label className="rcm-ca-item-label">
-          설명 <span className="rcm-ca-optional">(선택사항)</span>
+        <label className="rcm-label">
+          설명 <span className="rcm-text" data-tone="muted" data-size="xs">(선택사항)</span>
         </label>
         <Textarea
           name="content"

@@ -480,7 +480,7 @@ export const AdvancedSearchFormV2 = ({
               <div className="rcm-adv-search-header">
                 <div className="rcm-adv-search-header-left">
                   <IconSearch className="rcm-adv-search-header-icon" />
-                  <h4 className="rcm-adv-search-title">통합 검색</h4>
+                  <span className="rcm-text" data-size="md" data-weight="semibold">통합 검색</span>
                   <span className="rcm-adv-search-count">
                     {displayFields.length}개 필드
                   </span>
@@ -528,7 +528,7 @@ export const AdvancedSearchFormV2 = ({
                     value={state.quickSearchValue}
                     onChange={(e) => handleQuickSearchValueChange(e.target.value)}
                     placeholder={`${quickSearchLabel} 중 아무거나 입력...`}
-                    className="rcm-adv-search-qs-input"
+                    className="rcm-input"
                   />
                   <p className="rcm-adv-search-qs-description">
                     입력한 검색어가 {quickSearchLabel} 중 하나라도 포함되면 검색됩니다 (OR 조건)

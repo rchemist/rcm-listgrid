@@ -664,44 +664,7 @@
         gap: var(--rcm-space-sm);
     }
 
-    .rcm-field-selector-title {
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        color: var(--rcm-color-text);
-    }
-
-    .rcm-field-selector-count {
-        font-size: var(--rcm-font-size-xs);
-        background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
-        color: var(--rcm-color-primary);
-        padding: 0.125rem var(--rcm-space-sm);
-        border-radius: 9999px;
-    }
-
-    .rcm-field-selector-hint {
-        font-size: var(--rcm-font-size-xs);
-        color: var(--rcm-color-text-muted);
-    }
-
-    .rcm-field-selector-toggle {
-        padding: var(--rcm-space-xs);
-        background: transparent;
-        border: 0;
-        border-radius: var(--rcm-radius-md);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-field-selector-toggle:hover {
-        background: var(--rcm-color-surface-muted);
-    }
-
-    .rcm-field-selector-chevron {
-        width: 1rem;
-        height: 1rem;
-        color: var(--rcm-color-text-muted);
-        transition: transform var(--rcm-transition-fast);
-    }
+    /* .rcm-field-selector-title / -count / -hint / -toggle / -chevron removed — JSX uses rcm-text / rcm-badge / rcm-icon-btn / rcm-icon primitives. */
 
     .rcm-field-selector-body {
         border-top: var(--rcm-border-width) solid var(--rcm-color-border);
@@ -725,52 +688,9 @@
         left: var(--rcm-space-sm);
         top: 50%;
         transform: translateY(-50%);
-        width: 1rem;
-        height: 1rem;
-        color: var(--rcm-color-text-muted);
     }
 
-    .rcm-field-selector-search-input {
-        width: 100%;
-        padding: 0.375rem 0.75rem 0.375rem 2rem;
-        font-size: var(--rcm-font-size-sm);
-        color: var(--rcm-color-text);
-        background: var(--rcm-color-surface);
-        border: var(--rcm-border-width) solid var(--rcm-color-border);
-        border-radius: var(--rcm-radius-md);
-    }
-
-    .rcm-field-selector-search-input:focus {
-        outline: none;
-        border-color: var(--rcm-color-primary);
-    }
-
-    .rcm-field-selector-action {
-        padding: var(--rcm-space-xs) var(--rcm-space-sm);
-        font-size: var(--rcm-font-size-xs);
-        background: transparent;
-        border: 0;
-        border-radius: var(--rcm-radius-md);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast), color var(--rcm-transition-fast);
-    }
-
-    .rcm-field-selector-action-primary {
-        color: var(--rcm-color-primary);
-    }
-
-    .rcm-field-selector-action-primary:hover {
-        background: color-mix(in srgb, var(--rcm-color-primary) 5%, transparent);
-    }
-
-    .rcm-field-selector-action-muted {
-        color: var(--rcm-color-text-muted);
-    }
-
-    .rcm-field-selector-action-muted:hover {
-        background: var(--rcm-color-surface-muted);
-        color: var(--rcm-color-text);
-    }
+    /* .rcm-field-selector-search-input / -action* removed — JSX uses rcm-input / rcm-button primitives. */
 
     .rcm-field-selector-list {
         max-height: 12rem;
@@ -796,30 +716,7 @@
         }
     }
 
-    .rcm-field-selector-chip {
-        display: flex;
-        align-items: center;
-        gap: 0.375rem;
-        padding: 0.375rem var(--rcm-space-sm);
-        font-size: var(--rcm-font-size-xs);
-        background: var(--rcm-color-surface-muted);
-        color: var(--rcm-color-text-muted);
-        border: var(--rcm-border-width) solid transparent;
-        border-radius: var(--rcm-radius-md);
-        text-align: left;
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-field-selector-chip:hover {
-        background: var(--rcm-color-surface-hover);
-    }
-
-    .rcm-field-selector-chip-selected {
-        background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
-        color: var(--rcm-color-primary);
-        border-color: color-mix(in srgb, var(--rcm-color-primary) 30%, transparent);
-    }
+    /* .rcm-field-selector-chip / -chip-selected removed — JSX uses rcm-chip data-state="selected". */
 
     .rcm-field-selector-chip-check {
         flex-shrink: 0;
@@ -838,16 +735,12 @@
     }
 
     .rcm-field-selector-chip-check-icon {
-        width: 0.75rem;
-        height: 0.75rem;
         color: var(--rcm-color-primary-text);
     }
 
     .rcm-field-selector-empty {
         text-align: center;
         padding: var(--rcm-space-lg);
-        font-size: var(--rcm-font-size-sm);
-        color: var(--rcm-color-text-muted);
     }
 
     /* ------------------------------------------------------------------ *
@@ -1043,31 +936,7 @@
         object-fit: cover;
     }
 
-    .rcm-card-m2o-badge {
-        display: inline-block;
-        margin-bottom: var(--rcm-space-sm);
-        padding: 0.125rem var(--rcm-space-sm);
-        font-size: var(--rcm-font-size-xs);
-        font-weight: var(--rcm-font-weight-medium);
-        border-radius: 9999px;
-    }
-
-    .rcm-card-m2o-badge-primary {
-        background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
-        color: var(--rcm-color-primary);
-    }
-
-    .rcm-card-m2o-badge-neutral {
-        background: var(--rcm-color-surface-muted);
-        color: var(--rcm-color-text-muted);
-    }
-
-    .rcm-card-m2o-title {
-        font-size: var(--rcm-font-size-md);
-        font-weight: var(--rcm-font-weight-semibold);
-        color: var(--rcm-color-text);
-        margin: 0;
-    }
+    /* .rcm-card-m2o-badge / -badge-primary / -badge-neutral / -title removed — JSX uses rcm-badge + rcm-text. */
 
     .rcm-card-m2o-title-sm {
         font-size: var(--rcm-font-size-sm);
@@ -1097,37 +966,7 @@
         gap: var(--rcm-space-md);
     }
 
-    .rcm-card-m2o-action-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        padding: 0.375rem 0.75rem;
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        background: transparent;
-        border: var(--rcm-border-width) solid;
-        border-radius: var(--rcm-radius-lg);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-card-m2o-action-btn-primary {
-        color: var(--rcm-color-primary);
-        border-color: var(--rcm-color-primary);
-    }
-
-    .rcm-card-m2o-action-btn-primary:hover {
-        background: color-mix(in srgb, var(--rcm-color-primary) 5%, transparent);
-    }
-
-    .rcm-card-m2o-action-btn-muted {
-        color: var(--rcm-color-text-muted);
-        border-color: var(--rcm-color-border-hover);
-    }
-
-    .rcm-card-m2o-action-btn-muted:hover {
-        background: var(--rcm-color-surface-hover);
-    }
+    /* .rcm-card-m2o-action-btn* removed — JSX uses rcm-button data-variant primitive. */
 
     .rcm-card-m2o-loading {
         display: flex;
@@ -1167,24 +1006,7 @@
         border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
     }
 
-    .rcm-card-m2o-change-title {
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        color: var(--rcm-color-text);
-    }
-
-    .rcm-card-m2o-change-cancel {
-        font-size: var(--rcm-font-size-sm);
-        color: var(--rcm-color-text-muted);
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-        transition: color var(--rcm-transition-fast);
-    }
-
-    .rcm-card-m2o-change-cancel:hover {
-        color: var(--rcm-color-text);
-    }
+    /* .rcm-card-m2o-change-title / -change-cancel removed — JSX uses rcm-text + rcm-button. */
 
     .rcm-card-m2o-search-section {
         margin-bottom: var(--rcm-space-lg);
@@ -1242,29 +1064,7 @@
         color: var(--rcm-color-text);
     }
 
-    .rcm-card-m2o-search-submit {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        padding: 0.625rem 1rem;
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        color: var(--rcm-color-primary-text);
-        background: var(--rcm-color-primary);
-        border: 0;
-        border-radius: var(--rcm-radius-lg);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-card-m2o-search-submit:hover:not(:disabled) {
-        background: var(--rcm-color-primary-hover);
-    }
-
-    .rcm-card-m2o-search-submit:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+    /* .rcm-card-m2o-search-submit removed — JSX uses rcm-button data-variant="primary". */
 
     .rcm-card-m2o-search-status {
         margin-top: var(--rcm-space-sm);
@@ -1286,9 +1086,7 @@
         opacity: 0.5;
     }
 
-    .rcm-card-m2o-search-empty-text {
-        font-size: var(--rcm-font-size-sm);
-    }
+    /* .rcm-card-m2o-search-empty-text removed — JSX uses rcm-text. */
 
     .rcm-card-m2o-grid {
         display: grid;
@@ -1312,23 +1110,7 @@
         gap: var(--rcm-space-sm);
     }
 
-    .rcm-card-m2o-page-nav {
-        padding: 0.375rem;
-        border: var(--rcm-border-width) solid var(--rcm-color-border-hover);
-        border-radius: var(--rcm-radius-lg);
-        background: transparent;
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-card-m2o-page-nav:hover:not(:disabled) {
-        background: var(--rcm-color-surface-hover);
-    }
-
-    .rcm-card-m2o-page-nav:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
+    /* .rcm-card-m2o-page-nav removed — JSX uses rcm-icon-btn. */
 
     .rcm-card-m2o-page-numbers {
         display: flex;
@@ -1336,32 +1118,7 @@
         gap: 0.25rem;
     }
 
-    .rcm-card-m2o-page {
-        min-width: 2rem;
-        height: 2rem;
-        padding: 0 var(--rcm-space-sm);
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        background: transparent;
-        border: 0;
-        border-radius: var(--rcm-radius-lg);
-        color: var(--rcm-color-text-muted);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-card-m2o-page:hover {
-        background: var(--rcm-color-surface-hover);
-    }
-
-    .rcm-card-m2o-page-active {
-        background: var(--rcm-color-primary);
-        color: var(--rcm-color-primary-text);
-    }
-
-    .rcm-card-m2o-page-active:hover {
-        background: var(--rcm-color-primary-hover);
-    }
+    /* .rcm-card-m2o-page / -page-active removed — JSX uses rcm-button data-variant. */
 
     /* ------------------------------------------------------------------ *
      * CardItem — 리스트 카드 variant (group hover + header + tabs + body)
@@ -1433,11 +1190,7 @@
 
     .rcm-card-item-chevron-wrap { padding: 0.375rem; }
 
-    .rcm-card-item-chevron-icon {
-        width: 1rem;
-        height: 1rem;
-        color: var(--rcm-color-text-disabled);
-    }
+    /* .rcm-card-item-chevron-icon removed — JSX uses rcm-icon data-size data-tone. */
 
     .rcm-card-item-tabbar {
         padding: 0.75rem 1.25rem 0;
@@ -1637,12 +1390,7 @@
         color: var(--rcm-color-primary);
     }
 
-    .rcm-adv-search-title {
-        margin: 0;
-        font-size: var(--rcm-font-size-md);
-        font-weight: var(--rcm-font-weight-semibold);
-        color: var(--rcm-color-text);
-    }
+    /* .rcm-adv-search-title removed — JSX uses rcm-text data-weight="semibold". */
 
     .rcm-adv-search-count {
         font-size: var(--rcm-font-size-xs);
@@ -1720,22 +1468,7 @@
         margin-bottom: 0.375rem;
     }
 
-    .rcm-adv-search-qs-input {
-        width: 100%;
-        padding: 0 0.75rem;
-        height: var(--rcm-size-input-height);
-        font-size: var(--rcm-font-size-sm);
-        background: var(--rcm-color-surface);
-        border: var(--rcm-border-width) solid var(--rcm-color-border-hover);
-        border-radius: var(--rcm-radius-md);
-        box-shadow: var(--rcm-shadow-sm);
-    }
-
-    .rcm-adv-search-qs-input:focus {
-        outline: none;
-        border-color: var(--rcm-color-primary);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--rcm-color-primary) 20%, transparent);
-    }
+    /* .rcm-adv-search-qs-input removed — JSX uses rcm-input primitive. */
 
     .rcm-adv-search-qs-description {
         margin-top: 0.25rem;
@@ -1847,15 +1580,7 @@
         gap: var(--rcm-space-sm);
     }
 
-    .rcm-revision-diff-indicator {
-        display: inline-block;
-        width: 0.75rem;
-        height: 0.75rem;
-        border-radius: 2px;
-        background: color-mix(in srgb, var(--rcm-color-warning) 30%, transparent);
-        border-left: 2px solid var(--rcm-color-warning);
-        flex-shrink: 0;
-    }
+    /* .rcm-revision-diff-indicator removed — JSX uses rcm-icon-frame data-color="warning". */
 
     .rcm-revision-diff-labels {
         margin-top: 0.375rem;
@@ -1878,19 +1603,10 @@
         color: var(--rcm-color-text-muted);
     }
 
-    .rcm-revision-state-icon {
-        width: 1.25rem;
-        height: 1.25rem;
-        color: var(--rcm-color-text-disabled);
-    }
+    /* .rcm-revision-state-icon / -state-text removed — JSX uses rcm-icon + rcm-text. */
 
     .rcm-revision-state-icon-spin {
         animation: rcm-spin 1s linear infinite;
-    }
-
-    .rcm-revision-state-text {
-        font-size: var(--rcm-font-size-sm);
-        color: var(--rcm-color-text-muted);
     }
 
     .rcm-revision-wrap {
@@ -1955,14 +1671,7 @@
         gap: 0.75rem;
     }
 
-    .rcm-revision-item-name {
-        font-weight: var(--rcm-font-weight-medium);
-    }
-
-    .rcm-revision-item-date {
-        font-size: var(--rcm-font-size-xs);
-        color: var(--rcm-color-text-muted);
-    }
+    /* .rcm-revision-item-name / -item-date removed — JSX uses rcm-text. */
 
     /* .rcm-revision-badge* removed — JSX uses rcm-badge data-color primitive. */
 
@@ -1995,9 +1704,7 @@
         text-align: center;
     }
 
-    .rcm-ca-empty-text {
-        color: var(--rcm-color-text-muted);
-    }
+    /* .rcm-ca-empty-text removed — JSX uses rcm-text data-tone="muted". */
 
     .rcm-ca-add-btn {
         margin: var(--rcm-space-lg) auto 0;
@@ -2017,10 +1724,7 @@
         background: var(--rcm-color-primary-hover);
     }
 
-    .rcm-ca-add-btn-text {
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-    }
+    /* .rcm-ca-add-btn-text removed — JSX uses plain span inheriting from parent button. */
 
     .rcm-ca-add-btn-row {
         display: flex;
@@ -2055,27 +1759,9 @@
 
     .rcm-ca-item-title-col { flex: 1; }
 
-    .rcm-ca-item-label {
-        display: block;
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        color: var(--rcm-color-text);
-        margin-bottom: 0.25rem;
-    }
-
-    .rcm-ca-required { color: var(--rcm-color-error); }
-    .rcm-ca-optional {
-        color: var(--rcm-color-text-disabled);
-        font-size: var(--rcm-font-size-xs);
-    }
+    /* .rcm-ca-item-label / -required / -optional / -item-error-msg removed — JSX uses rcm-label / rcm-text primitives. */
 
     .rcm-ca-input-error { border-color: var(--rcm-color-error) !important; }
-
-    .rcm-ca-item-error-msg {
-        margin-top: 0.25rem;
-        font-size: var(--rcm-font-size-xs);
-        color: var(--rcm-color-error);
-    }
 
     .rcm-ca-item-remove-wrap { padding-top: 1.5rem; }
 
@@ -2085,10 +1771,7 @@
         margin-top: var(--rcm-space-sm);
     }
 
-    .rcm-ca-error {
-        color: var(--rcm-color-error);
-        font-size: var(--rcm-font-size-sm);
-    }
+    /* .rcm-ca-error removed — JSX uses rcm-text data-color="error" data-size="sm". */
 
     .rcm-ca-dialog {
         display: flex;
@@ -2121,10 +1804,7 @@
         padding: var(--rcm-space-lg) var(--rcm-space-lg);
     }
 
-    .rcm-import-sample-guide-text {
-        font-size: var(--rcm-font-size-sm);
-        color: var(--rcm-color-text);
-    }
+    /* .rcm-import-sample-guide-text removed — JSX uses rcm-text data-size="sm" data-tone="muted". */
 
     .rcm-import-sample-required-notice {
         display: flex;
@@ -2209,11 +1889,7 @@
         gap: 0.25rem;
     }
 
-    .rcm-import-sample-td-id-label {
-        font-size: var(--rcm-font-size-sm);
-        color: var(--rcm-color-text-muted);
-        white-space: nowrap;
-    }
+    /* .rcm-import-sample-td-id-label removed — JSX uses rcm-text data-size="sm" data-tone="muted" + inline nowrap. */
 
     .rcm-import-sample-td-id-help {
         width: 1rem;
@@ -2248,12 +1924,7 @@
         padding-top: 1.5rem;
     }
 
-    .rcm-importer-section-title {
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        color: var(--rcm-color-text);
-        margin: 0 0 0.75rem 0;
-    }
+    /* .rcm-importer-section-title removed — JSX uses rcm-text data-weight="semibold". */
 
     .rcm-importer-description {
         padding: 1rem;
@@ -4007,10 +3678,7 @@
     .rcm-alerts-indicator-success { background: var(--rcm-color-success); }
     .rcm-alerts-indicator-info    { background: var(--rcm-color-info); }
 
-    .rcm-alerts-header-title {
-        font-weight: var(--rcm-font-weight-medium);
-        color: var(--rcm-color-text);
-    }
+    /* .rcm-alerts-header-title removed — JSX uses rcm-text data-weight="medium". */
 
     /* .rcm-alerts-toggle / -chevron removed — JSX uses rcm-icon-btn + rcm-icon. */
 
@@ -4059,37 +3727,9 @@
         flex: 1;
     }
 
-    .rcm-alert-item-icon {
-        width: 1.25rem;
-        height: 1.25rem;
-        margin-top: 0.125rem;
-        flex-shrink: 0;
-    }
+    /* .rcm-alert-item-icon / -message / -description / -external* removed — JSX uses rcm-icon / rcm-text / rcm-button[data-variant="link"]. */
 
     .rcm-alert-item-body { flex: 1; }
-
-    .rcm-alert-item-message {
-        font-weight: var(--rcm-font-weight-medium);
-    }
-
-    .rcm-alert-item-description {
-        margin-top: var(--rcm-space-xs);
-        font-size: var(--rcm-font-size-sm);
-    }
-
-    .rcm-alert-item-external {
-        margin-left: var(--rcm-space-sm);
-        display: inline-flex;
-        align-items: center;
-        gap: var(--rcm-space-xs);
-    }
-
-    .rcm-alert-item-external:hover { text-decoration: underline; }
-
-    .rcm-alert-item-external-icon {
-        width: 0.75rem;
-        height: 0.75rem;
-    }
 
     /* .rcm-alert-item-close / -close-icon removed — JSX uses rcm-icon-btn + rcm-icon. */
 

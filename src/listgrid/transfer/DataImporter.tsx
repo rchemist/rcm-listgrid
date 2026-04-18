@@ -405,7 +405,7 @@ export const DataImporter = (props: ImporterProps) => {
         <div className="rcm-importer-body">
           <DataImportSample fields={fields} sampleData={sampleData} sampleFileName={props.sampleFileName} allowUpdate={allowUpdate}/>
           <div className="rcm-importer-section">
-            <h3 className="rcm-importer-section-title">
+            <h3 className="rcm-text" data-weight="semibold">
               {t('form.list.dataTransfer.tab.import.file.label') || '업로드할 파일 선택'}
             </h3>
             <FileUploadInput

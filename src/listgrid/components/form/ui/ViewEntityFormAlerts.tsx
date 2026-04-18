@@ -9,7 +9,7 @@ import React from "react";
 import {IconChevronDown, IconChevronUp} from "@tabler/icons-react";
 import {getTranslation} from "../../../utils/i18n";
 import {ViewEntityFormAlertsProps} from "../types/ViewEntityFormAlerts.types";
-import {getColorIndicator, useAlertManager} from "../hooks/useAlertManager";
+import {getColorIndicator, getIndicatorTone, useAlertManager} from "../hooks/useAlertManager";
 import {AlertItem} from "./AlertItem";
 
 export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({ 
@@ -59,9 +59,16 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
         onClick={toggleCollapse}
       >
         <div className="rcm-alerts-header-left">
-          {/* 색상 인디케이터 점 */}
-          <div className={`rcm-alerts-indicator ${getColorIndicator(dominantColor)}`} />
-          <span className="rcm-alerts-header-title">
+          {/* 색상 인디케이터 점 — rcm-icon-frame (circle/xs) primitive + legacy tone class.
+              data-tone 는 향후 primitives.css 확장 대비로 함께 emit. */}
+          <span
+            className={`rcm-icon-frame rcm-alerts-indicator ${getColorIndicator(dominantColor)}`}
+            data-shape="circle"
+            data-size="xs"
+            data-tone={getIndicatorTone(dominantColor)}
+            aria-hidden="true"
+          />
+          <span className="rcm-text" data-weight="medium">
             알림 ({visibleAlerts.length})
           </span>
         </div>
