@@ -245,9 +245,9 @@
 
     .rcm-button:disabled,
     .rcm-button[data-state="disabled"] {
-        color: var(--rcm-color-text-disabled);
-        background: var(--rcm-color-surface-disabled);
+        opacity: 0.5;
         cursor: not-allowed;
+        pointer-events: none;
     }
 
     .rcm-button[data-variant="primary"] {
