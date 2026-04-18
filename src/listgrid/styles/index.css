@@ -19,4 +19,5 @@
  */
 
 @import "./tokens.css";
+@import "./primitives.css";
 @import "./base.css";
