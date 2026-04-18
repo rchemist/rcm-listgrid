@@ -1,6 +1,6 @@
 {
     "name": "@rcm/listgrid",
-    "version": "0.1.0-alpha.39",
+    "version": "0.1.0-alpha.40",
     "private": true,
     "description": "Generic ListGrid engine — reusable CRUD UI engine for the RCM-framework backend",
     "license": "UNLICENSED",
