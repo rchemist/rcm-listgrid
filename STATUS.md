@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.36 — Phase 6 잔여 8 블록 병렬 + Phase 7 파일 분리 + Phase 8 theme cleanup 한 턴 완료)
+마지막 업데이트: 2026-04-18 (alpha.40 — 라이브러리 JSX Tailwind/gjcu-custom 전량 제거. **framework-free 달성**)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,7 +8,13 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.36` (CSS 리팩터 Phase 6 잔여 + Phase 7 base.css 파일 분리 + Phase 8 theme cleanup 완료, HTTP 303 검증 완료)
+**배포된 현재 버전**: `v0.1.0-alpha.40` (alpha.37~39 시각 회귀 수정 + alpha.40 Tailwind 전량 제거로 framework-free 달성)
+
+**alpha.37~40 하이라이트**:
+- alpha.37: ManyToOneView 찾기 버튼 색상 + SearchBarActions 우측 정렬 fix
+- alpha.38: `--rcm-color-secondary` (#805dca 보라) 토큰 추가 + ManyToOne addon 전용 rcm-* 클래스 + modal searchbar 레이아웃 fix
+- alpha.39: AdvancedSearch 그리드를 container query 로 전환 (모달 2 cols cap, 풀스크린 3 cols)
+- alpha.40: **Tailwind/gjcu-custom 하드코딩 전량 제거** — 3 병렬 에이전트로 list/form/fields 블록 분담, 메인이 fallback 정리. 최종 grep 검증 0건.
 
 **CSS 최종 파일 구조** (alpha.36):
 - `tokens.css` 110줄 (디자인 토큰)
@@ -83,7 +89,11 @@
 | 0.1.0-alpha.33 | CSS 리팩터 Phase 6 1차 — dead CSS 삭제. base.css 4,960 → 4,896 (−64) | ✅ 안정 |
 | 0.1.0-alpha.34 | CSS 리팩터 Phase 6 2차 — icon-btn 전환 묶음 (FilterDropdown/AlertItem/Alerts/PhoneNumber/Copy) | ✅ 안정 |
 | 0.1.0-alpha.35 | CSS 리팩터 Phase 6 3차 — ContentAssetItem remove 버튼 → rcm-icon-btn data-color="error". RevisionField badges/chips → rcm-badge + rcm-tag data-color. base.css ~4,780 → ~4,740 | ✅ 안정 |
-| **0.1.0-alpha.36** | **한 턴 대규모 완료** — Phase 6 잔여 8 블록 병렬 에이전트 (CardM2O/CardItem/AdvSearch/Revision/FieldSelector/DataImport/ContentAsset/Alerts) composite → primitive (base.css 4,750 → 4,390). Phase 7: base.css 를 layouts.css (2,912줄) + components.css (1,456줄) + base.css (100줄) 로 분리. Phase 8: defaultListGridTheme/defaultTheme/subCollectionTheme 의 legacy button variant string 정리 + components.css 의 .rcm-button-{primary,outline,danger,secondary,sm,icon} 규칙 완전 삭제 (components.css 1,456 → 1,386). | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.36 | 한 턴 대규모 완료 — Phase 6 잔여 8 블록 병렬 + Phase 7 파일 분리 + Phase 8 theme cleanup | ✅ 안정 |
+| 0.1.0-alpha.37 | 시각 회귀 1차 fix — ManyToOneView 찾기 버튼 색/크기 + SearchBarActions 우측 정렬 | ✅ 안정 |
+| 0.1.0-alpha.38 | 시각 회귀 2차 fix — --rcm-color-secondary 토큰 (#805dca 보라) + ManyToOne addon 재구현 + modal searchbar 레이아웃 | ✅ 안정 |
+| 0.1.0-alpha.39 | AdvancedSearch 그리드 container query 전환 (모달 2 cols cap) | ✅ 안정 |
+| **0.1.0-alpha.40** | **framework-free 달성** — JSX 잔여 Tailwind/gjcu-custom 하드코딩 전량 제거. 3 병렬 에이전트 (list/form/fields). 최종 grep 0건. 신규 rcm-* 규칙 ~30개 추가 (create-step-*, form-footer, m2o-input/wrap, asset-*, entire-checker-placeholder, field-focus-ring 등). | ✅ **현재 설치 대상** |
 
 ---
 

@@ -464,6 +464,19 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #63 alpha.37~40 시각 회귀 fix + framework-free 달성
+
+alpha.36 배포 후 사용자 수동 QA 에서 3 건 회귀 발견, alpha.37~39 에서 순차 수정:
+- ManyToOneView 찾기 버튼 색상 (Primary(파랑) → Secondary(보라 #805dca)). gjcu 원본의 `bg-secondary` 색 토큰을 rcm 에 미이식했던 것이 원인. `--rcm-color-secondary` 신규 토큰 + `.rcm-m2o-action-btn` / `.rcm-m2o-addon` / `.rcm-m2o-addon-btn` 재정의로 대응.
+- SearchBarActions 우측 정렬 실패. `.rcm-listgrid-searchbar` 의 `display: flex` 가 modal 테마 (innerWrapper 빈 문자열) 에서 자식 div 를 자연 너비로 쪼그라뜨려 `rcm-row-between` 의 space-between 이 동작 안 함. `display: flex` → `width: 100%` 블록 전환.
+- AdvancedSearch 그리드가 모달에서도 1280px media query 로 3 columns 됨. `@media` → `@container` query 전환으로 해결. `.rcm-adv-search-inner` 에 `container-type: inline-size` 지정, 640px (2 cols) / 1200px (3 cols) 컨테이너 breakpoint.
+
+alpha.40: 잔여 Tailwind/gjcu-custom 하드코딩 전량 제거. 3 블록 병렬 에이전트 (list/form/fields) + 메인 theme fallback 정리. 변경 파일 18, 신규 CSS 규칙 ~30. grep 최종 검증 결과 `src/**/*.tsx` 에서 Tailwind utility/gjcu-custom 참조 **0건**.
+
+**Why**: 오픈소스 품질 달성의 최대 블로커였음. 라이브러리가 Tailwind 설치 없이 정상 동작해야 함. 이번 작업으로 호스트는 `@rcm/listgrid/styles.css` 한 줄 import 만으로 완전 동작 확인.
+
+**검증 도구 개선 필요**: 시각 회귀 3건 모두 HTTP 303 통과 후 사용자 수동 QA 에서 발견. Playwright 스냅샷 regression suite 가 다음 세션 Top priority.
+
 ### #62 메인 세션 context 보호 원칙 공식화
 장기 리팩터 세션에서 "컴포넌트 소스 전체 읽기" 는 메인 context 폭증의 주범. 이번 세션에서 확립된 규칙:
 1. 컴포넌트 JSX 읽기 / CSS 블록 grep 은 **에이전트**가 수행
