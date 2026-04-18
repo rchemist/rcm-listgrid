@@ -464,6 +464,33 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #66 alpha.45 후속 정비 — ESLint v10 flat config + strict 옵션 + coverage 임계치
+
+alpha.45 배포 직후 CI/품질 gate 정비 3 건을 한 세션에 완료.
+
+1. **ESLint v10 flat config 마이그레이션**. `.eslintrc.json` 은 ESLint v9+ 에서 동작하지 않으나 CI 가 `|| echo "lint warnings"` 로 실패를 숨김 → 로컬/CI 모두 lint 실질 미작동 상태였음. 해결:
+   - `eslint.config.mjs` 신규 (flat 포맷). `@eslint/js`, `typescript-eslint`, `globals` 의존성 추가
+   - `react.version: 'detect'` → `'18.2'` 하드코드 (eslint-plugin-react 7.x 가 ESLint v10 의 context API 변경으로 detect 실패)
+   - **React Hooks v7 의 React Compiler 룰 비활성화**. `recommended` preset 에 포함된 `set-state-in-effect`, `preserve-manual-memoization`, `static-components` 등은 React Compiler 사용자용이며 기존 코드에서 45+9 개 cascading-render 에러 유발. Compiler 미사용 프로젝트에는 noise. `rules-of-hooks` + `exhaustive-deps` 만 유지
+   - 30 실제 에러 fix: no-duplicate-case 3 (common/func.ts 의 `case 'dark'` 중복), no-non-null-asserted-optional-chain 7 (`foo?.bar!` → `foo!.bar` 또는 `?? fallback`), no-useless-catch 3, no-useless-assignment 6, no-unused-expressions 2, no-var 1, no-wrapper-object-types 1 (`String` → `string`), rules-of-hooks 6 (4 곳은 useMemo 를 early return 앞으로 hoist, `mustRouter`/`mustUrlState` 2 곳은 eslint-disable + 이유 주석), preserve-caught-error 1 (`throw new Error(msg, { cause: e })`)
+   - CI: `npm run lint || echo` → `npm run lint` (실패 시 빌드 fail)
+
+2. **tsconfig strict 옵션 3 개 승격**. `strict: true` + `noImplicitAny: true` (alpha.45) 에 이어:
+   - `noImplicitReturns: true` — 2 useEffect 의 조건부 return 에 `return undefined` 명시
+   - `noFallthroughCasesInSwitch: true` — **0 errors, 무료 승격**
+   - 측정 후 미승격 (v0.3 backlog): `noUncheckedIndexedAccess` (118 errors, 배열/맵 index 전수 점검 필요), `exactOptionalPropertyTypes` (429 errors, optional prop 대거 보수)
+
+3. **Coverage baseline + CI 임계치**. 지금까지 coverage 측정은 가능했으나 CI 검증 없음 → 회귀 감지 불가. 해결:
+   - `vitest.config.ts` 에 thresholds 지정: statements 4% / branches 2% / functions 3% / lines 4% (baseline 4.52% / 2.42% / 3.91% / 4.65% 바로 아래)
+   - `package.json`: `test:coverage` 스크립트
+   - CI: `npm test` → `npm run test:coverage` 로 교체
+
+**Why**: alpha.45 에서 "v0.2 backlog 소진" 으로 v0.2 의 주요 타입 작업은 끝났으나, 실제 OSS 프로젝트 품질 게이트 3 개가 미작동이었음 (lint 미실행 / strict 옵션 제한 / coverage 임계치 없음). 이번 정비로 **CI 가 회귀를 실제로 감지** 하는 상태 달성. 이후부터는 기여자가 type / lint / coverage 중 어느 하나라도 깨면 PR 이 fail.
+
+**배포 필요성 판단**: 모든 변경이 dev-facing (CI / eslint / tsconfig strict / vitest threshold). 런타임 영향 0 — 소비자 (gjcu) 입장에서는 alpha.45 와 동일한 바이너리. 별도 alpha.46 배포 불필요.
+
+**v0.3 목표 갱신**: (1) coverage 점진 상향 (목표 20%+, Field/Config/Form 우선) (2) `noUncheckedIndexedAccess` 승격 (3) `exactOptionalPropertyTypes` 승격 (4) 잔여 의도된 any 를 generic refactor (EntityForm<T>/FieldValue<T>) 로 해소 (5) Playwright 스냅샷 regression suite (DECISIONS #63 권고).
+
 ### #65 alpha.45 — v0.2 backlog 소진 (테스트 포팅 + any 정리 + noImplicitAny)
 
 alpha.44 에서 연기한 v0.2 backlog 2 개를 한 세션에서 해소.
