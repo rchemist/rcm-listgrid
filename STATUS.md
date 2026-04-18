@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.31 — Phase 4 부분 / icon-frame + notice JSX → primitive 전환)
+마지막 업데이트: 2026-04-18 (alpha.32 — Phase 5 부분 / ViewTab → data-state 전환)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,9 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.31` (CSS 리팩터 Phase 4 부분 배포 — icon-frame + notice)
+**배포된 현재 버전**: `v0.1.0-alpha.32` (CSS 리팩터 Phase 5 부분 배포 — ViewTab data-state)
 
-**다음 작업**: **Phase 5 — Tab / Menu / FilterDropdown**. `rcm-tab-list`/`rcm-tab-selected` → `rcm-tab [data-state]`, `rcm-m2o-dropdown-*` + `rcm-phone-list-dropdown-*` → `rcm-menu` + `rcm-menu-item`, `rcm-filter-dropdown-*` → popover + menu. `REFACTOR_PLAN.md § Phase 5` 참조.
+**다음 작업**: **Phase 6 — 대규모 composite 블록 삭제**. `rcm-card-m2o-*`, `rcm-card-item-*`, `rcm-adv-search-*`, `rcm-revision-*`, `rcm-ca-*`, `rcm-alerts-*`, `rcm-alert-item-*`, `rcm-import-*` 등 블록을 한 번에 하나씩 JSX + base.css 동시 삭제. `REFACTOR_PLAN.md § Phase 6` 참조.
 
 **설계 문서 3종 (다음 세션 시작 시 이것부터 읽기)**:
 - `docs/REFACTOR_CURRENT_STATE.md` — 현재 CSS 인벤토리 + 문제 진단
@@ -63,7 +63,8 @@
 | 0.1.0-alpha.28 | CSS 리팩터 Phase 1 — `styles/primitives.css` 신규 (~1,250줄, 22 primitive + data-attr variants). JSX/TS 무변경. dormant | ✅ 안정 |
 | 0.1.0-alpha.29 | CSS 리팩터 Phase 2 — Button / Icon-button JSX 를 data-attr primitive 로 전환. 18 파일 | ✅ 안정 |
 | 0.1.0-alpha.30 | CSS 리팩터 Phase 3 — Input/Textarea/Select JSX → primitive | ✅ 안정 |
-| **0.1.0-alpha.31** | **CSS 리팩터 Phase 4 (부분)** — icon-frame + notice JSX 전환. 7 파일: BooleanField/NumberField/DateField/SelectField/StringField/ManyToOneField 의 `rcm-bool-icon-frame*` / `rcm-num-icon-frame*` / `rcm-date-icon-frame*` + `rcm-bool-icon*` + `rcm-bool-label*` → `rcm-icon-frame [data-color]` + `rcm-icon [data-size][data-tone][data-color]` + `rcm-text [data-weight][data-color][data-tone]`. DataExporter 의 `rcm-notice-{info,warning}` → `rcm-notice data-tone=...`. primitives.css `rcm-icon-frame` 디폴트 shape → rounded md + bg surface-muted, `rcm-text` 디폴트 font-size/line-height/color → inherit. 테마/AlertItem/fieldgroup 은 Phase 5~6 에서 | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.31 | CSS 리팩터 Phase 4 부분 — icon-frame + notice JSX 전환 | ✅ 안정 |
+| **0.1.0-alpha.32** | **CSS 리팩터 Phase 5 부분** — `ViewTab.tsx` 의 `rcm-tab-selected` / `rcm-tab-disabled` 클래스 하드코딩 제거 → `data-state` attr 로 전환. `rcm-card-item-tab*` 복합 클래스 (CardItem) + `rcm-m2o-dropdown-*` / `rcm-phone-list-dropdown-*` / `rcm-filter-dropdown-*` 은 Phase 6 composite 블록 삭제와 함께 일괄 처리 | ✅ **현재 설치 대상** |
 
 ---
 
@@ -98,8 +99,9 @@
 - ✅ Phase 2 (alpha.29) — 18 JSX 파일의 `rcm-button-{primary,outline,outline-danger,danger,secondary,sm,icon}` → `rcm-button data-variant=... data-color=... data-size=...` 전환. `rcm-card-item-action-btn*` → `rcm-icon-btn data-size="sm" data-color="error"`. 테마 파일은 Phase 8 유예.
 - ✅ Phase 3 (alpha.30) — JSX 의 `rcm-field-input` / `rcm-field-select` / `rcm-field-textarea` / `rcm-quick-search-input` → `rcm-input` / `rcm-select` / `rcm-textarea` primitive. 5 파일. primitives.css `rcm-input/textarea/select` 디폴트 font-size → sm, focus border-color → primary (현재 시각에 맞춤). Input group 내부 버튼 (addon) 은 Phase 5 에서 처리.
 - ✅ Phase 4 (alpha.31, 부분) — icon-frame + notice JSX 전환. Bool/Num/Date/Select/String/ManyToOne 필드의 `rcm-bool-icon-frame*` / `rcm-num-icon-frame*` / `rcm-date-icon-frame*` → `rcm-icon-frame [data-color]`. `rcm-bool-icon*` / `rcm-num-icon-*` / `rcm-date-icon` → `rcm-icon [data-size][data-tone][data-color]`. `rcm-bool-label*` → `rcm-text [data-weight][data-color][data-tone]`. DataExporter notice → data-tone. primitives.css 의 `rcm-icon-frame` 디폴트 shape → rounded + bg surface-muted, `rcm-text` 디폴트 → inherit (font-size/color 등). 테마 파일 / AlertItem / fieldgroup card 등 잔여 composite 은 Phase 5~6 에서.
-- ⏳ Phase 5 — Tab / Menu / FilterDropdown 전환 (다음 작업)
-- ⏳ Phase 6~9 — REFACTOR_PLAN.md 참조
+- ✅ Phase 5 (alpha.32, 부분) — `ViewTab.tsx` 에서 `rcm-tab-selected` / `rcm-tab-disabled` 하드코딩 제거 → `data-state="selected"|"disabled"`. 나머지 dropdown/card-item-tab 은 composite 제거와 동반 처리 예정.
+- ⏳ Phase 6 — 대규모 composite 블록 삭제 (다음 작업)
+- ⏳ Phase 7~9 — REFACTOR_PLAN.md 참조
 
 ### GlobalModalManager 포팅
 - `src/listgrid/ui/GlobalModalManager.tsx` — ManyToOneField 모달 렌더러

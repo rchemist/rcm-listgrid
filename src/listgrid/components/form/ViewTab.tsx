@@ -79,18 +79,20 @@ export const ViewTab = ({id, tabIndex, label, setTabIndex, entityForm, createSte
    * @returns {JSX.Element} - 버튼 렌더링
    */
   function ShowButton(selected: boolean) {
-    // 클래스 조합 — rcm-tab / rcm-tab-selected / rcm-tab-disabled 은 base.css 에서 전담
+    // primitive + data-state: rcm-tab 기본 + [data-state="selected"|"disabled"]
     let buttonClass = cn('rcm-tab', classNames.tabs?.tab);
     if (selected) {
-      buttonClass = cn(`${buttonClass} rcm-tab-selected`, classNames.tabs?.tabSelected);
+      buttonClass = cn(buttonClass, classNames.tabs?.tabSelected);
     }
     if (!hasContent) {
-      buttonClass = cn(`${buttonClass} rcm-tab-disabled`, classNames.tabs?.tabDisabled);
+      buttonClass = cn(buttonClass, classNames.tabs?.tabDisabled);
     }
+    const dataState = !hasContent ? 'disabled' : selected ? 'selected' : undefined;
 
     return <div style={{display: hasContent ? 'block' : 'none'}}>
       <button
         className={buttonClass}
+        data-state={dataState}
         onClick={() => {
           if (hasContent) {
             setTabIndex?.(id)
