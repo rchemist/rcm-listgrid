@@ -9,6 +9,7 @@ import {isEmpty} from "../../../utils";
 import {EntityButtonLinkProps, RenderType} from '../../../config/Config';
 import {openToast} from "../../../message";
 import {Session} from '../../../auth/types';
+import type {RouterApi} from '../../../router';
 
 /**
  * Custom hook for handling save/delete logic of EntityForm.
@@ -35,7 +36,7 @@ export const useEntityFormSave = ({
   isSubCollectionEntity: boolean,
   renderType: RenderType | undefined,
   pathname: string,
-  router: any,
+  router: RouterApi,
   buttonLinks?: EntityButtonLinkProps,
   postSave?: (entityForm: EntityForm) => Promise<EntityForm>,
   setEntityForm: (entityForm: EntityForm) => void,
@@ -64,7 +65,7 @@ export const useEntityFormSave = ({
       const context: ClientExtensionContext = {
         session,
         user: session?.getUser(),
-        entityForm: entityForm as any
+        entityForm: entityForm
       };
       
       // Pre Extension 실행 (Create/Update 구분)
@@ -87,7 +88,7 @@ export const useEntityFormSave = ({
         const context: ClientExtensionContext = {
           session,
           user: session?.getUser(),
-          entityForm: finalEntityForm as any
+          entityForm: finalEntityForm
         };
         
         const extensionPoint = renderType === 'update' ? ExtensionPoint.POST_UPDATE : ExtensionPoint.POST_CREATE;

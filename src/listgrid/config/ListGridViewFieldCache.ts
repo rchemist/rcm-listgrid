@@ -10,11 +10,10 @@ import {parse, stringify} from '../utils/jsonUtils';
 const cacheKey = 'listGridViewFields';
 
 class CacheContext {
-  public static create(value: any): CacheContext {
+  public static create(value: string | null): CacheContext {
     const cache = new CacheContext();
-    const data = parse(value);
-
     if (value) {
+      const data = parse(value);
       cache.data = new Map<string, string[]>(Object.entries(data.data));
     }
 

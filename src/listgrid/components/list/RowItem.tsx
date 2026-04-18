@@ -101,7 +101,7 @@ export const RowItem = (props: ViewRowItemProps) => {
 
   }
 
-  function checkItem(id: any) {
+  function checkItem(id: string) {
     const items: string[] = [...checkedItems];
     if (items.includes(id)) {
       setCheckedItems?.(items.filter(item => item !== id));

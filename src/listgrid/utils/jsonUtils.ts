@@ -29,7 +29,7 @@ export function reviver(_key: string, value: unknown): unknown {
   return value;
 }
 
-function mapReplacer(_key: any, value: any) {
+function mapReplacer(_key: string, value: unknown): unknown {
   if (value instanceof Map) {
     return Object.fromEntries(value);
   } else if (value instanceof Set) {
@@ -39,11 +39,11 @@ function mapReplacer(_key: any, value: any) {
   return value
 }
 
-export function stringify(obj: any, beautify?: boolean): string {
+export function stringify(obj: unknown, beautify?: boolean): string {
   // Circular reference를 처리하기 위한 WeakSet
-  const seen = new WeakSet();
+  const seen = new WeakSet<object>();
 
-  const circularSafeReplacer = (key: string, value: any) => {
+  const circularSafeReplacer = (key: string, value: unknown): unknown => {
     // 먼저 mapReplacer 적용
     const mappedValue = mapReplacer(key, value);
 
@@ -53,10 +53,10 @@ export function stringify(obj: any, beautify?: boolean): string {
     }
 
     // Circular reference 체크
-    if (seen.has(mappedValue)) {
+    if (seen.has(mappedValue as object)) {
       return '[Circular Reference]';
     }
-    seen.add(mappedValue);
+    seen.add(mappedValue as object);
 
     return mappedValue;
   };
@@ -72,17 +72,20 @@ export function stringify(obj: any, beautify?: boolean): string {
   }
 }
 
-const simpleStringify = (object: any) => {
+const simpleStringify = (object: Record<string, unknown>): string => {
   for (const eachIdx in object) {
     if (object[eachIdx] instanceof Map) {
-      object[eachIdx] = Array.from(object[eachIdx]);
+      object[eachIdx] = Array.from(object[eachIdx] as Map<unknown, unknown>);
       simpleStringify(object);
-    } else if (typeof object[eachIdx] == 'object') simpleStringify(object[eachIdx]);
+    } else if (typeof object[eachIdx] == 'object' && object[eachIdx] !== null) {
+      simpleStringify(object[eachIdx] as Record<string, unknown>);
+    }
   }
   return JSON.stringify(object);
 };
 
-export function parse(str: string) {
+// intentional: JSON.parse returns arbitrary data and consumers dereference fields directly
+export function parse(str: string): any {
   return JSON.parse(str, reviver);
 }
 

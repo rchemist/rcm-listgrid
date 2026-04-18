@@ -41,7 +41,7 @@ export const SubCollectionRenderer = ({collection, entityForm, session}: SubColl
 
   // 서브콜렉션 렌더링, 마운트 상태, 도움말 상태
   // State for sub-collection view, mounted state, and help text
-  const [view, setView] = useState<any>(null);
+  const [view, setView] = useState<ReactNode>(null);
   const [mounted, setMounted] = useState(false);
   const [helpText, setHelpText] = useState<ReactNode>(null);
 

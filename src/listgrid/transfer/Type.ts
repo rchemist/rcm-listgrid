@@ -151,7 +151,7 @@ export interface ImportTransferConfig extends TransferConfig {
   sampleData?: SampleDataItem[][];
 
   // 엑셀 업로드 시 파싱 결과 조작 - 업로드가 끝난 후 업로드 된 결과를 가지고 추가 처리를 해야 할 때 사용한다.
-  overrideParseResult?: (formData: DataRowSet, response: any) => { success: boolean, result: DataTransferResult, error?: string, errorView?: ReactNode };
+  overrideParseResult?: (formData: DataRowSet, response: unknown) => { success: boolean, result: DataTransferResult, error?: string, errorView?: ReactNode };
 
   mode?: {
     create?: boolean;
@@ -173,7 +173,7 @@ export interface TransferConfig {
   url?: string;
 
   // 엑셀 업로드/다운로드 시 모달 창 하단 설명
-  description?: any;
+  description?: ReactNode;
 
   // 엑셀 데이터가 formData 로 저장된 후 실제 API 를 호출하기 전에 formData 에 필드를 추가할 수 있다.
   // formData 자체를 조작하는 overrideFormData 와 달리 row 단위로 실행되며 단순히 필드를 추가할 때 쉽게 사용하기 위해 추가한다.
@@ -270,7 +270,7 @@ export class DataTransferConfig implements IDataTransferConfig {
     return this;
   }
 
-  withImportSampleData(importSampleData: any[]): DataTransferConfig {
+  withImportSampleData(importSampleData: SampleDataItem[][]): DataTransferConfig {
     if (this.import) {
       this.import.sampleData = importSampleData;
     } else {
@@ -364,7 +364,7 @@ export class DataTransferConfig implements IDataTransferConfig {
     return fields.filter((field) => field.getName() !== 'id');
   }
 
-  withExportDescription(description: any): DataTransferConfig {
+  withExportDescription(description: ReactNode): DataTransferConfig {
     if (this.export) {
       this.export.description = description;
     } else {
@@ -373,7 +373,7 @@ export class DataTransferConfig implements IDataTransferConfig {
     return this;
   }
 
-  withImportDescription(description: any): DataTransferConfig {
+  withImportDescription(description: ReactNode): DataTransferConfig {
     if (this.import) {
       this.import.description = description;
     } else {
@@ -382,7 +382,7 @@ export class DataTransferConfig implements IDataTransferConfig {
     return this;
   }
 
-  withImportOverrideParseResult(overrideParseResult: (formData: any, response: any) => { success: boolean, result: DataTransferResult }): DataTransferConfig {
+  withImportOverrideParseResult(overrideParseResult: (formData: DataRowSet, response: unknown) => { success: boolean, result: DataTransferResult, error?: string, errorView?: ReactNode }): DataTransferConfig {
     if (this.import) {
       this.import.overrideParseResult = overrideParseResult;
     } else {
@@ -632,7 +632,8 @@ export interface DataExportCount {
 }
 
 export interface DataExportResult {
-  data: any;
+  // Raw server page payload — shape determined by host API (DECISIONS #21).
+  data: unknown;
   page: number;
 }
 
@@ -649,7 +650,7 @@ export function createFieldMap(...fields: DataField[]): Map<string, DataField> {
 
 
 
-export function getExportFileName(exportFileName: string | undefined, translation: any) {
+export function getExportFileName(exportFileName: string | undefined, translation: (key: string) => string) {
 
   let fileName = exportFileName || 'export_file'
 
@@ -681,20 +682,20 @@ export function getExportFileName(exportFileName: string | undefined, translatio
 }
 
 // 타입 가드 함수들
-export function isDataColumn(value: any): value is DataColumn {
-  return value && typeof value.name === 'string' && 'value' in value;
+export function isDataColumn(value: unknown): value is DataColumn {
+  return !!value && typeof value === 'object' && typeof (value as DataColumn).name === 'string' && 'value' in value;
 }
 
-export function isDataRow(value: any): value is DataRow {
+export function isDataRow(value: unknown): value is DataRow {
   return Array.isArray(value) && value.every(isDataColumn);
 }
 
-export function isDataRowSet(value: any): value is DataRowSet {
+export function isDataRowSet(value: unknown): value is DataRowSet {
   return Array.isArray(value) && value.every(isDataRow);
 }
 
-export function isSampleDataItem(value: any): value is SampleDataItem {
-  return value && typeof value.name === 'string' && 'value' in value;
+export function isSampleDataItem(value: unknown): value is SampleDataItem {
+  return !!value && typeof value === 'object' && typeof (value as SampleDataItem).name === 'string' && 'value' in value;
 }
 
 

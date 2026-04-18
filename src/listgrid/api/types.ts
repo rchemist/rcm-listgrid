@@ -11,22 +11,25 @@
 
 export interface IEntityError {
     error: IEntityErrorBody;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface IEntityErrorBody {
     error?: boolean | string;
     message?: string;
     fieldError?: Map<string, string[]> | Record<string, string[]>;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 // ResponseData is a class so call sites can `new ResponseData()` to construct
 // synthetic responses (e.g. client-side 500s when session is missing).
 // The original @gjcu/ui ResponseData was also a class; instance methods like
 // `isError()` are preserved.
+// T defaults to `any` — legacy callers dereference `response.data.field` directly
+// (see DECISIONS #21 / generic entity payload). Tightening to `unknown` breaks
+// downstream components outside this B-1 scope.
 export class ResponseData<T = any> {
-    data: T = null as any;
+    data: T = null as T;
     status?: number;
     error?: string;
     entityError?: IEntityError;
@@ -41,5 +44,5 @@ export class ResponseData<T = any> {
 }
 
 export function createResponseData<T = any>(init: Partial<ResponseData<T>> & { data?: T }): ResponseData<T> {
-    return new ResponseData<T>(init as any);
+    return new ResponseData<T>(init);
 }

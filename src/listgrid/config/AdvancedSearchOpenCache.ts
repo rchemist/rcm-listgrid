@@ -8,11 +8,10 @@
 import {parse, stringify} from '../utils/jsonUtils';
 
 class CacheContext {
-  public static create(value: any): CacheContext {
+  public static create(value: string | null): CacheContext {
     const cache = new CacheContext();
-    const data = parse(value);
-
     if (value) {
+      const data = parse(value);
       cache.data = new Map<string, boolean>(Object.entries(data.data));
     }
 

@@ -21,7 +21,8 @@ export interface DatetimeFilterProps extends FilterRenderParameters{
 
 
 export const DatetimeFilter = (props: DatetimeFilterProps) => {
-  const [value, setValue] = useState<any>();
+  // value is either a Promise<any> from filter framework or Date[] from handleValueChange
+  const [value, setValue] = useState<unknown>();
 
   function handleValueChange(type: DefinedDateType) {
     const values = getDefinedDates(type);

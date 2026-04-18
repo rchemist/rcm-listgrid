@@ -91,7 +91,7 @@ export const LinkFieldView = (props: LinkFieldProps) => {
   );
 }
 
-function setValidatedValue(props: LinkFieldProps, value: string, setValue: React.Dispatch<any>) {
+function setValidatedValue(props: LinkFieldProps, value: string, setValue: React.Dispatch<React.SetStateAction<string>>) {
   let acceptable = true;
   let errorMessage: string = 'form.save.error.invalid';
   if (props.regex !== undefined) {

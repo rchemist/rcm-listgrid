@@ -18,13 +18,13 @@ import {
   WindowPositionType
 } from "./type";
 
-const valign: any = {
+const valign: Record<string, string> = {
   top: 'items-start',
   center: 'items-center',
   bottom: 'items-end',
 }
 
-const justifyAlign: any = {
+const justifyAlign: Record<string, string> = {
   left: 'justify-start',
   center: 'justify-center',
   right: 'justify-end',
@@ -239,11 +239,11 @@ export function getGutterValue(gutter: GutterType): string {
 }
 
 export function getResponsiveClasses(
-  value: ResponsiveValue<any>,
+  value: ResponsiveValue<string | number>,
   prefix: string,
-  valueMap?: Record<string, string> | ((val: any) => string)
+  valueMap?: Record<string, string> | ((val: string | number) => string)
 ): string {
-  const getValue = (val: any): string => {
+  const getValue = (val: string | number): string => {
     if (typeof valueMap === 'function') {
       return valueMap(val);
     }

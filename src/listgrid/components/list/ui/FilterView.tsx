@@ -2,7 +2,7 @@
 import {QueryConditionType} from "../../../form/SearchForm";
 import {EntityForm} from '../../../config/EntityForm';
 import {isTrue} from '../../../utils/BooleanUtil';
-import {useEffect, useState} from "react";
+import {ReactNode, useEffect, useState} from "react";
 import {ListableFormField} from "../../fields/abstract";
 
 interface FilterViewProps {
@@ -15,7 +15,7 @@ interface FilterViewProps {
   
   export const FilterView = ({entityForm, field, value, resetValue, onChange}: FilterViewProps) => {
   
-    const [view, setView] = useState<any>(undefined);
+    const [view, setView] = useState<ReactNode>(undefined);
   
     useEffect(() => {
       if (field.isFilterable()) {

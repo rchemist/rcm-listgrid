@@ -7,7 +7,7 @@
 
 import {isTrue} from "./BooleanUtil";
 
-export function isNulls(value: any, other: any): boolean {
+export function isNulls(value: unknown, other: unknown): boolean {
   if (value === undefined && other === undefined) {
     return true;
   }
@@ -30,7 +30,7 @@ export function isNulls(value: any, other: any): boolean {
   return false;
 }
 
-export function isEquals(value: any, other: any): boolean {
+export function isEquals(value: unknown, other: unknown): boolean {
   const isNull = isNulls(value, other);
 
   if (isNull) {
@@ -44,10 +44,12 @@ export function isEquals(value: any, other: any): boolean {
   if (typeof value === 'object' && typeof other === 'object' &&
       value !== null && other !== null &&
       !Array.isArray(value) && !Array.isArray(other)) {
-    const keysA = Object.keys(value);
-    const keysB = Object.keys(other);
+    const a = value as Record<string, unknown>;
+    const b = other as Record<string, unknown>;
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
     if (keysA.length !== keysB.length) return false;
-    return keysA.every(key => keysB.includes(key) && isEquals(value[key], other[key]));
+    return keysA.every(key => keysB.includes(key) && isEquals(a[key], b[key]));
   }
 
   return false;
@@ -62,7 +64,7 @@ export function isEqualsIgnoreCase(value: string | null | undefined, other: stri
   return value!.toLowerCase() === other!.toLowerCase();
 }
 
-export function isEqualCollection(value: any[], other: any[], ignoreOrder: boolean = false): boolean {
+export function isEqualCollection(value: unknown[], other: unknown[], ignoreOrder: boolean = false): boolean {
   if (value.length !== other.length) {
     return false;
   }
@@ -74,7 +76,7 @@ export function isEqualCollection(value: any[], other: any[], ignoreOrder: boole
   return value.every((v, i) => isEquals(v, other[i]));
 }
 
-export function isEmpty(collection: Map<any, any> | any[] | undefined): boolean {
+export function isEmpty(collection: Map<unknown, unknown> | unknown[] | undefined | null): boolean {
   if (collection === undefined || collection === null) {
     return true;
   }

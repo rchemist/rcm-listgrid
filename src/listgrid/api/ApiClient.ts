@@ -18,14 +18,16 @@ export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 export interface ApiRequestOptions {
     url: string;
     method?: ApiMethod;
-    formData?: any;
+    // intentional: arbitrary form payload (FormData / object / primitive)
+    formData?: unknown;
     entityFormName?: string;
     extensionPoint?: string;
     serverProxy?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface ApiClient {
+    // T defaults to `any` — legacy callers dereference response.data.field directly
     callExternalHttpRequest<T = any>(options: ApiRequestOptions): Promise<ResponseData<T>>;
     // `getExternalApiData(urlOrOptions)` accepts either a bare URL string or a full
     // options object, matching the original @gjcu/ui API. Implementations should

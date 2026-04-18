@@ -21,6 +21,7 @@ import {RegexValidation} from '../../validations/RegexValidation';
 import {readonlyClass} from "../../ui";
 import {formatPhoneNumber, removePhoneNumberHyphens} from "../../utils/PhoneUtil";
 import {RenderType} from '../../config/Config';
+import {EntityForm} from '../../config/EntityForm';
 
 interface TelephoneNumberFieldProps extends ListableFormFieldProps {
   validations?: Validation[];
@@ -155,13 +156,13 @@ export class TelephoneNumberField extends ListableFormField<TelephoneNumberField
   /**
    * TelephoneNumberField 표시값 가져오기 (하이픈 포맷팅)
    */
-  async getDisplayValue(entityForm: any, renderType?: RenderType): Promise<any> {
+  async getDisplayValue(entityForm: EntityForm, renderType?: RenderType): Promise<any> {
     if (this.displayFunc) {
       return this.displayFunc(entityForm, this, renderType);
     }
-    
+
     const value = await this.getCurrentValue(renderType);
-    
+
     // 하이픈 포맷팅 적용
     return formatPhoneNumber(value);
   }
@@ -169,7 +170,7 @@ export class TelephoneNumberField extends ListableFormField<TelephoneNumberField
   /**
    * TelephoneNumberField 저장값 가져오기 (하이픈 제거)
    */
-  async getSaveValue(entityForm: any, renderType?: RenderType): Promise<any> {
+  async getSaveValue(entityForm: EntityForm, renderType?: RenderType): Promise<any> {
     if (this.saveValue) {
       return this.saveValue(entityForm, this, renderType);
     }

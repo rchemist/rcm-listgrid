@@ -160,9 +160,10 @@ export const CardItem: React.FC<CardItemProps> = ({
 
     const statusField = itemEntityForm.fields.get('status');
     if (statusField && item.status) {
-      const options = (statusField as any).options;
+      // options is a SelectField-specific property not exposed on the base FormField type
+      const options = (statusField as { options?: { value: unknown; label: string }[] }).options;
       if (options && Array.isArray(options)) {
-        const option = options.find((opt: any) => opt.value === item.status);
+        const option = options.find((opt) => opt.value === item.status);
         if (option) {
           return { value: item.status, label: option.label };
         }

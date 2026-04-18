@@ -16,6 +16,7 @@ import {FieldRenderParameters} from '../../config/EntityField';
 import {getInputRendererParameters} from '../helper/FieldRendererHelper';
 import {formatPhoneNumber, removePhoneNumberHyphens} from "../../utils/PhoneUtil";
 import {RenderType} from '../../config/Config';
+import {EntityForm} from '../../config/EntityForm';
 import {PhoneNumberFieldView} from './view/PhoneNumberFieldView';
 import {PhoneNumberListView} from './view/PhoneNumberListView';
 
@@ -81,13 +82,13 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
   /**
    * PhoneNumberField 표시값 가져오기 (하이픈 포맷팅)
    */
-  async getDisplayValue(entityForm: any, renderType?: RenderType): Promise<any> {
+  async getDisplayValue(entityForm: EntityForm, renderType?: RenderType): Promise<any> {
     if (this.displayFunc) {
       return this.displayFunc(entityForm, this, renderType);
     }
-    
+
     const value = await this.getCurrentValue(renderType);
-    
+
     // 하이픈 포맷팅 적용
     return formatPhoneNumber(value);
   }
@@ -95,7 +96,7 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
   /**
    * PhoneNumberField 저장값 가져오기 (하이픈 제거)
    */
-  async getSaveValue(entityForm: any, renderType?: RenderType): Promise<any> {
+  async getSaveValue(entityForm: EntityForm, renderType?: RenderType): Promise<any> {
     if (this.saveValue) {
       return this.saveValue(entityForm, this, renderType);
     }

@@ -207,7 +207,7 @@ export const applyFullAddressFields = (entityForm: EntityForm, props?: FullAddre
     // - Some forms/pages can initialize current as empty, which makes required validation fail
     //   even though fetched data exists.
     // Here we force current address map value when fetched address fields exist.
-    const currentAddress: any = await entityForm.getValue(addressMapFieldName);
+    const currentAddress = await entityForm.getValue(addressMapFieldName) as { address1?: unknown } | undefined | null;
     const shouldForceCurrent =
       (!currentAddress || typeof currentAddress !== 'object')
       || (!isBlank(String(addressValue.address1 ?? '')) && isBlank(String(currentAddress.address1 ?? '')));

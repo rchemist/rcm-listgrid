@@ -46,6 +46,7 @@ export interface AbstractAddFieldProps {
 }
 
 export interface SubmitFormData {
+  // intentional: generic entity payload — callers know their own entity shape
   data: any;
   modifiedFields: string[];
   errors: FieldError[];

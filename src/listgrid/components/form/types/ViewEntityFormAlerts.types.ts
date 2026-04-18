@@ -6,7 +6,7 @@
  */
 
 import {AlertMessage, AlertMessageLink} from '../../../config/EntityFormTypes';
-import {FC} from "react";
+import {ComponentType, SVGProps} from "react";
 
 export interface ViewEntityFormAlertsProps {
   alertMessages: AlertMessage[];
@@ -23,7 +23,8 @@ export interface AlertStyles {
   bg: string;
   hoverBg: string;
   text: string;
-  icon: FC<any>;
+  /** Icon component (e.g. Tabler icons) — accepts standard SVG/icon props. */
+  icon: ComponentType<SVGProps<SVGSVGElement> & { size?: number | string; stroke?: number }>;
   /** Primitive class to apply on the alert root (`rcm-notice`). */
   className: string;
   /** Value for the `data-tone` attribute on the alert root, or undefined for neutral. */

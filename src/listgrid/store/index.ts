@@ -6,22 +6,24 @@
 // can keep their existing modal conventions.
 
 import { create } from 'zustand';
+import type { ReactNode } from 'react';
 
 export interface ModalOptions {
     modalId?: string;
-    title?: any;
-    size?: any;
+    title?: ReactNode;
+    size?: string;
     fullHeight?: boolean;
     maxHeight?: string;
-    content?: any;
+    content?: ReactNode;
     onClose?: () => void;
-    [key: string]: any;
+    // intentional: host apps extend with their own modal props (UIProvider wrapper)
+    [key: string]: unknown;
 }
 
 interface ModalManagerState {
     openModals: ModalOptions[];
     openModal: (options: ModalOptions) => string;
-    closeModal: (modalId?: string, ...rest: any[]) => void;
+    closeModal: (modalId?: string, ...rest: unknown[]) => void;
     closeTopModal: () => Promise<void>;
     findModal: (modalId: string) => ModalOptions | undefined;
     updateModalData: (modalId: string, data: Partial<ModalOptions>) => void;

@@ -5,15 +5,16 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ItemCheckable} from "../types/ViewListGrid.types";
+import {ItemCheckable, SelectionOptions} from "../types/ViewListGrid.types";
 import {isTrue} from '../../../utils/BooleanUtil';
 import {v1} from "uuid";
 
 interface EntireCheckerProps extends ItemCheckable {
   total: number;
-  listIds: any[];
+  listIds: string[];
   subCollection?: boolean;
-  selectionOptions?: any; // SelectionOptions
+  selectionOptions?: SelectionOptions;
+  // rows: generic entity payload kept as any[] per DECISIONS #21
   rows?: any[];
   showCheckboxInput?: boolean;
 }
@@ -21,11 +22,11 @@ interface EntireCheckerProps extends ItemCheckable {
 export const EntireChecker = ({ total, listIds, checkedItems, setCheckedItems, subCollection, selectionOptions, rows, showCheckboxInput }: EntireCheckerProps) => {
 
   // 선택 가능한 항목 필터링
-  const selectableIds = selectionOptions?.selectableFilter && rows
-    ? rows.filter(selectionOptions.selectableFilter).map((item: any) => item.id)
+  const selectableIds: string[] = selectionOptions?.selectableFilter && rows
+    ? rows.filter(selectionOptions.selectableFilter).map((item: { id: string }) => item.id)
     : listIds;
 
-  const checkAll = selectableIds.length > 0 && selectableIds.every((id: any) => checkedItems.includes(id));
+  const checkAll = selectableIds.length > 0 && selectableIds.every((id: string) => checkedItems.includes(id));
 
   function checkAllItems() {
     if (!selectionOptions?.selectableFilter) {
@@ -39,7 +40,7 @@ export const EntireChecker = ({ total, listIds, checkedItems, setCheckedItems, s
       // selectableFilter가 있을 때
       if (checkAll) {
         // 선택 가능한 항목들을 제거
-        const newCheckedItems = checkedItems.filter((id: any) => !selectableIds.includes(id));
+        const newCheckedItems = checkedItems.filter((id: string) => !selectableIds.includes(id));
         setCheckedItems?.(newCheckedItems);
       } else {
         // 선택 가능한 항목들을 추가

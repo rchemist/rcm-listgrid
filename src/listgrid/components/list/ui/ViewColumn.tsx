@@ -17,7 +17,7 @@ export const ViewColumn = ({
   onSelect,
   clickAccordion,
 }: RowItemProps) => {
-  const [views, setViews] = useState<any>();
+  const [views, setViews] = useState<ReactNode[] | undefined>();
   const { classNames: themeClasses } = useListGridTheme();
 
   const viewUrl = path + "/" + item.id;

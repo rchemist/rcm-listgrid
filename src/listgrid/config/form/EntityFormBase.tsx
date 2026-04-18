@@ -306,8 +306,9 @@ export abstract class EntityFormBase {
     return this.fetchedEntity;
   }
 
-  async getValues(): Promise<any> {
-    const values: any = {};
+  // intentional: values object is a generic entity payload
+  async getValues(): Promise<Record<string, any>> {
+    const values: Record<string, any> = {};
     for (const field of this.fields.values()) {
       values[field.getName()] = await field.getCurrentValue(this.getRenderType());
     }

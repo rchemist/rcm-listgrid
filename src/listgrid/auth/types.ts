@@ -6,7 +6,7 @@
 // to be present (host apps with plain session objects should wrap their data
 // before passing to AuthProvider).
 //
-// The [key: string]: any index signature lets host apps pass richer Session
+// The [key: string]: unknown index signature lets host apps pass richer Session
 // objects without type errors. ListGrid itself only reads the fields declared
 // explicitly below.
 
@@ -14,15 +14,15 @@ export interface SessionUser {
     id?: string | number;
     name?: string;
     roles?: string[];
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export interface Session {
     roles?: string[];
     authentication?: {
         roles?: string[];
-        [key: string]: any;
+        [key: string]: unknown;
     };
     getUser: () => SessionUser | null | undefined;
-    [key: string]: any;
+    [key: string]: unknown;
 }

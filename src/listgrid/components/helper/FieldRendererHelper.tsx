@@ -8,14 +8,13 @@ import {Tooltip} from "../../ui";
 import {Link} from "../../router";
 import {IconExternalLink} from "@tabler/icons-react";
 
-export async function getInputRendererParameters(field: FormField<any>, params: FieldRenderParameters, ...args: any[]) {
+export async function getInputRendererParameters(field: FormField<any>, params: FieldRenderParameters) {
     return {
       ...params,
       value: await field.getDisplayValue(params.entityForm, params.entityForm.getRenderType()),
       name: field.getName(),
       label: field.getLabel(),
       attributes: field.attributes,
-      ...args
     }
   }
   

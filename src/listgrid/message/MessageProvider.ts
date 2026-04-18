@@ -4,14 +4,17 @@
 // so we use a module-scope registry rather than React Context. Host apps invoke
 // `configureMessages({ ... })` at app bootstrap to inject concrete implementations.
 
+import type React from 'react';
+
+// intentional: host apps pass opaque options for their UI libraries (DECISIONS #21)
 export interface MessageServices {
-    showAlert(options: any): Promise<any>;
-    showConfirm(options: any): Promise<boolean>;
-    showSuccess(options: any): Promise<any> | any;
-    showToast(options: any): any;
-    showError(message: any): any;
-    openToast(options: any): any;
-    clearAllToasts(): any;
+    showAlert(options: unknown): Promise<unknown>;
+    showConfirm(options: unknown): Promise<boolean>;
+    showSuccess(options: unknown): Promise<unknown> | unknown;
+    showToast(options: unknown): unknown;
+    showError(message: unknown): unknown;
+    openToast(options: unknown): unknown;
+    clearAllToasts(): unknown;
 }
 
 // Default no-op implementations with console warnings.
@@ -48,29 +51,30 @@ export function configureMessages(services: Partial<MessageServices>): void {
 }
 
 // Thin wrapper functions matching the original @gjcu/ui/message/messageUtils API.
-export function showAlert(options: any): Promise<any> {
+export function showAlert(options: unknown): Promise<unknown> {
     return _services.showAlert(options);
 }
-export function showConfirm(options: any): Promise<boolean> {
+export function showConfirm(options: unknown): Promise<boolean> {
     return _services.showConfirm(options);
 }
-export function showSuccess(options: any): any {
+export function showSuccess(options: unknown): unknown {
     return _services.showSuccess(options);
 }
-export function showToast(options: any): any {
+export function showToast(options: unknown): unknown {
     return _services.showToast(options);
 }
-export function showError(message: any): any {
+export function showError(message: unknown): unknown {
     return _services.showError(message);
 }
-export function openToast(options: any): any {
+export function openToast(options: unknown): unknown {
     return _services.openToast(options);
 }
-export function clearAllToasts(): any {
+export function clearAllToasts(): unknown {
     return _services.clearAllToasts();
 }
 
 // The original exported `ShowError` (PascalCase) as well — likely a React component.
 // Stub it as a no-op renderless component for now; host apps that need a
 // visual error display can override via showError or component props.
-export const ShowError: any = () => null;
+// intentional: host apps pass arbitrary props to the renderless stub (DECISIONS #21)
+export const ShowError: React.FC<Record<string, unknown>> = () => null;

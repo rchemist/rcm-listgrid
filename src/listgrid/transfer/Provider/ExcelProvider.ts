@@ -43,11 +43,15 @@ export async function logExcelDownload(usePassword: boolean, condition?: Record<
 // Lazy-resolved so browser bundles don't blow up on import; host apps that need
 // the feature install `officecrypto-tool` as a peer and call
 // `registerExcelCrypto(require('officecrypto-tool'))` at bootstrap.
-let officeCrypto: any = null;
-export function registerExcelCrypto(impl: any): void {
+interface OfficeCrypto {
+  encrypt: (buffer: unknown, opts: { password: string }) => Promise<unknown>;
+  isEncrypted: (data: unknown) => Promise<boolean>;
+}
+let officeCrypto: OfficeCrypto | null = null;
+export function registerExcelCrypto(impl: OfficeCrypto): void {
   officeCrypto = impl;
 }
-function mustOfficeCrypto(): any {
+function mustOfficeCrypto(): OfficeCrypto {
   if (!officeCrypto) {
     throw new Error(
       '[@rcm/listgrid] password-protected Excel export requires officecrypto-tool. ' +
@@ -56,7 +60,8 @@ function mustOfficeCrypto(): any {
   }
   return officeCrypto;
 }
-function toNodeBuffer(data: any): any {
+function toNodeBuffer(data: ArrayBuffer | Uint8Array): unknown {
+  // (globalThis as any) kept — Node Buffer polyfill surface is untyped in browser builds
   const B: any = (globalThis as any).Buffer;
   if (!B) {
     throw new Error(
@@ -181,7 +186,7 @@ export const ExcelDownload = async (props: ExcelDownloadProps) => {
       const encryptedData = await mustOfficeCrypto().encrypt(buffer, {
         password: props.password,
       });
-      finalBlob = new Blob([encryptedData], {
+      finalBlob = new Blob([encryptedData as BlobPart], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
 
@@ -211,7 +216,7 @@ export const ExcelDownload = async (props: ExcelDownloadProps) => {
 }
 
 export async function saveExcelFile(
-  wb: any,
+  wb: XLSX.WorkBook,
   fileName: string,
   password?: string,
   logOptions?: ExcelDownloadLogOptions
@@ -221,7 +226,7 @@ export async function saveExcelFile(
   if (password) {
     const buffer = toNodeBuffer(xlsx);
     const encryptedData = await mustOfficeCrypto().encrypt(buffer, { password });
-    finalBlob = new Blob([encryptedData], {
+    finalBlob = new Blob([encryptedData as BlobPart], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
     const isEncrypted = await mustOfficeCrypto().isEncrypted(encryptedData);

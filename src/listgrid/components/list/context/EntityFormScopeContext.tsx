@@ -7,6 +7,7 @@
 
 import React, {createContext, useContext, ReactNode, useMemo} from 'react';
 import {useSubCollectionExpansion} from '../hooks/useSubCollectionExpansion';
+import {EntityForm} from '../../../config/EntityForm';
 
 export interface EntityFormScopeContextValue {
   // Depth information
@@ -29,7 +30,7 @@ export interface EntityFormScopeContextValue {
   collapseAll?: () => void;
 
   // Parent reference
-  parentEntityForm?: any;
+  parentEntityForm?: EntityForm;
 }
 
 const defaultContextValue: EntityFormScopeContextValue = {
@@ -54,7 +55,7 @@ export interface EntityFormScopeProviderProps {
   maxExpandedItems?: number;
   expansionMode?: 'single' | 'multiple';
   forceModalMode?: boolean;
-  parentEntityForm?: any;
+  parentEntityForm?: EntityForm;
 }
 
 /**

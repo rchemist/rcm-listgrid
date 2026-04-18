@@ -198,10 +198,10 @@ export class EntityForm extends EntityFormExtensions {
                 throw new Error(response.error);
               }
               throw new Error("response error");
-            } catch (e: any) {
+            } catch (e: unknown) {
               console.error(e);
 
-              if (e.message === '만료된 토큰 정보 입니다.') {
+              if (e instanceof Error && e.message === '만료된 토큰 정보 입니다.') {
                 throw new Error('만료된 토큰 정보 입니다.');
               }
 
@@ -447,7 +447,7 @@ export class EntityForm extends EntityFormExtensions {
   }
 
 
-  async deleteAll(idList: any[]): Promise<EntityFormActionResult> {
+  async deleteAll(idList: (string | number | bigint | null | undefined)[]): Promise<EntityFormActionResult> {
     if (!(this instanceof EntityForm)) {
       throw new Error('EntityFormActions.deleteAll() can only be called on EntityForm');
     }
@@ -460,7 +460,7 @@ export class EntityForm extends EntityFormExtensions {
     }
 
     const url = `${this.getUrl()}/delete`;
-    const formData: any = {};
+    const formData: Record<string, unknown> = {};
     formData['revisionEntityName'] = this.getRevisionEntityName();
     formData['ids'] = idList;
 
@@ -680,6 +680,7 @@ export class EntityForm extends EntityFormExtensions {
 
         if (response.error) {
           try {
+            // intentional: errorObject shape varies by backend error variant
             let errorObject: any;
 
             // entityError가 있으면 구조화된 정보 사용
@@ -818,6 +819,7 @@ export class EntityForm extends EntityFormExtensions {
 
     const renderType = this.getRenderType();
 
+    // intentional: generic entity payload assembled from heterogeneous fields
     let data: any = {};
     let error: boolean = false;
     let modifiedFields: string[] = [];

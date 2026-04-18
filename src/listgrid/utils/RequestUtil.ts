@@ -3,5 +3,5 @@
 
 import { callExternalHttpRequest as _call } from '../api';
 export const callExternalHttpRequest = _call;
-export const RequestUtil: any = { callExternalHttpRequest: _call };
+export const RequestUtil = { callExternalHttpRequest: _call };
 export default RequestUtil;

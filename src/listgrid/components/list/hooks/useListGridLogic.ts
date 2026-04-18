@@ -207,9 +207,9 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
         const context: ClientExtensionContext = {
           session,
           user: session?.getUser(),
-          entityForm: entityForm as any
+          entityForm
         };
-        
+
         finalSearchForm = await entityForm.executeClientExtensions(
           ExtensionPoint.PRE_FETCH_LIST,
           listSearchForm,
@@ -246,9 +246,9 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
             const context: ClientExtensionContext = {
               session,
               user: session?.getUser(),
-              entityForm: entityForm as any
+              entityForm
             };
-            
+
             processedResult = await entityForm.executeClientExtensions(
               ExtensionPoint.POST_FETCH_LIST,
               processedResult,

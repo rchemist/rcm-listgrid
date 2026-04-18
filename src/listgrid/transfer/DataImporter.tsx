@@ -322,15 +322,17 @@ export const DataImporter = (props: ImporterProps) => {
             throw new Error(response.error);
           }
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error in API call:', error);
         setSuccess(false);
-        setImportError(error.message || '업로드에 실패하였습니다.');
+        const message = error instanceof Error ? error.message : '업로드에 실패하였습니다.';
+        setImportError(message);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error in onSubmit:', error);
       setSuccess(false);
-      setErrorMessage(error.message || '업로드 중 오류가 발생했습니다.');
+      const message = error instanceof Error ? error.message : '업로드 중 오류가 발생했습니다.';
+      setErrorMessage(message);
     }
   }
 

@@ -40,7 +40,7 @@ function isTrue(value: boolean | string | undefined | unknown, defaultValue?: bo
 }
 
 // -- String helpers (subset of StringUtil used by library-internal callers) -
-function isBlank(data: any): boolean {
+function isBlank(data: unknown): boolean {
     return data === undefined || data === null || data === '';
 }
 
@@ -161,7 +161,7 @@ export function formatPrice(value: number, localeCode?: string): string {
 }
 
 // -- CompareUtil -----------------------------------------------------------
-export function isNulls(value: any, other: any): boolean {
+export function isNulls(value: unknown, other: unknown): boolean {
     if (value === undefined && other === undefined) return true;
     if (value === undefined) {
         if (other === null) return true;
@@ -173,7 +173,7 @@ export function isNulls(value: any, other: any): boolean {
     return false;
 }
 
-export function isEquals(value: any, other: any): boolean {
+export function isEquals(value: unknown, other: unknown): boolean {
     if (isNulls(value, other)) return true;
     if (value === other) return true;
 
@@ -183,10 +183,12 @@ export function isEquals(value: any, other: any): boolean {
         value !== null && other !== null &&
         !Array.isArray(value) && !Array.isArray(other)
     ) {
-        const keysA = Object.keys(value);
-        const keysB = Object.keys(other);
+        const a = value as Record<string, unknown>;
+        const b = other as Record<string, unknown>;
+        const keysA = Object.keys(a);
+        const keysB = Object.keys(b);
         if (keysA.length !== keysB.length) return false;
-        return keysA.every(key => keysB.includes(key) && isEquals(value[key], other[key]));
+        return keysA.every(key => keysB.includes(key) && isEquals(a[key], b[key]));
     }
     return false;
 }
@@ -200,7 +202,7 @@ export function isEqualsIgnoreCase(
     return value.toLowerCase() === other.toLowerCase();
 }
 
-export function isEqualCollection(value: any[], other: any[], ignoreOrder: boolean = false): boolean {
+export function isEqualCollection(value: unknown[], other: unknown[], ignoreOrder: boolean = false): boolean {
     if (value.length !== other.length) return false;
     if (isTrue(ignoreOrder)) {
         return value.every(v => other.includes(v));
@@ -208,10 +210,10 @@ export function isEqualCollection(value: any[], other: any[], ignoreOrder: boole
     return value.every((v, i) => isEquals(v, other[i]));
 }
 
-export function isEmpty(collection: Map<any, any> | any[] | undefined | null): boolean {
+export function isEmpty(collection: Map<unknown, unknown> | unknown[] | undefined | null): boolean {
     if (collection === undefined || collection === null) return true;
     if (collection instanceof Map) return collection.size === 0;
-    return (collection as any[]).length === 0;
+    return collection.length === 0;
 }
 
 export function isPositive(value?: number): boolean {
@@ -247,28 +249,29 @@ export function removeTrailingSeparator(input: string, separator: string): strin
 }
 
 // -- JSON helpers (from jsonUtils.ts) --------------------------------------
-function reviver(_key: string, value: any): any {
+function reviver(_key: string, value: unknown): unknown {
     if (typeof value === 'object' && value !== null) {
-        if (value.dataType === 'Map') {
-            return new Map(value.value);
+        const record = value as { dataType?: string; value?: Iterable<readonly [unknown, unknown]> };
+        if (record.dataType === 'Map' && record.value) {
+            return new Map(record.value);
         }
     }
     return value;
 }
 
-function mapReplacer(_key: string, value: any): any {
+function mapReplacer(_key: string, value: unknown): unknown {
     if (value instanceof Map) return Object.fromEntries(value);
     if (value instanceof Set) return [...value];
     return value;
 }
 
-export function stringify(obj: any, beautify?: boolean): string {
+export function stringify(obj: unknown, beautify?: boolean): string {
     const seen = new WeakSet<object>();
-    const circularSafeReplacer = (key: string, value: any) => {
+    const circularSafeReplacer = (key: string, value: unknown): unknown => {
         const mapped = mapReplacer(key, value);
         if (typeof mapped !== 'object' || mapped === null) return mapped;
-        if (seen.has(mapped)) return '[Circular Reference]';
-        seen.add(mapped);
+        if (seen.has(mapped as object)) return '[Circular Reference]';
+        seen.add(mapped as object);
         return mapped;
     };
     try {
@@ -281,6 +284,7 @@ export function stringify(obj: any, beautify?: boolean): string {
     }
 }
 
+// intentional: JSON.parse returns arbitrary data and consumers dereference fields directly
 export function parse(str: string): any {
     return JSON.parse(str, reviver);
 }
@@ -344,10 +348,10 @@ export function getLocalStorageItem(key: string): string | undefined {
     return undefined;
 }
 
-export function getLocalStorageObject<T>(key: string, customParse?: (value: any) => T | undefined): T | undefined {
+export function getLocalStorageObject<T>(key: string, customParse?: (value: string) => T | undefined): T | undefined {
     const value = getLocalStorageItem(key);
     if (isBlank(value)) return undefined;
-    if (customParse !== undefined) return customParse(value);
+    if (customParse !== undefined) return customParse(value!);
     return parse(value!) as T;
 }
 
@@ -380,7 +384,7 @@ export function getSessionStorageItem(key: string): string | undefined {
     return undefined;
 }
 
-export function getSessionStorageObject<T>(key: string, customParse?: (value: any) => T | undefined): T | undefined {
+export function getSessionStorageObject<T>(key: string, customParse?: (value: string) => T | undefined): T | undefined {
     const value = getSessionStorageItem(key);
     if (value === undefined) return undefined;
     if (customParse !== undefined) return customParse(value);
@@ -480,6 +484,8 @@ export {
 } from '../api';
 
 // -- Other -----------------------------------------------------------------
+// intentional: legacy placeholders kept for API parity with the original @gjcu/ui surface
+// (consumers dereference fields on these dynamically — tightening breaks out-of-scope)
 export const RequestUtil: any = {};
 export type EntityError = any;
 export const EntityError: any = undefined;

@@ -10,6 +10,7 @@ import {ReactNode} from "react";
 import {isEqualsIgnoreCase} from "../misc";
 import {LabelType} from '../config/Config';
 import {ModalOptions} from '../store';
+import type {RouterApi} from '../router/types';
 
 export interface EntityFormButtonStepInfo {
   useCreateStep: boolean;
@@ -20,18 +21,19 @@ export interface EntityFormButtonStepInfo {
 
 export interface EntityFormButtonProps {
   entityForm: EntityForm;
-  router: any;
-  pathname: any;
+  router: RouterApi;
+  pathname: string | null;
   setErrors: (errors: string[]) => void;
   setNotifications: (notifications: string[]) => void;
   step?: EntityFormButtonStepInfo;
-  
+
   // 모달 관련 함수들
   showModal?: (options: ModalOptions) => string; // 모달 ID 반환
   closeModal?: (id: string) => Promise<void>;
   closeTopModal?: () => Promise<void>;
-  getModalData?: (id: string) => any; // 모달 간 데이터 전달
-  updateModalData?: (id: string, data: any) => void;
+  // intentional: host apps define their own modal data shape (UIProvider wrapper)
+  getModalData?: (id: string) => unknown;
+  updateModalData?: (id: string, data: Partial<ModalOptions>) => void;
 }
 
 /**

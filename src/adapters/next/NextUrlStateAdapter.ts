@@ -18,15 +18,20 @@ import type {
     UrlStateSetOptions,
 } from '../../listgrid/urlState';
 
-function toNuqsParsers(parsers: Record<string, UrlParser<any>>): any {
-    const out: any = {};
+// UrlParser<any> is intentional: the framework-agnostic contract accepts
+// heterogeneous parser value types per key — narrowing here would require
+// higher-kinded generics the host cannot supply.
+function toNuqsParsers(
+    parsers: Record<string, UrlParser<any>>
+): Record<string, ReturnType<typeof nuqsCreateParser>> {
+    const out: Record<string, ReturnType<typeof nuqsCreateParser>> = {};
     for (const key of Object.keys(parsers)) {
         const p = parsers[key];
         out[key] = nuqsCreateParser({
             parse: p.parse,
             serialize: p.serialize,
             eq: p.eq,
-        } as any);
+        });
     }
     return out;
 }
@@ -37,7 +42,7 @@ export const nextUrlStateServices: UrlStateServices = {
         options?: UrlStateSetOptions
     ): [Record<string, any>, QueryStatesSetter] {
         const nuqsParsers = toNuqsParsers(parsers);
-        const [state, setState] = nuqsUseQueryStates(nuqsParsers, options as any);
+        const [state, setState] = nuqsUseQueryStates(nuqsParsers, options);
         return [state as Record<string, any>, setState as unknown as QueryStatesSetter];
     },
 };

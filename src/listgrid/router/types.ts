@@ -4,7 +4,7 @@
 // to their framework's navigation APIs (next/navigation, react-router,
 // Remix, Tanstack Router, etc.).
 
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, MouseEvent, ReactNode } from 'react';
 
 export interface RouterApi {
     push(url: string): void;
@@ -19,8 +19,11 @@ export interface RouterLinkProps {
     href: string;
     children?: ReactNode;
     className?: string;
-    onClick?: (event: any) => void;
+    onClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
     target?: string;
+    // Intentional: host adapters (next/link, react-router Link, etc.) accept
+    // arbitrary extra props (rel, prefetch, scroll, data-*, …). Keeping
+    // `any` here lets callers pass framework-specific attributes through.
     [key: string]: any;
 }
 

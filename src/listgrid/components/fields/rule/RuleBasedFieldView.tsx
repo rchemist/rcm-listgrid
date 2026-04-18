@@ -22,6 +22,7 @@ import {IconBox} from "@tabler/icons-react";
 import {SelectBox} from "../../../ui";
 import {isBlank} from '../../../utils/StringUtil';
 import {RuleCondition} from './RuleCondition';
+import {FormField} from '../abstract';
 import {isTrue} from '../../../utils/BooleanUtil';
 import {FilterItem, getQueryConditionValueType, SearchForm} from "../../../form/SearchForm";
 import {getExternalApiDataWithError} from "../../../misc";
@@ -374,7 +375,7 @@ export const RuleBasedFieldsView = (props: RuleBasedFieldViewProps) => {
 
         const field = getField(fieldValue.name);
 
-        if (field.type === 'manyToOne') {
+        if (field?.type === 'manyToOne') {
           // manyToOneField 인 경우에는 두가지 정보를 모두 서버로 보내자.
           // @ManyToOne 으로 매핑되었을 수도 있고, 단순 key 만 저장하고 있을 수도 있기 때문이다.
           filterItems.push({
@@ -470,7 +471,7 @@ export const RuleBasedFieldsView = (props: RuleBasedFieldViewProps) => {
   }
 
   function getField(fieldName: string) {
-    let field: any = undefined;
+    let field: FormField<any> | undefined = undefined;
 
     for (const form of props.entityForms) {
       if (props.entityForms.length === 1) {

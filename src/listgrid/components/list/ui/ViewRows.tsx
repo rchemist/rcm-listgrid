@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import React, {ReactNode, useEffect, useState} from "react";
 import {InlineExpansionState, ViewRowItemProps} from "../types/RowItem.types";
+import {SelectionOptions} from "../types/ViewListGrid.types";
 import {ViewColumn} from "./ViewColumn";
 import {usePathname, useRouter} from "../../../router";
 import {showAlert} from "../../../message";
@@ -20,13 +21,14 @@ import {useListGridTheme} from "../context/ListGridThemeContext";
 import {SubCollectionInlineView} from "./SubCollectionInlineView";
 
 export interface ViewRowsProps extends ViewRowItemProps {
+    // item/sortableList: generic entity payload per DECISIONS #21
     item: any;
     index: number;
-    checkItem: (id: any) => void;
+    checkItem: (id: string) => void;
     draggable: boolean;
     totalCount: number;
     sortableList: any[];
-    selectionOptions?: any; // SelectionOptions
+    selectionOptions?: SelectionOptions;
     showCheckboxInput?: boolean;
     /** SubCollection 인라인 확장 상태 */
     inlineExpansion?: InlineExpansionState;

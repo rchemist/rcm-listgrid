@@ -8,6 +8,7 @@
 'use client';
 
 import { EntityForm } from '../../../config/EntityForm';
+import type { EntityField } from '../../../config/EntityField';
 import { useEntityFormTheme } from '../context/EntityFormThemeContext';
 
 interface ViewEntityFormSkeletonProps {
@@ -157,13 +158,13 @@ export const ViewEntityFormSkeleton = ({
  * 필드그룹 스켈레톤
  */
 interface FieldGroupsSkeletonProps {
-  fieldGroups: { id: string; label: string; fields: { name: string; order: number }[] }[];
+  fieldGroups: { id: string; label: string; order?: number; fields: { name: string; order: number }[] }[];
   entityForm: EntityForm;
   subCollectionEntity?: boolean;
 }
 
 const FieldGroupsSkeleton = ({ fieldGroups, entityForm, subCollectionEntity }: FieldGroupsSkeletonProps) => {
-  const sortedGroups = [...fieldGroups].sort((a, b) => (a as any).order - (b as any).order);
+  const sortedGroups = [...fieldGroups].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   return (
     <div className="rcm-stack">
@@ -206,14 +207,16 @@ const FieldGroupsSkeleton = ({ fieldGroups, entityForm, subCollectionEntity }: F
  */
 interface FieldSkeletonProps {
   fieldName: string;
-  field?: any;
+  field?: EntityField;
 }
 
 const FieldSkeleton = ({ fieldName: _fieldName, field }: FieldSkeletonProps) => {
   const getFieldHeight = (): number => {
     if (!field) return 40;
 
-    const fieldType = field.config?.fieldType;
+    // Subclass-specific config access (e.g. CustomOptionField.config.fieldType);
+    // EntityField base has no `config`, so we probe via a narrow structural cast.
+    const fieldType = (field as { config?: { fieldType?: string } }).config?.fieldType;
     switch (fieldType) {
       case 'HTML':
       case 'RICH_TEXT':

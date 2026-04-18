@@ -12,6 +12,7 @@ import {EntityField} from '../config/EntityField';
 import {Validation} from '../validations/Validation';
 import {SelectOption} from "../form/Type";
 
+// intentional: `value` is a field value — heterogeneous by FieldType (string/number/bool/...)
 export type ConditionalProps = { value: any, result: Map<string, boolean> };
 export type ConditionalSelectOptionProps = {value: any, result: Map<string, SelectOption[]>, defaultValue?: any};
 export type OptionalValidation = false | {type?: 'append' | 'overwrite', validations?: Validation[]};

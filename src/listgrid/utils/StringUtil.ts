@@ -8,7 +8,7 @@
 import {stringify} from "./jsonUtils";
 import {isTrue} from "./BooleanUtil";
 
-export function isBlank(data: any): boolean {
+export function isBlank(data: unknown): boolean {
   return data === undefined || data === null || data === '';
 }
 
@@ -85,7 +85,7 @@ export function subStringBetweenLast(value: string, startCode: string, endCode: 
   return subStringBeforeLast(subStringAfterLast(value, startCode), endCode);
 }
 
-export function defaultString(value: any | undefined, defaultValue: string = '') {
+export function defaultString(value: unknown, defaultValue: string = ''): string {
   if (isBlank(value)) {
     return defaultValue;
   } else {
@@ -152,7 +152,7 @@ export function appendPrefixSuffix(str: string, prefix: string, suffix: string, 
 }
 
 
-export function getHashCode(data: any): number {
+export function getHashCode(data: unknown): number {
   if (data === null || data === undefined) {
     return 0;
   }

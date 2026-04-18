@@ -525,9 +525,9 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                     {managePriority && <th><div>&nbsp;</div></th>}{/*// priority 조절 핸들바의 th 를 마련한다.*/}
                     {enableCheckItem && <th>
                       <EntireChecker total={rows.length} subCollection={isSubCollection}
-                                     listIds={rows.map((item: any) => item.id)}
+                                     listIds={rows.map((item: { id: string }) => item.id)}
                                      checkedItems={checkedItems}
-                                     setCheckedItems={(itemIds: any[]) => setCheckedItems(itemIds)}
+                                     setCheckedItems={(itemIds: string[]) => setCheckedItems(itemIds)}
                                      selectionOptions={selectionOptions}
                                      rows={rows}
                                      showCheckboxInput={showCheckboxInput}

@@ -8,6 +8,7 @@
  */
 
 import {FieldError} from '../../../config/EntityFormTypes';
+import {EntityForm} from '../../../config/EntityForm';
 import {isEmpty} from "../../../utils";
 import React, {ReactNode, useState} from "react";
 import {IconChevronDown, IconChevronUp, IconInfoTriangle} from "@tabler/icons-react";
@@ -17,7 +18,7 @@ interface ViewEntityErrorProps {
   errors?: Map<string, FieldError[]>;
   onTabChange?: (tabIndex: number) => void;
   tabs?: Array<{id: string, label: string}>;
-  entityForm?: any; // EntityForm 인스턴스 추가
+  entityForm?: EntityForm;
 }
 
 export const ViewEntityError = (props: ViewEntityErrorProps) => {

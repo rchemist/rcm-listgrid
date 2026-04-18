@@ -31,7 +31,7 @@ export const ListButton = ({
 
     // Use router.back() if we came from the list page (preserves URL query params)
     // Otherwise use router.push() for direct access (bookmarks, external links, etc.)
-    if (referrer && referrer.startsWith(currentOrigin) && referrer.includes(listUrl)) {
+    if (router.back && referrer && referrer.startsWith(currentOrigin) && referrer.includes(listUrl)) {
       router.back();
     } else {
       router.push(listUrl);

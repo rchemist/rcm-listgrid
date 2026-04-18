@@ -23,7 +23,7 @@ export const RuleFieldView = (props: RuleFieldViewProps) => {
 
   const value = getValue(props.value);
 
-  function getValue(v: any) {
+  function getValue(v: unknown) {
     if (v === undefined) {
       return undefined;
     }

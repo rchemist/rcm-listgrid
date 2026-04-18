@@ -189,7 +189,7 @@ export const SelectFieldRenderer: React.FC<SelectFieldRendererProps> = ({
             fieldNames: visibleFields
           });
           if (fieldErrors.length > 0) {
-            const messages = fieldErrors.flatMap((e: any) => e.errors).filter(Boolean);
+            const messages = fieldErrors.flatMap((e) => e.errors).filter(Boolean);
             setOpenBaseLoading(false);
             setIsChanging(false);
             showAlert({

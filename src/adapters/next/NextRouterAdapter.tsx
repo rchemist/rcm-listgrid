@@ -8,10 +8,12 @@ import React from 'react';
 import NextLink from 'next/link';
 import { useRouter, usePathname, useParams, useSearchParams } from 'next/navigation';
 import type { RouterServices, RouterApi, RouterLinkProps } from '../../listgrid/router';
+import type { ComponentProps } from 'react';
 
 const NextLinkComponent: React.ComponentType<RouterLinkProps> = (props) => {
-    // next/link accepts href as string | UrlObject; we pass through string.
-    return <NextLink {...(props as any)} />;
+    // Bridge the framework-agnostic RouterLinkProps (href: string, loose onClick)
+    // into next/link's stricter prop shape via a single localized cast.
+    return <NextLink {...(props as unknown as ComponentProps<typeof NextLink>)} />;
 };
 
 export const nextRouterServices: RouterServices = {

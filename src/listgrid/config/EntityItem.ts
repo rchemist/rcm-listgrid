@@ -28,6 +28,7 @@ export interface EntityItem {
   // // tab, fieldGroup 의 ID, 이 값은 EntityForm 이 initialize 될 때 자동으로 처리된다. 외부에서 입력할 필요가 없는 값이다.
   form?: { tabId: string, fieldGroupId: string }
 
+  // intentional: each implementation returns its concrete subtype (EntityField, EntityTab, etc.)
   clone(includeValue?: boolean): any;
 
   getTabId(): string;

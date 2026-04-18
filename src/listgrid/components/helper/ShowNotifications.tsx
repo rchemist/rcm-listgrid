@@ -14,7 +14,7 @@ import {ColorType} from "../../common/type";
 
 interface ListGridNotificationsProps {
   messages?: string[] | Map<string, string>
-  error?: any
+  error?: unknown
   color?: ColorType;
   timeout?: number;   // ms 단위로 입력. 지정된 시간 이후로 메시지가 사라지게 할 수 있다. 입력하지 않으면 그대로 둔다.
   showClose?: boolean;

@@ -45,7 +45,7 @@ export class StringField extends CheckButtonValidationField<StringField> {
    * StringField 핵심 렌더링 로직 (원본 render 로직 보존)
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
-    const renderNode = async (extraProps?: any) => {
+    const renderNode = async (extraProps?: Record<string, unknown>) => {
       // readonly + maskedValueFunc: display masked value without touching original value
       if (params.readonly && this.maskedValueFunc) {
         const inputParams = await getInputRendererParameters(this, params);

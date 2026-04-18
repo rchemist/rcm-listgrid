@@ -16,6 +16,7 @@ import {
   OptionalField
 } from '../fields/abstract';
 import {EntityForm} from '../../config/EntityForm';
+import {QuickSearchProps} from '../../config/ListGrid';
 import React, {Fragment, useEffect, useState} from "react";
 import {getTranslation} from "../../utils/i18n";
 import {Transition} from "@headlessui/react";
@@ -44,7 +45,7 @@ const isNotCondition = (queryConditionType?: QueryConditionType): boolean => {
 interface ViewAdvancedSearchProps {
   entityForm: EntityForm;
   fields: ListableFormField<any>[];
-  quickSearchProperty: any;
+  quickSearchProperty: QuickSearchProps | undefined;
   searchForm: SearchForm;
   onSubmit: (searchForm: SearchForm) => void;
   onReset: () => void;

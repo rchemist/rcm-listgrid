@@ -52,15 +52,20 @@ export function mergeFieldErrors(origin: FieldError[], errors: FieldError[]): Fi
 }
 
 
+interface ApiErrorResponse {
+  error?: string | { message?: string; fieldError?: unknown } | unknown;
+  entityError?: { error?: string | { message?: string; fieldError?: unknown } };
+}
+
 /**
  * API 응답 에러를 처리하고 필드 에러와 글로벌 에러를 추출합니다.
  * EntityForm의 save 메소드에서 사용하는 에러 처리 로직을 재사용 가능하도록 추출한 함수입니다.
- * 
+ *
  * @param response - API 응답 객체 (error, entityError 포함 가능)
  * @param form - 필드 라벨을 가져오기 위한 EntityForm (optional)
  * @returns 처리된 에러 정보
  */
-export function processApiError(response: any, form?: EntityForm): {
+export function processApiError(response: ApiErrorResponse, form?: EntityForm): {
   fieldErrors: FieldError[];
   globalError?: string;
   hasError: boolean;
@@ -71,6 +76,7 @@ export function processApiError(response: any, form?: EntityForm): {
 
   if (response.error) {
     try {
+      // intentional: errorObject has heterogeneous shape depending on backend error variant
       let errorObject: any;
       
       // entityError가 있으면 구조화된 정보 사용
@@ -141,7 +147,7 @@ export function processApiError(response: any, form?: EntityForm): {
     hasError = true;
   } else {
     // 필드 에러가 없을 때만 일반 에러 메시지 표시
-    errorMessage = (!jsonError ? response.error : globalError ? globalError : undefined) ?? '저장 중 오류가 발생했습니다.';
+    errorMessage = (!jsonError ? (typeof response.error === 'string' ? response.error : undefined) : globalError ? globalError : undefined) ?? '저장 중 오류가 발생했습니다.';
     hasError = true;
   }
 

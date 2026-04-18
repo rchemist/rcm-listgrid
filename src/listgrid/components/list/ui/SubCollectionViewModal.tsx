@@ -6,7 +6,7 @@ import {EntityForm} from '../../../config/EntityForm';
 import {ViewListGridProps} from "../types/ViewListGrid.types";
 import {SearchForm} from "../../../form/SearchForm";
 
-export const SubCollectionViewModal = ({entityForm, managedId, props, setManagedId, fetchData, setOpenBaseLoading, mappedBy}: {entityForm: EntityForm, managedId: any, props: ViewListGridProps, setManagedId: React.Dispatch<any>, fetchData: (form?: SearchForm) => void, setOpenBaseLoading: (open: boolean) => void, mappedBy?: string}) => {
+export const SubCollectionViewModal = ({entityForm, managedId, props, setManagedId, fetchData, setOpenBaseLoading, mappedBy}: {entityForm: EntityForm, managedId: string | undefined, props: ViewListGridProps, setManagedId: React.Dispatch<React.SetStateAction<string | undefined>>, fetchData: (form?: SearchForm) => void, setOpenBaseLoading: (open: boolean) => void, mappedBy?: string}) => {
     
     if (!managedId) return null;
     

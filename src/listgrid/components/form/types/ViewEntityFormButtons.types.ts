@@ -10,16 +10,17 @@ import {EntityButtonLinkProps} from '../../../config/Config';
 import {Session} from '../../../auth/types';
 import {EntityFormButton} from '../../../config/EntityFormButton';
 import {ModalOptions} from '../../../store';
+import {RouterApi} from '../../../router';
 import {ViewEntityFormClassNames} from './ViewEntityFormTheme.types';
 
 export interface ButtonProps extends AbstractButtonProps {
 }
 
 export interface AbstractButtonProps extends EntityFormManageable {
-  postSave?: (entityForm: EntityForm) => Promise<void>,
-  postDelete?: (entityForm: EntityForm) => Promise<void>,
-  pathname: any,
-  router: any /* AppRouterInstance */,
+  postSave?: (entityForm: EntityForm) => Promise<EntityForm | void>,
+  postDelete?: (entityForm: EntityForm) => Promise<EntityForm | void>,
+  pathname: string,
+  router: RouterApi,
   buttonLinks?: EntityButtonLinkProps
   setErrors: (errors: string[]) => void;
   setNotifications: (notifications: string[]) => void;
@@ -51,8 +52,9 @@ export interface ViewEntityFormButtonsProps extends AbstractButtonProps {
     showModal?: (options: ModalOptions) => string;
     closeModal?: (id: string) => Promise<void>;
     closeTopModal?: () => Promise<void>;
-    getModalData?: (id: string) => any;
-    updateModalData?: (id: string, data: any) => void;
+    /** returns host-supplied data attached to the modal via ModalOptions.data */
+    getModalData?: (id: string) => unknown;
+    updateModalData?: (id: string, data: Partial<ModalOptions>) => void;
 
     // 테마 관련
     /** 버튼 커스텀 클래스 (테마 시스템에서 전달) */

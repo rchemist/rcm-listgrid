@@ -345,7 +345,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
     return modal?.data;
   }, [findModal]);
 
-  const handleUpdateModalData = useCallback((id: string, data: any) => {
+  const handleUpdateModalData = useCallback((id: string, data: Partial<ModalOptions>) => {
     updateModalData(id, data);
   }, [updateModalData]);
 
@@ -365,8 +365,8 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
         const newButtons = await getEntityFormButtons({
           readonly: readonly,
           entityForm: entityForm,
-          postSave: postSave as any,
-          postDelete: postDelete as any,
+          postSave: postSave,
+          postDelete: postDelete,
           buttonLinks: props.buttonLinks,
           buttons: props.buttons,
           excludeButtons: props.excludeButtons,

@@ -88,6 +88,8 @@ export function getQueryConditionValueType(type: QueryConditionType): QueryCondi
   }
 }
 
+// FormField is generic over the underlying value type — keep the <any> argument
+// for backwards compat with call sites that don't thread the value type through
 export function getQueryConditionTypes(field: FormField<any>): SelectOption[] {
 
   const types: SelectOption[] = [];
@@ -141,6 +143,7 @@ export function getQueryConditionTypes(field: FormField<any>): SelectOption[] {
 }
 
 
+// intentional: name is a heterogeneous LabelType (string | number | null | undefined | ReactNode) rendered into help text
 export function getQueryConditionHelpText(name: any, type: QueryConditionType): string {
   switch (type) {
     case 'EQUAL':
@@ -198,6 +201,7 @@ export function getQueryConditionHelpText(name: any, type: QueryConditionType): 
 
 export interface SearchValue {
   name: string;
+  // intentional: search values are heterogeneous — strings, numbers, arrays, booleans
   value: any;
   op?: QueryConditionType;
   shouldReturnEmpty?: boolean;    // ManyToOne lookup 할 때만 사용: SearchForm.withShouldReturnEmpty 을 true 로 지정한다. 여러 SearchValue 가 있을 때 하나만 true 가 되어도 전부 true 로 변경된다는 점에 주의해야 한다.
@@ -240,23 +244,24 @@ export class SearchForm {
    * @param item 역직렬화된 FilterItem 객체
    * @returns Map 구조가 복원된 FilterItem
    */
-  private static reconstructFilterItem(item: any): FilterItem {
+  // deserialize input — JSON.parsed shape from backend (arbitrary fields)
+  private static reconstructFilterItem(item: Record<string, unknown>): FilterItem {
     const reconstructed: FilterItem = {
-      name: item.name,
-      value: item.value,
-      values: item.values,
-      queryConditionType: item.queryConditionType,
-      not: item.not,
+      name: item.name as string,
+      value: item.value as string | undefined,
+      values: item.values as string[] | undefined,
+      queryConditionType: item.queryConditionType as QueryConditionType | undefined,
+      not: item.not as boolean | undefined,
     };
 
     // subFilters가 있으면 Map으로 재구성
     if (item.subFilters) {
       reconstructed.subFilters = new Map<'AND' | 'OR', FilterItem[]>();
       // JSON에서는 Map이 일반 객체로 직렬화됨
-      Object.entries(item.subFilters).forEach(([condition, subItems]) => {
+      Object.entries(item.subFilters as Record<string, unknown>).forEach(([condition, subItems]) => {
         if (Array.isArray(subItems)) {
           const reconstructedSubItems = subItems.map(subItem =>
-            SearchForm.reconstructFilterItem(subItem)
+            SearchForm.reconstructFilterItem(subItem as Record<string, unknown>)
           );
           reconstructed.subFilters!.set(condition as 'AND' | 'OR', reconstructedSubItems);
         }
@@ -266,7 +271,8 @@ export class SearchForm {
     return reconstructed;
   }
 
-  private static createByObject(data: any) {
+  // deserialize input — JSON.parsed shape from backend (arbitrary fields)
+  private static createByObject(data: Record<string, unknown>) {
     const searchForm = Object.assign(new SearchForm(), data);
     // object 가 assign 되면서 sorts 와 filters 가 {} 로 덮어써져 있는 상태다. Map 데이터이기 때문에 제대로 맞춰 줘야 한다.
     searchForm.sorts = new Map<string, Direction>();
@@ -278,7 +284,7 @@ export class SearchForm {
     if (data.sorts) {
       if (Array.isArray(data.sorts)) {
         // Array format: each element is [key, value] pair
-        data.sorts.forEach((entry: any) => {
+        data.sorts.forEach((entry: unknown) => {
           if (Array.isArray(entry) && entry.length === 2) {
             const [key, value] = entry;
             if (typeof key === 'string' && (value === 'ASC' || value === 'DESC')) {
@@ -288,7 +294,7 @@ export class SearchForm {
         });
       } else if (typeof data.sorts === 'object') {
         // Object format: { fieldName: direction }
-        Object.entries(data.sorts).forEach(([key, value]) => {
+        Object.entries(data.sorts as Record<string, unknown>).forEach(([key, value]) => {
           // Filter out numeric keys (array indices from malformed data)
           if (!/^\d+$/.test(key) && (value === 'ASC' || value === 'DESC')) {
             searchForm.withSort(key, value as Direction);
@@ -298,11 +304,11 @@ export class SearchForm {
     }
 
     if (data.filters && typeof data.filters === 'object') {
-      Object.entries(data.filters).forEach(([key, value]) => {
+      Object.entries(data.filters as Record<string, unknown>).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           // FilterItem의 subFilters를 Map으로 재구성
-          const reconstructedItems = (value as any[]).map(item =>
-            SearchForm.reconstructFilterItem(item)
+          const reconstructedItems = value.map(item =>
+            SearchForm.reconstructFilterItem(item as Record<string, unknown>)
           );
           searchForm.withFilter(key as 'AND' | 'OR', ...reconstructedItems);
         }
@@ -311,7 +317,7 @@ export class SearchForm {
 
     // quickSearchFields 복원 (배열 복사)
     searchForm.quickSearchFields = Array.isArray(data.quickSearchFields)
-      ? [...data.quickSearchFields]
+      ? [...data.quickSearchFields as string[]]
       : [];
 
     return searchForm;
@@ -321,6 +327,7 @@ export class SearchForm {
    * 검색 결과에서 반환된 JSON 을 SearchForm 객체로 만든다.
    * @param data
    */
+  // intentional: deserialization entry point — accepts arbitrary parsed input
   static deserialize(data: any): SearchForm {
     try {
       if (data) {
@@ -381,7 +388,8 @@ export class SearchForm {
     return this;
   }
 
-  handleAndFilter(fieldName: string, value: any, op?: QueryConditionType, not?: boolean): this {
+  // value can be a primitive string/number/boolean or an array of them
+  handleAndFilter(fieldName: string, value: string | number | boolean | string[] | null | undefined, op?: QueryConditionType, not?: boolean): this {
 
     if (value === undefined || value === null) {
       if (op === 'NULL') {
@@ -393,8 +401,8 @@ export class SearchForm {
     } else {
 
       let duplicated = false;
-      const filterValue = Array.isArray(value) ? undefined : value;
-      const filterValues = Array.isArray(value) ? value : undefined;
+      const filterValue: string | undefined = Array.isArray(value) ? undefined : String(value);
+      const filterValues: string[] | undefined = Array.isArray(value) ? value : undefined;
 
       this.filters.forEach((filterItems) => {
         filterItems.forEach((filterItem) => {
@@ -510,16 +518,15 @@ export class SearchForm {
     return this.sorts;
   }
 
-  filterValues(): Map<string, any> {
-    let filterValues = new Map<string, any>();
+  filterValues(): Map<string, string | string[]> {
+    let filterValues = new Map<string, string | string[]>();
 
     this.getFilters().forEach((filterItems) => {
       filterItems.forEach((filterItem) => {
         if (filterItem.values && filterItem.values.length > 0) {
           filterValues.set(filterItem.name, filterItem.values);
         } else {
-          const filterValue: any = filterItem.value ?? '';
-          filterValues.set(filterItem.name, filterValue);
+          filterValues.set(filterItem.name, filterItem.value ?? '');
         }
       });
     });
@@ -527,8 +534,8 @@ export class SearchForm {
     return filterValues;
   }
 
-  filterItems(): Map<string, { value: string, operator: QueryConditionType }> {
-    let filterItems = new Map<string, { value: any, operator: QueryConditionType }>();
+  filterItems(): Map<string, { value: string | string[], operator: QueryConditionType }> {
+    let filterItems = new Map<string, { value: string | string[], operator: QueryConditionType }>();
 
     this.getFilters().forEach((items) => {
       items.forEach((filterItem) => {
@@ -538,8 +545,7 @@ export class SearchForm {
             operator: filterItem.queryConditionType ?? 'EQUAL'
           });
         } else {
-          const filterValue: any = filterItem.value || '';
-          filterItems.set(filterItem.name, {value: filterValue, operator: filterItem.queryConditionType ?? 'EQUAL'});
+          filterItems.set(filterItem.name, {value: filterItem.value || '', operator: filterItem.queryConditionType ?? 'EQUAL'});
         }
       });
     });
@@ -604,7 +610,7 @@ export class SearchForm {
     return null;
   }
 
-  getSearchValue(name: string): any {
+  getSearchValue(name: string): string | string[] | null | undefined {
     let filterItem = this.getFilters().get('AND')?.find(filterItem => filterItem.name === name);
     return filterItem ? (filterItem.values && filterItem.values.length > 0) ? filterItem.values : filterItem.value : null;
   }
@@ -627,7 +633,7 @@ export class SearchForm {
    * @param name 필드명
    * @returns 필터 값 또는 null
    */
-  getSearchValueFromAnyCondition(name: string): any {
+  getSearchValueFromAnyCondition(name: string): string | string[] | null | undefined {
     // AND 조건 우선 검색
     const andValue = this.getSearchValue(name);
     if (andValue !== null) {
@@ -895,6 +901,7 @@ export type Direction = 'ASC' | 'DESC';
 
 export interface SearchValueConfig {
   name: string;
+  // intentional: search values are heterogeneous — strings, numbers, arrays, booleans
   value: any;
   op?: QueryConditionType;
   shouldReturnEmpty?: boolean;    // ManyToOne lookup 할 때만 사용: SearchForm.withShouldReturnEmpty 을 true 로 지정한다. 여러 SearchValue 가 있을 때 하나만 true 가 되어도 전부 true 로 변경된다는 점에 주의해야 한다.

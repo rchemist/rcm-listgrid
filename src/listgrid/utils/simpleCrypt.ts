@@ -38,19 +38,21 @@ export function decrypt(ciphertext: string, decompress?: boolean): string {
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 
-export function hash(...input: any[]): string {
+export function hash(...input: unknown[]): string {
 
   let inputs = '';
+  const normalized: string[] = [];
   for (let i = 0; i < input.length; i++) {
-    // TODO stringify
+    let s: string;
     if (input[i] === undefined || input[i] === null)
-      input[i] = '_NULL_'
+      s = '_NULL_'
     else if (typeof input[i] === 'object')
-      input[i] = stringify(input[i])
+      s = stringify(input[i])
     else
-      input[i] = String(input[i])
+      s = String(input[i])
 
-    inputs += input[i].trim();
+    normalized.push(s);
+    inputs += s.trim();
   }
 
   return CryptoJS.SHA256(inputs).toString();
