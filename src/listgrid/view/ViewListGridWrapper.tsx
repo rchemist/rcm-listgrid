@@ -152,7 +152,8 @@ export const ViewListGridWrapper: React.FC<OptimizedViewListGridWrapperProps> = 
             </p>
             <button
               onClick={() => window.history.back()}
-              className="rcm-button rcm-button-outline"
+              className="rcm-button"
+              data-variant="outline"
             >
               뒤로 가기
             </button>

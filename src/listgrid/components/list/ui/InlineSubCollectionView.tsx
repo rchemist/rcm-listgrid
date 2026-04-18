@@ -129,7 +129,9 @@ class InlineRowActionField extends ListableFormField<InlineRowActionField> {
             <Tooltip key={action.id} label={label}>
               <button
                 type="button"
-                className={`rcm-button rcm-button-sm ${action.className ?? 'rcm-button-outline'} ${isDisabled ? 'rcm-is-disabled' : ''}`}
+                className={`rcm-button ${action.className ?? ''} ${isDisabled ? 'rcm-is-disabled' : ''}`}
+                data-variant={action.className ? undefined : 'outline'}
+                data-size="sm"
                 disabled={isDisabled}
                 onClick={(e) => {
                   e.stopPropagation();

@@ -84,14 +84,18 @@ export const StatusChangeReasonModal: React.FC<StatusChangeReasonModalProps> = (
       <div className="rcm-status-change-footer">
         <button
           type="button"
-          className="rcm-button rcm-button-secondary rcm-button-sm"
+          className="rcm-button"
+          data-variant="ghost"
+          data-size="sm"
           onClick={onCancel}
         >
           취소
         </button>
         <button
           type="button"
-          className="rcm-button rcm-button-primary rcm-button-sm"
+          className="rcm-button"
+          data-variant="primary"
+          data-size="sm"
           onClick={handleConfirm}
         >
           확인

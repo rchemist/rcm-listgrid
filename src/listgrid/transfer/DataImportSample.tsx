@@ -235,7 +235,8 @@ const SampleDataButton = (props: SampleDataButtonProps) => {
       {!props.processing && (
         <button
           type="button"
-          className="rcm-button rcm-button-primary rcm-import-sample-download-btn"
+          className="rcm-button rcm-import-sample-download-btn"
+          data-variant="primary"
           onClick={() => { setProcessing(true); }}
         >
           <IconFile className="rcm-m2o-action-icon" />

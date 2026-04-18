@@ -49,15 +49,17 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
       <Flex gap={10}>
         <button
           type="button"
-          className="rcm-button rcm-button-primary"
+          className="rcm-button"
+          data-variant="primary"
           onClick={() => {setOpen(!open)}}
         >
           주소 찾기
         </button>
-        {(!required && !isBlank(postalCode)) && 
+        {(!required && !isBlank(postalCode)) &&
           <button
             type="button"
-            className="rcm-button rcm-button-outline"
+            className="rcm-button"
+            data-variant="outline"
             onClick={() => {removeAddress()}}
           >
             주소 제거
@@ -91,7 +93,8 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
                       />
                       <button
                         type="button"
-                        className="rcm-button rcm-button-primary"
+                        className="rcm-button"
+                        data-variant="primary"
                         onClick={() => {
                           setOpenDaumPostCode(true);
                         }}

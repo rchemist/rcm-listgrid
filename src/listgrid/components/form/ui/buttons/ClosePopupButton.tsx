@@ -23,7 +23,8 @@ export const ClosePopupButton = ({
 }: ButtonProps) => {
   return (
     <button
-      className={cn("rcm-button rcm-button-outline", buttonClassNames?.close)}
+      className={cn("rcm-button", buttonClassNames?.close)}
+      data-variant="outline"
       key="button_close_popup"
       onClick={(e) => {
         (async () => {

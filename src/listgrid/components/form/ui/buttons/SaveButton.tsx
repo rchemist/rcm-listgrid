@@ -30,9 +30,10 @@ export const SaveButton = ({
       type="button"
       disabled={isSaving}
       className={cn(
-        "rcm-button rcm-button-primary",
+        "rcm-button",
         buttonClassNames?.save ?? classNames.buttons?.save
       )}
+      data-variant="primary"
       key={"button_save"}
       onClick={(e) => {
         e.stopPropagation();

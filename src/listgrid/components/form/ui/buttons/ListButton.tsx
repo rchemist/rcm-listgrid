@@ -40,7 +40,8 @@ export const ListButton = ({
 
   return (
     <button
-      className={cn("rcm-button rcm-button-outline", buttonClassNames?.list)}
+      className={cn("rcm-button", buttonClassNames?.list)}
+      data-variant="outline"
       key={"button_list"}
       onClick={(e) => {
         (async () => {

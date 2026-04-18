@@ -67,7 +67,7 @@ export const PriorityButtons: React.FC<PriorityButtonsProps> = ({
     return (
       <div className="rcm-row">
         <Tooltip label={managePriority ? '리스트에서 우선순위를 변경한 후 버튼을 누르면 변경된 우선순위가 저장되어 목록에 반영됩니다.' : '리스트 각 행의 맨 좌측 열을 드래그해 우선순위를 변경할 수 있습니다'}>
-          <button type={'button'} className={`rcm-button ${managePriority ? 'rcm-button-primary' : 'rcm-button-outline'}`} onClick={handlePriorityToggle}>
+          <button type={'button'} className="rcm-button" data-variant={managePriority ? 'primary' : 'outline'} onClick={handlePriorityToggle}>
             {managePriority ? '우선순위 변경 완료' : '우선순위 변경'}
           </button>
         </Tooltip>

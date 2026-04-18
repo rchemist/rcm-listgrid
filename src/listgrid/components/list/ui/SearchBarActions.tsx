@@ -120,7 +120,8 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
           {filtered ? (
             <Indicator color="red" processing={true}>
               <button
-                className={'rcm-button rcm-button-primary rcm-search-bar-submit'}
+                className={'rcm-button rcm-search-bar-submit'}
+                data-variant="primary"
                 disabled={loading || !searchEnabled}
                 onClick={() => onOpenAdvancedSearch?.()}
               >
@@ -129,7 +130,8 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
             </Indicator>
           ) : (
             <button
-              className={'rcm-button rcm-button-primary rcm-search-bar-submit'}
+              className={'rcm-button rcm-search-bar-submit'}
+              data-variant="primary"
               disabled={loading || !searchEnabled}
               onClick={() => onOpenAdvancedSearch?.()}
             >

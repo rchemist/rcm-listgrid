@@ -41,7 +41,7 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
             {headerButtons}
             {supportPriority && !isSubCollection && (
                 <Tooltip label="리스트 각 행의 맨 좌측 열을 드래그해 우선순위를 변경할 수 있습니다">
-                    <button type="button" className="rcm-button rcm-button-primary" onClick={setManagePriority}>
+                    <button type="button" className="rcm-button" data-variant="primary" onClick={setManagePriority}>
                         우선순위 변경
                     </button>
                 </Tooltip>
@@ -55,13 +55,13 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
                 />
             )}
             {!isSubCollection && !readonly && isTrue(dataTransferConfig?.isSupportExport()) && (
-                <button type="button" className="rcm-button rcm-button-primary" onClick={() => setOpenDownload(true)}>
+                <button type="button" className="rcm-button" data-variant="primary" onClick={() => setOpenDownload(true)}>
                     <IconDownload className="rcm-btn-icon" />
                     다운로드
                 </button>
             )}
             {!isSubCollection && !readonly && isTrue(dataTransferConfig?.isSupportImport()) && (
-                <button type="button" className="rcm-button rcm-button-primary" onClick={() => setOpenUpload(true)}>
+                <button type="button" className="rcm-button" data-variant="primary" onClick={() => setOpenUpload(true)}>
                     <IconUpload className="rcm-btn-icon" />
                     업로드
                 </button>
@@ -80,7 +80,9 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
                         return (
                             <button
                                 type="button"
-                                className={isDeleteButtonObject && deleteButton.className ? deleteButton.className : "rcm-button rcm-button-outline-danger"}
+                                className={isDeleteButtonObject && deleteButton.className ? deleteButton.className : "rcm-button"}
+                                data-variant={isDeleteButtonObject && deleteButton.className ? undefined : "outline"}
+                                data-color={isDeleteButtonObject && deleteButton.className ? undefined : "error"}
                                 onClick={async () => {
                                     // 삭제 확인 메시지
                                     if (isDeleteButtonObject && deleteButton.confirmMessage) {
@@ -107,7 +109,7 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
                         <>{checkedButtons}</>
                     )}
                     {!isTrue(isSubCollection) && isTrue(addNew, true) && (
-                        <button className="rcm-button rcm-button-primary" onClick={() => {
+                        <button className="rcm-button" data-variant="primary" onClick={() => {
                             setOpenBaseLoading(true);
                             router.push(`${path}/add`);
                         }}>

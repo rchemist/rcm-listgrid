@@ -111,7 +111,8 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
           <Button
             variant="filled"
             disabled={!ableToExport}
-            className="rcm-button rcm-button-primary"
+            className="rcm-button"
+            data-variant="primary"
             onClick={() => {
               handleExport();
             }}>

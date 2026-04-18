@@ -200,7 +200,8 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
       <div className="rcm-modal-footer">
         <button
           type="button"
-          className="rcm-button rcm-button-outline"
+          className="rcm-button"
+          data-variant="outline"
           onClick={onClose}
           disabled={loading}
         >
@@ -208,7 +209,8 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
         </button>
         <button
           type="button"
-          className="rcm-button rcm-button-primary"
+          className="rcm-button"
+          data-variant="primary"
           onClick={() => {
             (async () => {
               await handleSend(senderAddress)

@@ -139,7 +139,8 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
         <button
           type="button"
           onClick={handleCancel}
-          className="rcm-button rcm-button-outline"
+          className="rcm-button"
+          data-variant="outline"
         >
           취소
         </button>
@@ -147,7 +148,8 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
           type="button"
           onClick={handleAdd}
           disabled={!title.trim()}
-          className="rcm-button rcm-button-primary"
+          className="rcm-button"
+          data-variant="primary"
         >
           추가
         </button>

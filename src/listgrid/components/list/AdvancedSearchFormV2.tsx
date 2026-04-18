@@ -584,7 +584,9 @@ export const AdvancedSearchFormV2 = ({
               <div className="rcm-adv-search-footer">
                 <button
                   type="button"
-                  className="rcm-button rcm-button-sm rcm-button-outline rcm-adv-search-btn"
+                  className="rcm-button rcm-adv-search-btn"
+                  data-variant="outline"
+                  data-size="sm"
                   onClick={onClose}
                 >
                   <IconX className="rcm-m2o-action-icon" />
@@ -592,7 +594,10 @@ export const AdvancedSearchFormV2 = ({
                 </button>
                 <button
                   type="button"
-                  className="rcm-button rcm-button-sm rcm-button-outline-danger rcm-adv-search-btn"
+                  className="rcm-button rcm-adv-search-btn"
+                  data-variant="outline"
+                  data-color="error"
+                  data-size="sm"
                   onClick={handleReset}
                 >
                   <IconRefresh className="rcm-m2o-action-icon" />
@@ -600,7 +605,9 @@ export const AdvancedSearchFormV2 = ({
                 </button>
                 <button
                   type="button"
-                  className="rcm-button rcm-button-sm rcm-button-primary rcm-adv-search-btn rcm-adv-search-btn-submit"
+                  className="rcm-button rcm-adv-search-btn rcm-adv-search-btn-submit"
+                  data-variant="primary"
+                  data-size="sm"
                   onClick={handleSubmit}
                 >
                   <IconSearch className="rcm-m2o-action-icon" />

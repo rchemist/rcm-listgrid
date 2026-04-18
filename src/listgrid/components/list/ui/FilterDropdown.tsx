@@ -179,7 +179,10 @@ export const FilterDropdown = ({
             {onClear && (
               <button
                 type="button"
-                className="rcm-button rcm-button-outline-danger rcm-button-sm"
+                className="rcm-button"
+                data-variant="outline"
+                data-color="error"
+                data-size="sm"
                 onClick={onClear}
               >
                 초기화
@@ -188,7 +191,9 @@ export const FilterDropdown = ({
             {onApply && (
               <button
                 type="button"
-                className="rcm-button rcm-button-primary rcm-button-sm"
+                className="rcm-button"
+                data-variant="primary"
+                data-size="sm"
                 onClick={onApply}
               >
                 적용

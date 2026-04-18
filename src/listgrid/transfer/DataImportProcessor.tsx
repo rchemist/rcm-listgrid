@@ -69,7 +69,8 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
                 justify={'center'}>
             <button
               type="button"
-              className="rcm-button rcm-button-outline"
+              className="rcm-button"
+              data-variant="outline"
               onClick={() => {
                 cancelImport();
                 onImportSuccess?.call(this);
@@ -86,7 +87,8 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
                   justify={'center'}>
               <button
                 type="button"
-                className="rcm-button rcm-button-secondary"
+                className="rcm-button"
+                data-variant="ghost"
                 onClick={() => {
                   cancelImport();
                 }}
@@ -101,7 +103,8 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
                   justify={'center'}>
               <button
                 type="button"
-                className="rcm-button rcm-button-primary"
+                className="rcm-button"
+                data-variant="primary"
                 onClick={() => {
                   onSubmit();
                 }}
@@ -110,7 +113,8 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
               </button>
               <button
                 type="button"
-                className="rcm-button rcm-button-outline"
+                className="rcm-button"
+                data-variant="outline"
                 onClick={() => {
                   cancelImport();
                 }}

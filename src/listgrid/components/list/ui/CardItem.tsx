@@ -411,19 +411,22 @@ export const CardItem: React.FC<CardItemProps> = ({
             {!readonly && onEdit && (
               <button
                 onClick={handleEditClick}
-                className="rcm-card-item-action-btn"
+                className="rcm-icon-btn"
+                data-size="sm"
                 aria-label="Edit"
               >
-                <IconPencil className="rcm-card-item-action-icon" stroke={1.5} />
+                <IconPencil className="rcm-icon" data-size="sm" stroke={1.5} />
               </button>
             )}
             {!readonly && onDelete && (
               <button
                 onClick={handleDeleteClick}
-                className="rcm-card-item-action-btn rcm-card-item-action-btn-danger"
+                className="rcm-icon-btn"
+                data-size="sm"
+                data-color="error"
                 aria-label="Delete"
               >
-                <IconTrash className="rcm-card-item-action-icon" stroke={1.5} />
+                <IconTrash className="rcm-icon" data-size="sm" stroke={1.5} />
               </button>
             )}
             {onClick && (
