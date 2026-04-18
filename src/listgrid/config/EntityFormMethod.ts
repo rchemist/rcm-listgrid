@@ -139,8 +139,8 @@ export function processApiError(response: ApiErrorResponse, form?: EntityForm): 
 
   // 에러 메시지 결정
   let errorMessage: string | undefined;
-  let hasError = false;
-  
+  let hasError: boolean;
+
   if (fieldErrors.length > 0) {
     // 필드 에러가 있으면 일반 에러 메시지는 표시하지 않지만, 에러 상태임은 표시
     errorMessage = undefined;

@@ -402,7 +402,7 @@ export abstract class EntityFormActions extends EntityFormData {
         if (isEmpty(this.dataTransferConfig.export?.fields)) {
           return await this.getDataFieldsFromFields();
         } else {
-          return this.dataTransferConfig.export?.fields!;
+          return this.dataTransferConfig.export?.fields;
         }
       }
     }
@@ -417,7 +417,7 @@ export abstract class EntityFormActions extends EntityFormData {
         if (isEmpty(this.dataTransferConfig.export?.fields)) {
           return await this.getDataFieldsFromFields();
         } else {
-          return this.dataTransferConfig.import?.fields!;
+          return this.dataTransferConfig.import?.fields;
         }
       }
     }

@@ -18,6 +18,7 @@ export function UrlStateProvider({ value, children }: UrlStateProviderProps) {
 }
 
 function mustUrlState(): UrlStateServices {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- assertion helper always invoked from within hooks/components below
     const ctx = useContext(UrlStateContext);
     if (!ctx) {
         throw new Error(

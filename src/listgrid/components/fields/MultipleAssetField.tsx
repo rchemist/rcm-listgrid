@@ -141,7 +141,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
     if (currentIndex === undefined) {
       setCurrentEdit({url: ''});
     } else {
-      setCurrentEdit(value?.assets?.[currentIndex]!);
+      setCurrentEdit(value?.assets?.[currentIndex] ?? {url: ''});
     }
 
   }

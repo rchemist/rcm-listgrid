@@ -62,7 +62,7 @@ export const DataImporter = (props: ImporterProps) => {
   const allowUpdate = props.config?.mode?.update !== false;
   const addedImportFields = props.config?.addedFields;
   const overrideFormData: ((formData: DataRowSet) => Promise<DataRowSet>) | undefined = props.config?.overrideFormData;
-  const url = props.config?.url!
+  const url = props.config!.url!
   const overrideParseResult = props.config?.overrideParseResult;
   const description = props.config?.description ?? '';
   const sampleData = props.config?.sampleData ?? [];

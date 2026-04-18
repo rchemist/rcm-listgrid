@@ -130,7 +130,7 @@ export abstract class EntityFormData extends EntityFormValidation {
     let entityFieldGroup: EntityFieldGroup;
 
     if (this.tabs.get(tab.id)?.fieldGroups.find((group) => group.id === fieldGroup.id)) {
-      entityFieldGroup = this.tabs.get(tab.id)?.fieldGroups.find((group) => group.id === fieldGroup.id)!;
+      entityFieldGroup = this.tabs.get(tab.id)!.fieldGroups.find((group) => group.id === fieldGroup.id)!;
     } else {
       entityFieldGroup = new EntityFieldGroup(fieldGroup);
       this.tabs.get(tab.id)?.fieldGroups.push(entityFieldGroup);
@@ -206,15 +206,15 @@ export abstract class EntityFormData extends EntityFormValidation {
             }
             // 기존 탭이 없는 경우에는 추가해야 한다.
             if (!newTab) {
-              newTab = explicitFieldInfo?.tab!;
+              newTab = explicitFieldInfo!.tab!;
               this.tabs.set(newTab.id, new EntityTab(newTab));
             }
           }
 
           // 필드 그룹 정보가 필드 단위로 변경된 경우
-          let newFieldGroup: EntityFieldGroup | undefined = undefined;
+          let newFieldGroup: EntityFieldGroup;
           if (this.tabs.get(newTab.id)?.fieldGroups.find((group) => group.id === newField.getFieldGroupId())) {
-            newFieldGroup = this.tabs.get(newTab.id)?.fieldGroups.find((group) => group.id === newField.getFieldGroupId())!;
+            newFieldGroup = this.tabs.get(newTab.id)!.fieldGroups.find((group) => group.id === newField.getFieldGroupId())!;
           } else {
             newFieldGroup = new EntityFieldGroup(explicitFieldInfo?.fieldGroup ?? fieldGroup);
             this.tabs.get(newTab.id)?.fieldGroups.push(newFieldGroup);

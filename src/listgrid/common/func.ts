@@ -87,7 +87,6 @@ export function getAdditionalColorClass(color: string) {
     case 'warning': return 'bg-warning';
     case 'danger': return 'bg-danger';
     case 'secondary': return 'bg-secondary';
-    case 'dark': return 'bg-dark';
     default: return 'bg-indigo';
   }
 }
@@ -117,7 +116,6 @@ export function getTextColorClass(color: string) {
     case 'warning': return 'text-warning';
     case 'danger': return 'text-danger';
     case 'secondary': return 'text-secondary';
-    case 'dark': return 'text-dark';
     default: return 'text-indigo';
   }
 }
@@ -147,7 +145,6 @@ export function getOppositeTextColorClass(color: string) {
     case 'warning': return 'text-white';
     case 'danger': return 'text-white';
     case 'secondary': return 'text-white';
-    case 'dark': return 'text-white';
     default: return 'text-dark';
   }
 }

@@ -34,7 +34,6 @@ export const KakaoMap = (props: KakaoMapProps) => {
 
   });
 */
-'use client';
 
   if (latitude === undefined || longitude === undefined) {
     if (isBlank(props.address1)) {
@@ -42,7 +41,7 @@ export const KakaoMap = (props: KakaoMapProps) => {
     } else {
       if (props.address1) {
         try {
-          var geocoder = new kakao.maps.services.Geocoder();
+          const geocoder = new kakao.maps.services.Geocoder();
           geocoder.addressSearch(props.address1, (result: any, status: any) => {
 
             if (status === 'OK' && result) {

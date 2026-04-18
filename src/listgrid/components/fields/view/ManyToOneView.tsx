@@ -418,12 +418,11 @@ export const ManyToOneView = ({
 
   function setManyToOneValue(value: any, initialize?: boolean) {
     (async () => {
-      let finalValue = value;
+      let finalValue: any;
 
       // 빈 문자열 처리 - 명시적으로 clear하는 경우
       if (value === "") {
         value = undefined;
-        finalValue = undefined;
       }
 
       if (value === undefined) {

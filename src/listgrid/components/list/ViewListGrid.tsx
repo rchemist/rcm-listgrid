@@ -424,9 +424,7 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                                                 searchForm={searchForm!}
                                                 totalCount={totalCount}
                                                 onChangeSearchForm={() => {
-                                                  async ()=> {
-                                                    await onChangeSearchForm(entityForm, searchForm!)
-                                                  };
+                                                  // no-op: previously declared an async arrow without invoking it
                                                 }}
                                                 parentId={props.parentId!}
                                                 checkedItems={checkedItems}

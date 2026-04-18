@@ -65,7 +65,7 @@ const ShowTitle = ({copyText, label}: {copyText: string, label: string}) => {
 }
 
 
-const showMessage = (message: String = '') => {
+const showMessage = (message: string = '') => {
   const toast = Swal.mixin({
     toast: true,
     position: 'top',

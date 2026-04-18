@@ -202,7 +202,7 @@ export class EntityForm extends EntityFormExtensions {
               console.error(e);
 
               if (e instanceof Error && e.message === '만료된 토큰 정보 입니다.') {
-                throw new Error('만료된 토큰 정보 입니다.');
+                throw new Error('만료된 토큰 정보 입니다.', { cause: e });
               }
 
               return { entityForm: entityForm, errors: ['데이터를 조회할 수 없습니다.'] };
@@ -356,79 +356,75 @@ export class EntityForm extends EntityFormExtensions {
     | string,
     hidden?: boolean
   ): this {
-    try {
-      if (typeof props === 'string') {
-        const name = props;
-        const hiddenValue = hidden ?? false;
+    if (typeof props === 'string') {
+      const name = props;
+      const hiddenValue = hidden ?? false;
 
-        const field = this.getField(name);
-        if (field) {
-          this.fields.set(name, field.withHidden(hiddenValue));
-          return this;
-        }
-
-        const collection = this.getCollection(name);
-        if (collection) {
-          this.collections.set(name, collection.withHidden(hiddenValue));
-          return this;
-        }
-
+      const field = this.getField(name);
+      if (field) {
+        this.fields.set(name, field.withHidden(hiddenValue));
         return this;
       }
 
-      const { type, hidden: hiddenValue } = props;
-
-      switch (type) {
-        case 'FIELD':
-          const { fieldName } = props as { type: 'FIELD', hidden: boolean, fieldName: string };
-          const field = this.getField(fieldName);
-          if (field) {
-            this.fields.set(fieldName, field.withHidden(hiddenValue));
-          } else {
-            const collection = this.getCollection(fieldName);
-            if (collection) {
-              this.collections.set(fieldName, collection.withHidden(hiddenValue));
-            }
-          }
-          break;
-
-        case 'GROUP':
-          const { tabId, fieldGroupId } = props as { type: 'GROUP', hidden: boolean, tabId: string, fieldGroupId: string };
-
-          const tab = this.getTab(tabId);
-          if (tab) {
-            const fieldGroup = tab.fieldGroups.find((group) => group.id === fieldGroupId);
-            if (fieldGroup) {
-              let affectedFields = 0;
-              fieldGroup.fields.forEach((field) => {
-                this.withHidden({ type: 'FIELD', hidden: hiddenValue, fieldName: field.name });
-                affectedFields++;
-              });
-            }
-          }
-          break;
-
-        case 'TAB':
-          const { tabId: targetTabId } = props as { type: 'TAB', hidden: boolean, tabId: string };
-
-          const targetTab = this.getTab(targetTabId);
-          if (targetTab) {
-            targetTab.hidden = hiddenValue;
-            let affectedFields = 0;
-            targetTab.fieldGroups.forEach((fieldGroup) => {
-              fieldGroup.fields.forEach((field) => {
-                this.withHidden({ type: 'FIELD', hidden: hiddenValue, fieldName: field.name });
-                affectedFields++;
-              });
-            });
-          }
-          break;
+      const collection = this.getCollection(name);
+      if (collection) {
+        this.collections.set(name, collection.withHidden(hiddenValue));
+        return this;
       }
 
       return this;
-    } catch (error) {
-      throw error;
     }
+
+    const { type, hidden: hiddenValue } = props;
+
+    switch (type) {
+      case 'FIELD':
+        const { fieldName } = props as { type: 'FIELD', hidden: boolean, fieldName: string };
+        const field = this.getField(fieldName);
+        if (field) {
+          this.fields.set(fieldName, field.withHidden(hiddenValue));
+        } else {
+          const collection = this.getCollection(fieldName);
+          if (collection) {
+            this.collections.set(fieldName, collection.withHidden(hiddenValue));
+          }
+        }
+        break;
+
+      case 'GROUP':
+        const { tabId, fieldGroupId } = props as { type: 'GROUP', hidden: boolean, tabId: string, fieldGroupId: string };
+
+        const tab = this.getTab(tabId);
+        if (tab) {
+          const fieldGroup = tab.fieldGroups.find((group) => group.id === fieldGroupId);
+          if (fieldGroup) {
+            let affectedFields = 0;
+            fieldGroup.fields.forEach((field) => {
+              this.withHidden({ type: 'FIELD', hidden: hiddenValue, fieldName: field.name });
+              affectedFields++;
+            });
+          }
+        }
+        break;
+
+      case 'TAB':
+        const { tabId: targetTabId } = props as { type: 'TAB', hidden: boolean, tabId: string };
+
+        const targetTab = this.getTab(targetTabId);
+        if (targetTab) {
+          targetTab.hidden = hiddenValue;
+          let affectedFields = 0;
+          targetTab.fieldGroups.forEach((fieldGroup) => {
+            fieldGroup.fields.forEach((field) => {
+              this.withHidden({ type: 'FIELD', hidden: hiddenValue, fieldName: field.name });
+              affectedFields++;
+            });
+          });
+        }
+        break;
+    }
+
+    return this;
   }
 
   async delete(): Promise<EntityFormActionResult> {
@@ -761,26 +757,20 @@ export class EntityForm extends EntityFormExtensions {
 
         // fieldError가 있으면 에러 메시지를 표시하지 않음 (필드별로 표시되므로)
         let errorMessage;
-        let hasError = false;
 
         if (fieldErrors.length > 0) {
           // 필드 에러가 있으면 일반 에러 메시지는 표시하지 않지만, 에러 상태임은 표시
-          errorMessage = undefined;
-          hasError = true;
           return { actionType: renderType, entityForm: form.withErrors(fieldErrors), errors: ['입력 값이 올바르지 않습니다.'] };
         } else {
           // 필드 에러가 없을 때만 일반 에러 메시지 표시
           errorMessage = (!jsonError ? response.error : globalError ? globalError : undefined) ?? '저장 중 오류가 발생했습니다.';
         }
 
-        // fieldError가 있거나 errorMessage가 있으면 errors 배열에 최소한 하나의 항목을 추가
+        // errorMessage 가 있으면 errors 배열에 최소한 하나의 항목을 추가
         // 이렇게 해야 호출하는 쪽에서 에러 상태임을 인식할 수 있음
         const errors: string[] = [];
         if (errorMessage) {
           errors.push(errorMessage);
-        } else if (hasError) {
-          // fieldError가 있지만 일반 메시지가 없는 경우, 빈 문자열이라도 추가하여 에러 상태임을 표시
-          errors.push('');
         }
 
         return { actionType: renderType, entityForm: form, errors };

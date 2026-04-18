@@ -13,6 +13,7 @@ export function RouterProvider({ value, children }: RouterProviderProps) {
 }
 
 function mustRouter(caller: string): RouterServices {
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- assertion helper always invoked from within hooks/components below
     const ctx = useContext(RouterContext);
     if (!ctx) {
         throw new Error(
