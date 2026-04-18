@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.40 — 라이브러리 JSX Tailwind/gjcu-custom 전량 제거. **framework-free 달성**)
+마지막 업데이트: 2026-04-19 (alpha.44 — **OSS 공개 준비 완료**. Apache-2 / 테스트 infra / CI / 린트 / 소비자 README. 다음 세션: `docs/NEXT_SESSION.md` 참조 — v0.2 backlog (테스트 5 파일 포팅 마감 + `any` 457 → 200 미만))
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,7 +8,9 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.40` (alpha.37~39 시각 회귀 수정 + alpha.40 Tailwind 전량 제거로 framework-free 달성)
+**배포된 현재 버전**: `v0.1.0-alpha.44` (OSS 공개 준비 완료 — Apache-2 라이선스 / vitest + testing-library / GitHub Actions CI / ESLint + Prettier / 소비자 README / PRIMITIVES 카탈로그 / 다크 모드 / 루트 아티팩트 정리)
+
+**다음 세션**: `docs/NEXT_SESSION.md` 진입 프롬프트 그대로 붙여넣기. 에이전트 병렬로 v0.2 backlog 2 개 소진 예정 (테스트 포팅 마감 + `any` 정리).
 
 **alpha.37~40 하이라이트**:
 - alpha.37: ManyToOneView 찾기 버튼 색상 + SearchBarActions 우측 정렬 fix
@@ -93,7 +95,11 @@
 | 0.1.0-alpha.37 | 시각 회귀 1차 fix — ManyToOneView 찾기 버튼 색/크기 + SearchBarActions 우측 정렬 | ✅ 안정 |
 | 0.1.0-alpha.38 | 시각 회귀 2차 fix — --rcm-color-secondary 토큰 (#805dca 보라) + ManyToOne addon 재구현 + modal searchbar 레이아웃 | ✅ 안정 |
 | 0.1.0-alpha.39 | AdvancedSearch 그리드 container query 전환 (모달 2 cols cap) | ✅ 안정 |
-| **0.1.0-alpha.40** | **framework-free 달성** — JSX 잔여 Tailwind/gjcu-custom 하드코딩 전량 제거. 3 병렬 에이전트 (list/form/fields). 최종 grep 0건. 신규 rcm-* 규칙 ~30개 추가 (create-step-*, form-footer, m2o-input/wrap, asset-*, entire-checker-placeholder, field-focus-ring 등). | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.40 | **framework-free 달성** — JSX 잔여 Tailwind/gjcu-custom 하드코딩 전량 제거. 3 병렬 에이전트 (list/form/fields). 최종 grep 0건. 신규 rcm-* 규칙 ~30개 추가. | ✅ 안정 |
+| 0.1.0-alpha.41 | rcm-button:disabled 를 opacity 기반으로 변경 (variant 색 유지) | ✅ 안정 |
+| 0.1.0-alpha.42 | components.css 의 중복 .rcm-button 블록 제거 — primitives 단일 소스 | ✅ 안정 |
+| 0.1.0-alpha.43 | CSS 중복 3 개 제거 + indigo 토큰화 + 다크 모드 토큰 + docs/PRIMITIVES.md (272줄) | ✅ 안정 |
+| **0.1.0-alpha.44** | **OSS 공개 준비 완료** — Apache-2 LICENSE, vitest/@testing-library 설치 + 33 tests pass + jest→vi 포팅, GitHub Actions CI (type-check/lint/test/build/dist 검증), ESLint + Prettier 구성, 소비자용 README 재작성 + 내부 로드맵은 docs/ROADMAP.md 로 분리, console.log/debug 69 → 9 (performanceLogger gated 만 유지), @ts-ignore 3 → 0, 루트 아티팩트 (PNG/=/.idea/.claude) 정리 + gitignore 보강, package.json license/private/description/keywords 정리. | ✅ **현재 설치 대상** |
 
 ---
 

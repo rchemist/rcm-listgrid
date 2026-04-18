@@ -464,6 +464,30 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #64 alpha.44 — OSS 공개 준비 완료 (Apache-2 / 테스트 / CI / README)
+
+alpha.40 에서 framework-free 달성 후, 오픈소스 공개 준비를 위한 4 개 치명적 블로커 해결:
+
+1. **License**: Apache-2.0 전문 LICENSE 파일 추가. `package.json`: `license: "UNLICENSED"` → `"Apache-2.0"`, `private: true` → `false`. description / keywords / author 필드 추가.
+
+2. **Test infra**: vitest + @vitest/coverage-v8 + jsdom + @testing-library/{react,jest-dom} + @testing-library/dom 설치. `vitest.config.ts` 생성 (jsdom env, globals, coverage). 기존 5 테스트 파일 jest → vi API 포팅 (Python 기반 일괄 치환). 33 tests passing (3 파일). 포팅 미완 5 파일은 vitest exclude + v0.2 backlog.
+
+3. **CI**: `.github/workflows/ci.yml` — type-check / lint / format:check / test / build / dist 검증. PR + main push 에서 실행. lint / format drift 는 fail 안 시키되 경고로 리포트.
+
+4. **Consumer README**: 기존 Stage 0~8 내부 로드맵 → `docs/ROADMAP.md` 이동. 새 README 는 소비자용 — Install / Peer deps 표 / Provider 배치 + EntityForm 정의 + JSX 렌더 Quick start / 테마 (토큰 / 다크모드 / classNames) / 아키텍처 다이어그램 / Provider 계약 / 브라우저 지원 / 기여 가이드.
+
+추가 정리:
+- ESLint + Prettier 구성 (typescript-eslint + react + react-hooks 플러그인, print-width 100, 2-space). npm run lint / lint:fix / format / format:check.
+- console.log/debug: 69 → 9. performanceLogger.ts 의 `configureRuntime({ debugListGridPerformance })` gated logger 만 유지.
+- `@ts-ignore`: 3 → 0. jsonUtils.ts 의 replacer/reviver 에 명시 타입. ViewApiSpecification 의 `<pre>{formData}</pre>` 를 `String(formData)` 캐스트로 전환.
+- 루트 artifact 정리: alpha19~21 PNG 스크린샷 7 개, `=` 빈 파일, `.playwright-mcp/`, `.mcp.json`, `.idea/`, `.claude/` 모두 제거 + `.gitignore` 보강.
+
+연기 (v0.2 backlog):
+- 포팅 실패 5 테스트 파일 (mock 구조 + CJS require 잔재) → 다음 세션.
+- `any` 타입 457 개 → 다음 세션. `noImplicitAny: true` 승격 시도 예정.
+
+`docs/NEXT_SESSION.md` 에 다음 세션 플랜 + 에이전트 프롬프트 3 개 (1 테스트 + 3 any 병렬) 준비 완료.
+
 ### #63 alpha.37~40 시각 회귀 fix + framework-free 달성
 
 alpha.36 배포 후 사용자 수동 QA 에서 3 건 회귀 발견, alpha.37~39 에서 순차 수정:
