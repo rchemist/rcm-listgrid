@@ -442,3 +442,33 @@ UIProvider 컴포넌트들이 받는 props 중 일부는 **library 내부 상태
 - Button variants/Notice/Skeleton 시스템 완성.
 
 **검증 필요**: gjcu 실험 워크트리에서 기존 UI가 그대로 동작하는지 확인. 테마 교체가 시각적으로 차이를 만들 수 있음.
+
+---
+
+## 2026-04-18 (Phase 6 병렬 + Phase 7 split + Phase 8 cleanup — alpha.36)
+
+### #59 8 블록 병렬 에이전트 dispatch 로 Phase 6 잔여 일괄 완료
+한 메시지에 8 개 Agent tool use (subagent_type=general-purpose) 로 CardManyToOneView / CardItem / AdvancedSearchFormV2 / RevisionField / FieldSelector / DataImport* / ContentAsset / Alerts 각각의 composite → primitive 전환을 병렬 수행. 각 에이전트는 자기 담당 JSX 만 편집하고 "CSS 삭제 후보 리스트" 를 구조화된 리포트로 반환. 메인 세션은 8 리포트 집계 + base.css 일괄 Edit + type-check/build + 커밋.
+**Why**: 리팩터 블록 간 상호 독립 (각 블록이 다른 파일군을 건드림) → 순차 진행 대비 5x+ 시간 단축. 또한 각 블록의 컴포넌트 소스 전체 읽기/분석을 메인 context 에서 격리 — 메인은 프롬프트 + 최종 리포트만 유지. 한 세션에서 3 개 phase 완료 가능해진 핵심 동인.
+**Trade-off**: 에이전트가 프롬프트 구조를 이탈하면 파싱 실패 가능 → 프롬프트에 "정확히 이 구조" 강조 + 예시 포함으로 방어. 결과적으로 8 리포트 모두 지정 포맷 준수.
+
+### #60 base.css 3-way split: layouts / components / base(utilities)
+Phase 7 에서 base.css (4,390줄) 를 `layouts.css` (2,912줄, 구조적 flex/grid composite 377 classes) + `components.css` (1,456줄 → Phase 8 후 1,386, component-specific 190 classes) + `base.css` (100줄, root/surface/readonly + text utilities + keyframes 15 classes) 로 분리. cascade 순서: `tokens → primitives → layouts → components → base`.
+**Why**: 한 파일 안에서 primitive / layout / component-special / utility 가 섞여 있으면 (a) 리팩터 시 어느 층을 건드리는지 불명 (b) 호스트 override 경로가 파일 단위로 분리되지 않아 교체/재정의 전략 한정적. 3 파일 분리 시 호스트는 원하는 층만 교체 가능 (예: layouts 는 유지, components 만 자체 구현). `package.json exports` 에 각 파일 노출.
+**순서 선택 근거**: utilities (base) 가 **마지막** 로드 → specificity 없이 overrides 이기는 자연 cascade. primitives 는 가장 먼저 로드되어 다른 층이 primitive 를 override 가능. layouts → components 순은 "components 가 layout 의 특수 케이스" 모델에 맞춤.
+**검증**: 분리 전후 rule set 동일성 검증 (645 selector+body multiset, 0 missing 0 extra). dist/styles.css 는 주석 3 블록만큼 +1,203 bytes 증가, 본문 byte-identical.
+
+### #61 Theme string 정리 + button variant CSS 완전 삭제
+Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm-button rcm-button-{primary,outline,danger,outline-danger,secondary,sm,icon}" 문자열을 "rcm-button" 또는 "" 로 단순화. JSX consumers (CreateButton 등) 에 data-variant / data-color / data-size attr 을 hardcode. components.css 에서 `.rcm-button-primary` / `.rcm-button-outline` / `.rcm-button-danger` / `.rcm-button-outline-danger` / `.rcm-button-secondary` / `.rcm-button-sm` / `.rcm-button-icon` 및 hover variants 완전 삭제 (−70줄).
+**Why**: Phase 2 에서 JSX 의 className 은 이미 data-attr 로 전환됨. 그러나 테마 파일의 className string 은 여전히 legacy class 를 emit → 호스트가 theme override 를 부분만 해도 legacy class 가 다시 삽입되어 불명확. theme string 도 primitive 단일화하면 (a) 단일 소스 (primitives.css `.rcm-button[data-variant=...]`) 로 모든 버튼 스타일 흐름 (b) legacy class 삭제 가능 → components.css 슬림.
+**grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
+**유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
+
+### #62 메인 세션 context 보호 원칙 공식화
+장기 리팩터 세션에서 "컴포넌트 소스 전체 읽기" 는 메인 context 폭증의 주범. 이번 세션에서 확립된 규칙:
+1. 컴포넌트 JSX 읽기 / CSS 블록 grep 은 **에이전트**가 수행
+2. 메인은 (a) 에이전트 프롬프트 작성 (b) 리포트 집계 (c) 전역 파일 (base.css, package.json) 일괄 편집 (d) 빌드 / 커밋 / 배포 만 담당
+3. 에이전트 리포트 포맷은 **구조화된 마크다운 템플릿** 강제 → 메인 파싱 비용 최소화
+4. 블록별 commit 분리 → 회귀 시 특정 commit 만 rollback
+**Why**: Opus 4.7 1M context 라도 4,390 줄 base.css + 600+ 줄 JSX 를 9 번 (각 블록 + split + cleanup) 반복 읽으면 한 세션이 200k+ 토큰 소비. 에이전트 격리 시 메인은 ~30k 선 유지 가능 → 한 세션에서 Phase 6 잔여 + 7 + 8 (3 phase) 완료 달성.
+**적용 범위**: 향후 Phase 9 (v0.2 cleanup) 도 동일 패턴. 새 기능 개발 (non-refactor) 도 큰 파일이 관여하면 동일하게 적용.

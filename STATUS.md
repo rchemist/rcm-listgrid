@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.35 — Phase 6 연속 / ContentAsset + RevisionField primitive 전환. **새 세션 준비 완료** → `docs/NEXT_SESSION.md` 참조)
+마지막 업데이트: 2026-04-18 (alpha.36 — Phase 6 잔여 8 블록 병렬 + Phase 7 파일 분리 + Phase 8 theme cleanup 한 턴 완료)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,24 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.35` (CSS 리팩터 Phase 6 연속 — badge/chip/tag)
+**배포된 현재 버전**: `v0.1.0-alpha.36` (CSS 리팩터 Phase 6 잔여 + Phase 7 base.css 파일 분리 + Phase 8 theme cleanup 완료, HTTP 303 검증 완료)
 
-**다음 작업**: **Phase 6 잔여 + Phase 7/8 한 턴에 완료** — 새 세션에서 실행. `docs/NEXT_SESSION.md` 의 진입 프롬프트 그대로 붙여넣으면 병렬 에이전트 8개 + 순차 phase 7/8 으로 alpha.36 까지 완료 예상. 메인 컨텍스트 보호 우선.
+**CSS 최종 파일 구조** (alpha.36):
+- `tokens.css` 110줄 (디자인 토큰)
+- `primitives.css` 1,259줄 (22 primitive + data-attr)
+- `layouts.css` 2,912줄 (구조적 composite, 377 classes) **신규**
+- `components.css` 1,386줄 (component-specific 최소, 190 classes) **신규**
+- `base.css` 100줄 (root/utilities/reset, 15 classes) **대폭 축소**
+- 합계 5,767줄 (alpha.28 시점 ~6,200줄 대비 정돈됨, base.css 단독은 4,960 → 100)
+
+**다음 작업**: **시각 수동 검증 필요** — HTTP 303 만으로는 시각 회귀 검출 불가. gjcu-experiment dev 서버 `localhost:9261` 에서 직접 확인:
+- CardManyToOneView (alpha.35 이전과 selected/default/hover 정확도)
+- RevisionField diff-indicator (warning 도트 변경됨)
+- FieldSelector chip selected 색 강도
+- AlertItem external link underline
+- button variant (save/delete/list/close) 시각 일관성
+
+회귀 발견 시 해당 commit 만 선택적 rollback 가능 (commit 구조: Phase 6 aggregate / Phase 7 split / Phase 8 theme 독립).
 
 **설계 문서 3종 (다음 세션 시작 시 이것부터 읽기)**:
 - `docs/REFACTOR_CURRENT_STATE.md` — 현재 CSS 인벤토리 + 문제 진단
@@ -67,7 +82,8 @@
 | 0.1.0-alpha.32 | CSS 리팩터 Phase 5 부분 — ViewTab data-state 전환 | ✅ 안정 |
 | 0.1.0-alpha.33 | CSS 리팩터 Phase 6 1차 — dead CSS 삭제. base.css 4,960 → 4,896 (−64) | ✅ 안정 |
 | 0.1.0-alpha.34 | CSS 리팩터 Phase 6 2차 — icon-btn 전환 묶음 (FilterDropdown/AlertItem/Alerts/PhoneNumber/Copy) | ✅ 안정 |
-| **0.1.0-alpha.35** | **CSS 리팩터 Phase 6 3차** — ContentAssetItem remove 버튼 → rcm-icon-btn data-color="error". RevisionField badges/chips → rcm-badge + rcm-tag data-color. base.css ~4,780 → ~4,740 | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.35 | CSS 리팩터 Phase 6 3차 — ContentAssetItem remove 버튼 → rcm-icon-btn data-color="error". RevisionField badges/chips → rcm-badge + rcm-tag data-color. base.css ~4,780 → ~4,740 | ✅ 안정 |
+| **0.1.0-alpha.36** | **한 턴 대규모 완료** — Phase 6 잔여 8 블록 병렬 에이전트 (CardM2O/CardItem/AdvSearch/Revision/FieldSelector/DataImport/ContentAsset/Alerts) composite → primitive (base.css 4,750 → 4,390). Phase 7: base.css 를 layouts.css (2,912줄) + components.css (1,456줄) + base.css (100줄) 로 분리. Phase 8: defaultListGridTheme/defaultTheme/subCollectionTheme 의 legacy button variant string 정리 + components.css 의 .rcm-button-{primary,outline,danger,secondary,sm,icon} 규칙 완전 삭제 (components.css 1,456 → 1,386). | ✅ **현재 설치 대상** |
 
 ---
 
@@ -103,9 +119,13 @@
 - ✅ Phase 3 (alpha.30) — JSX 의 `rcm-field-input` / `rcm-field-select` / `rcm-field-textarea` / `rcm-quick-search-input` → `rcm-input` / `rcm-select` / `rcm-textarea` primitive. 5 파일. primitives.css `rcm-input/textarea/select` 디폴트 font-size → sm, focus border-color → primary (현재 시각에 맞춤). Input group 내부 버튼 (addon) 은 Phase 5 에서 처리.
 - ✅ Phase 4 (alpha.31, 부분) — icon-frame + notice JSX 전환. Bool/Num/Date/Select/String/ManyToOne 필드의 `rcm-bool-icon-frame*` / `rcm-num-icon-frame*` / `rcm-date-icon-frame*` → `rcm-icon-frame [data-color]`. `rcm-bool-icon*` / `rcm-num-icon-*` / `rcm-date-icon` → `rcm-icon [data-size][data-tone][data-color]`. `rcm-bool-label*` → `rcm-text [data-weight][data-color][data-tone]`. DataExporter notice → data-tone. primitives.css 의 `rcm-icon-frame` 디폴트 shape → rounded + bg surface-muted, `rcm-text` 디폴트 → inherit (font-size/color 등). 테마 파일 / AlertItem / fieldgroup card 등 잔여 composite 은 Phase 5~6 에서.
 - ✅ Phase 5 (alpha.32, 부분) — `ViewTab.tsx` 에서 `rcm-tab-selected` / `rcm-tab-disabled` 하드코딩 제거 → `data-state="selected"|"disabled"`. 나머지 dropdown/card-item-tab 은 composite 제거와 동반 처리 예정.
-- ◻ Phase 6 1차 (alpha.33) — FormField.tsx `rcm-bool-icon` 잔여 JSX 수정. 그리고 base.css 에서 사용처 0 인 composite 클래스 삭제: bool/num/date icon+frame+label (약 20 규칙), rcm-card-item-action-btn* (4), rcm-tab-selected/-disabled (2). base.css 4,960 → 4,896줄.
-- ⏳ Phase 6 이후 — 남은 composite 블록 (card-item-*, card-m2o-*, adv-search-*, revision-*, ca-*, alerts-*, import-*, field-selector-*, filter-dropdown-*) 을 JSX 전환 + CSS 삭제 형태로 순차 진행.
-- ⏳ Phase 7~9 — REFACTOR_PLAN.md 참조
+- ✅ Phase 6 1차 (alpha.33) — FormField.tsx `rcm-bool-icon` 잔여 JSX 수정 + dead CSS 삭제. base.css 4,960 → 4,896.
+- ✅ Phase 6 2차 (alpha.34) — icon-btn 전환 묶음. base.css −116.
+- ✅ Phase 6 3차 (alpha.35) — ContentAsset remove + Revision badge/tag. base.css −40.
+- ✅ **Phase 6 잔여 병렬 (alpha.36)** — 8 블록 병렬 에이전트 dispatch 로 CardM2O/CardItem/AdvSearch/Revision/FieldSelector/DataImport/ContentAsset/Alerts 잔여 composite → primitive. base.css −360.
+- ✅ **Phase 7 (alpha.36)** — base.css 를 `layouts.css` + `components.css` + `base.css(utilities only)` 3개 파일로 분리. cascade 순서 `tokens → primitives → layouts → components → base`. rule-level diff 0 (645 selector+body multiset match).
+- ✅ **Phase 8 (alpha.36)** — theme 파일의 legacy button variant string("rcm-button rcm-button-primary" 등) → "rcm-button". JSX consumers 에 data-attr 직접 적용. components.css 의 .rcm-button-* variant 규칙 완전 삭제 (−70). grep 검증 0 references.
+- ⏳ Phase 9 — 시각 수동 검증 + v0.2 major bump 준비 (deprecated theme slot 제거, primitives 튜닝 제안 반영)
 
 ### GlobalModalManager 포팅
 - `src/listgrid/ui/GlobalModalManager.tsx` — ManyToOneField 모달 렌더러
