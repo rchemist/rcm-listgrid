@@ -71,7 +71,7 @@ const ColorPresetFieldView = ({name, label, required = false, readonly = false, 
   }, [props.value]);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="rcm-stack">
       <Popover position={'bottom'} shadow={'md'}
       opened={isOpen}
       onChange={setIsOpen}

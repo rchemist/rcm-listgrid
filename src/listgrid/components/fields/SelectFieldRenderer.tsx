@@ -424,7 +424,7 @@ export const SelectFieldRenderer: React.FC<SelectFieldRendererProps> = ({
   const hasChanged = selectedValue !== originalValue;
 
   return (
-    <div className="flex items-start gap-3">
+    <div className="rcm-select-renderer-wrap">
       <RadioChip
         name={name}
         value={selectedValue}

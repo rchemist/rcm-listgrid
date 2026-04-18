@@ -44,22 +44,22 @@ export const LinkFieldView = (props: LinkFieldProps) => {
 
   if (props.tooltip !== undefined) {
     return <Tooltip label={props.tooltip.label} color={props.tooltip.color}>
-      <div className="flex w-full">
-        <div className="flex w-full items-center">
-          <div className="group relative flex w-full">
-            <div className={"dropdown flex w-full"}>
+      <div className="rcm-input-group-full">
+        <div className="rcm-input-group-full-center">
+          <div className="rcm-input-group-full-relative">
+            <div className="rcm-input-group-full">
               {input}
             </div>
           </div>
           {!isBlank(value) && (
             <button
               type="button"
-              className="flex h-full min-w-[40px] cursor-pointer items-center justify-center space-x-1 whitespace-nowrap border border-secondary bg-secondary px-2 font-semibold text-white hover:bg-secondary/85 disabled:opacity-20 dark:border-[#17263c] rounded-r-md border-l-0"
+              className="rcm-link-button rcm-input-addon-btn"
               onClick={() => {
                 window.open(normalizeUrl(value), "_blank");
               }}
             >
-              <IconExternalLink className={"h-4 w-4"} />
+              <IconExternalLink className="rcm-m2o-action-icon" />
             </button>
           )}
         </div>
@@ -68,9 +68,9 @@ export const LinkFieldView = (props: LinkFieldProps) => {
   }
 
   return (
-    <div className="flex w-full">
-      <div className="flex w-full items-center">
-        <div className="group relative flex w-full">
+    <div className="rcm-input-group-full">
+      <div className="rcm-input-group-full-center">
+        <div className="rcm-input-group-full-relative">
           <div className={"dropdown flex w-full"}>
             {input}
           </div>
@@ -78,12 +78,12 @@ export const LinkFieldView = (props: LinkFieldProps) => {
         {!isBlank(value) && (
           <button
             type="button"
-            className="flex h-full min-w-[40px] cursor-pointer items-center justify-center space-x-1 whitespace-nowrap border border-secondary bg-secondary px-2 font-semibold text-white hover:bg-secondary/85 disabled:opacity-20 dark:border-[#17263c] rounded-r-md border-l-0"
+            className="rcm-link-button rcm-input-addon-btn"
             onClick={() => {
               window.open(normalizeUrl(value), "_blank");
             }}
           >
-            <IconExternalLink className={"h-4 w-4"} />
+            <IconExternalLink className="rcm-m2o-action-icon" />
           </button>
         )}
       </div>

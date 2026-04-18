@@ -66,32 +66,31 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
 }) => {
   // 로딩 중일 때
   if (loading) {
-    return <div className="p-4 text-gray-500">로딩 중...</div>;
+    return <div className="rcm-ca-loading">로딩 중...</div>;
   }
 
   // 아이템이 없을 때
   if (isEmpty) {
     return (
-      <div className="space-y-4">
-        <div className="border border-gray-200 rounded-lg p-8 text-center">
-          <p className="text-gray-500">등록된 컨텐츠가 없습니다.</p>
+      <div className="rcm-ca-wrap">
+        <div className="rcm-ca-empty">
+          <p className="rcm-ca-empty-text">등록된 컨텐츠가 없습니다.</p>
           {!readonly && canAddMore && (
             <button
               type="button"
               onClick={onAddItem}
-              className="mt-4 flex items-center gap-2 mx-auto px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200"
+              className="rcm-ca-add-btn"
             >
               <IconPlus size={16}/>
-              <span className="text-sm font-medium">컨텐츠 추가</span>
+              <span className="rcm-ca-add-btn-text">컨텐츠 추가</span>
             </button>
           )}
         </div>
-        
-        {/* 필드 에러 표시 */}
+
         {fieldErrors && fieldErrors.length > 0 && (
-          <div className="mt-2">
+          <div className="rcm-ca-errors">
             {fieldErrors.map((error, index) => (
-              <p key={index} className="text-red-500 text-sm">{error}</p>
+              <p key={index} className="rcm-ca-error">{error}</p>
             ))}
           </div>
         )}
@@ -100,25 +99,20 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
   }
 
   return (
-    <div className="space-y-4">
-      {/* 컨텐츠 목록 */}
+    <div className="rcm-ca-wrap">
       {items.map((item, index) => {
-        // 해당 항목의 에러 찾기
         const itemErrors = errors.filter(err => err.index === index);
         const hasError = itemErrors.length > 0 || titleErrors[index];
-        
+
         return (
-          <div 
-            key={index} 
-            className={`border rounded-lg p-4 space-y-3 transition-all ${
-              hasError ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:shadow-md'
-            }`}
+          <div
+            key={index}
+            className={`rcm-ca-item ${hasError ? 'rcm-ca-item-error' : ''}`}
           >
-            {/* 헤더 영역 - 제목과 삭제 버튼 */}
-            <div className="flex items-start gap-3">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  제목 <span className="text-red-500">*</span>
+            <div className="rcm-ca-item-header">
+              <div className="rcm-ca-item-title-col">
+                <label className="rcm-ca-item-label">
+                  제목 <span className="rcm-ca-required">*</span>
                 </label>
                 <div onBlur={(e: React.FocusEvent<HTMLDivElement>) => {
                   const target = e.target as HTMLInputElement;
@@ -132,22 +126,21 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
                     onChange={(val) => onTitleChange(index, val)}
                     placeHolder="제목을 입력하세요"
                     readonly={readonly}
-                    className={titleErrors[index] ? "border-red-500" : ""}
+                    className={titleErrors[index] ? "rcm-ca-input-error" : ""}
                   />
                 </div>
                 {titleErrors[index] && (
-                  <p className="mt-1 text-xs text-red-500">{titleErrors[index]}</p>
+                  <p className="rcm-ca-item-error-msg">{titleErrors[index]}</p>
                 )}
               </div>
-              
-              {/* 삭제 버튼 */}
+
               {!readonly && (
-                <div className="pt-6">
+                <div className="rcm-ca-item-remove-wrap">
                   <Tooltip label="삭제">
                     <button
                       type="button"
                       onClick={() => onRemoveItem(index)}
-                      className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors"
+                      className="rcm-ca-item-remove"
                     >
                       <IconTrash size={20} />
                     </button>
@@ -156,10 +149,9 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
               )}
             </div>
 
-            {/* 설명 영역 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                설명 <span className="text-gray-400 text-xs">(선택사항)</span>
+              <label className="rcm-ca-item-label">
+                설명 <span className="rcm-ca-optional">(선택사항)</span>
               </label>
               <Textarea
                 name={`content_${index}`}
@@ -171,10 +163,9 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
               />
             </div>
 
-            {/* 파일 업로드 영역 */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                파일 <span className="text-red-500">*</span>
+              <label className="rcm-ca-item-label">
+                파일 <span className="rcm-ca-required">*</span>
               </label>
               <FileUploadInput
                 name={`asset_${index}`}
@@ -184,40 +175,37 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
                 viewSimple={false}
                 config={{
                   maxCount: 1,
-                  maxSize: maxFileSize ? maxFileSize / (1024 * 1024) : 10, // bytes to MB
-                  extensions: acceptedFileTypes 
+                  maxSize: maxFileSize ? maxFileSize / (1024 * 1024) : 10,
+                  extensions: acceptedFileTypes
                     ? acceptedFileTypes.map(type => type.replace('*', '').replace('.', ''))
                     : ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx']
                 }}
               />
-              {/* 항목별 에러 표시 */}
               {itemErrors.filter(err => err.field === 'assetUrl').map((err, errIndex) => (
-                <p key={errIndex} className="mt-1 text-xs text-red-500">{err.message}</p>
+                <p key={errIndex} className="rcm-ca-item-error-msg">{err.message}</p>
               ))}
             </div>
           </div>
         );
       })}
 
-      {/* 추가 버튼 */}
       {!readonly && canAddMore && (
-        <div className="flex justify-center pt-2">
+        <div className="rcm-ca-add-btn-row">
           <button
             type="button"
             onClick={onAddItem}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all duration-200"
+            className="rcm-ca-add-btn"
           >
             <IconPlus size={16}/>
-            <span className="text-sm font-medium">컨텐츠 추가</span>
+            <span className="rcm-ca-add-btn-text">컨텐츠 추가</span>
           </button>
         </div>
       )}
 
-      {/* 필드 에러 표시 */}
       {fieldErrors && fieldErrors.length > 0 && (
-        <div className="mt-2">
+        <div className="rcm-ca-errors">
           {fieldErrors.map((error, index) => (
-            <p key={index} className="text-red-500 text-sm">{error}</p>
+            <p key={index} className="rcm-ca-error">{error}</p>
           ))}
         </div>
       )}

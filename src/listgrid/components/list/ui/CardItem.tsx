@@ -372,16 +372,12 @@ export const CardItem: React.FC<CardItemProps> = ({
   if (!itemEntityForm) {
     return (
       <article className={`
-        group relative rounded-xl
-        bg-white dark:bg-gray-900
-        border border-gray-200 dark:border-gray-800
-        shadow-sm
-        ${cardConfig?.containerClassName ?? ''}
+        rcm-card-item ${cardConfig?.containerClassName ?? ''}
       `}>
-        <div className="p-4">
-          <div className="space-y-3">
-            <div className="h-6 w-32 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
-            <div className="h-4 w-48 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+        <div className="rcm-card-item-body">
+          <div className="rcm-card-item-skel-stack">
+            <div className="rcm-card-item-skel-line rcm-card-item-skel-line-title" />
+            <div className="rcm-card-item-skel-line rcm-card-item-skel-line-subtitle" />
           </div>
         </div>
       </article>
@@ -390,32 +386,18 @@ export const CardItem: React.FC<CardItemProps> = ({
 
   return (
     <article
-      className={`
-        group relative rounded-xl
-        bg-white dark:bg-gray-900
-        border border-gray-200 dark:border-gray-800
-        shadow-sm
-        transition-all duration-200
-        hover:border-gray-300 dark:hover:border-gray-700
-        hover:shadow-md
-        ${onClick ? 'cursor-pointer' : ''}
-        ${cardConfig?.containerClassName ?? ''}
-      `}
+      className={`rcm-card-item rcm-card-item-hover ${onClick ? 'rcm-card-item-clickable' : ''} ${cardConfig?.containerClassName ?? ''}`}
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
     >
       {/* Card Header */}
-      <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-800">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2.5 flex-wrap">
-              <h3 className={`
-                text-base font-semibold text-gray-900 dark:text-gray-50
-                truncate
-                ${cardConfig?.titleClassName ?? ''}
-              `}>
+      <div className="rcm-card-item-header">
+        <div className="rcm-card-item-header-row">
+          <div className="rcm-card-item-header-left">
+            <div className="rcm-card-item-title-row">
+              <h3 className={`rcm-card-item-title ${cardConfig?.titleClassName ?? ''}`}>
                 {title}
               </h3>
               {statusInfo && (
@@ -425,28 +407,28 @@ export const CardItem: React.FC<CardItemProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="rcm-card-item-actions">
             {!readonly && onEdit && (
               <button
                 onClick={handleEditClick}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="rcm-card-item-action-btn"
                 aria-label="Edit"
               >
-                <IconPencil className="h-4 w-4" stroke={1.5} />
+                <IconPencil className="rcm-card-item-action-icon" stroke={1.5} />
               </button>
             )}
             {!readonly && onDelete && (
               <button
                 onClick={handleDeleteClick}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors"
+                className="rcm-card-item-action-btn rcm-card-item-action-btn-danger"
                 aria-label="Delete"
               >
-                <IconTrash className="h-4 w-4" stroke={1.5} />
+                <IconTrash className="rcm-card-item-action-icon" stroke={1.5} />
               </button>
             )}
             {onClick && (
-              <div className="p-1.5">
-                <IconChevronRight className="h-4 w-4 text-gray-400" stroke={2} />
+              <div className="rcm-card-item-chevron-wrap">
+                <IconChevronRight className="rcm-card-item-chevron-icon" stroke={2} />
               </div>
             )}
           </div>
@@ -455,20 +437,13 @@ export const CardItem: React.FC<CardItemProps> = ({
 
       {/* Tab Navigation - Only show if multiple tabs */}
       {tabs.length > 1 && (
-        <div className="px-5 pt-3 border-b border-gray-100 dark:border-gray-800">
-          <nav className="flex gap-1 -mb-px overflow-x-auto" aria-label="Tabs">
+        <div className="rcm-card-item-tabbar">
+          <nav className="rcm-card-item-tabnav" aria-label="Tabs">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={(e) => handleTabClick(e, tab.id)}
-                className={`
-                  px-3 py-2 text-xs font-medium rounded-t-lg
-                  transition-colors whitespace-nowrap
-                  ${selectedTabId === tab.id
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-b-2 border-primary-500'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                  }
-                `}
+                className={`rcm-card-item-tab ${selectedTabId === tab.id ? 'rcm-card-item-tab-active' : ''}`}
               >
                 {tab.label}
               </button>
@@ -478,17 +453,17 @@ export const CardItem: React.FC<CardItemProps> = ({
       )}
 
       {/* Card Body - FieldGroup Cards */}
-      <div className="p-4">
+      <div className="rcm-card-item-body">
         {isLoading ? (
-          <div className="space-y-3">
+          <div className="rcm-card-item-skel-stack">
             {[1, 2].map((i) => (
-              <div key={i} className="rounded-lg border border-gray-100 dark:border-gray-800 p-4">
-                <div className="h-4 w-24 animate-pulse rounded bg-gray-100 dark:bg-gray-800 mb-3" />
-                <div className="space-y-2">
+              <div key={i} className="rcm-card-item-skel-group">
+                <div className="rcm-card-item-skel-line rcm-card-item-skel-line-title" />
+                <div className="rcm-card-item-skel-rows">
                   {[1, 2, 3].map((j) => (
-                    <div key={j} className="grid grid-cols-3 gap-4">
-                      <div className="h-3 w-16 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
-                      <div className="col-span-2 h-3 w-24 animate-pulse rounded bg-gray-200 dark:bg-gray-700" />
+                    <div key={j} className="rcm-card-item-skel-row">
+                      <div className="rcm-card-item-skel-line rcm-card-item-skel-line-label" />
+                      <div className="rcm-card-item-skel-line rcm-card-item-skel-line-value" />
                     </div>
                   ))}
                 </div>
@@ -496,11 +471,11 @@ export const CardItem: React.FC<CardItemProps> = ({
             ))}
           </div>
         ) : fieldGroups.length === 0 && subCollections.length === 0 ? (
-          <p className="text-sm text-gray-400 dark:text-gray-500 italic text-center py-4">
+          <p className="rcm-card-item-empty">
             표시할 필드가 없습니다
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="rcm-card-item-sections">
             {/* Field Groups */}
             {fieldGroups.map((group) => (
               <CardFieldSection
@@ -515,29 +490,29 @@ export const CardItem: React.FC<CardItemProps> = ({
 
             {/* SubCollections (following ViewFieldGroup/SubCollectionRenderer pattern) */}
             {subCollections.length > 0 && (
-              <div className="space-y-4 pt-2">
+              <div className="rcm-card-item-subcollections">
                 {subCollections.map((collection) => {
                   const view = subCollectionViews.get(collection.getName());
                   const label = collection.getLabel();
                   const hideLabel = collection.hideLabel;
 
                   return (
-                    <div key={`subcollection_${collection.getName()}`} className="space-y-2">
+                    <div key={`subcollection_${collection.getName()}`} className="rcm-card-item-sub">
                       {/* SubCollection Label */}
                       {!hideLabel && label && (
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <h4 className="rcm-card-item-sub-label">
                           {typeof label === 'string' ? label : label}
                         </h4>
                       )}
                       {/* SubCollection View (CardSubCollectionView or ViewListGrid) */}
                       {view ? (
-                        <div className="rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-800/20 p-3">
+                        <div className="rcm-card-item-sub-view">
                           {view}
                         </div>
                       ) : (
-                        <div className="rounded-lg border border-gray-100 dark:border-gray-800 p-4">
-                          <div className="flex items-center justify-center py-4">
-                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                        <div className="rcm-card-item-sub-loading-wrap">
+                          <div className="rcm-card-item-sub-loading">
+                            <div className="rcm-card-item-sub-spinner" />
                           </div>
                         </div>
                       )}

@@ -138,23 +138,21 @@ export const ViewListGridWrapper: React.FC<OptimizedViewListGridWrapperProps> = 
     return (
       <div>
         {breadcrumbComponent}
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center p-8">
-            <div className="mb-4">
-              <svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="rcm-permission-denied">
+          <div className="rcm-permission-denied-inner">
+            <div className="rcm-permission-denied-icon-wrap">
+              <svg className="rcm-permission-denied-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              접근 권한이 없습니다
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+            <h3 className="rcm-permission-denied-title">접근 권한이 없습니다</h3>
+            <p className="rcm-permission-denied-desc">
               이 페이지에 접근할 수 있는 권한이 없습니다.<br />
               관리자에게 문의하시기 바랍니다.
             </p>
             <button
               onClick={() => window.history.back()}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+              className="rcm-button rcm-button-outline"
             >
               뒤로 가기
             </button>

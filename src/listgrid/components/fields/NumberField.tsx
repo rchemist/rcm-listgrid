@@ -164,17 +164,16 @@ export class NumberField extends ListableFormField<NumberField> {
 
       // 일반 모드: 아이콘 + 텍스트
       const IconComponent = this.cardIcon || IconCoin;
-      const iconColorClass = this.cardIcon
-        ? 'text-gray-400 dark:text-gray-500'
-        : 'text-emerald-500 dark:text-emerald-400';
+      const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-num-icon-frame-currency';
+      const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-num-icon-currency';
 
       return {
         result: (
-          <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <span className="flex items-center justify-center w-6 h-6 rounded-md bg-emerald-50 dark:bg-emerald-950/50">
-              <IconComponent className={`h-3.5 w-3.5 ${iconColorClass} shrink-0`} stroke={1.75} />
+          <span className="rcm-bool-wrap">
+            <span className={`rcm-bool-icon-frame ${frameClass}`}>
+              <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
             </span>
-            <span className="font-semibold tabular-nums">{displayText}</span>
+            <span className="rcm-num-value rcm-num-value-emphasis">{displayText}</span>
           </span>
         )
       };
@@ -187,17 +186,16 @@ export class NumberField extends ListableFormField<NumberField> {
 
     // 일반 모드: 아이콘 + 텍스트
     const IconComponent = this.cardIcon || IconHash;
-    const iconColorClass = this.cardIcon
-      ? 'text-gray-400 dark:text-gray-500'
-      : 'text-violet-500 dark:text-violet-400';
+    const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-num-icon-frame-number';
+    const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-num-icon-number';
 
     return {
       result: (
-        <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-          <span className="flex items-center justify-center w-6 h-6 rounded-md bg-violet-50 dark:bg-violet-950/50">
-            <IconComponent className={`h-3.5 w-3.5 ${iconColorClass} shrink-0`} stroke={1.75} />
+        <span className="rcm-bool-wrap">
+          <span className={`rcm-bool-icon-frame ${frameClass}`}>
+            <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
           </span>
-          <span className="font-medium tabular-nums">{formattedValue}</span>
+          <span className="rcm-num-value">{formattedValue}</span>
         </span>
       )
     };

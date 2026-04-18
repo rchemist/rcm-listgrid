@@ -115,11 +115,11 @@ export class BooleanField extends OptionalField<BooleanField> {
           const IconComponent = this.cardIcon;
           return {
             result: (
-              <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                <span className="flex items-center justify-center w-6 h-6 rounded-md bg-gray-100 dark:bg-gray-800">
-                  <IconComponent className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400 shrink-0" stroke={1.75} />
+              <span className="rcm-bool-wrap">
+                <span className="rcm-bool-icon-frame rcm-bool-icon-frame-neutral">
+                  <IconComponent className="rcm-bool-icon rcm-bool-icon-neutral" stroke={1.75} />
                 </span>
-                <span className="font-medium">{option.label}</span>
+                <span className="rcm-bool-label">{option.label}</span>
               </span>
             )
           };
@@ -130,22 +130,17 @@ export class BooleanField extends OptionalField<BooleanField> {
 
     // boolean 값에 따른 아이콘 렌더링
     if (value === true) {
-      // cardIcon이 있으면 해당 아이콘 사용, 없으면 체크 아이콘
       const IconComponent = this.cardIcon || IconCheck;
-      const bgColorClass = this.cardIcon
-        ? 'bg-gray-100 dark:bg-gray-800'
-        : 'bg-emerald-50 dark:bg-emerald-950/50';
-      const iconColorClass = this.cardIcon
-        ? 'text-gray-500 dark:text-gray-400'
-        : 'text-emerald-500 dark:text-emerald-400';
+      const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-bool-icon-frame-true';
+      const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-bool-icon-true';
 
       return {
         result: (
-          <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <span className={`flex items-center justify-center w-6 h-6 rounded-md ${bgColorClass}`}>
-              <IconComponent className={`h-3.5 w-3.5 ${iconColorClass} shrink-0`} stroke={2} />
+          <span className="rcm-bool-wrap">
+            <span className={`rcm-bool-icon-frame ${frameClass}`}>
+              <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={2} />
             </span>
-            <span className="font-medium text-emerald-600 dark:text-emerald-400">예</span>
+            <span className="rcm-bool-label rcm-bool-label-true">예</span>
           </span>
         )
       };
@@ -153,20 +148,14 @@ export class BooleanField extends OptionalField<BooleanField> {
 
     // false 값
     const IconComponent = this.cardIcon || IconX;
-    const bgColorClass = this.cardIcon
-      ? 'bg-gray-100 dark:bg-gray-800'
-      : 'bg-gray-100 dark:bg-gray-800';
-    const iconColorClass = this.cardIcon
-      ? 'text-gray-500 dark:text-gray-400'
-      : 'text-gray-400 dark:text-gray-500';
 
     return {
       result: (
-        <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-          <span className={`flex items-center justify-center w-6 h-6 rounded-md ${bgColorClass}`}>
-            <IconComponent className={`h-3.5 w-3.5 ${iconColorClass} shrink-0`} stroke={2} />
+        <span className="rcm-bool-wrap">
+          <span className="rcm-bool-icon-frame rcm-bool-icon-frame-neutral">
+            <IconComponent className="rcm-bool-icon rcm-bool-icon-false" stroke={2} />
           </span>
-          <span className="font-medium text-gray-500 dark:text-gray-400">아니오</span>
+          <span className="rcm-bool-label rcm-bool-label-false">아니오</span>
         </span>
       )
     };

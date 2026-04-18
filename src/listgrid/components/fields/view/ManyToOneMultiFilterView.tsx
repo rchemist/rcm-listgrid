@@ -162,7 +162,7 @@ export const ManyToOneMultiFilterView = ({
       title: `${label ?? name} 선택`,
       size: '5xl',
       content: (
-        <div className="modal-content flex max-h-[90vh] flex-col overflow-hidden">
+        <div className="rcm-modal-content-scroll">
           {config.tree ? (
             <TreeSelectView
               entityForm={entityForm}
@@ -201,21 +201,18 @@ export const ManyToOneMultiFilterView = ({
   }
 
   return (
-    <div className="flex flex-col gap-2 w-full">
+    <div className="rcm-m2o-multi-wrap">
       {/* Selected items as chips */}
-      <div className="flex flex-wrap gap-1.5 min-h-[32px]">
+      <div className="rcm-m2o-multi-chips">
         {selectedItems.map((item) => (
-          <div
-            key={item.id}
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary rounded-full text-sm border border-primary/20"
-          >
-            <span className="max-w-[150px] truncate">{item.name}</span>
+          <div key={item.id} className="rcm-m2o-multi-chip">
+            <span className="rcm-m2o-multi-chip-label">{item.name}</span>
             <button
               type="button"
               onClick={() => handleRemoveItem(item.id)}
-              className="flex items-center justify-center w-4 h-4 rounded-full hover:bg-primary/20 transition-colors"
+              className="rcm-m2o-multi-chip-remove"
             >
-              <IconX className="w-3 h-3" />
+              <IconX className="rcm-m2o-multi-chip-remove-icon" />
             </button>
           </div>
         ))}
@@ -224,16 +221,16 @@ export const ManyToOneMultiFilterView = ({
         <button
           type="button"
           onClick={handleSelectModal}
-          className="inline-flex items-center gap-1 px-2.5 py-1 border border-dashed border-gray-300 dark:border-gray-600 rounded-full text-sm text-gray-500 dark:text-gray-400 hover:border-primary hover:text-primary transition-colors"
+          className="rcm-m2o-multi-add"
         >
-          <IconPlus className="w-3.5 h-3.5" />
+          <IconPlus className="rcm-m2o-multi-add-icon" />
           <span>추가</span>
         </button>
       </div>
 
       {/* Helper text */}
       {selectedItems.length === 0 && (
-        <p className="text-xs text-gray-400">
+        <p className="rcm-m2o-multi-helper">
           추가 버튼을 클릭하여 {label ?? name}을(를) 선택하세요. 여러 개를 선택할 수 있습니다.
         </p>
       )}

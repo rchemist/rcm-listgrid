@@ -220,7 +220,7 @@ const BirthdayInput = ({
         maxLength={10} // YYYY-MM-DD = 10자
       />
       {validationError && (
-        <p className="text-sm text-red-500">{validationError}</p>
+        <p className="rcm-field-error">{validationError}</p>
       )}
     </div>
   )

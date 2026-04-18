@@ -103,11 +103,10 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
   }, [handleAdd]);
 
   return (
-    <div className="space-y-4">
-      {/* 제목 입력 */}
+    <div className="rcm-ca-dialog">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          제목 <span className="text-red-500">*</span>
+        <label className="rcm-ca-item-label">
+          제목 <span className="rcm-ca-required">*</span>
         </label>
         <div onBlur={handleTitleBlur} onKeyPress={handleKeyPress}>
           <TextInput
@@ -115,18 +114,17 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
             value={title}
             onChange={handleTitleChange}
             placeHolder="제목을 입력하세요"
-            className={titleError ? "border-red-500" : ""}
+            className={titleError ? "rcm-ca-input-error" : ""}
           />
         </div>
         {titleError && (
-          <p className="mt-1 text-xs text-red-500">{titleError}</p>
+          <p className="rcm-ca-item-error-msg">{titleError}</p>
         )}
       </div>
 
-      {/* 설명 입력 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          설명 <span className="text-gray-400 text-xs">(선택사항)</span>
+        <label className="rcm-ca-item-label">
+          설명 <span className="rcm-ca-optional">(선택사항)</span>
         </label>
         <Textarea
           name="content"
@@ -137,12 +135,11 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
         />
       </div>
 
-      {/* 버튼 영역 */}
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="rcm-ca-dialog-footer">
         <button
           type="button"
           onClick={handleCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          className="rcm-button rcm-button-outline"
         >
           취소
         </button>
@@ -150,7 +147,7 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
           type="button"
           onClick={handleAdd}
           disabled={!title.trim()}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+          className="rcm-button rcm-button-primary"
         >
           추가
         </button>

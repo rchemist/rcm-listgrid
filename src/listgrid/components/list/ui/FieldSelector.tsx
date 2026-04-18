@@ -63,35 +63,31 @@ const FieldSelectorInner = ({
   const totalCount = availableFields.length;
 
   return (
-    <div className="border border-gray-200 rounded-lg bg-white">
+    <div className="rcm-field-selector">
       {/* Header */}
       <div
-        className="flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="rcm-field-selector-header"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">
-            검색 필드 선택
-          </span>
-          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+        <div className="rcm-field-selector-header-left">
+          <span className="rcm-field-selector-title">검색 필드 선택</span>
+          <span className="rcm-field-selector-count">
             {selectedCount}/{totalCount}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="rcm-field-selector-header-right">
           {!isExpanded && selectedCount > 0 && (
-            <span className="text-xs text-gray-500">
+            <span className="rcm-field-selector-hint">
               {selectedCount}개 선택됨
             </span>
           )}
           <button
             type="button"
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="rcm-field-selector-toggle"
             aria-label={isExpanded ? '접기' : '펼치기'}
           >
             <svg
-              className={`w-4 h-4 text-gray-500 transition-transform ${
-                isExpanded ? 'rotate-180' : ''
-              }`}
+              className={`rcm-field-selector-chevron ${isExpanded ? 'rcm-rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -109,38 +105,38 @@ const FieldSelectorInner = ({
 
       {/* Expanded content */}
       {isExpanded && (
-        <div className="border-t border-gray-200">
+        <div className="rcm-field-selector-body">
           {/* Search and actions */}
-          <div className="px-3 py-2 border-b border-gray-100 flex items-center gap-2">
-            <div className="relative flex-1">
-              <IconSearch className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div className="rcm-field-selector-search-row">
+            <div className="rcm-field-selector-search-input-wrap">
+              <IconSearch className="rcm-field-selector-search-icon" />
               <input
                 type="text"
                 placeholder="필드 검색..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                className="rcm-field-selector-search-input"
               />
             </div>
             <button
               type="button"
               onClick={onSelectAll}
-              className="text-xs text-primary hover:text-primary-dark px-2 py-1 hover:bg-primary/5 rounded transition-colors"
+              className="rcm-field-selector-action rcm-field-selector-action-primary"
             >
               전체 선택
             </button>
             <button
               type="button"
               onClick={onDeselectAll}
-              className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 hover:bg-gray-100 rounded transition-colors"
+              className="rcm-field-selector-action rcm-field-selector-action-muted"
             >
               전체 해제
             </button>
           </div>
 
           {/* Field list */}
-          <div className="max-h-48 overflow-y-auto">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1 p-2">
+          <div className="rcm-field-selector-list">
+            <div className="rcm-field-selector-grid">
               {filteredFields.map((field) => {
                 const fieldName = field.getName();
                 const isSelected = selectedFieldNames.has(fieldName);
@@ -150,29 +146,19 @@ const FieldSelectorInner = ({
                     key={fieldName}
                     type="button"
                     onClick={() => onToggleField(fieldName)}
-                    className={`flex items-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors text-left ${
-                      isSelected
-                        ? 'bg-primary/10 text-primary border border-primary/30'
-                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-transparent'
-                    }`}
+                    className={`rcm-field-selector-chip ${isSelected ? 'rcm-field-selector-chip-selected' : ''}`}
                   >
-                    <span
-                      className={`flex-shrink-0 w-4 h-4 rounded border flex items-center justify-center ${
-                        isSelected
-                          ? 'bg-primary border-primary'
-                          : 'border-gray-300'
-                      }`}
-                    >
-                      {isSelected && <IconCheck className="w-3 h-3 text-white" />}
+                    <span className={`rcm-field-selector-chip-check ${isSelected ? 'rcm-field-selector-chip-check-selected' : ''}`}>
+                      {isSelected && <IconCheck className="rcm-field-selector-chip-check-icon" />}
                     </span>
-                    <span className="truncate">{field.viewLabel(t)}</span>
+                    <span className="rcm-truncate">{field.viewLabel(t)}</span>
                   </button>
                 );
               })}
             </div>
 
             {filteredFields.length === 0 && (
-              <div className="text-center py-4 text-sm text-gray-500">
+              <div className="rcm-field-selector-empty">
                 검색 결과가 없습니다
               </div>
             )}

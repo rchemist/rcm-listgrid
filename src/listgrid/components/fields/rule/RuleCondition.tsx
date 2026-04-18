@@ -115,9 +115,8 @@ export const RuleCondition = (props: RuleConditionProps) => {
     })
   }
 
-  return <div className="flex flex-wrap w-full justify-center mb-5">
-    <div
-      className="w-full border border-gray-500/20 rounded-md p-6 pt-2 relative">
+  return <div className="rcm-rule-wrap">
+    <div className="rcm-rule-condition-box">
       <div className={'form-input w-fit flex relative mt-[-20px] space-x-2 items-center'}>
         <div>{props.condition}</div>
         <div>조건</div>

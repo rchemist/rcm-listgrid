@@ -98,38 +98,33 @@ const CardFieldRow: React.FC<CardFieldRowProps> = ({ field, item, entityForm, se
   const showHelpText = !isBlank(helpText);
 
   return (
-    <div className="grid grid-cols-3 gap-3 py-2.5 border-b border-gray-50 dark:border-gray-800/50 last:border-b-0">
+    <div className="rcm-card-field-row">
       {/* Label Column - Takes 1/3 of space */}
-      <dt className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
+      <dt className="rcm-card-field-label">
         <span>{label}</span>
         {/* Required indicator */}
         {required && (
           <Tooltip label="필수값" color="red" withArrow>
-            <Icon
-              icon="healthicons:star-small"
-              className="cursor-help text-red-600 w-2.5 h-2.5"
-            />
+            <Icon icon="healthicons:star-small" className="rcm-field-icon rcm-field-icon-required" />
           </Tooltip>
         )}
         {/* Tooltip indicator */}
         {showTooltip && (
           <Tooltip label={tooltip} color="gray" withArrow position="top-end">
-            <IconHelp className="h-3 w-3 text-gray-400 cursor-help" />
+            <IconHelp className="rcm-card-field-help-icon" />
           </Tooltip>
         )}
       </dt>
       {/* Value Column - Takes 2/3 of space */}
-      <dd className="col-span-2 text-sm text-gray-900 dark:text-gray-100">
+      <dd className="rcm-card-field-value">
         {isLoading ? (
-          <span className="inline-block h-4 w-20 animate-pulse rounded bg-gray-100 dark:bg-gray-800" />
+          <span className="rcm-card-field-loading" />
         ) : (
-          <div className="space-y-1">
+          <div className="rcm-card-field-value-inner">
             <div>{renderedValue}</div>
             {/* Help text display */}
             {showHelpText && (
-              <div className="text-xs text-gray-400 dark:text-gray-500">
-                {helpText}
-              </div>
+              <div className="rcm-card-field-help-text">{helpText}</div>
             )}
           </div>
         )}
@@ -195,34 +190,30 @@ export const CardFieldSection: React.FC<CardFieldSectionProps> = ({
   };
 
   return (
-    <div className="rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30 overflow-hidden">
+    <div className="rcm-card-section">
       {/* Section Header - Only show if group has a label */}
       {hasLabel && (
         <div
-          className="px-4 py-2.5 bg-gray-100/80 dark:bg-gray-800/80 border-b border-gray-100 dark:border-gray-700 cursor-pointer"
+          className="rcm-card-section-header"
           onClick={handleToggle}
         >
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              {fieldGroup.label}
-            </h4>
-            <div className="flex items-center gap-2">
+          <div className="rcm-card-section-header-row">
+            <h4 className="rcm-card-section-title">{fieldGroup.label}</h4>
+            <div className="rcm-card-section-header-actions">
               {/* Help icon for description (following ViewFieldGroup pattern) */}
               {hasDescription && (
                 <Tooltip label={fieldGroup.description} color="gray" withArrow position="top-end">
-                  <IconInfoCircle className="h-4 w-4 text-gray-400 cursor-help" />
+                  <IconInfoCircle className="rcm-card-section-help-icon" />
                 </Tooltip>
               )}
               {/* Collapse toggle icon */}
               <button
                 type="button"
-                className="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="rcm-card-section-toggle"
                 aria-label={isOpen ? 'Collapse' : 'Expand'}
               >
                 <IconChevronUp
-                  className={`h-4 w-4 text-gray-400 transition-transform duration-200 ${
-                    isOpen ? '' : 'rotate-180'
-                  }`}
+                  className={`rcm-card-section-chevron ${isOpen ? '' : 'rcm-rotate-180'}`}
                 />
               </button>
             </div>
@@ -232,7 +223,7 @@ export const CardFieldSection: React.FC<CardFieldSectionProps> = ({
 
       {/* Fields - Collapsable content */}
       {isOpen && (
-        <dl className="px-4 py-2">
+        <dl className="rcm-card-section-body">
           {visibleFields.map((field) => (
             <CardFieldRow
               key={field.getName()}

@@ -245,8 +245,8 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
       const IconComponent = this.cardIcon;
       return {
         result: (
-          <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
-            <IconComponent className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500 shrink-0" stroke={1.75} />
+          <span className="rcm-bool-wrap">
+            <IconComponent className="rcm-bool-icon rcm-bool-icon-neutral" stroke={1.75} />
             <span>{text}</span>
           </span>
         )

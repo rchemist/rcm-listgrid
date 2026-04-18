@@ -14,11 +14,11 @@ export const QuickSearchInput: React.FC<QuickSearchInputProps> = ({search, setSe
   if (!quickSearchEnabled) return <div>&nbsp;</div>;
 
   return (
-      <div className={'flex w-full max-w-full'}>
+      <div className="rcm-quick-search-wrap">
         <input
             type="text"
             id="quick-search"
-            className="form-input peer form-input !pr-10 focus:!border-white-light py-3 max-w-[300px] min-w-[300px] disabled:pointer-events-none disabled:bg-[#f9f9f9] dark:disabled:bg-[#1b2e4b] placeholder:text-gray-400 dark:placeholder:text-gray-500 font-normal border-gray-300 dark:border-gray-600 dark:bg-gray-800"
+            className="rcm-quick-search-input"
             placeholder={`Search ${quickSearchLabel}`}
             value={search}
             readOnly={!quickSearchEnabled}
@@ -28,20 +28,20 @@ export const QuickSearchInput: React.FC<QuickSearchInputProps> = ({search, setSe
               if (e.key === 'Enter') onQuickSearch(search)
             }}
         />
-        <div className="flex items-center justify-center dark:border-[#17263c] text-danger h-[40px] font-semibold -ml-8">
-          <button className={'flex min-h-[24px] min-w-[24px] items-center justify-center'} onClick={() => {
+        <div className="rcm-quick-search-addon rcm-quick-search-addon-search">
+          <button className="rcm-quick-search-btn" onClick={() => {
             if (!isBlank(search)) onQuickSearch(search)
           }}>
-            <IconSearch className={'w-3.5 h-3.5 text-gray-900 dark:text-gray-100'} stroke={1}/>
+            <IconSearch className="rcm-quick-search-icon" stroke={1}/>
           </button>
         </div>
         {!isBlank(search) && (
-            <div className="flex items-center justify-center dark:border-[#17263c] text-danger h-[40px] font-semibold -ml-11">
-              <button className={'flex min-h-[24px] min-w-[24px] items-center justify-center'} onClick={() => {
+            <div className="rcm-quick-search-addon rcm-quick-search-addon-clear">
+              <button className="rcm-quick-search-btn" onClick={() => {
                 setSearch('');
                 onQuickSearch('');
               }}>
-                <IconCircleX className={'w-3.5 h-3.5 text-gray-900 dark:text-gray-100'} stroke={1}/>
+                <IconCircleX className="rcm-quick-search-icon" stroke={1}/>
               </button>
             </div>
         )}

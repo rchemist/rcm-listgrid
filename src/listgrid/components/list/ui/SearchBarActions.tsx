@@ -59,7 +59,7 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
   const { classNames: themeClasses, cn } = useListGridTheme();
 
   const containerClass = cn(
-    'flex my-4 mb-2 lg:my-2 md:my-0 justify-end gap-2',
+    'rcm-search-bar-actions',
     themeClasses.searchBarActions?.container
   );
 
@@ -90,8 +90,8 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
   return (
     <div className={containerClass}>
       {showPageSize && (
-        <div className="flex items-center space-x-2 md:mr-2 justify-end">
-          <div className="w-[140px] min-w-[140px]">
+        <div className="rcm-search-bar-pagesize">
+          <div className="rcm-search-bar-pagesize-select">
             <SelectBox
               required={true}
               name={`pageSizeSelector`}
@@ -104,7 +104,7 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
         </div>
       )}
       {enableHandleData && (
-        <div className={subCollection ? "" : "hidden sm:block"}>
+        <div className={subCollection ? "" : "rcm-hide-below-sm"}>
           <ViewFieldSelector
             viewFields={viewFields}
             setViewFields={setViewFields}
@@ -120,7 +120,7 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
           {filtered ? (
             <Indicator color="red" processing={true}>
               <button
-                className={'btn btn-primary flex items-center justify-center whitespace-nowrap'}
+                className={'rcm-button rcm-button-primary rcm-search-bar-submit'}
                 disabled={loading || !searchEnabled}
                 onClick={() => onOpenAdvancedSearch?.()}
               >
@@ -129,7 +129,7 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
             </Indicator>
           ) : (
             <button
-              className={'btn btn-primary flex items-center justify-center whitespace-nowrap'}
+              className={'rcm-button rcm-button-primary rcm-search-bar-submit'}
               disabled={loading || !searchEnabled}
               onClick={() => onOpenAdvancedSearch?.()}
             >

@@ -120,7 +120,7 @@ class InlineRowActionField extends ListableFormField<InlineRowActionField> {
     }
 
     const buttons = (
-      <div className="flex items-center justify-center gap-1">
+      <div className="rcm-inline-action-row">
         {visibleActions.map(action => {
           const label = typeof action.label === 'function' ? action.label(item) : action.label;
           const isDisabled = action.disabled?.(item) ?? false;
@@ -129,7 +129,7 @@ class InlineRowActionField extends ListableFormField<InlineRowActionField> {
             <Tooltip key={action.id} label={label}>
               <button
                 type="button"
-                className={`btn btn-sm ${action.className ?? 'btn-outline-primary'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`rcm-button rcm-button-sm ${action.className ?? 'rcm-button-outline'} ${isDisabled ? 'rcm-is-disabled' : ''}`}
                 disabled={isDisabled}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -386,7 +386,7 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
   return (
     <div className="inline-subcollection-view" key={`inline-sub-${refreshKey}`}>
       {tooltip && (
-        <div className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+        <div className="rcm-inline-subcollection-tooltip">
           {tooltip}
         </div>
       )}

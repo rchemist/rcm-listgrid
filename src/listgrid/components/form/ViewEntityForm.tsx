@@ -21,35 +21,35 @@ import {useEntityFormTheme} from "./context/EntityFormThemeContext";
 
 // Lazy load heavy components
 const ViewEntityFormErrors = dynamic(() => import("./ui/ViewEntityFormErrors").then(mod => ({ default: mod.ViewEntityFormErrors })), {
-  loading: () => <div className="h-4"></div>
+  loading: () => <div className="rcm-skeleton-placeholder-xs"></div>
 });
 
 const ViewEntityFormAlerts = dynamic(() => import("./ui/ViewEntityFormAlerts").then(mod => ({ default: mod.ViewEntityFormAlerts })), {
-  loading: () => <div className="h-4"></div>
+  loading: () => <div className="rcm-skeleton-placeholder-xs"></div>
 });
 
 const ViewTab = dynamic(() => import("./ViewTab").then(mod => ({ default: mod.ViewTab })), {
-  loading: () => <div className="h-8 bg-gray-100 rounded animate-pulse"></div>
+  loading: () => <div className="rcm-skeleton-placeholder-tab"></div>
 });
 
 const ViewTabPanel = dynamic(() => import("./ViewTabPanel").then(mod => ({ default: mod.ViewTabPanel })), {
-  loading: () => <div className="h-96 bg-gray-50 rounded animate-pulse"></div>
+  loading: () => <div className="rcm-skeleton-placeholder-panel"></div>
 });
 
 const SafePerfectScrollbar: React.ComponentType<any> = dynamic(
   () => import('../../ui').then(mod => ({ default: mod.SafePerfectScrollbar as any })),
   {
     ssr: false,
-    loading: () => <div className="w-full h-full"></div>
+    loading: () => <div className="rcm-skeleton-placeholder-fill"></div>
   }
 );
 
 const CreateStepView = dynamic(() => import("./ui/CreateStepView").then(mod => ({ default: mod.CreateStepView })), {
-  loading: () => <div className="h-32 bg-gray-100 rounded animate-pulse"></div>
+  loading: () => <div className="rcm-skeleton-placeholder-md"></div>
 });
 
 const CreateStepButtons = dynamic(() => import("./ui/CreateStepButtons").then(mod => ({ default: mod.CreateStepButtons })), {
-  loading: () => <div className="h-12"></div>
+  loading: () => <div className="rcm-skeleton-placeholder-lg"></div>
 });
 
 /**
@@ -134,12 +134,12 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
       className={classNames.root}
     >
       {/* Sticky header group: title + buttons + custom header area */}
-      <div className="sticky top-0 z-20 bg-white dark:bg-dark">
+      <div className="rcm-form-sticky-header">
         {/* Header 영역: 제목 + 버튼 그룹 */}
         {/* Header area: Title + Button group */}
-        <div className={cn("mt-1 w-full min-w-0", classNames.header?.container)}>
+        <div className={cn("rcm-form-header", classNames.header?.container)}>
           {/* 제목 영역 */}
-          <div className={cn("mb-3", classNames.header?.titleWrapper)}>
+          <div className={cn("rcm-form-header-title", classNames.header?.titleWrapper)}>
             <ViewEntityFormTitle
               title={title}
               hideTitle={props.hideTitle}
@@ -147,7 +147,7 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
           </div>
           {/* 버튼 영역 (header 위치일 때만) */}
           {showButtonsInHeader && (
-            <div className={cn("w-full min-w-0 overflow-hidden", classNames.header?.buttonWrapper)}>
+            <div className={cn("rcm-form-header-buttons", classNames.header?.buttonWrapper)}>
               <ViewEntityFormButtons buttons={buttons} />
             </div>
           )}
@@ -155,7 +155,7 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
         {/* Custom Header Area */}
         {headerAreaContent && (
           <div className={cn(
-            "mt-2 border-b border-white-light dark:border-[#191e3a]",
+            "rcm-form-header-area",
             classNames.headerArea?.container
           )}>
             {headerAreaContent}
@@ -187,26 +187,14 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
       {/* 필드(Tab/Panel) 영역: ViewEntityFormFields */}
       {/* Field(Tab/Panel) area: ViewEntityFormFields */}
       <SafePerfectScrollbar
-        className={cn("relative h-full", classNames.panel?.scrollContainer)}
+        className={cn("rcm-form-scroll-container", classNames.panel?.scrollContainer)}
       >
-        <div className={cn(
-          isInlineMode
-            ? "rcm-form-layout-wrapper"
-            : "rcm-form-layout-wrapper",
-          isInlineMode ? '' : classNames.panel?.layoutWrapper
-        )}>
+        <div className={cn("rcm-form-layout-wrapper", classNames.panel?.layoutWrapper)}>
           <div className={cn(
-            isInlineMode
-              ? "rcm-form-panel rcm-form-panel-inline"
-              : "rcm-form-panel",
-            isInlineMode ? '' : classNames.panel?.container
+            isInlineMode ? "rcm-form-panel rcm-form-panel-inline" : "rcm-form-panel",
+            classNames.panel?.container
           )}>
-            <div className={cn(
-              isInlineMode
-                ? "rcm-form-panel-inner"
-                : "rcm-form-panel-inner",
-              isInlineMode ? '' : classNames.panel?.inner
-            )}>
+            <div className={cn("rcm-form-panel-inner", classNames.panel?.inner)}>
               {/* Alert 메시지 영역: ViewEntityFormAlerts */}
               {/* Alert message area: ViewEntityFormAlerts */}
               {/*
@@ -284,10 +272,10 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
               }}>
                 {/* 인라인 모드: 탭 + 버튼을 같은 줄에 배치 */}
                 {showButtonsInTabRow && (
-                  <div className={`flex items-center justify-between mb-2 ${tabs.length > 1 ? 'border-b border-white-light dark:border-[#191e3a]' : ''}`}>
-                    <div className="flex-1">
+                  <div className={`rcm-form-tab-row ${tabs.length > 1 ? 'rcm-form-tab-row-border' : ''}`}>
+                    <div className="rcm-form-tab-row-tabs">
                       {tabs.length > 1 && (
-                        <Tab.List className={cn("flex flex-row whitespace-nowrap", useCreateStep ? "hidden" : undefined)}>
+                        <Tab.List className={cn("rcm-tab-list-inline", useCreateStep ? "rcm-hide" : undefined)}>
                           {tabs.map((tab, index) => (
                             <ViewTab
                               id={tab.id}
@@ -303,15 +291,15 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                         </Tab.List>
                       )}
                     </div>
-                    <div className="flex-shrink-0 ml-2 [&_button]:!py-1 [&_button]:!px-3 [&_button]:!text-sm [&_button]:!min-h-0 [&_button]:!h-auto [&_button]:!pb-0.5">
+                    <div className="rcm-form-tab-buttons">
                       <ViewEntityFormButtons buttons={buttons} />
                     </div>
                   </div>
                 )}
                 {/* 일반 모드: 기존 탭 레이아웃 (스테퍼 모드에서는 hidden 처리) */}
                 {!showButtonsInTabRow && tabs.length > 1 && (
-                  <SafePerfectScrollbar className={cn("relative w-full whitespace-nowrap", useCreateStep ? "hidden" : undefined)}>
-                    <Tab.List className={cn("mt-3 flex flex-row border-b border-white-light dark:border-[#191e3a] whitespace-nowrap", classNames.tabs?.list)}>
+                  <SafePerfectScrollbar className={cn(useCreateStep ? "rcm-hide" : "rcm-tab-scroll")}>
+                    <Tab.List className={cn("rcm-tab-list", classNames.tabs?.list)}>
                       {function () {
                         const tabsView: ReactNode[] = [];
                         tabs.forEach((tab, index) => {

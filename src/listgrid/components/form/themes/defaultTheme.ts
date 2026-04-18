@@ -93,10 +93,10 @@ export const defaultEntityFormTheme: ViewEntityFormClassNames = {
   },
 
   tabs: {
-    list: "rcm-tab-list",
-    tab: "rcm-tab",
-    tabSelected: "rcm-tab-selected",
-    tabDisabled: "rcm-tab-disabled",
+    list: "",
+    tab: "",
+    tabSelected: "",
+    tabDisabled: "",
   },
 
   tabPanel: {
@@ -107,26 +107,26 @@ export const defaultEntityFormTheme: ViewEntityFormClassNames = {
 
   panel: {
     scrollContainer: "",
-    layoutWrapper: "rcm-form-layout-wrapper",
-    container: "rcm-form-panel",
-    inner: "rcm-form-panel-inner",
+    layoutWrapper: "",
+    container: "",
+    inner: "",
   },
 
   fieldGroup: {
-    container: "rcm-panel",
-    headerWrapper: "rcm-skeleton-row",
-    title: "rcm-heading-sm rcm-row-between",
+    container: "",
+    headerWrapper: "",
+    title: "",
     icons: "rcm-row",
     collapseIcon: "rcm-cursor-pointer rcm-text-muted",
-    content: "rcm-grid",
+    content: "",
   },
 
   field: {
     container: "rcm-field-root",
-    labelWrapper: "rcm-row",
-    label: "rcm-field-label",
-    requiredIcon: "rcm-text-error rcm-cursor-pointer",
-    dirtyIcon: "rcm-text-warning rcm-cursor-pointer",
+    labelWrapper: "",
+    label: "",
+    requiredIcon: "",
+    dirtyIcon: "",
     tooltipIcon: "rcm-text-muted",
     valueContainer: "",
   },

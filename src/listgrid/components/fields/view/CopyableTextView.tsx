@@ -36,14 +36,14 @@ export const CopyButton = ({ value, className }: CopyButtonProps) => {
   };
 
   return (
-    <div className={className ?? "flex h-full items-center border border-white-light bg-[#fafafa] font-semibold text-secondary dark:border-[#17263c] dark:bg-[#1b2e4b] rounded-r-md border-l-0"}>
+    <div className={className ?? "rcm-copy-addon-wrap"}>
       <Tooltip label="복사">
         <button
           type="button"
-          className="flex h-[30px] w-[36px] items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="rcm-copy-addon-btn"
           onClick={handleCopy}
         >
-          <IconCopy className="h-4 w-4" />
+          <IconCopy className="rcm-m2o-action-icon" />
         </button>
       </Tooltip>
     </div>
@@ -60,11 +60,11 @@ export const CopyableTextView = ({
   displayValue,
 }: CopyableTextViewProps) => {
   return (
-    <div className="flex items-center space-x-1">
+    <div className="rcm-copy-text-wrap">
       <span>{displayValue ?? value}</span>
       <Tooltip label="복사">
         <button
-          className="h-5 w-5 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded opacity-60 hover:opacity-100 transition-opacity"
+          className="rcm-copy-text-btn"
           onClick={async (e) => {
             e.stopPropagation();
             try {

@@ -139,18 +139,17 @@ export class ImageField extends ListableFormField<ImageField> {
           const imgUrl = getAccessableAssetUrl(file.existFiles[0]!.url);
 
           return {
-            result: <div className={'flex w-full items-center justify-center'}>
-              <div className="relative text-center group">
+            result: <div className="rcm-image-field-cell">
+              <div className="rcm-image-field-hover-group">
                 <img
-                  className="h-9 w-9 rounded-md object-cover saturate-50 transition-transform duration-300 group-hover:scale-110"
+                  className="rcm-image-field-thumb"
                   src={`${imgUrl}`}
                   onError={(event) => {
                     event.currentTarget.src = '/assets/images/no-image.png'
                   }}
                   alt="primary image"/>
-                <div
-                  className="absolute min-w-48 top-0 left-1/2 bg-white transform -translate-x-1/2 -translate-y-12 mt-2 z-50 hidden group-hover:flex justify-center items-center">
-                  <img className="h-48 w-48 rounded-md object-cover shadow-lg max-w-48"
+                <div className="rcm-image-field-preview-wrap">
+                  <img className="rcm-image-field-preview"
                        src={`${imgUrl}`}
                        onError={(event) => {
                          event.currentTarget.src = '/assets/images/no-image.png'
@@ -163,8 +162,8 @@ export class ImageField extends ListableFormField<ImageField> {
       }
 
       return {
-        result: <div className={'flex w-full items-center justify-center'}><img
-          className="h-9 w-9 rounded-md object-cover saturate-50 group-hover:saturate-100"
+        result: <div className="rcm-image-field-cell"><img
+          className="rcm-image-field-thumb rcm-image-field-thumb-placeholder"
           src={`/assets/images/no-image.png`} alt="no image"/></div>
       };
     })();

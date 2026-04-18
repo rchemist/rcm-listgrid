@@ -62,13 +62,13 @@ export const FilterDropdown = ({
   const getSizeClass = () => {
     switch (size) {
       case 'sm':
-        return 'w-[260px]';
+        return 'rcm-filter-dropdown-sm';
       case 'md':
-        return 'w-[360px]';
+        return 'rcm-filter-dropdown-md';
       case 'lg':
-        return 'w-[420px]';
+        return 'rcm-filter-dropdown-lg';
       default:
-        return 'w-[260px]';
+        return 'rcm-filter-dropdown-sm';
     }
   };
 
@@ -152,34 +152,34 @@ export const FilterDropdown = ({
     >
       <div
         ref={dropdownRef}
-        className={`${usePortal ? '' : 'absolute'} mt-2 ${getSizeClass()} rounded-md bg-white dark:bg-[#0e1726] shadow-lg border border-gray-200 dark:border-[#17263c]`}
+        className={`rcm-filter-dropdown ${usePortal ? '' : 'rcm-filter-dropdown-floating'} ${getSizeClass()}`}
         style={usePortal ? { ...positionStyle, zIndex } : { ...getPlacementStyle(), zIndex }}
       >
-        <div className="p-4 space-y-3">
+        <div className="rcm-filter-dropdown-inner">
           {/* 헤더: 닫기 버튼 */}
-          <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-[#17263c]">
-            <span className="text-sm font-semibold">필터</span>
+          <div className="rcm-filter-dropdown-header">
+            <span className="rcm-filter-dropdown-title">필터</span>
             <button
               type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="rcm-filter-dropdown-close"
               aria-label="닫기"
             >
-              <IconX className="w-4 h-4" />
+              <IconX className="rcm-m2o-action-icon" />
             </button>
           </div>
 
           {/* 필터 UI */}
-          <div className="max-h-[400px] overflow-y-auto">
+          <div className="rcm-filter-dropdown-body">
             {children}
           </div>
 
           {/* 버튼 영역 */}
-          <div className="flex items-center justify-end space-x-2 pt-3 border-t border-gray-200 dark:border-[#17263c]">
+          <div className="rcm-filter-dropdown-footer">
             {onClear && (
               <button
                 type="button"
-                className="btn btn-outline-danger btn-sm"
+                className="rcm-button rcm-button-outline-danger rcm-button-sm"
                 onClick={onClear}
               >
                 초기화
@@ -188,7 +188,7 @@ export const FilterDropdown = ({
             {onApply && (
               <button
                 type="button"
-                className="btn btn-primary btn-sm"
+                className="rcm-button rcm-button-primary rcm-button-sm"
                 onClick={onApply}
               >
                 적용

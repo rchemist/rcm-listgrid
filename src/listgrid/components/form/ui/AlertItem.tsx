@@ -27,28 +27,28 @@ export const AlertItem = React.memo(function AlertItem({
 
   return (
     <div
-      className={`${styles.bg} ${isClickable ? `hover:${styles.hoverBg} cursor-pointer transition-colors` : ''} ${styles.text} p-4 rounded-lg border border-current/20 flex items-start justify-between gap-3`}
+      className={`${styles.bg} rcm-alert-item ${isClickable ? 'rcm-cursor-pointer' : ''}`}
       onClick={hasLink && alert.link?.type !== 'external' ? () => onLinkClick(alert.link!) : undefined}
     >
-      <div className="flex items-start gap-3 flex-1">
-        <IconComponent className="h-5 w-5 mt-0.5 flex-shrink-0" />
-        <div className="flex-1">
-          <div className="font-medium">
+      <div className="rcm-alert-item-content">
+        <IconComponent className="rcm-alert-item-icon" />
+        <div className="rcm-alert-item-body">
+          <div className="rcm-alert-item-message">
             {typeof alert.message === 'string' ? t(alert.message) : alert.message}
             {alert.link && alert.link.type === 'external' && (
               <a
                 href={alert.link.value as string}
                 target={alert.link.target || '_blank'}
                 rel="noopener noreferrer"
-                className="ml-2 inline-flex items-center gap-1 hover:underline"
+                className="rcm-alert-item-external"
                 onClick={(e) => e.stopPropagation()}
               >
-                <IconExternalLink className="h-3 w-3" />
+                <IconExternalLink className="rcm-alert-item-external-icon" />
               </a>
             )}
           </div>
           {alert.description && (
-            <div className="mt-1 text-sm">
+            <div className="rcm-alert-item-description">
               {alert.description}
             </div>
           )}
@@ -59,10 +59,10 @@ export const AlertItem = React.memo(function AlertItem({
           e.stopPropagation();
           onClose(alert.key);
         }}
-        className={`${styles.text} hover:opacity-70 transition-opacity flex-shrink-0`}
+        className="rcm-alert-item-close"
         aria-label="메시지 닫기"
       >
-        <IconX className="h-4 w-4" />
+        <IconX className="rcm-alert-item-close-icon" />
       </button>
     </div>
   );

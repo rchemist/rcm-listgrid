@@ -119,11 +119,11 @@ export class FileField extends ListableFormField<FileField> {
           const fileDownloadUrl = getAccessableAssetUrl(file.existFiles[0]!.url);
 
           return {
-            result: <div className={'flex w-full items-center justify-center'}>
-              <div className="relative text-center group">
+            result: <div className="rcm-file-field-cell">
+              <div className="rcm-file-field-inner">
                 <a href={fileDownloadUrl}
-                  target="_blank" rel="noreferrer" className="flex flex-row items-center space-x-1"><IconDeviceFloppy className="h-5 w-5 rounded-md object-cover saturate-50 group-hover:saturate-100" />
-                  <span className="text-xs">{file.existFiles[0]!.url}</span>
+                  target="_blank" rel="noreferrer" className="rcm-file-field-link"><IconDeviceFloppy className="rcm-file-field-icon" />
+                  <span className="rcm-file-field-name">{file.existFiles[0]!.url}</span>
                 </a>
               </div>
             </div>,

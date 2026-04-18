@@ -78,7 +78,7 @@ export const PhoneNumberListView = ({
   }
 
   return (
-    <div className="flex items-center space-x-1">
+    <div className="rcm-phone-list-wrap">
       <span>{formattedValue}</span>
       <Popover
         position="bottom"
@@ -88,28 +88,20 @@ export const PhoneNumberListView = ({
       >
         <Popover.Target>
           <Tooltip label="메뉴">
-            <button
-              className="h-6 w-6 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            >
-              <IconDotsVertical className="h-4 w-4" />
+            <button className="rcm-phone-list-menu-btn">
+              <IconDotsVertical className="rcm-m2o-action-icon" />
             </button>
           </Tooltip>
         </Popover.Target>
         <Popover.Dropdown onClick={(e) => e.stopPropagation()}>
-          <div className="flex flex-col space-y-1 p-1">
-            <button
-              className="flex items-center space-x-2 rounded px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-              onClick={handleCopy}
-            >
-              <IconCopy className="h-4 w-4" />
+          <div className="rcm-phone-list-dropdown">
+            <button className="rcm-phone-list-dropdown-item" onClick={handleCopy}>
+              <IconCopy className="rcm-m2o-action-icon" />
               <span>전화번호 복사</span>
             </button>
             {canSendSms && (
-              <button
-                className="flex items-center space-x-2 rounded px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={handleSms}
-              >
-                <IconMessage className="h-4 w-4" />
+              <button className="rcm-phone-list-dropdown-item" onClick={handleSms}>
+                <IconMessage className="rcm-m2o-action-icon" />
                 <span>SMS 보내기</span>
               </button>
             )}

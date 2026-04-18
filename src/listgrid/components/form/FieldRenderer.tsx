@@ -400,7 +400,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
         id={`field-${instanceId}-${name}-${version}`}
         className={cn(`rcm-field-label-wrapper ${showTooltip ? 'rcm-field-label-wrapper-with-tooltip' : ''}`, classNames.field?.labelWrapper)}
       >
-        <div className="rcm-row">
+        <div className="rcm-field-label-row">
           {/* 라벨 렌더링: 숨김 설정이 아니면 표시 */}
           {/* Render label: show unless hideLabel is true */}
           {!hideLabel && (

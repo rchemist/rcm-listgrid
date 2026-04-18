@@ -71,18 +71,16 @@ export const TreeSelectView = ({readonly = false, ...props}: TreeSelectViewProps
           // Only customize rendering when selection is needed
           // 선택이 필요한 경우에만 렌더링 커스터마이징
           return (
-            <div 
-              {...elementProps} 
-              key={`${node.value}-${level}`} 
-              className="w-full flex items-center py-1"
+            <div
+              {...elementProps}
+              key={`${node.value}-${level}`}
+              className="rcm-tree-node"
               style={{ paddingLeft: `${(level - 1) * 20}px` }}
             >
-              {/* Icon area - consistent width for all nodes */}
-              {/* 아이콘 영역 - 모든 노드에 일관된 너비 */}
-              <div className="flex items-center justify-center w-6 h-6 mr-2 flex-shrink-0">
+              <div className="rcm-tree-node-icon-wrap">
                 {hasChildren ? (
                   <button
-                    className="flex items-center justify-center w-5 h-5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className="rcm-tree-node-toggle"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -97,22 +95,19 @@ export const TreeSelectView = ({readonly = false, ...props}: TreeSelectViewProps
                     )}
                   </button>
                 ) : (
-                  /* Empty space for leaf nodes to maintain alignment */
-                  /* 리프 노드를 위한 빈 공간으로 정렬 유지 */
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
+                  <div className="rcm-tree-node-leaf">
+                    <div className="rcm-tree-node-leaf-dot"></div>
                   </div>
                 )}
               </div>
-              
-              {/* Node content */}
+
               {(
-                (isTrue(config.rootSelectable, true) || level !== 1) && 
+                (isTrue(config.rootSelectable, true) || level !== 1) &&
                 (isTrue(config.leafSelectable, true) || hasChildren)
               ) ? (
                 <Tooltip label={`${node.label} 선택`} zIndex={10000}>
                   <button
-                    className={`flex-1 text-left py-2 px-3 rounded-md transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 border border-transparent hover:border-blue-200 dark:hover:border-blue-800 font-medium text-gray-900 dark:text-gray-100`}
+                    className="rcm-tree-node-btn"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
@@ -140,7 +135,7 @@ export const TreeSelectView = ({readonly = false, ...props}: TreeSelectViewProps
                   </button>
                 </Tooltip>
               ) : (
-                <span className="flex-1 py-2 px-3 text-gray-400 dark:text-gray-500 text-sm">
+                <span className="rcm-tree-node-span">
                   {node.label}
                 </span>
               )}

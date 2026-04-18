@@ -77,13 +77,13 @@ export class StringField extends CheckButtonValidationField<StringField> {
         });
         
         return (
-          <div className="flex w-full items-stretch">
-            <div className="flex-grow">
+          <div className="rcm-input-group-stretch">
+            <div className="rcm-input-group-grow">
               {node}
             </div>
-            <CopyButton 
-              value={String(value)} 
-              className="flex items-center justify-center border border-white-light bg-[#fafafa] font-semibold text-secondary dark:border-[#17263c] dark:bg-[#1b2e4b] rounded-r-md border-l-0"
+            <CopyButton
+              value={String(value)}
+              className="rcm-copy-addon-wrap"
             />
           </div>
         );
@@ -139,9 +139,9 @@ export class StringField extends CheckButtonValidationField<StringField> {
       const IconComponent = this.cardIcon;
       return {
         result: (
-          <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <span className="flex items-center justify-center w-6 h-6 rounded-md bg-gray-100 dark:bg-gray-800">
-              <IconComponent className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400 shrink-0" stroke={1.75} />
+          <span className="rcm-bool-wrap">
+            <span className="rcm-bool-icon-frame rcm-bool-icon-frame-neutral">
+              <IconComponent className="rcm-bool-icon rcm-bool-icon-neutral" stroke={1.75} />
             </span>
             <span className="font-medium">{textValue}</span>
           </span>

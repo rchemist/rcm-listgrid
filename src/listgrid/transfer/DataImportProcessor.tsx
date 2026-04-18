@@ -69,7 +69,7 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
                 justify={'center'}>
             <button
               type="button"
-              className="btn btn-outline-primary border border-blue-500 text-blue-500 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="rcm-button rcm-button-outline"
               onClick={() => {
                 cancelImport();
                 onImportSuccess?.call(this);
@@ -86,7 +86,7 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
                   justify={'center'}>
               <button
                 type="button"
-                className="btn btn-outline-secondary border border-gray-500 text-gray-500 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                className="rcm-button rcm-button-secondary"
                 onClick={() => {
                   cancelImport();
                 }}
@@ -101,7 +101,7 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
                   justify={'center'}>
               <button
                 type="button"
-                className="btn btn-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="rcm-button rcm-button-primary"
                 onClick={() => {
                   onSubmit();
                 }}
@@ -110,7 +110,7 @@ export const DataImportProcessor = ({resultView, data, importResult, onSubmit, c
               </button>
               <button
                 type="button"
-                className="btn btn-outline-primary border border-blue-500 text-blue-500 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="rcm-button rcm-button-outline"
                 onClick={() => {
                   cancelImport();
                 }}

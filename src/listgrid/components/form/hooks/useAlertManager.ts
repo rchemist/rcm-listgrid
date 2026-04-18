@@ -93,78 +93,36 @@ export const useAlertManager = (
   };
 };
 
-// 알림 스타일 가져오기
+// 알림 스타일 가져오기 — rcm-notice 변형으로 통일
 export const getAlertStyles = (color: AlertMessage['color']): AlertStyles => {
   switch (color) {
     case 'success':
-      return {
-        bg: 'bg-success-light',
-        hoverBg: 'bg-success/15',
-        text: 'text-success',
-        icon: IconCheck
-      };
+      return { bg: 'rcm-notice rcm-notice-success', hoverBg: '', text: '', icon: IconCheck };
     case 'danger':
-      return {
-        bg: 'bg-danger-light',
-        hoverBg: 'bg-danger/15',
-        text: 'text-danger',
-        icon: IconAlertTriangle
-      };
+      return { bg: 'rcm-notice rcm-notice-error', hoverBg: '', text: '', icon: IconAlertTriangle };
     case 'warning':
-      return {
-        bg: 'bg-warning-light',
-        hoverBg: 'bg-warning/15',
-        text: 'text-warning',
-        icon: IconAlertTriangle
-      };
+      return { bg: 'rcm-notice rcm-notice-warning', hoverBg: '', text: '', icon: IconAlertTriangle };
     case 'info':
-      return {
-        bg: 'bg-info-light',
-        hoverBg: 'bg-info/15',
-        text: 'text-info',
-        icon: IconInfoCircle
-      };
+      return { bg: 'rcm-notice rcm-notice-info', hoverBg: '', text: '', icon: IconInfoCircle };
     case 'secondary':
-      return {
-        bg: 'bg-secondary-light',
-        hoverBg: 'bg-secondary/15',
-        text: 'text-secondary',
-        icon: IconInfoCircle
-      };
     case 'primary':
-      return {
-        bg: 'bg-primary-light',
-        hoverBg: 'bg-primary/15',
-        text: 'text-primary',
-        icon: IconInfoCircle
-      };
     case 'dark':
-      return {
-        bg: 'bg-dark-light',
-        hoverBg: 'bg-dark/15',
-        text: 'text-dark',
-        icon: IconInfoCircle
-      };
+      return { bg: 'rcm-notice', hoverBg: '', text: '', icon: IconInfoCircle };
     default:
-      return {
-        bg: 'bg-info-light',
-        hoverBg: 'bg-info/15',
-        text: 'text-info',
-        icon: IconInfoCircle
-      };
+      return { bg: 'rcm-notice rcm-notice-info', hoverBg: '', text: '', icon: IconInfoCircle };
   }
 };
 
-// 색상별 인디케이터 스타일
+// 색상별 인디케이터 스타일 (알림 요약 헤더의 점)
 export const getColorIndicator = (color: string): string => {
   switch (color) {
     case 'danger':
-      return 'bg-red-500';
+      return 'rcm-alerts-indicator-error';
     case 'warning':
-      return 'bg-amber-500';
+      return 'rcm-alerts-indicator-warning';
     case 'success':
-      return 'bg-green-500';
+      return 'rcm-alerts-indicator-success';
     default:
-      return 'bg-blue-500';
+      return 'rcm-alerts-indicator-info';
   }
 };

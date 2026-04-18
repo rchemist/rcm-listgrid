@@ -143,13 +143,11 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          발신번호 *
-        </label>
+    <div className="rcm-modal-body">
+      <div className="rcm-modal-field-group">
+        <label className="rcm-modal-label">발신번호 *</label>
         <select
-          className="form-select"
+          className="rcm-field-select"
           value={senderAddress}
           onChange={(e) => setSenderAddress(e.target.value)}
           disabled={loadingSenderList || senderList.length === 0}
@@ -162,39 +160,35 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
           ))}
         </select>
         {senderList.length === 0 && !loadingSenderList && (
-          <p className="text-xs text-red-500 mt-1">
+          <p className="rcm-modal-warning">
             사용 가능한 발신번호가 없습니다.
           </p>
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          수신자 전화번호
-        </label>
+      <div className="rcm-modal-field-group">
+        <label className="rcm-modal-label">수신자 전화번호</label>
         <input
           type="text"
-          className="form-input bg-gray-100 dark:bg-gray-700"
+          className="rcm-field-input rcm-field-input-disabled"
           value={phoneNumber}
           disabled
           readOnly
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          메시지 내용
-        </label>
+      <div className="rcm-modal-field-group">
+        <label className="rcm-modal-label">메시지 내용</label>
         <textarea
-          className="form-textarea min-h-[150px]"
+          className="rcm-field-textarea rcm-sms-textarea"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="메시지 내용을 입력해주세요."
         />
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="rcm-sms-meta">
           <span>
             {isLms ? (
-              <span className="text-orange-500">LMS로 발송됩니다 (90바이트 초과)</span>
+              <span className="rcm-sms-lms-notice">LMS로 발송됩니다 (90바이트 초과)</span>
             ) : (
               <span>SMS ({byteLength}/90 바이트)</span>
             )}
@@ -203,10 +197,10 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 mt-4">
+      <div className="rcm-modal-footer">
         <button
           type="button"
-          className="btn btn-outline-secondary"
+          className="rcm-button rcm-button-outline"
           onClick={onClose}
           disabled={loading}
         >
@@ -214,7 +208,7 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
         </button>
         <button
           type="button"
-          className="btn btn-primary"
+          className="rcm-button rcm-button-primary"
           onClick={() => {
             (async () => {
               await handleSend(senderAddress)

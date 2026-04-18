@@ -416,7 +416,7 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                     title={title}></ListGridHeader>
     <div className={panelClassName}>
       {props.options?.topContent && props.parentId && (
-        <div className="px-2 md:px-4 mb-2">
+        <div className="rcm-listgrid-top-content">
           {props.options.topContent(props.parentId, searchForm)}
         </div>
       )}

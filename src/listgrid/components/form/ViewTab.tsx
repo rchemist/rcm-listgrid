@@ -79,16 +79,13 @@ export const ViewTab = ({id, tabIndex, label, setTabIndex, entityForm, createSte
    * @returns {JSX.Element} - 버튼 렌더링
    */
   function ShowButton(selected: boolean) {
-    const baseTabClass = "-mb-[1px] block border border-transparent px-2.5 py-1.5 hover:text-primary dark:hover:border-b-black";
-    const selectedClass = "!border-white-light !border-b-white text-primary !outline-none dark:!border-[#191e3a] dark:!border-b-black";
-
-    // 클래스 조합
-    let buttonClass = cn(baseTabClass, classNames.tabs?.tab);
+    // 클래스 조합 — rcm-tab / rcm-tab-selected / rcm-tab-disabled 은 base.css 에서 전담
+    let buttonClass = cn('rcm-tab', classNames.tabs?.tab);
     if (selected) {
-      buttonClass = cn(buttonClass, cn(selectedClass, classNames.tabs?.tabSelected));
+      buttonClass = cn(`${buttonClass} rcm-tab-selected`, classNames.tabs?.tabSelected);
     }
     if (!hasContent) {
-      buttonClass = cn(buttonClass, classNames.tabs?.tabDisabled);
+      buttonClass = cn(`${buttonClass} rcm-tab-disabled`, classNames.tabs?.tabDisabled);
     }
 
     return <div style={{display: hasContent ? 'block' : 'none'}}>

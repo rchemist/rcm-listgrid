@@ -94,9 +94,9 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between bg-gray-50 rounded-lg py-4">
-        <p className="text-sm text-gray-700">
+    <div className="rcm-import-sample">
+      <div className="rcm-import-sample-guide">
+        <p className="rcm-import-sample-guide-text">
           {t('form.list.dataTransfer.tab.import.messages.guide')}
         </p>
         <SampleDataButton exportKey={exportKey} setExportKey={setExportKey}
@@ -104,30 +104,28 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
           data={sampleData} fileName={exportFileName} fields={fields} />
       </div>
       {hasRequired && (
-        <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
-          <span className="text-red-500 font-bold">*</span>
-          <span className="text-sm text-amber-800">
+        <div className="rcm-import-sample-required-notice">
+          <span className="rcm-import-sample-required-star">*</span>
+          <span className="rcm-import-sample-required-text">
             표시가 있는 필드는 필수 항목입니다. 필수 항목을 입력하지 않으면 업로드 되지 않습니다.
           </span>
         </div>
       )}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="rcm-import-sample-table-wrap">
         <SafePerfectScrollbar style={{minWidth: '100%'}}>
           <Table style={{ minWidth: 650 }} aria-label="simple table">
           <Table.Thead>
             <Table.Tr>
               {fields.map((field, index) => {
-
                 return (
-                  <Table.Th key={`header_${field.getName()}_${index + 1}`} 
-                    className={clsx('bg-indigo-600 text-white text-center py-3 px-4 text-sm font-medium whitespace-nowrap border border-indigo-500', 
-                      field.isRequired() && 'font-bold')}>
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center gap-1 whitespace-nowrap">
-                        {field.isRequired() && <span className="text-red-300">*</span>}
-                        <span className="whitespace-nowrap">{field.getLabel()}</span>
+                  <Table.Th key={`header_${field.getName()}_${index + 1}`}
+                    className={clsx('rcm-import-sample-th', field.isRequired() && 'rcm-import-sample-th-required')}>
+                    <div className="rcm-import-sample-th-inner">
+                      <div className="rcm-import-sample-th-label-row">
+                        {field.isRequired() && <span className="rcm-import-sample-th-star">*</span>}
+                        <span className="rcm-import-sample-th-label">{field.getLabel()}</span>
                       </div>
-                      <div className="text-xs text-indigo-200 mt-1 whitespace-nowrap">
+                      <div className="rcm-import-sample-th-name">
                         [{field.getName()}]
                       </div>
                     </div>
@@ -138,19 +136,17 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
           </Table.Thead>
           <Table.Tbody>
             {sampleData!.map((row, index) => {
-
               return (
                 <Table.Tr key={`body_${index + 1}`}>
                   {fields.map((field, index) => {
-
                     if (field.getName() === 'id') {
                       return (
-                        <Table.Td align="center" key={`body_${field.getName()}_${index + 1}`} 
-                          className="border border-gray-200 py-3 px-4 whitespace-nowrap">
-                          <div className='flex items-center justify-center gap-1'>
-                            <span className="text-sm text-gray-600 whitespace-nowrap">{`ID 값`}</span>
+                        <Table.Td align="center" key={`body_${field.getName()}_${index + 1}`}
+                          className="rcm-import-sample-td">
+                          <div className='rcm-import-sample-td-id'>
+                            <span className="rcm-import-sample-td-id-label">{`ID 값`}</span>
                             <Tooltip zIndex={10000} label='값이 있으면 UPDATE, 없으면 INSERT'>
-                              <IconHelpCircle className='h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help' />
+                              <IconHelpCircle className='rcm-import-sample-td-id-help' />
                             </Tooltip>
                           </div>
                         </Table.Td>
@@ -165,8 +161,8 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
                       }
                     }
                     return (
-                      <Table.Td align="center" key={`body_${field.getName()}_${index + 1}`} 
-                        className="border border-gray-200 py-3 px-4 text-sm text-gray-700 whitespace-nowrap">
+                      <Table.Td align="center" key={`body_${field.getName()}_${index + 1}`}
+                        className="rcm-import-sample-td rcm-import-sample-td-value">
                         {value}
                       </Table.Td>
                     )
@@ -239,10 +235,10 @@ const SampleDataButton = (props: SampleDataButtonProps) => {
       {!props.processing && (
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+          className="rcm-button rcm-button-primary rcm-import-sample-download-btn"
           onClick={() => { setProcessing(true); }}
         >
-          <IconFile className="h-4 w-4" />
+          <IconFile className="rcm-m2o-action-icon" />
           샘플 파일 다운로드
         </button>
       )}

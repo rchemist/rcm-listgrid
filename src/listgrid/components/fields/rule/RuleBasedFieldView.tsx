@@ -133,15 +133,13 @@ export const RuleBasedFieldsView = (props: RuleBasedFieldViewProps) => {
   }
 
   return <>
-    <div className="flex flex-wrap w-full justify-center mb-5">
-      <div
-        className={`w-full ${isButton ? 'p-6 pt-12 border border-gray-500/20 rounded-md' : 'p-2'} relative`}>
+    <div className="rcm-rule-wrap">
+      <div className={`rcm-rule-inner ${isButton ? 'rcm-rule-inner-button' : 'rcm-rule-inner-plain'}`}>
         {isButton && <>
-          <div
-            className="bg-primary absolute text-white-light left-6 -top-8 w-16 h-16 rounded-md flex items-center justify-center mb-5 mx-auto">
-            <IconBox className="h-12 w-12"/>
+          <div className="rcm-rule-icon-badge">
+            <IconBox className="rcm-rule-icon-badge-icon"/>
           </div>
-          <h5 className="text-dark text-lg font-semibold mb-3.5 dark:text-white-light">{props.label}</h5>
+          <h5 className="rcm-rule-title">{props.label}</h5>
           {props.helpText && <ViewHelpText helpText={props.helpText}></ViewHelpText>}
         </>}
 

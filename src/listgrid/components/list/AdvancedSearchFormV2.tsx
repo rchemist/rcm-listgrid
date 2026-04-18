@@ -473,31 +473,29 @@ export const AdvancedSearchFormV2 = ({
         leaveFrom="opacity-100 scale-100"
         leaveTo="opacity-0 scale-95"
       >
-        <div className={isCompactMode ? '' : 'xl:mr-3 xl:ml-3 xl:mb-3'}>
-          <div className="flex h-full flex-1 overflow-auto p-0">
-            <div className={`w-full ${isCompactMode ? 'px-0' : 'px-4'} py-3 space-y-3 max-h-[80vh] overflow-y-auto ${isCompactMode ? 'bg-transparent' : 'bg-white rounded-lg shadow-sm border border-gray-100'}`}>
+        <div className={isCompactMode ? '' : 'rcm-adv-search-outer'}>
+          <div className="rcm-adv-search-scroll">
+            <div className={`rcm-adv-search-inner ${isCompactMode ? 'rcm-adv-search-inner-compact' : 'rcm-adv-search-inner-panel'}`}>
               {/* Header */}
-              <div className="flex items-center justify-between pb-2 border-b border-gray-100">
-                <div className="flex items-center gap-2">
-                  <IconSearch className="w-5 h-5 text-primary" />
-                  <h4 className="font-semibold text-base text-gray-800">
-                    통합 검색
-                  </h4>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+              <div className="rcm-adv-search-header">
+                <div className="rcm-adv-search-header-left">
+                  <IconSearch className="rcm-adv-search-header-icon" />
+                  <h4 className="rcm-adv-search-title">통합 검색</h4>
+                  <span className="rcm-adv-search-count">
                     {displayFields.length}개 필드
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="rcm-adv-search-header-right">
                   <button
                     type="button"
                     onClick={handleToggleView}
-                    className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                    className="rcm-adv-search-view-toggle"
                     title={state.isGridView ? '리스트 뷰' : '그리드 뷰'}
                   >
                     {state.isGridView ? (
-                      <IconLayoutList className="w-4 h-4 text-gray-500" />
+                      <IconLayoutList className="rcm-adv-search-view-icon" />
                     ) : (
-                      <IconLayoutGrid className="w-4 h-4 text-gray-500" />
+                      <IconLayoutGrid className="rcm-adv-search-view-icon" />
                     )}
                   </button>
                 </div>
@@ -505,19 +503,17 @@ export const AdvancedSearchFormV2 = ({
 
               {/* QuickSearch Mode Toggle (only if multiple quickSearch fields exist) */}
               {hasMultipleQuickSearchFields && (
-                <div className="flex items-center gap-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                <div className="rcm-adv-search-qs-toggle">
+                  <label className="rcm-adv-search-qs-label">
                     <input
                       type="checkbox"
                       checked={state.useQuickSearchMode}
                       onChange={handleToggleQuickSearchMode}
-                      className="form-checkbox h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
+                      className="rcm-adv-search-qs-checkbox"
                     />
-                    <span className="text-sm font-medium text-blue-800">
-                      통합검색 사용
-                    </span>
+                    <span className="rcm-adv-search-qs-title">통합검색 사용</span>
                   </label>
-                  <span className="text-xs text-blue-600">
+                  <span className="rcm-adv-search-qs-hint">
                     {quickSearchLabel} 필드를 하나의 검색어로 검색합니다
                   </span>
                 </div>
@@ -525,18 +521,16 @@ export const AdvancedSearchFormV2 = ({
 
               {/* QuickSearch Input (when in quickSearch mode with multiple fields) */}
               {state.useQuickSearchMode && hasMultipleQuickSearchFields && (
-                <div className="px-3 py-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    {quickSearchLabel} 검색
-                  </label>
+                <div className="rcm-adv-search-qs-input-panel">
+                  <label className="rcm-adv-search-qs-input-label">{quickSearchLabel} 검색</label>
                   <input
                     type="text"
                     value={state.quickSearchValue}
                     onChange={(e) => handleQuickSearchValueChange(e.target.value)}
                     placeholder={`${quickSearchLabel} 중 아무거나 입력...`}
-                    className="form-input w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-20"
+                    className="rcm-adv-search-qs-input"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="rcm-adv-search-qs-description">
                     입력한 검색어가 {quickSearchLabel} 중 하나라도 포함되면 검색됩니다 (OR 조건)
                   </p>
                 </div>
@@ -553,13 +547,7 @@ export const AdvancedSearchFormV2 = ({
 
               {/* Filter Fields - Grid Layout */}
               {displayFields.length > 0 ? (
-                <div
-                  className={`${
-                    state.isGridView
-                      ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-4'
-                      : 'space-y-4'
-                  }`}
-                >
+                <div className={state.isGridView ? 'rcm-adv-search-grid' : 'rcm-adv-search-list'}>
                   {displayFields.map((field) => {
                     const fieldName =
                       field instanceof AbstractManyToOneField
@@ -580,12 +568,12 @@ export const AdvancedSearchFormV2 = ({
                   })}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p className="text-sm">검색할 필드를 선택해주세요</p>
+                <div className="rcm-adv-search-empty">
+                  <p className="rcm-adv-search-empty-text">검색할 필드를 선택해주세요</p>
                   <button
                     type="button"
                     onClick={handleSelectAll}
-                    className="mt-2 text-primary hover:text-primary-dark text-sm underline"
+                    className="rcm-adv-search-empty-action"
                   >
                     전체 필드 선택
                   </button>
@@ -593,29 +581,29 @@ export const AdvancedSearchFormV2 = ({
               )}
 
               {/* Action Buttons */}
-              <div className="pt-3 border-t border-gray-100 flex items-center justify-center gap-2">
+              <div className="rcm-adv-search-footer">
                 <button
                   type="button"
-                  className="btn btn-sm btn-outline-dark flex items-center gap-1 px-4"
+                  className="rcm-button rcm-button-sm rcm-button-outline rcm-adv-search-btn"
                   onClick={onClose}
                 >
-                  <IconX className="w-4 h-4" />
+                  <IconX className="rcm-m2o-action-icon" />
                   닫기
                 </button>
                 <button
                   type="button"
-                  className="btn btn-sm btn-outline-danger flex items-center gap-1 px-4"
+                  className="rcm-button rcm-button-sm rcm-button-outline-danger rcm-adv-search-btn"
                   onClick={handleReset}
                 >
-                  <IconRefresh className="w-4 h-4" />
+                  <IconRefresh className="rcm-m2o-action-icon" />
                   초기화
                 </button>
                 <button
                   type="button"
-                  className="btn btn-sm btn-primary flex items-center gap-1 px-6"
+                  className="rcm-button rcm-button-sm rcm-button-primary rcm-adv-search-btn rcm-adv-search-btn-submit"
                   onClick={handleSubmit}
                 >
-                  <IconSearch className="w-4 h-4" />
+                  <IconSearch className="rcm-m2o-action-icon" />
                   검색
                 </button>
               </div>

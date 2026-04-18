@@ -136,20 +136,19 @@ export class DateField extends AbstractDateField<DateField> {
 
     // 아이콘 컴포넌트 결정 (cardIcon > 기본 캘린더 아이콘)
     const IconComponent = this.cardIcon || IconCalendar;
-    const iconColorClass = this.cardIcon
-      ? 'text-gray-400 dark:text-gray-500'
-      : 'text-sky-500 dark:text-sky-400';
+    const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-date-icon-frame';
+    const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-date-icon';
 
     // range 타입인 경우 시작~끝 포맷
     if (this.range && Array.isArray(value) && value.length === 2) {
       const dateText = `${fDate(value[0], 'yyyy-MM-dd')} ~ ${fDate(value[1], 'yyyy-MM-dd')}`;
       return {
         result: (
-          <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-            <span className="flex items-center justify-center w-6 h-6 rounded-md bg-sky-50 dark:bg-sky-950/50">
-              <IconComponent className={`h-3.5 w-3.5 ${iconColorClass} shrink-0`} stroke={1.75} />
+          <span className="rcm-bool-wrap">
+            <span className={`rcm-bool-icon-frame ${frameClass}`}>
+              <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
             </span>
-            <span className="font-medium">{dateText}</span>
+            <span className="rcm-bool-label">{dateText}</span>
           </span>
         )
       };
@@ -159,11 +158,11 @@ export class DateField extends AbstractDateField<DateField> {
     const dateText = fDate(value, 'yyyy-MM-dd');
     return {
       result: (
-        <span className="inline-flex items-center gap-2 text-gray-700 dark:text-gray-300">
-          <span className="flex items-center justify-center w-6 h-6 rounded-md bg-sky-50 dark:bg-sky-950/50">
-            <IconComponent className={`h-3.5 w-3.5 ${iconColorClass} shrink-0`} stroke={1.75} />
+        <span className="rcm-bool-wrap">
+          <span className={`rcm-bool-icon-frame ${frameClass}`}>
+            <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
           </span>
-          <span className="font-medium">{dateText}</span>
+          <span className="rcm-bool-label">{dateText}</span>
         </span>
       )
     };

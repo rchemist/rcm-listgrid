@@ -265,7 +265,7 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
               collection.withReadOnly(true);
             }
 
-            return <div key={`subCollection_${collection.getName()}_${entityForm.id}`} className="col-span-full">
+            return <div key={`subCollection_${collection.getName()}_${entityForm.id}`} className="rcm-col-span-full">
               <SubCollectionRenderer
                 entityForm={entityForm}
                 collection={collection}

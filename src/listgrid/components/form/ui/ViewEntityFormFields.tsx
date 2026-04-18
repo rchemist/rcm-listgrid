@@ -79,7 +79,7 @@ export const ViewEntityFormFields = React.memo(function ViewEntityFormFields({
         <Tab.Group selectedIndex={selectedTabIndex} onChange={handleTabChange}>
               {tabs.length > 1 && (
                 <SafePerfectScrollbar className={`relative w-full whitespace-nowrap`}>
-                  <Tab.List className="mt-3 flex flex-row border-b border-white-light dark:border-[#191e3a] whitespace-nowrap">
+                  <Tab.List className="rcm-tab-list">
                     {tabs.map((tab, index) => (
                       <ViewTab
                         id={tab.id}

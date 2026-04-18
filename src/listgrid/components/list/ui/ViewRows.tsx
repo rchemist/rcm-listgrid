@@ -426,7 +426,7 @@ export const ViewRows = (props: ViewRowsProps) => {
       {/* SubCollection inline expansion view - 행과 외곽선 공유 (데스크톱 전용) */}
       {isInlineExpanded && inlineExpansion && !isMobile && (
         <tr key={`row_inline_${index}`}>
-          <td colSpan={props.fields.length + (enableCheckItem ? 1 : 0) + (showOpenInNewWindowButton ? 1 : 0) + (inlineExpansion ? 1 : 0) + (showViewButton && !inlineExpansion ? 1 : 0) + (managePriority ? 1 : 0) + (draggable ? 1 : 0)} className="p-2 bg-gray-100 dark:bg-gray-800/80 overflow-hidden" style={{ maxWidth: '1px' }}>
+          <td colSpan={props.fields.length + (enableCheckItem ? 1 : 0) + (showOpenInNewWindowButton ? 1 : 0) + (inlineExpansion ? 1 : 0) + (showViewButton && !inlineExpansion ? 1 : 0) + (managePriority ? 1 : 0) + (draggable ? 1 : 0)} className="rcm-row-expansion-cell" style={{ maxWidth: '1px' }}>
             <SubCollectionInlineView
               entityForm={entityForm.clone(true).withId(item.id)}
               itemId={item.id}

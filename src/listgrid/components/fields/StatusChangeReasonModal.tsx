@@ -58,13 +58,13 @@ export const StatusChangeReasonModal: React.FC<StatusChangeReasonModalProps> = (
   };
 
   return (
-    <div className="space-y-4">
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="text-sm text-gray-600 mb-2">상태 변경</div>
-        <div className="flex items-center gap-2">
-          <span className="font-medium">{currentLabel}</span>
-          <span className="text-gray-400">→</span>
-          <span className="font-medium text-primary-600">{newLabel}</span>
+    <div className="rcm-status-change-modal">
+      <div className="rcm-status-change-box">
+        <div className="rcm-status-change-caption">상태 변경</div>
+        <div className="rcm-status-change-row">
+          <span className="rcm-status-change-from">{currentLabel}</span>
+          <span className="rcm-status-change-arrow">→</span>
+          <span className="rcm-status-change-to">{newLabel}</span>
         </div>
       </div>
 
@@ -81,17 +81,17 @@ export const StatusChangeReasonModal: React.FC<StatusChangeReasonModalProps> = (
         />
       </div>
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
+      <div className="rcm-status-change-footer">
         <button
           type="button"
-          className="btn btn-secondary btn-sm"
+          className="rcm-button rcm-button-secondary rcm-button-sm"
           onClick={onCancel}
         >
           취소
         </button>
         <button
           type="button"
-          className="btn btn-primary btn-sm"
+          className="rcm-button rcm-button-primary rcm-button-sm"
           onClick={handleConfirm}
         >
           확인

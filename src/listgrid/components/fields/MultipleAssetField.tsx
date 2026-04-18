@@ -175,14 +175,14 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                 <tr>
                   <th key={`th-${index}`}
                       className={'px-2 dark:border-[#17263c] sm:w-50 md:w-20 md:max-w-20'}>
-                    <div className="flex justify-between items-center w-full">
+                    <div className="rcm-asset-th-row">
                       {/* 첫번째 div 가 최대한 많은 공간을 사용하고 */}
                       <div className={`flex-grow ${!isPrimary ? 'max-w-[70%]' : ''}`}>
                         <Tooltip label={`${asset.name}`}>
                           <div className={'truncate'}>{asset.name}</div>
                         </Tooltip></div>
                       {/*두번째 div 는 딱 버튼 하나 들어갈 자리만 차지하면 좋겠어*/}
-                      {!isPrimary && <div className="flex-shrink-0 justify-end ml-2">
+                      {!isPrimary && <div className="rcm-asset-th-remove">
                         {!readonly && <button
                           type={'button'}
                           className={'flex'}
@@ -216,7 +216,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                          onClick={() => {
                            openImageForm(index);
                          }}>
-                      <button className="flex justify-center items-center overflow-hidden w-full h-full">
+                      <button className="rcm-asset-btn-fill">
                         {function () {
                           if (isBlank(value?.assets?.[index].url)) {
                             // 데이터 없음
@@ -253,7 +253,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                   className={'p-2 flex min-w-[120px] h-full items-center justify-center'}>
                   <button
                     type="button"
-                    className="flex whitespace-nowrap min-w-[95px] space-x-1 cursor-pointer items-center justify-center border border-secondary hover:bg-secondary/85 dark:border-[#17263c] h-[40px] bg-secondary px-3 font-semibold text-white rounded-md"
+                    className="rcm-asset-add-btn"
                     onClick={() => {
                       openImageForm();
                     }}>

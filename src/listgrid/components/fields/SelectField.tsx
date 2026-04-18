@@ -418,9 +418,9 @@ export class SelectField extends OptionalField<SelectField> {
       const IconComponent = this.cardIcon;
       return {
         result: (
-          <span className="inline-flex items-center gap-2">
-            <span className="flex items-center justify-center w-6 h-6 rounded-md bg-gray-100 dark:bg-gray-800">
-              <IconComponent className="h-3.5 w-3.5 text-gray-500 dark:text-gray-400 shrink-0" stroke={1.75} />
+          <span className="rcm-bool-wrap">
+            <span className="rcm-bool-icon-frame rcm-bool-icon-frame-neutral">
+              <IconComponent className="rcm-bool-icon rcm-bool-icon-neutral" stroke={1.75} />
             </span>
             <Badge color={color}>{displayLabel}</Badge>
           </span>

@@ -76,20 +76,18 @@ export class LinkField extends CheckButtonValidationField<LinkField> {
 
     // 링크가 존재하는 경우 클릭 가능한 링크로 렌더링
     const linkElement = (
-      <div className="flex items-center gap-1.5">
-        <span className="truncate">{value}</span>
+      <div className="rcm-link-cell">
+        <span className="rcm-truncate">{value}</span>
         {!isBlank(value) && (
-          <button 
-            type="button" 
-            className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200" 
+          <button
+            type="button"
+            className="rcm-link-cell-btn"
             onClick={(e) => {
               e.stopPropagation();
               window.open(normalizeUrl(value), "_blank");
             }}
           >
-            <IconExternalLink 
-              className="h-3.5 w-3.5 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300" 
-            />
+            <IconExternalLink className="rcm-link-cell-icon" />
           </button>
         )}
       </div>

@@ -300,9 +300,9 @@ export const ManyToOneView = ({
   };
 
   return (
-    <div className="flex w-full">
-      <div className="flex w-full items-center">
-        <div className="group relative flex w-full">
+    <div className="rcm-input-group-full">
+      <div className="rcm-input-group-full-center">
+        <div className="rcm-input-group-full-relative">
           <div className={"dropdown flex w-full"}>
             <input
               type="text"
@@ -374,32 +374,32 @@ export const ManyToOneView = ({
 {isModifiable && !readonly ? (
           <Dropdown
             placement="bottom-end"
-            btnClassName="flex h-full min-w-[80px] cursor-pointer items-center justify-center space-x-1 whitespace-nowrap border border-secondary bg-secondary px-3 font-semibold text-white hover:bg-secondary/85 disabled:opacity-20 dark:border-[#17263c] rounded-r-md border-l-0"
+            btnClassName="rcm-m2o-action-btn"
             button={
               <>
-                <IconSettings2 className="h-4 w-4" />
+                <IconSettings2 className="rcm-m2o-action-icon" />
                 <span>관리</span>
               </>
             }
           >
-            <ul className="min-w-[120px] p-0">
+            <ul className="rcm-m2o-dropdown-list">
               <li>
                 <button
                   type="button"
-                  className="flex w-full items-center space-x-2 px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                  className="rcm-m2o-dropdown-item"
                   onClick={handleSelectModal}
                 >
-                  <IconSearch className="h-4 w-4" />
+                  <IconSearch className="rcm-m2o-action-icon" />
                   <span>찾기</span>
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  className="flex w-full items-center space-x-2 px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                  className="rcm-m2o-dropdown-item"
                   onClick={handleCreateModal}
                 >
-                  <IconPlus className="h-4 w-4" />
+                  <IconPlus className="rcm-m2o-action-icon" />
                   <span>등록</span>
                 </button>
               </li>
@@ -409,10 +409,10 @@ export const ManyToOneView = ({
           <button
             type="button"
             disabled={readonly}
-            className="flex h-full min-w-[80px] cursor-pointer items-center justify-center space-x-1 whitespace-nowrap border border-secondary bg-secondary px-3 font-semibold text-white hover:bg-secondary/85 disabled:opacity-20 dark:border-[#17263c] rounded-r-md border-l-0"
+            className="rcm-m2o-action-btn"
             onClick={handleSelectModal}
           >
-            <IconSearch className="h-4 w-4" />
+            <IconSearch className="rcm-m2o-action-icon" />
             <span>찾기</span>
           </button>
         )}

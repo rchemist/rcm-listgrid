@@ -38,7 +38,7 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
   // 알림이 1개일 때는 헤더 없이 직접 렌더링
   if (visibleAlerts.length === 1) {
     return (
-      <div className="mb-4">
+      <div className="rcm-alerts-single">
         <AlertItem
           key={'alert-' + visibleAlerts[0].key}
           alert={visibleAlerts[0]}
@@ -52,18 +52,16 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
 
   // 알림이 2개 이상일 때만 헤더와 함께 렌더링
   return (
-    <div className={`${isCollapsed ? '' : 'mb-4'}`}>
+    <div className={isCollapsed ? '' : 'rcm-alerts-multi'}>
       {/* 심플한 헤더 */}
-      <div 
-        className={`flex items-center justify-between p-3 bg-gray-50 border border-gray-200 cursor-pointer transition-all ${
-          isCollapsed ? 'rounded-lg' : 'rounded-t-lg border-b-0'
-        }`}
+      <div
+        className={`rcm-alerts-header ${isCollapsed ? 'rcm-alerts-header-collapsed' : 'rcm-alerts-header-expanded'}`}
         onClick={toggleCollapse}
       >
-        <div className="flex items-center gap-2">
+        <div className="rcm-alerts-header-left">
           {/* 색상 인디케이터 점 */}
-          <div className={`w-2 h-2 rounded-full ${getColorIndicator(dominantColor)}`} />
-          <span className="font-medium text-gray-700">
+          <div className={`rcm-alerts-indicator ${getColorIndicator(dominantColor)}`} />
+          <span className="rcm-alerts-header-title">
             알림 ({visibleAlerts.length})
           </span>
         </div>
@@ -72,24 +70,20 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
             e.stopPropagation();
             toggleCollapse();
           }}
-          className="text-gray-500 hover:text-gray-700 transition-colors"
+          className="rcm-alerts-toggle"
           aria-label={isCollapsed ? "알림 펼치기" : "알림 접기"}
         >
           {isCollapsed ? (
-            <IconChevronDown className="h-4 w-4" />
+            <IconChevronDown className="rcm-alerts-chevron" />
           ) : (
-            <IconChevronUp className="h-4 w-4" />
+            <IconChevronUp className="rcm-alerts-chevron" />
           )}
         </button>
       </div>
-      
+
       {/* 알림 목록 - 접힌 상태에서는 숨김 */}
-      <div 
-        className={`border-x border-b border-gray-200 rounded-b-lg bg-white overflow-hidden transition-all duration-300 ${
-          isCollapsed ? 'max-h-0 opacity-0' : 'max-h-[2000px] opacity-100'
-        }`}
-      >
-        <div className="p-2 space-y-2">
+      <div className={`rcm-alerts-body ${isCollapsed ? 'rcm-alerts-body-collapsed' : 'rcm-alerts-body-expanded'}`}>
+        <div className="rcm-alerts-list">
           {visibleAlerts.map((alert) => (
             <AlertItem
               key={'alert-' + alert.key}

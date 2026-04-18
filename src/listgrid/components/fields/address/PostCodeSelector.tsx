@@ -49,7 +49,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
       <Flex gap={10}>
         <button
           type="button"
-          className="btn btn-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="rcm-button rcm-button-primary"
           onClick={() => {setOpen(!open)}}
         >
           주소 찾기
@@ -57,7 +57,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
         {(!required && !isBlank(postalCode)) && 
           <button
             type="button"
-            className="btn btn-outline-primary border border-blue-500 text-blue-500 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="rcm-button rcm-button-outline"
             onClick={() => {removeAddress()}}
           >
             주소 제거
@@ -81,17 +81,17 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
                 <Grid className={classes.row} gutter={16} align="center">
                   <Grid.Col span={2} className={clsx(classes.title, 'text-right pr-2')}>우편번호</Grid.Col>
                   <Grid.Col span={10}>
-                    <div className="flex gap-2">
+                    <div className="rcm-postcode-input-row">
                       <input
                         type="text"
                         value={postalCode}
                         disabled={true}
                         readOnly={true}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 text-sm"
+                        className="rcm-field-input rcm-field-input-disabled"
                       />
-                      <button 
+                      <button
                         type="button"
-                        className="btn btn-primary text-white px-4 rounded-md whitespace-nowrap text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                        className="rcm-button rcm-button-primary"
                         onClick={() => {
                           setOpenDaumPostCode(true);
                         }}
@@ -110,7 +110,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
                       placeholder={'주소 검색을 눌러 주소를 선택하세요'}
                       readOnly={true}
                       disabled={true}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-700 text-sm"
+                      className="rcm-field-input rcm-field-input-disabled"
                     />
                   </Grid.Col>
                 </Grid>
@@ -125,7 +125,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
                         onChange={(e: any) => {
                           setAddress2(e.target.value ?? '');
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                        className="rcm-field-input"
                       />
                       {!isBlank(error) &&
                         <Box className={classes.error}>{error}</Box>

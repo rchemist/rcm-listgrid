@@ -402,10 +402,10 @@ export const DataImporter = (props: ImporterProps) => {
                props.onClose(false);
              }}
       >
-        <div className="space-y-6 p-6">
+        <div className="rcm-importer-body">
           <DataImportSample fields={fields} sampleData={sampleData} sampleFileName={props.sampleFileName} allowUpdate={allowUpdate}/>
-          <div className="border-t pt-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
+          <div className="rcm-importer-section">
+            <h3 className="rcm-importer-section-title">
               {t('form.list.dataTransfer.tab.import.file.label') || '업로드할 파일 선택'}
             </h3>
             <FileUploadInput
@@ -420,7 +420,7 @@ export const DataImporter = (props: ImporterProps) => {
             />
           </div>
           {description && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
+            <div className="rcm-importer-description" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
               {description}
             </div>
           )}

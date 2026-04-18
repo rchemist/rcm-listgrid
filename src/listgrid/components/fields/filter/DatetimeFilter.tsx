@@ -52,12 +52,12 @@ export const DatetimeFilter = (props: DatetimeFilterProps) => {
                         })}
                         limit={props.limit} range={true} value={value}/>
 
-<div className="block md:hidden">
+<div className="rcm-show-below-md">
     <SafePerfectScrollbar className="perfect-scrollbar relative w-full -mr-3 pr-3">
       {showButtons()}
     </SafePerfectScrollbar>
     </div>
-    <div className="hidden md:block">
+    <div className="rcm-show-from-md">
       {showButtons()}
     </div>
 

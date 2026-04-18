@@ -69,7 +69,7 @@ export const ShowNotifications = ({error, color, timeout, showClose = false, onC
       setView(
         <div className="pt-2">
           <div className={`h-full overflow-auto p-4 pr-2 ${bgColor}`}>
-            <div className="group relative flex-1">
+            <div className="rcm-notification-body">
               <div className={`${showClose ? 'flex items-start justify-between' : ''}`}>
                 <div className={`${textColor} w-full`}>
                   {uniqueMessages.map((item: MessageItem) => (

@@ -37,11 +37,11 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
     const { setOpenBaseLoading } = useLoadingStore();
 
     return (
-        <div className="flex items-center justify-start space-x-2 whitespace-nowrap">
+        <div className="rcm-header-actions">
             {headerButtons}
             {supportPriority && !isSubCollection && (
                 <Tooltip label="리스트 각 행의 맨 좌측 열을 드래그해 우선순위를 변경할 수 있습니다">
-                    <button type="button" className="btn btn-primary" onClick={setManagePriority}>
+                    <button type="button" className="rcm-button rcm-button-primary" onClick={setManagePriority}>
                         우선순위 변경
                     </button>
                 </Tooltip>
@@ -55,14 +55,14 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
                 />
             )}
             {!isSubCollection && !readonly && isTrue(dataTransferConfig?.isSupportExport()) && (
-                <button type="button" className="btn btn-primary" onClick={() => setOpenDownload(true)}>
-                    <IconDownload className="mb-0.5 h-3.5 w-3.5 mr-1" />
+                <button type="button" className="rcm-button rcm-button-primary" onClick={() => setOpenDownload(true)}>
+                    <IconDownload className="rcm-btn-icon" />
                     다운로드
                 </button>
             )}
             {!isSubCollection && !readonly && isTrue(dataTransferConfig?.isSupportImport()) && (
-                <button type="button" className="btn btn-primary" onClick={() => setOpenUpload(true)}>
-                    <IconUpload className="mb-0.5 h-3.5 w-3.5 mr-1" />
+                <button type="button" className="rcm-button rcm-button-primary" onClick={() => setOpenUpload(true)}>
+                    <IconUpload className="rcm-btn-icon" />
                     업로드
                 </button>
             )}
@@ -80,7 +80,7 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
                         return (
                             <button
                                 type="button"
-                                className={isDeleteButtonObject ? deleteButton.className || "btn btn-outline-danger w-full text-danger hover:!bg-danger-light hover:!text-danger" : "btn btn-outline-danger w-full text-danger hover:!bg-danger-light hover:!text-danger"}
+                                className={isDeleteButtonObject && deleteButton.className ? deleteButton.className : "rcm-button rcm-button-outline-danger"}
                                 onClick={async () => {
                                     // 삭제 확인 메시지
                                     if (isDeleteButtonObject && deleteButton.confirmMessage) {
@@ -93,7 +93,7 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
                                     deleteItems();
                                 }}
                             >
-                                {isDeleteButtonObject && deleteButton.icon ? deleteButton.icon : <IconTrash className="mb-0.5 h-3.5 w-3.5 mr-1" />}
+                                {isDeleteButtonObject && deleteButton.icon ? deleteButton.icon : <IconTrash className="rcm-btn-icon" />}
                                 {isDeleteButtonObject && deleteButton.label
                                     ? (typeof deleteButton.label === 'function'
                                         ? deleteButton.label(checkedItems || [])
@@ -107,14 +107,12 @@ export const HeaderActionButtons: React.FC<ListGridHeaderProps & { headerButtons
                         <>{checkedButtons}</>
                     )}
                     {!isTrue(isSubCollection) && isTrue(addNew, true) && (
-                        <button className="btn btn-primary" onClick={() => {
+                        <button className="rcm-button rcm-button-primary" onClick={() => {
                             setOpenBaseLoading(true);
                             router.push(`${path}/add`);
                         }}>
-                            <div className="flex items-center">
-                                <IconPlus className="mb-0.5 h-3.5 w-3.5 mr-1" />
-                                신규 입력
-                            </div>
+                            <IconPlus className="rcm-btn-icon" />
+                            신규 입력
                         </button>
                     )}
                 </>

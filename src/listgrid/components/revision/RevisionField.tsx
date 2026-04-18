@@ -67,7 +67,7 @@ const RevisionDiffWrapper: React.FC<{
     .filter((label): label is string => !!label);
 
   return (
-    <div id={containerId} className="h-full min-h-full">
+    <div id={containerId} className="rcm-revision-diff-container">
       {changedFields.size > 0 && (
         <>
           <style>{`
@@ -78,15 +78,15 @@ const RevisionDiffWrapper: React.FC<{
               border-radius: 4px;
             }
           `}</style>
-          <div className="bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mx-4 mt-2 text-sm text-amber-800">
-            <div className="flex items-center gap-2">
-              <span className="inline-block w-3 h-3 rounded-sm bg-amber-400/30 border-l-2 border-amber-500 flex-shrink-0"></span>
+          <div className="rcm-revision-diff-banner rcm-revision-diff-banner-changed">
+            <div className="rcm-revision-diff-banner-row">
+              <span className="rcm-revision-diff-indicator"></span>
               <span>이전 버전 대비 <strong>{changedFields.size}개</strong> 필드가 변경되었습니다</span>
             </div>
             {changedFieldLabels.length > 0 && (
-              <div className="mt-1.5 ml-5 flex flex-wrap gap-1">
+              <div className="rcm-revision-diff-labels">
                 {changedFieldLabels.map((label, i) => (
-                  <span key={i} className="inline-block bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-xs">
+                  <span key={i} className="rcm-revision-diff-label-chip">
                     {label}
                   </span>
                 ))}
@@ -96,7 +96,7 @@ const RevisionDiffWrapper: React.FC<{
         </>
       )}
       {hasPreviousRevision && changedFields.size === 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-md px-3 py-2 mx-4 mt-2 text-sm text-green-800">
+        <div className="rcm-revision-diff-banner rcm-revision-diff-banner-same">
           이전 버전과 동일합니다
         </div>
       )}
@@ -269,60 +269,55 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 p-4">
-        <IconHistory className="h-5 w-5 animate-spin text-gray-400" />
-        <span className="text-sm text-gray-500">변경 내역을 불러오는 중...</span>
+      <div className="rcm-revision-state">
+        <IconHistory className="rcm-revision-state-icon rcm-revision-state-icon-spin" />
+        <span className="rcm-revision-state-text">변경 내역을 불러오는 중...</span>
       </div>
     );
   }
 
   if (revisions.length === 0) {
     return (
-      <div className="flex items-center gap-2 p-4 text-gray-500">
-        <IconHistory className="h-5 w-5" />
-        <span className="text-sm">변경 내역이 없습니다.</span>
+      <div className="rcm-revision-state rcm-revision-state-empty">
+        <IconHistory className="rcm-revision-state-icon" />
+        <span className="rcm-revision-state-text">변경 내역이 없습니다.</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2">
-      <div className="space-y-1 rounded-lg border border-gray-200 bg-gray-50 p-3">
-        <div className="space-y-1">
+    <div className="rcm-revision-wrap">
+      <div className="rcm-revision-panel">
+        <div className="rcm-revision-list">
           {revisions.map((revision, index) => {
-            const isLatest = currentPage === 0 && index === 0; // 첫 페이지의 첫 번째 항목만 최신 버전
+            const isLatest = currentPage === 0 && index === 0;
             const isDelete = revision.type === 'DELETE';
             const isCreate = revision.type === 'CREATE';
             const isClickable = !isDelete && !isCreate;
+            const itemClass = isLatest
+              ? 'rcm-revision-item rcm-revision-item-latest'
+              : isDelete || isCreate
+              ? 'rcm-revision-item rcm-revision-item-muted'
+              : 'rcm-revision-item rcm-revision-item-default';
             return (
               <div
                 key={revision.id}
-                className={`flex items-center justify-between rounded-md p-2 text-sm ${
-                  isLatest
-                    ? 'bg-blue-50 text-blue-700 hover:bg-blue-100 cursor-pointer transition-colors'
-                    : isDelete || isCreate
-                    ? 'bg-gray-50 text-gray-600'
-                    : 'bg-white hover:bg-gray-100 cursor-pointer transition-colors'
-                }`}
+                className={itemClass}
                 onClick={isClickable ? () => handleRevisionClick(revision, index) : undefined}
               >
-                <div className="flex items-center gap-3">
-                  <span className="font-medium">{revision.name}</span>
-                  <span className="text-xs text-gray-500">
+                <div className="rcm-revision-item-row">
+                  <span className="rcm-revision-item-name">{revision.name}</span>
+                  <span className="rcm-revision-item-date">
                     {fDateTime(revision.createdAt, 'yyyy-MM-dd HH:mm:ss')}
                   </span>
                   {isLatest && (
-                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-                      현재 버전
-                    </span>
+                    <span className="rcm-revision-badge rcm-revision-badge-latest">현재 버전</span>
                   )}
                   {isCreate && (
-                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                      신규
-                    </span>
+                    <span className="rcm-revision-badge rcm-revision-badge-create">신규</span>
                   )}
                   {isDelete && (
-                    <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                    <span className="rcm-revision-badge rcm-revision-badge-delete">
                       {entityForm.neverDelete ? '사용안함' : '삭제'}
                     </span>
                   )}
@@ -332,7 +327,7 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
           })}
         </div>
         {totalPage > 1 && (
-          <div className="pt-3 border-t border-gray-200 mt-3 flex justify-center">
+          <div className="rcm-revision-pagination">
             <Pagination
               total={totalPage}
               value={currentPage + 1}

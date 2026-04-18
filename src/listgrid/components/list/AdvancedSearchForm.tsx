@@ -88,10 +88,10 @@ export const AdvancedSearchForm = ({
                         leave="ease-in duration-200"
                         leaveFrom="opacity-100 scale-100"
                         leaveTo="opacity-0 scale-95">
-        <div className={`pt-2 xl:mr-3`}>
-          <div className="flex h-full flex-1 overflow-auto p-0">
-            <div className={`w-full ${subCollection ? 'px-0' : 'px-8'} py-4 pb-2 space-y-4 max-h-[80vh] overflow-y-auto`}>
-              <h4 className="font-semibold mb-2 text-lg text-dark">통합 검색</h4>
+        <div className="rcm-adv-search-legacy-outer">
+          <div className="rcm-adv-search-scroll">
+            <div className={`rcm-adv-search-legacy-inner ${subCollection ? 'rcm-adv-search-legacy-inner-sub' : ''}`}>
+              <h4 className="rcm-adv-search-legacy-title">통합 검색</h4>
               {fields.map((field, index) => {
 
                 if (tempSearchForm === undefined) {
