@@ -149,10 +149,11 @@ export const PhoneNumberFieldView = ({
             <Tooltip label="전화번호 복사">
               <button
                 type="button"
-                className="rcm-input-addon-button"
+                className="rcm-icon-btn"
+                data-size="sm"
                 onClick={handleCopy}
               >
-                <IconCopy className="rcm-icon-sm" />
+                <IconCopy className="rcm-icon" data-size="sm" />
               </button>
             </Tooltip>
           )}
@@ -160,10 +161,11 @@ export const PhoneNumberFieldView = ({
             <Tooltip label="SMS 보내기">
               <button
                 type="button"
-                className="rcm-input-addon-button"
+                className="rcm-icon-btn"
+                data-size="sm"
                 onClick={handleSms}
               >
-                <IconMessage className="rcm-icon-sm" />
+                <IconMessage className="rcm-icon" data-size="sm" />
               </button>
             </Tooltip>
           )}
