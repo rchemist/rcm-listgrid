@@ -140,8 +140,8 @@ export class StringField extends CheckButtonValidationField<StringField> {
       return {
         result: (
           <span className="rcm-bool-wrap">
-            <span className="rcm-bool-icon-frame rcm-bool-icon-frame-neutral">
-              <IconComponent className="rcm-bool-icon rcm-bool-icon-neutral" stroke={1.75} />
+            <span className="rcm-icon-frame">
+              <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
             </span>
             <span className="font-medium">{textValue}</span>
           </span>

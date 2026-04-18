@@ -136,8 +136,7 @@ export class DateField extends AbstractDateField<DateField> {
 
     // 아이콘 컴포넌트 결정 (cardIcon > 기본 캘린더 아이콘)
     const IconComponent = this.cardIcon || IconCalendar;
-    const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-date-icon-frame';
-    const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-date-icon';
+    const frameColor = this.cardIcon ? undefined : 'info';
 
     // range 타입인 경우 시작~끝 포맷
     if (this.range && Array.isArray(value) && value.length === 2) {
@@ -145,10 +144,10 @@ export class DateField extends AbstractDateField<DateField> {
       return {
         result: (
           <span className="rcm-bool-wrap">
-            <span className={`rcm-bool-icon-frame ${frameClass}`}>
-              <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
+            <span className="rcm-icon-frame" data-color={frameColor}>
+              <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
             </span>
-            <span className="rcm-bool-label">{dateText}</span>
+            <span className="rcm-text" data-weight="medium">{dateText}</span>
           </span>
         )
       };
@@ -159,10 +158,10 @@ export class DateField extends AbstractDateField<DateField> {
     return {
       result: (
         <span className="rcm-bool-wrap">
-          <span className={`rcm-bool-icon-frame ${frameClass}`}>
-            <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
+          <span className="rcm-icon-frame" data-color={frameColor}>
+            <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
           </span>
-          <span className="rcm-bool-label">{dateText}</span>
+          <span className="rcm-text" data-weight="medium">{dateText}</span>
         </span>
       )
     };

@@ -116,10 +116,10 @@ export class BooleanField extends OptionalField<BooleanField> {
           return {
             result: (
               <span className="rcm-bool-wrap">
-                <span className="rcm-bool-icon-frame rcm-bool-icon-frame-neutral">
-                  <IconComponent className="rcm-bool-icon rcm-bool-icon-neutral" stroke={1.75} />
+                <span className="rcm-icon-frame">
+                  <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
                 </span>
-                <span className="rcm-bool-label">{option.label}</span>
+                <span className="rcm-text" data-weight="medium">{option.label}</span>
               </span>
             )
           };
@@ -131,16 +131,15 @@ export class BooleanField extends OptionalField<BooleanField> {
     // boolean 값에 따른 아이콘 렌더링
     if (value === true) {
       const IconComponent = this.cardIcon || IconCheck;
-      const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-bool-icon-frame-true';
-      const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-bool-icon-true';
+      const frameColor = this.cardIcon ? undefined : 'success';
 
       return {
         result: (
           <span className="rcm-bool-wrap">
-            <span className={`rcm-bool-icon-frame ${frameClass}`}>
-              <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={2} />
+            <span className="rcm-icon-frame" data-color={frameColor}>
+              <IconComponent className="rcm-icon" data-size="sm" stroke={2} />
             </span>
-            <span className="rcm-bool-label rcm-bool-label-true">예</span>
+            <span className="rcm-text" data-weight="medium" data-color="success">예</span>
           </span>
         )
       };
@@ -152,10 +151,10 @@ export class BooleanField extends OptionalField<BooleanField> {
     return {
       result: (
         <span className="rcm-bool-wrap">
-          <span className="rcm-bool-icon-frame rcm-bool-icon-frame-neutral">
-            <IconComponent className="rcm-bool-icon rcm-bool-icon-false" stroke={2} />
+          <span className="rcm-icon-frame">
+            <IconComponent className="rcm-icon" data-size="sm" data-tone="disabled" stroke={2} />
           </span>
-          <span className="rcm-bool-label rcm-bool-label-false">아니오</span>
+          <span className="rcm-text" data-weight="medium" data-tone="muted">아니오</span>
         </span>
       )
     };

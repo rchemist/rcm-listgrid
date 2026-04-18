@@ -60,7 +60,7 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
       onClose={() => { onClose() }}>
       <div className="rcm-dialog-body">
         <div className="rcm-stack">
-          <div className="rcm-notice rcm-notice-info" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
+          <div className="rcm-notice" data-tone="info" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
             <label className="rcm-text-sm rcm-text-info rcm-text-emphasis">
               {instruction}
             </label>
@@ -102,7 +102,7 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
           onErrorChange={setError}
         />
         {description && (
-          <div className="rcm-notice rcm-notice-warning">
+          <div className="rcm-notice" data-tone="warning">
             <div className="rcm-text-sm rcm-text-warning">{description}</div>
           </div>
         )}

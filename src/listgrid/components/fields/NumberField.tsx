@@ -164,14 +164,13 @@ export class NumberField extends ListableFormField<NumberField> {
 
       // 일반 모드: 아이콘 + 텍스트
       const IconComponent = this.cardIcon || IconCoin;
-      const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-num-icon-frame-currency';
-      const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-num-icon-currency';
+      const frameColor = this.cardIcon ? undefined : 'success';
 
       return {
         result: (
           <span className="rcm-bool-wrap">
-            <span className={`rcm-bool-icon-frame ${frameClass}`}>
-              <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
+            <span className="rcm-icon-frame" data-color={frameColor}>
+              <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
             </span>
             <span className="rcm-num-value rcm-num-value-emphasis">{displayText}</span>
           </span>
@@ -186,14 +185,13 @@ export class NumberField extends ListableFormField<NumberField> {
 
     // 일반 모드: 아이콘 + 텍스트
     const IconComponent = this.cardIcon || IconHash;
-    const frameClass = this.cardIcon ? 'rcm-bool-icon-frame-neutral' : 'rcm-num-icon-frame-number';
-    const iconClass = this.cardIcon ? 'rcm-bool-icon-neutral' : 'rcm-num-icon-number';
+    const frameColor = this.cardIcon ? undefined : 'info';
 
     return {
       result: (
         <span className="rcm-bool-wrap">
-          <span className={`rcm-bool-icon-frame ${frameClass}`}>
-            <IconComponent className={`rcm-bool-icon ${iconClass}`} stroke={1.75} />
+          <span className="rcm-icon-frame" data-color={frameColor}>
+            <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
           </span>
           <span className="rcm-num-value">{formattedValue}</span>
         </span>
