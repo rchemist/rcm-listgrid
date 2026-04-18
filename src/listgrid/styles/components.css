@@ -9,44 +9,9 @@
 
 /* BEGIN — unlayered (see top comment for rationale) */
     /* ------------------------------------------------------------------ *
-     * Buttons
+     * Button icon helper (sits inside rcm-button primitive — defined in
+     * primitives.css alongside all other rcm-button variant rules).
      * ------------------------------------------------------------------ */
-    .rcm-button {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--rcm-space-xs);
-        box-sizing: border-box;
-        height: var(--rcm-size-button-height);
-        padding: 0 var(--rcm-space-lg);
-        font-family: inherit;
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-medium);
-        color: var(--rcm-color-text);
-        background: var(--rcm-color-surface);
-        border: var(--rcm-border-width) solid var(--rcm-color-border);
-        border-radius: var(--rcm-radius-md);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast),
-            border-color var(--rcm-transition-fast);
-    }
-
-    .rcm-button:hover {
-        background: var(--rcm-color-surface-hover);
-        border-color: var(--rcm-color-border-hover);
-    }
-
-    .rcm-button:focus-visible {
-        outline: 2px solid var(--rcm-color-border-focus);
-        outline-offset: 2px;
-    }
-
-    .rcm-button[disabled] {
-        color: var(--rcm-color-text-disabled);
-        background: var(--rcm-color-surface-disabled);
-        cursor: not-allowed;
-    }
-
     /* Small icon used inside rcm-button (download/upload/trash/plus icons) */
     .rcm-btn-icon {
         width: 0.875rem;
