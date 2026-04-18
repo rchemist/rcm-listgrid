@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.33 — Phase 6 1차 / dead composite CSS 삭제)
+마지막 업데이트: 2026-04-18 (alpha.34 — Phase 6 연속 / FilterDropdown + Alerts + PhoneNumber + Copy icon-btn 전환)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,7 +8,7 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.33` (CSS 리팩터 Phase 6 1차 — dead CSS 삭제)
+**배포된 현재 버전**: `v0.1.0-alpha.34` (CSS 리팩터 Phase 6 연속 — icon-btn 전환)
 
 **다음 작업**: **Phase 6 연속** — 다음 블록: `rcm-card-item-*` (29 클래스), `rcm-card-m2o-*` (29 클래스), `rcm-adv-search-*`, `rcm-revision-*`, `rcm-ca-*`, `rcm-alerts-*`, `rcm-import-*`, `rcm-field-selector-*`, `rcm-filter-dropdown-*`. 각 블록당 JSX 치환 + CSS 삭제 + alpha 배포. `REFACTOR_PLAN.md § Phase 6` 참조.
 
@@ -65,7 +65,8 @@
 | 0.1.0-alpha.30 | CSS 리팩터 Phase 3 — Input/Textarea/Select JSX → primitive | ✅ 안정 |
 | 0.1.0-alpha.31 | CSS 리팩터 Phase 4 부분 — icon-frame + notice JSX 전환 | ✅ 안정 |
 | 0.1.0-alpha.32 | CSS 리팩터 Phase 5 부분 — ViewTab data-state 전환 | ✅ 안정 |
-| **0.1.0-alpha.33** | **CSS 리팩터 Phase 6 1차** — FormField.tsx `rcm-bool-icon` 잔여 수정 + dead CSS 삭제: `rcm-bool-icon{,-frame}*`, `rcm-bool-label*`, `rcm-num-icon*`, `rcm-date-icon*`, `rcm-card-item-action-btn*`, `rcm-tab-selected/-disabled`. base.css 4,960 → 4,896줄 (−64). 시각 회귀 0 (primitive 치환으로 이미 JSX 가 쓰지 않는 규칙만 제거) | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.33 | CSS 리팩터 Phase 6 1차 — dead CSS 삭제. base.css 4,960 → 4,896 (−64) | ✅ 안정 |
+| **0.1.0-alpha.34** | **CSS 리팩터 Phase 6 2차** — icon-btn 전환 묶음: FilterDropdown close/title, AlertItem close, ViewEntityFormAlerts toggle/chevron, PhoneNumberFieldView addon, CopyableTextView copy. base.css 4,896 → ~4,780 (−120). 남은 Phase 6 블록: card-item-*, card-m2o-*, adv-search-*, revision-*, ca-*, alerts-header/body/indicator, import-*, field-selector- 등 | ✅ **현재 설치 대상** |
 
 ---
 
