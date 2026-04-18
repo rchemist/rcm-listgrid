@@ -64,6 +64,7 @@ export const ViewEntityFormWrapper: React.FC<ViewEntityFormWrapperProps> = React
         document.body.classList.remove('popup-mode');
       };
     }
+    return undefined;
   }, [popupMode]);
 
   // Memoize entity form props to prevent unnecessary re-renders
