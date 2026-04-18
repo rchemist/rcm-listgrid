@@ -396,25 +396,8 @@
         color: var(--rcm-color-text);
     }
 
-    .rcm-bool-icon-frame {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 1.5rem;
-        height: 1.5rem;
-        border-radius: var(--rcm-radius-md);
-    }
-
-    .rcm-bool-icon-frame-neutral { background: var(--rcm-color-surface-muted); }
-    .rcm-bool-icon-frame-true    { background: var(--rcm-color-success-surface); }
-
-    /* NumberField / DateField 색상 변형 (currency / number / date) */
-    .rcm-num-icon-frame-currency { background: var(--rcm-color-success-surface); }
-    .rcm-num-icon-currency       { color: var(--rcm-color-success); }
-    .rcm-num-icon-frame-number   { background: var(--rcm-color-info-surface); }
-    .rcm-num-icon-number         { color: var(--rcm-color-info); }
-    .rcm-date-icon-frame         { background: var(--rcm-color-info-surface); }
-    .rcm-date-icon               { color: var(--rcm-color-info); }
+    /* bool/num/date icon-frame + icon + label classes removed in Phase 6 — JSX now uses
+     * rcm-icon-frame / rcm-icon / rcm-text primitives with data-attr variants. */
 
     .rcm-num-value {
         font-variant-numeric: tabular-nums;
@@ -425,23 +408,6 @@
         font-variant-numeric: tabular-nums;
         font-weight: var(--rcm-font-weight-semibold);
     }
-
-    .rcm-bool-icon {
-        width: 0.875rem;
-        height: 0.875rem;
-        flex-shrink: 0;
-    }
-
-    .rcm-bool-icon-neutral { color: var(--rcm-color-text-muted); }
-    .rcm-bool-icon-true    { color: var(--rcm-color-success); }
-    .rcm-bool-icon-false   { color: var(--rcm-color-text-disabled); }
-
-    .rcm-bool-label {
-        font-weight: var(--rcm-font-weight-medium);
-    }
-
-    .rcm-bool-label-true  { color: var(--rcm-color-success); }
-    .rcm-bool-label-false { color: var(--rcm-color-text-muted); }
 
     /* ------------------------------------------------------------------ *
      * ManyToOne Multi-select (filter chips + add button)
@@ -1479,27 +1445,7 @@
 
     .rcm-card-item:hover .rcm-card-item-actions { opacity: 1; }
 
-    .rcm-card-item-action-btn {
-        padding: 0.375rem;
-        border-radius: var(--rcm-radius-lg);
-        background: transparent;
-        border: 0;
-        color: var(--rcm-color-text-disabled);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast), color var(--rcm-transition-fast);
-    }
-
-    .rcm-card-item-action-btn:hover {
-        background: var(--rcm-color-surface-hover);
-        color: var(--rcm-color-text-muted);
-    }
-
-    .rcm-card-item-action-btn-danger:hover {
-        background: var(--rcm-color-error-surface);
-        color: var(--rcm-color-error);
-    }
-
-    .rcm-card-item-action-icon { width: 1rem; height: 1rem; }
+    /* rcm-card-item-action-btn* removed in Phase 6 — JSX now uses rcm-icon-btn primitive. */
 
     .rcm-card-item-chevron-wrap { padding: 0.375rem; }
 
@@ -3616,18 +3562,8 @@
         color: var(--rcm-color-primary);
     }
 
-    .rcm-tab-selected {
-        color: var(--rcm-color-primary);
-        background: var(--rcm-color-surface);
-        border-color: var(--rcm-color-border);
-        border-bottom-color: var(--rcm-color-surface);
-        outline: none;
-    }
-
-    .rcm-tab-disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+    /* .rcm-tab-selected / .rcm-tab-disabled removed in Phase 6 — JSX uses
+     * .rcm-tab[data-state="selected"|"disabled"] primitive variant. */
 
     /* ------------------------------------------------------------------ *
      * PhoneNumberField — input + copy/sms button group (addon suffix)

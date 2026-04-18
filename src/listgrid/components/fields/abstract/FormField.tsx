@@ -246,7 +246,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
       return {
         result: (
           <span className="rcm-bool-wrap">
-            <IconComponent className="rcm-bool-icon rcm-bool-icon-neutral" stroke={1.75} />
+            <IconComponent className="rcm-icon" data-size="sm" data-tone="muted" stroke={1.75} />
             <span>{text}</span>
           </span>
         )

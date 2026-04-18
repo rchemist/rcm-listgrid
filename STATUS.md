@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.32 — Phase 5 부분 / ViewTab → data-state 전환)
+마지막 업데이트: 2026-04-18 (alpha.33 — Phase 6 1차 / dead composite CSS 삭제)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,9 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.32` (CSS 리팩터 Phase 5 부분 배포 — ViewTab data-state)
+**배포된 현재 버전**: `v0.1.0-alpha.33` (CSS 리팩터 Phase 6 1차 — dead CSS 삭제)
 
-**다음 작업**: **Phase 6 — 대규모 composite 블록 삭제**. `rcm-card-m2o-*`, `rcm-card-item-*`, `rcm-adv-search-*`, `rcm-revision-*`, `rcm-ca-*`, `rcm-alerts-*`, `rcm-alert-item-*`, `rcm-import-*` 등 블록을 한 번에 하나씩 JSX + base.css 동시 삭제. `REFACTOR_PLAN.md § Phase 6` 참조.
+**다음 작업**: **Phase 6 연속** — 다음 블록: `rcm-card-item-*` (29 클래스), `rcm-card-m2o-*` (29 클래스), `rcm-adv-search-*`, `rcm-revision-*`, `rcm-ca-*`, `rcm-alerts-*`, `rcm-import-*`, `rcm-field-selector-*`, `rcm-filter-dropdown-*`. 각 블록당 JSX 치환 + CSS 삭제 + alpha 배포. `REFACTOR_PLAN.md § Phase 6` 참조.
 
 **설계 문서 3종 (다음 세션 시작 시 이것부터 읽기)**:
 - `docs/REFACTOR_CURRENT_STATE.md` — 현재 CSS 인벤토리 + 문제 진단
@@ -64,7 +64,8 @@
 | 0.1.0-alpha.29 | CSS 리팩터 Phase 2 — Button / Icon-button JSX 를 data-attr primitive 로 전환. 18 파일 | ✅ 안정 |
 | 0.1.0-alpha.30 | CSS 리팩터 Phase 3 — Input/Textarea/Select JSX → primitive | ✅ 안정 |
 | 0.1.0-alpha.31 | CSS 리팩터 Phase 4 부분 — icon-frame + notice JSX 전환 | ✅ 안정 |
-| **0.1.0-alpha.32** | **CSS 리팩터 Phase 5 부분** — `ViewTab.tsx` 의 `rcm-tab-selected` / `rcm-tab-disabled` 클래스 하드코딩 제거 → `data-state` attr 로 전환. `rcm-card-item-tab*` 복합 클래스 (CardItem) + `rcm-m2o-dropdown-*` / `rcm-phone-list-dropdown-*` / `rcm-filter-dropdown-*` 은 Phase 6 composite 블록 삭제와 함께 일괄 처리 | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.32 | CSS 리팩터 Phase 5 부분 — ViewTab data-state 전환 | ✅ 안정 |
+| **0.1.0-alpha.33** | **CSS 리팩터 Phase 6 1차** — FormField.tsx `rcm-bool-icon` 잔여 수정 + dead CSS 삭제: `rcm-bool-icon{,-frame}*`, `rcm-bool-label*`, `rcm-num-icon*`, `rcm-date-icon*`, `rcm-card-item-action-btn*`, `rcm-tab-selected/-disabled`. base.css 4,960 → 4,896줄 (−64). 시각 회귀 0 (primitive 치환으로 이미 JSX 가 쓰지 않는 규칙만 제거) | ✅ **현재 설치 대상** |
 
 ---
 
@@ -100,7 +101,8 @@
 - ✅ Phase 3 (alpha.30) — JSX 의 `rcm-field-input` / `rcm-field-select` / `rcm-field-textarea` / `rcm-quick-search-input` → `rcm-input` / `rcm-select` / `rcm-textarea` primitive. 5 파일. primitives.css `rcm-input/textarea/select` 디폴트 font-size → sm, focus border-color → primary (현재 시각에 맞춤). Input group 내부 버튼 (addon) 은 Phase 5 에서 처리.
 - ✅ Phase 4 (alpha.31, 부분) — icon-frame + notice JSX 전환. Bool/Num/Date/Select/String/ManyToOne 필드의 `rcm-bool-icon-frame*` / `rcm-num-icon-frame*` / `rcm-date-icon-frame*` → `rcm-icon-frame [data-color]`. `rcm-bool-icon*` / `rcm-num-icon-*` / `rcm-date-icon` → `rcm-icon [data-size][data-tone][data-color]`. `rcm-bool-label*` → `rcm-text [data-weight][data-color][data-tone]`. DataExporter notice → data-tone. primitives.css 의 `rcm-icon-frame` 디폴트 shape → rounded + bg surface-muted, `rcm-text` 디폴트 → inherit (font-size/color 등). 테마 파일 / AlertItem / fieldgroup card 등 잔여 composite 은 Phase 5~6 에서.
 - ✅ Phase 5 (alpha.32, 부분) — `ViewTab.tsx` 에서 `rcm-tab-selected` / `rcm-tab-disabled` 하드코딩 제거 → `data-state="selected"|"disabled"`. 나머지 dropdown/card-item-tab 은 composite 제거와 동반 처리 예정.
-- ⏳ Phase 6 — 대규모 composite 블록 삭제 (다음 작업)
+- ◻ Phase 6 1차 (alpha.33) — FormField.tsx `rcm-bool-icon` 잔여 JSX 수정. 그리고 base.css 에서 사용처 0 인 composite 클래스 삭제: bool/num/date icon+frame+label (약 20 규칙), rcm-card-item-action-btn* (4), rcm-tab-selected/-disabled (2). base.css 4,960 → 4,896줄.
+- ⏳ Phase 6 이후 — 남은 composite 블록 (card-item-*, card-m2o-*, adv-search-*, revision-*, ca-*, alerts-*, import-*, field-selector-*, filter-dropdown-*) 을 JSX 전환 + CSS 삭제 형태로 순차 진행.
 - ⏳ Phase 7~9 — REFACTOR_PLAN.md 참조
 
 ### GlobalModalManager 포팅
