@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (alpha.44 — **OSS 공개 준비 완료**. Apache-2 / 테스트 infra / CI / 린트 / 소비자 README. 다음 세션: `docs/NEXT_SESSION.md` 참조 — v0.2 backlog (테스트 5 파일 포팅 마감 + `any` 457 → 200 미만))
+마지막 업데이트: 2026-04-19 (alpha.45 — **v0.2 backlog 소진**. 테스트 포팅 5 파일 마감 (8 files / 133 tests), `any` 459 → 328 (−131), `noImplicitAny: true` 승격. HTTP 303 확인.)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,18 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.44` (OSS 공개 준비 완료 — Apache-2 라이선스 / vitest + testing-library / GitHub Actions CI / ESLint + Prettier / 소비자 README / PRIMITIVES 카탈로그 / 다크 모드 / 루트 아티팩트 정리)
+**배포된 현재 버전**: `v0.1.0-alpha.45` (v0.2 backlog 소진 — 테스트 포팅 마감 + `any` 정리 + `noImplicitAny: true`)
 
-**다음 세션**: `docs/NEXT_SESSION.md` 진입 프롬프트 그대로 붙여넣기. 에이전트 병렬로 v0.2 backlog 2 개 소진 예정 (테스트 포팅 마감 + `any` 정리).
+**이번 세션 성과 (alpha.45)**:
+- 테스트: 33 → 133 passing (5 파일 jest→vitest 포팅, exclude 0)
+- `any` 수치: 459 → 328 (−131, 29% 감소)
+- `tsconfig.json`: `noImplicitAny: false` → **`true`** 승격 (승격 시 발생한 40 개 TS7006/TS7031 에러를 20 파일에서 concrete 타입 또는 명시적 any 로 해결)
+- 3 병렬 에이전트 분담 (B-1/B-2/B-3) 으로 큰 파일 메인 context 보호
+
+**다음 세션 후보 (v0.2 continue / v0.3)**:
+- 잔여 `any` 328 중 "의도된 any" 가 대부분 (generic entity payload + UIProvider ComponentType<any>) → 추가 감축은 generic refactor 필요
+- ESLint v9 config 이슈 해결 (eslint.config.js 부재로 `npm run lint` 실패 — CI 는 .eslintrc.json 기반이므로 로컬만)
+- 시각 회귀 수동 검증 (아래 목록)
 
 **alpha.37~40 하이라이트**:
 - alpha.37: ManyToOneView 찾기 버튼 색상 + SearchBarActions 우측 정렬 fix
@@ -99,7 +108,8 @@
 | 0.1.0-alpha.41 | rcm-button:disabled 를 opacity 기반으로 변경 (variant 색 유지) | ✅ 안정 |
 | 0.1.0-alpha.42 | components.css 의 중복 .rcm-button 블록 제거 — primitives 단일 소스 | ✅ 안정 |
 | 0.1.0-alpha.43 | CSS 중복 3 개 제거 + indigo 토큰화 + 다크 모드 토큰 + docs/PRIMITIVES.md (272줄) | ✅ 안정 |
-| **0.1.0-alpha.44** | **OSS 공개 준비 완료** — Apache-2 LICENSE, vitest/@testing-library 설치 + 33 tests pass + jest→vi 포팅, GitHub Actions CI (type-check/lint/test/build/dist 검증), ESLint + Prettier 구성, 소비자용 README 재작성 + 내부 로드맵은 docs/ROADMAP.md 로 분리, console.log/debug 69 → 9 (performanceLogger gated 만 유지), @ts-ignore 3 → 0, 루트 아티팩트 (PNG/=/.idea/.claude) 정리 + gitignore 보강, package.json license/private/description/keywords 정리. | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.44 | **OSS 공개 준비 완료** — Apache-2 LICENSE, vitest/@testing-library 설치 + 33 tests pass + jest→vi 포팅, GitHub Actions CI (type-check/lint/test/build/dist 검증), ESLint + Prettier 구성, 소비자용 README 재작성 + 내부 로드맵은 docs/ROADMAP.md 로 분리, console.log/debug 69 → 9, @ts-ignore 3 → 0, 루트 아티팩트 정리 + gitignore 보강, package.json license/private/description/keywords 정리. | ✅ 안정 |
+| **0.1.0-alpha.45** | **v0.2 backlog 소진** — (1) 테스트 포팅 5 파일 완성 (33 → 133 tests pass, vitest.config.ts exclude 0) (2) `any` 정리 459 → 328 (B-1/B-2/B-3 3 병렬 에이전트, 영역별 분담) (3) `tsconfig.json` `noImplicitAny: true` 승격 + 40 개 TS7006/TS7031 에러 수정 (20 파일). 블록별 commit 분리 (test / refactor-any / feat-types / bump). | ✅ **현재 설치 대상** |
 
 ---
 

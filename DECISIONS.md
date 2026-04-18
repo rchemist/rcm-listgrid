@@ -464,6 +464,44 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #65 alpha.45 — v0.2 backlog 소진 (테스트 포팅 + any 정리 + noImplicitAny)
+
+alpha.44 에서 연기한 v0.2 backlog 2 개를 한 세션에서 해소.
+
+1. **테스트 포팅 5 파일**: jest → vitest 포팅이 불완전했던 파일들. 주요 원인 (에이전트가 해결):
+   - `require('../../ViewListGrid')` CJS → top-level `import` (vi.mock hoisting 이 spy 로 교체하므로 정상 동작)
+   - 폐기된 `vi.requireActual` 호출 (Vitest 에 없음 — `await vi.importActual` 필요) 제거. 그 `misc` mock 은 OSS 추출 후 불필요해짐
+   - `vi.fn().mockImplementation(...)` 에 `new` 호출이 불가 → `class MockListGrid` 로 전환
+   - `vi.Mock` 타입 → `import { type Mock } from 'vitest'`
+   - `.animate-pulse` 기대 셀렉터 → `[class*="rcm-subcollection-skeleton"]` 로 보정 (framework-free 전환 반영)
+   - jsdom fetch 가 `AbortController.signal.addEventListener` 요구 → MockAbortController 대신 prototype spy
+   - 결과: 33 → **133 tests passing, 8 files**, vitest.config.ts exclude 0
+
+2. **`any` 정리 459 → 328 (−131)**: 3 병렬 에이전트가 영역 분담:
+   - B-1 (config/form/misc/message/utils/api/store/common/auth): 208 → 129
+   - B-2 (components/fields+form+helper/extensions/adapters/router/menu/_stubs): 189 → 165
+   - B-3 (components/list + transfer): 246 → 209
+   
+   패턴별 처리:
+   - `catch (e: any)` → `catch (e: unknown)` + type guard
+   - parameter `any` → concrete (`EntityForm` / `RouterApi` / `MouseEvent` / `ReactNode` / `number`)
+   - `as any` 불필요한 assertion 제거
+   - `[key: string]: any` → `[key: string]: unknown` (host extensibility 유지)
+   
+   **의도적 유지 (DECISIONS #21)**: generic entity payload (`FieldValue.current/fetched/default`, `data` payload, `FormField<any>`), UIProvider `ComponentType<any>` wrapper props, `parse()` 반환 타입 (consumer 가 즉시 필드 dereference). 예상 잔여 any 는 대부분 이 의도적 카테고리.
+
+3. **`noImplicitAny: true` 승격**: tsconfig.json `noImplicitAny: false` → `true`. 승격 시 TS7006/TS7031 에러 40 개 발생 (20 파일, 대부분 `components/fields/` 의 callback parameter). 에이전트가 일괄 수정:
+   - TextInput/SelectBox/Tags 콜백 → concrete `string` 또는 도메인 enum
+   - Pagination/MouseEvent 이벤트 핸들러 → concrete
+   - 외부 라이브러리 콜백 (FlatPickr / kakao geocoder / ColorInput / Tree renderNode) → 명시적 `any` 또는 concrete
+   - 결과: `npm run type-check` PASS, `npm test` 133 passing 유지
+
+**Why**: alpha.44 의 "OSS 공개 준비" 가 형식적 블로커 (라이선스 / 테스트 infra / CI / README) 만 해결했다면, alpha.45 는 실제 품질 블로커 (테스트 커버리지 / 타입 엄격성) 를 올림. `noImplicitAny: true` 는 외부 공개 라이브러리의 기본 기대치.
+
+**한계**: `any` 는 200 목표를 넘어 328 으로 멈춤. 잔여 대부분이 generic entity payload (설계상 의도된 any — 임의 entity 스키마 지원 위해 필수). 더 줄이려면 generic refactor (EntityForm<T> / FieldValue<T>) 필요 — v0.3 작업.
+
+**세션 패턴 재확인**: 메인 context 보호 원칙 (DECISIONS #62) 이 이번에도 유효. 큰 파일 (CardManyToOneView 1,000+ lines, Type.ts 24 any) 은 에이전트가 읽고 고정 포맷 리포트 반환 → 메인은 집계 + 빌드 + 커밋 + 배포만. 블록별 commit 분리 (test / refactor-any / feat-types / chore-bump) 로 각 블록 독립 rollback 가능.
+
 ### #64 alpha.44 — OSS 공개 준비 완료 (Apache-2 / 테스트 / CI / README)
 
 alpha.40 에서 framework-free 달성 후, 오픈소스 공개 준비를 위한 4 개 치명적 블로커 해결:
