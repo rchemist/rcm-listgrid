@@ -18,6 +18,8 @@
         "./styles.css": "./dist/styles.css",
         "./styles/tokens.css": "./dist/styles/tokens.css",
         "./styles/primitives.css": "./dist/styles/primitives.css",
+        "./styles/layouts.css": "./dist/styles/layouts.css",
+        "./styles/components.css": "./dist/styles/components.css",
         "./styles/base.css": "./dist/styles/base.css"
     },
     "files": [
@@ -35,7 +37,7 @@
     "scripts": {
         "type-check": "tsc --noEmit",
         "build": "tsc -p tsconfig.build.json && npm run build:styles",
-        "build:styles": "mkdir -p dist/styles && cp src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/base.css dist/styles/ && cat src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/base.css > dist/styles.css",
+        "build:styles": "mkdir -p dist/styles && cp src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/layouts.css src/listgrid/styles/components.css src/listgrid/styles/base.css dist/styles/ && cat src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/layouts.css src/listgrid/styles/components.css src/listgrid/styles/base.css > dist/styles.css",
         "clean": "rm -rf dist",
         "deploy": "./deploy.sh"
     },
