@@ -147,7 +147,7 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
       <div className="rcm-modal-field-group">
         <label className="rcm-modal-label">발신번호 *</label>
         <select
-          className="rcm-field-select"
+          className="rcm-select"
           value={senderAddress}
           onChange={(e) => setSenderAddress(e.target.value)}
           disabled={loadingSenderList || senderList.length === 0}
@@ -170,7 +170,7 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
         <label className="rcm-modal-label">수신자 전화번호</label>
         <input
           type="text"
-          className="rcm-field-input rcm-field-input-disabled"
+          className="rcm-input"
           value={phoneNumber}
           disabled
           readOnly
@@ -180,7 +180,7 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
       <div className="rcm-modal-field-group">
         <label className="rcm-modal-label">메시지 내용</label>
         <textarea
-          className="rcm-field-textarea rcm-sms-textarea"
+          className="rcm-textarea rcm-sms-textarea"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="메시지 내용을 입력해주세요."

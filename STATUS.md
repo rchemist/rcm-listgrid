@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.29 — Phase 2 / Button JSX → data-attr 전환)
+마지막 업데이트: 2026-04-18 (alpha.30 — Phase 3 / Input·Textarea·Select JSX → primitive 전환)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,9 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.29` (CSS 리팩터 Phase 2 배포)
+**배포된 현재 버전**: `v0.1.0-alpha.30` (CSS 리팩터 Phase 3 배포)
 
-**다음 작업**: **Phase 3 — Input / Textarea / Select / Checkbox / Radio 전환**. `rcm-field-input` / `rcm-quick-search-input` 등 → `rcm-input data-size=...`. `REFACTOR_PLAN.md § Phase 3` 참조.
+**다음 작업**: **Phase 4 — Surface (Card / Panel / Notice / Badge / Chip / Tag)**. `rcm-notice-info/warning/error/success` → `rcm-notice data-tone=...`, `rcm-bool-icon-frame*` / `rcm-num-icon-frame*` → `rcm-icon-frame data-color=...`, etc. `REFACTOR_PLAN.md § Phase 4` 참조.
 
 **설계 문서 3종 (다음 세션 시작 시 이것부터 읽기)**:
 - `docs/REFACTOR_CURRENT_STATE.md` — 현재 CSS 인벤토리 + 문제 진단
@@ -61,7 +61,8 @@
 | 0.1.0-alpha.19 | Top offender rank 1,2: TableSubCollectionView + CardSubCollectionView rcm-subcollection-* 전환 | ✅ 안정 |
 | 0.1.0-alpha.20~27 | 라이브러리 JSX Tailwind 하드코딩 413줄 → 0줄. defaultTheme 전면 비움. 필드그룹/required/탭 등 회귀 수정 | ✅ 안정 |
 | 0.1.0-alpha.28 | CSS 리팩터 Phase 1 — `styles/primitives.css` 신규 (~1,250줄, 22 primitive + data-attr variants). JSX/TS 무변경. dormant | ✅ 안정 |
-| **0.1.0-alpha.29** | **CSS 리팩터 Phase 2** — Button / Icon-button JSX 를 data-attr primitive 로 전환. 16 파일: SaveButton/DeleteButton/ListButton/ClosePopupButton, HeaderActionButtons, SearchBarActions, CardItem, StatusChangeReasonModal, PostCodeSelector, SmsModal, AdvancedSearchFormV2, AddContentDialog, InlineSubCollectionView, PriorityButton, FilterDropdown, DataImportProcessor, DataImportSample, DataExporter, ViewListGridWrapper. 테마 파일 (defaultListGridTheme/defaultTheme/subCollectionTheme) 은 Phase 8 까지 기존 변형 클래스 유지 | ✅ **현재 설치 대상** |
+| 0.1.0-alpha.29 | CSS 리팩터 Phase 2 — Button / Icon-button JSX 를 data-attr primitive 로 전환. 18 파일 | ✅ 안정 |
+| **0.1.0-alpha.30** | **CSS 리팩터 Phase 3** — Input/Textarea/Select JSX → primitive. 5 파일 (SmsModal, PostCodeSelector, ExcelPasswordField, QuickSearchInput, PhoneNumberFieldView). primitives.css 의 `rcm-input/textarea/select` 디폴트 font-size 를 sm 으로, focus border-color 를 primary 로 조정해 현재 `rcm-field-input` 과 시각 parity 유지 | ✅ **현재 설치 대상** |
 
 ---
 
@@ -93,9 +94,10 @@
 ### CSS 리팩터 진행 (docs/REFACTOR_*.md)
 - ✅ Phase 0 — Phase 0 의 4개 결정 확정 (icon size xs=12/sm=14/md=16/lg=20/xl=24 ; `rcm-input-group` 과 `rcm-button-group` 둘 다 primitive 유지 ; Skeleton primitive + subcollection 쉘 layouts.css 분리 ; breakpoint 768 주 사용)
 - ✅ Phase 1 (alpha.28) — `primitives.css` 작성 + `index.css` 에 import + `build:styles` 에 concat 추가. JSX 한 줄도 변경 없음. 기존 base.css 와 선택자 중복 시 cat 순서(tokens → primitives → base) 상 base 가 이기도록 설계 → 시각 회귀 없음.
-- ✅ Phase 2 (alpha.29) — 18 JSX 파일의 `rcm-button-{primary,outline,outline-danger,danger,secondary,sm,icon}` → `rcm-button data-variant=... data-color=... data-size=...` 전환. `rcm-card-item-action-btn*` → `rcm-icon-btn data-size="sm" data-color="error"`. 테마 파일은 Phase 8 유예. base.css 의 variant 규칙은 그대로 (테마 참조 살아있음) → 다음 단계에서 변형 규칙이 dormant → duplicate 해지됨.
-- ⏳ Phase 3 — Input / Textarea / Select / Checkbox / Radio JSX 치환 (다음 작업)
-- ⏳ Phase 4~9 — REFACTOR_PLAN.md 참조
+- ✅ Phase 2 (alpha.29) — 18 JSX 파일의 `rcm-button-{primary,outline,outline-danger,danger,secondary,sm,icon}` → `rcm-button data-variant=... data-color=... data-size=...` 전환. `rcm-card-item-action-btn*` → `rcm-icon-btn data-size="sm" data-color="error"`. 테마 파일은 Phase 8 유예.
+- ✅ Phase 3 (alpha.30) — JSX 의 `rcm-field-input` / `rcm-field-select` / `rcm-field-textarea` / `rcm-quick-search-input` → `rcm-input` / `rcm-select` / `rcm-textarea` primitive. 5 파일. primitives.css `rcm-input/textarea/select` 디폴트 font-size → sm, focus border-color → primary (현재 시각에 맞춤). Input group 내부 버튼 (addon) 은 Phase 5 에서 처리.
+- ⏳ Phase 4 — Surface (Card / Panel / Notice / Badge / Chip / Tag) 전환 (다음 작업)
+- ⏳ Phase 5~9 — REFACTOR_PLAN.md 참조
 
 ### GlobalModalManager 포팅
 - `src/listgrid/ui/GlobalModalManager.tsx` — ManyToOneField 모달 렌더러

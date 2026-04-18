@@ -133,7 +133,7 @@ export const PhoneNumberFieldView = ({
           type="text"
           className={readonlyClass(
             readonly,
-            `rcm-field-input ${showButtons ? 'rcm-input-group-input-with-addon' : ''}`,
+            `rcm-input ${showButtons ? 'rcm-input-group-input-with-addon' : ''}`,
           )}
           id={name}
           value={displayValue}

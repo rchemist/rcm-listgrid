@@ -478,7 +478,7 @@
         height: var(--rcm-size-input-height);
         padding: 0 var(--rcm-space-md);
         font-family: inherit;
-        font-size: var(--rcm-font-size-md);
+        font-size: var(--rcm-font-size-sm);
         line-height: var(--rcm-line-height-normal);
         color: var(--rcm-color-text);
         background: var(--rcm-color-surface);
@@ -495,7 +495,7 @@
     .rcm-input:focus,
     .rcm-input:focus-visible {
         outline: none;
-        border-color: var(--rcm-color-border-focus);
+        border-color: var(--rcm-color-primary);
     }
 
     .rcm-input::placeholder {
@@ -523,7 +523,7 @@
 
     .rcm-input[data-size="md"] {
         height: var(--rcm-size-input-height);
-        font-size: var(--rcm-font-size-md);
+        font-size: var(--rcm-font-size-sm);
         padding: 0 var(--rcm-space-md);
     }
 
@@ -539,7 +539,7 @@
         min-height: calc(var(--rcm-size-input-height) * 2);
         padding: var(--rcm-space-sm) var(--rcm-space-md);
         font-family: inherit;
-        font-size: var(--rcm-font-size-md);
+        font-size: var(--rcm-font-size-sm);
         line-height: var(--rcm-line-height-normal);
         color: var(--rcm-color-text);
         background: var(--rcm-color-surface);
@@ -556,7 +556,7 @@
     .rcm-textarea:focus,
     .rcm-textarea:focus-visible {
         outline: none;
-        border-color: var(--rcm-color-border-focus);
+        border-color: var(--rcm-color-primary);
     }
 
     .rcm-textarea[aria-invalid="true"],
@@ -578,7 +578,7 @@
         height: var(--rcm-size-input-height);
         padding: 0 var(--rcm-space-xl) 0 var(--rcm-space-md);
         font-family: inherit;
-        font-size: var(--rcm-font-size-md);
+        font-size: var(--rcm-font-size-sm);
         color: var(--rcm-color-text);
         background: var(--rcm-color-surface);
         border: var(--rcm-border-width) solid var(--rcm-color-border);
@@ -598,7 +598,7 @@
     .rcm-select:focus,
     .rcm-select:focus-visible {
         outline: none;
-        border-color: var(--rcm-color-border-focus);
+        border-color: var(--rcm-color-primary);
     }
 
     .rcm-select:disabled,

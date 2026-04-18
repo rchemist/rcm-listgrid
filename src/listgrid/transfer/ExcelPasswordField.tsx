@@ -60,7 +60,7 @@ export const ExcelPasswordField: React.FC<ExcelPasswordFieldProps> = ({
           </label>
           <input
             type="text"
-            className="rcm-field-input rcm-field-input-compact"
+            className="rcm-input rcm-field-input-compact"
             id="excelPassword"
             name="excelPassword"
             maxLength={32}

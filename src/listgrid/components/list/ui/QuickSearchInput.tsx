@@ -18,7 +18,7 @@ export const QuickSearchInput: React.FC<QuickSearchInputProps> = ({search, setSe
         <input
             type="text"
             id="quick-search"
-            className="rcm-quick-search-input"
+            className="rcm-input rcm-quick-search-input"
             placeholder={`Search ${quickSearchLabel}`}
             value={search}
             readOnly={!quickSearchEnabled}

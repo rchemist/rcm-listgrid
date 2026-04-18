@@ -89,7 +89,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
                         value={postalCode}
                         disabled={true}
                         readOnly={true}
-                        className="rcm-field-input rcm-field-input-disabled"
+                        className="rcm-input"
                       />
                       <button
                         type="button"
@@ -113,7 +113,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
                       placeholder={'주소 검색을 눌러 주소를 선택하세요'}
                       readOnly={true}
                       disabled={true}
-                      className="rcm-field-input rcm-field-input-disabled"
+                      className="rcm-input"
                     />
                   </Grid.Col>
                 </Grid>
@@ -128,7 +128,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
                         onChange={(e: any) => {
                           setAddress2(e.target.value ?? '');
                         }}
-                        className="rcm-field-input"
+                        className="rcm-input"
                       />
                       {!isBlank(error) &&
                         <Box className={classes.error}>{error}</Box>
