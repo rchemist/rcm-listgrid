@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-18 (alpha.35 — Phase 6 연속 / ContentAsset + RevisionField primitive 전환)
+마지막 업데이트: 2026-04-18 (alpha.35 — Phase 6 연속 / ContentAsset + RevisionField primitive 전환. **새 세션 준비 완료** → `docs/NEXT_SESSION.md` 참조)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -10,7 +10,7 @@
 
 **배포된 현재 버전**: `v0.1.0-alpha.35` (CSS 리팩터 Phase 6 연속 — badge/chip/tag)
 
-**다음 작업**: **Phase 6 큰 블록 + Phase 7/8** — 남은 큰 블록 (CardManyToOneView 전체 rcm-card-m2o-*, CardItem layout rcm-card-item-*, AdvancedSearchFormV2 rcm-adv-search-*, Import rcm-import-*, FieldSelector rcm-field-selector-*) 은 **구조적 리팩터** 필요 — 단순 primitive 매핑보다 컴포넌트별 재설계. Phase 7 (layouts.css 분리) / Phase 8 (theme API 정리) 과 병행 고려. 자세한 계획은 `docs/PHASE_6_HANDOFF.md` 참조.
+**다음 작업**: **Phase 6 잔여 + Phase 7/8 한 턴에 완료** — 새 세션에서 실행. `docs/NEXT_SESSION.md` 의 진입 프롬프트 그대로 붙여넣으면 병렬 에이전트 8개 + 순차 phase 7/8 으로 alpha.36 까지 완료 예상. 메인 컨텍스트 보호 우선.
 
 **설계 문서 3종 (다음 세션 시작 시 이것부터 읽기)**:
 - `docs/REFACTOR_CURRENT_STATE.md` — 현재 CSS 인벤토리 + 문제 진단
