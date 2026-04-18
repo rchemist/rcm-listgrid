@@ -4,6 +4,7 @@ import {render, screen} from '@testing-library/react';
 import {InlineSubCollectionView} from '../InlineSubCollectionView';
 import {EntityForm} from '../../../../config/EntityForm';
 import {InlineRowAction, InlineRowActionColumn, InlineRowActionsConfig} from '../../../../config/InlineSubCollectionField';
+import {ViewListGrid} from '../../ViewListGrid';
 
 // Mock ViewListGrid component
 vi.mock('../../ViewListGrid', () => ({
@@ -15,11 +16,14 @@ vi.mock('../../ViewListGrid', () => ({
   )),
 }));
 
-// Mock ListGrid
+// Mock ListGrid — use a real class so `new ListGrid()` works
 vi.mock('../../../../config/ListGrid', () => ({
-  ListGrid: vi.fn().mockImplementation((entityForm) => ({
-    entityForm,
-  })),
+  ListGrid: class MockListGrid {
+    entityForm: any;
+    constructor(entityForm: any) {
+      this.entityForm = entityForm;
+    }
+  },
 }));
 
 // Mock Tooltip component
@@ -164,8 +168,6 @@ describe('InlineSubCollectionView', () => {
 
   describe('relation configuration', () => {
     it('should use mappedBy from relation', () => {
-      const { ViewListGrid } = require('../../ViewListGrid');
-
       render(
         <InlineSubCollectionView
           parentEntityForm={mockParentEntityForm}
@@ -182,8 +184,6 @@ describe('InlineSubCollectionView', () => {
     });
 
     it('should pass valueProperty in relation to ViewListGrid options', () => {
-      const { ViewListGrid } = require('../../ViewListGrid');
-
       render(
         <InlineSubCollectionView
           parentEntityForm={mockParentEntityForm}
@@ -490,8 +490,6 @@ describe('InlineSubCollectionView', () => {
 
   describe('pagination options', () => {
     it('should pass pagination options', () => {
-      const { ViewListGrid } = require('../../ViewListGrid');
-
       render(
         <InlineSubCollectionView
           parentEntityForm={mockParentEntityForm}
@@ -535,8 +533,6 @@ describe('InlineSubCollectionView', () => {
 
   describe('viewListOptions pass-through', () => {
     it('should pass viewListOptions to ViewListGrid', () => {
-      const { ViewListGrid } = require('../../ViewListGrid');
-
       const customViewListOptions = {
         customOption: 'value',
       };

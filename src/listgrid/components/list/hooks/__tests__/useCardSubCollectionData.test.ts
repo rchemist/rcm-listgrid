@@ -6,13 +6,15 @@ import { useCardSubCollectionData } from '../useCardSubCollectionData';
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
-// Mock AbortController
+// Spy on AbortController.prototype.abort so we can assert on it
+// (without replacing the real AbortController — jsdom's native one provides
+// signal.addEventListener, which the hook and fetch rely on)
 const mockAbort = vi.fn();
-class MockAbortController {
-  signal = { aborted: false };
-  abort = mockAbort;
-}
-global.AbortController = MockAbortController as any;
+const originalAbort = AbortController.prototype.abort;
+AbortController.prototype.abort = function abortSpy(reason?: any) {
+  mockAbort(reason);
+  return originalAbort.call(this, reason);
+};
 
 describe('useCardSubCollectionData', () => {
   beforeEach(() => {

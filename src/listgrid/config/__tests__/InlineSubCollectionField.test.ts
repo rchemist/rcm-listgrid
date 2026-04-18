@@ -8,15 +8,6 @@ import {
 } from '../InlineSubCollectionField';
 import {EntityForm} from '../EntityForm';
 
-// Mock getServerUrl to prevent import chain issues
-vi.mock('../../misc', () => ({
-  ...vi.requireActual('../../misc'),
-  getServerUrl: vi.fn(() => ({
-    assetServerUrl: 'http://test-server.com',
-    processUrl: '/api/process',
-  })),
-}));
-
 // Mock SubCollectionField's ViewListGrid import
 vi.mock('../../components/list/ViewListGrid', () => ({
   ViewListGrid: vi.fn(() => null),

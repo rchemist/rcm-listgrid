@@ -1,4 +1,4 @@
-import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi, type Mock } from 'vitest';
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 import {CardSubCollectionView} from '../CardSubCollectionView';
@@ -26,7 +26,7 @@ vi.mock('../../../../ui', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const mockUseCardSubCollectionData = useCardSubCollectionData as vi.Mock;
+const mockUseCardSubCollectionData = useCardSubCollectionData as unknown as Mock;
 
 describe('CardSubCollectionView', () => {
   let mockEntityForm: EntityForm;
@@ -73,8 +73,8 @@ describe('CardSubCollectionView', () => {
         />
       );
 
-      // Loading state shows skeleton divs with animate-pulse class
-      const skeletons = document.querySelectorAll('.animate-pulse');
+      // Loading state shows skeleton divs with rcm-subcollection-skeleton class
+      const skeletons = document.querySelectorAll('[class*="rcm-subcollection-skeleton"]');
       expect(skeletons.length).toBeGreaterThan(0);
     });
 
