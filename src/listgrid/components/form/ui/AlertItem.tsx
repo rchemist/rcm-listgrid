@@ -59,10 +59,11 @@ export const AlertItem = React.memo(function AlertItem({
           e.stopPropagation();
           onClose(alert.key);
         }}
-        className="rcm-alert-item-close"
+        className="rcm-icon-btn"
+        data-size="sm"
         aria-label="메시지 닫기"
       >
-        <IconX className="rcm-alert-item-close-icon" />
+        <IconX className="rcm-icon" data-size="sm" />
       </button>
     </div>
   );

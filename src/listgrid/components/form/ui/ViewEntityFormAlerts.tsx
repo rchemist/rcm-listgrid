@@ -70,13 +70,14 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
             e.stopPropagation();
             toggleCollapse();
           }}
-          className="rcm-alerts-toggle"
+          className="rcm-icon-btn"
+          data-size="sm"
           aria-label={isCollapsed ? "알림 펼치기" : "알림 접기"}
         >
           {isCollapsed ? (
-            <IconChevronDown className="rcm-alerts-chevron" />
+            <IconChevronDown className="rcm-icon" data-size="sm" />
           ) : (
-            <IconChevronUp className="rcm-alerts-chevron" />
+            <IconChevronUp className="rcm-icon" data-size="sm" />
           )}
         </button>
       </div>

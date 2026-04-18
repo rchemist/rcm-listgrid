@@ -4107,25 +4107,7 @@
         color: var(--rcm-color-text);
     }
 
-    .rcm-alerts-toggle {
-        display: inline-flex;
-        align-items: center;
-        padding: 0;
-        background: transparent;
-        border: 0;
-        color: var(--rcm-color-text-muted);
-        cursor: pointer;
-        transition: color var(--rcm-transition-fast);
-    }
-
-    .rcm-alerts-toggle:hover {
-        color: var(--rcm-color-text);
-    }
-
-    .rcm-alerts-chevron {
-        width: 1rem;
-        height: 1rem;
-    }
+    /* .rcm-alerts-toggle / -chevron removed — JSX uses rcm-icon-btn + rcm-icon. */
 
     .rcm-alerts-body {
         background: var(--rcm-color-surface);
@@ -4204,24 +4186,7 @@
         height: 0.75rem;
     }
 
-    .rcm-alert-item-close {
-        display: inline-flex;
-        align-items: center;
-        padding: 0;
-        background: transparent;
-        border: 0;
-        color: inherit;
-        cursor: pointer;
-        flex-shrink: 0;
-        transition: opacity var(--rcm-transition-fast);
-    }
-
-    .rcm-alert-item-close:hover { opacity: 0.7; }
-
-    .rcm-alert-item-close-icon {
-        width: 1rem;
-        height: 1rem;
-    }
+    /* .rcm-alert-item-close / -close-icon removed — JSX uses rcm-icon-btn + rcm-icon. */
 
     /* ------------------------------------------------------------------ *
      * Panels / containers (surface with padding, used for dialog sections)
