@@ -140,9 +140,11 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
                     <button
                       type="button"
                       onClick={() => onRemoveItem(index)}
-                      className="rcm-ca-item-remove"
+                      className="rcm-icon-btn"
+                      data-size="md"
+                      data-color="error"
                     >
-                      <IconTrash size={20} />
+                      <IconTrash className="rcm-icon" data-size="lg" />
                     </button>
                   </Tooltip>
                 </div>

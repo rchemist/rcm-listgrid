@@ -2106,19 +2106,7 @@
 
     .rcm-ca-item-remove-wrap { padding-top: 1.5rem; }
 
-    .rcm-ca-item-remove {
-        padding: var(--rcm-space-sm);
-        color: var(--rcm-color-error);
-        background: transparent;
-        border: 0;
-        border-radius: var(--rcm-radius-lg);
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-ca-item-remove:hover {
-        background: color-mix(in srgb, var(--rcm-color-error) 10%, transparent);
-    }
+    /* .rcm-ca-item-remove removed — JSX uses rcm-icon-btn data-color="error". */
 
     .rcm-ca-errors {
         margin-top: var(--rcm-space-sm);
