@@ -1087,6 +1087,34 @@
         font-size: var(--rcm-font-size-xs);
     }
 
+    /* Legacy className aliases for host themes that emit classNames rather
+     * than data-tone attrs (defaultTheme.alerts.{info,warning,error},
+     * ViewEntityFormAlerts header, etc.). Visually identical to the
+     * corresponding [data-tone="..."] variant above. */
+    .rcm-notice-info {
+        background: var(--rcm-color-info-surface);
+        border-color: color-mix(in srgb, var(--rcm-color-info) 30%, transparent);
+        color: var(--rcm-color-info);
+    }
+
+    .rcm-notice-success {
+        background: var(--rcm-color-success-surface);
+        border-color: color-mix(in srgb, var(--rcm-color-success) 30%, transparent);
+        color: var(--rcm-color-success);
+    }
+
+    .rcm-notice-warning {
+        background: var(--rcm-color-warning-surface);
+        border-color: color-mix(in srgb, var(--rcm-color-warning) 30%, transparent);
+        color: var(--rcm-color-warning);
+    }
+
+    .rcm-notice-error {
+        background: var(--rcm-color-error-surface);
+        border-color: color-mix(in srgb, var(--rcm-color-error) 30%, transparent);
+        color: var(--rcm-color-error);
+    }
+
     /* ================================================================== *
      * 7. Navigation primitives
      * ================================================================== */

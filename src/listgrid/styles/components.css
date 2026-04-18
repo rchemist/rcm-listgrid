@@ -554,14 +554,14 @@
     }
 
     .rcm-import-sample-th {
-        background: #4f46e5;
-        color: white;
+        background: var(--rcm-color-accent);
+        color: var(--rcm-color-accent-text);
         text-align: center;
         padding: 0.75rem 1rem;
         font-size: var(--rcm-font-size-sm);
         font-weight: var(--rcm-font-weight-medium);
         white-space: nowrap;
-        border: var(--rcm-border-width) solid #6366f1;
+        border: var(--rcm-border-width) solid var(--rcm-color-accent-border);
     }
 
     .rcm-import-sample-th-required {
@@ -581,13 +581,13 @@
         white-space: nowrap;
     }
 
-    .rcm-import-sample-th-star { color: #fca5a5; }
+    .rcm-import-sample-th-star { color: var(--rcm-color-accent-star); }
 
     .rcm-import-sample-th-label { white-space: nowrap; }
 
     .rcm-import-sample-th-name {
         font-size: var(--rcm-font-size-xs);
-        color: #c7d2fe;
+        color: var(--rcm-color-accent-subtext);
         margin-top: 0.25rem;
         white-space: nowrap;
     }
@@ -1181,13 +1181,9 @@
         padding: var(--rcm-space-2xl);
     }
 
-    /* Skeleton placeholder rects — size via inline style/width/height */
-    .rcm-skeleton {
-        background: var(--rcm-color-surface-hover);
-        border-radius: var(--rcm-radius-sm);
-        animation: rcm-pulse 1.5s ease-in-out infinite;
-    }
-
+    /* Skeleton variants — base .rcm-skeleton + .rcm-pulse keyframes live in
+     * primitives.css. These are color variants used by ViewListGridSkeleton
+     * and ViewEntityFormSkeleton to accent specific regions. */
     .rcm-skeleton-accent {
         background: color-mix(in srgb, var(--rcm-color-primary) 30%, transparent);
     }
@@ -1198,11 +1194,6 @@
 
     .rcm-pulse {
         animation: rcm-pulse 1.5s ease-in-out infinite;
-    }
-
-    @keyframes rcm-pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
     }
 
     .rcm-skeleton-row {
@@ -1297,24 +1288,8 @@
         margin-bottom: var(--rcm-space-sm);
     }
 
-    .rcm-tab {
-        display: block;
-        padding: var(--rcm-space-sm) var(--rcm-space-md);
-        margin-bottom: -1px;
-        font-size: var(--rcm-font-size-sm);
-        color: var(--rcm-color-text);
-        background: transparent;
-        border: var(--rcm-border-width) solid transparent;
-        cursor: pointer;
-        transition: color var(--rcm-transition-fast);
-    }
-
-    .rcm-tab:hover {
-        color: var(--rcm-color-primary);
-    }
-
-    /* .rcm-tab-selected / .rcm-tab-disabled removed in Phase 6 — JSX uses
-     * .rcm-tab[data-state="selected"|"disabled"] primitive variant. */
+    /* .rcm-tab base + :hover + [data-state="selected"|"disabled"] live in
+     * primitives.css. JSX uses data-state attr for selection/disabled. */
 
 
     /* ------------------------------------------------------------------ *
@@ -1383,40 +1358,9 @@
     }
 
 
-    /* ------------------------------------------------------------------ *
-     * Messaging (error / info boxes used in transfer, validators, etc.)
-     * ------------------------------------------------------------------ */
-    .rcm-notice {
-        display: flex;
-        gap: var(--rcm-space-sm);
-        padding: var(--rcm-space-md);
-        border: var(--rcm-border-width) solid var(--rcm-color-border);
-        border-radius: var(--rcm-radius-md);
-        background: var(--rcm-color-surface-muted);
-    }
-
-    .rcm-notice-info {
-        background: var(--rcm-color-info-surface);
-        border-color: color-mix(in srgb, var(--rcm-color-info) 30%, transparent);
-        color: var(--rcm-color-info);
-    }
-
-    .rcm-notice-warning {
-        background: var(--rcm-color-warning-surface);
-        border-color: color-mix(in srgb, var(--rcm-color-warning) 30%, transparent);
-        color: var(--rcm-color-warning);
-    }
-
-    .rcm-notice-error {
-        background: var(--rcm-color-error-surface);
-        border-color: color-mix(in srgb, var(--rcm-color-error) 30%, transparent);
-        color: var(--rcm-color-error);
-    }
-
-    .rcm-notice-success {
-        background: var(--rcm-color-success-surface);
-        border-color: color-mix(in srgb, var(--rcm-color-success) 30%, transparent);
-        color: var(--rcm-color-success);
-    }
+    /* .rcm-notice base + [data-tone="info|success|warning|error"] live in
+     * primitives.css. Legacy class-variant aliases (-info/-warning/-error/
+     * -success) are also in primitives.css for host themes that emit them
+     * as className strings rather than data-tone attrs. */
 
 /* END — unlayered */

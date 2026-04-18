@@ -76,6 +76,14 @@
     --rcm-color-info: #1d4ed8;
     --rcm-color-info-surface: #eff6ff;
 
+    /* Accent — used for Data Import sample table header (indigo default).
+     * Hosts override for a branded data-import look. */
+    --rcm-color-accent: #4f46e5;            /* indigo-600 */
+    --rcm-color-accent-border: #6366f1;     /* indigo-500 */
+    --rcm-color-accent-subtext: #c7d2fe;    /* indigo-200 */
+    --rcm-color-accent-text: #ffffff;
+    --rcm-color-accent-star: #fca5a5;       /* red-300 (required-field star on accent bg) */
+
     /* Spacing (4px base) ------------------------------------------------ */
     --rcm-space-0: 0;
     --rcm-space-xs: 0.25rem;   /* 4px */
@@ -115,4 +123,76 @@
     --rcm-z-modal: 1100;
     --rcm-z-toast: 1200;
     --rcm-z-tooltip: 1300;
+}
+
+/* ====================================================================== *
+ * Dark mode — opt-in via `[data-theme="dark"]` on a host ancestor (e.g.
+ *   <html data-theme="dark">), or automatic via `prefers-color-scheme`.
+ *
+ * Only surface/text/border/shadow tokens flip; brand colors (primary,
+ * secondary, info, success, warning, error) keep their values — hosts that
+ * want fully dark brand shades should override them explicitly.
+ * ====================================================================== */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --rcm-color-surface:          #1a1d23;
+        --rcm-color-surface-muted:    #242830;
+        --rcm-color-surface-hover:    #2d323b;
+        --rcm-color-surface-disabled: #2d323b;
+
+        --rcm-color-text:          #e5e7eb;
+        --rcm-color-text-muted:    #9ca3af;
+        --rcm-color-text-disabled: #6b7280;
+        --rcm-color-text-inverse:  #111827;
+
+        --rcm-color-border:        #374151;
+        --rcm-color-border-hover:  #4b5563;
+        --rcm-color-border-focus:  #d1d5db;
+
+        --rcm-color-info-surface:    #1e3a5f;
+        --rcm-color-success-surface: #14532d;
+        --rcm-color-warning-surface: #78350f;
+        --rcm-color-error-surface:   #7f1d1d;
+
+        --rcm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+        --rcm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5),
+            0 2px 4px -2px rgba(0, 0, 0, 0.5);
+        --rcm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6),
+            0 4px 6px -4px rgba(0, 0, 0, 0.6);
+    }
+}
+
+/* Explicit opt-in override: `<html data-theme="dark">` wins regardless of
+ * system preference. Same token values as the prefers-color-scheme block. */
+[data-theme="dark"] {
+    --rcm-color-surface:          #1a1d23;
+    --rcm-color-surface-muted:    #242830;
+    --rcm-color-surface-hover:    #2d323b;
+    --rcm-color-surface-disabled: #2d323b;
+
+    --rcm-color-text:          #e5e7eb;
+    --rcm-color-text-muted:    #9ca3af;
+    --rcm-color-text-disabled: #6b7280;
+    --rcm-color-text-inverse:  #111827;
+
+    --rcm-color-border:        #374151;
+    --rcm-color-border-hover:  #4b5563;
+    --rcm-color-border-focus:  #d1d5db;
+
+    --rcm-color-info-surface:    #1e3a5f;
+    --rcm-color-success-surface: #14532d;
+    --rcm-color-warning-surface: #78350f;
+    --rcm-color-error-surface:   #7f1d1d;
+
+    --rcm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --rcm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5),
+        0 2px 4px -2px rgba(0, 0, 0, 0.5);
+    --rcm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6),
+        0 4px 6px -4px rgba(0, 0, 0, 0.6);
+}
+
+/* Force light (opt-out of system dark) */
+[data-theme="light"] {
+    color-scheme: light;
 }
