@@ -111,9 +111,8 @@ export const ContentAssetItem: React.FC<ContentAssetItemProps> = (props) => {
   }, [handleUpdateAsset]);
 
   // 파일 업로드 진행률 핸들러
-  const handleUploadProgress = useCallback((index: number) => (progress: number) => {
+  const handleUploadProgress = useCallback((_index: number) => (_progress: number) => {
     // TODO: 진행률 UI 업데이트
-    console.log(`Upload progress for item ${index}: ${progress}%`);
   }, []);
 
   return (

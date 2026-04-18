@@ -1,3 +1,4 @@
+import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import {
   InlineListFieldConfig,
   InlineRowAction,
@@ -8,41 +9,41 @@ import {
 import {EntityForm} from '../EntityForm';
 
 // Mock getServerUrl to prevent import chain issues
-jest.mock('../../misc', () => ({
-  ...jest.requireActual('../../misc'),
-  getServerUrl: jest.fn(() => ({
+vi.mock('../../misc', () => ({
+  ...vi.requireActual('../../misc'),
+  getServerUrl: vi.fn(() => ({
     assetServerUrl: 'http://test-server.com',
     processUrl: '/api/process',
   })),
 }));
 
 // Mock SubCollectionField's ViewListGrid import
-jest.mock('../../components/list/ViewListGrid', () => ({
-  ViewListGrid: jest.fn(() => null),
+vi.mock('../../components/list/ViewListGrid', () => ({
+  ViewListGrid: vi.fn(() => null),
 }));
 
 // Mock EntityForm
-jest.mock('../EntityForm');
+vi.mock('../EntityForm');
 
 describe('InlineSubCollectionField', () => {
-  let mockEntityForm: jest.Mocked<EntityForm>;
-  let mockParentEntityForm: jest.Mocked<EntityForm>;
+  let mockEntityForm: any;
+  let mockParentEntityForm: any;
 
   beforeEach(() => {
     mockEntityForm = {
       id: 'test-entity-form',
-      clone: jest.fn().mockReturnThis(),
-      withParentId: jest.fn().mockReturnThis(),
-      getValue: jest.fn(),
-      getUrl: jest.fn().mockReturnValue('http://api.example.com/items'),
+      clone: vi.fn().mockReturnThis(),
+      withParentId: vi.fn().mockReturnThis(),
+      getValue: vi.fn(),
+      getUrl: vi.fn().mockReturnValue('http://api.example.com/items'),
       fields: new Map(),
     } as any;
 
     mockParentEntityForm = {
       id: 'parent-123',
-      clone: jest.fn().mockReturnThis(),
-      getValue: jest.fn(),
-      getUrl: jest.fn().mockReturnValue('http://api.example.com/parent'),
+      clone: vi.fn().mockReturnThis(),
+      getValue: vi.fn(),
+      getUrl: vi.fn().mockReturnValue('http://api.example.com/parent'),
     } as any;
   });
 

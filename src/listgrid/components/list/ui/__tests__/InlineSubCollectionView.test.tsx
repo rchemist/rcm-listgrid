@@ -1,3 +1,4 @@
+import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 import {InlineSubCollectionView} from '../InlineSubCollectionView';
@@ -5,8 +6,8 @@ import {EntityForm} from '../../../../config/EntityForm';
 import {InlineRowAction, InlineRowActionColumn, InlineRowActionsConfig} from '../../../../config/InlineSubCollectionField';
 
 // Mock ViewListGrid component
-jest.mock('../../ViewListGrid', () => ({
-  ViewListGrid: jest.fn(({ listGrid, options }) => (
+vi.mock('../../ViewListGrid', () => ({
+  ViewListGrid: vi.fn(({ listGrid, options }) => (
     <div data-testid="view-list-grid">
       <span data-testid="list-grid-readonly">{String(options?.readonly)}</span>
       <span data-testid="list-grid-hide-title">{String(options?.hideTitle)}</span>
@@ -15,46 +16,46 @@ jest.mock('../../ViewListGrid', () => ({
 }));
 
 // Mock ListGrid
-jest.mock('../../../../config/ListGrid', () => ({
-  ListGrid: jest.fn().mockImplementation((entityForm) => ({
+vi.mock('../../../../config/ListGrid', () => ({
+  ListGrid: vi.fn().mockImplementation((entityForm) => ({
     entityForm,
   })),
 }));
 
 // Mock Tooltip component
-jest.mock('../../../../ui', () => ({
+vi.mock('../../../../ui', () => ({
   Tooltip: ({ children, label }: { children: React.ReactNode; label: string }) => (
     <div data-tooltip={label}>{children}</div>
   ),
 }));
 
 // Mock loading store
-jest.mock('../../../../loading', () => ({
+vi.mock('../../../../loading', () => ({
   useLoadingStore: () => ({
-    setOpenBaseLoading: jest.fn(),
+    setOpenBaseLoading: vi.fn(),
   }),
 }));
 
 // Mock showAlert
-jest.mock('../../../../message', () => ({
-  showAlert: jest.fn(),
+vi.mock('../../../../message', () => ({
+  showAlert: vi.fn(),
 }));
 
 describe('InlineSubCollectionView', () => {
-  let mockEntityForm: jest.Mocked<EntityForm>;
-  let mockParentEntityForm: jest.Mocked<EntityForm>;
+  let mockEntityForm: any;
+  let mockParentEntityForm: any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEntityForm = {
       id: 'entity-form-id',
-      clone: jest.fn().mockReturnValue({
-        withParentId: jest.fn().mockReturnThis(),
+      clone: vi.fn().mockReturnValue({
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       }),
-      withParentId: jest.fn().mockReturnThis(),
-      setValue: jest.fn(),
+      withParentId: vi.fn().mockReturnThis(),
+      setValue: vi.fn(),
       fields: new Map<string, any>([
         ['id', {
           name: 'id',
@@ -71,8 +72,8 @@ describe('InlineSubCollectionView', () => {
           getLabel: () => '이름',
           getName: () => 'name',
           isSupportList: () => true,
-          useListField: jest.fn(),
-          withListConfig: jest.fn(),
+          useListField: vi.fn(),
+          withListConfig: vi.fn(),
           getListConfig: () => ({ support: true }),
         }],
       ]),
@@ -80,8 +81,8 @@ describe('InlineSubCollectionView', () => {
 
     mockParentEntityForm = {
       id: 'parent-123',
-      clone: jest.fn().mockReturnThis(),
-      getValue: jest.fn().mockReturnValue('parent-123'),
+      clone: vi.fn().mockReturnThis(),
+      getValue: vi.fn().mockReturnValue('parent-123'),
     } as any;
   });
 
@@ -204,20 +205,20 @@ describe('InlineSubCollectionView', () => {
   describe('listFields configuration', () => {
     it('should accept string array for listFields', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map([
           ['name', {
             name: 'name',
             isSupportList: () => true,
-            useListField: jest.fn(),
-            withListConfig: jest.fn(),
+            useListField: vi.fn(),
+            withListConfig: vi.fn(),
             getListConfig: () => ({ support: true }),
           }],
           ['status', {
             name: 'status',
             isSupportList: () => true,
-            useListField: jest.fn(),
-            withListConfig: jest.fn(),
+            useListField: vi.fn(),
+            withListConfig: vi.fn(),
             getListConfig: () => ({ support: true }),
             listConfig: { support: true },
           }],
@@ -241,11 +242,11 @@ describe('InlineSubCollectionView', () => {
     });
 
     it('should accept InlineListFieldConfig array', () => {
-      const useListFieldMock = jest.fn();
-      const withListConfigMock = jest.fn();
+      const useListFieldMock = vi.fn();
+      const withListConfigMock = vi.fn();
 
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map([
           ['name', {
             name: 'name',
@@ -278,15 +279,15 @@ describe('InlineSubCollectionView', () => {
 
   describe('globalListConfig', () => {
     it('should apply globalListConfig to all fields', () => {
-      const withListConfigMock = jest.fn();
+      const withListConfigMock = vi.fn();
 
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map([
           ['name', {
             name: 'name',
             isSupportList: () => true,
-            useListField: jest.fn(),
+            useListField: vi.fn(),
             withListConfig: withListConfigMock,
             getListConfig: () => ({ support: true }),
           }],
@@ -317,7 +318,7 @@ describe('InlineSubCollectionView', () => {
   describe('rowActions configuration', () => {
     it('should not add action field when rowActions is empty', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -339,7 +340,7 @@ describe('InlineSubCollectionView', () => {
 
     it('should add action field when rowActions is provided', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -365,7 +366,7 @@ describe('InlineSubCollectionView', () => {
 
     it('should add action field even in readonly mode', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -395,7 +396,7 @@ describe('InlineSubCollectionView', () => {
   describe('rowActionsConfig', () => {
     it('should pass rowActionsConfig to InlineRowActionField', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -434,7 +435,7 @@ describe('InlineSubCollectionView', () => {
 
     it('should use default order 9999 when rowActionsConfig.order is not provided', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -461,7 +462,7 @@ describe('InlineSubCollectionView', () => {
 
     it('should use default label 작업 when rowActionsConfig.label is not provided', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -511,7 +512,7 @@ describe('InlineSubCollectionView', () => {
   describe('refresh functionality', () => {
     it('should update refreshKey when refresh is called', async () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -560,7 +561,7 @@ describe('InlineSubCollectionView', () => {
   describe('rowActionColumns configuration', () => {
     it('should add multiple action fields when rowActionColumns is provided', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -603,7 +604,7 @@ describe('InlineSubCollectionView', () => {
 
     it('should set correct label and order for each column', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -650,7 +651,7 @@ describe('InlineSubCollectionView', () => {
 
     it('should prefer rowActionColumns over deprecated rowActions', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 
@@ -690,7 +691,7 @@ describe('InlineSubCollectionView', () => {
 
     it('should not add field for empty action column', () => {
       const clonedEntityForm = {
-        withParentId: jest.fn().mockReturnThis(),
+        withParentId: vi.fn().mockReturnThis(),
         fields: new Map(),
       };
 

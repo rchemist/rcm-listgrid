@@ -1,3 +1,4 @@
+import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 /**
  * Copyright (c) "2024". rchemist.io by Rchemist
  * Licensed under the Rchemist Common License, Version 1.0 (the "License");
@@ -185,7 +186,7 @@ describe('useSubCollectionExpansion', () => {
 
   describe('callbacks', () => {
     it('should call onExpand callback', () => {
-      const onExpand = jest.fn();
+      const onExpand = vi.fn();
       const {result} = renderHook(() =>
         useSubCollectionExpansion({onExpand})
       );
@@ -198,7 +199,7 @@ describe('useSubCollectionExpansion', () => {
     });
 
     it('should call onCollapse callback', () => {
-      const onCollapse = jest.fn();
+      const onCollapse = vi.fn();
       const {result} = renderHook(() =>
         useSubCollectionExpansion({onCollapse})
       );
@@ -212,7 +213,7 @@ describe('useSubCollectionExpansion', () => {
     });
 
     it('should not call callbacks on FIFO auto-collapse', () => {
-      const onCollapse = jest.fn();
+      const onCollapse = vi.fn();
       const {result} = renderHook(() =>
         useSubCollectionExpansion({maxExpandedItems: 1, onCollapse})
       );

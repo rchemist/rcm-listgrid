@@ -103,9 +103,6 @@ function isOptionalReactNode(condition: any): condition is OptionalReactNode {
 
 export async function getConditionalBoolean(props: ConditionalValue, condition: ConditionalBooleanValue | undefined): Promise<boolean> {
 
-  // console.log('getConditionalBoolean', props, condition);
-
-
   if (!condition) {
     return false;
   }

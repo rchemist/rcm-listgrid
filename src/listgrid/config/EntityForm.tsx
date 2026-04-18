@@ -625,8 +625,6 @@ export class EntityForm extends EntityFormExtensions {
 
     const submitFormData: SubmitFormData = await this.getSubmitFormData(forceIncludeExceptOnSave);
 
-    console.log('save Data', submitFormData);
-
     if (submitFormData.error) {
       const errorMessages = submitFormData.errors?.flatMap((e) => e.errors).filter(Boolean);
       const errors = errorMessages?.length ? errorMessages : ['입력 값이 올바르지 않습니다.'];

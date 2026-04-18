@@ -30,7 +30,6 @@ export const SubCollectionViewModal = ({entityForm, managedId, props, setManaged
           closeOnClickOutside={false}
           closeOnEscape={false}
           onClose={() => {
-            console.log('onClose');
             setManagedId(undefined);
           } }>
           <ViewEntityForm entityForm={collectionEntityForm}

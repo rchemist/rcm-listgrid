@@ -151,7 +151,6 @@ export class FileField extends ListableFormField<FileField> {
 
       for (const file of value.existFiles) {
         if (!isBlankString(file.url)) {
-          console.log('exist file', file);
           blank = false;
           break;
         }
@@ -160,7 +159,6 @@ export class FileField extends ListableFormField<FileField> {
       if (blank) {
         for (const file of value.newFiles) {
           if (!isBlankString(file.url)) {
-            console.log('new file', file);
             blank = false;
             break;
           }

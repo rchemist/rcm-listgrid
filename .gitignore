@@ -1,8 +1,32 @@
+# dependencies
 node_modules/
+
+# build output
 dist/
 .turbo/
-*.log
+*.tsbuildinfo
+
+# editor / OS
 .DS_Store
+.idea/
+.vscode/
+
+# env
 .env
 .env.local
-*.tsbuildinfo
+
+# logs
+*.log
+
+# test tooling
+coverage/
+.nyc_output/
+
+# MCP / Claude local artifacts
+.mcp.json
+.claude/
+.playwright-mcp/
+
+# accidental root-dir artifacts
+/=
+/*.png

@@ -194,8 +194,8 @@ interface SampleDataButtonProps {
 
 const SampleDataButton = (props: SampleDataButtonProps) => {
 
-  const setProcessing = props.setProcessing ?? function (processing: boolean) {
-    console.debug('do nothing with processing value: ', processing);
+  const setProcessing = props.setProcessing ?? function (_processing: boolean) {
+    // no-op default
   }
 
   if (props.data === undefined) {
@@ -205,8 +205,6 @@ const SampleDataButton = (props: SampleDataButtonProps) => {
   const sampleData = props.data.map((row) => {
     return row.filter((item) => props.fields.find((field) => field.getName() === item.name));
   });
-
-  console.log('sampleData: ', sampleData);
 
   return (
     <>

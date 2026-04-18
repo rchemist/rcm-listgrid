@@ -83,8 +83,6 @@ export const FieldRenderer = (props: FieldRendererProps) => {
       const fieldName = field.getName();
       const currentScroll = window.scrollY;
 
-      console.log(`[DEBUG FieldRenderer handleFieldChange] START field=${fieldName}, value=`, value);
-
       setErrors([]);
       setCurrentValue(value);
 
@@ -107,11 +105,9 @@ export const FieldRenderer = (props: FieldRendererProps) => {
 
       if (isPropagation) {
         if (cloned.onChanges && cloned.onChanges.length > 0) {
-          console.log(`[DEBUG FieldRenderer handleFieldChange] onChanges count=${cloned.onChanges.length}`);
           for (const onChange of cloned.onChanges!) {
             try {
               cloned = await onChange(cloned, fieldName);
-              console.log(`[DEBUG FieldRenderer handleFieldChange] after onChange: shouldReload=${cloned.shouldReload}`);
               if (isTrue(cloned.shouldReload)) {
                 changed = true;
               }
@@ -119,12 +115,8 @@ export const FieldRenderer = (props: FieldRendererProps) => {
               console.error(e);
             }
           }
-        } else {
-          console.log(`[DEBUG FieldRenderer handleFieldChange] NO onChanges registered`);
         }
       }
-
-      console.log(`[DEBUG FieldRenderer handleFieldChange] END field=${fieldName}, changed=${changed}`);
 
       const manyToOneField = cloned.getField(fieldName);
       setManyToOneLink(
@@ -132,10 +124,8 @@ export const FieldRenderer = (props: FieldRendererProps) => {
       );
 
       if (changed || manyToOneField instanceof AbstractManyToOneField) {
-        console.log(`[DEBUG FieldRenderer handleFieldChange] setEntityForm with NEW cloned`);
         setEntityForm?.(cloned);
       } else {
-        console.log(`[DEBUG FieldRenderer handleFieldChange] setEntityForm with MERGED original`);
         entityForm.merge(cloned);
         setEntityForm?.(entityForm);
       }
@@ -283,15 +273,11 @@ export const FieldRenderer = (props: FieldRendererProps) => {
 
               let changed = false;
 
-              console.log(`[DEBUG FieldRenderer] onChange START field=${name}, value=`, value, 'isPropagation=', isPropagation);
-
               if (isPropagation) {
                 if (cloned.onChanges && cloned.onChanges.length > 0) {
-                  console.log(`[DEBUG FieldRenderer] onChanges count=${cloned.onChanges.length}`);
                   for (const onChange of cloned.onChanges!) {
                     try {
                       cloned = await onChange(cloned, name);
-                      console.log(`[DEBUG FieldRenderer] after onChange callback: shouldReload=${cloned.shouldReload}`);
                       if (isTrue(cloned.shouldReload)) {
                         changed = true;
                       }
@@ -299,12 +285,8 @@ export const FieldRenderer = (props: FieldRendererProps) => {
                       console.error(e);
                     }
                   }
-                } else {
-                  console.log(`[DEBUG FieldRenderer] NO onChanges registered on cloned entityForm`);
                 }
               }
-
-              console.log(`[DEBUG FieldRenderer] onChange END field=${name}, changed=${changed}, shouldReload=${cloned.shouldReload}`);
 
               const manyToOneField = cloned.getField(name);
               setManyToOneLink(
@@ -312,10 +294,8 @@ export const FieldRenderer = (props: FieldRendererProps) => {
               );
 
               if (changed || manyToOneField instanceof AbstractManyToOneField) {
-                console.log(`[DEBUG FieldRenderer] setEntityForm with NEW cloned (changed=${changed}, isManyToOne=${manyToOneField instanceof AbstractManyToOneField})`);
                 setEntityForm?.(cloned);
               } else {
-                console.log(`[DEBUG FieldRenderer] setEntityForm with MERGED original`);
                 entityForm.merge(cloned);
                 setEntityForm?.(entityForm);
               }

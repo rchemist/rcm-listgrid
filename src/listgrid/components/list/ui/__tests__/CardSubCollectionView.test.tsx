@@ -1,3 +1,4 @@
+import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import React from 'react';
 import {fireEvent, render, screen} from '@testing-library/react';
 import {CardSubCollectionView} from '../CardSubCollectionView';
@@ -5,12 +6,12 @@ import {EntityForm} from '../../../../config/EntityForm';
 import {useCardSubCollectionData} from '../../hooks/useCardSubCollectionData';
 
 // Mock the useCardSubCollectionData hook
-jest.mock('../../hooks/useCardSubCollectionData', () => ({
-  useCardSubCollectionData: jest.fn(),
+vi.mock('../../hooks/useCardSubCollectionData', () => ({
+  useCardSubCollectionData: vi.fn(),
 }));
 
 // Mock CardItem component
-jest.mock('../CardItem', () => ({
+vi.mock('../CardItem', () => ({
   CardItem: ({ item, onEdit, onDelete }: { item: any; onEdit?: () => void; onDelete?: () => void }) => (
     <div data-testid={`card-${item.id}`}>
       <span>{item.name}</span>
@@ -21,24 +22,24 @@ jest.mock('../CardItem', () => ({
 }));
 
 // Mock Tooltip component
-jest.mock('../../../../ui', () => ({
+vi.mock('../../../../ui', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const mockUseCardSubCollectionData = useCardSubCollectionData as jest.Mock;
+const mockUseCardSubCollectionData = useCardSubCollectionData as vi.Mock;
 
 describe('CardSubCollectionView', () => {
   let mockEntityForm: EntityForm;
   let mockParentEntityForm: EntityForm;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEntityForm = {
       id: 'entity-form-id',
-      clone: jest.fn().mockReturnThis(),
-      withId: jest.fn().mockReturnThis(),
-      setValue: jest.fn(),
+      clone: vi.fn().mockReturnThis(),
+      withId: vi.fn().mockReturnThis(),
+      setValue: vi.fn(),
       fields: new Map([
         ['id', { name: 'id', type: 'text', hidden: true, getLabel: () => 'ID', getName: () => 'id' }],
         ['name', { name: 'name', type: 'text', hidden: false, getLabel: () => '이름', getName: () => 'name' }],
@@ -47,8 +48,8 @@ describe('CardSubCollectionView', () => {
 
     mockParentEntityForm = {
       id: 'parent-123',
-      clone: jest.fn().mockReturnThis(),
-      getValue: jest.fn(),
+      clone: vi.fn().mockReturnThis(),
+      getValue: vi.fn(),
     } as any;
   });
 
@@ -58,7 +59,7 @@ describe('CardSubCollectionView', () => {
         data: [],
         loading: true,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -82,7 +83,7 @@ describe('CardSubCollectionView', () => {
         data: [],
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -106,7 +107,7 @@ describe('CardSubCollectionView', () => {
         data: [],
         loading: false,
         error: mockError,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -137,7 +138,7 @@ describe('CardSubCollectionView', () => {
         data: mockData,
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -165,9 +166,9 @@ describe('CardSubCollectionView', () => {
     beforeEach(() => {
       searchEnabledEntityForm = {
         id: 'entity-form-id',
-        clone: jest.fn().mockReturnThis(),
-        withId: jest.fn().mockReturnThis(),
-        setValue: jest.fn(),
+        clone: vi.fn().mockReturnThis(),
+        withId: vi.fn().mockReturnThis(),
+        setValue: vi.fn(),
         fields: new Map([
           ['id', {
             name: 'id',
@@ -200,7 +201,7 @@ describe('CardSubCollectionView', () => {
         data: mockData,
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -235,7 +236,7 @@ describe('CardSubCollectionView', () => {
         data: mockData,
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -265,7 +266,7 @@ describe('CardSubCollectionView', () => {
         data: mockData,
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -290,7 +291,7 @@ describe('CardSubCollectionView', () => {
         data: [{ id: '1', name: 'Item 1' }],
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -315,7 +316,7 @@ describe('CardSubCollectionView', () => {
         data: [],
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -339,13 +340,13 @@ describe('CardSubCollectionView', () => {
     });
 
     it('should support function-based fetchUrl', () => {
-      const mockFetchUrl = jest.fn(() => 'http://api.example.com/parent/123/items');
+      const mockFetchUrl = vi.fn(() => 'http://api.example.com/parent/123/items');
 
       mockUseCardSubCollectionData.mockReturnValue({
         data: [],
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
       render(
@@ -370,10 +371,10 @@ describe('CardSubCollectionView', () => {
         data: [{ id: '1', name: 'Item 1' }],
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
-      const onItemAdd = jest.fn();
+      const onItemAdd = vi.fn();
 
       render(
         <CardSubCollectionView
@@ -397,10 +398,10 @@ describe('CardSubCollectionView', () => {
         data: [{ id: '1', name: 'Item 1' }],
         loading: false,
         error: null,
-        refresh: jest.fn(),
+        refresh: vi.fn(),
       });
 
-      const onItemAdd = jest.fn();
+      const onItemAdd = vi.fn();
 
       render(
         <CardSubCollectionView

@@ -25,8 +25,7 @@ export const ViewApiSpecification = ({method, response, formData, ...props}: Api
       <ShowTitle copyText={`${formData}`} label={'Form Data'}></ShowTitle>
       <div className="rcm-api-spec-block">
         <div>
-          {/*@ts-ignore*/}
-          <pre>{formData}</pre>
+          <pre>{String(formData)}</pre>
         </div>
 
       </div>

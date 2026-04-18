@@ -61,7 +61,6 @@ export const ViewEntityFormFields = React.memo(function ViewEntityFormFields({
     if (tabs && tabs.length > 0) {
       const currentTabIndex = tabs.findIndex(tab => tab.id === tabIndex);
       if (currentTabIndex !== -1 && currentTabIndex !== selectedTabIndex) {
-        console.log('ViewEntityFormFields - syncing selectedTabIndex from', selectedTabIndex, 'to', currentTabIndex);
         setSelectedTabIndex(currentTabIndex);
       }
     }

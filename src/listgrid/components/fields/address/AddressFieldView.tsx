@@ -99,7 +99,6 @@ export const AddressFieldView = ({entityForm, onChange, ...props}: AddressFieldV
       required={isTrue(props.required)}
       address={address}
       onSubmit={(address) => {
-        console.log('onSubmit', onChange, address);
         onChange({
           state: defaultString(address.state),
           city: defaultString(address.city),

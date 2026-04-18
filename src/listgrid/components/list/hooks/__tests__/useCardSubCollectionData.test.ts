@@ -1,12 +1,13 @@
+import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useCardSubCollectionData } from '../useCardSubCollectionData';
 
 // Mock fetch globally
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock AbortController
-const mockAbort = jest.fn();
+const mockAbort = vi.fn();
 class MockAbortController {
   signal = { aborted: false };
   abort = mockAbort;
@@ -15,7 +16,7 @@ global.AbortController = MockAbortController as any;
 
 describe('useCardSubCollectionData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockFetch.mockReset();
     mockAbort.mockReset();
   });
@@ -74,7 +75,7 @@ describe('useCardSubCollectionData', () => {
 
     it('should fetch data from function-based URL', async () => {
       const mockData = [{ id: '1', name: 'Item 1' }];
-      const fetchUrl = jest.fn(() => 'http://api.example.com/parent/123/items');
+      const fetchUrl = vi.fn(() => 'http://api.example.com/parent/123/items');
 
       mockFetch.mockResolvedValueOnce({
         ok: true,

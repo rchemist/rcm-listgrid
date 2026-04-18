@@ -74,11 +74,7 @@ export const DataImporter = (props: ImporterProps) => {
     const file = currentFiles[0];
     let result = [];
 
-
-    console.log('file', file);
-
     if (file instanceof File) {
-      console.log('file is File');
       // 사용자가 직접 업로드한 파일
       const reader = new FileReader();
       reset();
@@ -97,28 +93,18 @@ export const DataImporter = (props: ImporterProps) => {
 
           const fieldMap: Map<string, DataField> = createFieldMap(...fields);
 
-          // DEBUG: 필드 매핑 디버깅
-          console.log('[DataImporter] fields:', fields.map(f => f.getName()));
-          console.log('[DataImporter] fieldMap keys:', Array.from(fieldMap.keys()));
-
           if (isEmpty(result)) {
-            console.log('[DataImporter] result is empty');
             setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
             return;
           } else {
             const row: any = result[0];
-            console.log('[DataImporter] Excel header row:', row);
 
             row.findIndex((cell: string, excelColIndex: number) => {
-              let originalCell = cell;
-
               // cell 내용이 이름\n[필드이름] 형태라면
               if ((cell.includes('[') && cell.includes(']'))) {
                 const fieldName = subStringBetween(cell, '[', ']').trim().replace(/\n/g, '').replace(' ', '');
                 cell = fieldName;
               }
-
-              console.log(`[DataImporter] Checking cell: "${originalCell}" -> parsed: "${cell}", exists in fieldMap: ${fieldMap.has(cell)}`);
 
               if (fieldMap.has(cell)) {
                 cells.push(excelColIndex);
@@ -127,11 +113,7 @@ export const DataImporter = (props: ImporterProps) => {
             });
           }
 
-          console.log('[DataImporter] Matched cells:', cells);
-          console.log('[DataImporter] Header:', header);
-
           if (cells.length === 0) {
-            console.log('[DataImporter] No cells matched - field mismatch error');
             setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
             return;
           } else {
@@ -174,29 +156,16 @@ export const DataImporter = (props: ImporterProps) => {
       // 서버에 이미 업로드된 파일 (FileInfo)
       reset();
       const fileUrl = getAccessableAssetUrl(file.url);
-      console.log('[DataImporter-Server] file object:', file);
-      console.log('[DataImporter-Server] file.url:', file.url);
-      console.log('[DataImporter-Server] fileUrl (after getAccessableAssetUrl):', fileUrl);
       fetch(fileUrl)
         .then(response => {
-          console.log('[DataImporter-Server] fetch response status:', response.status);
-          console.log('[DataImporter-Server] fetch response ok:', response.ok);
-          console.log('[DataImporter-Server] fetch response headers content-type:', response.headers.get('content-type'));
           return response.arrayBuffer();
         })
         .then(buffer => {
-          console.log('[DataImporter-Server] buffer byteLength:', buffer.byteLength);
           try {
             const wb = XLSX.read(buffer, { type: 'array' });
             const wsname = wb.SheetNames[0] || '';
             const ws = wb.Sheets[wsname] || {};
             result = XLSX.utils.sheet_to_json(ws, {header: 1});
-
-            // DEBUG: 엑셀 파싱 결과 확인
-            console.log('[DataImporter-Server] wb.SheetNames:', wb.SheetNames);
-            console.log('[DataImporter-Server] ws keys:', Object.keys(ws));
-            console.log('[DataImporter-Server] result length:', result.length);
-            console.log('[DataImporter-Server] result (first 3 rows):', result.slice(0, 3));
 
             /*
             fields 정보와 비교해 불필요한 필드는 제거한다.
@@ -206,28 +175,18 @@ export const DataImporter = (props: ImporterProps) => {
 
             const fieldMap: Map<string, DataField> = createFieldMap(...fields);
 
-            // DEBUG: 필드 매핑 디버깅 (서버 파일)
-            console.log('[DataImporter-Server] fields:', fields.map(f => f.getName()));
-            console.log('[DataImporter-Server] fieldMap keys:', Array.from(fieldMap.keys()));
-
             if (isEmpty(result)) {
-              console.log('[DataImporter-Server] result is empty');
               setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
               return;
             } else {
               const row: any = result[0];
-              console.log('[DataImporter-Server] Excel header row:', row);
 
               row.findIndex((cell: string, excelColIndex: number) => {
-                let originalCell = cell;
-
                 // cell 내용이 이름\n[필드이름] 형태라면
                 if ((cell.includes('[') && cell.includes(']'))) {
                   const fieldName = subStringBetween(cell, '[', ']').trim().replace(/\n/g, '').replace(' ', '');
                   cell = fieldName;
                 }
-
-                console.log(`[DataImporter-Server] Checking cell: "${originalCell}" -> parsed: "${cell}", exists in fieldMap: ${fieldMap.has(cell)}`);
 
                 if (fieldMap.has(cell)) {
                   cells.push(excelColIndex);
@@ -236,11 +195,7 @@ export const DataImporter = (props: ImporterProps) => {
               });
             }
 
-            console.log('[DataImporter-Server] Matched cells:', cells);
-            console.log('[DataImporter-Server] Header:', header);
-
             if (cells.length === 0) {
-              console.log('[DataImporter-Server] No cells matched - field mismatch error');
               setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
               return;
             } else {
@@ -351,8 +306,6 @@ export const DataImporter = (props: ImporterProps) => {
           url: url,
           formData: importData
         });
-
-        console.log('response', response);
 
         if (overrideParseResult) {
           const overrideParseResultResult = overrideParseResult(formData, response.data);
