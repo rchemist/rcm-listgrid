@@ -30,8 +30,8 @@ jobs:
       - name: Format check
         run: npm run format:check || echo "format drift — not failing build"
 
-      - name: Test
-        run: npm test
+      - name: Test + coverage (enforces vitest.config.ts thresholds)
+        run: npm run test:coverage
 
       - name: Build
         run: npm run build
