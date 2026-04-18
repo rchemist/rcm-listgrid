@@ -39,15 +39,15 @@ export const defaultListGridTheme: ViewListGridClassNames = {
   headerButtons: {
     wrapper: "rcm-row rcm-gap-sm",
     default: "rcm-button",
-    primary: "rcm-button rcm-button-primary",
-    outline: "rcm-button rcm-button-outline",
-    danger: "rcm-button rcm-button-danger",
-    icon: "rcm-button rcm-button-outline rcm-button-icon",
-    delete: "rcm-button rcm-button-danger",
-    refresh: "rcm-button rcm-button-outline",
-    download: "rcm-button rcm-button-outline",
-    upload: "rcm-button rcm-button-outline",
-    create: "rcm-button rcm-button-primary",
+    primary: "rcm-button",
+    outline: "rcm-button",
+    danger: "rcm-button",
+    icon: "rcm-button",
+    delete: "rcm-button",
+    refresh: "rcm-button",
+    download: "rcm-button",
+    upload: "rcm-button",
+    create: "rcm-button",
   },
 
   panel: {
@@ -60,9 +60,9 @@ export const defaultListGridTheme: ViewListGridClassNames = {
   subCollectionButtons: {
     container: "rcm-action-bar-end",
     buttonGroup: "rcm-row rcm-gap-sm",
-    addButton: "rcm-button rcm-button-primary rcm-button-sm",
-    deleteButton: "rcm-button rcm-button-danger rcm-button-sm",
-    actionButton: "rcm-button rcm-button-outline rcm-button-sm",
+    addButton: "rcm-button",
+    deleteButton: "rcm-button",
+    actionButton: "rcm-button",
   },
 
   searchBar: {
@@ -75,16 +75,16 @@ export const defaultListGridTheme: ViewListGridClassNames = {
     container: "rcm-row",
     input: "rcm-listgrid-search-input",
     icon: "rcm-listgrid-search-icon",
-    button: "rcm-button rcm-button-primary",
+    button: "rcm-button",
     clearButton: "rcm-listgrid-search-clear",
   },
 
   searchBarActions: {
     container: "rcm-row rcm-gap-sm",
     pageSizeSelect: "rcm-field-input",
-    filterButton: "rcm-button rcm-button-outline rcm-button-sm",
-    fieldSelectorButton: "rcm-button rcm-button-outline rcm-button-sm",
-    advancedSearchButton: "rcm-button rcm-button-outline rcm-button-sm",
+    filterButton: "rcm-button",
+    fieldSelectorButton: "rcm-button",
+    advancedSearchButton: "rcm-button",
   },
 
   advancedSearch: {
@@ -92,9 +92,9 @@ export const defaultListGridTheme: ViewListGridClassNames = {
     panel: "rcm-panel",
     fieldGrid: "rcm-grid",
     buttonArea: "rcm-action-bar-end",
-    searchButton: "rcm-button rcm-button-primary",
-    resetButton: "rcm-button rcm-button-outline",
-    closeButton: "rcm-button rcm-button-secondary",
+    searchButton: "rcm-button",
+    resetButton: "rcm-button",
+    closeButton: "rcm-button",
   },
 
   table: {
@@ -179,8 +179,8 @@ export const defaultListGridTheme: ViewListGridClassNames = {
     container: "",
     panel: "rcm-listgrid-dropdown-left",
     input: "rcm-field-input",
-    applyButton: "rcm-button rcm-button-primary rcm-button-sm",
-    resetButton: "rcm-button rcm-button-secondary rcm-button-sm",
+    applyButton: "rcm-button",
+    resetButton: "rcm-button",
   },
 
   modal: {
@@ -189,7 +189,7 @@ export const defaultListGridTheme: ViewListGridClassNames = {
     header: "rcm-modal-header",
     body: "rcm-modal-body",
     footer: "rcm-modal-footer",
-    closeButton: "rcm-button rcm-button-secondary",
+    closeButton: "rcm-button",
   },
 
   dataTransferModal: {
@@ -202,8 +202,8 @@ export const defaultListGridTheme: ViewListGridClassNames = {
   priority: {
     dragHandle: "rcm-cursor-pointer",
     dragHandleIcon: "rcm-text-muted",
-    button: "rcm-button rcm-button-outline rcm-button-sm",
-    active: "rcm-button-primary",
+    button: "rcm-button",
+    active: "",
   },
 
   popup: {

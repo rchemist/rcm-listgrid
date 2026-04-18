@@ -27,13 +27,19 @@ export const CreateButton: React.FC<CreateButtonProps> = ({
 }) => {
   const { classNames: themeClasses } = useListGridTheme();
 
-  const deleteButtonClass = themeClasses.subCollectionButtons?.deleteButton ?? "btn btn-outline-danger";
-  const addButtonClass = themeClasses.subCollectionButtons?.addButton ?? "btn btn-primary";
+  const deleteButtonClass = themeClasses.subCollectionButtons?.deleteButton ?? "rcm-button";
+  const addButtonClass = themeClasses.subCollectionButtons?.addButton ?? "rcm-button";
 
   return (
     <>
       {ableDelete && activeTrashIcon && (
-        <button className={deleteButtonClass} onClick={deleteItems}>
+        <button
+          className={deleteButtonClass}
+          data-variant="outline"
+          data-color="error"
+          data-size="sm"
+          onClick={deleteItems}
+        >
           삭제
         </button>
       )}
@@ -43,6 +49,8 @@ export const CreateButton: React.FC<CreateButtonProps> = ({
       {ableAdd && (
         <button
           className={addButtonClass}
+          data-variant="primary"
+          data-size="sm"
           onClick={() => {
             setRenderKey(new Date().getTime());
             setOpen(true);

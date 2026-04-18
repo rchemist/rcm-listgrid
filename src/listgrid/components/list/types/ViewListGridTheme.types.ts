@@ -59,6 +59,10 @@ export interface ViewListGridClassNames {
 
   /**
    * 헤더 버튼 스타일 (HeaderActionButtons)
+   *
+   * TODO: remove in v0.2 — HeaderActionButtons의 JSX가 `rcm-button` + `data-variant`/`data-color`를
+   * 직접 사용하므로 이 slot은 소비되지 않습니다. (variant slots: primary/outline/danger/icon/delete/
+   * refresh/download/upload/create)
    */
   headerButtons?: {
     /** 버튼 래퍼 */
