@@ -40,10 +40,11 @@ export const CopyButton = ({ value, className }: CopyButtonProps) => {
       <Tooltip label="복사">
         <button
           type="button"
-          className="rcm-copy-addon-btn"
+          className="rcm-icon-btn"
+          data-size="sm"
           onClick={handleCopy}
         >
-          <IconCopy className="rcm-m2o-action-icon" />
+          <IconCopy className="rcm-icon" data-size="sm" />
         </button>
       </Tooltip>
     </div>
@@ -64,7 +65,8 @@ export const CopyableTextView = ({
       <span>{displayValue ?? value}</span>
       <Tooltip label="복사">
         <button
-          className="rcm-copy-text-btn"
+          className="rcm-icon-btn"
+          data-size="xs"
           onClick={async (e) => {
             e.stopPropagation();
             try {
@@ -82,7 +84,7 @@ export const CopyableTextView = ({
             }
           }}
         >
-          <IconCopy className="h-3.5 w-3.5" />
+          <IconCopy className="rcm-icon" data-size="xs" />
         </button>
       </Tooltip>
     </div>

@@ -2537,45 +2537,11 @@
         font-weight: var(--rcm-font-weight-semibold);
     }
 
-    .rcm-copy-addon-btn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 30px;
-        width: 36px;
-        background: transparent;
-        border: 0;
-        cursor: pointer;
-        transition: background var(--rcm-transition-fast);
-    }
-
-    .rcm-copy-addon-btn:hover {
-        background: var(--rcm-color-surface-hover);
-    }
-
+    /* .rcm-copy-addon-btn / .rcm-copy-text-btn removed — JSX uses rcm-icon-btn. */
     .rcm-copy-text-wrap {
         display: flex;
         align-items: center;
         gap: 0.25rem;
-    }
-
-    .rcm-copy-text-btn {
-        height: 1.25rem;
-        width: 1.25rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        border: 0;
-        border-radius: var(--rcm-radius-sm);
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity var(--rcm-transition-fast), background var(--rcm-transition-fast);
-    }
-
-    .rcm-copy-text-btn:hover {
-        background: var(--rcm-color-surface-muted);
-        opacity: 1;
     }
 
     /* ------------------------------------------------------------------ *
