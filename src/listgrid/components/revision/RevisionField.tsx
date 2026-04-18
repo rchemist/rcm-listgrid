@@ -86,7 +86,7 @@ const RevisionDiffWrapper: React.FC<{
             {changedFieldLabels.length > 0 && (
               <div className="rcm-revision-diff-labels">
                 {changedFieldLabels.map((label, i) => (
-                  <span key={i} className="rcm-revision-diff-label-chip">
+                  <span key={i} className="rcm-tag" data-color="warning">
                     {label}
                   </span>
                 ))}
@@ -311,13 +311,13 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
                     {fDateTime(revision.createdAt, 'yyyy-MM-dd HH:mm:ss')}
                   </span>
                   {isLatest && (
-                    <span className="rcm-revision-badge rcm-revision-badge-latest">현재 버전</span>
+                    <span className="rcm-badge" data-color="info">현재 버전</span>
                   )}
                   {isCreate && (
-                    <span className="rcm-revision-badge rcm-revision-badge-create">신규</span>
+                    <span className="rcm-badge" data-color="success">신규</span>
                   )}
                   {isDelete && (
-                    <span className="rcm-revision-badge rcm-revision-badge-delete">
+                    <span className="rcm-badge" data-color="error">
                       {entityForm.neverDelete ? '사용안함' : '삭제'}
                     </span>
                   )}
