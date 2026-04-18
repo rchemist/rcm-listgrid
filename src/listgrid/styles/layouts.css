@@ -830,6 +830,8 @@
         flex-direction: column;
         gap: 0.75rem;
         max-height: 80vh;
+        container-type: inline-size;
+        container-name: rcm-adv-search;
         overflow-y: auto;
     }
 
@@ -965,13 +967,17 @@
         row-gap: 1rem;
     }
 
-    @media (min-width: 768px) {
+    /* Container-query based columns so modal/popup AdvSearch (narrow container)
+     * tops out at 2 columns even on wide viewports, while full-width inline
+     * usage (wide container) reaches 3. Breakpoints refer to the
+     * rcm-adv-search container's inline size, not the viewport. */
+    @container rcm-adv-search (min-width: 640px) {
         .rcm-adv-search-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
 
-    @media (min-width: 1280px) {
+    @container rcm-adv-search (min-width: 1200px) {
         .rcm-adv-search-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
         }
