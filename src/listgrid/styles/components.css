@@ -90,9 +90,9 @@
         font-size: var(--rcm-font-size-sm);
         font-weight: var(--rcm-font-weight-semibold);
         white-space: nowrap;
-        color: var(--rcm-color-primary-text);
-        background: var(--rcm-color-primary);
-        border: var(--rcm-border-width) solid var(--rcm-color-primary);
+        color: var(--rcm-color-secondary-text);
+        background: var(--rcm-color-secondary);
+        border: var(--rcm-border-width) solid var(--rcm-color-secondary);
         border-left: 0;
         border-top-right-radius: var(--rcm-radius-md);
         border-bottom-right-radius: var(--rcm-radius-md);
@@ -101,8 +101,37 @@
     }
 
     .rcm-m2o-action-btn:hover {
-        background: var(--rcm-color-primary-hover);
-        border-color: var(--rcm-color-primary-hover);
+        background: var(--rcm-color-secondary-hover);
+        border-color: var(--rcm-color-secondary-hover);
+    }
+
+    .rcm-m2o-addon {
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        background: var(--rcm-color-surface-muted);
+        border: var(--rcm-border-width) solid var(--rcm-color-border);
+        border-left: 0;
+        color: var(--rcm-color-secondary);
+    }
+
+    .rcm-m2o-addon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2rem;
+        background: transparent;
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .rcm-m2o-addon-icon {
+        width: 1rem;
+        height: 1rem;
     }
 
     .rcm-m2o-action-btn:disabled {

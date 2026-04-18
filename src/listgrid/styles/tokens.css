@@ -45,6 +45,14 @@
     --rcm-color-primary-hover: #1d4ed8;    /* blue-700 */
     --rcm-color-primary-text: #ffffff;
 
+    /* Secondary accent — used for addon/detail actions (e.g. ManyToOne
+     * lookup/clear buttons). Defaults to a neutral-friendly purple so it
+     * visually distinguishes from primary CTAs. Hosts rebrand as needed. */
+    --rcm-color-secondary: #805dca;
+    --rcm-color-secondary-hover: #6c4db6;
+    --rcm-color-secondary-surface: #ebe4f7;
+    --rcm-color-secondary-text: #ffffff;
+
     --rcm-color-surface: #ffffff;
     --rcm-color-surface-muted: #f9fafb;
     --rcm-color-surface-hover: #f3f4f6;

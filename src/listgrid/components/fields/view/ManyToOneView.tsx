@@ -332,12 +332,11 @@ export const ManyToOneView = ({
           </div>
         </div>
         {!isBlank(value) && (
-          <div
-            className={`flex h-full items-center justify-center border border-white-light bg-[#fafafa] font-semibold text-secondary dark:border-[#17263c] dark:bg-[#1b2e4b] border-r-0`}
-          >
+          <div className="rcm-m2o-addon">
             <Tooltip label={isModifiable && !readonly ? `정보 수정` : `정보 보기`}>
               <button
-                className={"flex h-[30px] w-[40px] items-center justify-center"}
+                type="button"
+                className="rcm-m2o-addon-btn"
                 onClick={() => {
                   if (isBlank(menuUrl) || !subCollectionEntity) {
                     if (isModifiable && !readonly) {
@@ -350,23 +349,22 @@ export const ManyToOneView = ({
                   }
                 }}
               >
-                <IconSearch className={"h-4 w-4"}></IconSearch>
+                <IconSearch className="rcm-m2o-addon-icon" />
               </button>
             </Tooltip>
           </div>
         )}
         {!readonly && !isBlank(value) && (
-          <div
-            className={`flex h-full items-center justify-center border border-white-light bg-[#fafafa] font-semibold text-secondary dark:border-[#17263c] dark:bg-[#1b2e4b] border-r-0`}
-          >
+          <div className="rcm-m2o-addon">
             <Tooltip label={`선택 해제`}>
               <button
-                className={"flex h-[30px] w-[40px] items-center justify-center"}
+                type="button"
+                className="rcm-m2o-addon-btn"
                 onClick={() => {
                   setManyToOneValue("");
                 }}
               >
-                <IconCircleX className={"h-4 w-4"}></IconCircleX>
+                <IconCircleX className="rcm-m2o-addon-icon" />
               </button>
             </Tooltip>
           </div>
