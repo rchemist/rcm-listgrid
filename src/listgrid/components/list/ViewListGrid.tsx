@@ -61,7 +61,7 @@ const PaginationContainer: React.FC<PaginationContainerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={themeClasses.pagination?.container ?? "w-full py-6 flex justify-center"}
+      className={themeClasses.pagination?.container ?? "rcm-listgrid-pagination"}
     >
       <Pagination
         total={totalPage}
@@ -513,11 +513,11 @@ export const ViewListGrid = (props: ViewListGridProps) => {
             ? themeClasses.popup?.container ?? 'max-h-[70vh] flex flex-col overflow-y-auto p-0'
             : themeClasses.table?.contentWrapper ?? 'overflow-y-auto p-0'
           }>
-            <div className={themeClasses.table?.container ?? "flex-grow overflow-auto"}>
+            <div className={themeClasses.table?.container ?? "rcm-scroll-y"}>
               <SyncTopScrollbar targetRef={tableContainerRef} />
               <div
                 ref={tableContainerRef}
-                className={themeClasses.table?.responsiveWrapper ?? "table-responsive min-h-[400px] w-full"}
+                className={themeClasses.table?.responsiveWrapper ?? "rcm-skeleton-table-wrapper"}
               >
                 <table className={themeClasses.table?.table ?? "table-hover w-full"}>
                   <thead className={themeClasses.table?.thead ?? 'border-t border-b border-white-light dark:border-[#17263c]'}>

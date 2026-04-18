@@ -70,9 +70,9 @@ export const QuickSearchBar = (props: QuickSearchBarProps) => {
         leaveFrom="opacity-100 scale-100"
         leaveTo="opacity-0"
       >
-        <div className={themeClasses.searchBar?.container ?? "flex flex-1 p-0 mb-2"}>
-          <div className={themeClasses.searchBar?.innerWrapper ?? "w-full px-4"}>
-            <div className={themeClasses.searchBar?.layoutWrapper ?? "gap-2 md:flex md:items-center w-full md:justify-between"}>
+        <div className={themeClasses.searchBar?.container ?? "rcm-listgrid-searchbar"}>
+          <div className={themeClasses.searchBar?.innerWrapper ?? "rcm-listgrid-searchbar-inner"}>
+            <div className={themeClasses.searchBar?.layoutWrapper ?? "rcm-row-between rcm-gap-sm"}>
               <QuickSearchInput
                 search={search}
                 setSearch={setSearch}

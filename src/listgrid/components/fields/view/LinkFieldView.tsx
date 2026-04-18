@@ -28,8 +28,8 @@ export const LinkFieldView = (props: LinkFieldProps) => {
     setValue(props.value);
   }, [props.value]);
 
-  const input = <input type={'text'} 
-    className={readonlyClass(props.readonly, `form-input ${!isBlank(value) ? ' rounded-r-none border-r-0' : ''} ${props.className}`)} 
+  const input = <input type={'text'}
+    className={readonlyClass(props.readonly, `rcm-input${!isBlank(value) ? ' rcm-link-input-grouped' : ''}${props.className ? ' ' + props.className : ''}`)}
     id={`${props.name}`}
     value={value ?? ''}
     placeholder={props.placeHolder}
@@ -71,7 +71,7 @@ export const LinkFieldView = (props: LinkFieldProps) => {
     <div className="rcm-input-group-full">
       <div className="rcm-input-group-full-center">
         <div className="rcm-input-group-full-relative">
-          <div className={"dropdown flex w-full"}>
+          <div className="rcm-m2o-input-wrap">
             {input}
           </div>
         </div>

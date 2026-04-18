@@ -39,9 +39,9 @@ export const ListGridHeader = (props: ListGridHeaderProps) => {
 
   return (
     <React.Fragment>
-      <div className={themeClasses.header?.container ?? "mt-2 flex flex-wrap items-start gap-2"}>
+      <div className={themeClasses.header?.container ?? "rcm-listgrid-header"}>
         <HeaderTitle title={title} hideTitle={hideTitle} />
-        <div className={themeClasses.header?.buttonGroup ?? "flex max-w-full shrink-0 flex-wrap items-center gap-2"}>
+        <div className={themeClasses.header?.buttonGroup ?? "rcm-listgrid-button-group"}>
             <HeaderActionButtons
                 {...props}
                 headerButtons={headerButtons}

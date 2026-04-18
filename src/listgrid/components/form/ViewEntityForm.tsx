@@ -232,9 +232,9 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                           if (fieldElement) {
                             fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             // 포커스 효과 추가 (선택사항)
-                            fieldElement.classList.add('ring-2', 'ring-primary');
+                            fieldElement.classList.add('rcm-field-focus-ring');
                             setTimeout(() => {
-                              fieldElement.classList.remove('ring-2', 'ring-primary');
+                              fieldElement.classList.remove('rcm-field-focus-ring');
                             }, 2000);
                           }
                         }, 100);
@@ -349,7 +349,7 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
               {/* 하단 버튼 영역 (bottom 위치일 때만, 인라인 모드 제외) */}
               {/* Bottom button area (only when buttonPosition is 'bottom', excluding inline mode) */}
               {!showButtonsInTabRow && (
-                <div className={cn("mt-6 flex flex-col items-center gap-3", classNames.footer?.container)}>
+                <div className={cn("rcm-form-footer", classNames.footer?.container)}>
                   {useCreateStep && createStepButtonPosition === 'bottom' && entityForm && (
                     <CreateStepButtons
                       currentStep={currentStep}

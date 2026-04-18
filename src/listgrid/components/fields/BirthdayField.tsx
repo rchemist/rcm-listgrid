@@ -204,7 +204,7 @@ const BirthdayInput = ({
   }
 
   return (
-    <div className="space-y-1">
+    <div className="rcm-stack" data-gap="xs">
       <input
         id={name}
         name={name}
@@ -216,7 +216,8 @@ const BirthdayInput = ({
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
         disabled={readonly}
-        className={readonlyClass(readonly, `form-input ${hasError || validationError ? 'border-red-500' : ''}`)}
+        className={readonlyClass(readonly, 'rcm-input')}
+        data-state={hasError || validationError ? 'error' : undefined}
         maxLength={10} // YYYY-MM-DD = 10자
       />
       {validationError && (

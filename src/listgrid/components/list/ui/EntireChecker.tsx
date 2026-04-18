@@ -61,10 +61,10 @@ export const EntireChecker = ({ total, listIds, checkedItems, setCheckedItems, s
 
   // showCheckboxInput이 false면 체크박스 없이 '#' 표시
   if (!showCheckboxInput) {
-    return <div className="text-center font-medium">#</div>;
+    return <div className="rcm-entire-checker-placeholder">#</div>;
   }
 
-  return <input type={"checkbox"} aria-label="전체 선택" className="form-checkbox"
+  return <input type={"checkbox"} aria-label="전체 선택" className="rcm-checkbox"
     id={id}
     checked={checkAll}
     onChange={() => checkAllItems()} />

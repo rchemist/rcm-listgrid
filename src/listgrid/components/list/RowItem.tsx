@@ -42,11 +42,11 @@ export const RowItem = (props: ViewRowItemProps) => {
       colspan++;
     }
 
-    return <tbody className={themeClasses.table?.tbody ?? "overflow-auto p-0 !border-0"}>
+    return <tbody className={themeClasses.table?.tbody ?? "rcm-listgrid-tbody"}>
       <tr>
         <td colSpan={colspan}>
           <div
-            className={themeClasses.empty?.container ?? "flex h-full !border-0 min-h-[400px] items-center whitespace-nowrap justify-center text-md sm:min-h-[300px]"}>
+            className={themeClasses.empty?.container ?? "rcm-listgrid-empty"}>
             {props.messages?.noData ?? '데이터가 없습니다.'}
           </div>
         </td>
@@ -72,7 +72,7 @@ export const RowItem = (props: ViewRowItemProps) => {
     const totalCount = sortableList.length - 1;
 
     if (props.managePriority) {
-      return <ReactSortable tag={'tbody'} list={sortableList} setList={list => sortRowsPriority(list)} animation={200} swap={true} swapThreshold={1} className={themeClasses.table?.tbody ?? "overflow-auto p-0 !border-0"}>
+      return <ReactSortable tag={'tbody'} list={sortableList} setList={list => sortRowsPriority(list)} animation={200} swap={true} swapThreshold={1} className={themeClasses.table?.tbody ?? "rcm-listgrid-tbody"}>
         {sortableList.map((item, index) => {
           return <ViewRows {...props}
                            key={`view_row_${item.id}_${index}`}
@@ -85,7 +85,7 @@ export const RowItem = (props: ViewRowItemProps) => {
         })}
       </ReactSortable>
     } else {
-      return <tbody className={themeClasses.table?.tbody ?? "overflow-auto p-0 !border-0"}>
+      return <tbody className={themeClasses.table?.tbody ?? "rcm-listgrid-tbody"}>
         {sortableList.map((item, index) => {
           return <ViewRows {...props}
             key={`view_row_${item.id}_${index}`}

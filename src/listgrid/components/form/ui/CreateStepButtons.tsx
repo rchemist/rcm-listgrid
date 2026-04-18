@@ -50,9 +50,10 @@ export const CreateStepButtons = React.memo(function CreateStepButtons({
   }, [currentStep, setCurrentStep]);
 
   return (
-    <div className={cn("flex justify-center gap-3", classNames.createStep?.buttonGroup)}>
+    <div className={cn("rcm-create-step-buttons", classNames.createStep?.buttonGroup)}>
       <button
-        className={cn("btn btn-default", classNames.createStep?.prevButton)}
+        type="button"
+        className={cn("rcm-button", classNames.createStep?.prevButton)}
         onClick={handlePrev}
         disabled={currentStep === 0}
       >
@@ -60,7 +61,9 @@ export const CreateStepButtons = React.memo(function CreateStepButtons({
       </button>
       {currentStep < maxStep && (
         <button
-          className={cn("btn btn-primary", classNames.createStep?.nextButton)}
+          type="button"
+          className={cn("rcm-button", classNames.createStep?.nextButton)}
+          data-variant="primary"
           onClick={handleNext}
         >
           다음
@@ -68,7 +71,9 @@ export const CreateStepButtons = React.memo(function CreateStepButtons({
       )}
       {currentStep === maxStep && (
         <button
-          className={cn("btn btn-primary", classNames.createStep?.saveButton)}
+          type="button"
+          className={cn("rcm-button", classNames.createStep?.saveButton)}
+          data-variant="primary"
           onClick={onClickSaveButton}
         >
           {buttonLabels?.save ?? '저장'}

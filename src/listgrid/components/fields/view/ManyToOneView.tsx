@@ -303,12 +303,10 @@ export const ManyToOneView = ({
     <div className="rcm-input-group-full">
       <div className="rcm-input-group-full-center">
         <div className="rcm-input-group-full-relative">
-          <div className={"dropdown flex w-full"}>
+          <div className="rcm-m2o-input-wrap">
             <input
               type="text"
-              className={`peer cursor-pointer form-input 
-                w-full min-w-full cursor-not-allowed font-normal focus:!border-white-light 
-                rounded-r-none border-r-0 !pr-10`}
+              className="rcm-input rcm-m2o-input"
               placeholder={!readonly ? `찾기 버튼을 눌러 ${props.label} 을(를) 선택해 주세요` : ''}
               value={name}
               disabled={readonly}

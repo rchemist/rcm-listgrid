@@ -97,4 +97,11 @@
         white-space: nowrap;
     }
 
+    /* Programmatic focus ring toggled via classList when scrolling to a field
+     * (ViewEntityFormAlerts → onFieldFocus). Replaces Tailwind `ring-2 ring-primary`. */
+    .rcm-field-focus-ring {
+        outline: 2px solid var(--rcm-color-primary);
+        outline-offset: 2px;
+    }
+
 /* END — unlayered */

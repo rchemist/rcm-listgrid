@@ -156,10 +156,9 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
   const readonly = isTrue(props.readonly);
 
   return <React.Fragment>
-    <div
-      className={`flex flex-col gap-2.5 mt-2 py-4 p-2 border dark:border-[#17263c] rounded`}>
-      <div className={'table-responsive'}>
-        <div className={'grid grid-cols sm:grid-cols-2 gap-3 md:grid-cols-6 sm:min-w-[400px] md:min-w-[860px]'}>
+    <div className="rcm-asset-outer">
+      <div className="rcm-asset-table-responsive">
+        <div className="rcm-asset-grid">
           {tags.map((tag, index) => {
 
             const asset = value?.assets?.find((asset) => asset.name === tag);
@@ -170,22 +169,21 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
             const isPrimary = tag === 'Primary';
 
             return <div key={`asset${index}`}>
-              <table className={'border rounded-b w-full'}>
+              <table className="rcm-asset-table">
                 <thead>
                 <tr>
-                  <th key={`th-${index}`}
-                      className={'px-2 dark:border-[#17263c] sm:w-50 md:w-20 md:max-w-20'}>
+                  <th key={`th-${index}`} className="rcm-asset-th">
                     <div className="rcm-asset-th-row">
                       {/* 첫번째 div 가 최대한 많은 공간을 사용하고 */}
-                      <div className={`flex-grow ${!isPrimary ? 'max-w-[70%]' : ''}`}>
+                      <div className={`rcm-asset-th-name${!isPrimary ? ' rcm-asset-th-name-compact' : ''}`}>
                         <Tooltip label={`${asset.name}`}>
-                          <div className={'truncate'}>{asset.name}</div>
+                          <div className="rcm-truncate">{asset.name}</div>
                         </Tooltip></div>
                       {/*두번째 div 는 딱 버튼 하나 들어갈 자리만 차지하면 좋겠어*/}
                       {!isPrimary && <div className="rcm-asset-th-remove">
                         {!readonly && <button
                           type={'button'}
-                          className={'flex'}
+                          className="rcm-asset-th-remove-btn"
                           onClick={() => {
                             const newValues: MultipleAssetForm = {assets: []};
                             value!.assets?.forEach((asset, deleteIndex) => {
@@ -200,7 +198,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
 
                             setValue(newValues);
                             props.onChange(newValues, false);
-                          }}><IconTrash className="text-danger"/>{
+                          }}><IconTrash className="rcm-icon" data-color="error"/>{
                         }</button>}
                       </div>}
                     </div>
@@ -210,9 +208,8 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                 </thead>
                 <tbody>
                 <tr>
-                  <td key={`td-${index}`}
-                      className={'p-2 flex justify-center items-center dark:border-[#17263c] min-w-[120px] min-h-[120px]'}>
-                    <div className={'flex justify-center items-center overflow-hidden w-full h-full cursor-pointer'}
+                  <td key={`td-${index}`} className="rcm-asset-td">
+                    <div className="rcm-asset-td-inner"
                          onClick={() => {
                            openImageForm(index);
                          }}>
@@ -223,13 +220,13 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                             if (readonly) {
                               return null;
                             } else {
-                              return <IconPhotoPlus className={'text-gray-500 font-light'}/>;
+                              return <IconPhotoPlus className="rcm-icon rcm-asset-placeholder-icon"/>;
                             }
                           } else {
 
                             const imgUrl = getAccessableAssetUrl(value!.assets![index].url);
 
-                            return <img className={'h-full w-auto object-cover max-w-24'}
+                            return <img className="rcm-asset-img"
                                         alt={`${value?.assets?.[index].description ?? ''}`}
                                         onError={(event) => {
                                           event.currentTarget.src = '/assets/images/no-image.png'
@@ -245,12 +242,11 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
               </table>
             </div>
           })}
-          {!readonly && <div className={'h-full'}>
-            <table className={'max-w-[210px] md:max-w-[130px] h-full'}>
+          {!readonly && <div className="rcm-asset-add-col">
+            <table className="rcm-asset-add-table">
               <tbody>
               <tr>
-                <td
-                  className={'p-2 flex min-w-[120px] h-full items-center justify-center'}>
+                <td className="rcm-asset-add-td">
                   <button
                     type="button"
                     className="rcm-asset-add-btn"
@@ -271,9 +267,9 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                        opened={openAdd} onClose={() => {
       closeUpload()
     }}>
-      <Paper className={'space-y-4'} key={`image-upload${currentIndex}`}>
+      <Paper className="rcm-asset-modal-body" key={`image-upload${currentIndex}`}>
         <div>
-          <div className={'font-bold !text-[0.7rem] ml-0.5 flex items-end space-x-1'}>
+          <div className="rcm-asset-modal-label">
             <div>이미지 유형</div>
           </div>
           <TextInput
@@ -304,7 +300,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
             <ViewHelpText helpText={'Front 에서 이 이미지를 식별하기 위한 Key입니다. 영문 소문자/숫자만 입력할 수 있습니다.'}></ViewHelpText>}
         </div>
         <div>
-          <div className={'font-bold !text-[0.7rem] ml-0.5 flex items-end space-x-1'}>
+          <div className="rcm-asset-modal-label">
             <div>Alt Tag</div>
           </div>
           <TextInput
@@ -318,7 +314,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
             }} name={`description`}></TextInput>
         </div>
         <div>
-          <div className={'font-bold !text-[0.7rem] ml-0.5 flex items-end space-x-1'}>
+          <div className="rcm-asset-modal-label">
             <div>Image</div>
           </div>
           <MultipleAssetUpload
@@ -330,8 +326,8 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
               setCurrentEdit(currentItem);
             }}/>
         </div>
-        <div className={'py-4 flex flex-col items-center justify-center'}>
-          {!isBlank(error) && <div className={'text-danger mb-2 text-[0.8rem]'}>{error}</div>}
+        <div className="rcm-asset-modal-footer">
+          {!isBlank(error) && <div className="rcm-asset-modal-error">{error}</div>}
 
           <Button style={{marginLeft: 0.5}} color={'info'}
                   disabled={isBlank(currentEdit.name) || isBlank(currentEdit.url)}

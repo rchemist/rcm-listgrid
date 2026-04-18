@@ -117,6 +117,36 @@
         color: var(--rcm-color-secondary);
     }
 
+    /* ManyToOne / Link input wrapper (container around input within input-group-full-relative) */
+    .rcm-m2o-input-wrap {
+        display: flex;
+        width: 100%;
+    }
+
+    /* ManyToOne input — left side of input+addon group (flat right, padding-right for icon space) */
+    .rcm-m2o-input {
+        width: 100%;
+        min-width: 100%;
+        font-weight: var(--rcm-font-weight-normal);
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: 0;
+        padding-right: 2.5rem;
+        cursor: pointer;
+    }
+
+    .rcm-m2o-input:disabled,
+    .rcm-m2o-input[readonly] {
+        cursor: pointer;
+    }
+
+    /* LinkField input — same grouped shape (flat right, no right border) when paired with addon */
+    .rcm-link-input-grouped {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-right: 0;
+    }
+
     .rcm-m2o-addon-btn {
         display: inline-flex;
         align-items: center;
@@ -173,6 +203,16 @@
     .rcm-link-button {
         min-width: 40px;
         padding: 0 var(--rcm-space-sm);
+    }
+
+    /* ManyToOne 값 우측 외부 링크 아이콘 (getManyToOneLink — FieldRendererHelper.tsx)
+     * Replaces gjcu Tailwind `mb-2` + icon `text-secondary h-4 w-4 ml-1`.
+     * Icon itself uses rcm-icon primitive (size/tone via data-attr). */
+    .rcm-m2o-external-link {
+        display: inline-flex;
+        align-items: center;
+        margin-left: var(--rcm-space-xs);
+        margin-bottom: var(--rcm-space-sm);
     }
 
     /* input group 우측 addon 버튼 공통 shape */

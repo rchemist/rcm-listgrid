@@ -50,7 +50,8 @@ export const CacheClearButton: React.FC<CacheClearButtonProps> = ({
   return (
     <button
       type={"button"}
-      className={"btn btn-outline-primary"}
+      className="rcm-button"
+      data-variant="outline"
       onClick={handleCacheDelete}
     >
       캐시 삭제

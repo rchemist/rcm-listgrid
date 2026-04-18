@@ -24,7 +24,7 @@ export async function getInputRendererParameters(field: FormField<any>, params: 
       const idName = await field.getMappedIdName(renderType);
       const menuUrl = `${field.config.entityForm.menuUrl}/${idName?.id ?? ''}`;
       const tooltip = `${idName?.name ?? field.getLabel()} 보기`
-      return <Tooltip label={tooltip} color={'gray'}><Link href={menuUrl!} target={'_blank'} className="mb-2"><IconExternalLink className={'text-secondary h-4 w-4 ml-1'} /></Link></Tooltip>
+      return <Tooltip label={tooltip} color={'gray'}><Link href={menuUrl!} target={'_blank'} className="rcm-m2o-external-link"><IconExternalLink className="rcm-icon" data-size="md" data-tone="muted" /></Link></Tooltip>
     }
     return null;
   }

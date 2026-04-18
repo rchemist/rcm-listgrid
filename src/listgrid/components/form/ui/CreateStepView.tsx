@@ -99,9 +99,9 @@ export const CreateStepView = React.memo(function CreateStepView({
   }, [currentStep, setCurrentStep]);
 
   return (
-    <div className={cn("flex flex-col gap-2.5 pt-5 xl:flex-row", classNames.createStep?.container)}>
-      <div className={cn("panel relative flex-1 rounded-xl p-5", classNames.createStep?.panel)}>
-        <div className={cn("mb-2", classNames.createStep?.stepperWrapper)}>
+    <div className={cn("rcm-create-step-container", classNames.createStep?.container)}>
+      <div className={cn("rcm-create-step-panel", classNames.createStep?.panel)}>
+        <div className={cn("rcm-create-step-stepper-wrapper", classNames.createStep?.stepperWrapper)}>
           {showStepper ? (
             stepperRenderer ? (
               (() => {
@@ -130,15 +130,16 @@ export const CreateStepView = React.memo(function CreateStepView({
               </Stepper>
             )
           ) : (
-            <div className={cn("text-lg font-semibold", classNames.createStep?.stepLabel)}>
+            <div className={cn("rcm-create-step-label", classNames.createStep?.stepLabel)}>
               {createSteps[currentStep].label}
             </div>
           )}
         </div>
         {buttonPosition === 'top' && (
-          <Group justify="center" className={cn("pt-2 space-x-2", classNames.createStep?.buttonGroup)}>
+          <Group justify="center" className={cn("rcm-create-step-button-group", classNames.createStep?.buttonGroup)}>
             <button
-              className={cn("btn btn-default", classNames.createStep?.prevButton)}
+              type="button"
+              className={cn("rcm-button", classNames.createStep?.prevButton)}
               onClick={handlePrev}
               disabled={currentStep === 0}
             >
@@ -146,7 +147,9 @@ export const CreateStepView = React.memo(function CreateStepView({
             </button>
             {currentStep < maxStep && (
               <button
-                className={cn("btn btn-primary", classNames.createStep?.nextButton)}
+                type="button"
+                className={cn("rcm-button", classNames.createStep?.nextButton)}
+                data-variant="primary"
                 onClick={handleNext}
                 disabled={currentStep === maxStep}
               >
@@ -154,7 +157,12 @@ export const CreateStepView = React.memo(function CreateStepView({
               </button>
             )}
             {currentStep === maxStep && (
-              <button className={cn("btn btn-primary", classNames.createStep?.saveButton)} onClick={onClickSaveButton}>
+              <button
+                type="button"
+                className={cn("rcm-button", classNames.createStep?.saveButton)}
+                data-variant="primary"
+                onClick={onClickSaveButton}
+              >
                 {buttonLabels?.save ?? '저장'}
               </button>
             )}

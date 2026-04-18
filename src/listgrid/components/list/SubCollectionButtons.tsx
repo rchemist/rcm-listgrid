@@ -64,7 +64,7 @@ export const SubCollectionButtons = (props: SubCollectionButtonsProps) => {
     return null;
 
   return <div
-    className={themeClasses.subCollectionButtons?.container ?? "flex items-center justify-end space-x-2 whitespace-nowrap px-2 md:px-4 mb-2"}>
+    className={themeClasses.subCollectionButtons?.container ?? "rcm-action-bar-end"}>
     {props.supportPriority && (
       <PriorityButtons
         managePriority={managePriority}
