@@ -130,7 +130,7 @@ export const RuleCondition = (props: RuleConditionProps) => {
 
       <div className={'flex gap-3 items-center mt-3'}>
         <div className={'min-w-[200px]'}>
-          <SelectBox options={fieldOptions} required={true} onChange={(fieldName) => {
+          <SelectBox options={fieldOptions} required={true} onChange={(fieldName: string) => {
             const field = fields.find(f => f.name === fieldName);
             setSelected(field?.name);
           }} name={'targetField'}></SelectBox>
@@ -178,7 +178,7 @@ export const RuleCondition = (props: RuleConditionProps) => {
               <div className={'min-w-[200px] max-w-[200px]'}>
                 <SelectBox options={getQueryConditionTypes(field)}
                            value={fieldValue.queryConditionType}
-                           required={true} onChange={(type) => {
+                           required={true} onChange={(type: string) => {
                   changeQueryConditionType(index, type as QueryConditionType);
                 }} name={`queryConditionType${index}`}></SelectBox>
               </div>
@@ -249,7 +249,7 @@ export const RuleCondition = (props: RuleConditionProps) => {
                         size={'md'}
                         value={currentValue}
                         clearable
-                        onChange={(value) => {
+                        onChange={(value: string[]) => {
                           changeValue(index, [...value]);
                         }}
                       />

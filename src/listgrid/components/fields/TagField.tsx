@@ -75,7 +75,7 @@ export class TagField extends MultipleOptionalField<TagField> {
           data={tagData}
           filter={optionsFilter}
           clearable
-          onChange={(value) => {
+          onChange={(value: any) => {
             params.onChange(value);
           }}
           onValidateTag={this.tagValidation}

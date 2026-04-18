@@ -97,7 +97,7 @@ export class StringField extends CheckButtonValidationField<StringField> {
     return (async () => {
       return <TextInput
         name={`${this.name}_${params.entityForm.id}`}
-        onChange={(value) => {
+        onChange={(value: string) => {
           params.onChange(value, 'LIKE');
         }}
         value={params.value}></TextInput>;

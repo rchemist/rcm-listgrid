@@ -66,7 +66,7 @@ const ColorInputField = ({name, label, required = false, readonly = false, withA
   return <ColorInput
     name={name}
     value={value}
-    onChangeEnd={(color) => {
+    onChangeEnd={(color: string) => {
       setValue(color);
       props.onChange(color);
     }}

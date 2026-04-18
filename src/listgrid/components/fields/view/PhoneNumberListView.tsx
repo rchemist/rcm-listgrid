@@ -93,7 +93,7 @@ export const PhoneNumberListView = ({
             </button>
           </Tooltip>
         </Popover.Target>
-        <Popover.Dropdown onClick={(e) => e.stopPropagation()}>
+        <Popover.Dropdown onClick={(e: React.MouseEvent) => e.stopPropagation()}>
           <div className="rcm-phone-list-dropdown">
             <button className="rcm-phone-list-dropdown-item" onClick={handleCopy}>
               <IconCopy className="rcm-m2o-action-icon" />

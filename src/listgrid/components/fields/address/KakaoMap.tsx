@@ -43,7 +43,7 @@ export const KakaoMap = (props: KakaoMapProps) => {
       if (props.address1) {
         try {
           var geocoder = new kakao.maps.services.Geocoder();
-          geocoder.addressSearch(props.address1, (result, status) => {
+          geocoder.addressSearch(props.address1, (result: any, status: any) => {
 
             if (status === 'OK' && result) {
               const latitude = parseFloat(result[0]!.y);

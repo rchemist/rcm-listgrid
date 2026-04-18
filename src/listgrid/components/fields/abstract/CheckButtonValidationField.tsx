@@ -63,7 +63,7 @@ export abstract class CheckButtonValidationField<T extends CheckButtonValidation
           required: params.required,
         }}
         defaultValue={this.value?.fetched ?? this.value?.default ?? ''}
-        onValid={(value) => {
+        onValid={(value: any) => {
           entityForm.setFieldValidationState(this.getName(), { validated: true, color: 'success' });
           params.onChange(value);
         }}
@@ -72,7 +72,7 @@ export abstract class CheckButtonValidationField<T extends CheckButtonValidation
           params.onChange('');
         }}
         onCheck={
-          async (value) => {
+          async (value: any) => {
 
             if (!isEmpty(this.validations)) {
               const currentValue = { ...this.value };

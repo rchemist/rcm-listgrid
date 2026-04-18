@@ -148,7 +148,7 @@ export const RuleBasedFieldsView = (props: RuleBasedFieldViewProps) => {
           {(props.entityForms.length > 1) && <div className={'min-w-[200px]'}>
               <SelectBox options={targetEntityOptions}
                          value={targetRuleFieldEntityForm?.prefix ?? ''}
-                         required={true} onChange={(prefix) => {
+                         required={true} onChange={(prefix: string) => {
                 for (const form of props.entityForms) {
                   if (form.prefix === prefix) {
                     setTargetRuleFieldEntityForm(form);
@@ -161,8 +161,8 @@ export const RuleBasedFieldsView = (props: RuleBasedFieldViewProps) => {
           <div className={'min-w-[200px]'}>
             <SelectBox options={[{label: 'AND', value: 'AND'}, {label: 'OR', value: 'OR'}]}
                        value={condition ?? 'AND'}
-                       required={true} onChange={(condition) => {
-              setCondition(condition);
+                       required={true} onChange={(condition: string) => {
+              setCondition(condition as 'AND' | 'OR');
             }} name={'chooseCondition'}></SelectBox>
           </div>
 

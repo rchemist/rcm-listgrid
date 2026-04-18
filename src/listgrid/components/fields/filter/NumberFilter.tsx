@@ -67,7 +67,7 @@ export const NumberFilter = (props: NumberFilterProps) => {
         value={type}
         required={true}
         name={'type'} options={[...NumberFilterTypes]}
-                 onChange={(value) => {
+                 onChange={(value: QueryConditionType) => {
                    changeType(value);
                  }}
       ></SelectBox>
@@ -76,7 +76,7 @@ export const NumberFilter = (props: NumberFilterProps) => {
       <TextInput name={'start'}
                  type={"number"}
                    value={start ?? ''}
-                   onChange={(value) => {
+                   onChange={(value: string) => {
                      if (!isBlank(value) && isNaN(Number(value))) {
                        return;
                      }
@@ -87,7 +87,7 @@ export const NumberFilter = (props: NumberFilterProps) => {
         <TextInput name={'end'}
                    type={"number"}
                      value={end ?? ''}
-                     onChange={(value) => {
+                     onChange={(value: string) => {
                        if (!isBlank(value) && isNaN(Number(value))) {
                          return;
                        }

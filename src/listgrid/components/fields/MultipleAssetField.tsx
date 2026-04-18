@@ -276,7 +276,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
             placeHolder={'이미지 유형'}
             value={currentIndex === undefined ? '' : defaultString(value?.assets?.[currentIndex].name)}
             readonly={currentIndex !== undefined && tags.includes(defaultString(value?.assets?.[currentIndex ?? 0].name))}
-            onChange={(value) => {
+            onChange={(value: string) => {
               setError('');
               if (isBlank(value)) {
                 setError('이미지의 이름을 영문/숫자로 입력하세요.');
@@ -307,7 +307,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
             placeHolder={'Alt tag'}
             tooltip={{label: '이미지가 표시될 때 &lt;img> 태그에 alt 속성값을 정의할 수 있습니다.'}}
             value={defaultString(value?.assets?.[currentIndex ?? 0].description)}
-            onChange={(value) => {
+            onChange={(value: string) => {
               const currentItem: AssetItem = {...currentEdit};
               currentItem.description = value;
               setCurrentEdit(currentItem);

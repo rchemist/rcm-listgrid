@@ -66,7 +66,7 @@ const PaginationContainer: React.FC<PaginationContainerProps> = ({
       <Pagination
         total={totalPage}
         value={page + 1}
-        onChange={(p) => changePage(p - 1)}
+        onChange={(p: number) => changePage(p - 1)}
         responsiveSiblings
         withControls={false}
         withQuickJump={!isPopup}

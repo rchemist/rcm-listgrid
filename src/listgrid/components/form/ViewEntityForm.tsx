@@ -197,11 +197,11 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
               */}
               <ViewEntityFormAlerts
                 alertMessages={entityForm.getAlertMessages()}
-                onRemove={(key) => {
+                onRemove={(key: string) => {
                   const updatedForm = entityForm.clone().removeAlertMessage(key);
                   setEntityForm(updatedForm);
                 }}
-                onTabChange={(tabId) => {
+                onTabChange={(tabId: string) => {
                   // tab id로 tab index 찾기
                   const index = tabs.findIndex(tab => tab.id === tabId);
                   if (index !== -1) {
@@ -209,7 +209,7 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                     setTabIndex(tabId);
                   }
                 }}
-                onFieldFocus={(fieldName) => {
+                onFieldFocus={(fieldName: string) => {
                   // 필드가 있는 탭 찾기
                   const field = entityForm.getField(fieldName);
                   if (field) {
@@ -247,7 +247,7 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                 errors={errors}
                 entityErrorMap={entityForm.getErrorMap()}
                 notifications={notifications}
-                onTabChange={(tabIndex) => {
+                onTabChange={(tabIndex: number) => {
                   clearAllToasts();
                   setSelectedTabIndex(tabIndex);
                   if (tabs[tabIndex]) {

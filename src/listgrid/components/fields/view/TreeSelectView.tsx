@@ -67,7 +67,7 @@ export const TreeSelectView = ({readonly = false, ...props}: TreeSelectViewProps
         levelStyles={{
           fontWeight: true // Apply font weight differentiation by level
         }}
-        renderNode={selectable ? ({level, node, tree, expanded, hasChildren, elementProps}) => {
+        renderNode={selectable ? ({level, node, tree, expanded, hasChildren, elementProps}: {level: any; node: any; tree: any; expanded: any; hasChildren: any; elementProps: any}) => {
           // Only customize rendering when selection is needed
           // 선택이 필요한 경우에만 렌더링 커스터마이징
           return (

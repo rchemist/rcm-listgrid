@@ -76,7 +76,7 @@ export class DateField extends AbstractDateField<DateField> {
         return <TextInput
           name={`${this.name}_${params.entityForm.id}`}
           readonly={true}
-          onChange={(value) => {
+          onChange={(value: any) => {
             // do nothing
           }}
           value={value}></TextInput>
@@ -93,7 +93,7 @@ export class DateField extends AbstractDateField<DateField> {
     return (async () => {
       return <FlatPickrDateField type={'date'}
                                  name={this.getName()}
-                                 onChange={(value) => {
+                                 onChange={(value: any) => {
                                    if (Array.isArray(value) && value.length === 2) {
                                      if (value[0] === value[1]) {
                                        const until: Date = new Date(value[1]);

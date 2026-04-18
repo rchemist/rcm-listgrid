@@ -85,7 +85,7 @@ export class EmailField extends CheckButtonValidationField<EmailField> {
         readonly={params.readonly}
         required={params.required}
         commonDomains={this.commonDomains}
-        onChange={(newValue) => params.onChange(newValue)}
+        onChange={(newValue: any) => params.onChange(newValue)}
       />;
     })();
   }
@@ -108,7 +108,7 @@ export class EmailField extends CheckButtonValidationField<EmailField> {
         buttonLabel={this.checkButtonLabel}
         value={value}
         defaultValue={this.value?.fetched ?? this.value?.default ?? ''}
-        onValid={(newValue) => {
+        onValid={(newValue: any) => {
           entityForm.setFieldValidationState(this.getName(), { validated: true, color: 'success' });
           params.onChange(newValue);
         }}
@@ -116,7 +116,7 @@ export class EmailField extends CheckButtonValidationField<EmailField> {
           entityForm.clearFieldValidationState(this.getName());
           params.onChange('');
         }}
-        onCheck={async (checkValue) => {
+        onCheck={async (checkValue: any) => {
           if (!isEmpty(this.validations)) {
             const currentValue = { ...this.value };
             this.value = { ...this.value, current: checkValue };

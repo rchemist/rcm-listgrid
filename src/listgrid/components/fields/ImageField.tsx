@@ -120,7 +120,7 @@ export class ImageField extends ListableFormField<ImageField> {
     return (async () => {
       return <TextInput
         name={`${this.name}_${params.entityForm.id}`}
-        onChange={(value) => params.onChange(value, 'LIKE')}
+        onChange={(value: string) => params.onChange(value, 'LIKE')}
         value={params.value}
       />;
     })();

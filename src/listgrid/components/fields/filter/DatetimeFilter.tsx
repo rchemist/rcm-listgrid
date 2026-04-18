@@ -39,7 +39,7 @@ export const DatetimeFilter = (props: DatetimeFilterProps) => {
 
     <FlatPickrDateField type={'date'}
                         name={props.name}
-                        onChange={(val => {
+                        onChange={((val: any) => {
                           if (Array.isArray(val) && val.length === 2) {
                             if (val[0] === val[1]) {
                               const until: Date = new Date(val[1]);

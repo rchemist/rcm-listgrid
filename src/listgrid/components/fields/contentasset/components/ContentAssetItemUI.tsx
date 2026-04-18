@@ -123,7 +123,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
                   <TextInput
                     name={`title_${index}`}
                     value={item.title}
-                    onChange={(val) => onTitleChange(index, val)}
+                    onChange={(val: string) => onTitleChange(index, val)}
                     placeHolder="제목을 입력하세요"
                     readonly={readonly}
                     className={titleErrors[index] ? "rcm-ca-input-error" : ""}
@@ -158,7 +158,7 @@ export const ContentAssetItemUI: React.FC<ContentAssetItemUIProps> = ({
               <Textarea
                 name={`content_${index}`}
                 value={item.content || ''}
-                onChange={(val) => onContentChange(index, val)}
+                onChange={(val: string) => onContentChange(index, val)}
                 placeHolder="부가 설명을 입력하세요"
                 readonly={readonly}
                 rows={3}
