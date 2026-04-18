@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-17 (alpha.18 revert)
+마지막 업데이트: 2026-04-18 (alpha.27 — 라이브러리 JSX Tailwind 하드코딩 0 달성 / CSS 아키텍처 리팩터 설계 완료)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,14 +8,16 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.18` (gjcu-experiment에 설치 + dev 서버 9261 구동 중)
+**배포된 현재 버전**: `v0.1.0-alpha.27` (gjcu-experiment에 설치 + dev 서버 9261 구동 중)
 
-**alpha.18 = alpha.15 + revert**:
-- alpha.16/17의 Tailwind CLI 빌드 파이프라인은 **잘못된 방향으로 판명 → 전면 revert**
-- 두 Tailwind-compiled CSS가 같은 namespace(`flex`, `hidden`, `lg:flex`)를 공유하면 cascade 충돌이 원천적으로 불가피
-- 원래 합의된 방향(라이브러리 JSX를 `rcm-*` scoped 클래스로 전수 교체)이 유일 정답으로 확정
+**다음 작업**: **CSS 아키텍처 전면 리팩터**. 현재 627개 `.rcm-*` 클래스 + base.css 4,960줄이 `gjcu UI 하드코딩 수준`으로 진단됨. primitive + `data-*` variant 기반 구조로 전환.
 
-**바로 이어서 할 일**: rcm-* 전수 마이그레이션 (63 파일 590줄 남음)
+**설계 문서 3종 (다음 세션 시작 시 이것부터 읽기)**:
+- `docs/REFACTOR_CURRENT_STATE.md` — 현재 CSS 인벤토리 + 문제 진단
+- `docs/REFACTOR_DESIGN.md` — primitive 22종 + variant 규약 + 호스트 override 계약
+- `docs/REFACTOR_PLAN.md` — Phase 0~9 단계별 계획 + **§ 다음 세션 시작 프롬프트** (맨 아래)
+
+**alpha.20~27 세션 요약**: 라이브러리 JSX 내 Tailwind 하드코딩 413줄 → 0줄. `defaultTheme.ts` 전면 비움 (중복 클래스 적용 제거). 필드그룹 라벨/required 아이콘/탭 글자 색상/패널 좌우 패딩 등 시각 회귀 다수 수정. 하지만 그 과정에서 만들어진 627개 클래스가 다음 리팩터 대상.
 
 ---
 
@@ -55,7 +57,8 @@
 | 0.1.0-alpha.15 | rcm-* 작업 진행 중, 필드그룹 타이틀/라벨/helpText 등 교체 완료 | 직전 안정 |
 | 0.1.0-alpha.16 | ❌ Tailwind CLI 시도 — 호스트 CSS 전부 깨먹음 | revert됨 |
 | 0.1.0-alpha.17 | ❌ Tailwind utilities-only — cascade 충돌 여전, login 페이지 레이아웃 깨짐 | revert됨 |
-| **0.1.0-alpha.18** | revert: Tailwind CLI 제거, alpha.15 상태로 복귀 | ✅ **현재 설치** |
+| 0.1.0-alpha.18 | revert: Tailwind CLI 제거, alpha.15 상태로 복귀 | 안정 |
+| **0.1.0-alpha.19** | Top offender rank 1,2: TableSubCollectionView + CardSubCollectionView rcm-subcollection-* 전환 | ✅ **현재 설치** |
 
 ---
 
@@ -97,15 +100,15 @@
 ## 5. 남은 작업 — rcm-* 전수 마이그레이션
 
 ### 통계
-- 비-rcm className 현재 **~590줄 / 63 파일** (실측 명령어는 섹션 9 참조)
+- 비-rcm className 현재 **~409줄 / 61 파일** (실측 명령어는 섹션 9 참조)
 - 이 중 상당수는 `className={cn('하드코딩-tailwind', classNames.X)}` 패턴 — 하드코딩 Tailwind 부분 제거해야 함
 
 ### 전체 대상 파일 (Top offenders, 수작업 순서)
 
 | Rank | 파일 | 스타일 줄 수 |
 |---|---|---|
-| 1 | `components/list/ui/TableSubCollectionView.tsx` | 59 |
-| 2 | `components/list/ui/CardSubCollectionView.tsx` | 47 |
+| ~~1~~ | ~~`components/list/ui/TableSubCollectionView.tsx`~~ | ✅ alpha.19 |
+| ~~2~~ | ~~`components/list/ui/CardSubCollectionView.tsx`~~ | ✅ alpha.19 |
 | 3 | `components/fields/view/CardManyToOneView.tsx` | 38 |
 | 4 | `components/list/AdvancedSearchFormV2.tsx` | 29 |
 | 5 | `components/list/ui/CardItem.tsx` | 28 |
