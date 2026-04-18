@@ -158,14 +158,15 @@ export const FilterDropdown = ({
         <div className="rcm-filter-dropdown-inner">
           {/* 헤더: 닫기 버튼 */}
           <div className="rcm-filter-dropdown-header">
-            <span className="rcm-filter-dropdown-title">필터</span>
+            <span className="rcm-text" data-size="sm" data-weight="semibold">필터</span>
             <button
               type="button"
               onClick={onClose}
-              className="rcm-filter-dropdown-close"
+              className="rcm-icon-btn"
+              data-size="sm"
               aria-label="닫기"
             >
-              <IconX className="rcm-m2o-action-icon" />
+              <IconX className="rcm-icon" data-size="sm" />
             </button>
           </div>
 

@@ -619,23 +619,7 @@
         border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
     }
 
-    .rcm-filter-dropdown-title {
-        font-size: var(--rcm-font-size-sm);
-        font-weight: var(--rcm-font-weight-semibold);
-    }
-
-    .rcm-filter-dropdown-close {
-        padding: 0;
-        background: transparent;
-        border: 0;
-        color: var(--rcm-color-text-muted);
-        cursor: pointer;
-        transition: color var(--rcm-transition-fast);
-    }
-
-    .rcm-filter-dropdown-close:hover {
-        color: var(--rcm-color-text);
-    }
+    /* .rcm-filter-dropdown-title / -close removed — JSX uses rcm-text / rcm-icon-btn. */
 
     .rcm-filter-dropdown-body {
         max-height: 400px;
