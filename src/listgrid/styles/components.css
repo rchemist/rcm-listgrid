@@ -87,11 +87,12 @@
         height: 100%;
         min-width: 80px;
         padding: 0 var(--rcm-space-md);
+        font-size: var(--rcm-font-size-sm);
         font-weight: var(--rcm-font-weight-semibold);
         white-space: nowrap;
         color: var(--rcm-color-primary-text);
-        background: var(--rcm-color-text-muted);
-        border: var(--rcm-border-width) solid var(--rcm-color-text-muted);
+        background: var(--rcm-color-primary);
+        border: var(--rcm-border-width) solid var(--rcm-color-primary);
         border-left: 0;
         border-top-right-radius: var(--rcm-radius-md);
         border-bottom-right-radius: var(--rcm-radius-md);
@@ -100,7 +101,8 @@
     }
 
     .rcm-m2o-action-btn:hover {
-        background: color-mix(in srgb, var(--rcm-color-text-muted) 85%, black);
+        background: var(--rcm-color-primary-hover);
+        border-color: var(--rcm-color-primary-hover);
     }
 
     .rcm-m2o-action-btn:disabled {

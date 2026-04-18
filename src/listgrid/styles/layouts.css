@@ -1439,7 +1439,7 @@
      * ------------------------------------------------------------------ */
     .rcm-quick-search-wrap {
         display: flex;
-        width: 100%;
+        flex: 0 1 auto;
         max-width: 100%;
     }
 
@@ -1627,6 +1627,8 @@
         gap: var(--rcm-space-sm);
         margin-top: var(--rcm-space-lg);
         margin-bottom: var(--rcm-space-sm);
+        margin-left: auto;
+        flex-shrink: 0;
     }
 
     @media (min-width: 768px) {
