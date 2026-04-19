@@ -49,7 +49,11 @@ export class StringValidation extends ValidationItem {
     message?: string,
   ) {
     super(args.id ?? `StringValidation`, message);
-    this.length = args.length;
-    this.regex = args.regex;
+    if (args.length !== undefined) {
+      this.length = args.length;
+    }
+    if (args.regex !== undefined) {
+      this.regex = args.regex;
+    }
   }
 }

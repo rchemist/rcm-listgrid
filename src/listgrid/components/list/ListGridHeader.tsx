@@ -39,7 +39,7 @@ export const ListGridHeader = (props: ListGridHeaderProps) => {
   return (
     <React.Fragment>
       <div className={themeClasses.header?.container ?? 'rcm-listgrid-header'}>
-        <HeaderTitle title={title} hideTitle={hideTitle} />
+        <HeaderTitle title={title} {...(hideTitle !== undefined ? { hideTitle } : {})} />
         <div className={themeClasses.header?.buttonGroup ?? 'rcm-listgrid-button-group'}>
           <HeaderActionButtons
             {...props}
@@ -57,7 +57,7 @@ export const ListGridHeader = (props: ListGridHeaderProps) => {
           setOpenDownload={setOpenDownload}
           openUpload={openUpload}
           setOpenUpload={setOpenUpload}
-          dataTransferConfig={dataTransferConfig}
+          {...(dataTransferConfig !== undefined ? { dataTransferConfig } : {})}
           searchForm={searchForm}
           title={title}
           refresh={refresh}

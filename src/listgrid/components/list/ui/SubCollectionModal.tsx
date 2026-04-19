@@ -43,7 +43,7 @@ export const SubCollectionModal: React.FC<SubCollectionModalProps> = ({
       <ViewEntityForm
         entityForm={entityForm}
         subCollection={true}
-        hideMappedByFields={mappedBy}
+        {...(mappedBy !== undefined ? { hideMappedByFields: mappedBy } : {})}
         postSave={async (savedEntityForm: EntityForm) => {
           if (createOrUpdate?.onSave) {
             await createOrUpdate.onSave(savedEntityForm);

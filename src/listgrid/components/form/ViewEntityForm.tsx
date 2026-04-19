@@ -123,7 +123,7 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
   if (loading) {
     return (
       <ViewEntityFormSkeleton
-        entityForm={entityForm}
+        {...(entityForm !== undefined ? { entityForm } : {})}
         inlineMode={isInlineMode}
         subCollectionEntity={isSubCollectionEntity}
       />
@@ -148,7 +148,10 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
         <div className={cn('rcm-form-header', classNames.header?.container)}>
           {/* 제목 영역 */}
           <div className={cn('rcm-form-header-title', classNames.header?.titleWrapper)}>
-            <ViewEntityFormTitle title={title} hideTitle={props.hideTitle} />
+            <ViewEntityFormTitle
+              title={title}
+              {...(props.hideTitle !== undefined ? { hideTitle: props.hideTitle } : {})}
+            />
           </div>
           {/* 버튼 영역 (header 위치일 때만) */}
           {showButtonsInHeader && (

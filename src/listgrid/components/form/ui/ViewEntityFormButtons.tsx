@@ -237,11 +237,11 @@ export async function getEntityFormButtons(
               createStepFields: props.createStepFields ?? [],
             },
           }),
-          showModal,
-          closeModal,
-          closeTopModal,
-          getModalData,
-          updateModalData,
+          ...(showModal !== undefined ? { showModal } : {}),
+          ...(closeModal !== undefined ? { closeModal } : {}),
+          ...(closeTopModal !== undefined ? { closeTopModal } : {}),
+          ...(getModalData !== undefined ? { getModalData } : {}),
+          ...(updateModalData !== undefined ? { updateModalData } : {}),
         };
 
         const hidden = button.hidden ? await button.hidden(buttonProps) : false;

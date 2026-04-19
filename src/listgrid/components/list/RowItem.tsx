@@ -90,8 +90,12 @@ export const RowItem = (props: ViewRowItemProps) => {
                 index={index}
                 onDrag={onDrag}
                 checkItem={checkItem}
-                selectionOptions={props.selectionOptions}
-                showCheckboxInput={props.showCheckboxInput}
+                {...(props.selectionOptions !== undefined
+                  ? { selectionOptions: props.selectionOptions }
+                  : {})}
+                {...(props.showCheckboxInput !== undefined
+                  ? { showCheckboxInput: props.showCheckboxInput }
+                  : {})}
               ></ViewRows>
             );
           })}
@@ -112,8 +116,12 @@ export const RowItem = (props: ViewRowItemProps) => {
                 index={index}
                 onDrag={onDrag}
                 checkItem={checkItem}
-                selectionOptions={props.selectionOptions}
-                showCheckboxInput={props.showCheckboxInput}
+                {...(props.selectionOptions !== undefined
+                  ? { selectionOptions: props.selectionOptions }
+                  : {})}
+                {...(props.showCheckboxInput !== undefined
+                  ? { showCheckboxInput: props.showCheckboxInput }
+                  : {})}
               ></ViewRows>
             );
           })}

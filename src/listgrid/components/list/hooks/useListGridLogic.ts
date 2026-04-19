@@ -88,10 +88,14 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
 
   // URL state synchronization hook
   const urlStateHook = useListGridUrlState({
-    urlSync: props.options?.urlSync,
+    ...(props.options?.urlSync !== undefined ? { urlSync: props.options.urlSync } : {}),
     isMainEntity,
-    quickSearchPropertyName: quickSearchProperty?.name,
-    orFields: quickSearchProperty?.orFields,
+    ...(quickSearchProperty?.name !== undefined
+      ? { quickSearchPropertyName: quickSearchProperty.name }
+      : {}),
+    ...(quickSearchProperty?.orFields !== undefined
+      ? { orFields: quickSearchProperty.orFields }
+      : {}),
   });
 
   // Track if URL was used for initial load (for proper sync behavior)
@@ -216,9 +220,9 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
         // Client Pre Extension 실행
         if (hasClientExtensions) {
           const context: ClientExtensionContext = {
-            session,
-            user: session?.getUser(),
             entityForm,
+            ...(session ? { session } : {}),
+            ...(session?.getUser() != null ? { user: session.getUser() } : {}),
           };
 
           finalSearchForm = await entityForm.executeClientExtensions(
@@ -257,9 +261,9 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
               // Client Post Extension 실행
               if (hasClientExtensions) {
                 const context: ClientExtensionContext = {
-                  session,
-                  user: session?.getUser(),
                   entityForm,
+                  ...(session ? { session } : {}),
+                  ...(session?.getUser() != null ? { user: session.getUser() } : {}),
                 };
 
                 processedResult = await entityForm.executeClientExtensions(
@@ -525,7 +529,7 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
       entityForm.setRevisionEntityNameIfBlank(path);
     }
 
-    await entityForm.initialize({ session: session }).then((result) => {
+    await entityForm.initialize(session !== undefined ? { session } : {}).then((result) => {
       setEntityForm(result.entityForm);
     });
 

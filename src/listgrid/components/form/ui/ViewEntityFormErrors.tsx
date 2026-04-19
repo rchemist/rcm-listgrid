@@ -44,9 +44,9 @@ export const ViewEntityFormErrors = React.memo(function ViewEntityFormErrors({
       {entityErrorMap.size === 0 && <ShowNotifications messages={errors} error={true} />}
       <ViewEntityError
         errors={entityErrorMap}
-        onTabChange={onTabChange}
-        tabs={tabInfo}
-        entityForm={entityForm}
+        {...(onTabChange !== undefined ? { onTabChange } : {})}
+        {...(tabInfo !== undefined ? { tabs: tabInfo } : {})}
+        {...(entityForm !== undefined ? { entityForm } : {})}
       />
       <ShowNotifications messages={notifications} timeout={10000} showClose={true} />
     </>

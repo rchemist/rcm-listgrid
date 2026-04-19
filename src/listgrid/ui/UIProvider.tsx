@@ -342,10 +342,14 @@ export class FileFieldValue implements IFileField {
     for (let i = 0; i < this.deleteFiles.length; i++) {
       if (this.deleteFiles[i]!.url === file.url) {
         this.deleteFiles.splice(i, 1);
-        if (file.deleteType === 'new') {
-          this.newFiles.push({ ...file, deleteType: undefined });
-        } else if (file.deleteType === 'exist') {
-          this.existFiles.push({ ...file, deleteType: undefined });
+        {
+          const { deleteType: _dt, ...rest } = file;
+          void _dt;
+          if (file.deleteType === 'new') {
+            this.newFiles.push(rest);
+          } else if (file.deleteType === 'exist') {
+            this.existFiles.push(rest);
+          }
         }
         break;
       }

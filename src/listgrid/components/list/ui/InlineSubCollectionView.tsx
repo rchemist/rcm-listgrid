@@ -260,17 +260,20 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
             // Apply global config
             if (globalListConfig) {
               const currentConfig = field.getListConfig() ?? {};
+              const mergedFilterable = globalListConfig.filterable ?? currentConfig.filterable;
+              const mergedSortable = globalListConfig.sortable ?? currentConfig.sortable;
+              const mergedQuickSearch = globalListConfig.quickSearch ?? currentConfig.quickSearch;
               field.withListConfig({
                 ...currentConfig,
-                filterable: globalListConfig.filterable ?? currentConfig.filterable,
-                sortable: globalListConfig.sortable ?? currentConfig.sortable,
-                quickSearch: globalListConfig.quickSearch ?? currentConfig.quickSearch,
+                ...(mergedFilterable !== undefined ? { filterable: mergedFilterable } : {}),
+                ...(mergedSortable !== undefined ? { sortable: mergedSortable } : {}),
+                ...(mergedQuickSearch !== undefined ? { quickSearch: mergedQuickSearch } : {}),
                 support: true,
               });
             }
           } else {
             // Disable this field for list display
-            field.listConfig = undefined;
+            delete (field as { listConfig?: unknown }).listConfig;
           }
         }
       });
@@ -279,11 +282,14 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
       cloned.fields.forEach((field) => {
         if (field instanceof ListableFormField && field.isSupportList()) {
           const currentConfig = field.getListConfig() ?? {};
+          const mergedFilterable = globalListConfig.filterable ?? currentConfig.filterable;
+          const mergedSortable = globalListConfig.sortable ?? currentConfig.sortable;
+          const mergedQuickSearch = globalListConfig.quickSearch ?? currentConfig.quickSearch;
           field.withListConfig({
             ...currentConfig,
-            filterable: globalListConfig.filterable ?? currentConfig.filterable,
-            sortable: globalListConfig.sortable ?? currentConfig.sortable,
-            quickSearch: globalListConfig.quickSearch ?? currentConfig.quickSearch,
+            ...(mergedFilterable !== undefined ? { filterable: mergedFilterable } : {}),
+            ...(mergedSortable !== undefined ? { sortable: mergedSortable } : {}),
+            ...(mergedQuickSearch !== undefined ? { quickSearch: mergedQuickSearch } : {}),
             support: true,
           });
         }
@@ -358,7 +364,7 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
 
       const mappedByFilter: FilterItem = {
         name: filterBy,
-        value: mappedByValue !== undefined ? String(mappedByValue) : undefined,
+        ...(mappedByValue !== undefined ? { value: String(mappedByValue) } : {}),
       };
 
       // Apply user-defined filters if any
@@ -406,7 +412,7 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
         modal: false,
       },
       // Hide pagination controls if client-side pagination with all data
-      hidePagination: pagination?.clientSide,
+      ...(pagination?.clientSide !== undefined ? { hidePagination: pagination.clientSide } : {}),
     };
 
     return baseOptions;
@@ -420,7 +426,7 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
         parentId={parentId}
         options={options}
         viewMode="popup"
-        session={session}
+        {...(session !== undefined ? { session } : {})}
       />
     </div>
   );

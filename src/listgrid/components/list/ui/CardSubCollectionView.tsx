@@ -152,9 +152,11 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
   // Fetch data using the hook
   const { data, loading, error, refresh } = useCardSubCollectionData(fetchUrl, {
     mappedBy: relation.mappedBy,
-    filterBy: relation.filterBy,
-    useSearchForm: fetchOptions?.useSearchForm,
-    searchForm: initialSearchForm,
+    ...(relation.filterBy !== undefined ? { filterBy: relation.filterBy } : {}),
+    ...(fetchOptions?.useSearchForm !== undefined
+      ? { useSearchForm: fetchOptions.useSearchForm }
+      : {}),
+    ...(initialSearchForm !== undefined ? { searchForm: initialSearchForm } : {}),
   });
 
   const getFieldValue = useCallback((item: any, fieldName: string): any => {
@@ -519,13 +521,13 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
                 entityForm={entityForm}
                 parentEntityForm={parentEntityForm}
                 parentId={parentId}
-                cardConfig={cardConfig}
+                {...(cardConfig !== undefined ? { cardConfig } : {})}
                 relation={relation}
                 readonly={readonly}
-                session={session}
-                onClick={viewDetail ? () => handleCardClick(item) : undefined}
-                onEdit={!readonly ? () => handleEdit(item) : undefined}
-                onDelete={!readonly ? () => handleDelete(item) : undefined}
+                {...(session !== undefined ? { session } : {})}
+                {...(viewDetail ? { onClick: () => handleCardClick(item) } : {})}
+                {...(!readonly ? { onEdit: () => handleEdit(item) } : {})}
+                {...(!readonly ? { onDelete: () => handleDelete(item) } : {})}
               />
             ))}
           </div>

@@ -64,7 +64,9 @@ export const useEntityFormInitializer = ({
   const initializeEntityForm = useCallback(
     async (options?: { preserveTabIndex?: boolean }) => {
       try {
-        const actionResult = await initialEntityForm.initialize({ session });
+        const actionResult = await initialEntityForm.initialize(
+          session !== undefined ? { session } : {},
+        );
         let entityForm = actionResult.entityForm;
         if (actionResult.errors && !isEmpty(actionResult.errors)) {
           const listUrl = removeTrailingSeparator(pathname ?? '', '/') || '/';

@@ -396,7 +396,10 @@ export const CardItem: React.FC<CardItemProps> = ({
           const views = new Map<string, ReactNode>();
           for (const collection of allSubCollections) {
             try {
-              const view = await collection.render({ entityForm: itemEntityForm, session });
+              const view = await collection.render({
+                entityForm: itemEntityForm,
+                ...(session !== undefined ? { session } : {}),
+              });
               views.set(collection.getName(), view);
             } catch (error) {
               console.error(`Error rendering subcollection ${collection.getName()}:`, error);
@@ -587,7 +590,7 @@ export const CardItem: React.FC<CardItemProps> = ({
                 fields={group.fields}
                 item={item}
                 entityForm={itemEntityForm}
-                session={session}
+                {...(session !== undefined ? { session } : {})}
               />
             ))}
 

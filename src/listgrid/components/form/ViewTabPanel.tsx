@@ -78,13 +78,13 @@ export const ViewTabPanel = ({
                   groupId={group}
                   key={index}
                   readonly={readonly}
-                  subCollectionEntity={subCollectionEntity}
+                  {...(subCollectionEntity !== undefined ? { subCollectionEntity } : {})}
                   entityForm={entityForm}
-                  setEntityForm={setEntityForm}
-                  session={session}
-                  createStepFields={createStepFields}
-                  resetEntityForm={resetEntityForm}
-                  hideMappedByFields={hideMappedByFields}
+                  {...(setEntityForm !== undefined ? { setEntityForm } : {})}
+                  {...(session !== undefined ? { session } : {})}
+                  {...(createStepFields !== undefined ? { createStepFields } : {})}
+                  {...(resetEntityForm !== undefined ? { resetEntityForm } : {})}
+                  {...(hideMappedByFields !== undefined ? { hideMappedByFields } : {})}
                 />
               </div>,
             );

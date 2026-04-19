@@ -127,7 +127,7 @@ export const CardSubCollectionModal: React.FC<CardSubCollectionModalProps> = ({
         subCollection={true}
         readonly={readonly || mode === 'view'}
         excludeButtons={excludeButtons}
-        hideMappedByFields={mappedByFieldName}
+        {...(mappedByFieldName !== undefined ? { hideMappedByFields: mappedByFieldName } : {})}
         buttonLinks={{
           onClickList: async () => {
             onClose();

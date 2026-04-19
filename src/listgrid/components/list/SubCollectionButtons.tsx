@@ -67,7 +67,7 @@ export const SubCollectionButtons = (props: SubCollectionButtonsProps) => {
           managePriority={managePriority}
           setManagePriority={setManagePriority}
           setParentManagePriority={props.setManagePriority}
-          rows={props.rows}
+          {...(props.rows !== undefined ? { rows: props.rows } : {})}
           entityForm={props.entityForm}
           setNotifications={setNotifications}
           setErrors={setErrors}
@@ -85,7 +85,7 @@ export const SubCollectionButtons = (props: SubCollectionButtonsProps) => {
         ableDelete={ableDelete}
         activeTrashIcon={activeTrashIcon}
         deleteItems={deleteItems}
-        buttons={props.buttons}
+        {...(props.buttons !== undefined ? { buttons: props.buttons } : {})}
         buttonProps={props}
         ableAdd={ableAdd}
         setOpen={setOpen}
@@ -96,11 +96,11 @@ export const SubCollectionButtons = (props: SubCollectionButtonsProps) => {
         setOpen={setOpen}
         renderKey={renderKey}
         entityForm={entityForm}
-        createOrUpdate={createOrUpdate}
+        {...(createOrUpdate !== undefined ? { createOrUpdate } : {})}
         onNotifications={setNotifications}
         onErrors={setErrors}
         onRefresh={onRefresh}
-        mappedBy={mappedBy}
+        {...(mappedBy !== undefined ? { mappedBy } : {})}
       />
     </div>
   );

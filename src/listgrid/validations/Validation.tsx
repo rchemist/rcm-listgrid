@@ -66,7 +66,9 @@ export class ValidateResult {
 export abstract class ValidationItem implements Validation {
   protected constructor(id: string, message?: string) {
     this.id = `${id}`;
-    this.message = message;
+    if (message !== undefined) {
+      this.message = message;
+    }
   }
 
   id: string;

@@ -237,7 +237,7 @@ export const CardFieldSection: React.FC<CardFieldSectionProps> = ({
               field={field}
               item={item}
               entityForm={entityForm}
-              session={session}
+              {...(session !== undefined ? { session } : {})}
             />
           ))}
         </dl>

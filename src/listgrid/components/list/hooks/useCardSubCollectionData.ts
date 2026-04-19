@@ -121,7 +121,7 @@ export function useCardSubCollectionData(
       try {
         const url = getUrl(fetchUrl);
 
-        const response = await fetch(url, { signal });
+        const response = await fetch(url, signal !== undefined ? { signal } : {});
 
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);

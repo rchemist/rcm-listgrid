@@ -10,6 +10,7 @@
 import React, { memo } from 'react';
 import { EntityForm } from '../../../config/EntityForm';
 import { ViewEntityForm } from '../../form/ViewEntityForm';
+import { EntityButtonLinkProps } from '../../../config/Config';
 
 // Icons removed - collapse button moved to row
 
@@ -46,25 +47,29 @@ export const SubCollectionInlineView = memo(
     mappedBy,
   }: SubCollectionInlineViewProps) => {
     // buttonLinks에서 onClickList를 onCollapse로 대체
-    const buttonLinks = {
+    const buttonLinks: EntityButtonLinkProps = {
       onClickList: async () => {
         onCollapse();
       },
-      onSave: onSave
+      ...(onSave
         ? {
-            success: () => {
-              onSave();
+            onSave: {
+              success: () => {
+                onSave();
+              },
             },
           }
-        : undefined,
-      onDelete: onDelete
+        : {}),
+      ...(onDelete
         ? {
-            success: () => {
-              onDelete();
-              onCollapse();
+            onDelete: {
+              success: () => {
+                onDelete();
+                onCollapse();
+              },
             },
           }
-        : undefined,
+        : {}),
     };
 
     return (
@@ -109,7 +114,7 @@ export const SubCollectionInlineView = memo(
               buttonPosition="header"
               subCollection={true}
               inlineMode={true}
-              hideMappedByFields={mappedBy}
+              {...(mappedBy !== undefined ? { hideMappedByFields: mappedBy } : {})}
             />
           </div>
         </div>

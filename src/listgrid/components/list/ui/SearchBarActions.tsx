@@ -105,11 +105,11 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
         <div className={subCollection ? '' : 'rcm-hide-below-sm'}>
           <ViewFieldSelector
             viewFields={viewFields}
-            setViewFields={setViewFields}
+            {...(setViewFields !== undefined ? { setViewFields } : {})}
             fields={listFields}
             disabled={loading}
             entityUrl={entityUrl}
-            subCollectionName={subCollectionName}
+            {...(subCollectionName !== undefined ? { subCollectionName } : {})}
           />
         </div>
       )}

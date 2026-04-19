@@ -147,9 +147,11 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
 
   const { data, loading, error, refresh } = useCardSubCollectionData(fetchUrl, {
     mappedBy: relation.mappedBy,
-    filterBy: relation.filterBy,
-    useSearchForm: fetchOptions?.useSearchForm,
-    searchForm: initialSearchForm,
+    ...(relation.filterBy !== undefined ? { filterBy: relation.filterBy } : {}),
+    ...(fetchOptions?.useSearchForm !== undefined
+      ? { useSearchForm: fetchOptions.useSearchForm }
+      : {}),
+    ...(initialSearchForm !== undefined ? { searchForm: initialSearchForm } : {}),
   });
 
   // Get nested field value from item

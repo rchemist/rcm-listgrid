@@ -15,8 +15,9 @@ export const useListGridHeader = (props: ListGridHeaderProps) => {
       if (buttons) {
         const newButtons: ReactNode[] = [];
         for (const [index, buttonFunc] of buttons.entries()) {
+          const buttonProps = { ...props, ...(session !== undefined ? { session } : {}) };
           newButtons.push(
-            <React.Fragment key={index}>{await buttonFunc({ ...props, session })}</React.Fragment>,
+            <React.Fragment key={index}>{await buttonFunc(buttonProps)}</React.Fragment>,
           );
         }
         setHeaderButtons(newButtons);

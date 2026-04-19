@@ -116,7 +116,7 @@ export const getAlertStyles = (color: AlertMessage['color']): AlertStyles => {
     case 'secondary':
     case 'primary':
     case 'dark':
-      return { ...base, dataTone: undefined, icon: IconInfoCircle };
+      return { ...base, icon: IconInfoCircle };
     default:
       return { ...base, dataTone: 'info', icon: IconInfoCircle };
   }

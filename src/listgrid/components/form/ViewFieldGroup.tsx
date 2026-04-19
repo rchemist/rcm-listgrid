@@ -304,10 +304,12 @@ export const ViewFieldGroup = ({
                     <FieldRenderer
                       field={field}
                       entityForm={entityForm}
-                      setEntityForm={setEntityForm}
-                      subCollectionEntity={subCollectionEntity}
-                      session={session}
-                      resetEntityForm={props.resetEntityForm}
+                      {...(setEntityForm !== undefined ? { setEntityForm } : {})}
+                      {...(subCollectionEntity !== undefined ? { subCollectionEntity } : {})}
+                      {...(session !== undefined ? { session } : {})}
+                      {...(props.resetEntityForm !== undefined
+                        ? { resetEntityForm: props.resetEntityForm }
+                        : {})}
                     />
                   </div>
                 );
@@ -332,7 +334,7 @@ export const ViewFieldGroup = ({
                     <SubCollectionRenderer
                       entityForm={entityForm}
                       collection={collection}
-                      session={session}
+                      {...(session !== undefined ? { session } : {})}
                     />
                   </div>
                 );

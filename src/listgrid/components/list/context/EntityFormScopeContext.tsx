@@ -103,7 +103,7 @@ export function EntityFormScopeProvider({
       toggleExpansion,
       collapseItem,
       collapseAll,
-      parentEntityForm,
+      ...(parentEntityForm !== undefined ? { parentEntityForm } : {}),
     }),
     [
       effectiveDepth,

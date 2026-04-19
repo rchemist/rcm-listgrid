@@ -397,12 +397,16 @@ export const ViewListGrid = (props: ViewListGridProps) => {
           hideTitle={isSubCollection}
           cacheable={isTrue(props.options?.cacheable, true)}
           entityForm={entityForm}
-          dataTransferConfig={dataTransferConfig}
-          session={session}
-          checkedItems={checkedItems}
-          buttons={props.options?.headerButtons}
+          {...(dataTransferConfig !== undefined ? { dataTransferConfig } : {})}
+          {...(session !== undefined ? { session } : {})}
+          {...(checkedItems !== undefined ? { checkedItems } : {})}
+          {...(props.options?.headerButtons !== undefined
+            ? { buttons: props.options.headerButtons }
+            : {})}
           isSubCollection={isSubCollection}
-          addNew={props.options?.createOrUpdate?.addNew}
+          {...(props.options?.createOrUpdate?.addNew !== undefined
+            ? { addNew: props.options.createOrUpdate.addNew }
+            : {})}
           setErrors={handleErrors}
           supportPriority={supportPriority}
           setManagePriority={() => {
@@ -416,8 +420,8 @@ export const ViewListGrid = (props: ViewListGridProps) => {
           activeTrashIcon={activeTrashIcon}
           searchForm={searchForm!}
           deleteItems={deleteItems}
-          selectionOptions={selectionOptions}
-          rows={rows}
+          {...(selectionOptions !== undefined ? { selectionOptions } : {})}
+          {...(rows !== undefined ? { rows } : {})}
           refresh={fetchData}
           title={title}
         ></ListGridHeader>
@@ -436,8 +440,8 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                 // no-op: previously declared an async arrow without invoking it
               }}
               parentId={props.parentId!}
-              checkedItems={checkedItems}
-              rows={rows}
+              {...(checkedItems !== undefined ? { checkedItems } : {})}
+              {...(rows !== undefined ? { rows } : {})}
               supportPriority={supportPriority}
               setManagePriority={() => {
                 setManagePriority(!managePriority);
@@ -448,11 +452,21 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                   : enableHandleData
               }
               delete={isTrue(props.options?.subCollection?.delete, true)}
-              buttons={props.options?.subCollection?.buttons}
-              collectionName={props.options?.subCollection?.name}
-              mappedBy={props.options?.subCollection?.mappedBy}
-              mappedValue={props.options?.subCollection?.mappedValue}
-              createOrUpdate={props.options?.createOrUpdate}
+              {...(props.options?.subCollection?.buttons !== undefined
+                ? { buttons: props.options.subCollection.buttons }
+                : {})}
+              {...(props.options?.subCollection?.name !== undefined
+                ? { collectionName: props.options.subCollection.name }
+                : {})}
+              {...(props.options?.subCollection?.mappedBy !== undefined
+                ? { mappedBy: props.options.subCollection.mappedBy }
+                : {})}
+              {...(props.options?.subCollection?.mappedValue !== undefined
+                ? { mappedValue: props.options.subCollection.mappedValue }
+                : {})}
+              {...(props.options?.createOrUpdate !== undefined
+                ? { createOrUpdate: props.options.createOrUpdate }
+                : {})}
               setErrors={handleErrors}
               setNotifications={handleNotifications}
               onRefresh={() => {
@@ -505,17 +519,21 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                 subCollection={isSubCollection}
                 quickSearchValue={search}
                 listFields={listFields}
-                quickSearchProperty={quickSearchProperty}
+                {...(quickSearchProperty !== undefined ? { quickSearchProperty } : {})}
                 enableHandleData={enableHandleData}
                 showAdvancedSearch={showAdvancedSearch}
                 onOpenAdvancedSearch={() => {
                   setShowAdvancedSearch(true);
                 }}
                 viewFields={viewFields ?? []}
-                setViewFields={setViewFields}
+                {...(setViewFields !== undefined ? { setViewFields } : {})}
                 entityUrl={entityForm.getUrl()}
-                subCollectionName={props.options?.subCollection?.name}
-                hideAdvancedSearch={props.options?.hideAdvancedSearch}
+                {...(props.options?.subCollection?.name !== undefined
+                  ? { subCollectionName: props.options.subCollection.name }
+                  : {})}
+                {...(props.options?.hideAdvancedSearch !== undefined
+                  ? { hideAdvancedSearch: props.options.hideAdvancedSearch }
+                  : {})}
               />
             )}
 
@@ -572,7 +590,7 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                                 listIds={rows.map((item: { id: string }) => item.id)}
                                 checkedItems={checkedItems}
                                 setCheckedItems={(itemIds: string[]) => setCheckedItems(itemIds)}
-                                selectionOptions={selectionOptions}
+                                {...(selectionOptions !== undefined ? { selectionOptions } : {})}
                                 rows={rows}
                                 showCheckboxInput={showCheckboxInput}
                               />
@@ -619,44 +637,56 @@ export const ViewListGrid = (props: ViewListGridProps) => {
                           sortRowsPriority: sortRowsPriority,
                           isSubCollection: isSubCollection,
                           viewMode: props.viewMode ?? 'page',
-                          useAccordion: props.options?.useAccordion,
+                          ...(props.options?.useAccordion !== undefined
+                            ? { useAccordion: props.options.useAccordion }
+                            : {}),
                           startNumber: props.options?.hidePagination
                             ? rows.length
                             : (totalCount ?? 0) - searchForm!.getPage() * searchForm!.getPageSize(),
                           viewFields: viewFields ?? [],
                           checkedItems,
                           setCheckedItems,
-                          onSelect: onSelect
-                            ? (item, setId) => {
-                                onSelect?.(item, setId ?? setManagedId);
+                          ...(onSelect
+                            ? {
+                                onSelect: (item: any, setId: any) => {
+                                  onSelect?.(item, setId ?? setManagedId);
+                                },
                               }
-                            : undefined,
+                            : {}),
                           enableCheckItem,
                           onRefresh: fetchData,
                           router,
                           path,
-                          onDrag: props.options?.onDrag,
+                          ...(props.options?.onDrag !== undefined
+                            ? { onDrag: props.options.onDrag }
+                            : {}),
                           fields: filteredListFields,
                           entityForm,
-                          session: session,
+                          ...(session !== undefined ? { session } : {}),
                           isAdmin: isAdmin,
-                          messages: props.options?.messages,
-                          selectionOptions: selectionOptions,
+                          ...(props.options?.messages !== undefined
+                            ? { messages: props.options.messages }
+                            : {}),
+                          ...(selectionOptions !== undefined ? { selectionOptions } : {}),
                           showCheckboxInput: showCheckboxInput,
-                          openInNewWindow: openInNewWindow,
+                          ...(openInNewWindow !== undefined ? { openInNewWindow } : {}),
                           // Inline expansion props for SubCollection
-                          inlineExpansion: shouldUseInlineMode
+                          ...(shouldUseInlineMode
                             ? {
-                                expandedItems,
-                                isExpanded,
-                                toggleExpansion,
-                                collapseItem,
-                                canExpand,
-                                setManagedId,
+                                inlineExpansion: {
+                                  expandedItems,
+                                  isExpanded,
+                                  toggleExpansion,
+                                  collapseItem,
+                                  canExpand,
+                                  setManagedId,
+                                },
                               }
-                            : undefined,
+                            : {}),
                           // SubCollection mappedBy for auto-hiding parent reference fields
-                          mappedBy: props.options?.subCollection?.mappedBy,
+                          ...(props.options?.subCollection?.mappedBy !== undefined
+                            ? { mappedBy: props.options.subCollection.mappedBy }
+                            : {}),
                           // 인라인/상세 뷰에서 수정 불가 여부
                           inlineViewReadonly:
                             isTrue(props.options?.readonly) ||
@@ -690,7 +720,9 @@ export const ViewListGrid = (props: ViewListGridProps) => {
             setManagedId={setManagedId}
             fetchData={fetchData}
             setOpenBaseLoading={setOpenBaseLoading}
-            mappedBy={props.options?.subCollection?.mappedBy}
+            {...(props.options?.subCollection?.mappedBy !== undefined
+              ? { mappedBy: props.options.subCollection.mappedBy }
+              : {})}
           />
         )}
       </ListGridThemeProvider>

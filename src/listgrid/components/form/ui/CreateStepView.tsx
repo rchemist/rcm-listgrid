@@ -76,7 +76,7 @@ export const CreateStepView = React.memo(function CreateStepView({
       createSteps.map((step) => ({
         id: step.id,
         label: step.label,
-        description: step.description,
+        ...(step.description !== undefined ? { description: step.description } : {}),
       })),
     [createSteps],
   );

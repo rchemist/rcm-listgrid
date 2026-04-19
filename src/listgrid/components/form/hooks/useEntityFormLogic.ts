@@ -94,7 +94,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
   // title 계산 훅 (title 반환형)
   const getEntityFormTitle = useEntityFormTitle({
     entityForm: entityForm ?? props.entityForm,
-    customTitle: props.title,
+    ...(props.title !== undefined ? { customTitle: props.title } : {}),
   });
 
   // title 갱신 함수 - useCallback으로 메모이제이션
@@ -199,9 +199,9 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
     entityForm: props.entityForm,
     isSubCollectionEntity,
     pathname: pathname!,
-    session: session ?? undefined,
-    buttonLinks: props.buttonLinks,
-    onInitialize: props.onInitialize,
+    ...(session ? { session } : {}),
+    ...(props.buttonLinks !== undefined ? { buttonLinks: props.buttonLinks } : {}),
+    ...(props.onInitialize !== undefined ? { onInitialize: props.onInitialize } : {}),
     setTabs,
     setTabIndex,
     setEntityForm,
@@ -216,7 +216,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
     renderType,
     pathname: pathname!,
     router,
-    buttonLinks: props.buttonLinks,
+    ...(props.buttonLinks !== undefined ? { buttonLinks: props.buttonLinks } : {}),
     postSave: postSave,
     setEntityForm,
     setNotifications,
@@ -224,7 +224,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
     setCacheKey,
     setErrors,
     setOpenBaseLoading,
-    session: session ?? undefined,
+    ...(session ? { session } : {}),
   });
 
   // 최초 마운트 시 EntityForm 초기화
@@ -250,9 +250,9 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
     clearAutoSave,
     saveNow: saveAutoSaveNow,
   } = useEntityFormAutoSave({
-    entityForm,
+    ...(entityForm !== undefined ? { entityForm } : {}),
     enabled: props.autoSave ?? false,
-    autoSaveKey: props.autoSaveKey,
+    ...(props.autoSaveKey !== undefined ? { autoSaveKey: props.autoSaveKey } : {}),
   });
 
   // clearAutoSaveRef 업데이트 (postSave에서 사용)
@@ -405,9 +405,9 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
           entityForm: entityForm,
           postSave: postSave,
           postDelete: postDelete,
-          buttonLinks: props.buttonLinks,
-          buttons: props.buttons,
-          excludeButtons: props.excludeButtons,
+          ...(props.buttonLinks !== undefined ? { buttonLinks: props.buttonLinks } : {}),
+          ...(props.buttons !== undefined ? { buttons: props.buttons } : {}),
+          ...(props.excludeButtons !== undefined ? { excludeButtons: props.excludeButtons } : {}),
           subCollection: isSubCollectionEntity,
           setEntityForm: setEntityForm,
           setErrors: setErrors,

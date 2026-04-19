@@ -98,7 +98,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
 
         const validationErrors: FieldError[] = await cloned.validate({
           fieldNames: [fieldName],
-          session: props.session,
+          ...(props.session !== undefined ? { session: props.session } : {}),
         });
         cloned.mergeError(fieldName, validationErrors);
 
@@ -204,48 +204,40 @@ export const FieldRenderer = (props: FieldRendererProps) => {
 
         setErrors([...messages]);
 
-        const required = await field.isRequired({
+        const fieldInfoParams: { entityForm: EntityForm; session?: Session } = {
           entityForm,
-          session: props.session,
-        });
-        const readonly = await field.isReadonly({
-          entityForm,
-          session: props.session,
-        });
+          ...(props.session !== undefined ? { session: props.session } : {}),
+        };
+
+        const required = await field.isRequired(fieldInfoParams);
+        const readonly = await field.isReadonly(fieldInfoParams);
 
         setRequired(required);
         setReadonly(readonly);
 
-        const tooltip = await field.getTooltip({
-          entityForm,
-          session: props.session,
-        });
+        const tooltip = await field.getTooltip(fieldInfoParams);
         setTooltip(tooltip);
 
-        const helpText = await field.getHelpText({
-          entityForm,
-          session: props.session,
-        });
+        const helpText = await field.getHelpText(fieldInfoParams);
         setHelpText(helpText);
 
-        const placeHolder = await field.getPlaceHolder({
-          entityForm,
-          session: props.session,
-        });
+        const placeHolder = await field.getPlaceHolder(fieldInfoParams);
         setPlaceHolder(placeHolder);
 
         // 필드 렌더링 파라미터 구성 및 view 생성
         // Build field render parameters and generate view
         const viewParams: FieldRenderParameters = {
           entityForm: entityForm,
-          session: props.session,
+          ...(props.session !== undefined ? { session: props.session } : {}),
           subCollectionEntity: subCollectionEntity,
           updateEntityForm: async (updater) => {
             // EntityForm을 업데이트하고 상태를 반영
             const updatedEntityForm = await updater(entityForm.clone(true));
             setEntityForm?.(updatedEntityForm);
           },
-          resetEntityForm: props.resetEntityForm,
+          ...(props.resetEntityForm !== undefined
+            ? { resetEntityForm: props.resetEntityForm }
+            : {}),
           onChange: (value, propagation) => {
             (async () => {
               // 값 변경 시 에러 초기화, 값 반영, 검증, onChanges 콜백, manyToOneLink 갱신 등 처리
@@ -271,7 +263,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
               // Validate only the current value
               const errors: FieldError[] = await cloned.validate({
                 fieldNames: [name],
-                session: props.session,
+                ...(props.session !== undefined ? { session: props.session } : {}),
               });
               cloned.mergeError(name, errors);
 
@@ -443,18 +435,20 @@ export const FieldRenderer = (props: FieldRendererProps) => {
           <CustomFieldRenderer
             field={field}
             entityForm={entityForm}
-            setEntityForm={setEntityForm}
+            {...(setEntityForm !== undefined ? { setEntityForm } : {})}
             value={currentValue}
             onChange={handleFieldChange}
             onError={handleFieldError}
             clearError={handleClearError}
             required={required}
             readonly={_readonly ?? false}
-            session={props.session}
+            {...(props.session !== undefined ? { session: props.session } : {})}
             helpText={helpText}
             placeholder={_placeHolder}
             subCollectionEntity={subCollectionEntity}
-            resetEntityForm={props.resetEntityForm}
+            {...(props.resetEntityForm !== undefined
+              ? { resetEntityForm: props.resetEntityForm }
+              : {})}
           />
         ) : (
           view

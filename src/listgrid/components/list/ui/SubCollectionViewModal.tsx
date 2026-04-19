@@ -56,7 +56,7 @@ export const SubCollectionViewModal = ({
           subCollection={true}
           readonly={readonly}
           excludeButtons={excludeButtons}
-          hideMappedByFields={mappedBy}
+          {...(mappedBy !== undefined ? { hideMappedByFields: mappedBy } : {})}
           buttonLinks={{
             onClickList: async () => {
               setManagedId(undefined);

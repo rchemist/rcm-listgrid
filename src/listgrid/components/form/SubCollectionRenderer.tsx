@@ -53,8 +53,9 @@ export const SubCollectionRenderer = ({
       (async () => {
         // 서브콜렉션 렌더링 및 도움말 비동기 조회
         // Async fetch for sub-collection view and help text
-        setView(await collection.render({ entityForm, session }));
-        setHelpText(await collection.getHelpText({ entityForm, session }));
+        const params = { entityForm, ...(session !== undefined ? { session } : {}) };
+        setView(await collection.render(params));
+        setHelpText(await collection.getHelpText(params));
         setMounted(true);
       })();
     }

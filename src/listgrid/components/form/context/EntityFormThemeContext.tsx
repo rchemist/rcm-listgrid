@@ -59,10 +59,7 @@ const deepMerge = <T extends object>(base: T, override: Partial<T> | undefined):
 const EntityFormThemeContext = createContext<EntityFormThemeContextValue>({
   classNames: defaultEntityFormTheme,
   cn: (base, custom) => (custom ? cnUtil(base, custom) : base),
-  fieldRenderers: undefined,
   getFieldRenderer: () => undefined,
-  buttonLabels: undefined,
-  stepperRenderer: undefined,
   createStepButtonPosition: 'top',
 });
 
@@ -104,20 +101,23 @@ export const EntityFormThemeProvider: React.FC<EntityFormThemeProviderProps> = (
     // 기본 테마와 커스텀 테마를 deep merge
     const mergedClassNames = deepMerge(defaultEntityFormTheme, theme) as ViewEntityFormClassNames;
 
-    return {
+    const base: EntityFormThemeContextValue = {
       classNames: mergedClassNames,
       cn: (base: string, custom?: string) => {
         if (!custom) return base;
         return cnUtil(base, custom);
       },
-      fieldRenderers,
       getFieldRenderer: (fieldName: string) => {
         return fieldRenderers?.[fieldName];
       },
-      buttonLabels,
-      stepperRenderer,
-      createStepButtonPosition,
     };
+    if (fieldRenderers !== undefined) base.fieldRenderers = fieldRenderers;
+    if (buttonLabels !== undefined) base.buttonLabels = buttonLabels;
+    if (stepperRenderer !== undefined) base.stepperRenderer = stepperRenderer;
+    if (createStepButtonPosition !== undefined) {
+      base.createStepButtonPosition = createStepButtonPosition;
+    }
+    return base;
   }, [theme, fieldRenderers, buttonLabels, stepperRenderer, createStepButtonPosition]);
 
   return (
@@ -149,10 +149,7 @@ export const useEntityFormTheme = (): EntityFormThemeContextValue => {
     return {
       classNames: defaultEntityFormTheme,
       cn: (base, custom) => (custom ? cnUtil(base, custom) : base),
-      fieldRenderers: undefined,
       getFieldRenderer: () => undefined,
-      buttonLabels: undefined,
-      stepperRenderer: undefined,
       createStepButtonPosition: 'top',
     };
   }

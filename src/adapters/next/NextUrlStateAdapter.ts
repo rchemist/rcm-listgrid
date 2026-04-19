@@ -27,7 +27,7 @@ function toNuqsParsers(
     out[key] = nuqsCreateParser({
       parse: p.parse,
       serialize: p.serialize,
-      eq: p.eq,
+      ...(p.eq !== undefined ? { eq: p.eq } : {}),
     });
   }
   return out;

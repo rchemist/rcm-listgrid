@@ -242,25 +242,25 @@ export const ViewRows = (props: ViewRowsProps) => {
             entityForm={viewEntityForm}
             buttonLinks={{
               onClickList: async () => closeModal(modalId),
-              onSave: props.onRefresh
+              ...(props.onRefresh
                 ? {
-                    success: () => {
-                      props.onRefresh!();
+                    onSave: {
+                      success: () => {
+                        props.onRefresh!();
+                      },
+                    },
+                    onDelete: {
+                      success: () => {
+                        props.onRefresh!();
+                        closeModal(modalId);
+                      },
                     },
                   }
-                : undefined,
-              onDelete: props.onRefresh
-                ? {
-                    success: () => {
-                      props.onRefresh!();
-                      closeModal(modalId);
-                    },
-                  }
-                : undefined,
+                : {}),
             }}
             subCollection={true}
-            readonly={props.viewMode === 'popup' || inlineViewReadonly}
-            hideMappedByFields={mappedBy}
+            readonly={props.viewMode === 'popup' || inlineViewReadonly === true}
+            {...(mappedBy !== undefined ? { hideMappedByFields: mappedBy } : {})}
           />
         ),
       });
@@ -411,10 +411,15 @@ export const ViewRows = (props: ViewRowsProps) => {
         )}
         <ViewColumn
           {...props}
-          clickAccordion={
+          {...(() => {
             // Priority: inline expansion > accordion > undefined
-            inlineExpansion ? toggleInlineExpansion : accordionMode ? toggleAccordion : undefined
-          }
+            const clickAccordion = inlineExpansion
+              ? toggleInlineExpansion
+              : accordionMode
+                ? toggleAccordion
+                : undefined;
+            return clickAccordion !== undefined ? { clickAccordion } : {};
+          })()}
           viewMode={props.viewMode}
         />
         {draggable && (
@@ -502,10 +507,10 @@ export const ViewRows = (props: ViewRowsProps) => {
               itemId={item.id}
               isExpanded={true}
               onCollapse={() => inlineExpansion.collapseItem(item.id)}
-              readonly={props.viewMode === 'popup' || inlineViewReadonly}
-              onSave={props.onRefresh}
-              onDelete={props.onRefresh}
-              mappedBy={mappedBy}
+              readonly={props.viewMode === 'popup' || inlineViewReadonly === true}
+              {...(props.onRefresh !== undefined ? { onSave: props.onRefresh } : {})}
+              {...(props.onRefresh !== undefined ? { onDelete: props.onRefresh } : {})}
+              {...(mappedBy !== undefined ? { mappedBy } : {})}
             />
           </td>
         </tr>

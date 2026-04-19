@@ -277,7 +277,7 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
           <ViewEntityForm
             readonly={true}
             entityForm={revisionEntityForm}
-            session={session}
+            {...(session !== undefined ? { session } : {})}
             hideTitle={true}
             hideAllButtons={true}
           />

@@ -184,7 +184,11 @@ const FieldGroupsSkeleton = ({
                 .map((fieldItem) => {
                   const field = entityForm.fields.get(fieldItem.name);
                   return (
-                    <FieldSkeleton key={fieldItem.name} fieldName={fieldItem.name} field={field} />
+                    <FieldSkeleton
+                      key={fieldItem.name}
+                      fieldName={fieldItem.name}
+                      {...(field !== undefined ? { field } : {})}
+                    />
                   );
                 })}
             </div>
