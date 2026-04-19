@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (alpha.45 + 후속 정비 — **품질 게이트 완전 강제**. 375 tests / 8.1% coverage / strict 옵션 4개 승격 / ESLint v10 flat config / Prettier CI 강제. 다음 세션: `docs/NEXT_SESSION.md` 참조 — v0.3 backlog (Task C coverage / D exactOpt / E generic).)
+마지막 업데이트: 2026-04-19 (v0.3 Task C 완료 — coverage 8.1% → **16.9%** / **900 tests** + 1 todo (525 개 추가, 43 files) / config 11.7%→34.2%, form 6.97%→94.5%, misc 6.78%→92.4%, fields/abstract 1.18%→60.86% / store·menu·router·urlState 100% / vitest thresholds 16/14/17/16. 다음: Task D (exactOpt 430 errors).)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -10,26 +10,28 @@
 
 **배포된 현재 버전**: `v0.1.0-alpha.45` (v0.2 backlog 소진 — 테스트 포팅 마감 + `any` 정리 + `noImplicitAny: true`)
 
-**이번 세션 성과 (alpha.45 + 후속 정비)**:
-- **테스트**: 33 → **375 passing** (5 jest→vitest 포팅 + utils/common 순수 함수 유닛 242 개 추가)
-- **Coverage**: 4.5% → **8.1%** (utils 2.3% → 93%, common 0% → 94%)
-- **`any` 수치**: 459 → 328 (−131, 29% 감소)
-- **tsconfig strict 옵션 승격**:
-  - `noImplicitAny: false → true` (40 TS7006/7031 fix)
-  - `noImplicitReturns: true` (2 useEffect 수정)
-  - `noFallthroughCasesInSwitch: true` (0 err)
-  - `noUncheckedIndexedAccess: true` (**118 errs** fix — 2 병렬 에이전트, utils/adapters/config/transfer/form vs components/)
-  - 미승격: `exactOptionalPropertyTypes` (430 errs, 대부분 foundation 파일이라 v0.3 연기)
-- **ESLint v10 flat config** 마이그레이션. React Hooks v7 의 Compiler 룰 비활성화. 30 에러 fix. CI 에서 lint 실패 시 빌드 fail.
-- **Prettier** 299 파일 일괄 포맷 + CI 강제
-- **Coverage 임계치** 설정 (statements 8% / branches 6% / functions 6% / lines 8%). `npm run test:coverage` + CI 통합
-- CI 3 게이트 모두 hard-enforced 완료 (lint / format / coverage)
+**이번 세션 성과 (v0.3 Task C — coverage 상향)**:
+- **테스트**: 375 → **900 passing** + 1 todo (525 개 추가, 43 files, 3 병렬 에이전트)
+  - C-1 (config/): 164 tests (Config 55, OnChangeEntityForm 22, EntityFormMethod 23, EntityTab 15, EntityFieldGroup 13 등 9 파일)
+  - C-2 (form/misc/store/message/menu/router/urlState): 202 tests (misc 70, SearchForm 69, store 17, 나머지 6 영역)
+  - C-3 (components/fields/abstract/): 159 tests + 1 todo (FormField 68, ListableFormField 28, OptionalField 28 등)
+- **Coverage**: 8.1% → **16.9%** statements / 6.46% → 14.98% branches / 6.46% → 17.97% functions / 8.19% → 16.81% lines
+  - config: 11.7% → **34.22%**
+  - form: 6.97% → **94.5%** (SearchForm 96.4%)
+  - misc: 6.78% → **92.4%**
+  - fields/abstract: 1.18% → **60.86%**
+  - store, menu, router, urlState: **100%**
+- **vitest.config.ts thresholds** 상향: 8/6/6/8 → **16/14/17/16** (baseline 바로 아래)
+- 모든 품질 게이트 PASS (lint 0 errors, type-check PASS, format:check 통과)
 
-**다음 세션 후보 (v0.3)**:
-- coverage 점진 상향 (현재 8.1% → 목표 20%+). config/form/fields 영역 테스트 확장 필요.
-- `exactOptionalPropertyTypes` 승격 (430 errors). optional prop 을 명시 `| undefined` 로 분리.
-- 잔여 `any` 328 중 "의도된 any" 가 대부분. 추가 감축은 `EntityForm<T>` / `FieldValue<T>` generic refactor 필요.
-- 시각 회귀 수동 검증 (아래 목록) + Playwright 스냅샷 regression suite (DECISIONS #63 권고).
+**이전 세션 (alpha.45 + 후속 정비) 성과 요약**:
+- 테스트 포팅 (33 → 133), utils/common 유닛 242 추가 (→ 375), strict 옵션 4 개 승격 (noImplicitAny/Returns/Fallthrough/UncheckedIndexedAccess), ESLint v10 flat config, Prettier CI 강제, coverage 임계치 (8/6/6/8)
+- 미승격: `exactOptionalPropertyTypes` (430 errs, v0.3 Task D)
+
+**다음 세션 후보 (v0.3 잔여)**:
+- **Task D**: `exactOptionalPropertyTypes` 승격 (430 errors). 에러 타입별 fix 가이드는 `docs/NEXT_SESSION.md` § 3
+- **Task E**: `EntityForm<T>` / `FieldValue<T>` generic refactor (breaking change, v0.2 major bump 검토). 2 세션 분할 권장
+- 시각 회귀 수동 검증 + Playwright 스냅샷 regression suite (DECISIONS #63 권고)
 
 **alpha.37~40 하이라이트**:
 - alpha.37: ManyToOneView 찾기 버튼 색상 + SearchBarActions 우측 정렬 fix

@@ -464,6 +464,31 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #68 v0.3 Task C — coverage 8.1% → 16.9% (config/form/fields 테스트 525 개 추가)
+
+`docs/NEXT_SESSION.md` § 2 (Task C) 실행. 3 병렬 에이전트로 영역별 분담:
+
+1. **C-1 (config/)**: 164 tests / 9 파일 (Config 55, OnChangeEntityForm 22, EntityFormMethod 23, EntityTab 15, EntityFieldGroup 13, ListGridViewFieldCache 11, AdvancedSearchOpenCache 10, CommonType 8, RuntimeConfig 7). 순수 모델/로직 .ts 만 대상, .tsx (EntityForm 등) 제외. config 11.7% → **34.22%** statements
+2. **C-2 (form/misc/store/message/menu/router/urlState/)**: 202 tests / 9 파일 (misc 70, SearchForm 69, store 17, form/Type 10, MessageProvider 10, RouterProvider 10, urlState/types 7, menu/PermissionChecker 6, UrlStateProvider 3). 순수 함수 + Provider 의 delegation 만. store/menu/router/urlState 모두 100% 도달
+3. **C-3 (components/fields/abstract/)**: 159 tests + 1 todo / 6 파일 (FormField 68, ListableFormField 28, OptionalField 28, AbstractDateField 12 + 1 todo, AbstractManyToOneField 12, CheckButtonValidationField 11). React render 는 배제, 클래스 메소드 (accessors, builders, clone 등) 입출력 계약만. abstract 1.18% → **60.86%**
+
+**전체 수치 변화**:
+- 테스트: 375 → **900 passing** + 1 todo (525 개 추가, 43 files)
+- Coverage: 8.1% → **16.9%** statements / 6.46% → 14.98% branches / 6.46% → 17.97% functions / 8.19% → 16.81% lines
+- vitest.config.ts thresholds: 8/6/6/8 → **16/14/17/16** (baseline 바로 아래)
+
+**작업 규칙 고수**:
+- React 렌더 테스트 최소화. 순수 로직 우선 (UIProvider / Session 없이 테스트 가능한 경로)
+- 기존 구현 코드 무수정. 버그 의심 지점은 `it.todo` 또는 현행 동작을 lock-in 하는 pin test (AbstractDateField.clone 의 limit/range 참조 버그 추정 지점만 1 todo)
+- 의도된 비직관 동작 2 건 lock-in (misc/index.ts 의 `isEqualsIgnoreCase(null, null) → false`, `getAccessableAssetUrl` 의 URL-encode 후 http(s) 조기 반환 비작동)
+- 메인 context 보호: 에이전트 3 개 병렬, 큰 파일 (FormField 809 줄) 은 grep 으로 시그니처만 추출해서 분석
+
+**Why**: 커버리지는 "회귀 안전망". v0.3 의 Task D (exactOpt 430 errors) / Task E (generic refactor) 가 foundation 파일을 광범위하게 손댈 예정이므로, config/form/fields 층의 단위 테스트가 먼저 있어야 회귀 감지 가능. utils/common 은 이미 93~94% 지만 도메인 코드 (config/form/fields) 는 DECISIONS #67 이전까지 0~15% 였음.
+
+**배포 필요성 판단**: dev-only 변경 (테스트 + vitest 임계치). 런타임 영향 0. alpha.46 배포 불필요.
+
+**v0.3 잔여**: Task D (exactOpt 승격, 430 errors) / Task E (EntityForm<T> generic refactor).
+
 ### #67 품질 게이트 완전 강제 — noUncheckedIndexedAccess + prettier + utils 테스트
 
 DECISIONS #66 에 이어 품질 게이트 3 건을 hard-enforced 상태로 마감.
