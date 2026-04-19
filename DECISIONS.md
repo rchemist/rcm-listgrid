@@ -464,6 +464,41 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #71 v0.3 Task E 세션 2 — Generic refactor 구현 완료
+
+`docs/GENERIC_DESIGN.md` § 5 의 5 phase 순서대로 1 에이전트 구현. 세션 1 (#70) 의 설계를 거의 그대로 따름. 설계와 달라진 점은 아래 "설계 보정" 섹션 참고.
+
+**구현 결과 (전 phase 기준)**:
+- Phase 1 (foundation): `FieldValue<TValue = any>`. `ModifyEntityFormFunc<T = any>` / `ModifyFetchedEntityFormFunc<T>` / `OnInitializeFunc<T>` 3 callback 타입 제네릭화
+- Phase 2 (abstract chain): EntityFormBase → Validation → Data → Actions → Extensions → EntityForm 6 클래스에 `<T extends object = any>` 전파. 각 `extends Parent<T>`. clone/cloneWithEntityForm/merge 반환타입 `EntityForm<T>`. onChanges/onFetchData/onInitialize/onSave/postDelete/overrideFetchData/buttons/headerArea/withTitle.view/withPostDelete/withOverrideSubmitData/withCheckDuplicate 등 17 개 callback 시그니처 `EntityForm<T>` 승격
+- Phase 3 (keyof T overloads): getField / getValue / setValue / changeValue / setFetchedValue 에 `<K extends keyof T & string>` overload 추가. 순서 구체→일반 엄수
+- Phase 4 (FormField chain): `FormField<T>` → `FormField<TSelf, TValue = any, TForm extends object = any>` rename + append. 6 abstract (FormField / ListableFormField / OptionalField / MultipleOptionalField / CheckButtonValidationField / AbstractManyToOneField / AbstractDateField) 동일 패턴. 33+ concrete 서브클래스 무수정 동작 확인. FormFieldProps / ListableFormFieldProps / OptionalFieldProps / MultipleOptionalFieldProps / CheckButtonValidationFieldProps / AbstractManyToOneFieldProps / AbstractDateFieldProps 7 interface 전부 `<TValue, TForm>` 전파. FormField.value / getCurrentValue / getSaveValue / getFetchedValue 반환타입 `TValue | undefined` 로 승격
+- Phase 4b (추가 승격): fetchedEntity / getFetchedEntity / getValues / initialize 내 fetchedEntity 지역변수 `T` 계열로 승격
+- Phase 5 (검증): type-check PASS, 900+1 tests PASS (0 회귀), lint 0 errors, format:check PASS, build PASS
+
+**수치**:
+- `: any` 카운트 295 → 286 (9 건 감축). 설계 예상 (306 → 200대) 대비 보수적 — 이유: 다수 any 가 default `= any` 로 승격되어 같은 `: any` 문자열을 유지 (파라미터 타입이 제네릭 파라미터로 치환됐지만 grep 패턴에는 안 잡힘). 실제 "타입 파라미터로 치환된 논리적 any" 는 30+ 건
+- 테스트 900 passing + 1 todo → 동일 유지
+- commits: `a0af52e` (Phase 1-2), `4d6cfec` (Phase 3), `72f303b` (Phase 4), `0da1b68` (Phase 4b)
+
+**설계 보정 (#70 GENERIC_DESIGN.md 에 반영된 내용 외)**:
+1. **`EntityField.getDisplayValue` 인터페이스 시그니처 수정** — 기존 `Promise<string>` 선언이었으나 실제 모든 구현체 (FormField 포함) 는 `Promise<any>` 를 리턴하는 불일치 존재. Task E 구현 중 `FormField.getDisplayValue` 를 `Promise<TValue>` 로 승격 시도 시 EntityField 인터페이스와 비호환 드러남. **EntityField 인터페이스를 `Promise<any>` 로 바로잡음** (기존 코드의 잠재 버그 해소). 최종적으로 `FormField.getDisplayValue` 도 `Promise<any>` 유지 — TValue 로 좁히면 구현체 서브클래스 (SelectField 등 displayFunc 반환이 다양함) 에서 타입 오류 유발
+2. **`FormField.resetValue` / `withDefaultValue` 의 exactOptionalPropertyTypes 호환** — `this.value.current = this.value.fetched` 는 `TValue` vs `TValue | undefined` 충돌. `delete this.value.current` + 조건부 할당 패턴으로 교체
+3. **Phase 2 에서 원 설계 외 추가 승격**: EntityForm.setFetchedValues 의 entity 파라미터는 `Partial<T> | any` (타입 체크 편의 + 기존 동작 유지). initialize 의 `fetchedEntity` 지역변수는 `(T & Record<string, any>) | null` (T=any 디폴트에서 인덱스 접근 호환 확보)
+
+**가시화된 소비자 영향**:
+- 기존 `new EntityForm('User', '/api/user')` → `EntityForm<any>` 로 해석. 무수정 동작
+- 점진 승격 `new EntityForm<User>(...)` 사용 시 `getValue('name')` 이 `Promise<User['name']>` 로 narrow, `getValue('typo')` 는 컴파일 에러
+- 기존 `class MyField extends FormField<MyField>` → `FormField<MyField, any, any>` 로 해석. 무수정
+- 점진 승격 `extends FormField<MyField, string, User>` 사용 가능
+
+**gjcu 호스트 검증**: 구현 세션에서 실측은 안 함 (워크트리 격리 원칙). 설계 세션 (#70) 에서 예측한 13 + 1 + 10 + 1 개소 패턴은 전부 default = any 경로이므로 타입 오류 0 예상. 실측은 다음 세션 또는 alpha.46 배포 후 관찰
+
+**후속 과제 (Task F/G 후보)**:
+- `FieldRenderParameters<T, TValue>` 제네릭화 — UI 컴포넌트 층 전파 (FieldRenderer / ViewEntityForm 등). 설계 § 2.8 참고
+- `parse()` → `unknown` 전환 — 런타임 검증 도구 결합 시 의미
+- `attributes: Map<string, any>` → `Map<string, unknown>` — breaking. v0.2.0 major bump 시 후보
+
 ### #70 v0.3 Task E 세션 1 — Generic refactor 설계 (`EntityForm<T>` / `FormField<TSelf, TValue, TForm>`)
 
 Task E 를 2 세션으로 분할 (설계 → 구현). 이 엔트리는 세션 1 산출물 (`docs/GENERIC_DESIGN.md`) 의 결정 기록. 구현 결과는 세션 2 이후 별도 엔트리.
