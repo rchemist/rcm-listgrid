@@ -15,14 +15,15 @@ export default defineConfig({
       reporter: ['text', 'lcov'],
       include: ['src/listgrid/**/*.{ts,tsx}'],
       exclude: ['**/*.test.{ts,tsx}', '**/__tests__/**', 'src/_stubs/**'],
-      // Baseline (alpha.45): 4.5% statements / 2.4% branches / 3.9% funcs / 4.6%
-      // lines. Floors are set just below baseline so CI catches regressions.
-      // v0.3 에서 점진 상향 예정.
+      // Baseline (alpha.45 + utils/common tests): 8.1% statements / 6.46%
+      // branches / 6.46% funcs / 8.19% lines. Floors sit just below baseline so
+      // CI catches regressions. v0.3 에서 config/form/fields 영역으로 확대하며
+      // 점진 상향 예정.
       thresholds: {
-        statements: 4,
-        branches: 2,
-        functions: 3,
-        lines: 4,
+        statements: 8,
+        branches: 6,
+        functions: 6,
+        lines: 8,
       },
     },
   },
