@@ -262,12 +262,8 @@ export interface ViewEntityFormClassNames {
   tabPanel?: {
     /** Tab.Panel 자체에 적용되는 클래스 */
     panel?: string;
-    /** 탭 패널 컨테이너 (deprecated, use panel) */
-    container?: string;
     /** 빈 상태 메시지 */
     empty?: string;
-    /** 빈 상태 메시지 (deprecated, use empty) */
-    emptyMessage?: string;
     /** 콘텐츠 영역 */
     content?: string;
   };
@@ -294,18 +290,12 @@ export interface ViewEntityFormClassNames {
     container?: string;
     /** 그룹 헤더 영역 */
     header?: string;
-    /** 그룹 헤더 wrapper (deprecated, use header) */
-    headerWrapper?: string;
     /** 그룹 제목 */
     title?: string;
     /** 액션 영역 (도움말, 접기/펼치기) */
     actions?: string;
-    /** 아이콘/도움말 영역 (deprecated, use actions) */
-    icons?: string;
     /** 접기/펼치기 토글 */
     collapseToggle?: string;
-    /** 접기/펼치기 아이콘 (deprecated, use collapseToggle) */
-    collapseIcon?: string;
     /** 필드 목록 컨테이너 */
     content?: string;
   };

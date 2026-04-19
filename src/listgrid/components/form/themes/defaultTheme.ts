@@ -100,8 +100,8 @@ export const defaultEntityFormTheme: ViewEntityFormClassNames = {
   },
 
   tabPanel: {
-    container: '',
-    emptyMessage: 'rcm-text-muted',
+    panel: '',
+    empty: 'rcm-text-muted',
     content: '',
   },
 
@@ -114,10 +114,10 @@ export const defaultEntityFormTheme: ViewEntityFormClassNames = {
 
   fieldGroup: {
     container: '',
-    headerWrapper: '',
+    header: '',
     title: '',
-    icons: 'rcm-row',
-    collapseIcon: 'rcm-cursor-pointer rcm-text-muted',
+    actions: 'rcm-row',
+    collapseToggle: 'rcm-cursor-pointer rcm-text-muted',
     content: '',
   },
 
