@@ -5,19 +5,19 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FieldType,} from '../config/Config';
-import {fDate, fDateTime} from "../misc";
-import {ReactNode} from "react";
-import {isTrue} from '../utils/BooleanUtil';
-import {getPlainText} from "../ui";
+import { FieldType } from '../config/Config';
+import { fDate, fDateTime } from '../misc';
+import { ReactNode } from 'react';
+import { isTrue } from '../utils/BooleanUtil';
+import { getPlainText } from '../ui';
 import {
   defaultString,
   isBlank,
   subStringAfterLast,
-  subStringBeforeLast
+  subStringBeforeLast,
 } from '../utils/StringUtil';
-import {isEmpty} from "../utils";
-import {SelectOption} from "../form/Type";
+import { isEmpty } from '../utils';
+import { SelectOption } from '../form/Type';
 
 export interface IDataTransferProperty {
   name: string;
@@ -50,7 +50,7 @@ export class DataTransferProperty implements IDataTransferProperty {
   }
 
   static fromJsonArray(data: IDataTransferProperty[]): DataTransferProperty[] {
-    return data.map(item => DataTransferProperty.fromJson(item));
+    return data.map((item) => DataTransferProperty.fromJson(item));
   }
 
   withHelpText(helpText: string): DataTransferProperty {
@@ -74,13 +74,13 @@ export class DataTransferProperty implements IDataTransferProperty {
   }
 
   isConfigured(...configuredForms: string[]): boolean {
-    const tabId = (this.tabId) ? this.tabId : "";
-    const fieldGroupId = (this.fieldGroupId) ? this.fieldGroupId : "";
+    const tabId = this.tabId ? this.tabId : '';
+    const fieldGroupId = this.fieldGroupId ? this.fieldGroupId : '';
 
     const form = DataTransferProperty.getForm(tabId, fieldGroupId);
 
     try {
-      configuredForms.forEach(configuredForm => {
+      configuredForms.forEach((configuredForm) => {
         if (configuredForm === form) {
           throw new Error('configured');
         }
@@ -94,10 +94,8 @@ export class DataTransferProperty implements IDataTransferProperty {
   }
 
   static getForm(tabId: string, fieldGroupId: string): string {
-    return tabId + "_" + fieldGroupId;
+    return tabId + '_' + fieldGroupId;
   }
-
-
 }
 
 export interface DataManageType {
@@ -115,23 +113,23 @@ export interface IDataTransferConfig {
 
 export const DataTransferAll: DataManageType = {
   exportable: true,
-  importable: true
-}
+  importable: true,
+};
 
 export const DataTransferNotSupport: DataManageType = {
   exportable: false,
-  importable: false
-}
+  importable: false,
+};
 
 export const DataTransferExportOnly: DataManageType = {
   exportable: true,
-  importable: false
-}
+  importable: false,
+};
 
 export const DataTransferImportOnly: DataManageType = {
   exportable: false,
-  importable: true
-}
+  importable: true,
+};
 
 export interface DataColumn {
   name: string;
@@ -144,27 +142,25 @@ export type DataRowSet = DataRow[];
 export type SampleDataItem = {
   name: string;
   value: any;
-}
+};
 
 export interface ImportTransferConfig extends TransferConfig {
   // 엑셀 업로드 시 샘플 데이터
   sampleData?: SampleDataItem[][];
 
   // 엑셀 업로드 시 파싱 결과 조작 - 업로드가 끝난 후 업로드 된 결과를 가지고 추가 처리를 해야 할 때 사용한다.
-  overrideParseResult?: (formData: DataRowSet, response: unknown) => { success: boolean, result: DataTransferResult, error?: string, errorView?: ReactNode };
+  overrideParseResult?: (
+    formData: DataRowSet,
+    response: unknown,
+  ) => { success: boolean; result: DataTransferResult; error?: string; errorView?: ReactNode };
 
   mode?: {
     create?: boolean;
     update?: boolean;
-  }
-
+  };
 }
 
-export interface ExportTransferConfig extends TransferConfig {
-
-
-}
-
+export interface ExportTransferConfig extends TransferConfig {}
 
 export interface TransferConfig {
   fields?: DataField[];
@@ -181,9 +177,7 @@ export interface TransferConfig {
 
   // 엑셀 업로드/다운로드 시 폼 데이터 조작 - 전체 데이터에 대해 조작한다.
   overrideFormData?: (formData: DataRowSet) => Promise<DataRowSet>;
-
 }
-
 
 export class DataTransferConfig implements IDataTransferConfig {
   type: DataManageType;
@@ -193,9 +187,9 @@ export class DataTransferConfig implements IDataTransferConfig {
   exportFileName?: string;
 
   constructor(data: IDataTransferConfig, url: string) {
-    this.type = (data.type) ? data.type : { exportable: true, importable: true };
-    this.export = (data.export) ? data.export : { fields: [] };
-    this.import = (data.import) ? data.import : { fields: [] };
+    this.type = data.type ? data.type : { exportable: true, importable: true };
+    this.export = data.export ? data.export : { fields: [] };
+    this.import = data.import ? data.import : { fields: [] };
     this.exportFileName = data.exportFileName;
 
     const defaultImportMode = { create: true, update: true };
@@ -214,7 +208,6 @@ export class DataTransferConfig implements IDataTransferConfig {
       // 엑셀 업로드 기본 경로
       this.import.url = url + '/excel-upload';
     }
-
   }
 
   isSupportExport(): boolean {
@@ -297,7 +290,9 @@ export class DataTransferConfig implements IDataTransferConfig {
     return this;
   }
 
-  withOverrideExportFormData(overrideFormData?: (formData: DataRowSet) => Promise<DataRowSet>): DataTransferConfig {
+  withOverrideExportFormData(
+    overrideFormData?: (formData: DataRowSet) => Promise<DataRowSet>,
+  ): DataTransferConfig {
     if (this.export) {
       this.export.overrideFormData = overrideFormData;
     } else {
@@ -306,7 +301,9 @@ export class DataTransferConfig implements IDataTransferConfig {
     return this;
   }
 
-  withOverrideImportFormData(overrideFormData?: (formData: DataRowSet) => Promise<DataRowSet>): DataTransferConfig {
+  withOverrideImportFormData(
+    overrideFormData?: (formData: DataRowSet) => Promise<DataRowSet>,
+  ): DataTransferConfig {
     if (this.import) {
       this.import.overrideFormData = overrideFormData;
     } else {
@@ -331,11 +328,26 @@ export class DataTransferConfig implements IDataTransferConfig {
       this.import = { fields: [] };
     }
 
-    this.export.fields = this.updateFields(this.export.fields ?? [], dataFields, this.isSupportExport(), { ensureId: true });
-    this.import.fields = this.updateFields(this.import.fields ?? [], dataFields, this.isSupportImport(), { ensureId: this.isImportUpdateEnabled() });
+    this.export.fields = this.updateFields(
+      this.export.fields ?? [],
+      dataFields,
+      this.isSupportExport(),
+      { ensureId: true },
+    );
+    this.import.fields = this.updateFields(
+      this.import.fields ?? [],
+      dataFields,
+      this.isSupportImport(),
+      { ensureId: this.isImportUpdateEnabled() },
+    );
   }
 
-  private updateFields(existingFields: DataField[], dataFields: DataField[], isSupported: boolean, options?: { ensureId?: boolean }): DataField[] {
+  private updateFields(
+    existingFields: DataField[],
+    dataFields: DataField[],
+    isSupported: boolean,
+    options?: { ensureId?: boolean },
+  ): DataField[] {
     if (isSupported) {
       if (existingFields.length === 0) {
         existingFields.push(...dataFields);
@@ -347,7 +359,7 @@ export class DataTransferConfig implements IDataTransferConfig {
         });
       }
     }
-    
+
     const ensureId = options?.ensureId ?? true;
     return this.applyIdPolicy(existingFields, ensureId);
   }
@@ -382,7 +394,12 @@ export class DataTransferConfig implements IDataTransferConfig {
     return this;
   }
 
-  withImportOverrideParseResult(overrideParseResult: (formData: DataRowSet, response: unknown) => { success: boolean, result: DataTransferResult, error?: string, errorView?: ReactNode }): DataTransferConfig {
+  withImportOverrideParseResult(
+    overrideParseResult: (
+      formData: DataRowSet,
+      response: unknown,
+    ) => { success: boolean; result: DataTransferResult; error?: string; errorView?: ReactNode },
+  ): DataTransferConfig {
     if (this.import) {
       this.import.overrideParseResult = overrideParseResult;
     } else {
@@ -392,7 +409,6 @@ export class DataTransferConfig implements IDataTransferConfig {
   }
 
   validateDataFields(defaultFields: DataField[]) {
-
     // 이 class 인스턴스를 사용하기 전 반드시 initialize 를 해야 한다.
     // fields 설정을 조정하기 위해서이다.
     if (this.isSupportExport()) {
@@ -413,7 +429,6 @@ export class DataTransferConfig implements IDataTransferConfig {
       }
     }
   }
-
 }
 
 export interface DataTransferResult {
@@ -440,7 +455,7 @@ export interface DataFieldProps {
   label: string;
   type: FieldType;
   description?: string;
-  required?: boolean;   // import 할 때 validation 용으로 사용한다.
+  required?: boolean; // import 할 때 validation 용으로 사용한다.
   options?: SelectOption[];
   dataTransferRule?: DataTransferRule;
 }
@@ -454,7 +469,15 @@ export class DataField {
   private options?: SelectOption[];
   private dataTransferRule?: DataTransferRule;
 
-  constructor({ name, label, type, description, options, dataTransferRule, required }: DataFieldProps) {
+  constructor({
+    name,
+    label,
+    type,
+    description,
+    options,
+    dataTransferRule,
+    required,
+  }: DataFieldProps) {
     this.name = name;
     this.label = label;
     this.description = description;
@@ -503,7 +526,7 @@ export class DataField {
 
     if (this.type === 'select') {
       if (this.options) {
-        const option = this.options?.find(option => option.value === value);
+        const option = this.options?.find((option) => option.value === value);
         return option ? option.label : value;
       }
     } else if (this.type === 'multiselect') {
@@ -515,17 +538,19 @@ export class DataField {
         // multi select value
         if (val.includes('|||')) {
           const values = val.split('|||');
-          return values.map(value => {
-            const option = this.options?.find(option => option.value === value);
-            return option ? option.label ?? option.value : value;
-          }).join(',');
+          return values
+            .map((value) => {
+              const option = this.options?.find((option) => option.value === value);
+              return option ? (option.label ?? option.value) : value;
+            })
+            .join(',');
         } else {
-          const option = this.options?.find(option => option.value === value);
-          return option ? option.label ?? option.value : value;
+          const option = this.options?.find((option) => option.value === value);
+          return option ? (option.label ?? option.value) : value;
         }
       }
     } else if (this.type === 'datetime') {
-      return await getRangeDatetimeValue(value)
+      return await getRangeDatetimeValue(value);
     } else if (this.type === 'boolean') {
       const bool = isTrue(value);
       return bool ? '예' : '아니오';
@@ -534,14 +559,11 @@ export class DataField {
     } else if (this.type === 'markdown') {
       return getPlainText(value);
     } else if (this.type === 'date') {
-      return await getRangeDateValue(value)
+      return await getRangeDateValue(value);
     }
 
     return value;
   }
-
-
-
 
   async getValueOnImport(value: any): Promise<any> {
     if (this.dataTransferRule?.changeValueOnImport) {
@@ -549,7 +571,7 @@ export class DataField {
     }
 
     if (this.type === 'select') {
-      const option = this.options?.find(option => option.label === value);
+      const option = this.options?.find((option) => option.label === value);
       return option ? option.value : value;
     } else if (this.type === 'multiselect') {
       const val = value + '';
@@ -559,18 +581,20 @@ export class DataField {
       // multi select value
       if (val.includes(',')) {
         const values = val.split('|||');
-        return values.map(value => {
-          const option = this.options?.find(option => option.label === value);
-          return option ? option.value : value;
-        }).join('|||');
+        return values
+          .map((value) => {
+            const option = this.options?.find((option) => option.label === value);
+            return option ? option.value : value;
+          })
+          .join('|||');
       } else {
-        const option = this.options?.find(option => option.label === value);
+        const option = this.options?.find((option) => option.label === value);
         return option ? option.value : value;
       }
     } else if (this.type === 'datetime') {
-      return await getImportedRangeDatetimeValue(value)
+      return await getImportedRangeDatetimeValue(value);
     } else if (this.type === 'date') {
-      return await getImportedRangeDateValue(value)
+      return await getImportedRangeDateValue(value);
     } else if (this.type === 'boolean') {
       return isTrue(value);
     } else if (this.type === 'html') {
@@ -580,7 +604,6 @@ export class DataField {
     }
 
     return value;
-
   }
 
   withRequired(required: boolean): DataField {
@@ -599,7 +622,7 @@ export class DataField {
     } else {
       this.dataTransferRule = {
         changeValueOnExport: changeValueOnExport,
-      }
+      };
     }
     return this;
   }
@@ -610,7 +633,7 @@ export class DataField {
     } else {
       this.dataTransferRule = {
         changeValueOnImport: changeValueOnImport,
-      }
+      };
     }
     return this;
   }
@@ -623,7 +646,6 @@ export class DataField {
   getDescription(): string {
     return defaultString(this.description);
   }
-
 }
 
 export interface DataExportCount {
@@ -638,7 +660,6 @@ export interface DataExportResult {
 }
 
 export function createFieldMap(...fields: DataField[]): Map<string, DataField> {
-
   const fieldMap: Map<string, DataField> = new Map();
 
   fields.forEach((field) => {
@@ -648,11 +669,11 @@ export function createFieldMap(...fields: DataField[]): Map<string, DataField> {
   return fieldMap;
 }
 
-
-
-export function getExportFileName(exportFileName: string | undefined, translation: (key: string) => string) {
-
-  let fileName = exportFileName || 'export_file'
+export function getExportFileName(
+  exportFileName: string | undefined,
+  translation: (key: string) => string,
+) {
+  let fileName = exportFileName || 'export_file';
 
   // replace translation
   fileName = translation(fileName);
@@ -678,12 +699,16 @@ export function getExportFileName(exportFileName: string | undefined, translatio
   }
 
   return fileName;
-
 }
 
 // 타입 가드 함수들
 export function isDataColumn(value: unknown): value is DataColumn {
-  return !!value && typeof value === 'object' && typeof (value as DataColumn).name === 'string' && 'value' in value;
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    typeof (value as DataColumn).name === 'string' &&
+    'value' in value
+  );
 }
 
 export function isDataRow(value: unknown): value is DataRow {
@@ -695,11 +720,15 @@ export function isDataRowSet(value: unknown): value is DataRowSet {
 }
 
 export function isSampleDataItem(value: unknown): value is SampleDataItem {
-  return !!value && typeof value === 'object' && typeof (value as SampleDataItem).name === 'string' && 'value' in value;
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    typeof (value as SampleDataItem).name === 'string' &&
+    'value' in value
+  );
 }
 
-
-export async function getRangeDateValue(value: any) : Promise<any> {
+export async function getRangeDateValue(value: any): Promise<any> {
   // value 가 배열이면 배열의 첫번째 요소를 반환
   if (value !== undefined) {
     if (Array.isArray(value)) {
@@ -729,7 +758,7 @@ export async function getRangeDatetimeValue(value: any): Promise<any> {
   return value;
 }
 
-export async function getImportedRangeDateValue(value: any) : Promise<any> {
+export async function getImportedRangeDateValue(value: any): Promise<any> {
   if (value !== undefined) {
     const valueString = value + '';
     if (valueString.includes(' ~ ')) {
@@ -749,7 +778,7 @@ export async function getImportedRangeDateValue(value: any) : Promise<any> {
   return value;
 }
 
-export async function getImportedRangeDatetimeValue(value: any) : Promise<any> {
+export async function getImportedRangeDatetimeValue(value: any): Promise<any> {
   if (value !== undefined) {
     const valueString = value + '';
     if (valueString.includes(' ~ ')) {

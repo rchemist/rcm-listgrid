@@ -5,33 +5,27 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-'use client'
+'use client';
 
-import React, {ReactNode, useEffect, useState} from "react";
-import {Paper} from "../../../ui";
-import {Modal} from "../../../ui";
-import {
-  ResultByCount,
-  RuleBasedFieldProps,
-  RuleFieldType
-} from './Type';
-import {getConditionalReactNode, HelpTextType, LabelType} from '../../../config/Config';
-import {RuleBasedFieldsView} from './RuleBasedFieldView';
-import {EntityForm} from '../../../config/EntityForm';
-import {useSession} from '../../../auth';
-
+import React, { ReactNode, useEffect, useState } from 'react';
+import { Paper } from '../../../ui';
+import { Modal } from '../../../ui';
+import { ResultByCount, RuleBasedFieldProps, RuleFieldType } from './Type';
+import { getConditionalReactNode, HelpTextType, LabelType } from '../../../config/Config';
+import { RuleBasedFieldsView } from './RuleBasedFieldView';
+import { EntityForm } from '../../../config/EntityForm';
+import { useSession } from '../../../auth';
 
 interface RuleBasedSelectorProps extends RuleBasedFieldProps {
-  type: RuleFieldType,
-  helpText?: HelpTextType
-  label?: LabelType,
+  type: RuleFieldType;
+  helpText?: HelpTextType;
+  label?: LabelType;
   onSubmit?: ResultByCount;
   entityForm: EntityForm;
   apiUrl?: string;
 }
 
-export const RuleBasedSelector = ({...props}: RuleBasedSelectorProps) => {
-
+export const RuleBasedSelector = ({ ...props }: RuleBasedSelectorProps) => {
   const entityForm = props.entityForm;
 
   const apiUrl = getApiUrl(props.apiUrl ?? entityForm.getUrl(), props.type, props.parentId ?? '');
@@ -52,12 +46,12 @@ export const RuleBasedSelector = ({...props}: RuleBasedSelectorProps) => {
         const label = entityForm.getLabel(props.fieldName!);
         setLabel(label);
       } else {
-        setLabel((props.type === 'add' ? '검색 후 등록' : '검색 후 제거'));
+        setLabel(props.type === 'add' ? '검색 후 등록' : '검색 후 제거');
       }
     } else {
       //
       if (typeof props.label === 'boolean') {
-        setLabel((props.type === 'add' ? '검색 후 등록' : '검색 후 제거'));
+        setLabel(props.type === 'add' ? '검색 후 등록' : '검색 후 제거');
       } else {
         setLabel(props.label);
       }
@@ -75,54 +69,61 @@ export const RuleBasedSelector = ({...props}: RuleBasedSelectorProps) => {
     } else {
       //
       (async () => {
-        const helpText = await getConditionalReactNode({entityForm, renderType: entityForm?.getRenderType(), session: session}, props.helpText);
+        const helpText = await getConditionalReactNode(
+          { entityForm, renderType: entityForm?.getRenderType(), session: session },
+          props.helpText,
+        );
         setHelpText(helpText);
       })();
-
     }
-
   }, []);
 
-  return <>
-    <button className={'btn btn-outline-secondary h-[34px]'} onClick={() => {
-      setOpen(true);
-    }}>{label}</button>
-    <Modal opened={open}
-           size={'5xl'}
-           onClose={() => {
-             setOpen(false)
-           }}>
-      <Paper>
-
-
-        <RuleBasedFieldsView {...props}
-                             label={label}
-                             entityForms={[{label: '', prefix: '', entityForm: entityForm}]}
-                             helpText={helpText}
-                             apiUrl={apiUrl}
-                             viewType={'selector'}
-                             onSubmitSelector={
-                               props.onSubmit !== undefined ? props.onSubmit : (count: number) => {
-                                 setOpen(false);
-                                 props.setNotifications?.([`${count} 건의 데이터가 ${props.type === 'add' ? '등록' : '제거'} 되었습니다.`])
-                                 props.onRefresh?.();
-                               }
-
-                             } onCancel={() => {
-          setOpen(false)
-        }}/>
-      </Paper>
-    </Modal>
-  </>
-
-}
-
+  return (
+    <>
+      <button
+        className={'btn btn-outline-secondary h-[34px]'}
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        {label}
+      </button>
+      <Modal
+        opened={open}
+        size={'5xl'}
+        onClose={() => {
+          setOpen(false);
+        }}
+      >
+        <Paper>
+          <RuleBasedFieldsView
+            {...props}
+            label={label}
+            entityForms={[{ label: '', prefix: '', entityForm: entityForm }]}
+            helpText={helpText}
+            apiUrl={apiUrl}
+            viewType={'selector'}
+            onSubmitSelector={
+              props.onSubmit !== undefined
+                ? props.onSubmit
+                : (count: number) => {
+                    setOpen(false);
+                    props.setNotifications?.([
+                      `${count} 건의 데이터가 ${props.type === 'add' ? '등록' : '제거'} 되었습니다.`,
+                    ]);
+                    props.onRefresh?.();
+                  }
+            }
+            onCancel={() => {
+              setOpen(false);
+            }}
+          />
+        </Paper>
+      </Modal>
+    </>
+  );
+};
 
 function getApiUrl(apiUrl: string, type: 'add' | 'remove', parentId: string): string {
-  return (`${apiUrl}/${type}/${parentId}`);
+  return `${apiUrl}/${type}/${parentId}`;
 }
-
-
-
-
-

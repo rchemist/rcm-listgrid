@@ -4,25 +4,22 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
+'use client';
 
-import React, {createContext, useContext, useMemo} from "react";
+import React, { createContext, useContext, useMemo } from 'react';
 import {
   EntityFormThemeContextValue,
   EntityFormThemeProviderProps,
   ViewEntityFormClassNames,
-} from "../types/ViewEntityFormTheme.types";
-import {cn as cnUtil} from "../../../utils/cn";
-import {defaultEntityFormTheme} from "../themes/defaultTheme";
+} from '../types/ViewEntityFormTheme.types';
+import { cn as cnUtil } from '../../../utils/cn';
+import { defaultEntityFormTheme } from '../themes/defaultTheme';
 
 /**
  * 두 객체를 깊게 병합하는 유틸리티
  * 커스텀 테마가 기본 테마를 오버라이드
  */
-const deepMerge = <T extends object>(
-  base: T,
-  override: Partial<T> | undefined
-): T => {
+const deepMerge = <T extends object>(base: T, override: Partial<T> | undefined): T => {
   if (!override) return base;
 
   const result = { ...base };
@@ -35,15 +32,15 @@ const deepMerge = <T extends object>(
       if (
         baseValue &&
         overrideValue &&
-        typeof baseValue === "object" &&
-        typeof overrideValue === "object" &&
+        typeof baseValue === 'object' &&
+        typeof overrideValue === 'object' &&
         !Array.isArray(baseValue) &&
         !Array.isArray(overrideValue)
       ) {
         // 중첩 객체 병합
         (result as Record<string, unknown>)[key] = deepMerge(
           baseValue as object,
-          overrideValue as Partial<object>
+          overrideValue as Partial<object>,
         );
       } else if (overrideValue !== undefined) {
         // 값 오버라이드
@@ -105,10 +102,7 @@ export const EntityFormThemeProvider: React.FC<EntityFormThemeProviderProps> = (
 }) => {
   const value = useMemo<EntityFormThemeContextValue>(() => {
     // 기본 테마와 커스텀 테마를 deep merge
-    const mergedClassNames = deepMerge(
-      defaultEntityFormTheme,
-      theme
-    ) as ViewEntityFormClassNames;
+    const mergedClassNames = deepMerge(defaultEntityFormTheme, theme) as ViewEntityFormClassNames;
 
     return {
       classNames: mergedClassNames,
@@ -127,9 +121,7 @@ export const EntityFormThemeProvider: React.FC<EntityFormThemeProviderProps> = (
   }, [theme, fieldRenderers, buttonLabels, stepperRenderer, createStepButtonPosition]);
 
   return (
-    <EntityFormThemeContext.Provider value={value}>
-      {children}
-    </EntityFormThemeContext.Provider>
+    <EntityFormThemeContext.Provider value={value}>{children}</EntityFormThemeContext.Provider>
   );
 };
 

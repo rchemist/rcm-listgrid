@@ -5,21 +5,28 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ListableFormField, ListableFormFieldProps} from "./ListableFormField";
-import {FieldType} from '../../../config/Config';
-import {MinMaxStringLimit} from "../../../form/Type";
+import { ListableFormField, ListableFormFieldProps } from './ListableFormField';
+import { FieldType } from '../../../config/Config';
+import { MinMaxStringLimit } from '../../../form/Type';
 
 export interface AbstractDateFieldProps extends ListableFormFieldProps {
   limit?: MinMaxStringLimit;
   range?: boolean;
 }
 
-export abstract class AbstractDateField<T extends AbstractDateField<T>> extends ListableFormField<T> {
-
+export abstract class AbstractDateField<
+  T extends AbstractDateField<T>,
+> extends ListableFormField<T> {
   limit?: MinMaxStringLimit;
   range?: boolean;
 
-  protected constructor(name: string, order: number, type: FieldType, limit?: MinMaxStringLimit, range?: boolean) {
+  protected constructor(
+    name: string,
+    order: number,
+    type: FieldType,
+    limit?: MinMaxStringLimit,
+    range?: boolean,
+  ) {
     super(name, order, type);
     this.limit = limit;
     this.range = range;
@@ -48,7 +55,7 @@ export abstract class AbstractDateField<T extends AbstractDateField<T>> extends 
    * @param min
    */
   withMin(min?: string): this {
-    this.limit = { min: min, max: this.limit?.max }
+    this.limit = { min: min, max: this.limit?.max };
     return this;
   }
 
@@ -64,4 +71,4 @@ export abstract class AbstractDateField<T extends AbstractDateField<T>> extends 
   protected copyFields(origin: ListableFormFieldProps, includeValue: boolean = true): this {
     return super.copyFields(origin, includeValue).withLimit(this.limit).withRange(this.range);
   }
-} 
+}

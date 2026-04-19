@@ -12,25 +12,25 @@ import React, { Suspense, ComponentType, lazy } from 'react';
 //   dynamic(() => import('...'), { loading: () => <Skeleton/>, ssr: false })
 
 export interface LazyImportOptions {
-    loading?: () => React.ReactNode;
-    /** Ignored. Kept for next/dynamic API parity. */
-    ssr?: boolean;
+  loading?: () => React.ReactNode;
+  /** Ignored. Kept for next/dynamic API parity. */
+  ssr?: boolean;
 }
 
 // intentional: generic component loading mirrors next/dynamic ComponentType<any> contract
 export function lazyImport<P = any>(
-    loader: () => Promise<{ default: ComponentType<any> }>,
-    options: LazyImportOptions = {}
+  loader: () => Promise<{ default: ComponentType<any> }>,
+  options: LazyImportOptions = {},
 ): ComponentType<P> {
-    const Lazy = lazy(loader);
-    const fallback = options.loading ? options.loading() : null;
-    const Wrapped: ComponentType<P> = (props) => (
-        <Suspense fallback={fallback}>
-            <Lazy {...(props as Record<string, unknown>)} />
-        </Suspense>
-    );
-    Wrapped.displayName = 'LazyImport';
-    return Wrapped;
+  const Lazy = lazy(loader);
+  const fallback = options.loading ? options.loading() : null;
+  const Wrapped: ComponentType<P> = (props) => (
+    <Suspense fallback={fallback}>
+      <Lazy {...(props as Record<string, unknown>)} />
+    </Suspense>
+  );
+  Wrapped.displayName = 'LazyImport';
+  return Wrapped;
 }
 
 // Named as `dynamic` so call sites can `import { dynamic } from '.../utils/lazy'`

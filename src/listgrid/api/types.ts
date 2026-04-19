@@ -10,15 +10,15 @@
 // the shape but never constructs a real HTTP layer.
 
 export interface IEntityError {
-    error: IEntityErrorBody;
-    [key: string]: unknown;
+  error: IEntityErrorBody;
+  [key: string]: unknown;
 }
 
 export interface IEntityErrorBody {
-    error?: boolean | string;
-    message?: string;
-    fieldError?: Map<string, string[]> | Record<string, string[]>;
-    [key: string]: unknown;
+  error?: boolean | string;
+  message?: string;
+  fieldError?: Map<string, string[]> | Record<string, string[]>;
+  [key: string]: unknown;
 }
 
 // ResponseData is a class so call sites can `new ResponseData()` to construct
@@ -29,20 +29,22 @@ export interface IEntityErrorBody {
 // (see DECISIONS #21 / generic entity payload). Tightening to `unknown` breaks
 // downstream components outside this B-1 scope.
 export class ResponseData<T = any> {
-    data: T = null as T;
-    status?: number;
-    error?: string;
-    entityError?: IEntityError;
+  data: T = null as T;
+  status?: number;
+  error?: string;
+  entityError?: IEntityError;
 
-    constructor(init?: Partial<ResponseData<T>>) {
-        if (init) Object.assign(this, init);
-    }
+  constructor(init?: Partial<ResponseData<T>>) {
+    if (init) Object.assign(this, init);
+  }
 
-    isError(): boolean {
-        return !!(this.error || this.entityError || (this.status && this.status >= 400));
-    }
+  isError(): boolean {
+    return !!(this.error || this.entityError || (this.status && this.status >= 400));
+  }
 }
 
-export function createResponseData<T = any>(init: Partial<ResponseData<T>> & { data?: T }): ResponseData<T> {
-    return new ResponseData<T>(init);
+export function createResponseData<T = any>(
+  init: Partial<ResponseData<T>> & { data?: T },
+): ResponseData<T> {
+  return new ResponseData<T>(init);
 }

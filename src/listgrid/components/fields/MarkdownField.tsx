@@ -5,22 +5,17 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FormField, FormFieldProps} from './abstract';
-import {FieldRenderParameters} from '../../config/EntityField';
-import React from "react";
-import {
-  getInputRendererParameters
-} from '../helper/FieldRendererHelper';
-import {MarkdownEditor} from "../../ui";
-import {isEquals} from "../../misc";
-import {isBlank} from '../../utils/StringUtil';
+import { FormField, FormFieldProps } from './abstract';
+import { FieldRenderParameters } from '../../config/EntityField';
+import React from 'react';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { MarkdownEditor } from '../../ui';
+import { isEquals } from '../../misc';
+import { isBlank } from '../../utils/StringUtil';
 
-interface MarkdownFieldProps extends FormFieldProps{
-
-}
+interface MarkdownFieldProps extends FormFieldProps {}
 
 export class MarkdownField extends FormField<MarkdownField> {
-
   constructor(name: string, order: number) {
     super(name, order, 'markdown');
   }
@@ -30,7 +25,7 @@ export class MarkdownField extends FormField<MarkdownField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <MarkdownEditor {...await getInputRendererParameters(this, params)}></MarkdownEditor>
+      return <MarkdownEditor {...await getInputRendererParameters(this, params)}></MarkdownEditor>;
     })();
   }
 
@@ -42,22 +37,17 @@ export class MarkdownField extends FormField<MarkdownField> {
   }
 
   private isEqualsOrEmpty(value?: string): boolean {
-    if (isBlank(value))
-      return true;
+    if (isBlank(value)) return true;
     return value === '<p><br></p>' || value === '<p></p>';
   }
 
   isDirty(): boolean {
     if (this.value) {
-
       const isNullDefaultValue = this.isEqualsOrEmpty(this.value.default);
       const isNullFetchedValue = this.isEqualsOrEmpty(this.value.fetched);
       const isNullCurrentValue = this.isEqualsOrEmpty(this.value.current);
 
-
-      if (isNullDefaultValue
-        && isNullFetchedValue
-        && isNullCurrentValue) {
+      if (isNullDefaultValue && isNullFetchedValue && isNullCurrentValue) {
         return false;
       }
 
@@ -83,5 +73,4 @@ export class MarkdownField extends FormField<MarkdownField> {
   public static create(props: MarkdownFieldProps): MarkdownField {
     return new MarkdownField(props.name, props.order).copyFields(props);
   }
-
 }

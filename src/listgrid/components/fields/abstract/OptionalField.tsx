@@ -9,18 +9,18 @@ import {
   getNestedValue,
   ListableFormField,
   ListableFormFieldProps,
-  ViewListProps
-} from "./ListableFormField";
-import {ComboProps, FieldType, RenderType} from '../../../config/Config';
-import {MinMaxLimit, SelectOption} from "../../../form/Type";
-import {ValidateResult} from '../../../validations/Validation';
-import {EntityForm} from '../../../config/EntityForm';
-import {Session} from '../../../auth/types';
-import {hexHash} from "../../../utils/hash";
-import {isEquals} from "../../../misc";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {Badge} from "../../../ui";
-import {isBlank} from '../../../utils/StringUtil';
+  ViewListProps,
+} from './ListableFormField';
+import { ComboProps, FieldType, RenderType } from '../../../config/Config';
+import { MinMaxLimit, SelectOption } from '../../../form/Type';
+import { ValidateResult } from '../../../validations/Validation';
+import { EntityForm } from '../../../config/EntityForm';
+import { Session } from '../../../auth/types';
+import { hexHash } from '../../../utils/hash';
+import { isEquals } from '../../../misc';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { Badge } from '../../../ui';
+import { isBlank } from '../../../utils/StringUtil';
 
 function isEqualOptions(a?: SelectOption[], b?: SelectOption[]) {
   if (a === undefined && b === undefined) {
@@ -38,9 +38,9 @@ function isEqualOptions(a?: SelectOption[], b?: SelectOption[]) {
  * Chip UI 설정
  */
 export interface ChipConfig {
-  enabled: boolean;           // Chip UI 사용 여부
-  maxOptions?: number;        // Chip으로 표시할 최대 옵션 수 (기본값: 10)
-  maxLabelLength?: number;    // Chip으로 표시할 최대 라벨 길이 (기본값: 8)
+  enabled: boolean; // Chip UI 사용 여부
+  maxOptions?: number; // Chip으로 표시할 최대 옵션 수 (기본값: 10)
+  maxLabelLength?: number; // Chip으로 표시할 최대 라벨 길이 (기본값: 8)
 }
 
 // Chip UI 기본 설정값
@@ -48,20 +48,19 @@ const DEFAULT_CHIP_MAX_OPTIONS = 10;
 const DEFAULT_CHIP_MAX_LABEL_LENGTH = 8;
 
 export interface OptionalFieldProps extends ListableFormFieldProps {
-  combo?: ComboProps;    // radio 나 checkbox 타입 으로 보여져야 하는 경우 추가 설정
-  options?: SelectOption[];   // option 정보
-  preservedOptions?: SelectOption[];    // onChange 의 결과로 option 이 변경되었다면, 롤백을 위해 이 값을 저장해 둔다.
-  chipConfig?: ChipConfig;    // Chip UI 설정
-  singleFilter?: boolean;    // 목록 필터에서 단일 선택만 허용 (true: EQUAL, false/undefined: IN)
+  combo?: ComboProps; // radio 나 checkbox 타입 으로 보여져야 하는 경우 추가 설정
+  options?: SelectOption[]; // option 정보
+  preservedOptions?: SelectOption[]; // onChange 의 결과로 option 이 변경되었다면, 롤백을 위해 이 값을 저장해 둔다.
+  chipConfig?: ChipConfig; // Chip UI 설정
+  singleFilter?: boolean; // 목록 필터에서 단일 선택만 허용 (true: EQUAL, false/undefined: IN)
 }
 
 export abstract class OptionalField<T extends OptionalField<T>> extends ListableFormField<T> {
-
-  combo?: ComboProps;    // radio 나 checkbox 타입 으로 보여져야 하는 경우 추가 설정
-  options?: SelectOption[];   // option 정보
-  preservedOptions?: SelectOption[];    // onChange 의 결과로 option 이 변경되었다면, 롤백을 위해 이 값을 저장해 둔다.
-  chipConfig?: ChipConfig;    // Chip UI 설정
-  singleFilter?: boolean;    // 목록 필터에서 단일 선택만 허용 (true: EQUAL, false/undefined: IN)
+  combo?: ComboProps; // radio 나 checkbox 타입 으로 보여져야 하는 경우 추가 설정
+  options?: SelectOption[]; // option 정보
+  preservedOptions?: SelectOption[]; // onChange 의 결과로 option 이 변경되었다면, 롤백을 위해 이 값을 저장해 둔다.
+  chipConfig?: ChipConfig; // Chip UI 설정
+  singleFilter?: boolean; // 목록 필터에서 단일 선택만 허용 (true: EQUAL, false/undefined: IN)
 
   /**
    * 목록 필터에서 단일 선택만 허용하도록 설정합니다.
@@ -101,7 +100,7 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
     this.chipConfig = {
       enabled,
       maxOptions: config?.maxOptions ?? DEFAULT_CHIP_MAX_OPTIONS,
-      maxLabelLength: config?.maxLabelLength ?? DEFAULT_CHIP_MAX_LABEL_LENGTH
+      maxLabelLength: config?.maxLabelLength ?? DEFAULT_CHIP_MAX_LABEL_LENGTH,
     };
     return this;
   }
@@ -175,7 +174,10 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
   }
 
   protected copyFields(origin: OptionalFieldProps, includeValue: boolean = true): this {
-    const result = super.copyFields(origin, includeValue).withComboType(origin.combo).withOptions(origin.options)
+    const result = super
+      .copyFields(origin, includeValue)
+      .withComboType(origin.combo)
+      .withOptions(origin.options)
       .withPreservedOptions(origin.preservedOptions);
     if (origin.chipConfig) {
       result.chipConfig = { ...origin.chipConfig };
@@ -191,7 +193,9 @@ export interface MultipleOptionalFieldProps extends OptionalFieldProps {
   limit?: MinMaxLimit;
 }
 
-export abstract class MultipleOptionalField<T extends MultipleOptionalField<T>> extends OptionalField<T> {
+export abstract class MultipleOptionalField<
+  T extends MultipleOptionalField<T>,
+> extends OptionalField<T> {
   limit?: MinMaxLimit;
 
   /**
@@ -224,33 +228,40 @@ export abstract class MultipleOptionalField<T extends MultipleOptionalField<T>> 
   }
 
   protected createCacheKey(renderType?: RenderType) {
-
     let key: string = ``;
     for (const option of this.options!) {
-      key += `_${option.value}`
+      key += `_${option.value}`;
     }
 
     return hexHash(`${this.getName()}_${this.getCurrentValue(renderType)}_${key}`);
   }
 
-  protected constructor(name: string, order: number, type: FieldType, options?: SelectOption[], limit?: MinMaxLimit) {
+  protected constructor(
+    name: string,
+    order: number,
+    type: FieldType,
+    options?: SelectOption[],
+    limit?: MinMaxLimit,
+  ) {
     super(name, order, type);
     this.options = options;
     this.limit = limit;
   }
 
   protected copyFields(origin: OptionalFieldProps, includeValue: boolean = true): this {
-    return super.copyFields(origin, includeValue)
-      .withLimit(this.limit);
+    return super.copyFields(origin, includeValue).withLimit(this.limit);
   }
 
-  async validate(entityForm: EntityForm, session?: Session): Promise<ValidateResult | ValidateResult[]> {
+  async validate(
+    entityForm: EntityForm,
+    session?: Session,
+  ): Promise<ValidateResult | ValidateResult[]> {
     return await this.validateWithLimit({
       previousResult: await super.validate(entityForm, session),
       entityForm: entityForm,
       required: await this.isRequired({ entityForm, session }),
       limit: this.limit,
-      value: this.getCurrentValue(entityForm.getRenderType())
+      value: this.getCurrentValue(entityForm.getRenderType()),
     });
   }
 
@@ -277,7 +288,6 @@ export abstract class MultipleOptionalField<T extends MultipleOptionalField<T>> 
       // 에러가 안 난 경우에만 limit 에 대한 체크 에러를 시작한다.
 
       if (props.limit !== undefined) {
-
         const value = props.value;
 
         if (value !== undefined) {
@@ -288,20 +298,15 @@ export abstract class MultipleOptionalField<T extends MultipleOptionalField<T>> 
             if (props.limit.min !== undefined && selected < props.limit.min) {
               return ValidateResult.fail(`최소 ${props.limit.min}개 이상을 선택해야 합니다.`);
             } else if (props.limit.max !== undefined && selected > props.limit.max) {
-              return ValidateResult.fail(`최대 ${props.limit.max}개까지 선택할 수 있습니다.`)
+              return ValidateResult.fail(`최대 ${props.limit.max}개까지 선택할 수 있습니다.`);
             }
-
           } else {
-
             if (props.limit.min !== undefined) {
               return ValidateResult.fail(`최소 ${props.limit.min}개 이상을 선택해야 합니다.`);
             }
-
           }
         }
-
       }
-
     }
     return result;
   }
@@ -313,69 +318,90 @@ interface ValidateWithLimitProps {
   required: boolean;
   limit?: MinMaxLimit;
   value: any;
-} 
+}
 
 export function renderListOptionalField(field: OptionalField<any>, props: ViewListProps) {
-    // 중첩 객체 접근 지원 (예: score.student.name)
-    const value = String(getNestedValue(props.item, field.name) ?? '');
-  
-    if (isBlank(value)) {
-      return Promise.resolve({ result: '' });
-    }
-  
-  
-    const option = field.options?.find(option => option.value === value);
-  
-    if (option) {
-      const color = option.color ?? (field.type === 'boolean' ? (isTrue(value) ? 'info' : 'secondary') : 'primary');
-      const label = option.listLabel ?? (option.label ?? option.value);
-      return Promise.resolve({
-        result: <Badge color={color} variant={'outline'}>{label}</Badge>,
-        linkOnCell: true
-      });
-    }
-  
-    const color = field.type === 'boolean' ? isTrue(value) ? 'info' : 'dark' : undefined;
-    const label = field.type === 'boolean' ? isTrue(value) ? '예' : '아니오' : value;
-  
-    return Promise.resolve({ result: <Badge color={color} variant={'outline'}>{label}</Badge>, linkOnCell: true });
+  // 중첩 객체 접근 지원 (예: score.student.name)
+  const value = String(getNestedValue(props.item, field.name) ?? '');
+
+  if (isBlank(value)) {
+    return Promise.resolve({ result: '' });
   }
-  
-  
-  export function renderListMultipleOptionalField(field: OptionalField<any>, props: ViewListProps) {
-    // 중첩 객체 접근 지원 (예: score.student.name)
-    const value = getNestedValue(props.item, field.name);
-  
-    if (isBlank(value) || (Array.isArray(value) && value.length === 0)) {
-      return Promise.resolve({ result: '' });
-    }
-  
-    function getDisplayValue(value: any) {
-      if (field.options) {
-        for (const option of field.options) {
-          if (option.value === value) {
-            return option.listLabel ?? (option.label ?? option.value);
-          }
+
+  const option = field.options?.find((option) => option.value === value);
+
+  if (option) {
+    const color =
+      option.color ??
+      (field.type === 'boolean' ? (isTrue(value) ? 'info' : 'secondary') : 'primary');
+    const label = option.listLabel ?? option.label ?? option.value;
+    return Promise.resolve({
+      result: (
+        <Badge color={color} variant={'outline'}>
+          {label}
+        </Badge>
+      ),
+      linkOnCell: true,
+    });
+  }
+
+  const color = field.type === 'boolean' ? (isTrue(value) ? 'info' : 'dark') : undefined;
+  const label = field.type === 'boolean' ? (isTrue(value) ? '예' : '아니오') : value;
+
+  return Promise.resolve({
+    result: (
+      <Badge color={color} variant={'outline'}>
+        {label}
+      </Badge>
+    ),
+    linkOnCell: true,
+  });
+}
+
+export function renderListMultipleOptionalField(field: OptionalField<any>, props: ViewListProps) {
+  // 중첩 객체 접근 지원 (예: score.student.name)
+  const value = getNestedValue(props.item, field.name);
+
+  if (isBlank(value) || (Array.isArray(value) && value.length === 0)) {
+    return Promise.resolve({ result: '' });
+  }
+
+  function getDisplayValue(value: any) {
+    if (field.options) {
+      for (const option of field.options) {
+        if (option.value === value) {
+          return option.listLabel ?? option.label ?? option.value;
         }
       }
-      return value;
     }
-  
-  
-    if (Array.isArray(value)) {
-      return Promise.resolve({
-        result: <span className={'space-x-0.5'}>{value.map((v, index) => <Badge
-          color={v.color ?? 'secondary'}
-          variant={'outline'}
-          key={`${field.name}_${index}`}>{getDisplayValue(v)}</Badge>)}</span>
-      }); // 여러개 선택시 배열로 반환한다.
-    }
-  
-    const option = field.options?.find(option => option.value === value);
-    if (option) {
-      return Promise.resolve({ result: <Badge color={option.color ?? undefined}>{option.label}</Badge>, linkOnCell: false });
-    }
-  
-    return Promise.resolve({ result: <Badge>{value}</Badge>, linkOnCell: false });
-  
+    return value;
   }
+
+  if (Array.isArray(value)) {
+    return Promise.resolve({
+      result: (
+        <span className={'space-x-0.5'}>
+          {value.map((v, index) => (
+            <Badge
+              color={v.color ?? 'secondary'}
+              variant={'outline'}
+              key={`${field.name}_${index}`}
+            >
+              {getDisplayValue(v)}
+            </Badge>
+          ))}
+        </span>
+      ),
+    }); // 여러개 선택시 배열로 반환한다.
+  }
+
+  const option = field.options?.find((option) => option.value === value);
+  if (option) {
+    return Promise.resolve({
+      result: <Badge color={option.color ?? undefined}>{option.label}</Badge>,
+      linkOnCell: false,
+    });
+  }
+
+  return Promise.resolve({ result: <Badge>{value}</Badge>, linkOnCell: false });
+}

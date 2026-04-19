@@ -5,15 +5,14 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ValidateResult, ValidationItem} from '../validations/Validation';
-import {EntityForm} from '../config/EntityForm';
-import {FieldValue} from '../config/Config';
+import { ValidateResult, ValidationItem } from '../validations/Validation';
+import { EntityForm } from '../config/EntityForm';
+import { FieldValue } from '../config/Config';
 
-export class MinMaxNumberValidation extends ValidationItem{
+export class MinMaxNumberValidation extends ValidationItem {
+  limit: { min?: number; max?: number };
 
-  limit: {min?: number, max?: number};
-
-  constructor(id: string | undefined, limit: {min?: number, max?: number}, message?: string) {
+  constructor(id: string | undefined, limit: { min?: number; max?: number }, message?: string) {
     super(id ?? 'MinMaxNumberValidation', message);
     this.limit = limit;
   }
@@ -40,7 +39,5 @@ export class MinMaxNumberValidation extends ValidationItem{
     }
 
     return Promise.resolve(this.returnValidateResult(error, message));
-
   }
-
 }

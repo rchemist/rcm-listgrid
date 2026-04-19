@@ -5,9 +5,9 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React, {createContext, useContext, ReactNode, useMemo} from 'react';
-import {useSubCollectionExpansion} from '../hooks/useSubCollectionExpansion';
-import {EntityForm} from '../../../config/EntityForm';
+import React, { createContext, useContext, ReactNode, useMemo } from 'react';
+import { useSubCollectionExpansion } from '../hooks/useSubCollectionExpansion';
+import { EntityForm } from '../../../config/EntityForm';
 
 export interface EntityFormScopeContextValue {
   // Depth information
@@ -44,9 +44,7 @@ const defaultContextValue: EntityFormScopeContextValue = {
   canExpand: true,
 };
 
-const EntityFormScopeContext = createContext<EntityFormScopeContextValue>(
-  defaultContextValue
-);
+const EntityFormScopeContext = createContext<EntityFormScopeContextValue>(defaultContextValue);
 
 export interface EntityFormScopeProviderProps {
   children: ReactNode;
@@ -85,16 +83,11 @@ export function EntityFormScopeProvider({
   const isInlineMode = effectiveDepth <= effectiveMaxInlineDepth && !effectiveForceModalMode;
 
   // Use expansion hook for managing expanded items
-  const {
-    expandedItems,
-    canExpand,
-    toggleExpansion,
-    collapseItem,
-    collapseAll,
-  } = useSubCollectionExpansion({
-    maxExpandedItems: effectiveMaxExpandedItems,
-    expansionMode: effectiveExpansionMode,
-  });
+  const { expandedItems, canExpand, toggleExpansion, collapseItem, collapseAll } =
+    useSubCollectionExpansion({
+      maxExpandedItems: effectiveMaxExpandedItems,
+      expansionMode: effectiveExpansionMode,
+    });
 
   // Memoize context value to prevent unnecessary re-renders
   const value = useMemo<EntityFormScopeContextValue>(
@@ -125,13 +118,11 @@ export function EntityFormScopeProvider({
       collapseItem,
       collapseAll,
       parentEntityForm,
-    ]
+    ],
   );
 
   return (
-    <EntityFormScopeContext.Provider value={value}>
-      {children}
-    </EntityFormScopeContext.Provider>
+    <EntityFormScopeContext.Provider value={value}>{children}</EntityFormScopeContext.Provider>
   );
 }
 

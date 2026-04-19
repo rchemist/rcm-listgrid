@@ -1,10 +1,15 @@
-import { SearchForm } from "../../form/SearchForm";
-import { PageResult } from "../../form/Type";
-import { ExtensionPoint, ClientExtensionFunction, ExtensionOptions, ClientExtensionConfig, ClientExtensionContext } from '../../extensions/EntityFormExtension.types';
+import { SearchForm } from '../../form/SearchForm';
+import { PageResult } from '../../form/Type';
+import {
+  ExtensionPoint,
+  ClientExtensionFunction,
+  ExtensionOptions,
+  ClientExtensionConfig,
+  ClientExtensionContext,
+} from '../../extensions/EntityFormExtension.types';
 import { EntityFormActions } from '../../config/form/EntityFormActions';
 
 export abstract class EntityFormExtensions extends EntityFormActions {
-
   constructor(name: string, url: string) {
     super(name, url);
   }
@@ -15,7 +20,7 @@ export abstract class EntityFormExtensions extends EntityFormActions {
   private withClientExtension(
     point: ExtensionPoint,
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     const config: ClientExtensionConfig = {
       handler,
@@ -23,100 +28,94 @@ export abstract class EntityFormExtensions extends EntityFormActions {
         enabled: true,
         continueOnError: true,
         priority: 0,
-        ...options
-      }
+        ...options,
+      },
     };
 
     const configs = this.clientExtensions.get(point) || [];
     configs.push(config);
 
     // priority로 정렬
-    configs.sort((a, b) => ((a.options?.priority || 0) - (b.options?.priority || 0)));
+    configs.sort((a, b) => (a.options?.priority || 0) - (b.options?.priority || 0));
 
     this.clientExtensions.set(point, configs);
     return this;
   }
 
-
   // LIST Extensions - Client
   withClientPreFetchList(
     handler: ClientExtensionFunction<SearchForm>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.PRE_FETCH_LIST, handler, options);
   }
 
   withClientPostFetchList(
     handler: ClientExtensionFunction<PageResult>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.POST_FETCH_LIST, handler, options);
   }
 
-
   // CREATE Extensions - Client
   withClientPreCreate(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.PRE_CREATE, handler, options);
   }
 
   withClientPostCreate(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.POST_CREATE, handler, options);
   }
 
-
   // READ Extensions - Client
   withClientPreRead(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.PRE_READ, handler, options);
   }
 
   withClientPostRead(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.POST_READ, handler, options);
   }
 
-
   // UPDATE Extensions - Client
   withClientPreUpdate(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.PRE_UPDATE, handler, options);
   }
 
   withClientPostUpdate(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.POST_UPDATE, handler, options);
   }
 
-
   // DELETE Extensions - Client
   withClientPreDelete(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.PRE_DELETE, handler, options);
   }
 
   withClientPostDelete(
     handler: ClientExtensionFunction<any>,
-    options?: Omit<ExtensionOptions, 'executionContext'>
+    options?: Omit<ExtensionOptions, 'executionContext'>,
   ): this {
     return this.withClientExtension(ExtensionPoint.POST_DELETE, handler, options);
   }
-
 
   /**
    * Client Extension 실행
@@ -124,7 +123,7 @@ export abstract class EntityFormExtensions extends EntityFormActions {
   async executeClientExtensions<T>(
     point: ExtensionPoint,
     data: T,
-    context: ClientExtensionContext
+    context: ClientExtensionContext,
   ): Promise<T> {
     const configs = this.clientExtensions.get(point) || [];
     let result = data;
@@ -147,14 +146,11 @@ export abstract class EntityFormExtensions extends EntityFormActions {
     return result;
   }
 
-
-
-
   /**
    * Client Extensions 존재 여부 확인
    */
   hasClientExtensions(...points: ExtensionPoint[]): boolean {
-    return points.some(point => {
+    return points.some((point) => {
       const clientConfigs = this.clientExtensions.get(point) || [];
       return clientConfigs.length > 0;
     });
@@ -167,12 +163,10 @@ export abstract class EntityFormExtensions extends EntityFormActions {
     return this.clientExtensions.get(point) || [];
   }
 
-
   /**
    * 모든 Client Extension 정보 가져오기 (디버깅용)
    */
   getAllClientExtensions(): Map<ExtensionPoint, ClientExtensionConfig[]> {
     return new Map(this.clientExtensions);
   }
-
 }

@@ -1,15 +1,15 @@
 'use client';
-import {useCallback} from "react";
-import {EntityForm} from '../../../config/EntityForm';
+import { useCallback } from 'react';
+import { EntityForm } from '../../../config/EntityForm';
 import {
   ClientExtensionContext,
-  ExtensionPoint
+  ExtensionPoint,
 } from '../../../extensions/EntityFormExtension.types';
-import {isEmpty} from "../../../utils";
-import {EntityButtonLinkProps, RenderType} from '../../../config/Config';
-import {openToast} from "../../../message";
-import {Session} from '../../../auth/types';
-import type {RouterApi} from '../../../router';
+import { isEmpty } from '../../../utils';
+import { EntityButtonLinkProps, RenderType } from '../../../config/Config';
+import { openToast } from '../../../message';
+import { Session } from '../../../auth/types';
+import type { RouterApi } from '../../../router';
 
 /**
  * Custom hook for handling save/delete logic of EntityForm.
@@ -30,22 +30,22 @@ export const useEntityFormSave = ({
   setCacheKey,
   setErrors,
   setOpenBaseLoading,
-  session
+  session,
 }: {
-  entityForm: EntityForm,
-  isSubCollectionEntity: boolean,
-  renderType: RenderType | undefined,
-  pathname: string,
-  router: RouterApi,
-  buttonLinks?: EntityButtonLinkProps,
-  postSave?: (entityForm: EntityForm) => Promise<EntityForm>,
-  setEntityForm: (entityForm: EntityForm) => void,
-  setNotifications: (messages: string[]) => void,
-  setTitleText: (form?: EntityForm) => void,
-  setCacheKey: (key: string) => void,
-  setErrors: (errors: string[]) => void,
-  setOpenBaseLoading: (open: boolean) => void,
-  session?: Session
+  entityForm: EntityForm;
+  isSubCollectionEntity: boolean;
+  renderType: RenderType | undefined;
+  pathname: string;
+  router: RouterApi;
+  buttonLinks?: EntityButtonLinkProps;
+  postSave?: (entityForm: EntityForm) => Promise<EntityForm>;
+  setEntityForm: (entityForm: EntityForm) => void;
+  setNotifications: (messages: string[]) => void;
+  setTitleText: (form?: EntityForm) => void;
+  setCacheKey: (key: string) => void;
+  setErrors: (errors: string[]) => void;
+  setOpenBaseLoading: (open: boolean) => void;
+  session?: Session;
 }) => {
   /**
    * EntityForm 저장 버튼 클릭 시 호출되는 함수
@@ -56,49 +56,52 @@ export const useEntityFormSave = ({
     setErrors([]);
     setNotifications([]);
     // EntityForm Extension 지원 (클라이언트만)
-    const hasClientExtensions = entityForm.hasClientExtensions && 
+    const hasClientExtensions =
+      entityForm.hasClientExtensions &&
       (entityForm.hasClientExtensions(ExtensionPoint.PRE_CREATE, ExtensionPoint.POST_CREATE) ||
-       entityForm.hasClientExtensions(ExtensionPoint.PRE_UPDATE, ExtensionPoint.POST_UPDATE));
+        entityForm.hasClientExtensions(ExtensionPoint.PRE_UPDATE, ExtensionPoint.POST_UPDATE));
     let processedEntityForm = entityForm;
-    
+
     if (hasClientExtensions) {
       const context: ClientExtensionContext = {
         session,
         user: session?.getUser(),
-        entityForm: entityForm
+        entityForm: entityForm,
       };
-      
+
       // Pre Extension 실행 (Create/Update 구분)
-      const extensionPoint = renderType === 'update' ? ExtensionPoint.PRE_UPDATE : ExtensionPoint.PRE_CREATE;
+      const extensionPoint =
+        renderType === 'update' ? ExtensionPoint.PRE_UPDATE : ExtensionPoint.PRE_CREATE;
       await entityForm.executeClientExtensions(
         extensionPoint,
         entityForm.fetchedEntity ?? {},
-        context
+        context,
       );
 
       processedEntityForm = entityForm;
     }
-    
+
     const saveResult = await processedEntityForm.save(session);
     if (isEmpty(saveResult.errors)) {
       // Post Extension 실행
       let finalEntityForm = saveResult.entityForm;
-      
+
       if (hasClientExtensions) {
         const context: ClientExtensionContext = {
           session,
           user: session?.getUser(),
-          entityForm: finalEntityForm
+          entityForm: finalEntityForm,
         };
-        
-        const extensionPoint = renderType === 'update' ? ExtensionPoint.POST_UPDATE : ExtensionPoint.POST_CREATE;
+
+        const extensionPoint =
+          renderType === 'update' ? ExtensionPoint.POST_UPDATE : ExtensionPoint.POST_CREATE;
         await finalEntityForm.executeClientExtensions(
           extensionPoint,
           finalEntityForm.fetchedEntity ?? {},
-          context
+          context,
         );
       }
-      
+
       try {
         setOpenBaseLoading(false);
         if (postSave) {
@@ -113,22 +116,33 @@ export const useEntityFormSave = ({
       setEntityForm(saveResult.entityForm);
       setErrors([error]);
       setOpenBaseLoading(false);
-      openToast({ message: `${error}`, color: "danger", showCloseButton: false });
+      openToast({ message: `${error}`, color: 'danger', showCloseButton: false });
     }
-  }, [entityForm, session, postSave, setEntityForm, setErrors, setNotifications, setOpenBaseLoading]);
+  }, [
+    entityForm,
+    session,
+    postSave,
+    setEntityForm,
+    setErrors,
+    setNotifications,
+    setOpenBaseLoading,
+  ]);
 
   /**
    * EntityForm 삭제 후 처리
    * Handles post-delete logic
    */
-  const handlePostDelete = useCallback(async (entityForm: EntityForm) => {
-    if (postSave) {
-      await postSave(entityForm);
-    }
-  }, [postSave]);
+  const handlePostDelete = useCallback(
+    async (entityForm: EntityForm) => {
+      if (postSave) {
+        await postSave(entityForm);
+      }
+    },
+    [postSave],
+  );
 
   return {
     onClickSaveButton,
-    handlePostDelete
+    handlePostDelete,
   };
-}; 
+};

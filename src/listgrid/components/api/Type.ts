@@ -1,9 +1,9 @@
 // api spec 을 보여 주는 두 가지 방법
-import {SelectOption} from "../../form/Type";
+import { SelectOption } from '../../form/Type';
 
 export interface ApiSpecification {
   url: string;
-  authorized?: boolean;   // accessToken 이 반드시 필요한지 여부
+  authorized?: boolean; // accessToken 이 반드시 필요한지 여부
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
   formData?: ApiFormData | string;
   response: string;
@@ -15,7 +15,6 @@ export interface ApiFormData {
   fields?: ApiDataField[];
 }
 
-
 export interface ApiDataField {
   name: string;
   label: string;
@@ -25,8 +24,6 @@ export interface ApiDataField {
   required?: boolean;
   options?: SelectOption[];
 }
-
-
 
 // 타입 가드 함수
 export function isApiSpecification(obj: any): obj is ApiSpecification {

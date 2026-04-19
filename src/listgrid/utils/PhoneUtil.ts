@@ -29,10 +29,10 @@ export function removePhoneNumberHyphens(phoneNumber: string | null | undefined)
  */
 export function formatPhoneNumber(phoneNumber: string | null | undefined): string {
   if (!phoneNumber) return '';
-  
+
   // 이미 하이픈이 포함되어 있으면 제거 후 다시 포맷팅
   const digitsOnly = removePhoneNumberHyphens(phoneNumber);
-  
+
   if (digitsOnly.length === 10) {
     // 10자리: 000-0000-0000 형식
     return `${digitsOnly.substring(0, 3)}-${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}`;
@@ -40,9 +40,7 @@ export function formatPhoneNumber(phoneNumber: string | null | undefined): strin
     // 11자리: 000-0000-0000 형식
     return `${digitsOnly.substring(0, 3)}-${digitsOnly.substring(3, 7)}-${digitsOnly.substring(7)}`;
   }
-  
+
   // 10자리 또는 11자리가 아닌 경우 원본 반환 (검증은 별도로 처리)
   return digitsOnly;
 }
-
-

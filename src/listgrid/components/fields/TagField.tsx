@@ -12,12 +12,12 @@ import {
   ViewListProps,
   ViewListResult,
 } from './abstract';
-import React from "react";
-import {MinMaxLimit, SelectOption} from "../../form/Type";
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {TagsInput} from "../../ui";
-import {TagValidationResult} from "../../form/TagsInput/types";
-import {isEmpty} from "../../utils";
+import React from 'react';
+import { MinMaxLimit, SelectOption } from '../../form/Type';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { TagsInput } from '../../ui';
+import { TagValidationResult } from '../../form/TagsInput/types';
+import { isEmpty } from '../../utils';
 // CSS module removed in Stage 8 (host app supplies styling)
 const classes: Record<string, string> = {};
 interface TagFieldProps extends MultipleOptionalFieldProps {
@@ -25,10 +25,9 @@ interface TagFieldProps extends MultipleOptionalFieldProps {
 }
 
 export class TagField extends MultipleOptionalField<TagField> {
-
   tagValidation?: (value: string) => TagValidationResult | Promise<TagValidationResult>;
 
-  constructor(name: string, order: number, options?: SelectOption[], limit?: MinMaxLimit,) {
+  constructor(name: string, order: number, options?: SelectOption[], limit?: MinMaxLimit) {
     super(name, order, 'tag', options, limit);
   }
 
@@ -36,7 +35,9 @@ export class TagField extends MultipleOptionalField<TagField> {
    * 태그 추가 시 실시간 검증 함수를 설정합니다.
    * @param validation 검증 함수 (태그 값을 받아 TagValidationResult 반환)
    */
-  withTagValidation(validation: (value: string) => TagValidationResult | Promise<TagValidationResult>): TagField {
+  withTagValidation(
+    validation: (value: string) => TagValidationResult | Promise<TagValidationResult>,
+  ): TagField {
     this.tagValidation = validation;
     return this;
   }
@@ -55,12 +56,15 @@ export class TagField extends MultipleOptionalField<TagField> {
       const splittedSearch = search.toLowerCase().trim().split(' ');
       return options.filter((option) => {
         const words = option.toLowerCase().trim().split(' ');
-        return splittedSearch.every((searchWord) => words.some((word) => word.includes(searchWord)));
+        return splittedSearch.every((searchWord) =>
+          words.some((word) => word.includes(searchWord)),
+        );
       });
     };
 
     return (async () => {
-        return <TagsInput
+      return (
+        <TagsInput
           size={'md'}
           readOnly={params.readonly}
           required={params.required}
@@ -69,7 +73,7 @@ export class TagField extends MultipleOptionalField<TagField> {
           classNames={{
             root: classes.root,
             input: classes.input,
-            wrapper: classes.wrapper
+            wrapper: classes.wrapper,
           }}
           maxTags={this.limit?.max}
           data={tagData}
@@ -83,18 +87,20 @@ export class TagField extends MultipleOptionalField<TagField> {
             value: await this.getDisplayValue(params.entityForm, params.entityForm.getRenderType()),
           }}
         />
-      }
-    )();
+      );
+    })();
   }
 
   /**
    * TagField 핵심 리스트 필터 렌더링 로직 (기본 renderInstance 사용)
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
-    return this.renderInstance({ 
-      ...params, 
-      required: false, 
-      onChange: (value) => params.onChange(value) 
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
+    return this.renderInstance({
+      ...params,
+      required: false,
+      onChange: (value) => params.onChange(value),
     } as FieldRenderParameters);
   }
 
@@ -115,13 +121,13 @@ export class TagField extends MultipleOptionalField<TagField> {
   }
 
   static create(props: TagFieldProps): TagField {
-    const field = new TagField(props.name, props.order, props.options, props.limit)
-      .copyFields(props, true);
+    const field = new TagField(props.name, props.order, props.options, props.limit).copyFields(
+      props,
+      true,
+    );
     if (props.tagValidation) {
       field.tagValidation = props.tagValidation;
     }
     return field;
   }
-
 }
-

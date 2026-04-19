@@ -4,17 +4,17 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
+'use client';
 
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import Select, {SingleValue} from "react-select";
-import {AbstractManyToOneField} from "../abstract";
-import {CustomFieldRendererProps} from "../../form/types/ViewEntityFormTheme.types";
-import {ManyToOneConfig} from "../../../config/Config";
-import {SearchForm} from "../../../form/SearchForm";
-import {getManyToOneEntityValue} from "../ManyToOneField";
-import {PageResult} from "../../../form/Type";
-import {isTrue} from "../../../utils/BooleanUtil";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import Select, { SingleValue } from 'react-select';
+import { AbstractManyToOneField } from '../abstract';
+import { CustomFieldRendererProps } from '../../form/types/ViewEntityFormTheme.types';
+import { ManyToOneConfig } from '../../../config/Config';
+import { SearchForm } from '../../../form/SearchForm';
+import { getManyToOneEntityValue } from '../ManyToOneField';
+import { PageResult } from '../../../form/Type';
+import { isTrue } from '../../../utils/BooleanUtil';
 
 interface SelectOption {
   label: string;
@@ -144,39 +144,48 @@ export const SelectBoxManyToOneView: React.FC<SelectBoxManyToOneViewProps> = ({
   const configUrl = config?.entityForm?.getUrl();
 
   // 라벨 가져오기 함수
-  const getLabel = useCallback((item: any): string => {
-    if (!item) return '';
-    try {
-      if (typeof labelField === 'function') {
-        const result = labelField(item);
-        return result ?? '';
-      }
-      // config.field.name도 체크
-      if (config?.field?.name) {
-        if (typeof config.field.name === 'function') {
-          return config.field.name(item) ?? '';
+  const getLabel = useCallback(
+    (item: any): string => {
+      if (!item) return '';
+      try {
+        if (typeof labelField === 'function') {
+          const result = labelField(item);
+          return result ?? '';
         }
-        return item[config.field.name] ?? item[labelField as string] ?? '';
+        // config.field.name도 체크
+        if (config?.field?.name) {
+          if (typeof config.field.name === 'function') {
+            return config.field.name(item) ?? '';
+          }
+          return item[config.field.name] ?? item[labelField as string] ?? '';
+        }
+        return item[labelField as string] ?? item.name ?? item.title ?? '';
+      } catch (e) {
+        console.error('[SelectBoxManyToOneView] getLabel error:', e);
+        return item.name ?? item.title ?? '';
       }
-      return item[labelField as string] ?? item.name ?? item.title ?? '';
-    } catch (e) {
-      console.error('[SelectBoxManyToOneView] getLabel error:', e);
-      return item.name ?? item.title ?? '';
-    }
-  }, [labelField, config]);
+    },
+    [labelField, config],
+  );
 
   // 값 가져오기 함수
-  const getValue = useCallback((item: any): string => {
-    if (!item) return '';
-    return item[valueField] ?? item.id ?? '';
-  }, [valueField]);
+  const getValue = useCallback(
+    (item: any): string => {
+      if (!item) return '';
+      return item[valueField] ?? item.id ?? '';
+    },
+    [valueField],
+  );
 
   // value의 ID 추출
-  const getValueId = useCallback((val: any): string | undefined => {
-    if (!val) return undefined;
-    if (typeof val === 'string') return val;
-    return val[valueField] ?? val.id;
-  }, [valueField]);
+  const getValueId = useCallback(
+    (val: any): string | undefined => {
+      if (!val) return undefined;
+      if (typeof val === 'string') return val;
+      return val[valueField] ?? val.id;
+    },
+    [valueField],
+  );
 
   const currentValueId = useMemo(() => getValueId(value), [value, getValueId]);
 
@@ -241,12 +250,12 @@ export const SelectBoxManyToOneView: React.FC<SelectBoxManyToOneViewProps> = ({
           if (config.filter) {
             for (const filterItem of config.filter) {
               if (filterItem) {
-                searchForm.withFilter("AND", ...(await filterItem(entityFormRef.current)));
+                searchForm.withFilter('AND', ...(await filterItem(entityFormRef.current)));
               }
             }
           }
           if (config.entityForm.neverDelete) {
-            searchForm.handleAndFilter("active", "true");
+            searchForm.handleAndFilter('active', 'true');
           }
           searchForm.withPage(0).withPageSize(500);
 
@@ -279,7 +288,7 @@ export const SelectBoxManyToOneView: React.FC<SelectBoxManyToOneViewProps> = ({
 
   // SelectOption 목록 생성
   const options = useMemo<SelectOption[]>(() => {
-    const opts: SelectOption[] = items.map(item => ({
+    const opts: SelectOption[] = items.map((item) => ({
       label: getLabel(item),
       value: getValue(item),
       data: item,
@@ -306,7 +315,7 @@ export const SelectBoxManyToOneView: React.FC<SelectBoxManyToOneViewProps> = ({
         const entity = await getManyToOneEntityValue(field.getName(), value, config);
         if (entity) {
           const id = getValue(entity);
-          const found = options.find(opt => opt.value === id);
+          const found = options.find((opt) => opt.value === id);
           setSelectedOption(found ?? null);
         } else {
           setSelectedOption(null);
@@ -314,7 +323,7 @@ export const SelectBoxManyToOneView: React.FC<SelectBoxManyToOneViewProps> = ({
       } else {
         // required가 아니면 빈 옵션 선택
         if (!isTrue(required)) {
-          const emptyOption = options.find(opt => opt.value === '');
+          const emptyOption = options.find((opt) => opt.value === '');
           setSelectedOption(emptyOption ?? null);
         } else {
           setSelectedOption(null);
@@ -324,25 +333,44 @@ export const SelectBoxManyToOneView: React.FC<SelectBoxManyToOneViewProps> = ({
   }, [value, config, field, options, mounted, getValue, required]);
 
   // 선택 변경 핸들러
-  const handleChange = useCallback((newValue: SingleValue<SelectOption>) => {
-    if (readonly) return;
+  const handleChange = useCallback(
+    (newValue: SingleValue<SelectOption>) => {
+      if (readonly) return;
 
-    if (!newValue || newValue.value === '') {
-      setSelectedOption(null);
-      onChange(undefined, true);
-    } else {
-      setSelectedOption(newValue);
-      onChange(newValue.data, true);
-    }
-  }, [readonly, onChange]);
+      if (!newValue || newValue.value === '') {
+        setSelectedOption(null);
+        onChange(undefined, true);
+      } else {
+        setSelectedOption(newValue);
+        onChange(newValue.data, true);
+      }
+    },
+    [readonly, onChange],
+  );
 
   if (loading || !mounted) {
     return (
       <div className="rcm-select-loading-wrapper">
         <div className="rcm-select-loading">
-          <svg className="rcm-select-loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="rcm-spinner-track" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="rcm-spinner-head" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          <svg
+            className="rcm-select-loading-spinner"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="rcm-spinner-track"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="rcm-spinner-head"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
           </svg>
           <span className="rcm-select-loading-text">불러오는 중...</span>
         </div>
@@ -364,7 +392,7 @@ export const SelectBoxManyToOneView: React.FC<SelectBoxManyToOneViewProps> = ({
         placeholder={placeholder}
         onChange={handleChange}
         isClearable={false}
-        noOptionsMessage={() => "선택 가능한 항목이 없습니다."}
+        noOptionsMessage={() => '선택 가능한 항목이 없습니다.'}
         styles={{
           control: (base: any) => ({
             ...base,

@@ -6,16 +6,15 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
-import React, {useState} from "react";
-import {isTrue} from '../../utils/BooleanUtil';
-import {useListGridHeader} from "./hooks/useListGridHeader";
-import {ListGridHeaderProps} from "./types/ListGridHeader.types";
-import {HeaderTitle} from "./ui/HeaderTitle";
-import {DataTransferModals} from "./ui/DataTransferModal";
-import {HeaderActionButtons} from "./ui/HeaderActionButtons";
-import {useListGridTheme} from "./context/ListGridThemeContext";
-
+'use client';
+import React, { useState } from 'react';
+import { isTrue } from '../../utils/BooleanUtil';
+import { useListGridHeader } from './hooks/useListGridHeader';
+import { ListGridHeaderProps } from './types/ListGridHeader.types';
+import { HeaderTitle } from './ui/HeaderTitle';
+import { DataTransferModals } from './ui/DataTransferModal';
+import { HeaderActionButtons } from './ui/HeaderActionButtons';
+import { useListGridTheme } from './context/ListGridThemeContext';
 
 export const ListGridHeader = (props: ListGridHeaderProps) => {
   const {
@@ -39,29 +38,31 @@ export const ListGridHeader = (props: ListGridHeaderProps) => {
 
   return (
     <React.Fragment>
-      <div className={themeClasses.header?.container ?? "rcm-listgrid-header"}>
+      <div className={themeClasses.header?.container ?? 'rcm-listgrid-header'}>
         <HeaderTitle title={title} hideTitle={hideTitle} />
-        <div className={themeClasses.header?.buttonGroup ?? "rcm-listgrid-button-group"}>
-            <HeaderActionButtons
-                {...props}
-                headerButtons={headerButtons}
-                checkedButtons={checkedButtons}
-                setOpenDownload={setOpenDownload}
-                setOpenUpload={setOpenUpload}
-                neverDelete={isTrue(props.entityForm.neverDelete)}
-            />
+        <div className={themeClasses.header?.buttonGroup ?? 'rcm-listgrid-button-group'}>
+          <HeaderActionButtons
+            {...props}
+            headerButtons={headerButtons}
+            checkedButtons={checkedButtons}
+            setOpenDownload={setOpenDownload}
+            setOpenUpload={setOpenUpload}
+            neverDelete={isTrue(props.entityForm.neverDelete)}
+          />
         </div>
       </div>
-      {!isSubCollection && <DataTransferModals
-        openDownload={openDownload}
-        setOpenDownload={setOpenDownload}
-        openUpload={openUpload}
-        setOpenUpload={setOpenUpload}
-        dataTransferConfig={dataTransferConfig}
-        searchForm={searchForm}
-        title={title}
-        refresh={refresh}
-      />}
+      {!isSubCollection && (
+        <DataTransferModals
+          openDownload={openDownload}
+          setOpenDownload={setOpenDownload}
+          openUpload={openUpload}
+          setOpenUpload={setOpenUpload}
+          dataTransferConfig={dataTransferConfig}
+          searchForm={searchForm}
+          title={title}
+          refresh={refresh}
+        />
+      )}
     </React.Fragment>
   );
 };

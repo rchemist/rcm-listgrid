@@ -1,9 +1,20 @@
-import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi, type Mock } from 'vitest';
+import {
+  describe,
+  it,
+  test,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+  vi,
+  type Mock,
+} from 'vitest';
 import React from 'react';
-import {fireEvent, render, screen} from '@testing-library/react';
-import {CardSubCollectionView} from '../CardSubCollectionView';
-import {EntityForm} from '../../../../config/EntityForm';
-import {useCardSubCollectionData} from '../../hooks/useCardSubCollectionData';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { CardSubCollectionView } from '../CardSubCollectionView';
+import { EntityForm } from '../../../../config/EntityForm';
+import { useCardSubCollectionData } from '../../hooks/useCardSubCollectionData';
 
 // Mock the useCardSubCollectionData hook
 vi.mock('../../hooks/useCardSubCollectionData', () => ({
@@ -12,11 +23,27 @@ vi.mock('../../hooks/useCardSubCollectionData', () => ({
 
 // Mock CardItem component
 vi.mock('../CardItem', () => ({
-  CardItem: ({ item, onEdit, onDelete }: { item: any; onEdit?: () => void; onDelete?: () => void }) => (
+  CardItem: ({
+    item,
+    onEdit,
+    onDelete,
+  }: {
+    item: any;
+    onEdit?: () => void;
+    onDelete?: () => void;
+  }) => (
     <div data-testid={`card-${item.id}`}>
       <span>{item.name}</span>
-      {onEdit && <button onClick={onEdit} aria-label={`Edit ${item.name}`}>Edit</button>}
-      {onDelete && <button onClick={onDelete} aria-label={`Delete ${item.name}`}>Delete</button>}
+      {onEdit && (
+        <button onClick={onEdit} aria-label={`Edit ${item.name}`}>
+          Edit
+        </button>
+      )}
+      {onDelete && (
+        <button onClick={onDelete} aria-label={`Delete ${item.name}`}>
+          Delete
+        </button>
+      )}
     </div>
   ),
 }));
@@ -41,8 +68,20 @@ describe('CardSubCollectionView', () => {
       withId: vi.fn().mockReturnThis(),
       setValue: vi.fn(),
       fields: new Map([
-        ['id', { name: 'id', type: 'text', hidden: true, getLabel: () => 'ID', getName: () => 'id' }],
-        ['name', { name: 'name', type: 'text', hidden: false, getLabel: () => '이름', getName: () => 'name' }],
+        [
+          'id',
+          { name: 'id', type: 'text', hidden: true, getLabel: () => 'ID', getName: () => 'id' },
+        ],
+        [
+          'name',
+          {
+            name: 'name',
+            type: 'text',
+            hidden: false,
+            getLabel: () => '이름',
+            getName: () => 'name',
+          },
+        ],
       ]),
     } as any;
 
@@ -70,7 +109,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // Loading state shows skeleton divs with rcm-subcollection-skeleton class
@@ -94,7 +133,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // Changed to Korean text
@@ -118,7 +157,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // Changed to Korean error message
@@ -150,7 +189,7 @@ describe('CardSubCollectionView', () => {
           cardConfig={{ columns: 3 }}
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       expect(screen.getByTestId('card-1')).toBeInTheDocument();
@@ -170,22 +209,28 @@ describe('CardSubCollectionView', () => {
         withId: vi.fn().mockReturnThis(),
         setValue: vi.fn(),
         fields: new Map([
-          ['id', {
-            name: 'id',
-            type: 'text',
-            hidden: true,
-            getLabel: () => 'ID',
-            getName: () => 'id',
-            listConfig: { support: false, quickSearch: false },
-          }],
-          ['name', {
-            name: 'name',
-            type: 'text',
-            hidden: false,
-            getLabel: () => '이름',
-            getName: () => 'name',
-            listConfig: { support: true, quickSearch: true },
-          }],
+          [
+            'id',
+            {
+              name: 'id',
+              type: 'text',
+              hidden: true,
+              getLabel: () => 'ID',
+              getName: () => 'id',
+              listConfig: { support: false, quickSearch: false },
+            },
+          ],
+          [
+            'name',
+            {
+              name: 'name',
+              type: 'text',
+              hidden: false,
+              getLabel: () => '이름',
+              getName: () => 'name',
+              listConfig: { support: true, quickSearch: true },
+            },
+          ],
         ]),
       } as any;
     });
@@ -212,7 +257,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // Find search input and type a query
@@ -247,7 +292,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // Dynamic placeholder based on entityForm fields - use role to find input
@@ -258,9 +303,7 @@ describe('CardSubCollectionView', () => {
     });
 
     it('should not show search input when no quickSearch fields are defined', () => {
-      const mockData = [
-        { id: '1', name: 'Apple' },
-      ];
+      const mockData = [{ id: '1', name: 'Apple' }];
 
       mockUseCardSubCollectionData.mockReturnValue({
         data: mockData,
@@ -277,7 +320,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // Search input should not be present when no quickSearch fields
@@ -302,7 +345,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId' }}
           readonly={true}
-        />
+        />,
       );
 
       // In readonly mode, the component should still render but without action handlers
@@ -327,7 +370,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl="http://api.example.com/items"
           relation={{ mappedBy: 'parentId', filterBy: 'parent.id' }}
           readonly={false}
-        />
+        />,
       );
 
       expect(mockUseCardSubCollectionData).toHaveBeenCalledWith(
@@ -335,7 +378,7 @@ describe('CardSubCollectionView', () => {
         expect.objectContaining({
           mappedBy: 'parentId',
           filterBy: 'parent.id',
-        })
+        }),
       );
     });
 
@@ -357,7 +400,7 @@ describe('CardSubCollectionView', () => {
           fetchUrl={mockFetchUrl}
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // The fetchUrl function should be called
@@ -385,7 +428,7 @@ describe('CardSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           onItemAdd={onItemAdd}
-        />
+        />,
       );
 
       // Changed to Korean text - "추가" button
@@ -412,7 +455,7 @@ describe('CardSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={true}
           onItemAdd={onItemAdd}
-        />
+        />,
       );
 
       expect(screen.queryByText(/추가/)).not.toBeInTheDocument();

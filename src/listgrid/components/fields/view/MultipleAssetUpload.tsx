@@ -6,12 +6,12 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
+'use client';
 
-import {ASSET_SERVER_URL, removeAssetServerPrefix} from "../../../misc";
-import {getTranslation} from "../../../utils/i18n";
-import {FileFieldValue, FileUploadInput} from "../../../ui";
-import {useEffect, useState} from "react";
+import { ASSET_SERVER_URL, removeAssetServerPrefix } from '../../../misc';
+import { getTranslation } from '../../../utils/i18n';
+import { FileFieldValue, FileUploadInput } from '../../../ui';
+import { useEffect, useState } from 'react';
 
 interface ProductAssetUploadProps {
   url?: string;
@@ -24,11 +24,10 @@ const assetServerUrl = ASSET_SERVER_URL;
 const ASSET_PREFIX = '/static-resource/';
 
 export const MultipleAssetUpload = (props: ProductAssetUploadProps) => {
-
   const maxFiles = 1;
   const [fileValue, setFileValue] = useState<FileFieldValue>(FileFieldValue.create());
 
-  const {t} = getTranslation();
+  const { t } = getTranslation();
 
   // 초기 URL이 있으면 FileFieldValue에 설정
   useEffect(() => {
@@ -38,7 +37,7 @@ export const MultipleAssetUpload = (props: ProductAssetUploadProps) => {
       newValue.addExistValue({
         url: url,
         id: url, // 임시 ID로 URL 사용
-        fileName: url.split('/').pop() || '파일'
+        fileName: url.split('/').pop() || '파일',
       });
       setFileValue(newValue);
     }
@@ -65,8 +64,10 @@ export const MultipleAssetUpload = (props: ProductAssetUploadProps) => {
       config={{
         maxCount: maxFiles,
         fileTypes: fileTypes,
-        extensions: fileTypes.includes('image/*') ? ['jpg', 'jpeg', 'png', 'gif', 'webp'] : undefined
+        extensions: fileTypes.includes('image/*')
+          ? ['jpg', 'jpeg', 'png', 'gif', 'webp']
+          : undefined,
       }}
     />
   );
-}
+};

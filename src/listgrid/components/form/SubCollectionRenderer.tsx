@@ -7,15 +7,15 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {SubCollectionField} from '../../config/SubCollectionField';
-import React, {ReactNode, useEffect, useState} from "react";
-import {EntityForm} from '../../config/EntityForm';
-import {LabelType} from '../../config/Config';
-import {getTranslation} from "../../utils/i18n";
-import {LoadingOverlay} from '../../ui';
-import {ViewHelpText} from './ui/ViewHelpText';
-import {isTrue} from '../../utils/BooleanUtil';
-import {Session} from '../../auth/types';
+import { SubCollectionField } from '../../config/SubCollectionField';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { EntityForm } from '../../config/EntityForm';
+import { LabelType } from '../../config/Config';
+import { getTranslation } from '../../utils/i18n';
+import { LoadingOverlay } from '../../ui';
+import { ViewHelpText } from './ui/ViewHelpText';
+import { isTrue } from '../../utils/BooleanUtil';
+import { Session } from '../../auth/types';
 
 /**
  * SubCollectionRenderer component
@@ -35,9 +35,12 @@ interface SubCollectionRendererProps {
   session?: Session; // 세션 정보
 }
 
-export const SubCollectionRenderer = ({collection, entityForm, session}: SubCollectionRendererProps) => {
-
-  const {t} = getTranslation();
+export const SubCollectionRenderer = ({
+  collection,
+  entityForm,
+  session,
+}: SubCollectionRendererProps) => {
+  const { t } = getTranslation();
 
   // 서브콜렉션 렌더링, 마운트 상태, 도움말 상태
   // State for sub-collection view, mounted state, and help text
@@ -50,9 +53,9 @@ export const SubCollectionRenderer = ({collection, entityForm, session}: SubColl
       (async () => {
         // 서브콜렉션 렌더링 및 도움말 비동기 조회
         // Async fetch for sub-collection view and help text
-        setView(await collection.render({entityForm, session}));
-        setHelpText(await collection.getHelpText({entityForm, session}))
-        setMounted(true)
+        setView(await collection.render({ entityForm, session }));
+        setHelpText(await collection.getHelpText({ entityForm, session }));
+        setMounted(true);
       })();
     }
   }, []);
@@ -63,23 +66,31 @@ export const SubCollectionRenderer = ({collection, entityForm, session}: SubColl
   // 마운트 전에는 로딩 오버레이 표시
   // Show loading overlay before mount
   if (!mounted) {
-    return <div className={'relative'}>
-      <LoadingOverlay visible={true}/>
-      <div className={'w-full h-[400px]'}></div>
-    </div>;
+    return (
+      <div className={'relative'}>
+        <LoadingOverlay visible={true} />
+        <div className={'w-full h-[400px]'}></div>
+      </div>
+    );
   }
 
-  return <div>
-    {/* 라벨 렌더링: 숨김 설정이 아니면 표시 */}
-    {/* Render label: show unless hideLabel is true */}
-    {!hideLabel && <div><label>{viewLabel(label)}</label></div>}
-    {/* 서브콜렉션 뷰 렌더링 */}
-    {/* Render sub-collection view */}
-    <div>{view}</div>
-    {/* 도움말 텍스트 렌더링 */}
-    {/* Render help text */}
-    <ViewHelpText helpText={helpText}></ViewHelpText>
-  </div>
+  return (
+    <div>
+      {/* 라벨 렌더링: 숨김 설정이 아니면 표시 */}
+      {/* Render label: show unless hideLabel is true */}
+      {!hideLabel && (
+        <div>
+          <label>{viewLabel(label)}</label>
+        </div>
+      )}
+      {/* 서브콜렉션 뷰 렌더링 */}
+      {/* Render sub-collection view */}
+      <div>{view}</div>
+      {/* 도움말 텍스트 렌더링 */}
+      {/* Render help text */}
+      <ViewHelpText helpText={helpText}></ViewHelpText>
+    </div>
+  );
 
   /**
    * viewLabel
@@ -92,5 +103,4 @@ export const SubCollectionRenderer = ({collection, entityForm, session}: SubColl
     }
     return label;
   }
-
-}
+};

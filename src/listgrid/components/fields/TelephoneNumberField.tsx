@@ -5,23 +5,23 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-'use client'
+'use client';
 
 import {
   ListableFormField,
   ListableFormFieldProps,
   ViewListProps,
-  ViewListResult
+  ViewListResult,
 } from './abstract';
-import {FieldRenderParameters} from '../../config/EntityField';
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import React, { useState, useEffect } from "react";
-import {Validation} from '../../validations/Validation';
-import {RegexValidation} from '../../validations/RegexValidation';
-import {readonlyClass} from "../../ui";
-import {formatPhoneNumber, removePhoneNumberHyphens} from "../../utils/PhoneUtil";
-import {RenderType} from '../../config/Config';
-import {EntityForm} from '../../config/EntityForm';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import React, { useState, useEffect } from 'react';
+import { Validation } from '../../validations/Validation';
+import { RegexValidation } from '../../validations/RegexValidation';
+import { readonlyClass } from '../../ui';
+import { formatPhoneNumber, removePhoneNumberHyphens } from '../../utils/PhoneUtil';
+import { RenderType } from '../../config/Config';
+import { EntityForm } from '../../config/EntityForm';
 
 interface TelephoneNumberFieldProps extends ListableFormFieldProps {
   validations?: Validation[];
@@ -48,7 +48,7 @@ const TelephoneNumberInput = ({
   onError,
   readonly = false,
   placeHolder,
-  regex
+  regex,
 }: TelephoneNumberInputProps) => {
   // 표시용 값 (하이픈 포함)
   const [displayValue, setDisplayValue] = useState('');
@@ -65,24 +65,24 @@ const TelephoneNumberInput = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
-    
+
     // 하이픈 제거 (숫자만 추출)
     const digitsOnly = removePhoneNumberHyphens(inputValue);
-    
+
     // 최대 11자리로 제한
     const truncated = digitsOnly.substring(0, 11);
-    
+
     // 표시용 값은 하이픈 포함 형식으로 포맷팅
     const formatted = formatPhoneNumber(truncated);
     setDisplayValue(formatted);
-    
+
     // 저장용 값은 하이픈 제거한 숫자만 전달 (입력 중에는 검증하지 않음)
     onChange(truncated, false);
   };
 
   const handleBlur = () => {
     const digitsOnly = removePhoneNumberHyphens(displayValue);
-    
+
     // blur 시에만 검증 (입력이 완료되었을 때)
     if (regex && digitsOnly) {
       const isValid = regex.pattern.test(digitsOnly);
@@ -93,7 +93,7 @@ const TelephoneNumberInput = ({
         onError?.('');
       }
     }
-    
+
     onChange(digitsOnly, true);
   };
 
@@ -112,7 +112,6 @@ const TelephoneNumberInput = ({
 };
 
 export class TelephoneNumberField extends ListableFormField<TelephoneNumberField> {
-
   validations?: Validation[];
 
   constructor(name: string, order: number, validations?: Validation[]) {
@@ -126,19 +125,21 @@ export class TelephoneNumberField extends ListableFormField<TelephoneNumberField
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
       const inputParams = await getInputRendererParameters(this, params);
-      
+
       // validations에서 RegexValidation 찾기
       let regex: { pattern: RegExp; message: string } | undefined;
       if (this.validations) {
-        const regexValidation = this.validations.find(v => v instanceof RegexValidation) as RegexValidation | undefined;
+        const regexValidation = this.validations.find((v) => v instanceof RegexValidation) as
+          | RegexValidation
+          | undefined;
         if (regexValidation) {
           regex = {
             pattern: regexValidation.regex,
-            message: regexValidation.message || '전화번호 형식이 올바르지 않습니다.'
+            message: regexValidation.message || '전화번호 형식이 올바르지 않습니다.',
           };
         }
       }
-      
+
       return (
         <TelephoneNumberInput
           name={inputParams.name}
@@ -174,9 +175,9 @@ export class TelephoneNumberField extends ListableFormField<TelephoneNumberField
     if (this.saveValue) {
       return this.saveValue(entityForm, this, renderType);
     }
-    
+
     const value = await this.getCurrentValue(renderType);
-    
+
     // 하이픈 제거한 숫자만 반환
     return removePhoneNumberHyphens(value);
   }
@@ -198,8 +199,9 @@ export class TelephoneNumberField extends ListableFormField<TelephoneNumberField
   }
 
   static create(props: TelephoneNumberFieldProps): TelephoneNumberField {
-    return new TelephoneNumberField(props.name, props.order, props.validations)
-      .copyFields(props, true);
+    return new TelephoneNumberField(props.name, props.order, props.validations).copyFields(
+      props,
+      true,
+    );
   }
-  
 }

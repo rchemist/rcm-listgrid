@@ -8,16 +8,16 @@ type SignOutFn = () => Promise<void> | void;
 let _signOut: SignOutFn | undefined;
 
 export function registerSignOut(fn: SignOutFn): void {
-    _signOut = fn;
+  _signOut = fn;
 }
 
 export async function signOut(): Promise<void> {
-    if (_signOut) {
-        await _signOut();
-        return;
-    }
-    console.warn(
-        '[@rcm/listgrid] signOut() called but no host implementation is registered. ' +
-            'Call registerSignOut(yourImpl) at app bootstrap.'
-    );
+  if (_signOut) {
+    await _signOut();
+    return;
+  }
+  console.warn(
+    '[@rcm/listgrid] signOut() called but no host implementation is registered. ' +
+      'Call registerSignOut(yourImpl) at app bootstrap.',
+  );
 }

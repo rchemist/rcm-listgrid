@@ -5,27 +5,25 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-
-import {Direction, SearchForm} from "../../../form/SearchForm";
+import { Direction, SearchForm } from '../../../form/SearchForm';
 // import {SearchFormState} from '../state/State';
 import {
   IconSortAscendingLetters,
   IconSortDescending,
-  IconSortDescendingLetters
-} from "@tabler/icons-react";
+  IconSortDescendingLetters,
+} from '@tabler/icons-react';
 
 interface SortFieldProps {
   name: string;
   searchForm: SearchForm;
   onChangeSearchForm: (searchForm: SearchForm) => void;
 }
-export const SortField = ({name, searchForm, onChangeSearchForm}: SortFieldProps) => {
-
+export const SortField = ({ name, searchForm, onChangeSearchForm }: SortFieldProps) => {
   const sorts = searchForm.getSorts();
 
   const sorted = sorts.has(name);
 
-  let direction: Direction|undefined = undefined;
+  let direction: Direction | undefined = undefined;
 
   if (sorted) {
     // 이미 정렬 되어 있음
@@ -38,11 +36,11 @@ export const SortField = ({name, searchForm, onChangeSearchForm}: SortFieldProps
     onChangeSearchForm(newSearchForm);
   }
 
-  function getNextDirection() : Direction | undefined {
+  function getNextDirection(): Direction | undefined {
     if (direction === undefined) {
-      return 'DESC'
+      return 'DESC';
     } else if (direction === 'DESC') {
-      return 'ASC'
+      return 'ASC';
     } else {
       return undefined;
     }
@@ -50,13 +48,21 @@ export const SortField = ({name, searchForm, onChangeSearchForm}: SortFieldProps
 
   const icon = () => {
     if (direction === undefined) {
-      return <IconSortDescending className={`w-3.5`}/>
+      return <IconSortDescending className={`w-3.5`} />;
     } else if (direction === 'ASC') {
-      return <IconSortDescendingLetters className={`w-3.5 text-primary`}/>
+      return <IconSortDescendingLetters className={`w-3.5 text-primary`} />;
     } else {
-      return <IconSortAscendingLetters className={`w-3.5 text-primary`}/>
+      return <IconSortAscendingLetters className={`w-3.5 text-primary`} />;
     }
-  }
+  };
 
-  return <button onClick={() => {changeSort()}}>{icon()}</button>;
-}
+  return (
+    <button
+      onClick={() => {
+        changeSort();
+      }}
+    >
+      {icon()}
+    </button>
+  );
+};

@@ -1,17 +1,17 @@
 'use client';
 
-import React, {ReactNode, useCallback, useEffect, useMemo, useState} from 'react';
-import {useCardSubCollectionData} from '../hooks/useCardSubCollectionData';
-import {EntityForm} from '../../../config/EntityForm';
+import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCardSubCollectionData } from '../hooks/useCardSubCollectionData';
+import { EntityForm } from '../../../config/EntityForm';
 import {
   CardSubCollectionFetchOptions,
-  CardSubCollectionRelation
+  CardSubCollectionRelation,
 } from '../../../config/CardSubCollectionField';
-import {TableConfig} from '../../../config/TableSubCollectionField';
-import {Session} from '../../../auth/types';
-import {SearchForm} from '../../../form/SearchForm';
-import {Tooltip} from '../../../ui';
-import {ListableFormField} from '../../fields/abstract';
+import { TableConfig } from '../../../config/TableSubCollectionField';
+import { Session } from '../../../auth/types';
+import { SearchForm } from '../../../form/SearchForm';
+import { Tooltip } from '../../../ui';
+import { ListableFormField } from '../../fields/abstract';
 import {
   IconAlertCircle,
   IconChevronLeft,
@@ -92,7 +92,7 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
     if (displayFields && displayFields.length > 0) {
       // Use explicit displayFields order
       selectedFields = displayFields
-        .map(name => fields.find(f => f.getName() === name))
+        .map((name) => fields.find((f) => f.getName() === name))
         .filter(Boolean);
     } else {
       // Use list-enabled fields
@@ -145,15 +145,12 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
     return fetchUrlProp;
   }, [fetchUrlProp, parentEntityForm]);
 
-  const { data, loading, error, refresh } = useCardSubCollectionData(
-    fetchUrl,
-    {
-      mappedBy: relation.mappedBy,
-      filterBy: relation.filterBy,
-      useSearchForm: fetchOptions?.useSearchForm,
-      searchForm: initialSearchForm,
-    }
-  );
+  const { data, loading, error, refresh } = useCardSubCollectionData(fetchUrl, {
+    mappedBy: relation.mappedBy,
+    filterBy: relation.filterBy,
+    useSearchForm: fetchOptions?.useSearchForm,
+    searchForm: initialSearchForm,
+  });
 
   // Get nested field value from item
   const getFieldValue = useCallback((item: any, fieldName: string): any => {
@@ -170,29 +167,32 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
   }, []);
 
   // Resolve display value for a cell
-  const getCellDisplay = useCallback((item: any, col: ColumnDef): string => {
-    const value = getFieldValue(item, col.name);
-    if (value === null || value === undefined) return '';
+  const getCellDisplay = useCallback(
+    (item: any, col: ColumnDef): string => {
+      const value = getFieldValue(item, col.name);
+      if (value === null || value === undefined) return '';
 
-    // Resolve select options
-    if (col.options && Array.isArray(col.options)) {
-      const rawValue = typeof value === 'object' ? value?.value : value;
-      const option = col.options.find((opt: any) => opt.value === rawValue);
-      if (option) return option.label;
-    }
+      // Resolve select options
+      if (col.options && Array.isArray(col.options)) {
+        const rawValue = typeof value === 'object' ? value?.value : value;
+        const option = col.options.find((opt: any) => opt.value === rawValue);
+        if (option) return option.label;
+      }
 
-    // Boolean
-    if (typeof value === 'boolean') {
-      return value ? 'Y' : 'N';
-    }
+      // Boolean
+      if (typeof value === 'boolean') {
+        return value ? 'Y' : 'N';
+      }
 
-    // Object with name/title (ManyToOne)
-    if (typeof value === 'object' && !Array.isArray(value)) {
-      return value.name || value.title || value.label || JSON.stringify(value);
-    }
+      // Object with name/title (ManyToOne)
+      if (typeof value === 'object' && !Array.isArray(value)) {
+        return value.name || value.title || value.label || JSON.stringify(value);
+      }
 
-    return String(value);
-  }, [getFieldValue]);
+      return String(value);
+    },
+    [getFieldValue],
+  );
 
   // Search filtering
   const searchValue = useCallback((value: any, query: string): boolean => {
@@ -200,7 +200,11 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
     if (typeof value === 'string') return value.toLowerCase().includes(query);
     if (typeof value === 'object' && !Array.isArray(value)) {
       for (const prop of ['name', 'title', 'label']) {
-        if (value[prop] && typeof value[prop] === 'string' && value[prop].toLowerCase().includes(query)) {
+        if (
+          value[prop] &&
+          typeof value[prop] === 'string' &&
+          value[prop].toLowerCase().includes(query)
+        ) {
           return true;
         }
       }
@@ -212,7 +216,7 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
     if (!isQuickSearchEnabled || !searchQuery.trim()) return data;
     const query = searchQuery.toLowerCase().trim();
     return data.filter((item) =>
-      quickSearchFields.some((field) => searchValue(getFieldValue(item, field.getName()), query))
+      quickSearchFields.some((field) => searchValue(getFieldValue(item, field.getName()), query)),
     );
   }, [data, searchQuery, quickSearchFields, isQuickSearchEnabled, getFieldValue, searchValue]);
 
@@ -230,7 +234,9 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
     else if (currentPage < 1 && totalPages > 0) setCurrentPage(1);
   }, [currentPage, totalPages]);
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const paginatedData = useMemo(() => {
     if (!isPaginationEnabled) return filteredData;
@@ -238,11 +244,16 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
     return filteredData.slice(start, start + pageSize);
   }, [filteredData, currentPage, pageSize, isPaginationEnabled]);
 
-  const goToPage = useCallback((page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (page: number) => {
+      setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    },
+    [totalPages],
+  );
 
-  const clearSearch = useCallback(() => { setSearchQuery(''); }, []);
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
+  }, []);
 
   const showRowNumbers = tableConfig?.showRowNumbers !== false;
 
@@ -277,14 +288,8 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
           <h4 className="rcm-subcollection-error-title">
             데이터를 불러오는 중 오류가 발생했습니다
           </h4>
-          <p className="rcm-subcollection-error-message">
-            {error.message}
-          </p>
-          <button
-            type="button"
-            onClick={() => refresh()}
-            className="rcm-subcollection-error-retry"
-          >
+          <p className="rcm-subcollection-error-message">{error.message}</p>
+          <button type="button" onClick={() => refresh()} className="rcm-subcollection-error-retry">
             <IconRefresh size={16} />
             다시 시도
           </button>
@@ -388,9 +393,7 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
               <div className="rcm-subcollection-empty-icon">
                 <IconTable size={32} />
               </div>
-              <p className="rcm-subcollection-empty-title">
-                표시할 항목이 없습니다
-              </p>
+              <p className="rcm-subcollection-empty-title">표시할 항목이 없습니다</p>
             </>
           )}
         </div>
@@ -400,9 +403,7 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
             <table className="rcm-subcollection-table">
               <thead>
                 <tr>
-                  {showRowNumbers && (
-                    <th className="rcm-subcollection-th-no">No</th>
-                  )}
+                  {showRowNumbers && <th className="rcm-subcollection-th-no">No</th>}
                   {columns.map((col) => (
                     <th key={col.name}>{col.label}</th>
                   ))}
@@ -415,9 +416,7 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
                     : index + 1;
                   return (
                     <tr key={item.id || index}>
-                      {showRowNumbers && (
-                        <td className="rcm-subcollection-td-no">{rowNumber}</td>
-                      )}
+                      {showRowNumbers && <td className="rcm-subcollection-td-no">{rowNumber}</td>}
                       {columns.map((col) => (
                         <td key={col.name}>{getCellDisplay(item, col)}</td>
                       ))}
@@ -472,9 +471,7 @@ export const TableSubCollectionView: React.FC<TableSubCollectionViewProps> = ({
               >
                 <IconChevronsRight size={16} stroke={2} />
               </button>
-              <div className="rcm-subcollection-page-size-badge">
-                {pageSize}개씩
-              </div>
+              <div className="rcm-subcollection-page-size-badge">{pageSize}개씩</div>
             </div>
           )}
         </>

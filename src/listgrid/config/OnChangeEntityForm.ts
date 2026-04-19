@@ -5,21 +5,36 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ModifyEntityFormFunc} from '../config/Config';
-import {EntityForm} from '../config/EntityForm';
-import {OptionalField} from '../components/fields/abstract';
-import {EntityField} from '../config/EntityField';
-import {Validation} from '../validations/Validation';
-import {SelectOption} from "../form/Type";
+import { ModifyEntityFormFunc } from '../config/Config';
+import { EntityForm } from '../config/EntityForm';
+import { OptionalField } from '../components/fields/abstract';
+import { EntityField } from '../config/EntityField';
+import { Validation } from '../validations/Validation';
+import { SelectOption } from '../form/Type';
 
 // intentional: `value` is a field value — heterogeneous by FieldType (string/number/bool/...)
-export type ConditionalProps = { value: any, result: Map<string, boolean> };
-export type ConditionalSelectOptionProps = {value: any, result: Map<string, SelectOption[]>, defaultValue?: any};
-export type OptionalValidation = false | {type?: 'append' | 'overwrite', validations?: Validation[]};
-export type ConditionalValidations = {value: ConditionalValidationValue, result: Map<string, OptionalValidation>};
-export type ConditionalValidationValue = string | number | boolean | string[] | number[] | boolean[] | ((value: any) => boolean);
-export class ConditionalValidation implements ConditionalValidations{
-
+export type ConditionalProps = { value: any; result: Map<string, boolean> };
+export type ConditionalSelectOptionProps = {
+  value: any;
+  result: Map<string, SelectOption[]>;
+  defaultValue?: any;
+};
+export type OptionalValidation =
+  | false
+  | { type?: 'append' | 'overwrite'; validations?: Validation[] };
+export type ConditionalValidations = {
+  value: ConditionalValidationValue;
+  result: Map<string, OptionalValidation>;
+};
+export type ConditionalValidationValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | boolean[]
+  | ((value: any) => boolean);
+export class ConditionalValidation implements ConditionalValidations {
   value: ConditionalValidationValue;
   result: Map<string, OptionalValidation> = new Map<string, OptionalValidation>();
 
@@ -31,14 +46,17 @@ export class ConditionalValidation implements ConditionalValidations{
     return new ConditionalValidation(value);
   }
 
-  addValidation(fieldName: string, type: 'append' | 'overwrite', ...validations: Validation[]) : this{
-    this.result.set(fieldName, {type, validations});
+  addValidation(
+    fieldName: string,
+    type: 'append' | 'overwrite',
+    ...validations: Validation[]
+  ): this {
+    this.result.set(fieldName, { type, validations });
     return this;
   }
-
 }
 
-export class ConditionalSelectOption implements ConditionalSelectOptionProps{
+export class ConditionalSelectOption implements ConditionalSelectOptionProps {
   value: any;
   result: Map<string, SelectOption[]> = new Map<string, SelectOption[]>();
   defaultValue: any;
@@ -51,37 +69,51 @@ export class ConditionalSelectOption implements ConditionalSelectOptionProps{
     return new ConditionalSelectOption(value);
   }
 
-  withDefaultValue(defaultValue?: any) : this {
+  withDefaultValue(defaultValue?: any): this {
     this.defaultValue = defaultValue;
     return this;
   }
 
-  addSelectOption(fieldName: string, ...options: SelectOption[]) : this{
+  addSelectOption(fieldName: string, ...options: SelectOption[]): this {
     this.result.set(fieldName, options);
     return this;
   }
 }
 
 export class OnChangeEntityForm {
-  static changeHidden(name: string, options: ConditionalProps | ConditionalProps[]): ModifyEntityFormFunc {
+  static changeHidden(
+    name: string,
+    options: ConditionalProps | ConditionalProps[],
+  ): ModifyEntityFormFunc {
     return onChangeSetFieldHidden(name, options);
   }
 
-  static changeRequired(name: string, options: ConditionalProps | ConditionalProps[]): ModifyEntityFormFunc {
+  static changeRequired(
+    name: string,
+    options: ConditionalProps | ConditionalProps[],
+  ): ModifyEntityFormFunc {
     return onChangeSetFieldRequired(name, options);
   }
 
-  static changeSelectOptions(name: string, options: ConditionalSelectOptionProps | ConditionalSelectOptionProps[]): ModifyEntityFormFunc {
+  static changeSelectOptions(
+    name: string,
+    options: ConditionalSelectOptionProps | ConditionalSelectOptionProps[],
+  ): ModifyEntityFormFunc {
     return onChangeSetSelectOptions(name, options);
   }
 
-  static derivedValidations(name: string, options: ConditionalValidations | ConditionalValidations[]): ModifyEntityFormFunc {
+  static derivedValidations(
+    name: string,
+    options: ConditionalValidations | ConditionalValidations[],
+  ): ModifyEntityFormFunc {
     return onChangeDerivedValidations(name, options);
   }
-
 }
 
-function onChangeDerivedValidations(name: string, options: ConditionalValidations | ConditionalValidations[]): ModifyEntityFormFunc {
+function onChangeDerivedValidations(
+  name: string,
+  options: ConditionalValidations | ConditionalValidations[],
+): ModifyEntityFormFunc {
   return (entityForm: EntityForm) => {
     const field = entityForm.getField(name);
 
@@ -94,13 +126,15 @@ function onChangeDerivedValidations(name: string, options: ConditionalValidation
       } else {
         setDerivedValidations(options, value, true);
       }
-
     }
     return Promise.resolve(entityForm);
 
-    function setDerivedValidations(option: ConditionalValidations, value: any, autoRemove: boolean = false) {
+    function setDerivedValidations(
+      option: ConditionalValidations,
+      value: any,
+      autoRemove: boolean = false,
+    ) {
       function isMatched(option: ConditionalValidations, value: any) {
-
         if (typeof option.value === 'function') {
           return option.value(value);
         }
@@ -113,7 +147,6 @@ function onChangeDerivedValidations(name: string, options: ConditionalValidation
           const f = entityForm.getField(key);
 
           if (f) {
-
             // false 로 지정하면 validations 을 제거하라는 뜻이다.
             if (value === false) {
               f.withValidations();
@@ -137,7 +170,6 @@ function onChangeDerivedValidations(name: string, options: ConditionalValidation
                     if (!duplicated) {
                       validations.push(v);
                     }
-
                   }
                 }
 
@@ -172,15 +204,26 @@ function onChangeDerivedValidations(name: string, options: ConditionalValidation
         }
       }
     }
-
-  }
-
+  };
 }
 
-
-function onChangeSetSelectOptions(name: string, options: ConditionalSelectOptionProps | ConditionalSelectOptionProps[]): ModifyEntityFormFunc {
-
-  function changeOptions<T>({key, field, value, entityForm, defaultValue}: {key: string, field: EntityField, value: SelectOption[], entityForm: EntityForm, defaultValue?: any}): boolean {
+function onChangeSetSelectOptions(
+  name: string,
+  options: ConditionalSelectOptionProps | ConditionalSelectOptionProps[],
+): ModifyEntityFormFunc {
+  function changeOptions<T>({
+    key,
+    field,
+    value,
+    entityForm,
+    defaultValue,
+  }: {
+    key: string;
+    field: EntityField;
+    value: SelectOption[];
+    entityForm: EntityForm;
+    defaultValue?: any;
+  }): boolean {
     if (key === field.getName()) {
       if (field instanceof OptionalField) {
         return field.changeOptions(value);
@@ -209,7 +252,6 @@ function onChangeSetSelectOptions(name: string, options: ConditionalSelectOption
   }
 
   return (entityForm: EntityForm) => {
-
     const field = entityForm.getField(name);
     let changed = false;
     if (field) {
@@ -218,7 +260,7 @@ function onChangeSetSelectOptions(name: string, options: ConditionalSelectOption
         for (const option of options) {
           if (option.value === value) {
             option.result.forEach((value, key) => {
-              if (changeOptions({key, field, value, entityForm})) {
+              if (changeOptions({ key, field, value, entityForm })) {
                 changed = true;
               }
             });
@@ -233,7 +275,7 @@ function onChangeSetSelectOptions(name: string, options: ConditionalSelectOption
       } else {
         if (options.value === value) {
           options.result.forEach((value, key) => {
-            if (changeOptions({key, field, value, entityForm})) {
+            if (changeOptions({ key, field, value, entityForm })) {
               changed = true;
             }
           });
@@ -252,19 +294,19 @@ function onChangeSetSelectOptions(name: string, options: ConditionalSelectOption
     }
 
     return Promise.resolve(entityForm);
-  }
+  };
 }
 
-
-function onChangeSetFieldRequired(name: string, options: ConditionalProps | ConditionalProps[]): ModifyEntityFormFunc {
+function onChangeSetFieldRequired(
+  name: string,
+  options: ConditionalProps | ConditionalProps[],
+): ModifyEntityFormFunc {
   return (entityForm: EntityForm) => {
-
     const field = entityForm.getField(name);
     if (field) {
       const value = field.getCurrentValue(entityForm.getRenderType());
 
       if (Array.isArray(options)) {
-
         for (const prop of options) {
           if (prop.value === value) {
             prop.result.forEach((value, key) => {
@@ -272,9 +314,7 @@ function onChangeSetFieldRequired(name: string, options: ConditionalProps | Cond
             });
           }
         }
-
       } else {
-
         // option 이 단수라면 value 가 equals 일 때와 그렇지 않을 때를 각각 적용한다.
         const required = value === options.value;
 
@@ -287,21 +327,21 @@ function onChangeSetFieldRequired(name: string, options: ConditionalProps | Cond
           }
         });
       }
-
     }
     return Promise.resolve(entityForm);
-  }
+  };
 }
 
-function onChangeSetFieldHidden(name: string, options: ConditionalProps | ConditionalProps[]) : ModifyEntityFormFunc{
+function onChangeSetFieldHidden(
+  name: string,
+  options: ConditionalProps | ConditionalProps[],
+): ModifyEntityFormFunc {
   return (entityForm: EntityForm) => {
-
     const field = entityForm.getField(name);
     if (field) {
       const value = field.getCurrentValue(entityForm.getRenderType());
 
       if (Array.isArray(options)) {
-
         for (const prop of options) {
           if (prop.value === value) {
             prop.result.forEach((value, key) => {
@@ -309,9 +349,7 @@ function onChangeSetFieldHidden(name: string, options: ConditionalProps | Condit
             });
           }
         }
-
       } else {
-
         // option 이 단수라면 value 가 equals 일 때와 그렇지 않을 때를 각각 적용한다.
         const hidden = value === options.value;
 
@@ -324,8 +362,7 @@ function onChangeSetFieldHidden(name: string, options: ConditionalProps | Condit
           }
         });
       }
-
     }
     return Promise.resolve(entityForm);
-  }
+  };
 }

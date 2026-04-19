@@ -5,22 +5,20 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ValidateResult, ValidationItem} from '../validations/Validation';
-import {EntityForm} from '../config/EntityForm';
-import {FieldValue} from '../config/Config';
-import {isBlank} from '../utils/StringUtil';
+import { ValidateResult, ValidationItem } from '../validations/Validation';
+import { EntityForm } from '../config/EntityForm';
+import { FieldValue } from '../config/Config';
+import { isBlank } from '../utils/StringUtil';
 
 // currentValue가 정규식 패턴인지 확인
 const regexPattern = /^\/.*\/[gimsuy]*$/;
 
 export class RegexFormulaValidation extends ValidationItem {
-
   constructor(id: string) {
     super(id);
   }
 
   validate(entityForm: EntityForm, value: FieldValue, message?: string): Promise<ValidateResult> {
-
     const currentValue = this.getValueAsString(entityForm, value);
 
     let error: boolean = true;
@@ -40,9 +38,6 @@ export class RegexFormulaValidation extends ValidationItem {
       }
     }
 
-
-
     return Promise.resolve(this.returnValidateResult(error, '정규식 문자열을 입력해야 합니다.'));
   }
-
 }

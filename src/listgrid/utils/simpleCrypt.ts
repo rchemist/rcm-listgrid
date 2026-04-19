@@ -7,9 +7,9 @@
 
 import * as CryptoJS from 'crypto-js';
 
-import {isTrue} from "./BooleanUtil";
-import {stringify} from "./jsonUtils";
-import {getRuntimeConfig} from '../config/RuntimeConfig';
+import { isTrue } from './BooleanUtil';
+import { stringify } from './jsonUtils';
+import { getRuntimeConfig } from '../config/RuntimeConfig';
 
 // Lazy-resolved: call getRuntimeConfig() at use time so host-side
 // configureRuntime({ cryptKey: ... }) can run after module import.
@@ -27,29 +27,23 @@ export function encrypt(input: string, compress?: boolean): string {
 }
 
 export function decrypt(ciphertext: string, decompress?: boolean): string {
-
   let text = ciphertext;
 
   if (isTrue(decompress)) {
   }
-
 
   const bytes = CryptoJS.AES.decrypt(text, secretKey());
   return bytes.toString(CryptoJS.enc.Utf8);
 }
 
 export function hash(...input: unknown[]): string {
-
   let inputs = '';
   const normalized: string[] = [];
   for (let i = 0; i < input.length; i++) {
     let s: string;
-    if (input[i] === undefined || input[i] === null)
-      s = '_NULL_'
-    else if (typeof input[i] === 'object')
-      s = stringify(input[i])
-    else
-      s = String(input[i])
+    if (input[i] === undefined || input[i] === null) s = '_NULL_';
+    else if (typeof input[i] === 'object') s = stringify(input[i]);
+    else s = String(input[i]);
 
     normalized.push(s);
     inputs += s.trim();
@@ -57,7 +51,6 @@ export function hash(...input: unknown[]): string {
 
   return CryptoJS.SHA256(inputs).toString();
 }
-
 
 export // Generate a UUID v4
 function generateUUID(): string {
@@ -84,13 +77,25 @@ function generateUUID(): string {
   }
 
   return (
-    byteToHex[byteArray[0]!]! + byteToHex[byteArray[1]!]! +
-    byteToHex[byteArray[2]!]! + byteToHex[byteArray[3]!]! + '-' +
-    byteToHex[byteArray[4]!]! + byteToHex[byteArray[5]!]! + '-' +
-    byteToHex[byteArray[6]!]! + byteToHex[byteArray[7]!]! + '-' +
-    byteToHex[byteArray[8]!]! + byteToHex[byteArray[9]!]! + '-' +
-    byteToHex[byteArray[10]!]! + byteToHex[byteArray[11]!]! +
-    byteToHex[byteArray[12]!]! + byteToHex[byteArray[13]!]! +
-    byteToHex[byteArray[14]!]! + byteToHex[byteArray[15]!]!
+    byteToHex[byteArray[0]!]! +
+    byteToHex[byteArray[1]!]! +
+    byteToHex[byteArray[2]!]! +
+    byteToHex[byteArray[3]!]! +
+    '-' +
+    byteToHex[byteArray[4]!]! +
+    byteToHex[byteArray[5]!]! +
+    '-' +
+    byteToHex[byteArray[6]!]! +
+    byteToHex[byteArray[7]!]! +
+    '-' +
+    byteToHex[byteArray[8]!]! +
+    byteToHex[byteArray[9]!]! +
+    '-' +
+    byteToHex[byteArray[10]!]! +
+    byteToHex[byteArray[11]!]! +
+    byteToHex[byteArray[12]!]! +
+    byteToHex[byteArray[13]!]! +
+    byteToHex[byteArray[14]!]! +
+    byteToHex[byteArray[15]!]!
   );
 }

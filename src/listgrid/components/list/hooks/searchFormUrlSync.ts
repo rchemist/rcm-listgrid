@@ -5,8 +5,8 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FilterItem, SearchForm} from '../../../form/SearchForm';
-import {FiltersState, hasUrlParams, ListGridUrlState} from './urlStateParsers';
+import { FilterItem, SearchForm } from '../../../form/SearchForm';
+import { FiltersState, hasUrlParams, ListGridUrlState } from './urlStateParsers';
 
 /**
  * Convert SearchForm to URL state object
@@ -18,7 +18,7 @@ import {FiltersState, hasUrlParams, ListGridUrlState} from './urlStateParsers';
 export function searchFormToUrlState(
   searchForm: SearchForm,
   quickSearchPropertyName?: string,
-  orFields?: string[]
+  orFields?: string[],
 ): ListGridUrlState {
   const urlState: ListGridUrlState = {
     page: null,
@@ -68,12 +68,19 @@ export function searchFormToUrlState(
 
       for (const filter of andFilters) {
         // Skip quick search filter with subFilters (handled via q parameter)
-        if (filter.subFilters && filter.subFilters.size > 0 &&
-            quickSearchFields.includes(filter.name)) {
+        if (
+          filter.subFilters &&
+          filter.subFilters.size > 0 &&
+          quickSearchFields.includes(filter.name)
+        ) {
           continue;
         }
         // Extract quick search to separate q parameter (legacy single field search)
-        if (quickSearchPropertyName && filter.name === quickSearchPropertyName && !orFields?.length) {
+        if (
+          quickSearchPropertyName &&
+          filter.name === quickSearchPropertyName &&
+          !orFields?.length
+        ) {
           // Legacy mode: if quickSearchValue is not set yet, use this filter's value
           if (!quickSearchValue) {
             urlState.q = filter.value ?? null;
@@ -96,9 +103,7 @@ export function searchFormToUrlState(
     const orFilters = filters.get('OR');
     if (orFilters && orFilters.length > 0) {
       // Filter out quick search filters and NOT conditions
-      const urlFilters = orFilters.filter(f =>
-        !f.not && !quickSearchFields.includes(f.name)
-      );
+      const urlFilters = orFilters.filter((f) => !f.not && !quickSearchFields.includes(f.name));
       if (urlFilters.length > 0) {
         filtersState.OR = urlFilters;
       }
@@ -130,7 +135,7 @@ export function urlStateToSearchForm(
   urlState: ListGridUrlState,
   quickSearchPropertyName?: string,
   baseSearchForm?: SearchForm,
-  orFields?: string[]
+  orFields?: string[],
 ): SearchForm {
   const searchForm = baseSearchForm?.clone() ?? SearchForm.create();
 
@@ -188,7 +193,7 @@ export function mergeUrlAndSessionState(
   urlState: ListGridUrlState,
   sessionSearchForm: SearchForm | undefined,
   quickSearchPropertyName?: string,
-  orFields?: string[]
+  orFields?: string[],
 ): SearchForm {
   // If URL has any params, use URL state (URL priority)
   if (hasUrlParams(urlState)) {
@@ -215,7 +220,7 @@ export function mergeUrlAndSessionState(
 export function getQuickSearchFromSearchForm(
   searchForm: SearchForm,
   quickSearchPropertyName?: string,
-  orFields?: string[]
+  orFields?: string[],
 ): string {
   // First, try to get value from _quickSearch filter (OR condition search)
   const quickSearchValue = searchForm.getQuickSearchValue();

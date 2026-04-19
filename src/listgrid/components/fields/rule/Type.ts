@@ -5,11 +5,10 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {QueryConditionType} from "../../../form/SearchForm";
-import {FormField} from '../abstract';
-import {EntityForm} from '../../../config/EntityForm';
-import {parse, stringify} from '../../../utils/jsonUtils';
-
+import { QueryConditionType } from '../../../form/SearchForm';
+import { FormField } from '../abstract';
+import { EntityForm } from '../../../config/EntityForm';
+import { parse, stringify } from '../../../utils/jsonUtils';
 
 export interface RuleFieldValue {
   id: number;
@@ -22,13 +21,12 @@ export interface RuleFieldValue {
 export type RuleFieldType = 'add' | 'remove';
 
 export class RuleConditionValue {
-
   id: number;
   condition: 'AND' | 'OR';
   targetEntityPrefix: string;
   values: RuleFieldValue[];
 
-  constructor(id: number, condition: "AND" | "OR", targetEntityPrefix: string) {
+  constructor(id: number, condition: 'AND' | 'OR', targetEntityPrefix: string) {
     this.id = id;
     this.condition = condition;
     this.values = [];
@@ -36,7 +34,7 @@ export class RuleConditionValue {
   }
 
   public static create(data: unknown): RuleConditionValue {
-    if (typeof data === "string") {
+    if (typeof data === 'string') {
       const result = parse(data) as RuleConditionValue;
 
       const value = new RuleConditionValue(result.id, result.condition, result.targetEntityPrefix);
@@ -49,20 +47,19 @@ export class RuleConditionValue {
     } else {
       return RuleConditionValue.create(stringify(data));
     }
-
   }
 
   addValues(...values: RuleFieldValue[]) {
-    values.forEach(newValue => {
+    values.forEach((newValue) => {
       const existingValueIndex = this.values.findIndex(
-        v => v.id === newValue.id && v.name === newValue.name
+        (v) => v.id === newValue.id && v.name === newValue.name,
       );
 
       if (existingValueIndex !== -1) {
         // 기존에 동일한 id와 name이 있는 경우, 해당 값을 업데이트
         this.values[existingValueIndex] = {
           ...this.values[existingValueIndex],
-          ...newValue
+          ...newValue,
         };
       } else {
         // 동일한 id와 name이 없는 경우, 새로운 값을 추가
@@ -79,15 +76,13 @@ export class RuleConditionValue {
   isEmpty() {
     return !this.values || this.values.length === 0;
   }
-
-
 }
 
 export type ResultByCount = (count: number) => void;
 export type ResultByRuleCondition = (result: Map<number, RuleConditionValue>) => void;
 
 export interface RuleBasedFieldProps {
-  value?: Map<number, RuleConditionValue>
+  value?: Map<number, RuleConditionValue>;
   onRefresh?: () => void;
   setNotifications?: (notifications: string[]) => void;
   parentId?: string;
@@ -105,12 +100,11 @@ export interface RuleBasedFieldProps {
  * 엔티티폼을 통째로 넘기거나 필요한 필드를 지정해 넘길 수 있다.
  */
 export type RuleFieldEntityForm = {
-  prefix: string,   // field 앞에 붙일 prefix. 만약 대상 entityForm 이 단 하나라면 이 값을 무시해도 된다.
-  label: string,   // view 에서 필드 앞에 붙일 라벨명
-  entityForm?: EntityForm
+  prefix: string; // field 앞에 붙일 prefix. 만약 대상 entityForm 이 단 하나라면 이 값을 무시해도 된다.
+  label: string; // view 에서 필드 앞에 붙일 라벨명
+  entityForm?: EntityForm;
   fields?: FormField<any>[];
-}
-
+};
 
 export function getConfiguredFields(targetEntityForm: RuleFieldEntityForm): FormField<any>[] {
   const fields: FormField<any>[] = [];
@@ -124,7 +118,6 @@ export function getConfiguredFields(targetEntityForm: RuleFieldEntityForm): Form
         fields.push(field);
       }
     }
-
   }
 
   return fields;
@@ -143,7 +136,3 @@ export function isIgnoreField(field: FormField<any>) {
 
   return false;
 }
-
-
-
-

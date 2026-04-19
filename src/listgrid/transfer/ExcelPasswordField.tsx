@@ -1,9 +1,9 @@
 'use client';
 
-import React, {useState} from 'react';
-import {Tooltip} from '../ui';
-import {ShowError} from '../message';
-import {getTranslation} from '../utils/i18n';
+import React, { useState } from 'react';
+import { Tooltip } from '../ui';
+import { ShowError } from '../message';
+import { getTranslation } from '../utils/i18n';
 
 interface ExcelPasswordFieldProps {
   password: string;
@@ -18,17 +18,23 @@ export const ExcelPasswordField: React.FC<ExcelPasswordFieldProps> = ({
   error,
   onErrorChange,
 }) => {
-  const {t} = getTranslation();
+  const { t } = getTranslation();
   const [usePassword, setUsePassword] = useState(false);
 
-  const usePasswordLabel = t('form.list.dataTransfer.tab.export.usepassword.label') || '비밀번호 설정';
+  const usePasswordLabel =
+    t('form.list.dataTransfer.tab.export.usepassword.label') || '비밀번호 설정';
   const passwordLabel = t('form.list.dataTransfer.tab.export.password.label') || '비밀번호';
 
   return (
     <div className="rcm-panel rcm-panel-muted rcm-stack">
       <div className="rcm-row-between">
         <Tooltip
-          label={<div>파일에 비밀번호를 설정하는 경우 데이터 양이 많을 경우 암호화에 다소 시간이 소요될 수 있습니다.</div>}
+          label={
+            <div>
+              파일에 비밀번호를 설정하는 경우 데이터 양이 많을 경우 암호화에 다소 시간이 소요될 수
+              있습니다.
+            </div>
+          }
           zIndex={1100}
           color="gray"
           withArrow={true}

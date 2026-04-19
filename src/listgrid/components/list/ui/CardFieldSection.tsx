@@ -61,7 +61,9 @@ const CardFieldRow: React.FC<CardFieldRowProps> = ({ field, item, entityForm, se
     };
 
     loadFieldProperties();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [field, entityForm, session]);
 
   // Render field value
@@ -75,7 +77,12 @@ const CardFieldRow: React.FC<CardFieldRowProps> = ({ field, item, entityForm, se
 
         if (isMounted) {
           // Keep the result as-is; show placeholder for empty values
-          if (result.result === null || result.result === '—' || result.result === '-' || result.result === '') {
+          if (
+            result.result === null ||
+            result.result === '—' ||
+            result.result === '-' ||
+            result.result === ''
+          ) {
             setRenderedValue('—'); // Show placeholder for empty values
           } else {
             setRenderedValue(result.result);
@@ -91,7 +98,9 @@ const CardFieldRow: React.FC<CardFieldRowProps> = ({ field, item, entityForm, se
     };
 
     renderValue();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [field, item, entityForm]);
 
   const showTooltip = !isBlank(tooltip);
@@ -105,7 +114,10 @@ const CardFieldRow: React.FC<CardFieldRowProps> = ({ field, item, entityForm, se
         {/* Required indicator */}
         {required && (
           <Tooltip label="필수값" color="red" withArrow>
-            <Icon icon="healthicons:star-small" className="rcm-field-icon rcm-field-icon-required" />
+            <Icon
+              icon="healthicons:star-small"
+              className="rcm-field-icon rcm-field-icon-required"
+            />
           </Tooltip>
         )}
         {/* Tooltip indicator */}
@@ -123,9 +135,7 @@ const CardFieldRow: React.FC<CardFieldRowProps> = ({ field, item, entityForm, se
           <div className="rcm-card-field-value-inner">
             <div>{renderedValue}</div>
             {/* Help text display */}
-            {showHelpText && (
-              <div className="rcm-card-field-help-text">{helpText}</div>
-            )}
+            {showHelpText && <div className="rcm-card-field-help-text">{helpText}</div>}
           </div>
         )}
       </dd>
@@ -193,10 +203,7 @@ export const CardFieldSection: React.FC<CardFieldSectionProps> = ({
     <div className="rcm-card-section">
       {/* Section Header - Only show if group has a label */}
       {hasLabel && (
-        <div
-          className="rcm-card-section-header"
-          onClick={handleToggle}
-        >
+        <div className="rcm-card-section-header" onClick={handleToggle}>
           <div className="rcm-card-section-header-row">
             <h4 className="rcm-card-section-title">{fieldGroup.label}</h4>
             <div className="rcm-card-section-header-actions">

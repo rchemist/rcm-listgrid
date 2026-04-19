@@ -14,28 +14,27 @@ import {
   DataRow,
   DataRowSet,
   DataTransferResult,
-  ImportTransferConfig
+  ImportTransferConfig,
 } from '../transfer/Type';
-import {ReactNode, useState} from "react";
-import {getTranslation} from "../utils/i18n";
-import {isTrue} from '../utils/BooleanUtil';
-import {isBlank, subStringBetween} from '../utils/StringUtil';
-import {isEmpty} from "../utils";
+import { ReactNode, useState } from 'react';
+import { getTranslation } from '../utils/i18n';
+import { isTrue } from '../utils/BooleanUtil';
+import { isBlank, subStringBetween } from '../utils/StringUtil';
+import { isEmpty } from '../utils';
 import * as XLSX from 'xlsx-js-style';
-import {getAccessableAssetUrl, getExternalApiDataWithError} from "../misc";
+import { getAccessableAssetUrl, getExternalApiDataWithError } from '../misc';
 import DataImportSample from '../transfer/DataImportSample';
-import {Modal} from "../ui";
-import {DataImportProcessor} from '../transfer/DataImportProcessor';
-import {FileFieldValue, FileUploadInput} from "../ui";
+import { Modal } from '../ui';
+import { DataImportProcessor } from '../transfer/DataImportProcessor';
+import { FileFieldValue, FileUploadInput } from '../ui';
 
 interface ImporterProps {
   config?: ImportTransferConfig;
   sampleFileName: string;
-  onClose: (result: boolean) => void;    // 그냥 창을 닫았을 때
+  onClose: (result: boolean) => void; // 그냥 창을 닫았을 때
 }
 
 export const DataImporter = (props: ImporterProps) => {
-
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<DataRowSet>([]);
   const [success, setSuccess] = useState(false);
@@ -44,9 +43,10 @@ export const DataImporter = (props: ImporterProps) => {
   const [importErrorView, setImportErrorView] = useState<ReactNode>(<></>);
   const [importResult, setImportResult] = useState<DataTransferResult>();
 
-  const {t} = getTranslation();
+  const { t } = getTranslation();
 
-  const resultView: boolean = isTrue(success) && isBlank(errorMessage) && isBlank(importError) && importResult !== undefined;
+  const resultView: boolean =
+    isTrue(success) && isBlank(errorMessage) && isBlank(importError) && importResult !== undefined;
   const errorView: boolean = !isTrue(success) && (!isBlank(errorMessage) || !isBlank(importError));
   const preview: boolean = !isTrue(success) && isBlank(errorMessage) && isBlank(importError);
 
@@ -61,8 +61,9 @@ export const DataImporter = (props: ImporterProps) => {
   const fields = props.config?.fields ?? [];
   const allowUpdate = props.config?.mode?.update !== false;
   const addedImportFields = props.config?.addedFields;
-  const overrideFormData: ((formData: DataRowSet) => Promise<DataRowSet>) | undefined = props.config?.overrideFormData;
-  const url = props.config!.url!
+  const overrideFormData: ((formData: DataRowSet) => Promise<DataRowSet>) | undefined =
+    props.config?.overrideFormData;
+  const url = props.config!.url!;
   const overrideParseResult = props.config?.overrideParseResult;
   const description = props.config?.description ?? '';
   const sampleData = props.config?.sampleData ?? [];
@@ -85,7 +86,7 @@ export const DataImporter = (props: ImporterProps) => {
           const wb = XLSX.read(buffer, { type: 'array' });
           const wsname = wb.SheetNames[0] || '';
           const ws = wb.Sheets[wsname] || {};
-          result = XLSX.utils.sheet_to_json(ws, {header: 1});
+          result = XLSX.utils.sheet_to_json(ws, { header: 1 });
           /*
           fields 정보와 비교해 불필요한 필드는 제거한다.
            */
@@ -102,8 +103,11 @@ export const DataImporter = (props: ImporterProps) => {
 
             row.findIndex((cell: string, excelColIndex: number) => {
               // cell 내용이 이름\n[필드이름] 형태라면
-              if ((cell.includes('[') && cell.includes(']'))) {
-                const fieldName = subStringBetween(cell, '[', ']').trim().replace(/\n/g, '').replace(' ', '');
+              if (cell.includes('[') && cell.includes(']')) {
+                const fieldName = subStringBetween(cell, '[', ']')
+                  .trim()
+                  .replace(/\n/g, '')
+                  .replace(' ', '');
                 cell = fieldName;
               }
 
@@ -118,7 +122,6 @@ export const DataImporter = (props: ImporterProps) => {
             setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
             return;
           } else {
-
             const sheetData: DataRowSet = [];
             sheetData.push(header);
             result.map(async (row: any, index: number) => {
@@ -129,9 +132,11 @@ export const DataImporter = (props: ImporterProps) => {
 
                   if (field) {
                     const fieldName: string = field.getName();
-                    newRow.push({name: fieldName, value: await field.getValueOnImport(row[excelColIndex])});
+                    newRow.push({
+                      name: fieldName,
+                      value: await field.getValueOnImport(row[excelColIndex]),
+                    });
                   }
-
                 });
                 sheetData.push(newRow);
               }
@@ -144,7 +149,6 @@ export const DataImporter = (props: ImporterProps) => {
               setErrorMessage('데이터가 존재하지 않습니다.');
               return;
             }
-
           }
 
           setOpen(true);
@@ -158,15 +162,15 @@ export const DataImporter = (props: ImporterProps) => {
       reset();
       const fileUrl = getAccessableAssetUrl(file.url);
       fetch(fileUrl)
-        .then(response => {
+        .then((response) => {
           return response.arrayBuffer();
         })
-        .then(buffer => {
+        .then((buffer) => {
           try {
             const wb = XLSX.read(buffer, { type: 'array' });
             const wsname = wb.SheetNames[0] || '';
             const ws = wb.Sheets[wsname] || {};
-            result = XLSX.utils.sheet_to_json(ws, {header: 1});
+            result = XLSX.utils.sheet_to_json(ws, { header: 1 });
 
             /*
             fields 정보와 비교해 불필요한 필드는 제거한다.
@@ -184,8 +188,11 @@ export const DataImporter = (props: ImporterProps) => {
 
               row.findIndex((cell: string, excelColIndex: number) => {
                 // cell 내용이 이름\n[필드이름] 형태라면
-                if ((cell.includes('[') && cell.includes(']'))) {
-                  const fieldName = subStringBetween(cell, '[', ']').trim().replace(/\n/g, '').replace(' ', '');
+                if (cell.includes('[') && cell.includes(']')) {
+                  const fieldName = subStringBetween(cell, '[', ']')
+                    .trim()
+                    .replace(/\n/g, '')
+                    .replace(' ', '');
                   cell = fieldName;
                 }
 
@@ -200,7 +207,6 @@ export const DataImporter = (props: ImporterProps) => {
               setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
               return;
             } else {
-
               const sheetData: DataRowSet = [];
               sheetData.push(header);
               result.map(async (row: any, index: number) => {
@@ -211,9 +217,11 @@ export const DataImporter = (props: ImporterProps) => {
 
                     if (field) {
                       const fieldName: string = field.getName();
-                      newRow.push({name: fieldName, value: await field.getValueOnImport(row[excelColIndex])});
+                      newRow.push({
+                        name: fieldName,
+                        value: await field.getValueOnImport(row[excelColIndex]),
+                      });
                     }
-
                   });
                   sheetData.push(newRow);
                 }
@@ -226,15 +234,16 @@ export const DataImporter = (props: ImporterProps) => {
                 setErrorMessage('데이터가 존재하지 않습니다.');
                 return;
               }
-
             }
 
             setOpen(true);
           } catch (err) {
-            setErrorMessage('엑셀 파일을 읽는 중 오류가 발생했습니다. 파일 형식(xlsx)을 확인하세요.');
+            setErrorMessage(
+              '엑셀 파일을 읽는 중 오류가 발생했습니다. 파일 형식(xlsx)을 확인하세요.',
+            );
           }
         })
-        .catch(error => {
+        .catch((error) => {
           setErrorMessage('파일을 읽는 중 오류가 발생했습니다.');
         });
     }
@@ -249,21 +258,23 @@ export const DataImporter = (props: ImporterProps) => {
       // formData 의 각 행, 각 셀의 데이터를 map 으로 변환해 전송한다.
       if (fileData.length > 0) {
         try {
-          const rows: DataRow[] = await Promise.all(fileData.map(async (row: DataRow) => {
-            try {
-              let columns: DataColumn[] = [...row];
+          const rows: DataRow[] = await Promise.all(
+            fileData.map(async (row: DataRow) => {
+              try {
+                let columns: DataColumn[] = [...row];
 
-              if (addedImportFields !== undefined) {
-                const addedColumns = await addedImportFields(columns);
-                columns = [...columns, ...addedColumns];
+                if (addedImportFields !== undefined) {
+                  const addedColumns = await addedImportFields(columns);
+                  columns = [...columns, ...addedColumns];
+                }
+
+                return columns;
+              } catch (error) {
+                console.error('Error processing row:', error);
+                throw error;
               }
-
-              return columns;
-            } catch (error) {
-              console.error('Error processing row:', error);
-              throw error;
-            }
-          }));
+            }),
+          );
 
           formData = rows;
         } catch (error) {
@@ -283,29 +294,27 @@ export const DataImporter = (props: ImporterProps) => {
 
       // server 측 DTO 는 list 타입의 data 필드를 가지고 있어야 한다.
       try {
-
         // 서버에 전송하기 위한 데이터 형식으로 변환한다.
         const importData: ImportSubmitData = {
-          rows: []
+          rows: [],
         };
-        
-        
+
         const rows: Map<string, DataColumn>[] = [];
 
         formData.forEach((row: DataRow) => {
           const rowMap: Map<string, DataColumn> = new Map();
           row.forEach((column: DataColumn) => {
-            rowMap.set(column.name, {name: column.name, value: column.value});
+            rowMap.set(column.name, { name: column.name, value: column.value });
           });
           rows.push(rowMap);
           importData.rows.push({
-            properties: rowMap
+            properties: rowMap,
           });
         });
 
         const response = await getExternalApiDataWithError({
           url: url,
-          formData: importData
+          formData: importData,
         });
 
         if (overrideParseResult) {
@@ -351,15 +360,21 @@ export const DataImporter = (props: ImporterProps) => {
 
   return (
     <>
-      <Modal opened={true}
-             size={'5xl'}
-             title={t('form.list.dataTransfer.tab.import.title')}
-             onClose={() => {
-               props.onClose(false);
-             }}
+      <Modal
+        opened={true}
+        size={'5xl'}
+        title={t('form.list.dataTransfer.tab.import.title')}
+        onClose={() => {
+          props.onClose(false);
+        }}
       >
         <div className="rcm-importer-body">
-          <DataImportSample fields={fields} sampleData={sampleData} sampleFileName={props.sampleFileName} allowUpdate={allowUpdate}/>
+          <DataImportSample
+            fields={fields}
+            sampleData={sampleData}
+            sampleFileName={props.sampleFileName}
+            allowUpdate={allowUpdate}
+          />
           <div className="rcm-importer-section">
             <h3 className="rcm-text" data-weight="semibold">
               {t('form.list.dataTransfer.tab.import.file.label') || '업로드할 파일 선택'}
@@ -370,39 +385,51 @@ export const DataImporter = (props: ImporterProps) => {
               onChange={onFileUpload}
               config={{
                 maxCount: 1,
-                fileTypes: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'],
-                extensions: ['xlsx', 'xls']
+                fileTypes: [
+                  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                  'application/vnd.ms-excel',
+                ],
+                extensions: ['xlsx', 'xls'],
               }}
             />
           </div>
           {description && (
-            <div className="rcm-importer-description" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
+            <div
+              className="rcm-importer-description"
+              style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}
+            >
               {description}
             </div>
           )}
         </div>
-        {open && <Modal
-          size={'5xl'}
-          title={resultModalTitle}
-          zIndex={11000}
-          opened={open}
-          closeOnClickOutside={false}
-          closeOnEscape={false}
-          onClose={() => {
-            cancelImport();
-          }}>
-          <DataImportProcessor fields={fields} data={data}
-                               preview={preview}
-                               errorMessage={errorMessage}
-                               importError={importError}
-                               importErrorView={importErrorView}
-                               viewError={errorView}
-                               importResult={importResult}
-                               cancelImport={cancelImport}
-                               resultView={resultView}
-                               onImportSuccess={onImportSuccess}
-                               onSubmit={onSubmit}/>
-        </Modal>}
+        {open && (
+          <Modal
+            size={'5xl'}
+            title={resultModalTitle}
+            zIndex={11000}
+            opened={open}
+            closeOnClickOutside={false}
+            closeOnEscape={false}
+            onClose={() => {
+              cancelImport();
+            }}
+          >
+            <DataImportProcessor
+              fields={fields}
+              data={data}
+              preview={preview}
+              errorMessage={errorMessage}
+              importError={importError}
+              importErrorView={importErrorView}
+              viewError={errorView}
+              importResult={importResult}
+              cancelImport={cancelImport}
+              resultView={resultView}
+              onImportSuccess={onImportSuccess}
+              onSubmit={onSubmit}
+            />
+          </Modal>
+        )}
       </Modal>
     </>
   );
@@ -416,12 +443,12 @@ export const DataImporter = (props: ImporterProps) => {
     setOpen(false);
     props.onClose(true);
   }
-}
+};
 
 interface ImportSubmitData {
-  rows: ImportRow[]
+  rows: ImportRow[];
 }
 
 interface ImportRow {
-  properties: Map<string, DataColumn>
+  properties: Map<string, DataColumn>;
 }

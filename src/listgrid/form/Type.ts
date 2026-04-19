@@ -5,12 +5,12 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {AdditionalColorType, ColorType} from "../common/type";
-import {SearchForm} from './SearchForm';
-import {callExternalHttpRequest, ResponseData} from "../misc";
-import {isTrue} from '../utils/BooleanUtil';
-import {signOut} from "../auth/SessionProvider";
-import {showConfirm} from "../message";
+import { AdditionalColorType, ColorType } from '../common/type';
+import { SearchForm } from './SearchForm';
+import { callExternalHttpRequest, ResponseData } from '../misc';
+import { isTrue } from '../utils/BooleanUtil';
+import { signOut } from '../auth/SessionProvider';
+import { showConfirm } from '../message';
 
 export interface SelectOption {
   // 옵션 라벨
@@ -39,25 +39,24 @@ export interface SelectOption {
   targets?: string[];
 }
 
+export type MinMaxLimit = { min?: number; max?: number };
 
-export type MinMaxLimit = { min?: number, max?: number }
+export type MinMaxStringLimit = { min?: string; max?: string };
 
-export type MinMaxStringLimit = { min?: string, max?: string }
-
-export type EntityWithId = {id?: string | bigint, [key: string]: any};
+export type EntityWithId = { id?: string | bigint; [key: string]: any };
 
 export class PageResult {
   list: EntityWithId[] = [];
   totalCount: number;
   totalPage: number;
   searchForm: SearchForm = new SearchForm();
-  errors?: string[]
+  errors?: string[];
 
   constructor(props: {
-    list: EntityWithId[]
-    totalCount: number,
-    totalPage: number,
-    searchForm: SearchForm
+    list: EntityWithId[];
+    totalCount: number;
+    totalPage: number;
+    searchForm: SearchForm;
   }) {
     this.list = props.list;
     this.totalCount = props.totalCount;
@@ -70,37 +69,45 @@ export class PageResult {
       list: [],
       totalCount: 0,
       totalPage: 0,
-      searchForm: searchForm || new SearchForm()
+      searchForm: searchForm || new SearchForm(),
     });
   }
 
-  withErrors(...errors: string[]) : this {
+  withErrors(...errors: string[]): this {
     this.errors = errors;
     return this;
   }
 
-  static async fetchListData(url: string, searchForm: SearchForm, extensionOptions?: {
-    entityFormName?: string;
-    extensionPoint?: string;
-  }, serverProxy: boolean = true) {
+  static async fetchListData(
+    url: string,
+    searchForm: SearchForm,
+    extensionOptions?: {
+      entityFormName?: string;
+      extensionPoint?: string;
+    },
+    serverProxy: boolean = true,
+  ) {
     // 정적 빌드 시 cookies 사용으로 인한 오류 방지
     try {
-
       /**
        * 만약 serverSide가 true 라면 넘어 온 url 을 파라미터로 포함해 내부 프록시 api 를 호출하고 그 결과를 response 로 받는다.
        */
 
-      const response : ResponseData | null = await callExternalHttpRequest({
+      const response: ResponseData | null = await callExternalHttpRequest({
         url: url,
         method: 'POST',
         formData: searchForm,
         entityFormName: extensionOptions?.entityFormName,
         extensionPoint: extensionOptions?.extensionPoint,
-        serverProxy: serverProxy
+        serverProxy: serverProxy,
       });
 
       if (response.isError()) {
-        if (response.error === 'Failed to fetch' && response.status === 500 && typeof window !== 'undefined') {
+        if (
+          response.error === 'Failed to fetch' &&
+          response.status === 500 &&
+          typeof window !== 'undefined'
+        ) {
           await showConfirm({
             title: '세션이 만료되었습니다.',
             message: '서비스를 이용하려면 다시 로그인해야 합니다.',
@@ -108,20 +115,23 @@ export class PageResult {
             cancelButtonText: '',
             onConfirm: async () => {
               await signOut();
-            }
+            },
           });
-          
         }
-  
+
         if (response.entityError) {
-          return PageResult.createEmptyResult(searchForm).withErrors(response.entityError.error.message ?? '데이터 로딩 중 오류가 발생했습니다.');
+          return PageResult.createEmptyResult(searchForm).withErrors(
+            response.entityError.error.message ?? '데이터 로딩 중 오류가 발생했습니다.',
+          );
         }
-  
-        return PageResult.createEmptyResult(searchForm).withErrors(response.error ?? '데이터 로딩 중 오류가 발생했습니다.');
+
+        return PageResult.createEmptyResult(searchForm).withErrors(
+          response.error ?? '데이터 로딩 중 오류가 발생했습니다.',
+        );
       }
-  
+
       const newSearchForm = SearchForm.deserialize(response.data.searchForm);
-      
+
       if (searchForm.hasPreservedFilters()) {
         searchForm.getPreservedFilters().forEach((filter) => {
           if (isTrue(filter.remove)) {
@@ -133,13 +143,13 @@ export class PageResult {
           }
         });
       }
-  
+
       // list 또는 content 필드 확인
       const listData = response.data.list || response.data.content || [];
-      
+
       const responseList: EntityWithId[] = listData.map((item: EntityWithId) => ({
         ...item,
-        id: String(item.id) // id를 문자열로 강제 변환
+        id: String(item.id), // id를 문자열로 강제 변환
       }));
 
       return new PageResult({
@@ -148,10 +158,10 @@ export class PageResult {
         totalPage: response.data.totalPage,
         searchForm: newSearchForm,
       });
-  
     } catch (error) {
-      return PageResult.createEmptyResult(searchForm).withErrors('데이터 로딩 중 오류가 발생했습니다.');
+      return PageResult.createEmptyResult(searchForm).withErrors(
+        '데이터 로딩 중 오류가 발생했습니다.',
+      );
     }
   }
-  
 }

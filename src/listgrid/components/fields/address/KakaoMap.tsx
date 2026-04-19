@@ -7,9 +7,9 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {Map, MapMarker, useKakaoLoader} from 'react-kakao-maps-sdk';
-import {useState} from "react";
-import {isBlank} from '../../../utils/StringUtil';
+import { Map, MapMarker, useKakaoLoader } from 'react-kakao-maps-sdk';
+import { useState } from 'react';
+import { isBlank } from '../../../utils/StringUtil';
 
 interface KakaoMapProps {
   latitude?: number;
@@ -21,11 +21,10 @@ interface KakaoMapProps {
 }
 
 export const KakaoMap = (props: KakaoMapProps) => {
-
   const [latitude, setLatitude] = useState(props.latitude);
   const [longitude, setLongitude] = useState(props.longitude);
 
-  useKakaoLoader({appkey: props.apiKey, libraries: ['services']});
+  useKakaoLoader({ appkey: props.apiKey, libraries: ['services'] });
 
   /*
   (async () => {
@@ -43,7 +42,6 @@ export const KakaoMap = (props: KakaoMapProps) => {
         try {
           const geocoder = new kakao.maps.services.Geocoder();
           geocoder.addressSearch(props.address1, (result: any, status: any) => {
-
             if (status === 'OK' && result) {
               const latitude = parseFloat(result[0]!.y);
               const longitude = parseFloat(result[0]!.x);
@@ -51,9 +49,8 @@ export const KakaoMap = (props: KakaoMapProps) => {
               setLongitude(longitude);
               props.onSetCoordinates(latitude, longitude);
             }
-
-          })
-        }catch (e) {
+          });
+        } catch (e) {
           // no nothing
         }
       }
@@ -64,19 +61,23 @@ export const KakaoMap = (props: KakaoMapProps) => {
     return null;
   }
 
-  return <>
-    <Map
-      id={'address-map'}
-      level={3}
-      center={{ lat: latitude, lng: longitude }} style={{ width: '100%', height: '300px', marginTop:`1rem` }}>
-      <MapMarker // 마커를 생성합니다
-        position={{
-          // 마커가 표시될 위치입니다
-          lat: latitude,
-          lng: longitude,
-        }}
-        title={props.address1 ? `${props.address1} ${props.address2}` : ''}
-      />
-    </Map>
+  return (
+    <>
+      <Map
+        id={'address-map'}
+        level={3}
+        center={{ lat: latitude, lng: longitude }}
+        style={{ width: '100%', height: '300px', marginTop: `1rem` }}
+      >
+        <MapMarker // 마커를 생성합니다
+          position={{
+            // 마커가 표시될 위치입니다
+            lat: latitude,
+            lng: longitude,
+          }}
+          title={props.address1 ? `${props.address1} ${props.address2}` : ''}
+        />
+      </Map>
     </>
-}
+  );
+};

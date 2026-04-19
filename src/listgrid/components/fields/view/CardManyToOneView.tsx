@@ -4,27 +4,27 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
+'use client';
 
-import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {AbstractManyToOneField} from "../abstract";
-import {CustomFieldRendererProps} from "../../form/types/ViewEntityFormTheme.types";
-import {ManyToOneConfig} from "../../../config/Config";
-import {SearchForm} from "../../../form/SearchForm";
-import {isBlank} from "../../../utils/StringUtil";
-import {getManyToOneEntityValue} from "../ManyToOneField";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AbstractManyToOneField } from '../abstract';
+import { CustomFieldRendererProps } from '../../form/types/ViewEntityFormTheme.types';
+import { ManyToOneConfig } from '../../../config/Config';
+import { SearchForm } from '../../../form/SearchForm';
+import { isBlank } from '../../../utils/StringUtil';
+import { getManyToOneEntityValue } from '../ManyToOneField';
 import {
   IconCheck,
   IconChevronLeft,
   IconChevronRight,
   IconEdit,
   IconSearch,
-  IconX
-} from "@tabler/icons-react";
-import {ViewListGrid} from "../../list/ViewListGrid";
-import {ListGrid} from "../../../config/ListGrid";
-import {useModalManagerStore} from "../../../store";
-import {PageResult} from "../../../form/Type";
+  IconX,
+} from '@tabler/icons-react';
+import { ViewListGrid } from '../../list/ViewListGrid';
+import { ListGrid } from '../../../config/ListGrid';
+import { useModalManagerStore } from '../../../store';
+import { PageResult } from '../../../form/Type';
 
 /**
  * 카드 아이템의 스타일/렌더링 설정
@@ -130,7 +130,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
   cardConfig,
   items: providedItems,
   loadItems,
-  emptyMessage = "선택 가능한 항목이 없습니다.",
+  emptyMessage = '선택 가능한 항목이 없습니다.',
   showSearchButton = true,
   showAllWhenEmpty = true,
   pageSize = 6,
@@ -145,7 +145,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [isChanging, setIsChanging] = useState(false); // 변경 모드 상태
   const [currentPage, setCurrentPage] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [hasSearched, setHasSearched] = useState(false); // searchFirst 모드에서 검색 실행 여부
   const [isSearching, setIsSearching] = useState(false); // 검색 중 상태
 
@@ -193,7 +193,8 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
     if (prevDeps.providedItems !== providedItems) changes.push('providedItems');
     if (prevDeps.loadItems !== loadItems) changes.push('loadItems');
     if (prevDeps.config !== config) changes.push('config');
-    if (prevDeps.currentValueId !== currentValueId) changes.push(`currentValueId: ${prevDeps.currentValueId} -> ${currentValueId}`);
+    if (prevDeps.currentValueId !== currentValueId)
+      changes.push(`currentValueId: ${prevDeps.currentValueId} -> ${currentValueId}`);
 
     // 현재 값 저장
     prevDepsRef.current = { providedItems, loadItems, config, currentValueId };
@@ -215,12 +216,12 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
             for (const filterItem of config.filter) {
               if (filterItem) {
                 // 최신 entityForm 사용
-                searchForm.withFilter("AND", ...(await filterItem(entityFormRef.current)));
+                searchForm.withFilter('AND', ...(await filterItem(entityFormRef.current)));
               }
             }
           }
           if (config.entityForm.neverDelete) {
-            searchForm.handleAndFilter("active", "true");
+            searchForm.handleAndFilter('active', 'true');
           }
           searchForm.withPage(0).withPageSize(100);
 
@@ -262,7 +263,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
       setIsChanging(false); // 선택 후 변경 모드 종료
       onChange(item, true);
     },
-    [readonly, onChange]
+    [readonly, onChange],
   );
 
   // 선택 해제 핸들러
@@ -287,7 +288,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
     openModal({
       modalId,
       title: `${field.getLabel()} 검색`,
-      size: "5xl",
+      size: '5xl',
       content: (
         <div className="rcm-modal-content-scroll">
           <ViewListGrid
@@ -314,20 +315,20 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
   const getTitle = useCallback(
     (item: any): string => {
       if (cardConfig?.titleField) {
-        if (typeof cardConfig.titleField === "function") {
+        if (typeof cardConfig.titleField === 'function') {
           return cardConfig.titleField(item);
         }
-        return item[cardConfig.titleField] ?? "";
+        return item[cardConfig.titleField] ?? '';
       }
       if (config?.field?.name) {
-        if (typeof config.field.name === "function") {
+        if (typeof config.field.name === 'function') {
           return config.field.name(item);
         }
-        return item[config.field.name] ?? "";
+        return item[config.field.name] ?? '';
       }
-      return item.name ?? item.title ?? "";
+      return item.name ?? item.title ?? '';
     },
-    [cardConfig, config]
+    [cardConfig, config],
   );
 
   // 페이징/검색 필요 여부
@@ -360,64 +361,70 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
   }, []);
 
   // 서버 검색 실행 (searchFirst 모드용)
-  const handleServerSearch = useCallback(async (query: string) => {
-    if (!config?.entityForm || isBlank(query.trim())) {
-      return;
-    }
+  const handleServerSearch = useCallback(
+    async (query: string) => {
+      if (!config?.entityForm || isBlank(query.trim())) {
+        return;
+      }
 
-    setIsSearching(true);
-    setHasSearched(true);
+      setIsSearching(true);
+      setHasSearched(true);
 
-    try {
-      const searchForm = SearchForm.create();
+      try {
+        const searchForm = SearchForm.create();
 
-      // 기존 필터 적용
-      if (config.filter) {
-        for (const filterItem of config.filter) {
-          if (filterItem) {
-            searchForm.withFilter("AND", ...(await filterItem(entityFormRef.current)));
+        // 기존 필터 적용
+        if (config.filter) {
+          for (const filterItem of config.filter) {
+            if (filterItem) {
+              searchForm.withFilter('AND', ...(await filterItem(entityFormRef.current)));
+            }
           }
         }
+
+        // 검색어 필터 추가 (OR 조건으로 searchFields에 대해 검색)
+        const searchFilters = searchFields.map((fieldName) => ({
+          name: fieldName,
+          value: `%${query.trim()}%`,
+          queryConditionType: 'LIKE' as const,
+        }));
+        if (searchFilters.length === 1) {
+          searchForm.withFilter('AND', searchFilters[0]!);
+        } else {
+          // 여러 필드에 대해 OR 검색
+          searchForm.withFilter('OR', ...searchFilters);
+        }
+
+        if (config.entityForm.neverDelete) {
+          searchForm.handleAndFilter('active', 'true');
+        }
+        searchForm.withPage(0).withPageSize(pageSize * 3); // 검색 시 더 많이 가져옴
+
+        const url = config.entityForm.getUrl();
+        const result = await PageResult.fetchListData(url, searchForm);
+
+        setItems(result?.list ?? []);
+        setCurrentPage(0);
+      } catch (e) {
+        console.error('Server search failed:', e);
+        setItems([]);
+      } finally {
+        setIsSearching(false);
       }
-
-      // 검색어 필터 추가 (OR 조건으로 searchFields에 대해 검색)
-      const searchFilters = searchFields.map(fieldName => ({
-        name: fieldName,
-        value: `%${query.trim()}%`,
-        queryConditionType: 'LIKE' as const,
-      }));
-      if (searchFilters.length === 1) {
-        searchForm.withFilter("AND", searchFilters[0]!);
-      } else {
-        // 여러 필드에 대해 OR 검색
-        searchForm.withFilter("OR", ...searchFilters);
-      }
-
-      if (config.entityForm.neverDelete) {
-        searchForm.handleAndFilter("active", "true");
-      }
-      searchForm.withPage(0).withPageSize(pageSize * 3); // 검색 시 더 많이 가져옴
-
-      const url = config.entityForm.getUrl();
-      const result = await PageResult.fetchListData(url, searchForm);
-
-      setItems(result?.list ?? []);
-      setCurrentPage(0);
-    } catch (e) {
-      console.error("Server search failed:", e);
-      setItems([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [config, searchFields, pageSize, fieldName]);
+    },
+    [config, searchFields, pageSize, fieldName],
+  );
 
   // Enter 키 핸들러 (searchFirst 모드용)
-  const handleSearchKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchFirst) {
-      e.preventDefault();
-      handleServerSearch(searchQuery);
-    }
-  }, [searchFirst, searchQuery, handleServerSearch]);
+  const handleSearchKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && searchFirst) {
+        e.preventDefault();
+        handleServerSearch(searchQuery);
+      }
+    },
+    [searchFirst, searchQuery, handleServerSearch],
+  );
 
   // 페이지 변경
   const handlePageChange = useCallback((page: number) => {
@@ -428,44 +435,44 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
   const getLabel = useCallback(
     (item: any): string => {
       if (cardConfig?.labelField) {
-        if (typeof cardConfig.labelField === "function") {
+        if (typeof cardConfig.labelField === 'function') {
           return cardConfig.labelField(item);
         }
-        return item[cardConfig.labelField] ?? "";
+        return item[cardConfig.labelField] ?? '';
       }
-      return "";
+      return '';
     },
-    [cardConfig]
+    [cardConfig],
   );
 
   // 설명 가져오기
   const getDescription = useCallback(
     (item: any): string => {
       if (cardConfig?.descriptionField) {
-        if (typeof cardConfig.descriptionField === "function") {
+        if (typeof cardConfig.descriptionField === 'function') {
           return cardConfig.descriptionField(item);
         }
-        return item[cardConfig.descriptionField] ?? "";
+        return item[cardConfig.descriptionField] ?? '';
       } else if (cardConfig?.descriptionField === '') {
-        return "";
+        return '';
       }
-      return item.description ?? "";
+      return item.description ?? '';
     },
-    [cardConfig]
+    [cardConfig],
   );
 
   // 이미지 가져오기
   const getImage = useCallback(
     (item: any): string | undefined => {
       if (cardConfig?.imageField) {
-        if (typeof cardConfig.imageField === "function") {
+        if (typeof cardConfig.imageField === 'function') {
           return cardConfig.imageField(item);
         }
         return item[cardConfig.imageField];
       }
       return item.image ?? item.thumbnail ?? item.imageUrl;
     },
-    [cardConfig]
+    [cardConfig],
   );
 
   // 아이템 선택 여부 확인
@@ -474,7 +481,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
       if (!selectedItem) return false;
       return selectedItem.id === item.id;
     },
-    [selectedItem]
+    [selectedItem],
   );
 
   // 선택된 카드 렌더링 (readonly 모드 또는 선택 완료 상태)
@@ -487,11 +494,11 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
       return (
         <div
           key={item.id}
-          className={cardConfig?.selectedContainerClassName ?? "rcm-card-m2o rcm-card-m2o-selected"}
+          className={cardConfig?.selectedContainerClassName ?? 'rcm-card-m2o rcm-card-m2o-selected'}
         >
           {/* 선택 체크 아이콘 */}
           <span
-            className={cardConfig?.checkIconClassName ?? "rcm-card-m2o-check rcm-icon-frame"}
+            className={cardConfig?.checkIconClassName ?? 'rcm-card-m2o-check rcm-icon-frame'}
             data-shape="circle"
             data-color="success"
           >
@@ -507,26 +514,20 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
 
           {/* 라벨(뱃지) */}
           {!isBlank(label) && (
-            <span
-              className={cardConfig?.labelClassName ?? "rcm-badge"}
-              data-color="primary"
-            >
+            <span className={cardConfig?.labelClassName ?? 'rcm-badge'} data-color="primary">
               {label}
             </span>
           )}
 
           {/* 타이틀 */}
-          <h4
-            className={cardConfig?.titleClassName ?? "rcm-text"}
-            data-weight="semibold"
-          >
+          <h4 className={cardConfig?.titleClassName ?? 'rcm-text'} data-weight="semibold">
             {getTitle(item)}
           </h4>
 
           {/* 설명 */}
           {!isBlank(description) && (
             <p
-              className={cardConfig?.descriptionClassName ?? "rcm-card-m2o-description rcm-text"}
+              className={cardConfig?.descriptionClassName ?? 'rcm-card-m2o-description rcm-text'}
               data-tone="muted"
               data-size="sm"
             >
@@ -536,14 +537,12 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
 
           {/* 액션 영역 */}
           {cardConfig?.renderAction && (
-            <div className="rcm-card-m2o-action">
-              {cardConfig.renderAction(item)}
-            </div>
+            <div className="rcm-card-m2o-action">{cardConfig.renderAction(item)}</div>
           )}
         </div>
       );
     },
-    [cardConfig, getTitle, getLabel, getDescription, getImage]
+    [cardConfig, getTitle, getLabel, getDescription, getImage],
   );
 
   // 선택 가능한 카드 렌더링 (편집 모드)
@@ -557,14 +556,16 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
         <div
           key={item.id}
           onClick={onSelect}
-          className={`rcm-card-m2o rcm-card-m2o-clickable ${selected
-            ? (cardConfig?.selectedContainerClassName ?? "rcm-card-m2o-selected")
-            : (cardConfig?.containerClassName ?? "rcm-card-m2o-default")}`}
+          className={`rcm-card-m2o rcm-card-m2o-clickable ${
+            selected
+              ? (cardConfig?.selectedContainerClassName ?? 'rcm-card-m2o-selected')
+              : (cardConfig?.containerClassName ?? 'rcm-card-m2o-default')
+          }`}
         >
           {/* 선택 체크 아이콘 */}
           {selected && (
             <span
-              className={cardConfig?.checkIconClassName ?? "rcm-card-m2o-check rcm-icon-frame"}
+              className={cardConfig?.checkIconClassName ?? 'rcm-card-m2o-check rcm-icon-frame'}
               data-shape="circle"
               data-color="success"
             >
@@ -581,17 +582,14 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
 
           {/* 라벨(뱃지) */}
           {!isBlank(label) && (
-            <span
-              className={cardConfig?.labelClassName ?? "rcm-badge"}
-              data-color="neutral"
-            >
+            <span className={cardConfig?.labelClassName ?? 'rcm-badge'} data-color="neutral">
               {label}
             </span>
           )}
 
           {/* 타이틀 */}
           <h4
-            className={cardConfig?.titleClassName ?? "rcm-card-m2o-title-sm rcm-text"}
+            className={cardConfig?.titleClassName ?? 'rcm-card-m2o-title-sm rcm-text'}
             data-weight="semibold"
           >
             {getTitle(item)}
@@ -600,7 +598,10 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
           {/* 설명 */}
           {!isBlank(description) && (
             <p
-              className={cardConfig?.descriptionClassName ?? "rcm-card-m2o-description rcm-card-m2o-description-clamp rcm-text"}
+              className={
+                cardConfig?.descriptionClassName ??
+                'rcm-card-m2o-description rcm-card-m2o-description-clamp rcm-text'
+              }
               data-tone="muted"
               data-size="sm"
             >
@@ -610,14 +611,12 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
 
           {/* 액션 영역 */}
           {cardConfig?.renderAction && (
-            <div className="rcm-card-m2o-action">
-              {cardConfig.renderAction(item)}
-            </div>
+            <div className="rcm-card-m2o-action">{cardConfig.renderAction(item)}</div>
           )}
         </div>
       );
     },
-    [cardConfig, getTitle, getLabel, getDescription, getImage]
+    [cardConfig, getTitle, getLabel, getDescription, getImage],
   );
 
   if (loading) {
@@ -631,11 +630,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
   // readonly 모드: 선택된 카드만 표시
   if (readonly) {
     if (!selectedItem) {
-      return (
-        <div className="rcm-card-m2o-empty-readonly">
-          선택된 항목이 없습니다.
-        </div>
-      );
+      return <div className="rcm-card-m2o-empty-readonly">선택된 항목이 없습니다.</div>;
     }
     return (
       <div className="rcm-card-m2o-wrapper">
@@ -667,12 +662,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
             <IconEdit size={16} />
             변경
           </button>
-          <button
-            type="button"
-            onClick={handleClear}
-            className="rcm-button"
-            data-size="sm"
-          >
+          <button type="button" onClick={handleClear} className="rcm-button" data-size="sm">
             <IconX size={16} />
             선택 해제
           </button>
@@ -718,14 +708,19 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={handleSearchKeyDown}
-                placeholder={searchPlaceholder ?? "검색어를 입력하세요..."}
+                placeholder={searchPlaceholder ?? '검색어를 입력하세요...'}
                 className="rcm-card-m2o-search-input rcm-input"
                 data-size="sm"
               />
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => { setSearchQuery(""); setItems([]); setHasSearched(false); setCurrentPage(0); }}
+                  onClick={() => {
+                    setSearchQuery('');
+                    setItems([]);
+                    setHasSearched(false);
+                    setCurrentPage(0);
+                  }}
                   className="rcm-card-m2o-search-clear rcm-icon-btn"
                   data-size="sm"
                 >
@@ -778,7 +773,10 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => { setSearchQuery(""); setCurrentPage(0); }}
+                onClick={() => {
+                  setSearchQuery('');
+                  setCurrentPage(0);
+                }}
                 className="rcm-card-m2o-search-clear rcm-icon-btn"
                 data-size="sm"
               >
@@ -809,7 +807,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
       ) : paginatedItems.length > 0 ? (
         <div
           id={`card-grid-${field.getName()}`}
-          className={gridClassName ?? "rcm-card-m2o-grid"}
+          className={gridClassName ?? 'rcm-card-m2o-grid'}
           style={
             !gridClassName
               ? {
@@ -831,16 +829,20 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
           {paginatedItems.map((item) => {
             const selected = isItemSelected(item);
             if (cardConfig?.renderCard) {
-              return cardConfig.renderCard(item, selected, () =>
-                handleSelect(item)
-              );
+              return cardConfig.renderCard(item, selected, () => handleSelect(item));
             }
             return renderSelectableCard(item, selected, () => handleSelect(item));
           })}
         </div>
       ) : (
         <div className="rcm-card-m2o-no-results">
-          <p>{searchFirst && hasSearched ? "검색 결과가 없습니다." : (searchQuery ? "검색 결과가 없습니다." : emptyMessage)}</p>
+          <p>
+            {searchFirst && hasSearched
+              ? '검색 결과가 없습니다.'
+              : searchQuery
+                ? '검색 결과가 없습니다.'
+                : emptyMessage}
+          </p>
         </div>
       )}
 
@@ -884,7 +886,6 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
           </button>
         </div>
       )}
-
     </div>
   );
 };

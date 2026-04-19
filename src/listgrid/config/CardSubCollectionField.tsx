@@ -82,10 +82,12 @@ export interface CardSubCollectionRelation {
  * Filter configuration for CardSubCollectionField
  * Same format as ViewListGridOptionProps.filters
  */
-export type CardSubCollectionFilters = (entityForm: EntityForm) => Promise<{
-  condition: 'AND' | 'OR';
-  items: FilterItem[];
-}[]>;
+export type CardSubCollectionFilters = (entityForm: EntityForm) => Promise<
+  {
+    condition: 'AND' | 'OR';
+    items: FilterItem[];
+  }[]
+>;
 
 /**
  * Fetch options for CardSubCollectionField
@@ -238,13 +240,13 @@ export class CardSubCollectionField extends SubCollectionField {
       if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
         // Check if mappedBy filter already exists
         const hasMappedByFilter = additionalFilters[0]!.items.some(
-          (item: FilterItem) => item.name === mappedByFilter.name
+          (item: FilterItem) => item.name === mappedByFilter.name,
         );
         if (!hasMappedByFilter) {
           additionalFilters[0]!.items.unshift(mappedByFilter);
         }
         // Apply all filters
-        additionalFilters.forEach(filterGroup => {
+        additionalFilters.forEach((filterGroup) => {
           searchForm.withFilter(filterGroup.condition, ...filterGroup.items);
         });
       }
@@ -267,8 +269,10 @@ export class CardSubCollectionField extends SubCollectionField {
     session?: Session;
   }): Promise<ReactNode | null> {
     // Lazy load the CardSubCollectionView component
-    const CardSubCollectionView = React.lazy(
-      () => import('../components/list/ui/CardSubCollectionView').then(m => ({ default: m.CardSubCollectionView }))
+    const CardSubCollectionView = React.lazy(() =>
+      import('../components/list/ui/CardSubCollectionView').then((m) => ({
+        default: m.CardSubCollectionView,
+      })),
     );
 
     // Get the fetch URL

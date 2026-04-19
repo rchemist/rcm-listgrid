@@ -5,8 +5,8 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {EntityItem} from '../config/EntityItem';
-import {EntityForm} from '../config/EntityForm';
+import { EntityItem } from '../config/EntityItem';
+import { EntityForm } from '../config/EntityForm';
 import {
   ConditionalReactNodeValue,
   DEFAULT_FIELD_GROUP_INFO,
@@ -19,35 +19,34 @@ import {
   ManyToOneFilter,
   OptionalBoolean,
   ReadOnlyType,
-  ViewPreset
+  ViewPreset,
 } from '../config/Config';
-import {ListGrid} from '../config/ListGrid';
-import {isEmpty} from "../utils";
-import {AbstractManyToOneField, ListableFormField} from '../components/fields/abstract';
-import {ReactNode} from "react";
-import {ViewListGridOptionProps} from '../components/list/types/ViewListGrid.types';
-import {FilterItem} from "../form/SearchForm";
-import {FieldInfoParameters} from "./EntityField";
-import {Session} from '../auth/types';
-import {ViewListGrid} from "../components/list/ViewListGrid";
+import { ListGrid } from '../config/ListGrid';
+import { isEmpty } from '../utils';
+import { AbstractManyToOneField, ListableFormField } from '../components/fields/abstract';
+import { ReactNode } from 'react';
+import { ViewListGridOptionProps } from '../components/list/types/ViewListGrid.types';
+import { FilterItem } from '../form/SearchForm';
+import { FieldInfoParameters } from './EntityField';
+import { Session } from '../auth/types';
+import { ViewListGrid } from '../components/list/ViewListGrid';
 
 export class SubCollectionField implements EntityItem {
-
-  order: number;    // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
-  name: string;     // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
-  label?: LabelType;    // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
-  helpText?: HelpTextType;   // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  hidden?: HiddenType;    // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  readonly?: ReadOnlyType;    // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  dynamicUrl?: (parentEntityForm: EntityForm) => string;    // sub collection 의 url 이 parent entityForm 의 id 기반으로 생성된다면 이 메소드를 통해 url 을 동적으로 생성할 수 있다.
+  order: number; // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
+  name: string; // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
+  label?: LabelType; // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
+  helpText?: HelpTextType; // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  hidden?: HiddenType; // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  readonly?: ReadOnlyType; // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  dynamicUrl?: (parentEntityForm: EntityForm) => string; // sub collection 의 url 이 parent entityForm 의 id 기반으로 생성된다면 이 메소드를 통해 url 을 동적으로 생성할 수 있다.
 
   // // tab, fieldGroup 의 ID, 이 값은 EntityForm 이 initialize 될 때 자동으로 처리된다. 외부에서 입력할 필요가 없는 값이다.
-  form?: { tabId: string, fieldGroupId: string }
+  form?: { tabId: string; fieldGroupId: string };
 
   entityForm: EntityForm;
   hideLabel?: boolean;
 
-  relation: SubCollectionRelation
+  relation: SubCollectionRelation;
 
   // EntityForm 에서 리스트로 지정한 필드 중 subCollection 에서만 따로 목록 조회 필드를 정의하고 싶을 때 사용한다.
   listViewFields?: string[];
@@ -55,16 +54,16 @@ export class SubCollectionField implements EntityItem {
   viewListOptions?: ViewListGridOptionProps;
 
   constructor(props: {
-    entityForm: EntityForm,
-    relation: SubCollectionRelation,
-    order: number,
-    name: string,
-    label?: LabelType,
-    helpText?: HelpTextType,
-    hidden?: HiddenType,
-    readonly?: ReadOnlyType,
-    dynamicUrl?: (parentEntityForm: EntityForm) => string,
-    viewListOptions?: ViewListGridOptionProps
+    entityForm: EntityForm;
+    relation: SubCollectionRelation;
+    order: number;
+    name: string;
+    label?: LabelType;
+    helpText?: HelpTextType;
+    hidden?: HiddenType;
+    readonly?: ReadOnlyType;
+    dynamicUrl?: (parentEntityForm: EntityForm) => string;
+    viewListOptions?: ViewListGridOptionProps;
   }) {
     this.entityForm = props.entityForm;
     this.relation = props.relation;
@@ -79,7 +78,7 @@ export class SubCollectionField implements EntityItem {
   }
 
   withTooltip(tooltip?: ConditionalReactNodeValue): this {
-    console.error('not supported')
+    console.error('not supported');
     return this;
   }
 
@@ -115,7 +114,7 @@ export class SubCollectionField implements EntityItem {
     if (this.form) {
       this.form.tabId = tabId;
     } else {
-      this.form = { tabId: tabId, fieldGroupId: DEFAULT_FIELD_GROUP_INFO.id }
+      this.form = { tabId: tabId, fieldGroupId: DEFAULT_FIELD_GROUP_INFO.id };
     }
     return this;
   }
@@ -124,7 +123,7 @@ export class SubCollectionField implements EntityItem {
     if (this.form) {
       this.form.fieldGroupId = fieldGroupId;
     } else {
-      this.form = { tabId: DEFAULT_TAB_INFO.id, fieldGroupId }
+      this.form = { tabId: DEFAULT_TAB_INFO.id, fieldGroupId };
     }
     return this;
   }
@@ -195,7 +194,7 @@ export class SubCollectionField implements EntityItem {
     return await getConditionalBoolean(props, this.readonly);
   }
 
-  withForm(form: { tabId: string, fieldGroupId: string }): this {
+  withForm(form: { tabId: string; fieldGroupId: string }): this {
     this.form = form;
     return this;
   }
@@ -229,12 +228,17 @@ export class SubCollectionField implements EntityItem {
         }
       });
     }
-    
+
     return new ListGrid(entityForm);
   }
 
-  async render({ entityForm, session }: { entityForm: EntityForm, session?: Session }): Promise<ReactNode | null> {
-
+  async render({
+    entityForm,
+    session,
+  }: {
+    entityForm: EntityForm;
+    session?: Session;
+  }): Promise<ReactNode | null> {
     const listGrid = this.getListGrid(entityForm);
     const collectionEntityForm = listGrid.getEntityForm();
 
@@ -250,8 +254,6 @@ export class SubCollectionField implements EntityItem {
         }
       });
     }
-
-
 
     if (this.dynamicUrl !== undefined) {
       const url = this.dynamicUrl(entityForm);
@@ -279,7 +281,7 @@ export class SubCollectionField implements EntityItem {
         if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
           // mappedBy 필터가 이미 있는지 확인하고 없으면 추가
           const hasMappedByFilter = additionalFilters[0]!.items.some(
-            (item: FilterItem) => item.name === mappedByFilter.name
+            (item: FilterItem) => item.name === mappedByFilter.name,
           );
           if (!hasMappedByFilter) {
             additionalFilters[0]!.items.unshift(mappedByFilter);
@@ -289,42 +291,45 @@ export class SubCollectionField implements EntityItem {
       }
 
       // 기본: mappedBy 필터만 반환
-      return [{
-        condition: 'AND',
-        items: [mappedByFilter]
-      }];
+      return [
+        {
+          condition: 'AND',
+          items: [mappedByFilter],
+        },
+      ];
     };
 
-    
     if (options.readonly === undefined) {
       options.readonly = readonly;
     }
-    
+
     const subCollection = {
       ...this.viewListOptions?.subCollection,
       name: this.getName(),
       mappedBy: this.viewListOptions?.subCollection?.mappedBy ?? this.relation.mappedBy,
-      mappedValue: this.viewListOptions?.subCollection?.mappedValue ?? this.getMappedByValue(entityForm)
-    }
-    
+      mappedValue:
+        this.viewListOptions?.subCollection?.mappedValue ?? this.getMappedByValue(entityForm),
+    };
+
     return Promise.resolve(
       <ViewListGrid
         listGrid={listGrid}
         parentId={entityForm.id}
         options={{
           ...options,
-          subCollection: subCollection
+          subCollection: subCollection,
         }}
-      />
+      />,
     );
-
   }
 
   protected getMappedByFilter(entityForm: EntityForm): FilterItem {
     const mappedBy = this.relation.mappedBy;
     // mappedBy 가 entityId 일 때 이걸 entity.id 로 변환해야 한다.
     // 연산자 우선순위: ?? 보다 삼항연산자가 먼저 평가되도록 괄호 추가
-    const filterBy = this.relation.filterBy ?? (mappedBy.endsWith('Id') ? mappedBy.replace('Id', '') + '.id' : mappedBy);
+    const filterBy =
+      this.relation.filterBy ??
+      (mappedBy.endsWith('Id') ? mappedBy.replace('Id', '') + '.id' : mappedBy);
     const mappedValue: FilterItem = { name: filterBy };
 
     const mappedByValue = this.getMappedByValue(entityForm);
@@ -349,9 +354,7 @@ export class SubCollectionField implements EntityItem {
       return undefined;
     }
   }
-
 }
-
 
 interface SubCollectionRelation {
   /**
@@ -367,7 +370,7 @@ interface SubCollectionRelation {
    * - mappedBy: 'practiceId' → Create 시 { practiceId: '...' } 전송
    *                          → 조회 시 practice.id 필터로 자동 변환
    */
-  mappedBy: string,
+  mappedBy: string;
 
   /**
    * 조회 필터에 사용할 필드명 (선택사항).
@@ -380,7 +383,7 @@ interface SubCollectionRelation {
    * - mappedBy와 다른 필드명으로 조회해야 할 때
    * - 자동 변환 규칙이 맞지 않을 때
    */
-  filterBy?: string,
+  filterBy?: string;
 
   /**
    * 부모 엔티티에서 mappedBy 값으로 사용할 프로퍼티명.
@@ -388,7 +391,7 @@ interface SubCollectionRelation {
    * - 미지정 시: 부모 entityForm의 'id' 사용
    * - 지정 시: 부모 entityForm에서 해당 프로퍼티 값 사용
    */
-  valueProperty?: string,
+  valueProperty?: string;
 
   /**
    * 서브콜렉션 내부에서 사용할 추가 속성.
@@ -396,9 +399,9 @@ interface SubCollectionRelation {
    * 예: 서브콜렉션 내 ManyToOneField의 필터에 최상위 엔티티 값이 필요할 때
    * (Syllabus - SyllabusPrivileged 관계에서 admission 필터가 syllabus.id일 때 등)
    */
-  attributes?: Record<string, any>
+  attributes?: Record<string, any>;
 
   subCollectionEntityForm?: {
-    manyToOneFilter?: Record<string, ManyToOneFilter[]>
-  }
+    manyToOneFilter?: Record<string, ManyToOneFilter[]>;
+  };
 }

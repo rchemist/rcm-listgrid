@@ -1,8 +1,8 @@
-import React from "react";
-import {EntityForm} from "../../../config/EntityForm";
-import {Session} from '../../../auth/types';
-import {useEntityFormTheme} from "../context/EntityFormThemeContext";
-import {validateAndAdvanceStep} from "./CreateStepView";
+import React from 'react';
+import { EntityForm } from '../../../config/EntityForm';
+import { Session } from '../../../auth/types';
+import { useEntityFormTheme } from '../context/EntityFormThemeContext';
+import { validateAndAdvanceStep } from './CreateStepView';
 
 /**
  * CreateStepButtons 컴포넌트
@@ -38,7 +38,11 @@ export const CreateStepButtons = React.memo(function CreateStepButtons({
   const { classNames, cn, buttonLabels } = useEntityFormTheme();
 
   const handleNext = React.useCallback(async () => {
-    const { canAdvance, updatedForm } = await validateAndAdvanceStep(entityForm, currentStep, session);
+    const { canAdvance, updatedForm } = await validateAndAdvanceStep(
+      entityForm,
+      currentStep,
+      session,
+    );
     setEntityForm(updatedForm);
     if (canAdvance) {
       setCurrentStep(currentStep + 1);
@@ -50,10 +54,10 @@ export const CreateStepButtons = React.memo(function CreateStepButtons({
   }, [currentStep, setCurrentStep]);
 
   return (
-    <div className={cn("rcm-create-step-buttons", classNames.createStep?.buttonGroup)}>
+    <div className={cn('rcm-create-step-buttons', classNames.createStep?.buttonGroup)}>
       <button
         type="button"
-        className={cn("rcm-button", classNames.createStep?.prevButton)}
+        className={cn('rcm-button', classNames.createStep?.prevButton)}
         onClick={handlePrev}
         disabled={currentStep === 0}
       >
@@ -62,7 +66,7 @@ export const CreateStepButtons = React.memo(function CreateStepButtons({
       {currentStep < maxStep && (
         <button
           type="button"
-          className={cn("rcm-button", classNames.createStep?.nextButton)}
+          className={cn('rcm-button', classNames.createStep?.nextButton)}
           data-variant="primary"
           onClick={handleNext}
         >
@@ -72,7 +76,7 @@ export const CreateStepButtons = React.memo(function CreateStepButtons({
       {currentStep === maxStep && (
         <button
           type="button"
-          className={cn("rcm-button", classNames.createStep?.saveButton)}
+          className={cn('rcm-button', classNames.createStep?.saveButton)}
           data-variant="primary"
           onClick={onClickSaveButton}
         >

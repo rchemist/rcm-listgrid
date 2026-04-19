@@ -5,14 +5,13 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FormField, FormFieldProps} from './abstract';
-import {FieldInfoParameters, FieldRenderParameters} from '../../config/EntityField';
-import React from "react";
+import { FormField, FormFieldProps } from './abstract';
+import { FieldInfoParameters, FieldRenderParameters } from '../../config/EntityField';
+import React from 'react';
 
 // ManyToOne 관계이지만 단순 Join key 만 관리되는 필드인 경우 이 필드를 사용한다.
 // 보통 SubCollection 에서처럼 key 값 관리만 하는 경우에 사용된다.
 export class MappedJoinField extends FormField<MappedJoinField> {
-
   constructor(name: string) {
     super(name, 10, 'hidden');
   }
@@ -22,7 +21,13 @@ export class MappedJoinField extends FormField<MappedJoinField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <input type={'hidden'} name={`${this.getName()}`} value={await this.getCurrentValue(params.entityForm.getRenderType())}/>;
+      return (
+        <input
+          type={'hidden'}
+          name={`${this.getName()}`}
+          value={await this.getCurrentValue(params.entityForm.getRenderType())}
+        />
+      );
     })();
   }
 
@@ -34,8 +39,7 @@ export class MappedJoinField extends FormField<MappedJoinField> {
   }
 
   static create(props: FormFieldProps): MappedJoinField {
-    return new MappedJoinField(props.name)
-      .copyFields(props, true);
+    return new MappedJoinField(props.name).copyFields(props, true);
   }
 
   async isHidden(props: FieldInfoParameters): Promise<boolean> {

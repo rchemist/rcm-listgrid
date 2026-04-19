@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {isTrue} from "./BooleanUtil";
+import { isTrue } from './BooleanUtil';
 
 export function isNulls(value: unknown, other: unknown): boolean {
   if (value === undefined && other === undefined) {
@@ -41,21 +41,29 @@ export function isEquals(value: unknown, other: unknown): boolean {
   }
 
   // plain object deep comparison
-  if (typeof value === 'object' && typeof other === 'object' &&
-      value !== null && other !== null &&
-      !Array.isArray(value) && !Array.isArray(other)) {
+  if (
+    typeof value === 'object' &&
+    typeof other === 'object' &&
+    value !== null &&
+    other !== null &&
+    !Array.isArray(value) &&
+    !Array.isArray(other)
+  ) {
     const a = value as Record<string, unknown>;
     const b = other as Record<string, unknown>;
     const keysA = Object.keys(a);
     const keysB = Object.keys(b);
     if (keysA.length !== keysB.length) return false;
-    return keysA.every(key => keysB.includes(key) && isEquals(a[key], b[key]));
+    return keysA.every((key) => keysB.includes(key) && isEquals(a[key], b[key]));
   }
 
   return false;
 }
 
-export function isEqualsIgnoreCase(value: string | null | undefined, other: string | null | undefined): boolean {
+export function isEqualsIgnoreCase(
+  value: string | null | undefined,
+  other: string | null | undefined,
+): boolean {
   const isNull = isNulls(value, other);
 
   if (isNull) {
@@ -64,7 +72,11 @@ export function isEqualsIgnoreCase(value: string | null | undefined, other: stri
   return value!.toLowerCase() === other!.toLowerCase();
 }
 
-export function isEqualCollection(value: unknown[], other: unknown[], ignoreOrder: boolean = false): boolean {
+export function isEqualCollection(
+  value: unknown[],
+  other: unknown[],
+  ignoreOrder: boolean = false,
+): boolean {
   if (value.length !== other.length) {
     return false;
   }
@@ -86,14 +98,14 @@ export function isEmpty(collection: Map<unknown, unknown> | unknown[] | undefine
   return collection.length === 0;
 }
 
-export function isPositive(value?: number) : boolean {
+export function isPositive(value?: number): boolean {
   if (value === undefined || value === null) {
     return false;
   }
   return value > 0;
 }
 
-export function isNegative(value?: number) : boolean {
+export function isNegative(value?: number): boolean {
   if (value === undefined || value === null) {
     return false;
   }

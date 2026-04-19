@@ -1,9 +1,9 @@
 'use client';
-import {getAlignClassName} from "../../../common/func";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {ReactNode, useEffect, useState} from "react";
-import {RowItemProps} from "../types/RowItem.types";
-import {useListGridTheme} from "../context/ListGridThemeContext";
+import { getAlignClassName } from '../../../common/func';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { ReactNode, useEffect, useState } from 'react';
+import { RowItemProps } from '../types/RowItem.types';
+import { useListGridTheme } from '../context/ListGridThemeContext';
 
 export const ViewColumn = ({
   fields,
@@ -20,7 +20,7 @@ export const ViewColumn = ({
   const [views, setViews] = useState<ReactNode[] | undefined>();
   const { classNames: themeClasses } = useListGridTheme();
 
-  const viewUrl = path + "/" + item.id;
+  const viewUrl = path + '/' + item.id;
 
   // 테마에서 데이터 셀 클래스 가져오기
   const dataCellClass = themeClasses.cell?.dataCell ?? '';
@@ -41,14 +41,12 @@ export const ViewColumn = ({
           const linkOnCell = isTrue(viewListResult.linkOnCell, true);
 
           const tdIndex = fields.indexOf(field);
-          const alignClassName = getAlignClassName(
-            field.getListFieldAlignType()
-          );
+          const alignClassName = getAlignClassName(field.getListFieldAlignType());
 
           views.push(
             <td
               className={`${baseCellClass} ${dataCellClass} ${alignClassName} whitespace-nowrap ${
-                linkOnCell ? "cursor-pointer" : ""
+                linkOnCell ? 'cursor-pointer' : ''
               }`}
               key={`td_${index}_${tdIndex}`}
               onClick={() => {
@@ -59,7 +57,7 @@ export const ViewColumn = ({
                     if (onSelect !== undefined) {
                       onSelect(item);
                     } else {
-                      if (viewMode === "page") {
+                      if (viewMode === 'page') {
                         router.push(viewUrl);
                       } else {
                         window.open(viewUrl, `${item.id}`);
@@ -70,7 +68,7 @@ export const ViewColumn = ({
               }}
             >
               {viewListResult.result}
-            </td>
+            </td>,
           );
         }
       }

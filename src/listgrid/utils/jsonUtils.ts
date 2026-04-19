@@ -33,10 +33,10 @@ function mapReplacer(_key: string, value: unknown): unknown {
   if (value instanceof Map) {
     return Object.fromEntries(value);
   } else if (value instanceof Set) {
-    return [...value]
+    return [...value];
     // of course you can separate cases to turn Maps into objects
   }
-  return value
+  return value;
 }
 
 export function stringify(obj: unknown, beautify?: boolean): string {
@@ -88,4 +88,3 @@ const simpleStringify = (object: Record<string, unknown>): string => {
 export function parse(str: string): any {
   return JSON.parse(str, reviver);
 }
-

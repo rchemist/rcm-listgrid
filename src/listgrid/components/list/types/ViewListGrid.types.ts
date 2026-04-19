@@ -1,14 +1,14 @@
-import {ColorType} from "../../../common/type";
-import {FilterItem, SearchForm} from "../../../form/SearchForm";
-import {PageResult} from "../../../form/Type";
-import {EntityFormActionResult} from '../../../config/Config';
-import {EntityForm} from '../../../config/EntityForm';
-import {ListGrid, SubCollectionProps} from '../../../config/ListGrid';
-import {ListableFormField} from "../../fields/abstract";
-import {ListGridHeaderButtonProps} from "./ListGridHeader.types";
-import {ReactNode} from "react";
-import {Session} from '../../../auth/types';
-import {getRuntimeConfig} from '../../../config/RuntimeConfig';
+import { ColorType } from '../../../common/type';
+import { FilterItem, SearchForm } from '../../../form/SearchForm';
+import { PageResult } from '../../../form/Type';
+import { EntityFormActionResult } from '../../../config/Config';
+import { EntityForm } from '../../../config/EntityForm';
+import { ListGrid, SubCollectionProps } from '../../../config/ListGrid';
+import { ListableFormField } from '../../fields/abstract';
+import { ListGridHeaderButtonProps } from './ListGridHeader.types';
+import { ReactNode } from 'react';
+import { Session } from '../../../auth/types';
+import { getRuntimeConfig } from '../../../config/RuntimeConfig';
 
 export const searchFormHashKey: string = getRuntimeConfig().searchFormHashKey;
 
@@ -27,57 +27,65 @@ export interface SelectionActionButton {
 export interface SelectionOptions {
   // 체크박스 표시 제어
   enabled?: boolean | ((entityForm: EntityForm) => boolean);
-  
+
   // 선택 가능한 항목 필터링
   selectableFilter?: (item: any) => boolean;
-  
+
   // 선택 상태 변경 시 콜백
   onSelectionChange?: (checkedItems: string[], allItems: any[]) => void;
-  
+
   // 선택 제한
   maxSelection?: number;
   minSelection?: number;
-  
+
   // 선택 검증
   validateSelection?: (checkedItems: string[]) => { valid: boolean; message?: string };
-  
+
   // 선택 시 표시되는 액션 버튼들
   actions?: SelectionActionButton[];
-  
+
   // 기본 삭제 버튼 설정
-  deleteButton?: {
-    show?: boolean | ((checkedItems: string[]) => boolean);
-    label?: string | ((checkedItems: string[]) => string);
-    confirmMessage?: string | ((checkedItems: string[]) => string);
-    className?: string;
-    icon?: ReactNode;
-  } | false;  // false로 설정하면 삭제 버튼 완전히 숨김
+  deleteButton?:
+    | {
+        show?: boolean | ((checkedItems: string[]) => boolean);
+        label?: string | ((checkedItems: string[]) => string);
+        confirmMessage?: string | ((checkedItems: string[]) => string);
+        className?: string;
+        icon?: ReactNode;
+      }
+    | false; // false로 설정하면 삭제 버튼 완전히 숨김
 }
 
 export interface ViewListGridOptionProps {
   hideTitle?: boolean;
-  onDragPriority?: { support: boolean, onModify?: (changed: Map<string, number>) => Promise<void> };    // priority 를 지원하는 컬렉션. 즉 우선순위를 변경할 수 있는지 여부. 이 값이 true 라면 listGrid 의 맨 왼쪽에 onDrag 핸들러를 붙여 준다.
+  onDragPriority?: { support: boolean; onModify?: (changed: Map<string, number>) => Promise<void> }; // priority 를 지원하는 컬렉션. 즉 우선순위를 변경할 수 있는지 여부. 이 값이 true 라면 listGrid 의 맨 왼쪽에 onDrag 핸들러를 붙여 준다.
   onDrag?: (idList: string[]) => void;
-  useAccordion?: {render: (item: any, router: any) => Promise<ReactNode | null | undefined>};
+  useAccordion?: { render: (item: any, router: any) => Promise<ReactNode | null | undefined> };
   readonly?: boolean;
-  subCollection?: SubCollectionProps,
-  onSelect?: (item: any, setManagedId: (value: any) => void) => void,
-  manyToOne?: { onSelect: (item: any, setManagedId: (value: any) => void) => void }
-  popup?: boolean,
-  filterable?: boolean, // EntityForm 설정 여부와 관계 없이 filter 를 할 수 없게 하려면 이 값을 false 로 정의한다.
-  sortable?: boolean,   // EntityForm 설정 여부와 관계 없이 sort 를 할 수 없게 하려면 이 값을 false 로 정의한.
-  createOrUpdate?: CreateUpdateOptions,
+  subCollection?: SubCollectionProps;
+  onSelect?: (item: any, setManagedId: (value: any) => void) => void;
+  manyToOne?: { onSelect: (item: any, setManagedId: (value: any) => void) => void };
+  popup?: boolean;
+  filterable?: boolean; // EntityForm 설정 여부와 관계 없이 filter 를 할 수 없게 하려면 이 값을 false 로 정의한다.
+  sortable?: boolean; // EntityForm 설정 여부와 관계 없이 sort 를 할 수 없게 하려면 이 값을 false 로 정의한.
+  createOrUpdate?: CreateUpdateOptions;
   delete?: {
-    onDelete?: (entityForm: EntityForm, rows: any[], checkedItems: string[]) => Promise<EntityFormActionResult>,
-    postDelete?: (entityForm: EntityForm, rows: any[], checkedItems: string[]) => Promise<void>
-  },
+    onDelete?: (
+      entityForm: EntityForm,
+      rows: any[],
+      checkedItems: string[],
+    ) => Promise<EntityFormActionResult>;
+    postDelete?: (entityForm: EntityForm, rows: any[], checkedItems: string[]) => Promise<void>;
+  };
   // 선택 관련 통합 옵션
   selection?: SelectionOptions;
   // if condition is undefined, then AND
-  filters?: (entityForm: EntityForm) => Promise<{ condition?: 'AND' | 'OR', items: FilterItem[] }[]>,
-  fields?: ListableFormField<any>[],
+  filters?: (
+    entityForm: EntityForm,
+  ) => Promise<{ condition?: 'AND' | 'OR'; items: FilterItem[] }[]>;
+  fields?: ListableFormField<any>[];
   onFetched?: PostFetchListData;
-  headerButtons?: ((props: ListGridHeaderButtonProps) => Promise<ReactNode>)[]
+  headerButtons?: ((props: ListGridHeaderButtonProps) => Promise<ReactNode>)[];
   cacheable?: boolean;
   messages?: {
     noData?: string;
@@ -141,10 +149,10 @@ export type PostFetchListData = (pageResult: PageResult) => Promise<PageResult>;
 
 export interface ViewListGridProps {
   listGrid: ListGrid;
-  parentId?: string,
-  options?: ViewListGridOptionProps,
+  parentId?: string;
+  options?: ViewListGridOptionProps;
   title?: string;
-  viewMode?: 'popup' | 'page';    // subcollection 일 때는 popup 으로만 사용된다. 일반적인 리스트그리드에서 기본값은 page 이다. 
+  viewMode?: 'popup' | 'page'; // subcollection 일 때는 popup 으로만 사용된다. 일반적인 리스트그리드에서 기본값은 page 이다.
   session?: Session;
 }
 

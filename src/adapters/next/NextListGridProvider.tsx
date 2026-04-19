@@ -16,13 +16,13 @@ import { nextUrlStateServices } from './NextUrlStateAdapter';
 //   </NextListGridProvider>
 
 export interface NextListGridProviderProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 export function NextListGridProvider({ children }: NextListGridProviderProps) {
-    return (
-        <RouterProvider value={nextRouterServices}>
-            <UrlStateProvider value={nextUrlStateServices}>{children}</UrlStateProvider>
-        </RouterProvider>
-    );
+  return (
+    <RouterProvider value={nextRouterServices}>
+      <UrlStateProvider value={nextUrlStateServices}>{children}</UrlStateProvider>
+    </RouterProvider>
+  );
 }

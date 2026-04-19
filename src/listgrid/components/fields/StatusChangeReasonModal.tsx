@@ -7,10 +7,10 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React, {useState} from 'react';
-import {Textarea} from '../../ui';
-import {SelectOption} from '../../form/Type';
-import {FieldValue} from '../../config/Config';
+import React, { useState } from 'react';
+import { Textarea } from '../../ui';
+import { SelectOption } from '../../form/Type';
+import { FieldValue } from '../../config/Config';
 
 interface StatusReason {
   message: string;
@@ -33,14 +33,15 @@ export const StatusChangeReasonModal: React.FC<StatusChangeReasonModalProps> = (
   options,
   reason,
   onConfirm,
-  onCancel
+  onCancel,
 }) => {
   const [changeReason, setChangeReason] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   // 현재 상태와 새 상태의 라벨 찾기
-  const currentLabel = options.find(opt => opt.value === currentStatus)?.label || String(currentStatus);
-  const newLabel = options.find(opt => opt.value === newStatus)?.label || String(newStatus);
+  const currentLabel =
+    options.find((opt) => opt.value === currentStatus)?.label || String(currentStatus);
+  const newLabel = options.find((opt) => opt.value === newStatus)?.label || String(newStatus);
 
   const handleConfirm = () => {
     if (reason.required && !changeReason.trim()) {

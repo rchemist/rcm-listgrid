@@ -5,35 +5,37 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FormField, FormFieldProps} from './abstract';
-import {FieldRenderParameters} from '../../config/EntityField';
-import React from "react";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {EntityForm} from '../../config/EntityForm';
-import {XrefPreferMappingValue} from './view/XrefPreferMappingView';
-import {RenderType} from '../../config/Config';
-import {isEmpty} from "../../utils";
-import {XrefPriceMappingView} from './view/XrefPiceMappingView';
-import {FilterItem} from "../../form/SearchForm";
+import { FormField, FormFieldProps } from './abstract';
+import { FieldRenderParameters } from '../../config/EntityField';
+import React from 'react';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { EntityForm } from '../../config/EntityForm';
+import { XrefPreferMappingValue } from './view/XrefPreferMappingView';
+import { RenderType } from '../../config/Config';
+import { isEmpty } from '../../utils';
+import { XrefPriceMappingView } from './view/XrefPiceMappingView';
+import { FilterItem } from '../../form/SearchForm';
 
 interface XrefPriceAdditionalProps {
   entityForm: EntityForm;
   initPrice: (entityForm: EntityForm, rowValue: any) => Promise<void>;
   priceHelpText?: string;
-  filterItems?: FilterItem[] | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+  filterItems?:
+    | FilterItem[]
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
 }
 
-export interface XrefPriceMappingFieldProps extends FormFieldProps, XrefPriceAdditionalProps {
-}
+export interface XrefPriceMappingFieldProps extends FormFieldProps, XrefPriceAdditionalProps {}
 
-export class XrefPriceMappingField extends FormField<XrefPriceMappingField>{
-
+export class XrefPriceMappingField extends FormField<XrefPriceMappingField> {
   entityForm: EntityForm;
   initPrice: (entityForm: EntityForm, rowValue: any) => Promise<void>;
   priceHelpText?: string;
-  filterItems?: FilterItem[] | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+  filterItems?:
+    | FilterItem[]
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
 
-  constructor(name: string, order:number, props: XrefPriceAdditionalProps) {
+  constructor(name: string, order: number, props: XrefPriceAdditionalProps) {
     super(name, order, 'xrefMapping');
     this.entityForm = props.entityForm;
     this.helpText = '이 정보를 변경한 후 반드시 저장 버튼을 눌러야 변경 사항이 반영됩니다.';
@@ -47,23 +49,27 @@ export class XrefPriceMappingField extends FormField<XrefPriceMappingField>{
       entityForm: props.entityForm,
       initPrice: props.initPrice,
       priceHelpText: props.priceHelpText,
-      filterItems: props.filterItems
-    })
-      .copyFields(props, true);
+      filterItems: props.filterItems,
+    }).copyFields(props, true);
   }
 
   /**
    * XrefPriceMappingField 핵심 렌더링 로직 (원본 render 로직 보존)
    */
-  protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null | undefined> {
+  protected renderInstance(
+    params: FieldRenderParameters,
+  ): Promise<React.ReactNode | null | undefined> {
     return (async () => {
-      return <XrefPriceMappingView {...await getInputRendererParameters(this, {...params})}
-                                    priceHelpText={this.priceHelpText}
-                                    initPrice={this.initPrice}
-                                    parentEntityForm={params.entityForm}
-                                   filters={this.filterItems}
-                                    entityForm={this.entityForm}
-      />;
+      return (
+        <XrefPriceMappingView
+          {...await getInputRendererParameters(this, { ...params })}
+          priceHelpText={this.priceHelpText}
+          initPrice={this.initPrice}
+          parentEntityForm={params.entityForm}
+          filters={this.filterItems}
+          entityForm={this.entityForm}
+        />
+      );
     })();
   }
 
@@ -75,7 +81,7 @@ export class XrefPriceMappingField extends FormField<XrefPriceMappingField>{
       entityForm: this.entityForm,
       initPrice: this.initPrice,
       priceHelpText: this.priceHelpText,
-      filterItems: this.filterItems
+      filterItems: this.filterItems,
     });
   }
 
@@ -96,5 +102,4 @@ export class XrefPriceMappingField extends FormField<XrefPriceMappingField>{
     this.filterItems = filterItems;
     return this;
   }
-
 }

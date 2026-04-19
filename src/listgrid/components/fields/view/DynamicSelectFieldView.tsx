@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
+'use client';
 
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import {SelectOption} from "../../../form/Type";
-import {SelectBox} from "../../../ui";
-import {RadioChip} from "../../../ui";
-import {RadioInput} from "../../../ui";
-import {EntityForm} from "../../../config/EntityForm";
-import {InputRendererProps} from "../../../config/Config";
-import {OptionsLoader} from "../SelectField";
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { SelectOption } from '../../../form/Type';
+import { SelectBox } from '../../../ui';
+import { RadioChip } from '../../../ui';
+import { RadioInput } from '../../../ui';
+import { EntityForm } from '../../../config/EntityForm';
+import { InputRendererProps } from '../../../config/Config';
+import { OptionsLoader } from '../SelectField';
 
 // ============================================================================
 // 모듈 레벨 캐시 - 옵션 로더별로 데이터 캐싱
@@ -161,9 +161,25 @@ export const DynamicSelectFieldView: React.FC<DynamicSelectFieldViewProps> = ({
   if (loading || !mounted) {
     return (
       <div className="rcm-select-loading">
-        <svg className="rcm-select-loading-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle className="rcm-spinner-track" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-          <path className="rcm-spinner-head" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <svg
+          className="rcm-select-loading-spinner"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="rcm-spinner-track"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="rcm-spinner-head"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
         </svg>
         <span className="rcm-select-loading-text">불러오는 중...</span>
       </div>
@@ -181,29 +197,12 @@ export const DynamicSelectFieldView: React.FC<DynamicSelectFieldViewProps> = ({
 
   switch (renderType) {
     case 'chip':
-      return (
-        <RadioChip
-          options={options}
-          combo={combo ?? { direction: 'row' }}
-          {...commonProps}
-        />
-      );
+      return <RadioChip options={options} combo={combo ?? { direction: 'row' }} {...commonProps} />;
     case 'radio':
-      return (
-        <RadioInput
-          options={options}
-          combo={combo}
-          {...commonProps}
-        />
-      );
+      return <RadioInput options={options} combo={combo} {...commonProps} />;
     case 'select':
     default:
-      return (
-        <SelectBox
-          options={options}
-          {...commonProps}
-        />
-      );
+      return <SelectBox options={options} {...commonProps} />;
   }
 };
 

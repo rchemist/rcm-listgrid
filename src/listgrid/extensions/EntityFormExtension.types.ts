@@ -14,9 +14,9 @@ import { EntityForm } from '../config/EntityForm';
  */
 export interface ClientExtensionContext<TSession = Session, TUser = any> {
   session?: TSession;
-  user?: TUser;  // session에서 얻은 사용자 정보
-  entityForm: EntityForm;  // Client에서는 EntityForm 전체 접근 가능
-  [key: string]: any;  // 추가 컨텍스트 데이터
+  user?: TUser; // session에서 얻은 사용자 정보
+  entityForm: EntityForm; // Client에서는 EntityForm 전체 접근 가능
+  [key: string]: any; // 추가 컨텍스트 데이터
 }
 
 /**
@@ -38,10 +38,8 @@ export interface ExtensionOptions {
  */
 export type ClientExtensionFunction<TInput, TOutput = TInput> = (
   data: TInput,
-  context: ClientExtensionContext
+  context: ClientExtensionContext,
 ) => Promise<TOutput> | TOutput;
-
-
 
 /**
  * Extension Point 정의
@@ -51,7 +49,7 @@ export enum ExtensionPoint {
   // LIST 관련
   PRE_FETCH_LIST = 'preFetchList',
   POST_FETCH_LIST = 'postFetchList',
-  
+
   // CRUD 관련
   PRE_CREATE = 'preCreate',
   POST_CREATE = 'postCreate',
@@ -60,7 +58,7 @@ export enum ExtensionPoint {
   PRE_UPDATE = 'preUpdate',
   POST_UPDATE = 'postUpdate',
   PRE_DELETE = 'preDelete',
-  POST_DELETE = 'postDelete'
+  POST_DELETE = 'postDelete',
 }
 
 /**
@@ -70,6 +68,3 @@ export interface ClientExtensionConfig {
   handler: ClientExtensionFunction<any>;
   options?: Omit<ExtensionOptions, 'executionContext'>;
 }
-
-
-

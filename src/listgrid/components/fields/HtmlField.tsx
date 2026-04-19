@@ -5,20 +5,17 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FormField, FormFieldProps, ViewRenderProps, ViewRenderResult} from './abstract';
-import {FieldRenderParameters} from '../../config/EntityField';
-import React from "react";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {MarkdownEditor} from "../../ui";
-import {isEquals} from "../../misc";
-import {isBlank} from '../../utils/StringUtil';
+import { FormField, FormFieldProps, ViewRenderProps, ViewRenderResult } from './abstract';
+import { FieldRenderParameters } from '../../config/EntityField';
+import React from 'react';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { MarkdownEditor } from '../../ui';
+import { isEquals } from '../../misc';
+import { isBlank } from '../../utils/StringUtil';
 
-interface HtmlFieldProps extends FormFieldProps{
-
-}
+interface HtmlFieldProps extends FormFieldProps {}
 
 export class HtmlField extends FormField<HtmlField> {
-
   constructor(name: string, order: number) {
     super(name, order, 'markdown');
   }
@@ -28,7 +25,7 @@ export class HtmlField extends FormField<HtmlField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <MarkdownEditor {...await getInputRendererParameters(this, params)}></MarkdownEditor>
+      return <MarkdownEditor {...await getInputRendererParameters(this, params)}></MarkdownEditor>;
     })();
   }
 
@@ -41,7 +38,7 @@ export class HtmlField extends FormField<HtmlField> {
       return { result: null };
     }
     return {
-      result: <div dangerouslySetInnerHTML={{ __html: String(value) }} />
+      result: <div dangerouslySetInnerHTML={{ __html: String(value) }} />,
     };
   }
 
@@ -53,22 +50,17 @@ export class HtmlField extends FormField<HtmlField> {
   }
 
   private isEqualsOrEmpty(value?: string): boolean {
-    if (isBlank(value))
-      return true;
+    if (isBlank(value)) return true;
     return value === '<p><br></p>' || value === '<p></p>';
   }
 
   isDirty(): boolean {
     if (this.value) {
-
       const isNullDefaultValue = this.isEqualsOrEmpty(this.value.default);
       const isNullFetchedValue = this.isEqualsOrEmpty(this.value.fetched);
       const isNullCurrentValue = this.isEqualsOrEmpty(this.value.current);
 
-
-      if (isNullDefaultValue
-        && isNullFetchedValue
-        && isNullCurrentValue) {
+      if (isNullDefaultValue && isNullFetchedValue && isNullCurrentValue) {
         return false;
       }
 
@@ -94,5 +86,4 @@ export class HtmlField extends FormField<HtmlField> {
   public static create(props: HtmlFieldProps): HtmlField {
     return new HtmlField(props.name, props.order).copyFields(props);
   }
-
 }

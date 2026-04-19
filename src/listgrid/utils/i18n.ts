@@ -10,14 +10,14 @@
 // (identity translator) so UI is still renderable.
 
 export interface TranslatorI18n {
-    language?: string;
-    changeLanguage?(lang: string): void;
+  language?: string;
+  changeLanguage?(lang: string): void;
 }
 
 export interface Translator {
-    t: (key: string, fallback?: string) => string;
-    i18n?: TranslatorI18n;
-    initLocale?: (themeLocale: string) => void;
+  t: (key: string, fallback?: string) => string;
+  i18n?: TranslatorI18n;
+  initLocale?: (themeLocale: string) => void;
 }
 
 /**
@@ -29,23 +29,26 @@ export type TranslatorFactory = () => Translator;
 let _factory: TranslatorFactory | undefined;
 
 export function configureTranslator(factory: TranslatorFactory): void {
-    _factory = factory;
+  _factory = factory;
 }
 
 const DEFAULT_TRANSLATOR: Translator = {
-    t: (key: string, fallback?: string) => fallback ?? key,
-    i18n: {},
-    initLocale: () => {},
+  t: (key: string, fallback?: string) => fallback ?? key,
+  i18n: {},
+  initLocale: () => {},
 };
 
 export function getTranslation(): Translator {
-    if (_factory) {
-        try {
-            return _factory();
-        } catch (e) {
-            console.warn('[@rcm/listgrid] configured translator factory threw; falling back to identity.', e);
-            return DEFAULT_TRANSLATOR;
-        }
+  if (_factory) {
+    try {
+      return _factory();
+    } catch (e) {
+      console.warn(
+        '[@rcm/listgrid] configured translator factory threw; falling back to identity.',
+        e,
+      );
+      return DEFAULT_TRANSLATOR;
     }
-    return DEFAULT_TRANSLATOR;
+  }
+  return DEFAULT_TRANSLATOR;
 }

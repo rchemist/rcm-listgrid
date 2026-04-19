@@ -6,27 +6,27 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
+'use client';
 
-import {AbstractManyToOneField, FormField} from '../fields/abstract';
-import React, {ReactNode, useCallback, useEffect, useId, useState} from "react";
-import {ViewFieldError} from './ui/ViewFieldError';
-import {LabelType} from '../../config/Config';
-import {EntityForm} from '../../config/EntityForm';
-import {FieldError} from '../../config/EntityFormTypes';
-import {ViewHelpText} from './ui/ViewHelpText';
-import {FieldRenderParameters} from '../../config/EntityField';
-import {Icon} from "@iconify/react";
-import {EntityFormManageable} from './types/ViewEntityForm.types';
-import {isTrue} from '../../utils/BooleanUtil';
-import {isBlank} from '../../utils/StringUtil';
-import {IconHelp} from "@tabler/icons-react";
-import {Tooltip} from "../../ui";
-import {Session} from '../../auth/types';
-import {useLoadingStore} from "../../loading";
-import {getTranslation} from "../../utils/i18n";
-import {getManyToOneLink} from "../helper/FieldRendererHelper";
-import {useEntityFormTheme} from "./context/EntityFormThemeContext";
+import { AbstractManyToOneField, FormField } from '../fields/abstract';
+import React, { ReactNode, useCallback, useEffect, useId, useState } from 'react';
+import { ViewFieldError } from './ui/ViewFieldError';
+import { LabelType } from '../../config/Config';
+import { EntityForm } from '../../config/EntityForm';
+import { FieldError } from '../../config/EntityFormTypes';
+import { ViewHelpText } from './ui/ViewHelpText';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { Icon } from '@iconify/react';
+import { EntityFormManageable } from './types/ViewEntityForm.types';
+import { isTrue } from '../../utils/BooleanUtil';
+import { isBlank } from '../../utils/StringUtil';
+import { IconHelp } from '@tabler/icons-react';
+import { Tooltip } from '../../ui';
+import { Session } from '../../auth/types';
+import { useLoadingStore } from '../../loading';
+import { getTranslation } from '../../utils/i18n';
+import { getManyToOneLink } from '../helper/FieldRendererHelper';
+import { useEntityFormTheme } from './context/EntityFormThemeContext';
 
 /**
  * FieldRenderer component
@@ -66,9 +66,9 @@ export const FieldRenderer = (props: FieldRendererProps) => {
   const [errors, setErrors] = useState<string[]>([]);
   const [required, setRequired] = useState<boolean>(false);
   const [_readonly, setReadonly] = useState<boolean>();
-  const [tooltip, setTooltip] = useState<ReactNode>("");
-  const [helpText, setHelpText] = useState<ReactNode>("");
-  const [_placeHolder, setPlaceHolder] = useState<string>("");
+  const [tooltip, setTooltip] = useState<ReactNode>('');
+  const [helpText, setHelpText] = useState<ReactNode>('');
+  const [_placeHolder, setPlaceHolder] = useState<string>('');
   const [manyToOneLink, setManyToOneLink] = useState<ReactNode>(null);
   const [dirty, setDirty] = useState<boolean>(false);
   // 커스텀 렌더러용 현재 필드 값
@@ -78,90 +78,94 @@ export const FieldRenderer = (props: FieldRendererProps) => {
   const CustomFieldRenderer = getFieldRenderer(field.getName());
 
   // 커스텀 렌더러용 onChange 핸들러
-  const handleFieldChange = useCallback((value: any, propagation?: boolean) => {
-    (async () => {
-      const fieldName = field.getName();
-      const currentScroll = window.scrollY;
+  const handleFieldChange = useCallback(
+    (value: any, propagation?: boolean) => {
+      (async () => {
+        const fieldName = field.getName();
+        const currentScroll = window.scrollY;
 
-      setErrors([]);
-      setCurrentValue(value);
+        setErrors([]);
+        setCurrentValue(value);
 
-      const isPropagation = isTrue(propagation, true);
+        const isPropagation = isTrue(propagation, true);
 
-      let cloned: EntityForm = entityForm.clone(true);
-      cloned.setValue(fieldName, value);
-      cloned.clearAlertMessages(false);
+        let cloned: EntityForm = entityForm.clone(true);
+        cloned.setValue(fieldName, value);
+        cloned.clearAlertMessages(false);
 
-      const updatedField = cloned.fields.get(fieldName);
-      setDirty(updatedField?.isDirty() ?? false);
+        const updatedField = cloned.fields.get(fieldName);
+        setDirty(updatedField?.isDirty() ?? false);
 
-      const validationErrors: FieldError[] = await cloned.validate({
-        fieldNames: [fieldName],
-        session: props.session,
-      });
-      cloned.mergeError(fieldName, validationErrors);
+        const validationErrors: FieldError[] = await cloned.validate({
+          fieldNames: [fieldName],
+          session: props.session,
+        });
+        cloned.mergeError(fieldName, validationErrors);
 
-      let changed = false;
+        let changed = false;
 
-      if (isPropagation) {
-        if (cloned.onChanges && cloned.onChanges.length > 0) {
-          for (const onChange of cloned.onChanges!) {
-            try {
-              cloned = await onChange(cloned, fieldName);
-              if (isTrue(cloned.shouldReload)) {
-                changed = true;
+        if (isPropagation) {
+          if (cloned.onChanges && cloned.onChanges.length > 0) {
+            for (const onChange of cloned.onChanges!) {
+              try {
+                cloned = await onChange(cloned, fieldName);
+                if (isTrue(cloned.shouldReload)) {
+                  changed = true;
+                }
+              } catch (e) {
+                console.error(e);
               }
-            } catch (e) {
-              console.error(e);
             }
           }
         }
-      }
 
-      const manyToOneField = cloned.getField(fieldName);
-      setManyToOneLink(
-        await getManyToOneLink(cloned.getRenderType(), manyToOneField)
-      );
+        const manyToOneField = cloned.getField(fieldName);
+        setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
 
-      if (changed || manyToOneField instanceof AbstractManyToOneField) {
-        setEntityForm?.(cloned);
-      } else {
-        entityForm.merge(cloned);
-        setEntityForm?.(entityForm);
-      }
-
-      requestAnimationFrame(() => {
-        if (Math.abs(window.scrollY - currentScroll) > 0) {
-          setOpenBaseLoading(true);
-          window.scrollTo({
-            top: currentScroll,
-            behavior: "instant",
-          });
-          setTimeout(() => {
-            setOpenBaseLoading(false);
-          }, 50);
+        if (changed || manyToOneField instanceof AbstractManyToOneField) {
+          setEntityForm?.(cloned);
+        } else {
+          entityForm.merge(cloned);
+          setEntityForm?.(entityForm);
         }
-      });
-    })();
-  }, [entityForm, setEntityForm, field, props.session, setOpenBaseLoading]);
+
+        requestAnimationFrame(() => {
+          if (Math.abs(window.scrollY - currentScroll) > 0) {
+            setOpenBaseLoading(true);
+            window.scrollTo({
+              top: currentScroll,
+              behavior: 'instant',
+            });
+            setTimeout(() => {
+              setOpenBaseLoading(false);
+            }, 50);
+          }
+        });
+      })();
+    },
+    [entityForm, setEntityForm, field, props.session, setOpenBaseLoading],
+  );
 
   // 커스텀 렌더러용 onError 핸들러
-  const handleFieldError = useCallback((message: string) => {
-    if (isBlank(message)) return;
+  const handleFieldError = useCallback(
+    (message: string) => {
+      if (isBlank(message)) return;
 
-    const newErrors: string[] = [message];
-    setErrors(newErrors);
+      const newErrors: string[] = [message];
+      setErrors(newErrors);
 
-    const errors: FieldError[] = entityForm.errors ? [...entityForm.errors] : [];
-    errors.push({
-      name: field.name,
-      label: field.label,
-      errors: newErrors,
-    });
+      const errors: FieldError[] = entityForm.errors ? [...entityForm.errors] : [];
+      errors.push({
+        name: field.name,
+        label: field.label,
+        errors: newErrors,
+      });
 
-    const cloned = entityForm.clone(true).withErrors(errors);
-    setEntityForm?.(cloned);
-  }, [entityForm, setEntityForm, field]);
+      const cloned = entityForm.clone(true).withErrors(errors);
+      setEntityForm?.(cloned);
+    },
+    [entityForm, setEntityForm, field],
+  );
 
   // 커스텀 렌더러용 clearError 핸들러
   const handleClearError = useCallback(() => {
@@ -255,7 +259,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
 
               let cloned: EntityForm = entityForm.clone(true);
               cloned.setValue(name, value);
-              
+
               // persistent가 false인 alert 메시지들을 제거
               cloned.clearAlertMessages(false);
 
@@ -289,9 +293,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
               }
 
               const manyToOneField = cloned.getField(name);
-              setManyToOneLink(
-                await getManyToOneLink(cloned.getRenderType(), manyToOneField)
-              );
+              setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
 
               if (changed || manyToOneField instanceof AbstractManyToOneField) {
                 setEntityForm?.(cloned);
@@ -300,7 +302,6 @@ export const FieldRenderer = (props: FieldRendererProps) => {
                 setEntityForm?.(entityForm);
               }
 
-
               // entityForm 갱신으로 스크롤에 변화가 생겼다면 해당 위치로 스크롤을 자동 이동하는 구문
               // If entityForm update changes scroll, auto-scroll to previous position
               requestAnimationFrame(() => {
@@ -308,7 +309,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
                   setOpenBaseLoading(true);
                   window.scrollTo({
                     top: currentScroll,
-                    behavior: "instant",
+                    behavior: 'instant',
                   });
 
                   setTimeout(() => {
@@ -339,9 +340,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
               errors: newErrors,
             });
 
-            const cloned: EntityForm = entityForm
-              .clone(true)
-              .withErrors(errors);
+            const cloned: EntityForm = entityForm.clone(true).withErrors(errors);
             setEntityForm?.(cloned);
           },
           clearError: () => {
@@ -364,9 +363,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
     (async () => {
       // manyToOneLink(상세보기 등) 렌더링용 상태 갱신
       // Update manyToOneLink (for detail view, etc.)
-      setManyToOneLink(
-        await getManyToOneLink(entityForm.getRenderType(), field)
-      );
+      setManyToOneLink(await getManyToOneLink(entityForm.getRenderType(), field));
     })();
   }, []);
 
@@ -378,7 +375,10 @@ export const FieldRenderer = (props: FieldRendererProps) => {
     >
       <div
         id={`field-${instanceId}-${name}-${version}`}
-        className={cn(`rcm-field-label-wrapper ${showTooltip ? 'rcm-field-label-wrapper-with-tooltip' : ''}`, classNames.field?.labelWrapper)}
+        className={cn(
+          `rcm-field-label-wrapper ${showTooltip ? 'rcm-field-label-wrapper-with-tooltip' : ''}`,
+          classNames.field?.labelWrapper,
+        )}
       >
         <div className="rcm-field-label-row">
           {/* 라벨 렌더링: 숨김 설정이 아니면 표시 */}
@@ -394,11 +394,14 @@ export const FieldRenderer = (props: FieldRendererProps) => {
           {/* 필수값 아이콘 */}
           {/* Required icon */}
           {required && (
-            <Tooltip label={"필수값"} color={"red"} withArrow={true}>
+            <Tooltip label={'필수값'} color={'red'} withArrow={true}>
               <div className="rcm-field-icon-wrap">
                 <Icon
                   icon="healthicons:star-small"
-                  className={cn('rcm-field-icon rcm-field-icon-required', classNames.field?.requiredIcon)}
+                  className={cn(
+                    'rcm-field-icon rcm-field-icon-required',
+                    classNames.field?.requiredIcon,
+                  )}
                 />
               </div>
             </Tooltip>
@@ -406,7 +409,12 @@ export const FieldRenderer = (props: FieldRendererProps) => {
           {/* 수정됨(Dirty) 아이콘 */}
           {/* Dirty icon */}
           {dirty && (
-            <Tooltip label={"수정됨"} color={"yellow"} withArrow={true} key={`tooltip-${name}-${version}-dirty`}>
+            <Tooltip
+              label={'수정됨'}
+              color={'yellow'}
+              withArrow={true}
+              key={`tooltip-${name}-${version}-dirty`}
+            >
               <div className="rcm-field-icon-wrap">
                 <Icon
                   icon="healthicons:star-small-outline"
@@ -420,12 +428,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
         {/* Tooltip icon: only show if tooltip exists */}
         {showTooltip && (
           <div className="rcm-row">
-            <Tooltip
-              label={tooltip}
-              color={"gray"}
-              withArrow={true}
-              position={"top-end"}
-            >
+            <Tooltip label={tooltip} color={'gray'} withArrow={true} position={'top-end'}>
               <div className={cn('rcm-field-tooltip-icon', classNames.field?.tooltipIcon)}>
                 <IconHelp className="rcm-field-icon" />
               </div>
@@ -472,7 +475,7 @@ export const FieldRenderer = (props: FieldRendererProps) => {
    * - If label is string, translate; otherwise, return as is
    */
   function viewLabel(label: LabelType) {
-    if (typeof label === "string") {
+    if (typeof label === 'string') {
       return t(label);
     }
     return label;

@@ -4,33 +4,33 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-'use client'
+'use client';
 import {
   ALWAYS,
   InputRendererProps,
   ManyToOneConfig,
   NO_FILTER_SORT_ON_LIST,
-  ViewPreset
+  ViewPreset,
 } from '../../../config/Config';
-import {EntityForm} from '../../../config/EntityForm';
-import {SubmitFormData} from '../../../config/EntityFormTypes';
-import {useEffect, useState} from "react";
-import {Paper} from "../../../ui";
-import {LoadingOverlay} from "../../../ui";
-import {useModalManagerStore} from '../../../store';
-import {ViewListGrid} from '../../list/ViewListGrid';
-import {ListGrid} from '../../../config/ListGrid';
-import {FilterItem, SearchForm} from "../../../form/SearchForm";
-import {isEmpty} from "../../../utils";
-import {ManyToOneField} from '../ManyToOneField';
-import {ViewEntityForm} from '../../form/ViewEntityForm';
-import {PageResult} from "../../../form/Type";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {BooleanField} from '../BooleanField';
-import {EntityFormButton} from '../../../config/EntityFormButton';
-import {NumberField} from '../NumberField';
-import {generateUUID} from '../../../utils/simpleCrypt';
-import {isBlank} from '../../../utils/StringUtil';
+import { EntityForm } from '../../../config/EntityForm';
+import { SubmitFormData } from '../../../config/EntityFormTypes';
+import { useEffect, useState } from 'react';
+import { Paper } from '../../../ui';
+import { LoadingOverlay } from '../../../ui';
+import { useModalManagerStore } from '../../../store';
+import { ViewListGrid } from '../../list/ViewListGrid';
+import { ListGrid } from '../../../config/ListGrid';
+import { FilterItem, SearchForm } from '../../../form/SearchForm';
+import { isEmpty } from '../../../utils';
+import { ManyToOneField } from '../ManyToOneField';
+import { ViewEntityForm } from '../../form/ViewEntityForm';
+import { PageResult } from '../../../form/Type';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { BooleanField } from '../BooleanField';
+import { EntityFormButton } from '../../../config/EntityFormButton';
+import { NumberField } from '../NumberField';
+import { generateUUID } from '../../../utils/simpleCrypt';
+import { isBlank } from '../../../utils/StringUtil';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 
@@ -39,11 +39,13 @@ interface XrefPriceMappingViewProps extends InputRendererProps {
   parentEntityForm?: EntityForm;
   initPrice: (entityForm: EntityForm, rowValue: any) => Promise<void>;
   priceHelpText?: string;
-  filters?: FilterItem[] | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+  filters?:
+    | FilterItem[]
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
 }
 
 export interface XrefPriceMappingValue {
-  mapped?: XrefPriceValue[]
+  mapped?: XrefPriceValue[];
 }
 
 interface XrefPriceValue {
@@ -51,34 +53,37 @@ interface XrefPriceValue {
   price?: number;
 }
 
-
-const PriceMappingEntityForm = (label: string, mapping: {
-  config: ManyToOneConfig,
-  name: string,
+const PriceMappingEntityForm = (
   label: string,
-  helpText?: string;
-  exceptId?: any[]
-  priceViewPreset: ViewPreset
-}): EntityForm => {
+  mapping: {
+    config: ManyToOneConfig;
+    name: string;
+    label: string;
+    helpText?: string;
+    exceptId?: any[];
+    priceViewPreset: ViewPreset;
+  },
+): EntityForm => {
+  return new EntityForm(label, '').addFields({
+    items: [
+      new ManyToOneField(mapping.name, 100, mapping.config)
+        .withLabel(mapping.label)
+        .withRequired(true),
+      new NumberField('price', 200)
+        .withLabel('가격')
+        .withHelpText(mapping.helpText)
+        .withViewPreset(mapping.priceViewPreset)
+        .withDefaultValue(false)
+        .withListConfig(NO_FILTER_SORT_ON_LIST),
+    ],
+  });
+};
 
-  return new EntityForm(label, '')
-    .addFields(
-      {
-        items: [
-          new ManyToOneField(mapping.name, 100, mapping.config).withLabel(mapping.label).withRequired(true),
-          new NumberField('price', 200).withLabel('가격')
-            .withHelpText(mapping.helpText)
-            .withViewPreset(mapping.priceViewPreset)
-            .withDefaultValue(false)
-            .withListConfig(NO_FILTER_SORT_ON_LIST),
-        ]
-      }
-    );
-
-}
-
-export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: XrefPriceMappingViewProps) => {
-
+export const XrefPriceMappingView = ({
+  entityForm,
+  parentEntityForm,
+  ...props
+}: XrefPriceMappingViewProps) => {
   const readonly = props.readonly ?? false;
   const priceViewPreset: ViewPreset = ALWAYS;
   const label = props.label;
@@ -106,7 +111,7 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
   if (value !== undefined) {
     mappingValue.mapped = value.mapped ?? [];
   }
-  
+
   useEffect(() => {
     if (props.filters) {
       (async () => {
@@ -122,8 +127,7 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
 
   useEffect(() => {
     if (value.mapped === undefined || value.mapped.length === 0) {
-      const newViewSearchForm = new SearchForm()
-        .withShouldReturnEmpty(true);
+      const newViewSearchForm = new SearchForm().withShouldReturnEmpty(true);
       setViewSearchForm(newViewSearchForm);
       setListKey(new Date().getTime().toString());
       return;
@@ -137,29 +141,24 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
 
     setIdList([...idList]);
     setListKey(new Date().getTime().toString());
-    const newViewSearchForm = viewSearchForm?.clone()
+    const newViewSearchForm = viewSearchForm
+      ?.clone()
       .removeFilter('id')
       .withShouldReturnEmpty(false)
-      .withFilter('AND', {name: 'id', values: idList, queryConditionType: "IN"});
+      .withFilter('AND', { name: 'id', values: idList, queryConditionType: 'IN' });
     setViewSearchForm(newViewSearchForm);
-
   }, [value]);
 
-
   useEffect(() => {
-
     const viewSearchForm: SearchForm = new SearchForm().withPageSize(1000);
     const idList: string[] = [];
     if (mappingValue.mapped !== undefined && mappingValue.mapped.length > 0) {
-
-
       // 이미 매핑된 정보는 확인할 수 없게 한다.
       idList.push(...mappingValue.mapped.map((mapped) => mapped.id).filter(Boolean));
 
       // viewSearchForm 에서는 이미 매핑된 정보만 표시되도록 한다.
-      viewSearchForm.withFilter('AND', {name: 'id', queryConditionType: 'IN', values: idList})
+      viewSearchForm.withFilter('AND', { name: 'id', queryConditionType: 'IN', values: idList });
       viewSearchForm.withIgnoreCache(true);
-
     } else {
       // viewSearchForm 은 반드시 empty 를 리턴하게 한다.
       viewSearchForm.withShouldReturnEmpty(true);
@@ -167,7 +166,6 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
 
     setIdList(idList);
     setViewSearchForm(viewSearchForm);
-
   }, [props.value]);
 
   if (filters.length > 0) {
@@ -175,41 +173,50 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
   }
 
   if (viewSearchForm === undefined) {
-    return <div className={'relative'}>
-      <div className={`panel p-4 flex-1 gap-2.5 mt-5 border dark:border-[#17263c] rounded-xl shadow-none space-y-2`}>
-        <LoadingOverlay visible={true} />
-        <div className={'w-full h-[400px]'}></div>
+    return (
+      <div className={'relative'}>
+        <div
+          className={`panel p-4 flex-1 gap-2.5 mt-5 border dark:border-[#17263c] rounded-xl shadow-none space-y-2`}
+        >
+          <LoadingOverlay visible={true} />
+          <div className={'w-full h-[400px]'}></div>
+        </div>
       </div>
-    </div>
+    );
   }
 
   const xrefEntityForm = PriceMappingEntityForm(labelText!, {
     config: {
       entityForm: entityForm,
-      filter: isEmpty(idList) ? [(entityForm: EntityForm) => {
-        const filterItems: FilterItem[] = [];
-        if (filters.length > 0) {
-          filterItems.push(...filters);
-        }
-        filterItems.push({name: 'id', queryConditionType: 'NOT_NULL'});
-        return Promise.resolve(filterItems);
-      }]: [(entityForm: EntityForm) => {
-        const filterItems: FilterItem[] = [];
-        if (filters.length > 0) {
-          filterItems.push(...filters);
-        }
-        filterItems.push({name: 'id', queryConditionType: 'NOT_IN', values: idList});
-        return Promise.resolve(filterItems);
-      }],
+      filter: isEmpty(idList)
+        ? [
+            (entityForm: EntityForm) => {
+              const filterItems: FilterItem[] = [];
+              if (filters.length > 0) {
+                filterItems.push(...filters);
+              }
+              filterItems.push({ name: 'id', queryConditionType: 'NOT_NULL' });
+              return Promise.resolve(filterItems);
+            },
+          ]
+        : [
+            (entityForm: EntityForm) => {
+              const filterItems: FilterItem[] = [];
+              if (filters.length > 0) {
+                filterItems.push(...filters);
+              }
+              filterItems.push({ name: 'id', queryConditionType: 'NOT_IN', values: idList });
+              return Promise.resolve(filterItems);
+            },
+          ],
     },
     name: 'mapping',
     label: labelText!,
     helpText: props.priceHelpText ?? '가격을 재설정할 수 있습니다.',
     exceptId: idList,
-    priceViewPreset: priceViewPreset
+    priceViewPreset: priceViewPreset,
   })
     .withOnChanges(async (entityForm, name) => {
-
       if (name === 'mapping') {
         const mappingValue = await entityForm.getValue('mapping');
         await props.initPrice(entityForm, mappingValue);
@@ -219,17 +226,18 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
       return entityForm;
     })
     .withOnSave(async (entityForm) => {
-
       const form = entityForm.clone(true);
 
       const fieldErrors = await entityForm.validate();
 
       if (!isEmpty(fieldErrors)) {
-        return {entityForm: form.withErrors(fieldErrors), errors: ['입력 값이 올바르지 않습니다.']};
+        return {
+          entityForm: form.withErrors(fieldErrors),
+          errors: ['입력 값이 올바르지 않습니다.'],
+        };
       }
 
       const formData: SubmitFormData = await form.getSubmitFormData();
-
 
       const target = formData.data['mappingId'];
 
@@ -246,11 +254,14 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
         if (duplicated) {
           // 에러를 내야 한다.
           return {
-            entityForm: form.withErrors([{
-              name: 'mapping',
-              label: labelText!,
-              errors: ['이미 등록된 정보입니다.']
-            }]), errors: ['이미 등록된 정보입니다.']
+            entityForm: form.withErrors([
+              {
+                name: 'mapping',
+                label: labelText!,
+                errors: ['이미 등록된 정보입니다.'],
+              },
+            ]),
+            errors: ['이미 등록된 정보입니다.'],
           };
         }
       }
@@ -268,94 +279,102 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
       }
 
       if (!duplicated) {
-        mappingValue.mapped.push({id: target, price: price});
+        mappingValue.mapped.push({ id: target, price: price });
       }
 
-      setValue({...mappingValue});
+      setValue({ ...mappingValue });
       setListKey(generateUUID());
 
-      props.onChange({...mappingValue})
+      props.onChange({ ...mappingValue });
 
-      return Promise.resolve({entityForm});
+      return Promise.resolve({ entityForm });
     });
 
+  return (
+    <div className={'w-full'}>
+      {/*현재 매핑된 필터만 표시하는 리스트 그리드*/}
+      <ViewListGrid
+        key={listKey}
+        listGrid={new ListGrid(entityForm).withSearchForm(viewSearchForm)}
+        options={{
+          hideTitle: true,
+          filterable: false,
+          sortable: false,
+          onSelect: (item: any) => {
+            MySwal.fire({
+              title:
+                '계약 메뉴는 수정할 수 없습니다. 가격을 변경하려면 메뉴를 제거하고 다시 등록해 주세요.',
+              toast: true,
+              position: 'bottom-end',
+              showConfirmButton: false,
+              timer: 3000,
+              showCloseButton: true,
+              customClass: {
+                popup: `color-danger`,
+              },
+            });
 
-  return <div className={'w-full'}>
-    {/*현재 매핑된 필터만 표시하는 리스트 그리드*/}
-    <ViewListGrid key={listKey} listGrid={new ListGrid(entityForm).withSearchForm(viewSearchForm)} options={{
-      hideTitle: true,
-      filterable: false,
-      sortable: false,
-      onSelect: (item: any) => {
-
-        MySwal.fire({
-          title: '계약 메뉴는 수정할 수 없습니다. 가격을 변경하려면 메뉴를 제거하고 다시 등록해 주세요.',
-          toast: true,
-          position: 'bottom-end',
-          showConfirmButton: false,
-          timer: 3000,
-          showCloseButton: true,
-          customClass: {
-            popup: `color-danger`,
+            // View 를 지원하지 않는다.
+            return;
           },
-        });
-
-
-        // View 를 지원하지 않는다.
-        return;
-
-      },
-      fields: [
-        new BooleanField('price', 10000).withLabel(`${labelText} 최종 가격`).withSortable(false).withFilterable(false)
-      ],
-      onFetched: async (result: PageResult) => {
-        // 필드의 값을 추가한다.
-        if (mappingValue.mapped && mappingValue.mapped.length > 0) {
-          result.list.forEach((item) => {
-            for (const mapped of mappingValue.mapped!) {
-              if (item['id'] === mapped.id) {
-                item['price'] = mapped.price;
-              }
+          fields: [
+            new BooleanField('price', 10000)
+              .withLabel(`${labelText} 최종 가격`)
+              .withSortable(false)
+              .withFilterable(false),
+          ],
+          onFetched: async (result: PageResult) => {
+            // 필드의 값을 추가한다.
+            if (mappingValue.mapped && mappingValue.mapped.length > 0) {
+              result.list.forEach((item) => {
+                for (const mapped of mappingValue.mapped!) {
+                  if (item['id'] === mapped.id) {
+                    item['price'] = mapped.price;
+                  }
+                }
+              });
             }
-          });
-        }
-        return result;
-      },
-      delete: {
-        onDelete: async (_entityForm: EntityForm, _rows, checkedItems: string[]) => {
-          if (!isEmpty(checkedItems)) {
-            onDelete(checkedItems);
-          }
-          return Promise.resolve({entityForm: _entityForm});
-        }
-      },
-      subCollection: {
-        add: false, delete: true,
-        modifyOnView: false,
-        buttons: [
-          () => <button type="button"
-                        className={`btn btn-outline-secondary h-[34px]`}
-                        disabled={readonly} onClick={() => {
-            handleOpenModal();
-          }}>불러오기</button>
-        ]
-      }
-    }}></ViewListGrid>
-    {!isBlank(error) && <>
-
-    </>}
-  </div>
-
-
+            return result;
+          },
+          delete: {
+            onDelete: async (_entityForm: EntityForm, _rows, checkedItems: string[]) => {
+              if (!isEmpty(checkedItems)) {
+                onDelete(checkedItems);
+              }
+              return Promise.resolve({ entityForm: _entityForm });
+            },
+          },
+          subCollection: {
+            add: false,
+            delete: true,
+            modifyOnView: false,
+            buttons: [
+              () => (
+                <button
+                  type="button"
+                  className={`btn btn-outline-secondary h-[34px]`}
+                  disabled={readonly}
+                  onClick={() => {
+                    handleOpenModal();
+                  }}
+                >
+                  불러오기
+                </button>
+              ),
+            ],
+          },
+        }}
+      ></ViewListGrid>
+      {!isBlank(error) && <></>}
+    </div>
+  );
 
   function onDelete(checkedItems: string[]) {
-
     if (mappingValue.mapped === undefined) {
       mappingValue.mapped = [];
     }
 
     const newIdList = [...idList];
-
 
     for (const id of checkedItems) {
       const index = mappingValue.mapped!.findIndex((mapped) => mapped.id === id);
@@ -381,24 +400,23 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
       if (!found) {
         mappingValue.mapped[0]!.price = undefined;
       }
-
     }
 
     setIdList(newIdList);
-    setValue({...mappingValue});
+    setValue({ ...mappingValue });
     props.onChange(mappingValue, false);
   }
 
   function handleOpenModal() {
     const modalId = `xref-price-mapping-${props.name}`;
-    
+
     openModal({
       modalId,
       title: String(label || '기본값'),
       size: '5xl',
       content: (
         <Paper key={listKey}>
-          <ViewEntityForm 
+          <ViewEntityForm
             entityForm={xrefEntityForm}
             buttons={[
               new EntityFormButton('list')
@@ -407,7 +425,7 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
                 .withOnClick(async (props) => {
                   closeModal(modalId);
                   return props.entityForm;
-                })
+                }),
             ]}
             postSave={async (entityForm) => {
               closeModal(modalId);
@@ -418,4 +436,4 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
       ),
     });
   }
-}
+};

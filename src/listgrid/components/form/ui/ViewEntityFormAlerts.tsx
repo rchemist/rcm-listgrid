@@ -5,18 +5,18 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React from "react";
-import {IconChevronDown, IconChevronUp} from "@tabler/icons-react";
-import {getTranslation} from "../../../utils/i18n";
-import {ViewEntityFormAlertsProps} from "../types/ViewEntityFormAlerts.types";
-import {getColorIndicator, getIndicatorTone, useAlertManager} from "../hooks/useAlertManager";
-import {AlertItem} from "./AlertItem";
+import React from 'react';
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { getTranslation } from '../../../utils/i18n';
+import { ViewEntityFormAlertsProps } from '../types/ViewEntityFormAlerts.types';
+import { getColorIndicator, getIndicatorTone, useAlertManager } from '../hooks/useAlertManager';
+import { AlertItem } from './AlertItem';
 
-export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({ 
-  alertMessages, 
+export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
+  alertMessages,
   onRemove,
   onTabChange,
-  onFieldFocus
+  onFieldFocus,
 }: ViewEntityFormAlertsProps): React.ReactNode {
   const { t } = getTranslation();
   const {
@@ -25,14 +25,14 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
     handleLinkClick,
     handleCloseAlert,
     toggleCollapse,
-    getDominantColor
+    getDominantColor,
   } = useAlertManager(alertMessages, onRemove, onTabChange, onFieldFocus);
-  
+
   // 조건부 return은 모든 hooks 호출 이후에
   if (!alertMessages || alertMessages.length === 0 || visibleAlerts.length === 0) {
     return null;
   }
-  
+
   const dominantColor = getDominantColor();
 
   // 알림이 1개일 때는 헤더 없이 직접 렌더링
@@ -79,7 +79,7 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
           }}
           className="rcm-icon-btn"
           data-size="sm"
-          aria-label={isCollapsed ? "알림 펼치기" : "알림 접기"}
+          aria-label={isCollapsed ? '알림 펼치기' : '알림 접기'}
         >
           {isCollapsed ? (
             <IconChevronDown className="rcm-icon" data-size="sm" />
@@ -90,7 +90,9 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
       </div>
 
       {/* 알림 목록 - 접힌 상태에서는 숨김 */}
-      <div className={`rcm-alerts-body ${isCollapsed ? 'rcm-alerts-body-collapsed' : 'rcm-alerts-body-expanded'}`}>
+      <div
+        className={`rcm-alerts-body ${isCollapsed ? 'rcm-alerts-body-collapsed' : 'rcm-alerts-body-expanded'}`}
+      >
         <div className="rcm-alerts-list">
           {visibleAlerts.map((alert) => (
             <AlertItem
@@ -105,4 +107,4 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
       </div>
     </div>
   );
-}); 
+});

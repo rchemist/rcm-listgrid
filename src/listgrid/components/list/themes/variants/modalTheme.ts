@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import { ViewListGridClassNames } from "../../types/ViewListGridTheme.types";
+import { ViewListGridClassNames } from '../../types/ViewListGridTheme.types';
 
 /**
  * 모달용 ListGrid 테마 변형 — 중립 버전.
@@ -15,48 +15,48 @@ import { ViewListGridClassNames } from "../../types/ViewListGridTheme.types";
  */
 export const modalListGridTheme: Partial<ViewListGridClassNames> = {
   panel: {
-    container: "rcm-listgrid-panel",
-    mainEntity: "",
-    subCollection: "",
-    default: "",
+    container: 'rcm-listgrid-panel',
+    mainEntity: '',
+    subCollection: '',
+    default: '',
   },
 
   header: {
-    container: "rcm-listgrid-header",
-    titleWrapper: "rcm-listgrid-title",
-    titleText: "rcm-listgrid-title",
-    buttonGroup: "rcm-listgrid-button-group",
+    container: 'rcm-listgrid-header',
+    titleWrapper: 'rcm-listgrid-title',
+    titleText: 'rcm-listgrid-title',
+    buttonGroup: 'rcm-listgrid-button-group',
   },
 
   searchBar: {
-    container: "rcm-listgrid-searchbar",
-    innerWrapper: "",
-    layoutWrapper: "rcm-row-between rcm-gap-sm",
+    container: 'rcm-listgrid-searchbar',
+    innerWrapper: '',
+    layoutWrapper: 'rcm-row-between rcm-gap-sm',
   },
 
   table: {
-    responsiveWrapper: "rcm-skeleton-table-wrapper",
-    container: "rcm-scroll-y",
-    table: "rcm-table",
-    thead: "rcm-listgrid-thead",
-    headerRow: "",
-    tbody: "rcm-listgrid-tbody",
+    responsiveWrapper: 'rcm-skeleton-table-wrapper',
+    container: 'rcm-scroll-y',
+    table: 'rcm-table',
+    thead: 'rcm-listgrid-thead',
+    headerRow: '',
+    tbody: 'rcm-listgrid-tbody',
   },
 
   empty: {
-    container: "rcm-listgrid-empty",
-    message: "rcm-text-muted",
-    icon: "rcm-text-muted",
+    container: 'rcm-listgrid-empty',
+    message: 'rcm-text-muted',
+    icon: 'rcm-text-muted',
   },
 
   pagination: {
-    container: "rcm-listgrid-pagination",
-    wrapper: "",
+    container: 'rcm-listgrid-pagination',
+    wrapper: '',
   },
 
   popup: {
-    container: "rcm-skeleton-popup-container",
-    scrollArea: "rcm-scroll-y",
-    table: "",
+    container: 'rcm-skeleton-popup-container',
+    scrollArea: 'rcm-scroll-y',
+    table: '',
   },
 };

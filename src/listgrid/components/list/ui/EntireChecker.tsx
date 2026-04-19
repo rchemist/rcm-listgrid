@@ -5,9 +5,9 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ItemCheckable, SelectionOptions} from "../types/ViewListGrid.types";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {v1} from "uuid";
+import { ItemCheckable, SelectionOptions } from '../types/ViewListGrid.types';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { v1 } from 'uuid';
 
 interface EntireCheckerProps extends ItemCheckable {
   total: number;
@@ -19,14 +19,24 @@ interface EntireCheckerProps extends ItemCheckable {
   showCheckboxInput?: boolean;
 }
 
-export const EntireChecker = ({ total, listIds, checkedItems, setCheckedItems, subCollection, selectionOptions, rows, showCheckboxInput }: EntireCheckerProps) => {
-
+export const EntireChecker = ({
+  total,
+  listIds,
+  checkedItems,
+  setCheckedItems,
+  subCollection,
+  selectionOptions,
+  rows,
+  showCheckboxInput,
+}: EntireCheckerProps) => {
   // 선택 가능한 항목 필터링
-  const selectableIds: string[] = selectionOptions?.selectableFilter && rows
-    ? rows.filter(selectionOptions.selectableFilter).map((item: { id: string }) => item.id)
-    : listIds;
+  const selectableIds: string[] =
+    selectionOptions?.selectableFilter && rows
+      ? rows.filter(selectionOptions.selectableFilter).map((item: { id: string }) => item.id)
+      : listIds;
 
-  const checkAll = selectableIds.length > 0 && selectableIds.every((id: string) => checkedItems.includes(id));
+  const checkAll =
+    selectableIds.length > 0 && selectableIds.every((id: string) => checkedItems.includes(id));
 
   function checkAllItems() {
     if (!selectionOptions?.selectableFilter) {
@@ -48,15 +58,14 @@ export const EntireChecker = ({ total, listIds, checkedItems, setCheckedItems, s
         setCheckedItems?.(newCheckedItems);
       }
     }
-    
+
     // 선택 변경 콜백
     if (selectionOptions?.onSelectionChange) {
       selectionOptions.onSelectionChange(checkedItems, rows || []);
     }
   }
 
-  if (total < 1)
-    return null;
+  if (total < 1) return null;
 
   const id = isTrue(subCollection) ? v1() : 'entire-checker';
 
@@ -65,8 +74,14 @@ export const EntireChecker = ({ total, listIds, checkedItems, setCheckedItems, s
     return <div className="rcm-entire-checker-placeholder">#</div>;
   }
 
-  return <input type={"checkbox"} aria-label="전체 선택" className="rcm-checkbox"
-    id={id}
-    checked={checkAll}
-    onChange={() => checkAllItems()} />
-}
+  return (
+    <input
+      type={'checkbox'}
+      aria-label="전체 선택"
+      className="rcm-checkbox"
+      id={id}
+      checked={checkAll}
+      onChange={() => checkAllItems()}
+    />
+  );
+};

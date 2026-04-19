@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-'use client'
+'use client';
 
-import {FormField} from '../abstract';
-import React, {ReactNode, useEffect, useState} from "react";
-import {EntityForm} from '../../../config/EntityForm';
-import {FieldRenderParameters} from '../../../config/EntityField';
-import {useSession} from '../../../auth';
+import { FormField } from '../abstract';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { EntityForm } from '../../../config/EntityForm';
+import { FieldRenderParameters } from '../../../config/EntityField';
+import { useSession } from '../../../auth';
 
 interface RuleFieldRendererProps {
   field: FormField<any>;
@@ -18,36 +18,26 @@ interface RuleFieldRendererProps {
 }
 
 export const RuleFieldRenderer = (props: RuleFieldRendererProps) => {
-
   const field = props.field;
 
   const [view, setView] = useState<ReactNode>();
 
   const session = useSession();
 
-
   useEffect(() => {
-
-    (async () =>{
-
+    (async () => {
       const viewParams: FieldRenderParameters = {
         entityForm: new EntityForm('temp', ''),
         onChange: props.onChange,
-        required: await field.isRequired({session})
-      }
+        required: await field.isRequired({ session }),
+      };
       setView(await field.render(viewParams));
-
     })();
-
-
-
   }, []);
 
-  return <div>
-    <div className={'flex items-center'}>
-      {view}
+  return (
+    <div>
+      <div className={'flex items-center'}>{view}</div>
     </div>
-  </div>
-
-}
-
+  );
+};

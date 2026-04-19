@@ -12,14 +12,14 @@ import {
   ViewListProps,
   ViewListResult,
 } from './abstract';
-import React from "react";
-import {MinMaxLimit, SelectOption} from "../../form/Type";
-import {FieldRenderParameters} from '../../config/EntityField';
-import {CheckBoxChip} from "../../ui";
-import {RadioInput} from "../../ui";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {MultiSelectBox} from "../../ui";
-import {StatusChangeReason, StatusChangeValidation} from './SelectField';
+import React from 'react';
+import { MinMaxLimit, SelectOption } from '../../form/Type';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { CheckBoxChip } from '../../ui';
+import { RadioInput } from '../../ui';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { MultiSelectBox } from '../../ui';
+import { StatusChangeReason, StatusChangeValidation } from './SelectField';
 
 export interface MultiSelectFieldProps extends MultipleOptionalFieldProps {
   /**
@@ -41,7 +41,7 @@ export interface MultiSelectFieldProps extends MultipleOptionalFieldProps {
   validateStatusChange?: StatusChangeValidation;
 }
 
-export class MultiSelectField extends MultipleOptionalField<MultiSelectField>{
+export class MultiSelectField extends MultipleOptionalField<MultiSelectField> {
   /** 즉시 변경 기능 활성화 여부 */
   enableImmediateChange?: boolean;
 
@@ -51,7 +51,14 @@ export class MultiSelectField extends MultipleOptionalField<MultiSelectField>{
   /** 상태 변경 시 검증 로직 */
   validateStatusChange?: StatusChangeValidation;
 
-  constructor(name: string, order: number, options: SelectOption[], limit?: MinMaxLimit, reason?: StatusChangeReason[], validateStatusChange?: StatusChangeValidation) {
+  constructor(
+    name: string,
+    order: number,
+    options: SelectOption[],
+    limit?: MinMaxLimit,
+    reason?: StatusChangeReason[],
+    validateStatusChange?: StatusChangeValidation,
+  ) {
     super(name, order, 'multiselect', options, limit);
     this.reason = reason;
     this.validateStatusChange = validateStatusChange;
@@ -78,20 +85,27 @@ export class MultiSelectField extends MultipleOptionalField<MultiSelectField>{
 
       // Chip UI 조건 충족 시 CheckBoxChip 사용
       if (this.shouldRenderAsChip()) {
-        return <CheckBoxChip key={cacheKey}
-                            options={this.options!}
-                            limit={this.limit}
-                            combo={{ direction: 'row' }}
-                            {...await getInputRendererParameters(this, params)}></CheckBoxChip>;
+        return (
+          <CheckBoxChip
+            key={cacheKey}
+            options={this.options!}
+            limit={this.limit}
+            combo={{ direction: 'row' }}
+            {...await getInputRendererParameters(this, params)}
+          ></CheckBoxChip>
+        );
       }
 
-      return <MultiSelectBox key={cacheKey}
-                             limit={this.limit}
-                             options={this.options!} {...await getInputRendererParameters(this, params)}></MultiSelectBox>;
+      return (
+        <MultiSelectBox
+          key={cacheKey}
+          limit={this.limit}
+          options={this.options!}
+          {...await getInputRendererParameters(this, params)}
+        ></MultiSelectBox>
+      );
     })();
   }
-
-
 
   /**
    * MultiSelectField 핵심 리스트 아이템 렌더링 로직
@@ -104,13 +118,27 @@ export class MultiSelectField extends MultipleOptionalField<MultiSelectField>{
    * MultiSelectField 인스턴스 생성
    */
   protected createInstance(name: string, order: number): MultiSelectField {
-    const instance = new MultiSelectField(name, order, this.options!, this.limit, this.reason, this.validateStatusChange);
+    const instance = new MultiSelectField(
+      name,
+      order,
+      this.options!,
+      this.limit,
+      this.reason,
+      this.validateStatusChange,
+    );
     instance.enableImmediateChange = this.enableImmediateChange;
     return instance;
   }
 
   static create(props: MultiSelectFieldProps): MultiSelectField {
-    const field = new MultiSelectField(props.name, props.order, props.options!, props.limit, props.reason, props.validateStatusChange);
+    const field = new MultiSelectField(
+      props.name,
+      props.order,
+      props.options!,
+      props.limit,
+      props.reason,
+      props.validateStatusChange,
+    );
     field.enableImmediateChange = props.enableImmediateChange;
     return field.copyFields(props, true);
   }
@@ -145,5 +173,3 @@ export class MultiSelectField extends MultipleOptionalField<MultiSelectField>{
     return this;
   }
 }
-
-

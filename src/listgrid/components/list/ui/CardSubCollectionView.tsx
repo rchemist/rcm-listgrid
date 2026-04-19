@@ -5,11 +5,27 @@ import { useCardSubCollectionData } from '../hooks/useCardSubCollectionData';
 import { CardItem } from './CardItem';
 import { CardSubCollectionModal } from './CardSubCollectionModal';
 import { EntityForm } from '../../../config/EntityForm';
-import { CardSubCollectionRelation, CardConfig, CardSubCollectionFetchOptions } from '../../../config/CardSubCollectionField';
+import {
+  CardSubCollectionRelation,
+  CardConfig,
+  CardSubCollectionFetchOptions,
+} from '../../../config/CardSubCollectionField';
 import { Session } from '../../../auth/types';
 import { SearchForm } from '../../../form/SearchForm';
 import { Tooltip } from '../../../ui';
-import { IconHelp, IconSearch, IconX, IconPlus, IconRefresh, IconLayoutGrid, IconAlertCircle, IconChevronLeft, IconChevronRight, IconChevronsLeft, IconChevronsRight } from '@tabler/icons-react';
+import {
+  IconHelp,
+  IconSearch,
+  IconX,
+  IconPlus,
+  IconRefresh,
+  IconLayoutGrid,
+  IconAlertCircle,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronsLeft,
+  IconChevronsRight,
+} from '@tabler/icons-react';
 
 export interface CardSubCollectionViewProps {
   /** Parent entity form */
@@ -115,12 +131,10 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
       return '검색';
     }
 
-    const labels = quickSearchFields
-      .slice(0, 3)
-      .map((field) => {
-        const label = field.getLabel();
-        return typeof label === 'string' ? label : field.getName();
-      });
+    const labels = quickSearchFields.slice(0, 3).map((field) => {
+      const label = field.getLabel();
+      return typeof label === 'string' ? label : field.getName();
+    });
 
     return `${labels.join(', ')} 검색`;
   }, [quickSearchFields]);
@@ -136,15 +150,12 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
   }, [fetchUrlProp, parentEntityForm]);
 
   // Fetch data using the hook
-  const { data, loading, error, refresh } = useCardSubCollectionData(
-    fetchUrl,
-    {
-      mappedBy: relation.mappedBy,
-      filterBy: relation.filterBy,
-      useSearchForm: fetchOptions?.useSearchForm,
-      searchForm: initialSearchForm,
-    }
-  );
+  const { data, loading, error, refresh } = useCardSubCollectionData(fetchUrl, {
+    mappedBy: relation.mappedBy,
+    filterBy: relation.filterBy,
+    useSearchForm: fetchOptions?.useSearchForm,
+    searchForm: initialSearchForm,
+  });
 
   const getFieldValue = useCallback((item: any, fieldName: string): any => {
     if (!fieldName.includes('.')) {
@@ -218,9 +229,12 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
     return filteredData.slice(startIndex, endIndex);
   }, [filteredData, currentPage, pageSize, isPaginationEnabled]);
 
-  const goToPage = useCallback((page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (page: number) => {
+      setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    },
+    [totalPages],
+  );
 
   const goToFirstPage = useCallback(() => goToPage(1), [goToPage]);
   const goToLastPage = useCallback(() => goToPage(totalPages), [goToPage, totalPages]);
@@ -238,39 +252,49 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
 
   // rcm-subcollection-card-grid + optional variant for sm+ breakpoint.
   const gridClassName = useMemo(() => {
-    const variant = cardColumns >= 1 && cardColumns <= 4
-      ? ` rcm-subcollection-card-grid-${cardColumns}`
-      : ' rcm-subcollection-card-grid-2';
+    const variant =
+      cardColumns >= 1 && cardColumns <= 4
+        ? ` rcm-subcollection-card-grid-${cardColumns}`
+        : ' rcm-subcollection-card-grid-2';
     return `rcm-subcollection-card-grid${variant}`;
   }, [cardColumns]);
 
-  const handleCardClick = useCallback((item: any) => {
-    if (viewDetail || !readonly) {
-      setSelectedItemId(item.id);
-      setModalMode(readonly ? 'view' : 'view');
-      setIsModalOpen(true);
-    }
-  }, [viewDetail, readonly]);
+  const handleCardClick = useCallback(
+    (item: any) => {
+      if (viewDetail || !readonly) {
+        setSelectedItemId(item.id);
+        setModalMode(readonly ? 'view' : 'view');
+        setIsModalOpen(true);
+      }
+    },
+    [viewDetail, readonly],
+  );
 
-  const handleEdit = useCallback((item: any) => {
-    if (onItemEdit) {
-      onItemEdit(item);
-    } else {
-      setSelectedItemId(item.id);
-      setModalMode('edit');
-      setIsModalOpen(true);
-    }
-  }, [onItemEdit]);
+  const handleEdit = useCallback(
+    (item: any) => {
+      if (onItemEdit) {
+        onItemEdit(item);
+      } else {
+        setSelectedItemId(item.id);
+        setModalMode('edit');
+        setIsModalOpen(true);
+      }
+    },
+    [onItemEdit],
+  );
 
-  const handleDelete = useCallback(async (item: any) => {
-    if (onItemDelete) {
-      onItemDelete(item);
-    } else {
-      setSelectedItemId(item.id);
-      setModalMode('edit');
-      setIsModalOpen(true);
-    }
-  }, [onItemDelete]);
+  const handleDelete = useCallback(
+    async (item: any) => {
+      if (onItemDelete) {
+        onItemDelete(item);
+      } else {
+        setSelectedItemId(item.id);
+        setModalMode('edit');
+        setIsModalOpen(true);
+      }
+    },
+    [onItemDelete],
+  );
 
   const handleAdd = useCallback(() => {
     if (onItemAdd) {
@@ -359,14 +383,8 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
           <h4 className="rcm-subcollection-error-title">
             데이터를 불러오는 중 오류가 발생했습니다
           </h4>
-          <p className="rcm-subcollection-error-message">
-            {error.message}
-          </p>
-          <button
-            type="button"
-            onClick={() => refresh()}
-            className="rcm-subcollection-error-retry"
-          >
+          <p className="rcm-subcollection-error-message">{error.message}</p>
+          <button type="button" onClick={() => refresh()} className="rcm-subcollection-error-retry">
             <IconRefresh size={16} />
             다시 시도
           </button>
@@ -437,12 +455,7 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
           </button>
 
           {tooltip && (
-            <Tooltip
-              label={tooltip}
-              color="gray"
-              withArrow={true}
-              position="top-end"
-            >
+            <Tooltip label={tooltip} color="gray" withArrow={true} position="top-end">
               <div className="rcm-subcollection-icon-btn rcm-subcollection-icon-btn-help">
                 <IconHelp size={16} stroke={2} />
               </div>
@@ -450,11 +463,7 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
           )}
 
           {!readonly && (
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="rcm-subcollection-add-btn"
-            >
+            <button type="button" onClick={handleAdd} className="rcm-subcollection-add-btn">
               <IconPlus size={16} stroke={2.5} />
               <span className="rcm-subcollection-add-btn-label">추가</span>
             </button>
@@ -473,9 +482,7 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
               <p className="rcm-subcollection-empty-title">
                 &apos;{searchQuery}&apos;에 대한 검색 결과가 없습니다
               </p>
-              <p className="rcm-subcollection-empty-hint">
-                다른 키워드로 검색해 보세요
-              </p>
+              <p className="rcm-subcollection-empty-hint">다른 키워드로 검색해 보세요</p>
               <button
                 type="button"
                 onClick={clearSearch}
@@ -489,17 +496,14 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
               <div className="rcm-subcollection-empty-icon">
                 <IconLayoutGrid size={32} />
               </div>
-              <p className="rcm-subcollection-empty-title">
-                표시할 항목이 없습니다
-              </p>
+              <p className="rcm-subcollection-empty-title">표시할 항목이 없습니다</p>
               {!readonly && (
                 <button
                   type="button"
                   onClick={handleAdd}
                   className="rcm-subcollection-empty-action"
                 >
-                  <IconPlus size={16} />
-                  첫 번째 항목 추가
+                  <IconPlus size={16} />첫 번째 항목 추가
                 </button>
               )}
             </>
@@ -570,9 +574,7 @@ export const CardSubCollectionView: React.FC<CardSubCollectionViewProps> = ({
               >
                 <IconChevronsRight size={16} stroke={2} />
               </button>
-              <div className="rcm-subcollection-page-size-badge">
-                {pageSize}개씩
-              </div>
+              <div className="rcm-subcollection-page-size-badge">{pageSize}개씩</div>
             </div>
           )}
         </>

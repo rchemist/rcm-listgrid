@@ -4,53 +4,68 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
-import React, {ReactNode} from "react";
-import {ViewEntityFormProps} from "./types/ViewEntityForm.types";
+'use client';
+import React, { ReactNode } from 'react';
+import { ViewEntityFormProps } from './types/ViewEntityForm.types';
 // Static imports for core components
-import {ViewEntityFormTitle} from "./ui/ViewEntityFormTitle";
-import {ViewEntityFormButtons} from "./ui/ViewEntityFormButtons";
-import {ViewEntityFormSkeleton} from "./ui/ViewEntityFormSkeleton";
-import {Tab} from '@headlessui/react';
+import { ViewEntityFormTitle } from './ui/ViewEntityFormTitle';
+import { ViewEntityFormButtons } from './ui/ViewEntityFormButtons';
+import { ViewEntityFormSkeleton } from './ui/ViewEntityFormSkeleton';
+import { Tab } from '@headlessui/react';
 // Dynamic imports to reduce bundle size
-import {dynamic} from "../../utils/lazy";
-import {useEntityFormLogic} from "./hooks/useEntityFormLogic";
-import {clearAllToasts} from "../../message";
+import { dynamic } from '../../utils/lazy';
+import { useEntityFormLogic } from './hooks/useEntityFormLogic';
+import { clearAllToasts } from '../../message';
 // Theme system
-import {useEntityFormTheme} from "./context/EntityFormThemeContext";
+import { useEntityFormTheme } from './context/EntityFormThemeContext';
 
 // Lazy load heavy components
-const ViewEntityFormErrors = dynamic(() => import("./ui/ViewEntityFormErrors").then(mod => ({ default: mod.ViewEntityFormErrors })), {
-  loading: () => <div className="rcm-skeleton-placeholder-xs"></div>
-});
-
-const ViewEntityFormAlerts = dynamic(() => import("./ui/ViewEntityFormAlerts").then(mod => ({ default: mod.ViewEntityFormAlerts })), {
-  loading: () => <div className="rcm-skeleton-placeholder-xs"></div>
-});
-
-const ViewTab = dynamic(() => import("./ViewTab").then(mod => ({ default: mod.ViewTab })), {
-  loading: () => <div className="rcm-skeleton-placeholder-tab"></div>
-});
-
-const ViewTabPanel = dynamic(() => import("./ViewTabPanel").then(mod => ({ default: mod.ViewTabPanel })), {
-  loading: () => <div className="rcm-skeleton-placeholder-panel"></div>
-});
-
-const SafePerfectScrollbar: React.ComponentType<any> = dynamic(
-  () => import('../../ui').then(mod => ({ default: mod.SafePerfectScrollbar as any })),
+const ViewEntityFormErrors = dynamic(
+  () => import('./ui/ViewEntityFormErrors').then((mod) => ({ default: mod.ViewEntityFormErrors })),
   {
-    ssr: false,
-    loading: () => <div className="rcm-skeleton-placeholder-fill"></div>
-  }
+    loading: () => <div className="rcm-skeleton-placeholder-xs"></div>,
+  },
 );
 
-const CreateStepView = dynamic(() => import("./ui/CreateStepView").then(mod => ({ default: mod.CreateStepView })), {
-  loading: () => <div className="rcm-skeleton-placeholder-md"></div>
+const ViewEntityFormAlerts = dynamic(
+  () => import('./ui/ViewEntityFormAlerts').then((mod) => ({ default: mod.ViewEntityFormAlerts })),
+  {
+    loading: () => <div className="rcm-skeleton-placeholder-xs"></div>,
+  },
+);
+
+const ViewTab = dynamic(() => import('./ViewTab').then((mod) => ({ default: mod.ViewTab })), {
+  loading: () => <div className="rcm-skeleton-placeholder-tab"></div>,
 });
 
-const CreateStepButtons = dynamic(() => import("./ui/CreateStepButtons").then(mod => ({ default: mod.CreateStepButtons })), {
-  loading: () => <div className="rcm-skeleton-placeholder-lg"></div>
-});
+const ViewTabPanel = dynamic(
+  () => import('./ViewTabPanel').then((mod) => ({ default: mod.ViewTabPanel })),
+  {
+    loading: () => <div className="rcm-skeleton-placeholder-panel"></div>,
+  },
+);
+
+const SafePerfectScrollbar: React.ComponentType<any> = dynamic(
+  () => import('../../ui').then((mod) => ({ default: mod.SafePerfectScrollbar as any })),
+  {
+    ssr: false,
+    loading: () => <div className="rcm-skeleton-placeholder-fill"></div>,
+  },
+);
+
+const CreateStepView = dynamic(
+  () => import('./ui/CreateStepView').then((mod) => ({ default: mod.CreateStepView })),
+  {
+    loading: () => <div className="rcm-skeleton-placeholder-md"></div>,
+  },
+);
+
+const CreateStepButtons = dynamic(
+  () => import('./ui/CreateStepButtons').then((mod) => ({ default: mod.CreateStepButtons })),
+  {
+    loading: () => <div className="rcm-skeleton-placeholder-lg"></div>,
+  },
+);
 
 /**
  * ViewEntityForm component (render-only structure)
@@ -130,27 +145,21 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
       <div className="rcm-form-sticky-header">
         {/* Header 영역: 제목 + 버튼 그룹 */}
         {/* Header area: Title + Button group */}
-        <div className={cn("rcm-form-header", classNames.header?.container)}>
+        <div className={cn('rcm-form-header', classNames.header?.container)}>
           {/* 제목 영역 */}
-          <div className={cn("rcm-form-header-title", classNames.header?.titleWrapper)}>
-            <ViewEntityFormTitle
-              title={title}
-              hideTitle={props.hideTitle}
-            />
+          <div className={cn('rcm-form-header-title', classNames.header?.titleWrapper)}>
+            <ViewEntityFormTitle title={title} hideTitle={props.hideTitle} />
           </div>
           {/* 버튼 영역 (header 위치일 때만) */}
           {showButtonsInHeader && (
-            <div className={cn("rcm-form-header-buttons", classNames.header?.buttonWrapper)}>
+            <div className={cn('rcm-form-header-buttons', classNames.header?.buttonWrapper)}>
               <ViewEntityFormButtons buttons={buttons} />
             </div>
           )}
         </div>
         {/* Custom Header Area */}
         {headerAreaContent && (
-          <div className={cn(
-            "rcm-form-header-area",
-            classNames.headerArea?.container
-          )}>
+          <div className={cn('rcm-form-header-area', classNames.headerArea?.container)}>
             {headerAreaContent}
           </div>
         )}
@@ -180,14 +189,16 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
       {/* 필드(Tab/Panel) 영역: ViewEntityFormFields */}
       {/* Field(Tab/Panel) area: ViewEntityFormFields */}
       <SafePerfectScrollbar
-        className={cn("rcm-form-scroll-container", classNames.panel?.scrollContainer)}
+        className={cn('rcm-form-scroll-container', classNames.panel?.scrollContainer)}
       >
-        <div className={cn("rcm-form-layout-wrapper", classNames.panel?.layoutWrapper)}>
-          <div className={cn(
-            isInlineMode ? "rcm-form-panel rcm-form-panel-inline" : "rcm-form-panel",
-            classNames.panel?.container
-          )}>
-            <div className={cn("rcm-form-panel-inner", classNames.panel?.inner)}>
+        <div className={cn('rcm-form-layout-wrapper', classNames.panel?.layoutWrapper)}>
+          <div
+            className={cn(
+              isInlineMode ? 'rcm-form-panel rcm-form-panel-inline' : 'rcm-form-panel',
+              classNames.panel?.container,
+            )}
+          >
+            <div className={cn('rcm-form-panel-inner', classNames.panel?.inner)}>
               {/* Alert 메시지 영역: ViewEntityFormAlerts */}
               {/* Alert message area: ViewEntityFormAlerts */}
               {/*
@@ -203,7 +214,7 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                 }}
                 onTabChange={(tabId: string) => {
                   // tab id로 tab index 찾기
-                  const index = tabs.findIndex(tab => tab.id === tabId);
+                  const index = tabs.findIndex((tab) => tab.id === tabId);
                   if (index !== -1) {
                     setSelectedTabIndex(index);
                     setTabIndex(tabId);
@@ -215,13 +226,15 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                   if (field) {
                     const fieldTabId = field.getTabId();
                     if (fieldTabId) {
-                      const tabIdx = tabs.findIndex(tab => tab.id === fieldTabId);
+                      const tabIdx = tabs.findIndex((tab) => tab.id === fieldTabId);
                       if (tabIdx !== -1) {
                         setSelectedTabIndex(tabIdx);
                         setTabIndex(fieldTabId);
                         // 필드로 스크롤 (약간의 지연 후)
                         setTimeout(() => {
-                          const fieldElement = document.querySelector(`[data-field-name="${fieldName}"]`);
+                          const fieldElement = document.querySelector(
+                            `[data-field-name="${fieldName}"]`,
+                          );
                           if (fieldElement) {
                             fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             // 포커스 효과 추가 (선택사항)
@@ -259,16 +272,26 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
               />
               {/* 필드(Tab/Panel) 영역: 직접 렌더링 (백업 코드 방식) */}
               {/* Field(Tab/Panel) area: Direct rendering (backup code style) */}
-              <Tab.Group selectedIndex={selectedTabIndex} onChange={(index) => {
-                clearAllToasts();
-                setSelectedTabIndex(index);
-              }}>
+              <Tab.Group
+                selectedIndex={selectedTabIndex}
+                onChange={(index) => {
+                  clearAllToasts();
+                  setSelectedTabIndex(index);
+                }}
+              >
                 {/* 인라인 모드: 탭 + 버튼을 같은 줄에 배치 */}
                 {showButtonsInTabRow && (
-                  <div className={`rcm-form-tab-row ${tabs.length > 1 ? 'rcm-form-tab-row-border' : ''}`}>
+                  <div
+                    className={`rcm-form-tab-row ${tabs.length > 1 ? 'rcm-form-tab-row-border' : ''}`}
+                  >
                     <div className="rcm-form-tab-row-tabs">
                       {tabs.length > 1 && (
-                        <Tab.List className={cn("rcm-tab-list-inline", useCreateStep ? "rcm-hide" : undefined)}>
+                        <Tab.List
+                          className={cn(
+                            'rcm-tab-list-inline',
+                            useCreateStep ? 'rcm-hide' : undefined,
+                          )}
+                        >
                           {tabs.map((tab, index) => (
                             <ViewTab
                               id={tab.id}
@@ -291,9 +314,11 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                 )}
                 {/* 일반 모드: 기존 탭 레이아웃 (스테퍼 모드에서는 hidden 처리) */}
                 {!showButtonsInTabRow && tabs.length > 1 && (
-                  <SafePerfectScrollbar className={cn(useCreateStep ? "rcm-hide" : "rcm-tab-scroll")}>
-                    <Tab.List className={cn("rcm-tab-list", classNames.tabs?.list)}>
-                      {function () {
+                  <SafePerfectScrollbar
+                    className={cn(useCreateStep ? 'rcm-hide' : 'rcm-tab-scroll')}
+                  >
+                    <Tab.List className={cn('rcm-tab-list', classNames.tabs?.list)}>
+                      {(function () {
                         const tabsView: ReactNode[] = [];
                         tabs.forEach((tab, index) => {
                           tabsView.push(
@@ -306,17 +331,17 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                               entityForm={entityForm}
                               createStepFields={createStepFields}
                               setTabIndex={setTabIndex}
-                            />
+                            />,
                           );
                         });
                         return tabsView;
-                      }()}
+                      })()}
                     </Tab.List>
                   </SafePerfectScrollbar>
                 )}
 
                 <Tab.Panels>
-                  {function () {
+                  {(function () {
                     const panels: ReactNode[] = [];
                     tabs.forEach((tab, index) => {
                       panels.push(
@@ -332,17 +357,17 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                           setEntityForm={setEntityForm}
                           resetEntityForm={resetEntityForm}
                           hideMappedByFields={props.hideMappedByFields}
-                        />
+                        />,
                       );
                     });
                     return panels;
-                  }()}
+                  })()}
                 </Tab.Panels>
               </Tab.Group>
               {/* 하단 버튼 영역 (bottom 위치일 때만, 인라인 모드 제외) */}
               {/* Bottom button area (only when buttonPosition is 'bottom', excluding inline mode) */}
               {!showButtonsInTabRow && (
-                <div className={cn("rcm-form-footer", classNames.footer?.container)}>
+                <div className={cn('rcm-form-footer', classNames.footer?.container)}>
                   {useCreateStep && createStepButtonPosition === 'bottom' && entityForm && (
                     <CreateStepButtons
                       currentStep={currentStep}
@@ -354,9 +379,10 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                       session={session ?? undefined}
                     />
                   )}
-                  {!showButtonsInHeader && !(useCreateStep && createStepButtonPosition === 'bottom') && (
-                    <ViewEntityFormButtons buttons={buttons} />
-                  )}
+                  {!showButtonsInHeader &&
+                    !(useCreateStep && createStepButtonPosition === 'bottom') && (
+                      <ViewEntityFormButtons buttons={buttons} />
+                    )}
                 </div>
               )}
             </div>
@@ -366,4 +392,3 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
     </div>
   );
 };
-

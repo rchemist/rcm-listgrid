@@ -5,18 +5,18 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React from "react";
-import {FormField, FormFieldProps, ViewRenderProps, ViewRenderResult} from "./FormField";
+import React from 'react';
+import { FormField, FormFieldProps, ViewRenderProps, ViewRenderResult } from './FormField';
 import {
   EntityField,
   FieldRenderParameters,
-  FilterRenderParameters
+  FilterRenderParameters,
 } from '../../../config/EntityField';
-import {EntityForm} from '../../../config/EntityForm';
-import {LabelType, RenderType} from '../../../config/Config';
-import {TextAlignType} from "../../../common/type";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {QueryConditionType} from "../../../form/SearchForm";
+import { EntityForm } from '../../../config/EntityForm';
+import { LabelType, RenderType } from '../../../config/Config';
+import { TextAlignType } from '../../../common/type';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { QueryConditionType } from '../../../form/SearchForm';
 
 /**
  * 중첩 객체에서 dot notation 경로로 값을 가져온다.
@@ -47,7 +47,6 @@ export function getNestedValue(obj: any, path: string): any {
   return value;
 }
 
-
 export interface ViewListProps {
   entityForm: EntityForm;
   item: any;
@@ -57,7 +56,7 @@ export interface ViewListProps {
 
 export interface ViewListResult {
   result: React.ReactNode | null;
-  linkOnCell?: boolean;     // td 에 링크를 걸 것인지, 아니면 result 가 버튼이거나 해서 td 에 링크를 걸면 안 되는지에 대한 처리
+  linkOnCell?: boolean; // td 에 링크를 걸 것인지, 아니면 result 가 버튼이거나 해서 td 에 링크를 걸면 안 되는지에 대한 처리
 }
 
 export interface IListConfig {
@@ -119,7 +118,6 @@ export interface ListableFormFieldProps extends FormFieldProps {
 }
 
 export abstract class ListableFormField<T extends ListableFormField<T>> extends FormField<T> {
-
   listConfig?: IListConfig;
 
   overrideRenderListItem?: (props: ViewListProps) => Promise<ViewListResult>;
@@ -130,7 +128,9 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
    * 각 필드의 핵심 리스트 필터 렌더링 로직을 구현하는 추상 메소드
    * null을 반환하면 기본 필터 로직(원본 renderListFilter)을 적용
    */
-  protected async renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected async renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return null;
   }
 
@@ -176,7 +176,7 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
       if (customFilter !== null) {
         return customFilter;
       }
-      
+
       // 원본 기본 필터 로직 실행
       return this.renderListFilterOriginal(params);
     })();
@@ -190,8 +190,15 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
    * @param params
    * @protected
    */
-  protected renderListFilterOriginal({ onChange, ...params }: FilterRenderParameters): Promise<React.ReactNode | null> {
-    return this.render({ ...params, required: false, onChange: (value) => onChange(value) } as FieldRenderParameters);
+  protected renderListFilterOriginal({
+    onChange,
+    ...params
+  }: FilterRenderParameters): Promise<React.ReactNode | null> {
+    return this.render({
+      ...params,
+      required: false,
+      onChange: (value) => onChange(value),
+    } as FieldRenderParameters);
   }
 
   /**
@@ -203,7 +210,7 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
       if (customItem !== null) {
         return customItem;
       }
-      
+
       // 원본 기본 리스트 아이템 로직 실행
       return this.renderListItemOriginal(props);
     })();
@@ -232,10 +239,10 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
   protected async renderViewInstance(props: ViewRenderProps): Promise<ViewRenderResult> {
     // ViewListProps 형태로 변환하여 renderListItemInstance 호출
     const viewListProps: ViewListProps = {
-      entityForm: props.entityForm ?? {} as EntityForm,
+      entityForm: props.entityForm ?? ({} as EntityForm),
       item: props.item,
       router: null,
-      viewUrl: ''
+      viewUrl: '',
     };
 
     // 기존 renderListItemInstance 로직 재사용
@@ -285,18 +292,22 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
     return this;
   }
 
-  withOverrideRenderListItem(overrideRenderList?: (props: ViewListProps) => Promise<ViewListResult>): this {
+  withOverrideRenderListItem(
+    overrideRenderList?: (props: ViewListProps) => Promise<ViewListResult>,
+  ): this {
     this.overrideRenderListItem = overrideRenderList;
     return this;
   }
 
-  withOverrideRenderListFilter(overrideRenderFilter?: (params: FilterRenderParameters) => Promise<React.ReactNode | null>): this {
+  withOverrideRenderListFilter(
+    overrideRenderFilter?: (params: FilterRenderParameters) => Promise<React.ReactNode | null>,
+  ): this {
     this.overrideRenderListFilter = overrideRenderFilter;
     return this;
   }
 
   isSupportList(): boolean {
-    return this.listConfig !== undefined && (isTrue(this.listConfig.support));
+    return this.listConfig !== undefined && isTrue(this.listConfig.support);
   }
 
   getListConfig(): IListConfig | undefined {
@@ -325,7 +336,8 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
       return config.align;
     }
 
-    if (this.type === 'select' ||
+    if (
+      this.type === 'select' ||
       this.type === 'multiselect' ||
       this.type === 'date' ||
       this.type === 'datetime' ||
@@ -336,11 +348,10 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
       this.type === 'file' ||
       this.type === 'image'
     ) {
-      return 'center'
+      return 'center';
     }
 
-    return "left";
-
+    return 'left';
   }
 
   /**
@@ -358,7 +369,13 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
    * EntityForm 이 저장될 때 서버로 전송할 값을 override 하는 메소드
    * @param saveValue
    */
-  withSaveValue(saveValue: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>): this {
+  withSaveValue(
+    saveValue: (
+      entityForm: EntityForm,
+      field: EntityField,
+      renderType?: RenderType,
+    ) => Promise<any>,
+  ): this {
     this.saveValue = saveValue;
     return this;
   }
@@ -377,14 +394,12 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
 
   isFilterable() {
     if (!this.isSupportList()) {
-
       if (this.listConfig !== undefined) {
         return isTrue(this.listConfig.filterable, true);
       }
 
       return false;
     }
-
 
     return isTrue(this.getListConfig()?.filterable, true);
   }
@@ -401,7 +416,9 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
   }
 
   protected copyFields(origin: ListableFormFieldProps, includeValue: boolean = true): this {
-    super.copyFields(origin, includeValue).withListConfig(origin.listConfig)
+    super
+      .copyFields(origin, includeValue)
+      .withListConfig(origin.listConfig)
       .withOverrideRenderListItem(origin.overrideRenderListItem);
 
     if (isTrue(origin.showList)) {
@@ -410,4 +427,4 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
 
     return this;
   }
-} 
+}

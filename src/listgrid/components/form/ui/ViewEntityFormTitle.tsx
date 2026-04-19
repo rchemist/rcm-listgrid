@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-import React, {ReactNode} from "react";
-import {Tooltip} from "../../../ui";
-import {getTranslation} from "../../../utils/i18n";
-import {useEntityFormTheme} from "../context/EntityFormThemeContext";
+import React, { ReactNode } from 'react';
+import { Tooltip } from '../../../ui';
+import { getTranslation } from '../../../utils/i18n';
+import { useEntityFormTheme } from '../context/EntityFormThemeContext';
 
 /**
  * ViewEntityFormTitle 컴포넌트
@@ -22,7 +22,10 @@ interface ViewEntityFormTitleProps {
   hideTitle?: boolean;
 }
 
-export const ViewEntityFormTitle = React.memo(function ViewEntityFormTitle({ title, hideTitle }: ViewEntityFormTitleProps): React.ReactNode {
+export const ViewEntityFormTitle = React.memo(function ViewEntityFormTitle({
+  title,
+  hideTitle,
+}: ViewEntityFormTitleProps): React.ReactNode {
   const { t } = getTranslation();
   const { classNames, cn } = useEntityFormTheme();
 
@@ -31,14 +34,15 @@ export const ViewEntityFormTitle = React.memo(function ViewEntityFormTitle({ tit
   if (typeof title === 'string') {
     const titleText = t(title);
     const titleView = (
-      <div className={cn(
-        "flex items-center mt-2 min-h-[60px] truncate py-3 pt-2 md:mt-0",
-        classNames.title?.container
-      )}>
-        <span className={cn(
-          "text-[1.8rem] font-bold dark:text-white-light",
-          classNames.title?.text
-        )}>
+      <div
+        className={cn(
+          'flex items-center mt-2 min-h-[60px] truncate py-3 pt-2 md:mt-0',
+          classNames.title?.container,
+        )}
+      >
+        <span
+          className={cn('text-[1.8rem] font-bold dark:text-white-light', classNames.title?.text)}
+        >
           {titleText}
         </span>
       </div>

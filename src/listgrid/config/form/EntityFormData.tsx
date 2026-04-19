@@ -1,14 +1,21 @@
-import { isBlank, isEmpty, isTrue } from "../../utils";
+import { isBlank, isEmpty, isTrue } from '../../utils';
 import { EntityFormBase } from './EntityFormBase';
 import { EntityFormValidation } from './EntityFormValidation';
-import { CopyEntityFormExplicitFieldType, CopyEntityFormToInnerFieldsProps } from '../../config/EntityFormTypes';
-import { DEFAULT_FIELD_GROUP_INFO, DEFAULT_TAB_INFO, FieldGroupInfo, TabInfo } from '../../config/Config';
+import {
+  CopyEntityFormExplicitFieldType,
+  CopyEntityFormToInnerFieldsProps,
+} from '../../config/EntityFormTypes';
+import {
+  DEFAULT_FIELD_GROUP_INFO,
+  DEFAULT_TAB_INFO,
+  FieldGroupInfo,
+  TabInfo,
+} from '../../config/Config';
 import { EntityField } from '../../config/EntityField';
 import { EntityFieldGroup } from '../../config/EntityFieldGroup';
 import { EntityTab } from '../../config/EntityTab';
 
 export abstract class EntityFormData extends EntityFormValidation {
-
   constructor(name: string, url: string) {
     super(name, url);
   }
@@ -56,8 +63,8 @@ export abstract class EntityFormData extends EntityFormValidation {
   /**
    * 단순히 필드값을 변경하는 setValue 와는 다르게 필드값이 변경되면 onChanges 에 등록된 함수를 실행한다.
    * @param fieldName
-   * @param value 
-   * @returns 
+   * @param value
+   * @returns
    */
   changeValue(fieldName: string, value: any): this {
     const field = this.getField(fieldName);
@@ -67,8 +74,6 @@ export abstract class EntityFormData extends EntityFormValidation {
     }
     return this;
   }
-
-  
 
   clearOnChanges(): this {
     this.onChanges = [];
@@ -89,8 +94,6 @@ export abstract class EntityFormData extends EntityFormValidation {
     this.onFetchListData = [];
     return this;
   }
-
-  
 
   isDirty(): boolean {
     // 모든 필드 요소를 순회하며 dirty 여부를 확인한다.
@@ -130,14 +133,15 @@ export abstract class EntityFormData extends EntityFormValidation {
     let entityFieldGroup: EntityFieldGroup;
 
     if (this.tabs.get(tab.id)?.fieldGroups.find((group) => group.id === fieldGroup.id)) {
-      entityFieldGroup = this.tabs.get(tab.id)!.fieldGroups.find((group) => group.id === fieldGroup.id)!;
+      entityFieldGroup = this.tabs
+        .get(tab.id)!
+        .fieldGroups.find((group) => group.id === fieldGroup.id)!;
     } else {
       entityFieldGroup = new EntityFieldGroup(fieldGroup);
       this.tabs.get(tab.id)?.fieldGroups.push(entityFieldGroup);
     }
 
     for (const field of fields) {
-
       if (excludeFields.includes(field.getName())) {
         continue;
       }
@@ -213,8 +217,14 @@ export abstract class EntityFormData extends EntityFormValidation {
 
           // 필드 그룹 정보가 필드 단위로 변경된 경우
           let newFieldGroup: EntityFieldGroup;
-          if (this.tabs.get(newTab.id)?.fieldGroups.find((group) => group.id === newField.getFieldGroupId())) {
-            newFieldGroup = this.tabs.get(newTab.id)!.fieldGroups.find((group) => group.id === newField.getFieldGroupId())!;
+          if (
+            this.tabs
+              .get(newTab.id)
+              ?.fieldGroups.find((group) => group.id === newField.getFieldGroupId())
+          ) {
+            newFieldGroup = this.tabs
+              .get(newTab.id)!
+              .fieldGroups.find((group) => group.id === newField.getFieldGroupId())!;
           } else {
             newFieldGroup = new EntityFieldGroup(explicitFieldInfo?.fieldGroup ?? fieldGroup);
             this.tabs.get(newTab.id)?.fieldGroups.push(newFieldGroup);
@@ -224,12 +234,8 @@ export abstract class EntityFormData extends EntityFormValidation {
           entityFieldGroup.fields.push(newField);
         }
 
-
         this.fields.set(newName, newField);
-
       }
-
     }
   }
-
 }

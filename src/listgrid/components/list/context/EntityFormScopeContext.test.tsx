@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import {render, screen} from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {EntityFormScopeProvider, useEntityFormScope} from './EntityFormScopeContext';
+import { EntityFormScopeProvider, useEntityFormScope } from './EntityFormScopeContext';
 
 describe('EntityFormScopeContext', () => {
   describe('useEntityFormScope', () => {
@@ -43,7 +43,7 @@ describe('EntityFormScopeContext', () => {
       render(
         <EntityFormScopeProvider depth={2}>
           <TestComponent />
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('depth')).toHaveTextContent('2');
@@ -55,10 +55,10 @@ describe('EntityFormScopeContext', () => {
         return <span data-testid="isInlineMode">{String(scope.isInlineMode)}</span>;
       };
 
-      const {rerender} = render(
+      const { rerender } = render(
         <EntityFormScopeProvider depth={0} maxInlineDepth={1}>
           <TestComponent />
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('isInlineMode')).toHaveTextContent('true');
@@ -66,7 +66,7 @@ describe('EntityFormScopeContext', () => {
       rerender(
         <EntityFormScopeProvider depth={2} maxInlineDepth={1}>
           <TestComponent />
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('isInlineMode')).toHaveTextContent('false');
@@ -82,34 +82,35 @@ describe('EntityFormScopeContext', () => {
               data-testid="toggleBtn"
               onClick={() => {
                 scope.toggleExpansion?.('test-id');
-              }}>
+              }}
+            >
               Toggle
             </button>
             <button
               data-testid="collapseBtn"
               onClick={() => {
                 scope.collapseItem?.('test-id');
-              }}>
+              }}
+            >
               Collapse
             </button>
             <button
               data-testid="collapseAllBtn"
               onClick={() => {
                 scope.collapseAll?.();
-              }}>
+              }}
+            >
               Collapse All
             </button>
-            <span data-testid="expandedCount">
-              {scope.expandedItems?.length || 0}
-            </span>
+            <span data-testid="expandedCount">{scope.expandedItems?.length || 0}</span>
           </div>
         );
       };
 
-      const {getByTestId} = render(
+      const { getByTestId } = render(
         <EntityFormScopeProvider depth={0}>
           <TestComponent />
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(getByTestId('expandedCount')).toHaveTextContent('0');
@@ -136,7 +137,7 @@ describe('EntityFormScopeContext', () => {
           <EntityFormScopeProvider depth={1}>
             <TestComponent />
           </EntityFormScopeProvider>
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('depth')).toHaveTextContent('1');
@@ -152,7 +153,7 @@ describe('EntityFormScopeContext', () => {
       render(
         <EntityFormScopeProvider depth={0} maxExpandedItems={5}>
           <TestComponent />
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('maxExpanded')).toHaveTextContent('5');
@@ -167,7 +168,7 @@ describe('EntityFormScopeContext', () => {
       render(
         <EntityFormScopeProvider depth={0} expansionMode="single">
           <TestComponent />
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('expansionMode')).toHaveTextContent('single');
@@ -182,7 +183,7 @@ describe('EntityFormScopeContext', () => {
       render(
         <EntityFormScopeProvider depth={0} forceModalMode={true}>
           <TestComponent />
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('forceModal')).toHaveTextContent('true');
@@ -191,7 +192,7 @@ describe('EntityFormScopeContext', () => {
 
   describe('nesting scenarios', () => {
     it('should handle deeply nested providers', () => {
-      const TestComponent = ({level}: {level: number}) => {
+      const TestComponent = ({ level }: { level: number }) => {
         const scope = useEntityFormScope();
         return <span data-testid={`depth-${level}`}>{scope.depth}</span>;
       };
@@ -205,7 +206,7 @@ describe('EntityFormScopeContext', () => {
               <TestComponent level={2} />
             </EntityFormScopeProvider>
           </EntityFormScopeProvider>
-        </EntityFormScopeProvider>
+        </EntityFormScopeProvider>,
       );
 
       expect(screen.getByTestId('depth-0')).toHaveTextContent('0');

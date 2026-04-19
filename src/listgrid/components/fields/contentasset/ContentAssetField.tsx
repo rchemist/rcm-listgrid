@@ -11,20 +11,20 @@
  *  limitations under the License.
  */
 
-import {FormField, FormFieldProps} from '../abstract';
-import React from "react";
-import {FieldRenderParameters} from '../../../config/EntityField';
-import {getInputRendererParameters} from '../../helper/FieldRendererHelper';
-import {ContentAssetItem} from "./ContentAssetItem";
-import {ContentAsset} from "./types";
+import { FormField, FormFieldProps } from '../abstract';
+import React from 'react';
+import { FieldRenderParameters } from '../../../config/EntityField';
+import { getInputRendererParameters } from '../../helper/FieldRendererHelper';
+import { ContentAssetItem } from './ContentAssetItem';
+import { ContentAsset } from './types';
 
 interface ContentAssetFieldProps extends FormFieldProps {
   /** 최대 업로드 가능한 항목 수 */
   maxItems?: number;
-  
+
   /** 허용된 파일 타입 (예: ['image/*', 'application/pdf']) */
   acceptedFileTypes?: string[];
-  
+
   /** 최대 파일 크기 (bytes) */
   maxFileSize?: number;
 }
@@ -32,17 +32,16 @@ interface ContentAssetFieldProps extends FormFieldProps {
 /**
  * ContentAssetField
  * 범용적인 파일 업로드 및 관리를 위한 ListGrid 커스텀 필드
- * 
+ *
  * @extends FormField
  */
 export class ContentAssetField extends FormField<ContentAssetField> {
-
   /** 최대 업로드 가능한 항목 수 */
   maxItems?: number;
-  
+
   /** 허용된 파일 타입 */
   acceptedFileTypes?: string[];
-  
+
   /** 최대 파일 크기 (bytes) */
   maxFileSize?: number;
 
@@ -57,8 +56,8 @@ export class ContentAssetField extends FormField<ContentAssetField> {
     return (async () => {
       const inputParams = await getInputRendererParameters(this, params);
       return (
-        <ContentAssetItem 
-          {...inputParams} 
+        <ContentAssetItem
+          {...inputParams}
           entityForm={params.entityForm}
           session={params.session}
           maxItems={this.maxItems}
@@ -116,21 +115,20 @@ export class ContentAssetField extends FormField<ContentAssetField> {
    * @param props ContentAssetFieldProps
    */
   static create(props: ContentAssetFieldProps): ContentAssetField {
-    const field = new ContentAssetField(props.name, props.order)
-      .copyFields(props, true);
-    
+    const field = new ContentAssetField(props.name, props.order).copyFields(props, true);
+
     if (props.maxItems !== undefined) {
       field.withMaxItems(props.maxItems);
     }
-    
+
     if (props.acceptedFileTypes) {
       field.withAcceptedFileTypes(props.acceptedFileTypes);
     }
-    
+
     if (props.maxFileSize !== undefined) {
       field.withMaxFileSize(props.maxFileSize);
     }
-    
+
     return field;
   }
 }

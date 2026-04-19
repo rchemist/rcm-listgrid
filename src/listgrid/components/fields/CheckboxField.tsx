@@ -10,20 +10,17 @@ import {
   MultipleOptionalFieldProps,
   renderListMultipleOptionalField,
   ViewListProps,
-  ViewListResult
+  ViewListResult,
 } from './abstract';
-import React from "react";
-import {MinMaxLimit, SelectOption} from "../../form/Type";
-import {FieldRenderParameters} from '../../config/EntityField';
-import {CheckBox} from "../../ui";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
+import React from 'react';
+import { MinMaxLimit, SelectOption } from '../../form/Type';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { CheckBox } from '../../ui';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 
-interface CheckboxFieldProps extends MultipleOptionalFieldProps {
-
-}
+interface CheckboxFieldProps extends MultipleOptionalFieldProps {}
 
 export class CheckboxField extends MultipleOptionalField<CheckboxField> {
-
   constructor(name: string, order: number, options: SelectOption[], limit?: MinMaxLimit) {
     super(name, order, 'checkbox', options, limit);
   }
@@ -34,11 +31,17 @@ export class CheckboxField extends MultipleOptionalField<CheckboxField> {
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
       const cacheKey = this.createCacheKey();
-      return <CheckBox key={cacheKey} limit={this.limit} combo={this.combo} options={this.options ?? []} {...await getInputRendererParameters(this, params)}></CheckBox>
+      return (
+        <CheckBox
+          key={cacheKey}
+          limit={this.limit}
+          combo={this.combo}
+          options={this.options ?? []}
+          {...await getInputRendererParameters(this, params)}
+        ></CheckBox>
+      );
     })();
   }
-
-
 
   /**
    * CheckboxField 핵심 리스트 아이템 렌더링 로직
@@ -54,8 +57,10 @@ export class CheckboxField extends MultipleOptionalField<CheckboxField> {
     return new CheckboxField(name, order, this.options!, this.limit);
   }
 
-  static create(props: CheckboxFieldProps) : CheckboxField {
-    return new CheckboxField(props.name, props.order, props.options!, props.limit)
-      .copyFields(props, true);
+  static create(props: CheckboxFieldProps): CheckboxField {
+    return new CheckboxField(props.name, props.order, props.options!, props.limit).copyFields(
+      props,
+      true,
+    );
   }
 }

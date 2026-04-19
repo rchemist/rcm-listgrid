@@ -5,14 +5,14 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React from "react";
-import {EntityForm} from "../../../config/EntityForm";
-import {FormField} from "../../fields/abstract";
-import {Session} from '../../../auth/types';
+import React from 'react';
+import { EntityForm } from '../../../config/EntityForm';
+import { FormField } from '../../fields/abstract';
+import { Session } from '../../../auth/types';
 import {
   ListGridThemeVariant,
-  ViewListGridClassNames
-} from "../../list/types/ViewListGridTheme.types";
+  ViewListGridClassNames,
+} from '../../list/types/ViewListGridTheme.types';
 
 /**
  * 커스텀 필드 렌더러에 전달되는 Props
@@ -411,7 +411,9 @@ export interface EntityFormThemeContextValue {
    * @param fieldName 필드명
    * @returns 커스텀 렌더러 컴포넌트 또는 undefined
    */
-  getFieldRenderer: (fieldName: string) => React.ComponentType<CustomFieldRendererProps> | undefined;
+  getFieldRenderer: (
+    fieldName: string,
+  ) => React.ComponentType<CustomFieldRendererProps> | undefined;
   /** 버튼 라벨 오버라이드 */
   buttonLabels?: ButtonLabelOverrides;
   /** Custom stepper renderer for create step mode */
@@ -545,7 +547,9 @@ export interface ThemeContextValue {
    * @param fieldName 필드명
    * @returns 커스텀 렌더러 컴포넌트 또는 undefined
    */
-  getFieldRenderer: (fieldName: string) => React.ComponentType<CustomFieldRendererProps> | undefined;
+  getFieldRenderer: (
+    fieldName: string,
+  ) => React.ComponentType<CustomFieldRendererProps> | undefined;
 }
 
 /**

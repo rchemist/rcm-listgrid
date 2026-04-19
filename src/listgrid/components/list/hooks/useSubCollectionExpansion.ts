@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {useState, useCallback} from 'react';
+import { useState, useCallback } from 'react';
 
 export interface UseSubCollectionExpansionOptions {
   maxExpandedItems?: number;
@@ -30,33 +30,25 @@ export interface UseSubCollectionExpansionReturn {
  * @returns Expansion state and control functions
  */
 export function useSubCollectionExpansion(
-  options: UseSubCollectionExpansionOptions = {}
+  options: UseSubCollectionExpansionOptions = {},
 ): UseSubCollectionExpansionReturn {
-  const {
-    maxExpandedItems = 3,
-    expansionMode = 'multiple',
-    onExpand,
-    onCollapse,
-  } = options;
+  const { maxExpandedItems = 3, expansionMode = 'multiple', onExpand, onCollapse } = options;
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
-  const isExpanded = useCallback(
-    (id: string) => expandedItems.includes(id),
-    [expandedItems]
-  );
+  const isExpanded = useCallback((id: string) => expandedItems.includes(id), [expandedItems]);
 
   const canExpand = expandedItems.length < maxExpandedItems;
 
   const toggleExpansion = useCallback(
     (id: string) => {
-      setExpandedItems(prev => {
+      setExpandedItems((prev) => {
         const isCurrentlyExpanded = prev.includes(id);
 
         if (isCurrentlyExpanded) {
           // Collapse
           onCollapse?.(id);
-          return prev.filter(item => item !== id);
+          return prev.filter((item) => item !== id);
         } else {
           // Expand
           let newExpandedItems: string[];
@@ -80,20 +72,20 @@ export function useSubCollectionExpansion(
         }
       });
     },
-    [expansionMode, maxExpandedItems, onExpand, onCollapse]
+    [expansionMode, maxExpandedItems, onExpand, onCollapse],
   );
 
   const collapseItem = useCallback(
     (id: string) => {
-      setExpandedItems(prev => {
+      setExpandedItems((prev) => {
         if (prev.includes(id)) {
           onCollapse?.(id);
-          return prev.filter(item => item !== id);
+          return prev.filter((item) => item !== id);
         }
         return prev;
       });
     },
-    [onCollapse]
+    [onCollapse],
   );
 
   const collapseAll = useCallback(() => {

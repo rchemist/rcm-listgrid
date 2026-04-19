@@ -8,14 +8,14 @@
 'use client';
 
 import React from 'react';
-import {IconCopy, IconDotsVertical, IconMessage} from '@tabler/icons-react';
-import {Popover} from '../../../ui';
-import {Tooltip} from '../../../ui';
-import {getOverlayZIndex, POPOVER_Z_INDEX, useModalManagerStore} from '../../../store';
-import {showToast} from '../../../message';
-import {SmsModal} from './SmsModal';
-import {Session} from '../../../auth';
-import {formatPhoneNumber} from '../../../utils/PhoneUtil';
+import { IconCopy, IconDotsVertical, IconMessage } from '@tabler/icons-react';
+import { Popover } from '../../../ui';
+import { Tooltip } from '../../../ui';
+import { getOverlayZIndex, POPOVER_Z_INDEX, useModalManagerStore } from '../../../store';
+import { showToast } from '../../../message';
+import { SmsModal } from './SmsModal';
+import { Session } from '../../../auth';
+import { formatPhoneNumber } from '../../../utils/PhoneUtil';
 
 interface PhoneNumberListViewProps {
   phoneNumber: string;
@@ -45,13 +45,13 @@ export const PhoneNumberListView = ({
       await navigator.clipboard.writeText(phoneNumber);
       showToast({
         message: '전화번호가 복사되었습니다.',
-        color: 'success'
+        color: 'success',
       });
     } catch (error) {
       console.error('Failed to copy:', error);
       showToast({
         message: '복사에 실패했습니다.',
-        color: 'danger'
+        color: 'danger',
       });
     }
   };
@@ -80,12 +80,7 @@ export const PhoneNumberListView = ({
   return (
     <div className="rcm-phone-list-wrap">
       <span>{formattedValue}</span>
-      <Popover
-        position="bottom"
-        withArrow
-        shadow="md"
-        zIndex={getOverlayZIndex(POPOVER_Z_INDEX)}
-      >
+      <Popover position="bottom" withArrow shadow="md" zIndex={getOverlayZIndex(POPOVER_Z_INDEX)}>
         <Popover.Target>
           <Tooltip label="메뉴">
             <button className="rcm-phone-list-menu-btn">

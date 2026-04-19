@@ -16,5 +16,5 @@ export { callExternalHttpRequest, getExternalApiData, getExternalApiDataWithErro
 
 // String helpers absent from the inlined utils but used by original source.
 export function endsWith(value: string | undefined | null, suffix: string): boolean {
-    return typeof value === 'string' && value.endsWith(suffix);
+  return typeof value === 'string' && value.endsWith(suffix);
 }

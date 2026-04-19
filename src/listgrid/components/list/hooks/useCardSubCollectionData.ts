@@ -34,7 +34,7 @@ export interface CardSubCollectionDataConfig {
  */
 export function useCardSubCollectionData(
   fetchUrl: string | (() => string),
-  config: CardSubCollectionDataConfig
+  config: CardSubCollectionDataConfig,
 ) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -113,43 +113,46 @@ export function useCardSubCollectionData(
   /**
    * Fetch data using simple GET request
    */
-  const fetchDataSimple = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true);
-    setError(null);
+  const fetchDataSimple = useCallback(
+    async (signal?: AbortSignal) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const url = getUrl(fetchUrl);
+      try {
+        const url = getUrl(fetchUrl);
 
-      const response = await fetch(url, { signal });
+        const response = await fetch(url, { signal });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
 
-      const jsonData = await response.json();
-      const items = extractData(jsonData);
+        const jsonData = await response.json();
+        const items = extractData(jsonData);
 
-      // Only update state if not aborted and mounted
-      if (!signal?.aborted && isMountedRef.current) {
-        setData(items);
-        setError(null);
+        // Only update state if not aborted and mounted
+        if (!signal?.aborted && isMountedRef.current) {
+          setData(items);
+          setError(null);
+        }
+      } catch (err) {
+        // Ignore abort errors
+        if (err instanceof Error && err.name === 'AbortError') {
+          return;
+        }
+        const errorObj = err instanceof Error ? err : new Error(String(err));
+        if (isMountedRef.current) {
+          setError(errorObj);
+          setData([]);
+        }
+      } finally {
+        if (isMountedRef.current) {
+          setLoading(false);
+        }
       }
-    } catch (err) {
-      // Ignore abort errors
-      if (err instanceof Error && err.name === 'AbortError') {
-        return;
-      }
-      const errorObj = err instanceof Error ? err : new Error(String(err));
-      if (isMountedRef.current) {
-        setError(errorObj);
-        setData([]);
-      }
-    } finally {
-      if (isMountedRef.current) {
-        setLoading(false);
-      }
-    }
-  }, [fetchUrl, getUrl, extractData]);
+    },
+    [fetchUrl, getUrl, extractData],
+  );
 
   /**
    * Effect to fetch data on mount and when dependencies change
@@ -180,7 +183,15 @@ export function useCardSubCollectionData(
         abortControllerRef.current.abort();
       }
     };
-  }, [fetchUrl, config.mappedBy, config.filterBy, config.useSearchForm, config.searchForm, fetchDataWithSearchForm, fetchDataSimple]);
+  }, [
+    fetchUrl,
+    config.mappedBy,
+    config.filterBy,
+    config.useSearchForm,
+    config.searchForm,
+    fetchDataWithSearchForm,
+    fetchDataSimple,
+  ]);
 
   /**
    * Refresh function to manually refetch data

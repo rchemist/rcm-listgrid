@@ -4,28 +4,25 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
+'use client';
 
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo } from 'react';
 import {
   ViewListGridClassNames,
   ListGridThemeVariant,
   ListGridThemeContextValue,
-} from "../types/ViewListGridTheme.types";
-import { cn as cnUtil } from "../../../utils/cn";
-import { defaultListGridTheme } from "../themes/defaultListGridTheme";
-import { mainListGridTheme } from "../themes/variants/mainTheme";
-import { subCollectionListGridTheme } from "../themes/variants/subCollectionTheme";
-import { modalListGridTheme } from "../themes/variants/modalTheme";
+} from '../types/ViewListGridTheme.types';
+import { cn as cnUtil } from '../../../utils/cn';
+import { defaultListGridTheme } from '../themes/defaultListGridTheme';
+import { mainListGridTheme } from '../themes/variants/mainTheme';
+import { subCollectionListGridTheme } from '../themes/variants/subCollectionTheme';
+import { modalListGridTheme } from '../themes/variants/modalTheme';
 
 /**
  * 두 객체를 깊게 병합하는 유틸리티
  * 커스텀 테마가 기본 테마를 오버라이드
  */
-const deepMerge = <T extends object>(
-  base: T,
-  override: Partial<T> | undefined
-): T => {
+const deepMerge = <T extends object>(base: T, override: Partial<T> | undefined): T => {
   if (!override) return base;
 
   const result = { ...base };
@@ -38,15 +35,15 @@ const deepMerge = <T extends object>(
       if (
         baseValue &&
         overrideValue &&
-        typeof baseValue === "object" &&
-        typeof overrideValue === "object" &&
+        typeof baseValue === 'object' &&
+        typeof overrideValue === 'object' &&
         !Array.isArray(baseValue) &&
         !Array.isArray(overrideValue)
       ) {
         // 중첩 객체 병합
         (result as Record<string, unknown>)[key] = deepMerge(
           baseValue as object,
-          overrideValue as Partial<object>
+          overrideValue as Partial<object>,
         );
       } else if (overrideValue !== undefined) {
         // 값 오버라이드
@@ -62,15 +59,15 @@ const deepMerge = <T extends object>(
  * Variant에 따른 프리셋 테마 가져오기
  */
 const getVariantTheme = (
-  variant: ListGridThemeVariant
+  variant: ListGridThemeVariant,
 ): Partial<ViewListGridClassNames> | undefined => {
   switch (variant) {
-    case "main":
+    case 'main':
       return mainListGridTheme;
-    case "subCollection":
+    case 'subCollection':
       return subCollectionListGridTheme;
-    case "modal":
-    case "popup":
+    case 'modal':
+    case 'popup':
       return modalListGridTheme;
     default:
       return undefined;
@@ -84,7 +81,7 @@ const getVariantTheme = (
 const ListGridThemeContext = createContext<ListGridThemeContextValue>({
   classNames: defaultListGridTheme,
   cn: (base, custom) => (custom ? cnUtil(base, custom) : base),
-  variant: "default",
+  variant: 'default',
 });
 
 /**
@@ -123,7 +120,7 @@ export interface ListGridThemeProviderProps {
  */
 export const ListGridThemeProvider: React.FC<ListGridThemeProviderProps> = ({
   theme,
-  variant = "default",
+  variant = 'default',
   children,
 }) => {
   const value = useMemo<ListGridThemeContextValue>(() => {
@@ -138,10 +135,7 @@ export const ListGridThemeProvider: React.FC<ListGridThemeProviderProps> = ({
 
     // 3. 커스텀 테마 적용 (최우선)
     if (theme) {
-      mergedClassNames = deepMerge(
-        mergedClassNames,
-        theme
-      ) as ViewListGridClassNames;
+      mergedClassNames = deepMerge(mergedClassNames, theme) as ViewListGridClassNames;
     }
 
     return {
@@ -154,11 +148,7 @@ export const ListGridThemeProvider: React.FC<ListGridThemeProviderProps> = ({
     };
   }, [theme, variant]);
 
-  return (
-    <ListGridThemeContext.Provider value={value}>
-      {children}
-    </ListGridThemeContext.Provider>
-  );
+  return <ListGridThemeContext.Provider value={value}>{children}</ListGridThemeContext.Provider>;
 };
 
 /**
@@ -185,7 +175,7 @@ export const useListGridTheme = (): ListGridThemeContextValue => {
     return {
       classNames: defaultListGridTheme,
       cn: (base, custom) => (custom ? cnUtil(base, custom) : base),
-      variant: "default",
+      variant: 'default',
     };
   }
 
@@ -203,7 +193,7 @@ export const useListGridTheme = (): ListGridThemeContextValue => {
  * ```
  */
 export const getListGridThemeByVariant = (
-  variant: ListGridThemeVariant
+  variant: ListGridThemeVariant,
 ): ViewListGridClassNames => {
   let mergedClassNames = { ...defaultListGridTheme };
   const variantTheme = getVariantTheme(variant);

@@ -1,12 +1,12 @@
 'use client';
 
-import {dynamic} from "../utils/lazy";
-import {Skeleton} from '../ui';
-import {ComponentProps} from 'react';
+import { dynamic } from '../utils/lazy';
+import { Skeleton } from '../ui';
+import { ComponentProps } from 'react';
 
 // DataImporter와 XLSX를 동적으로 로드
 const DynamicDataImporter = dynamic(
-  () => import('./DataImporter').then(mod => ({ default: mod.DataImporter })),
+  () => import('./DataImporter').then((mod) => ({ default: mod.DataImporter })),
   {
     loading: () => (
       <div className="rcm-skeleton-stack">
@@ -19,7 +19,7 @@ const DynamicDataImporter = dynamic(
       </div>
     ),
     ssr: false, // 클라이언트에서만 로드
-  }
+  },
 );
 
 // 원본 DataImporter와 동일한 Props 타입 사용
@@ -29,4 +29,4 @@ export const LazyDataImporter = (props: DataImporterProps) => {
   return <DynamicDataImporter {...props} />;
 };
 
-export default LazyDataImporter; 
+export default LazyDataImporter;

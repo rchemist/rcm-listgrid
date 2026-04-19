@@ -14,21 +14,73 @@ import { SubCollectionField } from '../../../config/SubCollectionField';
 
 // Status badge color mapping
 const STATUS_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
-  ACTIVE: { bg: 'bg-emerald-50 dark:bg-emerald-950/50', text: 'text-emerald-700 dark:text-emerald-400', ring: 'ring-emerald-600/20' },
-  COMPLETED: { bg: 'bg-blue-50 dark:bg-blue-950/50', text: 'text-blue-700 dark:text-blue-400', ring: 'ring-blue-600/20' },
-  CANCELLED: { bg: 'bg-red-50 dark:bg-red-950/50', text: 'text-red-700 dark:text-red-400', ring: 'ring-red-600/20' },
-  PENDING: { bg: 'bg-amber-50 dark:bg-amber-950/50', text: 'text-amber-700 dark:text-amber-400', ring: 'ring-amber-600/20' },
-  ENROLLED: { bg: 'bg-emerald-50 dark:bg-emerald-950/50', text: 'text-emerald-700 dark:text-emerald-400', ring: 'ring-emerald-600/20' },
-  GRADUATED: { bg: 'bg-blue-50 dark:bg-blue-950/50', text: 'text-blue-700 dark:text-blue-400', ring: 'ring-blue-600/20' },
-  ON_LEAVE: { bg: 'bg-amber-50 dark:bg-amber-950/50', text: 'text-amber-700 dark:text-amber-400', ring: 'ring-amber-600/20' },
-  GIVE_UP: { bg: 'bg-orange-50 dark:bg-orange-950/50', text: 'text-orange-700 dark:text-orange-400', ring: 'ring-orange-600/20' },
-  EXPELLED: { bg: 'bg-red-50 dark:bg-red-950/50', text: 'text-red-700 dark:text-red-400', ring: 'ring-red-600/20' },
-  PAID: { bg: 'bg-emerald-50 dark:bg-emerald-950/50', text: 'text-emerald-700 dark:text-emerald-400', ring: 'ring-emerald-600/20' },
-  UNPAID: { bg: 'bg-rose-50 dark:bg-rose-950/50', text: 'text-rose-700 dark:text-rose-400', ring: 'ring-rose-600/20' },
-  PARTIAL: { bg: 'bg-amber-50 dark:bg-amber-950/50', text: 'text-amber-700 dark:text-amber-400', ring: 'ring-amber-600/20' },
+  ACTIVE: {
+    bg: 'bg-emerald-50 dark:bg-emerald-950/50',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    ring: 'ring-emerald-600/20',
+  },
+  COMPLETED: {
+    bg: 'bg-blue-50 dark:bg-blue-950/50',
+    text: 'text-blue-700 dark:text-blue-400',
+    ring: 'ring-blue-600/20',
+  },
+  CANCELLED: {
+    bg: 'bg-red-50 dark:bg-red-950/50',
+    text: 'text-red-700 dark:text-red-400',
+    ring: 'ring-red-600/20',
+  },
+  PENDING: {
+    bg: 'bg-amber-50 dark:bg-amber-950/50',
+    text: 'text-amber-700 dark:text-amber-400',
+    ring: 'ring-amber-600/20',
+  },
+  ENROLLED: {
+    bg: 'bg-emerald-50 dark:bg-emerald-950/50',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    ring: 'ring-emerald-600/20',
+  },
+  GRADUATED: {
+    bg: 'bg-blue-50 dark:bg-blue-950/50',
+    text: 'text-blue-700 dark:text-blue-400',
+    ring: 'ring-blue-600/20',
+  },
+  ON_LEAVE: {
+    bg: 'bg-amber-50 dark:bg-amber-950/50',
+    text: 'text-amber-700 dark:text-amber-400',
+    ring: 'ring-amber-600/20',
+  },
+  GIVE_UP: {
+    bg: 'bg-orange-50 dark:bg-orange-950/50',
+    text: 'text-orange-700 dark:text-orange-400',
+    ring: 'ring-orange-600/20',
+  },
+  EXPELLED: {
+    bg: 'bg-red-50 dark:bg-red-950/50',
+    text: 'text-red-700 dark:text-red-400',
+    ring: 'ring-red-600/20',
+  },
+  PAID: {
+    bg: 'bg-emerald-50 dark:bg-emerald-950/50',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    ring: 'ring-emerald-600/20',
+  },
+  UNPAID: {
+    bg: 'bg-rose-50 dark:bg-rose-950/50',
+    text: 'text-rose-700 dark:text-rose-400',
+    ring: 'ring-rose-600/20',
+  },
+  PARTIAL: {
+    bg: 'bg-amber-50 dark:bg-amber-950/50',
+    text: 'text-amber-700 dark:text-amber-400',
+    ring: 'ring-amber-600/20',
+  },
 };
 
-const DEFAULT_STATUS_COLOR = { bg: 'bg-gray-50 dark:bg-gray-800', text: 'text-gray-700 dark:text-gray-300', ring: 'ring-gray-600/20' };
+const DEFAULT_STATUS_COLOR = {
+  bg: 'bg-gray-50 dark:bg-gray-800',
+  text: 'text-gray-700 dark:text-gray-300',
+  ring: 'ring-gray-600/20',
+};
 
 export interface CardItemProps {
   item: any;
@@ -52,10 +104,12 @@ const StatusBadge: React.FC<{ status: string; label?: string }> = ({ status, lab
   const colors = STATUS_COLORS[upperStatus] || DEFAULT_STATUS_COLOR;
 
   return (
-    <span className={`
+    <span
+      className={`
       inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset
       ${colors.bg} ${colors.text} ${colors.ring}
-    `}>
+    `}
+    >
       {label || status}
     </span>
   );
@@ -140,7 +194,9 @@ export const CardItem: React.FC<CardItemProps> = ({
     };
 
     initializeEntityForm();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [entityForm, item]);
 
   // Get title
@@ -210,22 +266,26 @@ export const CardItem: React.FC<CardItemProps> = ({
 
   // Fields to exclude (mappedBy patterns, title, and user-specified excludeFields)
   // Following ViewFieldGroup's filteredFields logic exactly
-  const shouldExcludeField = useCallback((fieldName: string): boolean => {
-    // User-specified excludeFields
-    if (cardConfig?.excludeFields?.includes(fieldName)) return true;
+  const shouldExcludeField = useCallback(
+    (fieldName: string): boolean => {
+      // User-specified excludeFields
+      if (cardConfig?.excludeFields?.includes(fieldName)) return true;
 
-    // Title field (shown separately in card header)
-    const titleFieldName = typeof cardConfig?.titleField === 'string' ? cardConfig.titleField : null;
-    if (titleFieldName && fieldName === titleFieldName) return true;
+      // Title field (shown separately in card header)
+      const titleFieldName =
+        typeof cardConfig?.titleField === 'string' ? cardConfig.titleField : null;
+      if (titleFieldName && fieldName === titleFieldName) return true;
 
-    // Exact pattern match
-    if (mappedByPatterns.exactPatterns.has(fieldName)) return true;
+      // Exact pattern match
+      if (mappedByPatterns.exactPatterns.has(fieldName)) return true;
 
-    // Nested pattern match (e.g., student.name when mappedBy is studentId)
-    if (fieldName.startsWith(mappedByPatterns.nestedPrefix)) return true;
+      // Nested pattern match (e.g., student.name when mappedBy is studentId)
+      if (fieldName.startsWith(mappedByPatterns.nestedPrefix)) return true;
 
-    return false;
-  }, [cardConfig, mappedByPatterns]);
+      return false;
+    },
+    [cardConfig, mappedByPatterns],
+  );
 
   // Load all tabs when itemEntityForm is ready
   useEffect(() => {
@@ -236,7 +296,8 @@ export const CardItem: React.FC<CardItemProps> = ({
     const loadTabs = async () => {
       try {
         // Use itemEntityForm (with id set) for proper visibility calculation
-        const viewableTabs = await itemEntityForm.getViewableTabs(false, undefined, session) ?? [];
+        const viewableTabs =
+          (await itemEntityForm.getViewableTabs(false, undefined, session)) ?? [];
         if (isMounted && viewableTabs.length > 0) {
           setTabs(viewableTabs);
           setSelectedTabId(viewableTabs[0]!.id);
@@ -252,100 +313,109 @@ export const CardItem: React.FC<CardItemProps> = ({
     };
 
     loadTabs();
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+    };
   }, [itemEntityForm, session]);
 
   // Load FieldGroups and SubCollections when tab changes (following ViewTabPanel/ViewFieldGroup logic)
-  const loadFieldGroupsForTab = useCallback(async (tabId: string) => {
-    if (!itemEntityForm) return;
+  const loadFieldGroupsForTab = useCallback(
+    async (tabId: string) => {
+      if (!itemEntityForm) return;
 
-    setIsLoading(true);
+      setIsLoading(true);
 
-    try {
-      // Following ViewTabPanel.tsx: use getViewableFieldGroups
-      const viewableFieldGroupIds = await itemEntityForm.getViewableFieldGroups({ tabId });
+      try {
+        // Following ViewTabPanel.tsx: use getViewableFieldGroups
+        const viewableFieldGroupIds = await itemEntityForm.getViewableFieldGroups({ tabId });
 
-      if (viewableFieldGroupIds.length === 0) {
+        if (viewableFieldGroupIds.length === 0) {
+          setFieldGroups([]);
+          setSubCollections([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const allFieldGroups: FieldGroupWithFields[] = [];
+        const allSubCollections: SubCollectionField[] = [];
+
+        // If displayFields is specified, create a single "virtual" group
+        if (cardConfig?.displayFields) {
+          const fields = cardConfig.displayFields
+            .filter((name) => itemEntityForm.fields.has(name) && !shouldExcludeField(name))
+            .map((name) => itemEntityForm.fields.get(name)!)
+            .filter(Boolean);
+
+          if (fields.length > 0) {
+            allFieldGroups.push({
+              fieldGroup: new EntityFieldGroup({ id: 'display', label: '', order: 0 }),
+              fields,
+            });
+          }
+        } else {
+          // Following ViewFieldGroup.tsx: use getVisibleFields and getVisibleCollections for each group
+          for (const groupId of viewableFieldGroupIds) {
+            // Load fields
+            const fieldInfo = await itemEntityForm.getVisibleFields(tabId, groupId, session);
+
+            if (fieldInfo?.fieldGroup && fieldInfo?.fields && fieldInfo.fields.length > 0) {
+              const visibleFields = fieldInfo.fields.filter((field) => {
+                if (!(field instanceof FormField)) return false;
+                const fieldName = field.getName();
+                return !shouldExcludeField(fieldName);
+              });
+
+              if (visibleFields.length > 0) {
+                allFieldGroups.push({
+                  fieldGroup: fieldInfo.fieldGroup,
+                  fields: visibleFields,
+                });
+              }
+            }
+
+            // Load subCollections (following ViewFieldGroup pattern)
+            // Only load if itemEntityForm has an id (existing entity)
+            if (itemEntityForm.id) {
+              const collectionInfo = await itemEntityForm.getVisibleCollections(
+                tabId,
+                groupId,
+                session,
+              );
+              if (collectionInfo?.collections && collectionInfo.collections.length > 0) {
+                allSubCollections.push(...collectionInfo.collections);
+              }
+            }
+          }
+        }
+
+        setFieldGroups(allFieldGroups);
+        setSubCollections(allSubCollections);
+
+        // Render subCollections asynchronously (following SubCollectionRenderer pattern)
+        if (allSubCollections.length > 0) {
+          const views = new Map<string, ReactNode>();
+          for (const collection of allSubCollections) {
+            try {
+              const view = await collection.render({ entityForm: itemEntityForm, session });
+              views.set(collection.getName(), view);
+            } catch (error) {
+              console.error(`Error rendering subcollection ${collection.getName()}:`, error);
+            }
+          }
+          setSubCollectionViews(views);
+        } else {
+          setSubCollectionViews(new Map());
+        }
+      } catch (error) {
+        console.error('Error loading field groups:', error);
         setFieldGroups([]);
         setSubCollections([]);
+      } finally {
         setIsLoading(false);
-        return;
       }
-
-      const allFieldGroups: FieldGroupWithFields[] = [];
-      const allSubCollections: SubCollectionField[] = [];
-
-      // If displayFields is specified, create a single "virtual" group
-      if (cardConfig?.displayFields) {
-        const fields = cardConfig.displayFields
-          .filter(name => itemEntityForm.fields.has(name) && !shouldExcludeField(name))
-          .map(name => itemEntityForm.fields.get(name)!)
-          .filter(Boolean);
-
-        if (fields.length > 0) {
-          allFieldGroups.push({
-            fieldGroup: new EntityFieldGroup({ id: 'display', label: '', order: 0 }),
-            fields,
-          });
-        }
-      } else {
-        // Following ViewFieldGroup.tsx: use getVisibleFields and getVisibleCollections for each group
-        for (const groupId of viewableFieldGroupIds) {
-          // Load fields
-          const fieldInfo = await itemEntityForm.getVisibleFields(tabId, groupId, session);
-
-          if (fieldInfo?.fieldGroup && fieldInfo?.fields && fieldInfo.fields.length > 0) {
-            const visibleFields = fieldInfo.fields.filter(field => {
-              if (!(field instanceof FormField)) return false;
-              const fieldName = field.getName();
-              return !shouldExcludeField(fieldName);
-            });
-
-            if (visibleFields.length > 0) {
-              allFieldGroups.push({
-                fieldGroup: fieldInfo.fieldGroup,
-                fields: visibleFields,
-              });
-            }
-          }
-
-          // Load subCollections (following ViewFieldGroup pattern)
-          // Only load if itemEntityForm has an id (existing entity)
-          if (itemEntityForm.id) {
-            const collectionInfo = await itemEntityForm.getVisibleCollections(tabId, groupId, session);
-            if (collectionInfo?.collections && collectionInfo.collections.length > 0) {
-              allSubCollections.push(...collectionInfo.collections);
-            }
-          }
-        }
-      }
-
-      setFieldGroups(allFieldGroups);
-      setSubCollections(allSubCollections);
-
-      // Render subCollections asynchronously (following SubCollectionRenderer pattern)
-      if (allSubCollections.length > 0) {
-        const views = new Map<string, ReactNode>();
-        for (const collection of allSubCollections) {
-          try {
-            const view = await collection.render({ entityForm: itemEntityForm, session });
-            views.set(collection.getName(), view);
-          } catch (error) {
-            console.error(`Error rendering subcollection ${collection.getName()}:`, error);
-          }
-        }
-        setSubCollectionViews(views);
-      } else {
-        setSubCollectionViews(new Map());
-      }
-    } catch (error) {
-      console.error('Error loading field groups:', error);
-      setFieldGroups([]);
-      setSubCollections([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [itemEntityForm, cardConfig, shouldExcludeField, session]);
+    },
+    [itemEntityForm, cardConfig, shouldExcludeField, session],
+  );
 
   // Load FieldGroups when selectedTabId changes
   useEffect(() => {
@@ -372,13 +442,21 @@ export const CardItem: React.FC<CardItemProps> = ({
   // Don't render until itemEntityForm is ready
   if (!itemEntityForm) {
     return (
-      <article className={`
+      <article
+        className={`
         rcm-card-item ${cardConfig?.containerClassName ?? ''}
-      `}>
+      `}
+      >
         <div className="rcm-card-item-body">
           <div className="rcm-card-item-skel-stack">
-            <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-title" data-shape="line" />
-            <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-subtitle" data-shape="line" />
+            <div
+              className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-title"
+              data-shape="line"
+            />
+            <div
+              className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-subtitle"
+              data-shape="line"
+            />
           </div>
         </div>
       </article>
@@ -391,19 +469,26 @@ export const CardItem: React.FC<CardItemProps> = ({
       onClick={onClick}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); } : undefined}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') onClick();
+            }
+          : undefined
+      }
     >
       {/* Card Header */}
       <div className="rcm-card-item-header">
         <div className="rcm-card-item-header-row">
           <div className="rcm-card-item-header-left">
             <div className="rcm-card-item-title-row">
-              <h3 className={`rcm-text rcm-card-item-title ${cardConfig?.titleClassName ?? ''}`} data-weight="semibold">
+              <h3
+                className={`rcm-text rcm-card-item-title ${cardConfig?.titleClassName ?? ''}`}
+                data-weight="semibold"
+              >
                 {title}
               </h3>
-              {statusInfo && (
-                <StatusBadge status={statusInfo.value} label={statusInfo.label} />
-              )}
+              {statusInfo && <StatusBadge status={statusInfo.value} label={statusInfo.label} />}
             </div>
           </div>
 
@@ -432,7 +517,12 @@ export const CardItem: React.FC<CardItemProps> = ({
             )}
             {onClick && (
               <div className="rcm-card-item-chevron-wrap">
-                <IconChevronRight className="rcm-icon" data-size="md" data-tone="disabled" stroke={2} />
+                <IconChevronRight
+                  className="rcm-icon"
+                  data-size="md"
+                  data-tone="disabled"
+                  stroke={2}
+                />
               </div>
             )}
           </div>
@@ -462,12 +552,21 @@ export const CardItem: React.FC<CardItemProps> = ({
           <div className="rcm-card-item-skel-stack">
             {[1, 2].map((i) => (
               <div key={i} className="rcm-card-item-skel-group">
-                <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-title" data-shape="line" />
+                <div
+                  className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-title"
+                  data-shape="line"
+                />
                 <div className="rcm-card-item-skel-rows">
                   {[1, 2, 3].map((j) => (
                     <div key={j} className="rcm-card-item-skel-row">
-                      <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-label" data-shape="line" />
-                      <div className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-value" data-shape="line" />
+                      <div
+                        className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-label"
+                        data-shape="line"
+                      />
+                      <div
+                        className="rcm-skeleton rcm-card-item-skel-line rcm-card-item-skel-line-value"
+                        data-shape="line"
+                      />
                     </div>
                   ))}
                 </div>
@@ -501,7 +600,10 @@ export const CardItem: React.FC<CardItemProps> = ({
                   const hideLabel = collection.hideLabel;
 
                   return (
-                    <div key={`subcollection_${collection.getName()}`} className="rcm-card-item-sub">
+                    <div
+                      key={`subcollection_${collection.getName()}`}
+                      className="rcm-card-item-sub"
+                    >
                       {/* SubCollection Label */}
                       {!hideLabel && label && (
                         <h4 className="rcm-text rcm-card-item-sub-label" data-weight="semibold">
@@ -510,9 +612,7 @@ export const CardItem: React.FC<CardItemProps> = ({
                       )}
                       {/* SubCollection View (CardSubCollectionView or ViewListGrid) */}
                       {view ? (
-                        <div className="rcm-card-item-sub-view">
-                          {view}
-                        </div>
+                        <div className="rcm-card-item-sub-view">{view}</div>
                       ) : (
                         <div className="rcm-card-item-sub-loading-wrap">
                           <div className="rcm-card-item-sub-loading">

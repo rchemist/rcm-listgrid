@@ -9,26 +9,26 @@
 // silently skipped — callers should check `createSmsHistoryField` for null.
 
 export interface SmsHistoryFieldConstructor {
-    new (fieldName: string, order: number, targetFieldName: string): any;
+  new (fieldName: string, order: number, targetFieldName: string): any;
 }
 
 let _smsHistoryFieldCtor: SmsHistoryFieldConstructor | undefined;
 
 export function registerSmsHistoryField(ctor: SmsHistoryFieldConstructor): void {
-    _smsHistoryFieldCtor = ctor;
+  _smsHistoryFieldCtor = ctor;
 }
 
 export function createSmsHistoryField(
-    fieldName: string,
-    order: number,
-    targetFieldName: string
+  fieldName: string,
+  order: number,
+  targetFieldName: string,
 ): any | null {
-    if (!_smsHistoryFieldCtor) {
-        console.warn(
-            '[@rcm/listgrid] SMS history field requested but no implementation registered. ' +
-                'Call registerSmsHistoryField(YourSmsHistoryFieldClass) at bootstrap.'
-        );
-        return null;
-    }
-    return new _smsHistoryFieldCtor(fieldName, order, targetFieldName);
+  if (!_smsHistoryFieldCtor) {
+    console.warn(
+      '[@rcm/listgrid] SMS history field requested but no implementation registered. ' +
+        'Call registerSmsHistoryField(YourSmsHistoryFieldClass) at bootstrap.',
+    );
+    return null;
+  }
+  return new _smsHistoryFieldCtor(fieldName, order, targetFieldName);
 }

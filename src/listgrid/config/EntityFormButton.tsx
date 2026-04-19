@@ -5,12 +5,12 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {EntityForm} from '../config/EntityForm';
-import {ReactNode} from "react";
-import {isEqualsIgnoreCase} from "../misc";
-import {LabelType} from '../config/Config';
-import {ModalOptions} from '../store';
-import type {RouterApi} from '../router/types';
+import { EntityForm } from '../config/EntityForm';
+import { ReactNode } from 'react';
+import { isEqualsIgnoreCase } from '../misc';
+import { LabelType } from '../config/Config';
+import { ModalOptions } from '../store';
+import type { RouterApi } from '../router/types';
 
 export interface EntityFormButtonStepInfo {
   useCreateStep: boolean;
@@ -41,8 +41,8 @@ export interface EntityFormButtonProps {
  * ID를 가진 ReactNode로 중복 방지 가능
  */
 export interface EntityFormReactNodeButton {
-  id: string;  // 버튼 식별자 (중복 방지용)
-  button: ReactNode;  // 실제 React 컴포넌트
+  id: string; // 버튼 식별자 (중복 방지용)
+  button: ReactNode; // 실제 React 컴포넌트
 }
 
 /**
@@ -51,7 +51,7 @@ export interface EntityFormReactNodeButton {
 export type EntityFormButtonType = EntityFormButton | EntityFormReactNodeButton;
 
 export class EntityFormButton {
-  readonly id: string;     // id 가 save 이거나 delete 인 경우에는 기존의 entityForm 버튼을 대체한다.
+  readonly id: string; // id 가 save 이거나 delete 인 경우에는 기존의 entityForm 버튼을 대체한다.
   icon?: ReactNode;
   label?: LabelType;
   className?: string;
@@ -63,14 +63,14 @@ export class EntityFormButton {
   constructor(id: string) {
     this.id = id;
   }
-  
+
   // 버튼 ID를 반환
   getId(): string {
     return this.id;
   }
 
   // id 가 save 이거나 delete 인 경우에는 기존의 entityForm 버튼을 대체한다.
-  isOverwrite(id: string) : boolean {
+  isOverwrite(id: string): boolean {
     return isEqualsIgnoreCase(this.id, id);
   }
 
@@ -108,5 +108,4 @@ export class EntityFormButton {
     this.tooltip = tooltip;
     return this;
   }
-
 }

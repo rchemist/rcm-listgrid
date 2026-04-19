@@ -15,13 +15,13 @@ export const DEFAULT_MENU_ALIAS = 'default';
 import type { PermissionType } from '../config/Config';
 
 export interface MenuPermissionCheckArgs {
-    url: string;
-    alias?: string;
-    [key: string]: any;
+  url: string;
+  alias?: string;
+  [key: string]: any;
 }
 
 export type MenuPermissionChecker = (
-    args: MenuPermissionCheckArgs
+  args: MenuPermissionCheckArgs,
 ) => PermissionType | Promise<PermissionType>;
 
 const DEFAULT_CHECKER: MenuPermissionChecker = () => 'ALL';
@@ -29,11 +29,11 @@ const DEFAULT_CHECKER: MenuPermissionChecker = () => 'ALL';
 let _checker: MenuPermissionChecker = DEFAULT_CHECKER;
 
 export function registerMenuPermissionChecker(checker: MenuPermissionChecker): void {
-    _checker = checker;
+  _checker = checker;
 }
 
 export function checkAdminMenuPermission(
-    args: MenuPermissionCheckArgs
+  args: MenuPermissionCheckArgs,
 ): PermissionType | Promise<PermissionType> {
-    return _checker(args);
+  return _checker(args);
 }

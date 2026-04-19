@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {EntityForm} from './EntityForm';
+import { EntityForm } from './EntityForm';
 import {
   getConditionalReactNode,
   HelpTextType,
@@ -14,12 +14,12 @@ import {
   ReadOnlyType,
   TooltipType,
 } from './Config';
-import React, {ReactNode} from 'react';
-import {FieldInfoParameters} from './EntityField';
-import {Session} from '../auth/types';
-import {FilterItem, SearchForm} from '../form/SearchForm';
-import {SubCollectionField} from './SubCollectionField';
-import {IListConfig} from '../components/fields/abstract/ListableFormField';
+import React, { ReactNode } from 'react';
+import { FieldInfoParameters } from './EntityField';
+import { Session } from '../auth/types';
+import { FilterItem, SearchForm } from '../form/SearchForm';
+import { SubCollectionField } from './SubCollectionField';
+import { IListConfig } from '../components/fields/abstract/ListableFormField';
 
 /**
  * Inline list field configuration
@@ -129,10 +129,12 @@ export interface InlineSubCollectionFetchOptions {
   /** Whether to use viewDetail mode */
   viewDetail?: boolean;
   /** Additional filters to apply */
-  filters?: (entityForm: EntityForm) => Promise<{
-    condition: 'AND' | 'OR';
-    items: FilterItem[];
-  }[]>;
+  filters?: (entityForm: EntityForm) => Promise<
+    {
+      condition: 'AND' | 'OR';
+      items: FilterItem[];
+    }[]
+  >;
 }
 
 /**
@@ -215,12 +217,14 @@ export class InlineSubCollectionField extends SubCollectionField {
       this.inlineRowActionColumns = props.rowActionColumns;
     } else if (props.rowActions && props.rowActions.length > 0) {
       // Convert deprecated rowActions to rowActionColumns for backward compatibility
-      this.inlineRowActionColumns = [{
-        id: '_default',
-        label: props.rowActionsConfig?.label ?? '작업',
-        order: props.rowActionsConfig?.order ?? 9999,
-        actions: props.rowActions,
-      }];
+      this.inlineRowActionColumns = [
+        {
+          id: '_default',
+          label: props.rowActionsConfig?.label ?? '작업',
+          order: props.rowActionsConfig?.order ?? 9999,
+          actions: props.rowActions,
+        },
+      ];
     }
 
     // Set default fetchOptions
@@ -262,12 +266,14 @@ export class InlineSubCollectionField extends SubCollectionField {
   withRowActions(...actions: InlineRowAction[]): this {
     this.inlineRowActions = actions;
     // Convert to rowActionColumns for backward compatibility
-    this.inlineRowActionColumns = [{
-      id: '_default',
-      label: this.inlineRowActionsConfig?.label ?? '작업',
-      order: this.inlineRowActionsConfig?.order ?? 9999,
-      actions: actions,
-    }];
+    this.inlineRowActionColumns = [
+      {
+        id: '_default',
+        label: this.inlineRowActionsConfig?.label ?? '작업',
+        order: this.inlineRowActionsConfig?.order ?? 9999,
+        actions: actions,
+      },
+    ];
     return this;
   }
 
@@ -279,7 +285,7 @@ export class InlineSubCollectionField extends SubCollectionField {
     this.inlineRowActionsConfig = config;
     // Update existing rowActionColumns if present
     if (this.inlineRowActionColumns && this.inlineRowActionColumns.length > 0) {
-      const defaultColumn = this.inlineRowActionColumns.find(col => col.id === '_default');
+      const defaultColumn = this.inlineRowActionColumns.find((col) => col.id === '_default');
       if (defaultColumn) {
         defaultColumn.label = config.label ?? defaultColumn.label;
         defaultColumn.order = config.order ?? defaultColumn.order;
@@ -384,13 +390,13 @@ export class InlineSubCollectionField extends SubCollectionField {
       if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
         // Check if mappedBy filter already exists
         const hasMappedByFilter = additionalFilters[0]!.items.some(
-          (item: FilterItem) => item.name === mappedByFilter.name
+          (item: FilterItem) => item.name === mappedByFilter.name,
         );
         if (!hasMappedByFilter) {
           additionalFilters[0]!.items.unshift(mappedByFilter);
         }
         // Apply all filters
-        additionalFilters.forEach(filterGroup => {
+        additionalFilters.forEach((filterGroup) => {
           searchForm.withFilter(filterGroup.condition, ...filterGroup.items);
         });
       }
@@ -413,8 +419,10 @@ export class InlineSubCollectionField extends SubCollectionField {
     session?: Session;
   }): Promise<ReactNode | null> {
     // Lazy load the InlineSubCollectionView component
-    const InlineSubCollectionView = React.lazy(
-      () => import('../components/list/ui/InlineSubCollectionView').then(m => ({ default: m.InlineSubCollectionView }))
+    const InlineSubCollectionView = React.lazy(() =>
+      import('../components/list/ui/InlineSubCollectionView').then((m) => ({
+        default: m.InlineSubCollectionView,
+      })),
     );
 
     // Determine readonly status

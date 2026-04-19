@@ -5,30 +5,32 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ValidateResult, ValidationItem} from '../validations/Validation';
-import {EntityForm} from '../config/EntityForm';
-import {FieldValue,} from '../config/Config';
-import {MinMaxLimit} from "../form/Type";
+import { ValidateResult, ValidationItem } from '../validations/Validation';
+import { EntityForm } from '../config/EntityForm';
+import { FieldValue } from '../config/Config';
+import { MinMaxLimit } from '../form/Type';
 
 export class StringValidation extends ValidationItem {
-
-  length?: MinMaxLimit
+  length?: MinMaxLimit;
   regex?: RegExp;
 
   validate(entityForm: EntityForm, value: FieldValue, message?: string): Promise<ValidateResult> {
-
     const currentValue = this.getValueAsString(entityForm, value);
 
     if (this.length) {
       if (this.length.min) {
         if ((currentValue?.length ?? 0) < this.length.min) {
-          return Promise.resolve(this.returnValidateResult(true, message ?? `Minimum length is ${this.length.min}`));
+          return Promise.resolve(
+            this.returnValidateResult(true, message ?? `Minimum length is ${this.length.min}`),
+          );
         }
       }
 
       if (this.length.max) {
         if ((currentValue?.length ?? 0) > this.length.max) {
-          return Promise.resolve(this.returnValidateResult(true, message ?? `Maximum length is ${this.length.max}`));
+          return Promise.resolve(
+            this.returnValidateResult(true, message ?? `Maximum length is ${this.length.max}`),
+          );
         }
       }
     }
@@ -40,11 +42,12 @@ export class StringValidation extends ValidationItem {
     }
 
     return Promise.resolve(this.returnValidateResult(false));
-
   }
 
-
-  constructor(args: {length?: { min?: number; max?: number }, regex?: RegExp, id: string}, message?: string) {
+  constructor(
+    args: { length?: { min?: number; max?: number }; regex?: RegExp; id: string },
+    message?: string,
+  ) {
     super(args.id ?? `StringValidation`, message);
     this.length = args.length;
     this.regex = args.regex;

@@ -5,21 +5,21 @@
 // `configureLoading({ setOpenBaseLoading })`; otherwise calls no-op.
 
 export interface LoadingStore {
-    openBaseLoading: boolean;
-    setOpenBaseLoading: (open: boolean) => void;
+  openBaseLoading: boolean;
+  setOpenBaseLoading: (open: boolean) => void;
 }
 
 let _store: LoadingStore = {
-    openBaseLoading: false,
-    setOpenBaseLoading: (open) => {
-        _store.openBaseLoading = open;
-    },
+  openBaseLoading: false,
+  setOpenBaseLoading: (open) => {
+    _store.openBaseLoading = open;
+  },
 };
 
 export function configureLoading(store: LoadingStore): void {
-    _store = store;
+  _store = store;
 }
 
 export function useLoadingStore(): LoadingStore {
-    return _store;
+  return _store;
 }

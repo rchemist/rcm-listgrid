@@ -1,11 +1,10 @@
-import React, {ReactNode} from "react";
-import {FieldRenderParameters} from "../../config/EntityField";
-import {FormField} from "./abstract";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {UserView} from "../../ui";
+import React, { ReactNode } from 'react';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { FormField } from './abstract';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { UserView } from '../../ui';
 
 export class ProfileField extends FormField<ProfileField> {
-
   constructor(name: string, order: number) {
     super(name, order, 'custom');
     this.hideLabel = true;
@@ -27,5 +26,4 @@ export class ProfileField extends FormField<ProfileField> {
   protected createInstance(name: string, order: number): ProfileField {
     return new ProfileField(name, order);
   }
-
 }

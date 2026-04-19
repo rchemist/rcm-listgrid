@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React from "react";
+import React from 'react';
 import {
   OptionalField,
   OptionalFieldProps,
@@ -13,27 +13,26 @@ import {
   ViewListProps,
   ViewListResult,
   ViewRenderProps,
-  ViewRenderResult
+  ViewRenderResult,
 } from './abstract';
-import {BooleanRadio} from "../../ui";
-import {RadioChip} from "../../ui";
+import { BooleanRadio } from '../../ui';
+import { RadioChip } from '../../ui';
 import {
   FieldInfoParameters,
   FieldRenderParameters,
-  FilterRenderParameters
+  FilterRenderParameters,
 } from '../../config/EntityField';
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {RenderType} from '../../config/Config';
-import {IconCheck, IconX} from "@tabler/icons-react";
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { RenderType } from '../../config/Config';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 interface BooleanFieldProps extends OptionalFieldProps {
   emptyLabel?: string;
 }
 
 export class BooleanField extends OptionalField<BooleanField> {
-  
   emptyLabel?: string;
-  
+
   constructor(name: string, order: number, emptyLabel?: string) {
     super(name, order, 'boolean');
     this.emptyLabel = emptyLabel;
@@ -44,7 +43,14 @@ export class BooleanField extends OptionalField<BooleanField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <BooleanRadio options={this.options} combo={this.combo} {...await getInputRendererParameters(this, params)} emptyLabel={this.emptyLabel}></BooleanRadio>;
+      return (
+        <BooleanRadio
+          options={this.options}
+          combo={this.combo}
+          {...await getInputRendererParameters(this, params)}
+          emptyLabel={this.emptyLabel}
+        ></BooleanRadio>
+      );
     })();
   }
 
@@ -52,12 +58,14 @@ export class BooleanField extends OptionalField<BooleanField> {
    * BooleanField 리스트 필터 렌더링 로직
    * Chip 스타일의 Radio 버튼으로 "예/아니오/전체" 세 가지 옵션 제공
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     // 필터용 옵션 설정 (예/아니오/전체)
     const filterOptions = [
       { label: '예', value: 'true' },
       { label: '아니오', value: 'false' },
-      { label: '전체', value: '' }
+      { label: '전체', value: '' },
     ];
 
     return (async () => {
@@ -69,7 +77,7 @@ export class BooleanField extends OptionalField<BooleanField> {
           if (value === 'true') params.onChange(true);
           else if (value === 'false') params.onChange(false);
           else params.onChange(undefined);
-        }
+        },
       });
 
       // 현재 값을 string으로 변환
@@ -78,12 +86,14 @@ export class BooleanField extends OptionalField<BooleanField> {
       if (inputParams.value === true || inputParams.value === 'true') currentValue = 'true';
       else if (inputParams.value === false || inputParams.value === 'false') currentValue = 'false';
 
-      return <RadioChip
-        {...inputParams}
-        value={currentValue}
-        options={filterOptions}
-        combo={{ direction: 'row' }}
-      ></RadioChip>;
+      return (
+        <RadioChip
+          {...inputParams}
+          value={currentValue}
+          options={filterOptions}
+          combo={{ direction: 'row' }}
+        ></RadioChip>
+      );
     })();
   }
 
@@ -108,7 +118,7 @@ export class BooleanField extends OptionalField<BooleanField> {
 
     // options가 있으면 해당 label 찾기
     if (this.options && this.options.length > 0) {
-      const option = this.options.find(opt => opt.value === value);
+      const option = this.options.find((opt) => opt.value === value);
       if (option) {
         // cardIcon이 있으면 아이콘과 함께 표시
         if (this.cardIcon) {
@@ -119,9 +129,11 @@ export class BooleanField extends OptionalField<BooleanField> {
                 <span className="rcm-icon-frame">
                   <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
                 </span>
-                <span className="rcm-text" data-weight="medium">{option.label}</span>
+                <span className="rcm-text" data-weight="medium">
+                  {option.label}
+                </span>
               </span>
-            )
+            ),
           };
         }
         return { result: option.label };
@@ -139,9 +151,11 @@ export class BooleanField extends OptionalField<BooleanField> {
             <span className="rcm-icon-frame" data-color={frameColor}>
               <IconComponent className="rcm-icon" data-size="sm" stroke={2} />
             </span>
-            <span className="rcm-text" data-weight="medium" data-color="success">예</span>
+            <span className="rcm-text" data-weight="medium" data-color="success">
+              예
+            </span>
           </span>
-        )
+        ),
       };
     }
 
@@ -154,9 +168,11 @@ export class BooleanField extends OptionalField<BooleanField> {
           <span className="rcm-icon-frame">
             <IconComponent className="rcm-icon" data-size="sm" data-tone="disabled" stroke={2} />
           </span>
-          <span className="rcm-text" data-weight="medium" data-tone="muted">아니오</span>
+          <span className="rcm-text" data-weight="medium" data-tone="muted">
+            아니오
+          </span>
         </span>
-      )
+      ),
     };
   }
 
@@ -168,15 +184,13 @@ export class BooleanField extends OptionalField<BooleanField> {
   }
 
   static create(props: BooleanFieldProps): BooleanField {
-    return new BooleanField(props.name, props.order, props.emptyLabel)
-      .copyFields(props, true);
+    return new BooleanField(props.name, props.order, props.emptyLabel).copyFields(props, true);
   }
 
   async getCurrentValue(renderType?: RenderType): Promise<boolean | undefined> {
-
     const value = await super.getCurrentValue(renderType);
 
-    if (await this.isRequired({renderType})) {
+    if (await this.isRequired({ renderType })) {
       if (value === undefined) {
         const value = this.options?.[0]?.value ?? false;
         this.withValue(value);
@@ -187,13 +201,10 @@ export class BooleanField extends OptionalField<BooleanField> {
     return value;
   }
 
-
   async isRequired(props: FieldInfoParameters): Promise<boolean> {
-
     const renderTypeValue = props.renderType ?? props.entityForm?.getRenderType() ?? 'create';
 
     if (renderTypeValue === 'update') {
-
       if (this.required !== undefined && typeof this.required === 'function') {
         return await this.required(props);
       }
@@ -209,7 +220,6 @@ export class BooleanField extends OptionalField<BooleanField> {
         return true;
       }
     }
-
 
     return super.isRequired(props);
   }

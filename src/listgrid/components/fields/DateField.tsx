@@ -11,25 +11,22 @@ import {
   ViewListProps,
   ViewListResult,
   ViewRenderProps,
-  ViewRenderResult
+  ViewRenderResult,
 } from './abstract';
-import React from "react";
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {RenderType} from '../../config/Config';
-import {fDate, fToNow} from "../../misc";
-import {FlatPickrDateField} from "../../ui";
-import {IconCalendar} from "@tabler/icons-react";
-import {isTrue} from '../../utils/BooleanUtil';
-import {MinMaxStringLimit} from "../../form/Type";
-import {TextInput} from "../../ui";
+import React from 'react';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { RenderType } from '../../config/Config';
+import { fDate, fToNow } from '../../misc';
+import { FlatPickrDateField } from '../../ui';
+import { IconCalendar } from '@tabler/icons-react';
+import { isTrue } from '../../utils/BooleanUtil';
+import { MinMaxStringLimit } from '../../form/Type';
+import { TextInput } from '../../ui';
 
-interface DateFieldProps extends AbstractDateFieldProps {
-
-}
+interface DateFieldProps extends AbstractDateFieldProps {}
 
 export class DateField extends AbstractDateField<DateField> {
-
   constructor(name: string, order: number, limit?: MinMaxStringLimit, range?: boolean) {
     super(name, order, 'date', limit, range);
   }
@@ -38,15 +35,11 @@ export class DateField extends AbstractDateField<DateField> {
     const value = await super.getCurrentValue(renderType);
 
     if (value === 'today') {
-
       if (isTrue(this.range)) {
         const today: Date = new Date();
         const tomorrow: Date = new Date(today);
         tomorrow.setDate(today.getDate() + 1);
-        return [
-          fDate(today),
-          fDate(tomorrow)
-        ];
+        return [fDate(today), fDate(tomorrow)];
       }
 
       return fDate(new Date());
@@ -62,7 +55,7 @@ export class DateField extends AbstractDateField<DateField> {
     return (async () => {
       const readonly = isTrue(this.readonly);
 
-      let value = (await this.getCurrentValue(params.entityForm.getRenderType()));
+      let value = await this.getCurrentValue(params.entityForm.getRenderType());
       if (value) {
         if (this.range && Array.isArray(value)) {
           value = `${fDate(value[0]!)} ~ ${fDate(value[1]!)}`;
@@ -71,41 +64,58 @@ export class DateField extends AbstractDateField<DateField> {
         }
       }
 
-
       if (readonly) {
-        return <TextInput
-          name={`${this.name}_${params.entityForm.id}`}
-          readonly={true}
-          onChange={(value: any) => {
-            // do nothing
-          }}
-          value={value}></TextInput>
+        return (
+          <TextInput
+            name={`${this.name}_${params.entityForm.id}`}
+            readonly={true}
+            onChange={(value: any) => {
+              // do nothing
+            }}
+            value={value}
+          ></TextInput>
+        );
       }
 
-      return <FlatPickrDateField type={'date'} limit={this.limit} range={this.range} {...await getInputRendererParameters(this, params)}/>
+      return (
+        <FlatPickrDateField
+          type={'date'}
+          limit={this.limit}
+          range={this.range}
+          {...await getInputRendererParameters(this, params)}
+        />
+      );
     })();
   }
 
   /**
    * DateField 핵심 리스트 필터 렌더링 로직
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
-      return <FlatPickrDateField type={'date'}
-                                 name={this.getName()}
-                                 onChange={(value: any) => {
-                                   if (Array.isArray(value) && value.length === 2) {
-                                     if (value[0] === value[1]) {
-                                       const until: Date = new Date(value[1]);
-                                       until.setDate(until.getDate() + 1);
-                                       params.onChange([value[0], fDate(until, `yyyy-MM-dd`)], "BETWEEN");
-                                     } else {
-                                       params.onChange(value, "BETWEEN");
-                                     }
-                                     return;
-                                   }
-                                 }}
-                                 limit={this.limit} range={true} value={params.value}/>
+      return (
+        <FlatPickrDateField
+          type={'date'}
+          name={this.getName()}
+          onChange={(value: any) => {
+            if (Array.isArray(value) && value.length === 2) {
+              if (value[0] === value[1]) {
+                const until: Date = new Date(value[1]);
+                until.setDate(until.getDate() + 1);
+                params.onChange([value[0], fDate(until, `yyyy-MM-dd`)], 'BETWEEN');
+              } else {
+                params.onChange(value, 'BETWEEN');
+              }
+              return;
+            }
+          }}
+          limit={this.limit}
+          range={true}
+          value={params.value}
+        />
+      );
     })();
   }
 
@@ -116,10 +126,10 @@ export class DateField extends AbstractDateField<DateField> {
     const value = props.item[this.name];
     if (this.range && Array.isArray(value) && value.length === 2) {
       return Promise.resolve({
-        result: `${fDate(value[0], 'yyyy-MM-dd')} ~ ${fDate(value[1], 'yyyy-MM-dd')}`
+        result: `${fDate(value[0], 'yyyy-MM-dd')} ~ ${fDate(value[1], 'yyyy-MM-dd')}`,
       });
     }
-    return Promise.resolve({result: fDate(value ?? '', 'yyyy-MM-dd')});
+    return Promise.resolve({ result: fDate(value ?? '', 'yyyy-MM-dd') });
   }
 
   /**
@@ -147,9 +157,11 @@ export class DateField extends AbstractDateField<DateField> {
             <span className="rcm-icon-frame" data-color={frameColor}>
               <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
             </span>
-            <span className="rcm-text" data-weight="medium">{dateText}</span>
+            <span className="rcm-text" data-weight="medium">
+              {dateText}
+            </span>
           </span>
-        )
+        ),
       };
     }
 
@@ -161,9 +173,11 @@ export class DateField extends AbstractDateField<DateField> {
           <span className="rcm-icon-frame" data-color={frameColor}>
             <IconComponent className="rcm-icon" data-size="sm" stroke={1.75} />
           </span>
-          <span className="rcm-text" data-weight="medium">{dateText}</span>
+          <span className="rcm-text" data-weight="medium">
+            {dateText}
+          </span>
         </span>
-      )
+      ),
     };
   }
 
@@ -175,8 +189,6 @@ export class DateField extends AbstractDateField<DateField> {
   }
 
   static create(props: DateFieldProps): DateField {
-    return new DateField(props.name, props.order, props.limit, props.range)
-      .copyFields(props, true);
+    return new DateField(props.name, props.order, props.limit, props.range).copyFields(props, true);
   }
-
 }

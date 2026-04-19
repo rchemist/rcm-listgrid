@@ -6,23 +6,23 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
-import {InputRendererProps, ManyToOneConfig, ManyToOneFilter,} from '../../../config/Config';
-import React, {useEffect, useRef, useState} from "react";
-import {Tooltip} from "../../../ui";
-import {IconCircleX, IconPlus, IconSearch, IconSettings2} from "@tabler/icons-react";
-import {Dropdown} from "../../../ui";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {isBlank} from '../../../utils/StringUtil';
-import {ViewListGrid} from '../../list/ViewListGrid';
-import {ListGrid} from '../../../config/ListGrid';
-import {TreeSelectView} from './TreeSelectView';
-import {SearchForm} from "../../../form/SearchForm";
-import {getManyToOneEntityValue} from '../ManyToOneField';
-import {ViewEntityForm} from '../../form/ViewEntityForm';
-import {EntityForm} from '../../../config/EntityForm';
-import {useModalManagerStore} from '../../../store';
-import {useSession} from '../../../auth';
+'use client';
+import { InputRendererProps, ManyToOneConfig, ManyToOneFilter } from '../../../config/Config';
+import React, { useEffect, useRef, useState } from 'react';
+import { Tooltip } from '../../../ui';
+import { IconCircleX, IconPlus, IconSearch, IconSettings2 } from '@tabler/icons-react';
+import { Dropdown } from '../../../ui';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { isBlank } from '../../../utils/StringUtil';
+import { ViewListGrid } from '../../list/ViewListGrid';
+import { ListGrid } from '../../../config/ListGrid';
+import { TreeSelectView } from './TreeSelectView';
+import { SearchForm } from '../../../form/SearchForm';
+import { getManyToOneEntityValue } from '../ManyToOneField';
+import { ViewEntityForm } from '../../form/ViewEntityForm';
+import { EntityForm } from '../../../config/EntityForm';
+import { useModalManagerStore } from '../../../store';
+import { useSession } from '../../../auth';
 
 // Value ID 추출 헬퍼
 function getValueId(val: any): string | undefined {
@@ -43,7 +43,7 @@ export const ManyToOneView = ({
   ...props
 }: ManyToOneViewProps) => {
   const readonly = isTrue(props.readonly);
-  
+
   const { openModal, closeModal } = useModalManagerStore();
   const session = useSession();
 
@@ -51,7 +51,7 @@ export const ManyToOneView = ({
   const menuUrl: string | undefined = config.entityForm.menuUrl; // 선택된 item 이 있는 경우 해당 item 으로 링크 처리
   const subCollectionEntity = isTrue(props.subCollectionEntity, false);
 
-  const [name, setName] = useState<string>("");
+  const [name, setName] = useState<string>('');
   const [value, setValue] = useState<any>();
   const [defaultValue, setDefaultValue] = useState();
   const [mount, setMount] = useState(false);
@@ -59,7 +59,7 @@ export const ManyToOneView = ({
 
   // 로컬에서 선택한 값의 ID를 추적하여 불필요한 재처리 방지
   const localValueIdRef = useRef<string | undefined>(undefined);
-  
+
   // modifiable 권한 체크 함수
   const checkModifiable = (): boolean => {
     if (config.modifiable === true) {
@@ -71,7 +71,7 @@ export const ManyToOneView = ({
       if (!userRoles) {
         return false;
       }
-      return config.modifiable.roles.some(role => userRoles.includes(role));
+      return config.modifiable.roles.some((role) => userRoles.includes(role));
     }
     return false;
   };
@@ -92,11 +92,7 @@ export const ManyToOneView = ({
     (async () => {
       // props.value 를 json 에서 parse 된 object 타입이어야 한다.
       if (props.value) {
-        let value = await getManyToOneEntityValue(
-          props.name,
-          props.value,
-          config
-        );
+        let value = await getManyToOneEntityValue(props.name, props.value, config);
 
         // Case 1: value가 문자열인 경우 (ID만 전달된 경우 - 상세검색 필터 등)
         // getManyToOneEntityValue가 fetch하지 못하고 문자열 그대로 반환한 경우
@@ -114,8 +110,9 @@ export const ManyToOneView = ({
         }
         // Case 2: value가 객체이고 id만 있는 경우 (name 등 display 정보가 없는 경우)
         else if (value && typeof value === 'object' && value.id) {
-          const hasDisplayInfo = config.displayFunc ||
-            (config.field?.name instanceof Function) ||
+          const hasDisplayInfo =
+            config.displayFunc ||
+            config.field?.name instanceof Function ||
             (config.field?.name && value[config.field.name]) ||
             value.name;
 
@@ -137,8 +134,8 @@ export const ManyToOneView = ({
         setManyToOneValue(value, true);
       } else {
         // 값이 없을 때 name과 value 모두 초기화
-        setName("");
-        setValue("");
+        setName('');
+        setValue('');
         localValueIdRef.current = undefined;
       }
 
@@ -155,10 +152,10 @@ export const ManyToOneView = ({
 
       if (filter !== undefined && filter.length > 0) {
         for (const filterItem of filter) {
-          searchForm.withFilter("AND", ...(await filterItem(parentEntityForm)));
+          searchForm.withFilter('AND', ...(await filterItem(parentEntityForm)));
         }
         if (entityForm.neverDelete) {
-          searchForm.handleAndFilter("active", "true");
+          searchForm.handleAndFilter('active', 'true');
         }
       }
 
@@ -184,7 +181,9 @@ export const ManyToOneView = ({
       fullHeight: isTree ? false : true,
       maxHeight: isTree ? undefined : '90vh',
       content: (
-        <div className={`modal-content flex flex-col overflow-hidden ${isTree ? '' : 'max-h-[85vh]'}`}>
+        <div
+          className={`modal-content flex flex-col overflow-hidden ${isTree ? '' : 'max-h-[85vh]'}`}
+        >
           {isTree ? (
             <TreeSelectView
               entityForm={entityForm}
@@ -215,7 +214,7 @@ export const ManyToOneView = ({
             />
           )}
         </div>
-      )
+      ),
     });
   };
 
@@ -237,12 +236,12 @@ export const ManyToOneView = ({
             return savedForm;
           }}
           buttonLinks={{
-            onClickList: async () => closeModal(modalId)
+            onClickList: async () => closeModal(modalId),
           }}
           subCollection={true}
           readonly={false}
         />
-      )
+      ),
     });
   };
 
@@ -263,12 +262,12 @@ export const ManyToOneView = ({
             return updatedForm;
           }}
           buttonLinks={{
-            onClickList: async () => closeModal(modalId)
+            onClickList: async () => closeModal(modalId),
           }}
           subCollection={true}
           readonly={false}
         />
-      )
+      ),
     });
   };
 
@@ -278,9 +277,13 @@ export const ManyToOneView = ({
     const viewEntityForm = entityForm
       .clone(true)
       .withId(value.id)
-      .withTitle(value.id === undefined ? undefined : {
-        view: async () => name ? `정보 조회 > ${name}` : '정보 조회'
-      });
+      .withTitle(
+        value.id === undefined
+          ? undefined
+          : {
+              view: async () => (name ? `정보 조회 > ${name}` : '정보 조회'),
+            },
+      );
 
     openModal({
       modalId,
@@ -290,12 +293,12 @@ export const ManyToOneView = ({
         <ViewEntityForm
           entityForm={viewEntityForm}
           buttonLinks={{
-            onClickList: async () => closeModal(modalId)
+            onClickList: async () => closeModal(modalId),
           }}
           subCollection={true}
           readonly={true}
         />
-      )
+      ),
     });
   };
 
@@ -343,7 +346,7 @@ export const ManyToOneView = ({
                       handleViewModal();
                     }
                   } else {
-                    window.open(menuUrl + "/" + value.id, "_blank");
+                    window.open(menuUrl + '/' + value.id, '_blank');
                   }
                 }}
               >
@@ -359,7 +362,7 @@ export const ManyToOneView = ({
                 type="button"
                 className="rcm-m2o-addon-btn"
                 onClick={() => {
-                  setManyToOneValue("");
+                  setManyToOneValue('');
                 }}
               >
                 <IconCircleX className="rcm-m2o-addon-icon" />
@@ -367,7 +370,7 @@ export const ManyToOneView = ({
             </Tooltip>
           </div>
         )}
-{isModifiable && !readonly ? (
+        {isModifiable && !readonly ? (
           <Dropdown
             placement="bottom-end"
             btnClassName="rcm-m2o-action-btn"
@@ -380,21 +383,13 @@ export const ManyToOneView = ({
           >
             <ul className="rcm-m2o-dropdown-list">
               <li>
-                <button
-                  type="button"
-                  className="rcm-m2o-dropdown-item"
-                  onClick={handleSelectModal}
-                >
+                <button type="button" className="rcm-m2o-dropdown-item" onClick={handleSelectModal}>
                   <IconSearch className="rcm-m2o-action-icon" />
                   <span>찾기</span>
                 </button>
               </li>
               <li>
-                <button
-                  type="button"
-                  className="rcm-m2o-dropdown-item"
-                  onClick={handleCreateModal}
-                >
+                <button type="button" className="rcm-m2o-dropdown-item" onClick={handleCreateModal}>
                   <IconPlus className="rcm-m2o-action-icon" />
                   <span>등록</span>
                 </button>
@@ -421,7 +416,7 @@ export const ManyToOneView = ({
       let finalValue: any;
 
       // 빈 문자열 처리 - 명시적으로 clear하는 경우
-      if (value === "") {
+      if (value === '') {
         value = undefined;
       }
 
@@ -436,7 +431,7 @@ export const ManyToOneView = ({
           localValueIdRef.current = getValueId(defaultValue);
         } else {
           // 명시적 clear이거나 초기화가 아닌 경우 무조건 clear
-          setName("");
+          setName('');
           setValue(undefined);
           finalValue = undefined;
           // localValueIdRef 초기화
@@ -475,7 +470,7 @@ export const ManyToOneView = ({
       }
     } else {
       // 설정된 정보가 없으면 name 필드를 우선 사용한다.
-      return value["name"] ?? "";
+      return value['name'] ?? '';
     }
   }
 };

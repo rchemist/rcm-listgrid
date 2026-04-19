@@ -7,15 +7,15 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {DataField, ExportTransferConfig} from '../transfer/Type';
-import {Modal} from "../ui";
-import {getTranslation} from "../utils/i18n";
-import {ReactNode, useEffect, useState} from "react";
-import {SimpleGrid} from "../ui";
-import {SearchForm} from "../form/SearchForm";
-import {DataExportProcessor} from '../transfer/DataExportProcessor';
-import {Button} from "../ui";
-import {ExcelPasswordField} from '../transfer/ExcelPasswordField';
+import { DataField, ExportTransferConfig } from '../transfer/Type';
+import { Modal } from '../ui';
+import { getTranslation } from '../utils/i18n';
+import { ReactNode, useEffect, useState } from 'react';
+import { SimpleGrid } from '../ui';
+import { SearchForm } from '../form/SearchForm';
+import { DataExportProcessor } from '../transfer/DataExportProcessor';
+import { Button } from '../ui';
+import { ExcelPasswordField } from '../transfer/ExcelPasswordField';
 
 interface ExporterProps {
   config?: ExportTransferConfig;
@@ -25,7 +25,6 @@ interface ExporterProps {
 }
 
 export const DataExporter = ({ config, searchForm, fileName, onClose }: ExporterProps) => {
-
   const { t } = getTranslation();
   const fields = config?.fields ?? [];
   const [dataFields, setDataFields] = useState<DataField[]>([...fields]);
@@ -39,8 +38,7 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
     setMounted(true);
   }, []);
 
-  if (config === undefined || !mounted)
-    return null;
+  if (config === undefined || !mounted) return null;
 
   const title = t('form.list.dataTransfer.tab.export.title') ?? '다운로드';
 
@@ -49,103 +47,129 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
   const description = config?.description ?? '';
   const url = config.url!;
 
-
-  return <>
-    <Modal size={'5xl'}
-      title={title}
-      animation={'none'}
-      closeOnClickOutside={false}
-      closeOnEscape={false}
-      opened={true}
-      onClose={() => { onClose() }}>
-      <div className="rcm-dialog-body">
-        <div className="rcm-stack">
-          <div className="rcm-notice" data-tone="info" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}>
-            <label className="rcm-text-sm rcm-text-info rcm-text-emphasis">
-              {instruction}
-            </label>
+  return (
+    <>
+      <Modal
+        size={'5xl'}
+        title={title}
+        animation={'none'}
+        closeOnClickOutside={false}
+        closeOnEscape={false}
+        opened={true}
+        onClose={() => {
+          onClose();
+        }}
+      >
+        <div className="rcm-dialog-body">
+          <div className="rcm-stack">
+            <div
+              className="rcm-notice"
+              data-tone="info"
+              style={{ wordBreak: 'break-word', overflowWrap: 'break-word', whiteSpace: 'normal' }}
+            >
+              <label className="rcm-text-sm rcm-text-info rcm-text-emphasis">{instruction}</label>
+            </div>
+            <div className="rcm-panel">
+              <h3 className="rcm-heading-sm">다운로드할 필드 선택</h3>
+              <SimpleGrid cols={{ base: 2, xs: 2, sm: 3, md: 4, lg: 5 }} spacing="md">
+                {(function () {
+                  const forms: ReactNode[] = [];
+                  fields.forEach((field) => {
+                    const fieldName = field.getName();
+                    if (fieldName === 'id') {
+                      return;
+                    }
+                    forms.push(
+                      <div className="rcm-checkbox-row" key={`fields_${fieldName}`}>
+                        <input
+                          type="checkbox"
+                          key={fieldName}
+                          id={fieldName}
+                          name={fieldName}
+                          defaultChecked={dataFields.some((item) => item.equals(field))}
+                          value={field.getName()}
+                          onChange={(event) => {
+                            handleTargetFieldChange(field, event);
+                          }}
+                        />
+                        <label htmlFor={`${fieldName}`} className="rcm-checkbox-label">
+                          {field.getLabel()}
+                        </label>
+                      </div>,
+                    );
+                  });
+                  return forms;
+                })()}
+              </SimpleGrid>
+            </div>
           </div>
-          <div className="rcm-panel">
-            <h3 className="rcm-heading-sm">다운로드할 필드 선택</h3>
-            <SimpleGrid cols={{ base: 2, xs: 2, sm: 3, md: 4, lg: 5 }}
-              spacing="md">
-            {(function () {
-              const forms: ReactNode[] = [];
-              fields.forEach((field) => {
-                const fieldName = field.getName();
-                if (fieldName === 'id') {
-                  return;
-                }
-                forms.push(
-                  <div className="rcm-checkbox-row" key={`fields_${fieldName}`}>
-                    <input type="checkbox"
-                      key={fieldName}
-                      id={fieldName}
-                      name={fieldName}
-                      defaultChecked={dataFields.some((item) => item.equals(field))} value={field.getName()}
-                      onChange={(event) => {
-                        handleTargetFieldChange(field, event)
-                      }} />
-                    <label htmlFor={`${fieldName}`} className="rcm-checkbox-label">{field.getLabel()}</label>
-                  </div>
-                );
-              });
-              return forms;
-            }())}
-            </SimpleGrid>
+          <ExcelPasswordField
+            password={password}
+            onPasswordChange={setPassword}
+            error={error}
+            onErrorChange={setError}
+          />
+          {description && (
+            <div className="rcm-notice" data-tone="warning">
+              <div className="rcm-text-sm rcm-text-warning">{description}</div>
+            </div>
+          )}
+
+          <div className="rcm-action-bar">
+            <Button
+              variant="filled"
+              disabled={!ableToExport}
+              className="rcm-button"
+              data-variant="primary"
+              onClick={() => {
+                handleExport();
+              }}
+            >
+              {t('form.list.dataTransfer.tab.export.button.download')}
+            </Button>
           </div>
         </div>
-        <ExcelPasswordField
-          password={password}
-          onPasswordChange={setPassword}
-          error={error}
-          onErrorChange={setError}
-        />
-        {description && (
-          <div className="rcm-notice" data-tone="warning">
-            <div className="rcm-text-sm rcm-text-warning">{description}</div>
-          </div>
-        )}
-
-        <div className="rcm-action-bar">
-          <Button
-            variant="filled"
-            disabled={!ableToExport}
-            className="rcm-button"
-            data-variant="primary"
-            onClick={() => {
-              handleExport();
-            }}>
-            {t('form.list.dataTransfer.tab.export.button.download')}
-          </Button>
-        </div>
-      </div>
-    </Modal>
-    {processing && <Modal size={'lg'}
-      title={`${title}`}
-      opened={processing} closeOnClickOutside={false} closeOnEscape={false} onClose={() => { setProcessing(false) }}>
-      <DataExportProcessor url={url} fields={dataFields}
-        searchForm={searchForm}
-        exportFileName={fileName}
-        addedFields={config?.addedFields}
-        overrideFormData={config?.overrideFormData}
-        key={'data_export_' + exportKey}
-        process={processing}
-        password={password}
-        onProcessed={() => {
-          setExportKey(Date.now());
-          setProcessing(false);
-        }}></DataExportProcessor>
-    </Modal>}
-  </>;
-
+      </Modal>
+      {processing && (
+        <Modal
+          size={'lg'}
+          title={`${title}`}
+          opened={processing}
+          closeOnClickOutside={false}
+          closeOnEscape={false}
+          onClose={() => {
+            setProcessing(false);
+          }}
+        >
+          <DataExportProcessor
+            url={url}
+            fields={dataFields}
+            searchForm={searchForm}
+            exportFileName={fileName}
+            addedFields={config?.addedFields}
+            overrideFormData={config?.overrideFormData}
+            key={'data_export_' + exportKey}
+            process={processing}
+            password={password}
+            onProcessed={() => {
+              setExportKey(Date.now());
+              setProcessing(false);
+            }}
+          ></DataExportProcessor>
+        </Modal>
+      )}
+    </>
+  );
 
   function handleExport() {
     setError('');
     setProcessing(true);
   }
 
-  function handleTargetFieldChange(targetField: DataField, event: React.ChangeEvent<HTMLInputElement>) {
+  function handleTargetFieldChange(
+    targetField: DataField,
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const isChecked = event.target.checked;
     const fieldExists = dataFields.some((item) => item.equals(targetField));
 
@@ -179,4 +203,4 @@ export const DataExporter = ({ config, searchForm, fileName, onClose }: Exporter
       setAbleToExport(false);
     }
   }
-}
+};

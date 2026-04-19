@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {parse, stringify} from '../utils/jsonUtils';
+import { parse, stringify } from '../utils/jsonUtils';
 
 class CacheContext {
   public static create(value: string | null): CacheContext {
@@ -37,27 +37,23 @@ class CacheContext {
   toJson(): string {
     return stringify(this);
   }
-
 }
 
 export function isOpenedAdvancedSearch(key: string, postFix?: string): boolean {
-  if (typeof window === 'undefined')
-    return false;
+  if (typeof window === 'undefined') return false;
   const cache = CacheContext.create(localStorage.getItem('advancedSearchFormOpened'));
   return cache.isOpened(key, postFix);
 }
 
 export function setOpenedAdvancedSearch(key: string, postFix?: string, opened: boolean = true) {
-  if (typeof window === 'undefined')
-    return;
+  if (typeof window === 'undefined') return;
   const cache = CacheContext.create(localStorage.getItem('advancedSearchFormOpened'));
   cache.setOpened(key, postFix, opened);
   localStorage.setItem('advancedSearchFormOpened', cache.toJson());
 }
 
 export function setClosedAdvancedSearch(key: string, postFix?: string) {
-  if (typeof window === 'undefined')
-    return;
+  if (typeof window === 'undefined') return;
   const cache = CacheContext.create(localStorage.getItem('advancedSearchFormOpened'));
   cache.setClosed(key, postFix);
   localStorage.setItem('advancedSearchFormOpened', cache.toJson());

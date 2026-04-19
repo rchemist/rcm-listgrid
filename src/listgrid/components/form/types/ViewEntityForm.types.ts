@@ -2,12 +2,12 @@
  *  ViewEntityForm 타입/인터페이스 정의 파일
  *  모든 타입에는 JSDoc(영문) + 한글 설명을 추가합니다.
  */
-import {EntityForm} from '../../../config/EntityForm';
-import {EntityFormButton} from '../../../config/EntityFormButton';
-import {EntityButtonLinkProps} from '../../../config/Config';
-import {Session} from '../../../auth/types';
-import {Dispatch, ReactNode, SetStateAction} from "react";
-import {ApiSpecification} from "../../api/Type";
+import { EntityForm } from '../../../config/EntityForm';
+import { EntityFormButton } from '../../../config/EntityFormButton';
+import { EntityButtonLinkProps } from '../../../config/Config';
+import { Session } from '../../../auth/types';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
+import { ApiSpecification } from '../../api/Type';
 
 /**
  * Props for ViewEntityForm component.
@@ -165,15 +165,14 @@ export interface EntityFormManageable {
    * EntityForm 상태 setter (선택)
    */
   setEntityForm?: Dispatch<SetStateAction<EntityForm | undefined>>;
-} 
+}
 
 export interface TabIndexable {
-    tabIndex: string;
-    setTabIndex?: (tabIndex: string) => void;
-  }
-  
-  export interface EntityFormManageable {
-    entityForm: EntityForm;
-    setEntityForm?: React.Dispatch<React.SetStateAction<EntityForm | undefined>>;
-  }
-  
+  tabIndex: string;
+  setTabIndex?: (tabIndex: string) => void;
+}
+
+export interface EntityFormManageable {
+  entityForm: EntityForm;
+  setEntityForm?: React.Dispatch<React.SetStateAction<EntityForm | undefined>>;
+}

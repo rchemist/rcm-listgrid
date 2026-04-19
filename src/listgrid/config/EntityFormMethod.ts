@@ -1,17 +1,20 @@
-import {IEntityError} from '../api';
+import { IEntityError } from '../api';
 import { isTrue } from '../utils/BooleanUtil';
-import { FieldError } from "./EntityFormTypes";
+import { FieldError } from './EntityFormTypes';
 import { parse } from '../utils/jsonUtils';
-import { EntityForm } from "./EntityForm";
+import { EntityForm } from './EntityForm';
 
 export function entityErrorToString(entityError: IEntityError): string {
   if (entityError.error) {
     if (isTrue(entityError.error.error)) {
       if (entityError.error.fieldError) {
-        const entries = entityError.error.fieldError instanceof Map
-          ? Array.from(entityError.error.fieldError.entries())
-          : Object.entries(entityError.error.fieldError);
-        return entries.map(([key, value]) => `${key}: ${(value as string[]).join(', ')}`).join(', ');
+        const entries =
+          entityError.error.fieldError instanceof Map
+            ? Array.from(entityError.error.fieldError.entries())
+            : Object.entries(entityError.error.fieldError);
+        return entries
+          .map(([key, value]) => `${key}: ${(value as string[]).join(', ')}`)
+          .join(', ');
       }
       if (entityError.error.message) {
         return entityError.error.message;
@@ -21,7 +24,6 @@ export function entityErrorToString(entityError: IEntityError): string {
 
   return 'failed to parse error';
 }
-
 
 export function mergeFieldErrors(origin: FieldError[], errors: FieldError[]): FieldError[] {
   const mergedMap: Map<string, FieldError> = new Map();
@@ -51,7 +53,6 @@ export function mergeFieldErrors(origin: FieldError[], errors: FieldError[]): Fi
   return Array.from(mergedMap.values());
 }
 
-
 interface ApiErrorResponse {
   error?: string | { message?: string; fieldError?: unknown } | unknown;
   entityError?: { error?: string | { message?: string; fieldError?: unknown } };
@@ -65,7 +66,10 @@ interface ApiErrorResponse {
  * @param form - 필드 라벨을 가져오기 위한 EntityForm (optional)
  * @returns 처리된 에러 정보
  */
-export function processApiError(response: ApiErrorResponse, form?: EntityForm): {
+export function processApiError(
+  response: ApiErrorResponse,
+  form?: EntityForm,
+): {
   fieldErrors: FieldError[];
   globalError?: string;
   hasError: boolean;
@@ -78,7 +82,7 @@ export function processApiError(response: ApiErrorResponse, form?: EntityForm): 
     try {
       // intentional: errorObject has heterogeneous shape depending on backend error variant
       let errorObject: any;
-      
+
       // entityError가 있으면 구조화된 정보 사용
       if (response.entityError) {
         // entityError.error가 객체인지 문자열인지 확인
@@ -147,18 +151,24 @@ export function processApiError(response: ApiErrorResponse, form?: EntityForm): 
     hasError = true;
   } else {
     // 필드 에러가 없을 때만 일반 에러 메시지 표시
-    errorMessage = (!jsonError ? (typeof response.error === 'string' ? response.error : undefined) : globalError ? globalError : undefined) ?? '저장 중 오류가 발생했습니다.';
+    errorMessage =
+      (!jsonError
+        ? typeof response.error === 'string'
+          ? response.error
+          : undefined
+        : globalError
+          ? globalError
+          : undefined) ?? '저장 중 오류가 발생했습니다.';
     hasError = true;
   }
 
   return {
     fieldErrors,
     globalError: errorMessage,
-    hasError
+    hasError,
   };
 }
 
 export function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
-

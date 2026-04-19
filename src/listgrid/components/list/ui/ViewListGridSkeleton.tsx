@@ -27,9 +27,7 @@ interface ViewListGridSkeletonProps {
 // Inline sizing for skeleton rects; library CSS owns pulse/color.
 const size = (height: number, width?: number | string) => ({
   height: `${height}px`,
-  ...(width !== undefined
-    ? { width: typeof width === 'number' ? `${width}px` : width }
-    : {}),
+  ...(width !== undefined ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
 });
 
 /**
@@ -77,7 +75,9 @@ export const ViewListGridSkeleton = ({
       )}
 
       {/* 테이블 스켈레톤 */}
-      <div className={isPopup ? themeClasses.popup?.container ?? 'rcm-skeleton-popup-container' : ''}>
+      <div
+        className={isPopup ? (themeClasses.popup?.container ?? 'rcm-skeleton-popup-container') : ''}
+      >
         <div className={themeClasses.table?.container ?? 'rcm-scroll-y'}>
           <div className={themeClasses.table?.responsiveWrapper ?? 'rcm-skeleton-table-wrapper'}>
             <table className={themeClasses.table?.table ?? 'rcm-table'}>
@@ -88,25 +88,23 @@ export const ViewListGridSkeleton = ({
                       <div className="rcm-skeleton" style={size(16, 16)} />
                     </th>
                   )}
-                  {fields.length > 0 ? (
-                    fields.map((field, index) => (
-                      <th key={field.getName()} className="rcm-skeleton-th">
-                        <div
-                          className="rcm-skeleton"
-                          style={{ height: '16px', width: getColumnWidth(field, index) }}
-                        />
-                      </th>
-                    ))
-                  ) : (
-                    Array.from({ length: columnCount }).map((_, index) => (
-                      <th key={index} className="rcm-skeleton-th">
-                        <div
-                          className="rcm-skeleton"
-                          style={{ height: '16px', width: `${60 + (index % 3) * 20}px` }}
-                        />
-                      </th>
-                    ))
-                  )}
+                  {fields.length > 0
+                    ? fields.map((field, index) => (
+                        <th key={field.getName()} className="rcm-skeleton-th">
+                          <div
+                            className="rcm-skeleton"
+                            style={{ height: '16px', width: getColumnWidth(field, index) }}
+                          />
+                        </th>
+                      ))
+                    : Array.from({ length: columnCount }).map((_, index) => (
+                        <th key={index} className="rcm-skeleton-th">
+                          <div
+                            className="rcm-skeleton"
+                            style={{ height: '16px', width: `${60 + (index % 3) * 20}px` }}
+                          />
+                        </th>
+                      ))}
                 </tr>
               </thead>
 
@@ -121,30 +119,24 @@ export const ViewListGridSkeleton = ({
                         </div>
                       </td>
                     )}
-                    {fields.length > 0 ? (
-                      fields.map((field, colIndex) => (
-                        <td key={field.getName()} className="rcm-skeleton-td">
-                          <SkeletonCell
-                            field={field}
-                            rowIndex={rowIndex}
-                            colIndex={colIndex}
-                          />
-                        </td>
-                      ))
-                    ) : (
-                      Array.from({ length: columnCount }).map((_, colIndex) => (
-                        <td key={colIndex} className="rcm-skeleton-td">
-                          <div
-                            className="rcm-skeleton"
-                            style={{
-                              height: '20px',
-                              width: `${40 + ((rowIndex + colIndex) % 4) * 20}%`,
-                              maxWidth: '200px',
-                            }}
-                          />
-                        </td>
-                      ))
-                    )}
+                    {fields.length > 0
+                      ? fields.map((field, colIndex) => (
+                          <td key={field.getName()} className="rcm-skeleton-td">
+                            <SkeletonCell field={field} rowIndex={rowIndex} colIndex={colIndex} />
+                          </td>
+                        ))
+                      : Array.from({ length: columnCount }).map((_, colIndex) => (
+                          <td key={colIndex} className="rcm-skeleton-td">
+                            <div
+                              className="rcm-skeleton"
+                              style={{
+                                height: '20px',
+                                width: `${40 + ((rowIndex + colIndex) % 4) * 20}%`,
+                                maxWidth: '200px',
+                              }}
+                            />
+                          </td>
+                        ))}
                   </tr>
                 ))}
               </tbody>
@@ -160,11 +152,7 @@ export const ViewListGridSkeleton = ({
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className={
-                  index === 2
-                    ? 'rcm-skeleton rcm-skeleton-accent'
-                    : 'rcm-skeleton'
-                }
+                className={index === 2 ? 'rcm-skeleton rcm-skeleton-accent' : 'rcm-skeleton'}
                 style={size(32, 32)}
               />
             ))}
@@ -184,7 +172,12 @@ function getColumnWidth(field: ListableFormField<any>, index: number): string {
 
   if (fieldClassName.includes('date')) return '100px';
   if (fieldClassName.includes('boolean') || fieldClassName.includes('checkbox')) return '60px';
-  if (fieldClassName.includes('number') || fieldClassName.includes('integer') || fieldClassName.includes('decimal')) return '80px';
+  if (
+    fieldClassName.includes('number') ||
+    fieldClassName.includes('integer') ||
+    fieldClassName.includes('decimal')
+  )
+    return '80px';
   if (fieldClassName.includes('email')) return '140px';
   if (fieldClassName.includes('url')) return '160px';
 

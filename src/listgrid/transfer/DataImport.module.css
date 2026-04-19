@@ -22,7 +22,7 @@
 }
 
 .sampleDataButton {
-  margin-left: .5rem;
+  margin-left: 0.5rem;
 }
 
 .header {
@@ -30,22 +30,22 @@
   white-space: nowrap;
   text-align: center;
   background-color: var(--mantine-color-indigo-5);
-  font-size: .9rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  padding: .5rem;
+  padding: 0.5rem;
   color: var(--mantine-color-white);
 }
 
 .row {
   border: 1px solid var(--mantine-color-indigo-2);
   white-space: nowrap;
-  font-size: .9rem;
-  padding: .5rem;
+  font-size: 0.9rem;
+  padding: 0.5rem;
 }
 
 .required {
   font-weight: bold;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
 .required::before {

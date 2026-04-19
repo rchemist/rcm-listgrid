@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {EntityForm} from './EntityForm';
+import { EntityForm } from './EntityForm';
 import {
   getConditionalReactNode,
   HelpTextType,
@@ -14,12 +14,12 @@ import {
   ReadOnlyType,
   TooltipType,
 } from './Config';
-import React, {ReactNode} from 'react';
-import {FieldInfoParameters} from './EntityField';
-import {Session} from '../auth/types';
-import {FilterItem, SearchForm} from '../form/SearchForm';
-import {SubCollectionField} from './SubCollectionField';
-import {CardSubCollectionFetchOptions, CardSubCollectionRelation,} from './CardSubCollectionField';
+import React, { ReactNode } from 'react';
+import { FieldInfoParameters } from './EntityField';
+import { Session } from '../auth/types';
+import { FilterItem, SearchForm } from '../form/SearchForm';
+import { SubCollectionField } from './SubCollectionField';
+import { CardSubCollectionFetchOptions, CardSubCollectionRelation } from './CardSubCollectionField';
 
 /**
  * Table configuration for TableSubCollectionField
@@ -159,12 +159,12 @@ export class TableSubCollectionField extends SubCollectionField {
       const additionalFilters = await this.fetchOptions.filters(parentEntityForm);
       if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
         const hasMappedByFilter = additionalFilters[0]!.items.some(
-          (item: FilterItem) => item.name === mappedByFilter.name
+          (item: FilterItem) => item.name === mappedByFilter.name,
         );
         if (!hasMappedByFilter) {
           additionalFilters[0]!.items.unshift(mappedByFilter);
         }
-        additionalFilters.forEach(filterGroup => {
+        additionalFilters.forEach((filterGroup) => {
           searchForm.withFilter(filterGroup.condition, ...filterGroup.items);
         });
       }
@@ -182,8 +182,10 @@ export class TableSubCollectionField extends SubCollectionField {
     entityForm: EntityForm;
     session?: Session;
   }): Promise<ReactNode | null> {
-    const TableSubCollectionView = React.lazy(
-      () => import('../components/list/ui/TableSubCollectionView').then(m => ({ default: m.TableSubCollectionView }))
+    const TableSubCollectionView = React.lazy(() =>
+      import('../components/list/ui/TableSubCollectionView').then((m) => ({
+        default: m.TableSubCollectionView,
+      })),
     );
 
     let fetchUrl: string;

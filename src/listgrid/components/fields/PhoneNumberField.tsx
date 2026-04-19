@@ -5,27 +5,31 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-'use client'
+'use client';
 
-import {ListableFormField, ListableFormFieldProps, ViewListProps, ViewListResult} from './abstract';
-import React from "react";
-import {Validation} from '../../validations/Validation';
-import {PhoneNumberValidation} from '../../validations/PhoneNumberValidation';
-import {RegexValidation} from '../../validations/RegexValidation';
-import {FieldRenderParameters} from '../../config/EntityField';
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {formatPhoneNumber, removePhoneNumberHyphens} from "../../utils/PhoneUtil";
-import {RenderType} from '../../config/Config';
-import {EntityForm} from '../../config/EntityForm';
-import {PhoneNumberFieldView} from './view/PhoneNumberFieldView';
-import {PhoneNumberListView} from './view/PhoneNumberListView';
+import {
+  ListableFormField,
+  ListableFormFieldProps,
+  ViewListProps,
+  ViewListResult,
+} from './abstract';
+import React from 'react';
+import { Validation } from '../../validations/Validation';
+import { PhoneNumberValidation } from '../../validations/PhoneNumberValidation';
+import { RegexValidation } from '../../validations/RegexValidation';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { formatPhoneNumber, removePhoneNumberHyphens } from '../../utils/PhoneUtil';
+import { RenderType } from '../../config/Config';
+import { EntityForm } from '../../config/EntityForm';
+import { PhoneNumberFieldView } from './view/PhoneNumberFieldView';
+import { PhoneNumberListView } from './view/PhoneNumberListView';
 
 interface PhoneNumberFieldProps extends ListableFormFieldProps {
-  enableSms?: boolean;    // Enable SMS functionality (default: false)
+  enableSms?: boolean; // Enable SMS functionality (default: false)
 }
 
 export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
-
   enableSms?: boolean;
 
   constructor(name: string, order: number, validations?: Validation[], enableSms?: boolean) {
@@ -53,11 +57,13 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
       // validations에서 RegexValidation 찾기
       let regex: { pattern: RegExp; message: string } | undefined;
       if (this.validations) {
-        const regexValidation = this.validations.find(v => v instanceof RegexValidation) as RegexValidation | undefined;
+        const regexValidation = this.validations.find((v) => v instanceof RegexValidation) as
+          | RegexValidation
+          | undefined;
         if (regexValidation) {
           regex = {
             pattern: regexValidation.regex,
-            message: regexValidation.message || '전화번호 형식이 올바르지 않습니다.'
+            message: regexValidation.message || '전화번호 형식이 올바르지 않습니다.',
           };
         }
       }
@@ -100,9 +106,9 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
     if (this.saveValue) {
       return this.saveValue(entityForm, this, renderType);
     }
-    
+
     const value = await this.getCurrentValue(renderType);
-    
+
     // 하이픈 제거한 숫자만 반환
     return removePhoneNumberHyphens(value);
   }
@@ -125,7 +131,7 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
             session={props.entityForm.session}
           />
         ),
-        linkOnCell: true  // Prevent row click from triggering when clicking the dropdown
+        linkOnCell: true, // Prevent row click from triggering when clicking the dropdown
       });
     }
 
@@ -143,5 +149,4 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
     const field = new PhoneNumberField(props.name, props.order, props.validations, props.enableSms);
     return field.copyFields(props, true);
   }
-  
 }

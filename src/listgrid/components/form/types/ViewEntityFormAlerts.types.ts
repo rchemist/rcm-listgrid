@@ -5,8 +5,8 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {AlertMessage, AlertMessageLink} from '../../../config/EntityFormTypes';
-import {ComponentType, SVGProps} from "react";
+import { AlertMessage, AlertMessageLink } from '../../../config/EntityFormTypes';
+import { ComponentType, SVGProps } from 'react';
 
 export interface ViewEntityFormAlertsProps {
   alertMessages: AlertMessage[];
@@ -38,4 +38,11 @@ export interface AlertItemProps {
   t: (key: string) => string;
 }
 
-export type AlertColor = 'success' | 'danger' | 'warning' | 'info' | 'secondary' | 'primary' | 'dark';
+export type AlertColor =
+  | 'success'
+  | 'danger'
+  | 'warning'
+  | 'info'
+  | 'secondary'
+  | 'primary'
+  | 'dark';

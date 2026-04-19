@@ -4,9 +4,9 @@ import {
   InlineRowAction,
   InlineRowActionColumn,
   InlineRowActionsConfig,
-  InlineSubCollectionField
+  InlineSubCollectionField,
 } from '../InlineSubCollectionField';
-import {EntityForm} from '../EntityForm';
+import { EntityForm } from '../EntityForm';
 
 // Mock SubCollectionField's ViewListGrid import
 vi.mock('../../components/list/ViewListGrid', () => ({
@@ -470,9 +470,7 @@ describe('InlineSubCollectionField', () => {
           id: 'shortcuts',
           label: '바로가기',
           order: 200,
-          actions: [
-            { id: 'view', label: '상세보기', onClick: async () => {} },
-          ],
+          actions: [{ id: 'view', label: '상세보기', onClick: async () => {} }],
         },
       ];
 
@@ -501,9 +499,7 @@ describe('InlineSubCollectionField', () => {
           id: 'actions',
           label: '액션',
           order: 50,
-          actions: [
-            { id: 'test', label: 'Test', onClick: async () => {} },
-          ],
+          actions: [{ id: 'test', label: 'Test', onClick: async () => {} }],
         },
       ];
 
@@ -536,18 +532,14 @@ describe('InlineSubCollectionField', () => {
     });
 
     it('should prefer rowActionColumns over deprecated rowActions', () => {
-      const rowActions: InlineRowAction[] = [
-        { id: 'old', label: 'Old', onClick: async () => {} },
-      ];
+      const rowActions: InlineRowAction[] = [{ id: 'old', label: 'Old', onClick: async () => {} }];
 
       const rowActionColumns: InlineRowActionColumn[] = [
         {
           id: 'new',
           label: 'New',
           order: 10,
-          actions: [
-            { id: 'new-action', label: 'New Action', onClick: async () => {} },
-          ],
+          actions: [{ id: 'new-action', label: 'New Action', onClick: async () => {} }],
         },
       ];
 
@@ -571,9 +563,7 @@ describe('InlineSubCollectionField', () => {
           id: 'management',
           label: '관리',
           order: 100,
-          actions: [
-            { id: 'edit', label: '수정', onClick: async () => {} },
-          ],
+          actions: [{ id: 'edit', label: '수정', onClick: async () => {} }],
         },
       ];
 

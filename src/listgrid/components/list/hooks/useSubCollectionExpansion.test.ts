@@ -6,18 +6,21 @@ import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll,
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {renderHook, act} from '@testing-library/react';
-import {useSubCollectionExpansion, UseSubCollectionExpansionOptions} from './useSubCollectionExpansion';
+import { renderHook, act } from '@testing-library/react';
+import {
+  useSubCollectionExpansion,
+  UseSubCollectionExpansionOptions,
+} from './useSubCollectionExpansion';
 
 describe('useSubCollectionExpansion', () => {
   describe('basic expansion', () => {
     it('should initialize with empty expandedItems', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
       expect(result.current.expandedItems).toEqual([]);
     });
 
     it('should toggle expansion of an item', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -28,7 +31,7 @@ describe('useSubCollectionExpansion', () => {
     });
 
     it('should toggle off expanded item', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -47,7 +50,7 @@ describe('useSubCollectionExpansion', () => {
 
   describe('multiple expansion', () => {
     it('should allow multiple items to be expanded', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -62,9 +65,7 @@ describe('useSubCollectionExpansion', () => {
     });
 
     it('should enforce maxExpandedItems limit', () => {
-      const {result} = renderHook(() =>
-        useSubCollectionExpansion({maxExpandedItems: 2})
-      );
+      const { result } = renderHook(() => useSubCollectionExpansion({ maxExpandedItems: 2 }));
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -79,9 +80,7 @@ describe('useSubCollectionExpansion', () => {
     });
 
     it('should use FIFO order when removing oldest expanded item', () => {
-      const {result} = renderHook(() =>
-        useSubCollectionExpansion({maxExpandedItems: 2})
-      );
+      const { result } = renderHook(() => useSubCollectionExpansion({ maxExpandedItems: 2 }));
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -100,9 +99,7 @@ describe('useSubCollectionExpansion', () => {
 
   describe('single mode', () => {
     it('should collapse previous item in single mode', () => {
-      const {result} = renderHook(() =>
-        useSubCollectionExpansion({expansionMode: 'single'})
-      );
+      const { result } = renderHook(() => useSubCollectionExpansion({ expansionMode: 'single' }));
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -122,7 +119,7 @@ describe('useSubCollectionExpansion', () => {
 
   describe('collapse operations', () => {
     it('should collapse specific item', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -141,7 +138,7 @@ describe('useSubCollectionExpansion', () => {
     });
 
     it('should collapse all items', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -164,9 +161,7 @@ describe('useSubCollectionExpansion', () => {
 
   describe('canExpand flag', () => {
     it('should indicate when more items can be expanded', () => {
-      const {result} = renderHook(() =>
-        useSubCollectionExpansion({maxExpandedItems: 2})
-      );
+      const { result } = renderHook(() => useSubCollectionExpansion({ maxExpandedItems: 2 }));
 
       expect(result.current.canExpand).toBe(true);
 
@@ -187,9 +182,7 @@ describe('useSubCollectionExpansion', () => {
   describe('callbacks', () => {
     it('should call onExpand callback', () => {
       const onExpand = vi.fn();
-      const {result} = renderHook(() =>
-        useSubCollectionExpansion({onExpand})
-      );
+      const { result } = renderHook(() => useSubCollectionExpansion({ onExpand }));
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -200,9 +193,7 @@ describe('useSubCollectionExpansion', () => {
 
     it('should call onCollapse callback', () => {
       const onCollapse = vi.fn();
-      const {result} = renderHook(() =>
-        useSubCollectionExpansion({onCollapse})
-      );
+      const { result } = renderHook(() => useSubCollectionExpansion({ onCollapse }));
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -214,8 +205,8 @@ describe('useSubCollectionExpansion', () => {
 
     it('should not call callbacks on FIFO auto-collapse', () => {
       const onCollapse = vi.fn();
-      const {result} = renderHook(() =>
-        useSubCollectionExpansion({maxExpandedItems: 1, onCollapse})
+      const { result } = renderHook(() =>
+        useSubCollectionExpansion({ maxExpandedItems: 1, onCollapse }),
       );
 
       act(() => {
@@ -230,7 +221,7 @@ describe('useSubCollectionExpansion', () => {
 
   describe('default values', () => {
     it('should use default maxExpandedItems of 3', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
 
       act(() => {
         result.current.toggleExpansion('item-1');
@@ -244,7 +235,7 @@ describe('useSubCollectionExpansion', () => {
     });
 
     it('should use default expansionMode of multiple', () => {
-      const {result} = renderHook(() => useSubCollectionExpansion());
+      const { result } = renderHook(() => useSubCollectionExpansion());
 
       act(() => {
         result.current.toggleExpansion('item-1');

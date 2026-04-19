@@ -17,8 +17,8 @@ export type ClassNamesMap<K extends string> = Partial<Record<K, string>>;
  *   <input className={mergeSlot('rcm-field-input', classNames?.input)} />
  */
 export function mergeSlot(base: string, override?: string): string {
-    if (!override) return base;
-    return cn(base, override);
+  if (!override) return base;
+  return cn(base, override);
 }
 
 /**
@@ -26,14 +26,14 @@ export function mergeSlot(base: string, override?: string): string {
  * resolve it up-front rather than calling `mergeSlot` per slot.
  */
 export function resolveSlots<K extends string>(
-    defaults: Record<K, string>,
-    overrides?: ClassNamesMap<K>
+  defaults: Record<K, string>,
+  overrides?: ClassNamesMap<K>,
 ): Record<K, string> {
-    if (!overrides) return defaults;
-    const out = { ...defaults } as Record<K, string>;
-    for (const key of Object.keys(overrides) as K[]) {
-        const value = overrides[key];
-        if (value) out[key] = cn(defaults[key], value);
-    }
-    return out;
+  if (!overrides) return defaults;
+  const out = { ...defaults } as Record<K, string>;
+  for (const key of Object.keys(overrides) as K[]) {
+    const value = overrides[key];
+    if (value) out[key] = cn(defaults[key], value);
+  }
+  return out;
 }

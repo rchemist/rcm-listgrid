@@ -11,22 +11,22 @@ import {
   LabelType,
   ReadOnlyType,
   TooltipType,
-  ViewPreset
+  ViewPreset,
 } from '../config/Config';
-import {ReactNode} from "react";
-import {FieldInfoParameters} from '../config/EntityField';
+import { ReactNode } from 'react';
+import { FieldInfoParameters } from '../config/EntityField';
 
 export interface EntityItem {
-  order: number;    // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
-  name: string;     // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
-  label?: LabelType;    // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
-  helpText?: HelpTextType;   // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  hidden?: HiddenType;    // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  readonly?: ReadOnlyType;    // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  hideLabel?: boolean;    // 필드 렌더러에서 라벨을 표시하지 않고 싶다면 이 값을 true 로 한다.
+  order: number; // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
+  name: string; // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
+  label?: LabelType; // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
+  helpText?: HelpTextType; // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  hidden?: HiddenType; // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  readonly?: ReadOnlyType; // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  hideLabel?: boolean; // 필드 렌더러에서 라벨을 표시하지 않고 싶다면 이 값을 true 로 한다.
 
   // // tab, fieldGroup 의 ID, 이 값은 EntityForm 이 initialize 될 때 자동으로 처리된다. 외부에서 입력할 필요가 없는 값이다.
-  form?: { tabId: string, fieldGroupId: string }
+  form?: { tabId: string; fieldGroupId: string };
 
   // intentional: each implementation returns its concrete subtype (EntityField, EntityTab, etc.)
   clone(includeValue?: boolean): any;
@@ -114,7 +114,5 @@ export interface EntityItem {
    * withTabId, withFieldGroupId 를 한번에 지정하는 것과 같습니다.
    * @param form
    */
-  withForm(form: { tabId: string, fieldGroupId: string }): this;
-
-
+  withForm(form: { tabId: string; fieldGroupId: string }): this;
 }

@@ -7,11 +7,11 @@
  * You may obtain a copy of the License under controlled by GJCU
  */
 
-import React, {memo, useCallback, useEffect, useRef, useState} from 'react';
-import {QueryConditionType} from '../../../form/SearchForm';
-import {EntityForm} from '../../../config/EntityForm';
-import {ListableFormField} from '../../fields/abstract';
-import {getTranslation} from '../../../utils/i18n';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { QueryConditionType } from '../../../form/SearchForm';
+import { EntityForm } from '../../../config/EntityForm';
+import { ListableFormField } from '../../fields/abstract';
+import { getTranslation } from '../../../utils/i18n';
 
 interface MemoizedFilterFieldProps {
   entityForm: EntityForm;
@@ -44,7 +44,7 @@ const MemoizedFilterFieldInner = ({
     (newValue: any, op?: QueryConditionType) => {
       onChange(fieldName, newValue, op);
     },
-    [fieldName, onChange]
+    [fieldName, onChange],
   );
 
   // Load filter view only once on mount
@@ -84,9 +84,7 @@ const MemoizedFilterFieldInner = ({
   }, [field, entityForm, handleChange, value]);
 
   if (isLoading) {
-    return (
-      <div className={`animate-pulse ${isCompact ? 'h-8' : 'h-10'} bg-gray-100 rounded`} />
-    );
+    return <div className={`animate-pulse ${isCompact ? 'h-8' : 'h-10'} bg-gray-100 rounded`} />;
   }
 
   if (!filterView) {
@@ -103,9 +101,7 @@ const MemoizedFilterFieldInner = ({
       >
         {field.viewLabel(t)}
       </label>
-      <div className={isCompact ? 'filter-field-compact' : ''}>
-        {filterView}
-      </div>
+      <div className={isCompact ? 'filter-field-compact' : ''}>{filterView}</div>
     </div>
   );
 };

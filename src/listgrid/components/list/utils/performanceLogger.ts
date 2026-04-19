@@ -9,7 +9,7 @@
  * 2. Remove imports and usage from ViewListGrid.tsx and useListGridLogic.ts
  */
 
-import {getRuntimeConfig} from '../../../config/RuntimeConfig';
+import { getRuntimeConfig } from '../../../config/RuntimeConfig';
 
 const isEnabled = (): boolean => {
   if (typeof window === 'undefined') return false;
@@ -34,7 +34,12 @@ export const perfLog = {
     console.log(`${PREFIX} [Component] Unmounted`, context);
   },
 
-  rowsRendered: (context: { entityUrl?: string; rowCount: number; totalCount?: number; timeSinceMount: string }) => {
+  rowsRendered: (context: {
+    entityUrl?: string;
+    rowCount: number;
+    totalCount?: number;
+    timeSinceMount: string;
+  }) => {
     if (!isEnabled()) return;
     console.log(`${PREFIX} [Component] Rows rendered`, context);
   },
@@ -46,7 +51,10 @@ export const perfLog = {
     console.log(`${PREFIX} [State] Loading started`, context);
   },
 
-  loadingCompleted: (duration: number, context: { entityUrl?: string; rowCount: number; totalCount?: number }) => {
+  loadingCompleted: (
+    duration: number,
+    context: { entityUrl?: string; rowCount: number; totalCount?: number },
+  ) => {
     if (!isEnabled()) return;
     console.log(`${PREFIX} [State] Loading completed in ${duration.toFixed(2)}ms`, context);
   },
@@ -58,7 +66,10 @@ export const perfLog = {
     console.log(`${PREFIX} [API] Request started`, context);
   },
 
-  apiCompleted: (duration: number, context: { entityUrl?: string; rowCount: number; totalCount?: number; page?: number }) => {
+  apiCompleted: (
+    duration: number,
+    context: { entityUrl?: string; rowCount: number; totalCount?: number; page?: number },
+  ) => {
     if (!isEnabled()) return;
     console.log(`${PREFIX} [API] Response received in ${duration.toFixed(2)}ms`, context);
   },

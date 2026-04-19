@@ -5,10 +5,10 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FieldGroupInfo, TabInfo} from '../config/Config';
-import {isTrue} from '../utils/BooleanUtil';
-import {EntityFieldGroup} from '../config/EntityFieldGroup';
-import {EntityItem} from '../config/EntityItem';
+import { FieldGroupInfo, TabInfo } from '../config/Config';
+import { isTrue } from '../utils/BooleanUtil';
+import { EntityFieldGroup } from '../config/EntityFieldGroup';
+import { EntityItem } from '../config/EntityItem';
 
 export class EntityTab {
   id: string;
@@ -53,7 +53,7 @@ export class EntityTab {
     if (!userPermissions || userPermissions.length === 0) {
       return false;
     }
-    return this.requiredPermissions.some(permission => userPermissions.includes(permission));
+    return this.requiredPermissions.some((permission) => userPermissions.includes(permission));
   }
 
   clone(): EntityTab {
@@ -63,7 +63,9 @@ export class EntityTab {
     cloned.order = this.order;
     cloned.hidden = this.hidden;
     cloned.description = this.description;
-    cloned.requiredPermissions = this.requiredPermissions ? [...this.requiredPermissions] : undefined;
+    cloned.requiredPermissions = this.requiredPermissions
+      ? [...this.requiredPermissions]
+      : undefined;
 
     const fieldGroups: EntityFieldGroup[] = [];
     this.fieldGroups.forEach((fieldGroup) => {
@@ -84,8 +86,8 @@ export class EntityTab {
     }
 
     // 이미 존재하는지 확인 후 없으면 추가
-    if (!entityFieldGroup.fields.some(fld => fld.name === field.name)) {
-      entityFieldGroup.fields.push({name: field.getName(), order: field.getOrder()});
+    if (!entityFieldGroup.fields.some((fld) => fld.name === field.name)) {
+      entityFieldGroup.fields.push({ name: field.getName(), order: field.getOrder() });
     }
   }
 }

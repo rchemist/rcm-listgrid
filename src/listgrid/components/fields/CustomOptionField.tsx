@@ -3,20 +3,20 @@ import {
   OptionalFieldProps,
   renderListOptionalField,
   ViewListProps,
-  ViewListResult
+  ViewListResult,
 } from '../../components/fields/abstract';
-import React from "react";
-import {RenderType} from '../../config/Config';
-import {SelectBox} from "../../ui";
-import {RadioInput} from "../../ui";
-import {getInputRendererParameters} from '../../components/helper/FieldRendererHelper';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {hexHash} from "../../utils/hash";
-import {SelectOption} from "../../form/Type";
-import {getExternalApiDataWithError, isEmpty, isEquals} from "../../misc";
-import {CheckBox} from "../../ui";
-import {isTrue} from '../../utils/BooleanUtil';
-import {MultiSelectBox} from "../../ui";
+import React from 'react';
+import { RenderType } from '../../config/Config';
+import { SelectBox } from '../../ui';
+import { RadioInput } from '../../ui';
+import { getInputRendererParameters } from '../../components/helper/FieldRendererHelper';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { hexHash } from '../../utils/hash';
+import { SelectOption } from '../../form/Type';
+import { getExternalApiDataWithError, isEmpty, isEquals } from '../../misc';
+import { CheckBox } from '../../ui';
+import { isTrue } from '../../utils/BooleanUtil';
+import { MultiSelectBox } from '../../ui';
 
 const customOptionFetchUrl = '/option/by-alias';
 const customOptionBulkFetchUrl = '/option/by-aliases';
@@ -46,7 +46,6 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-
       if (this.options === undefined || this.options.length === 0) {
         this.options = await getCustomOptionValues(this.alias);
       }
@@ -55,16 +54,42 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
 
       if (this.combo !== undefined && this.combo.direction !== undefined) {
         if (isTrue(this.multiple)) {
-          return <CheckBox key={cacheKey} options={this.options!} combo={this.combo} {...await getInputRendererParameters(this, params)}></CheckBox>
+          return (
+            <CheckBox
+              key={cacheKey}
+              options={this.options!}
+              combo={this.combo}
+              {...await getInputRendererParameters(this, params)}
+            ></CheckBox>
+          );
         } else {
-          return <RadioInput key={cacheKey} options={this.options!} combo={this.combo} {...await getInputRendererParameters(this, params)}></RadioInput>
+          return (
+            <RadioInput
+              key={cacheKey}
+              options={this.options!}
+              combo={this.combo}
+              {...await getInputRendererParameters(this, params)}
+            ></RadioInput>
+          );
         }
       }
 
       if (isTrue(this.multiple)) {
-        return <MultiSelectBox key={cacheKey} options={this.options!} {...await getInputRendererParameters(this, params)}></MultiSelectBox>
+        return (
+          <MultiSelectBox
+            key={cacheKey}
+            options={this.options!}
+            {...await getInputRendererParameters(this, params)}
+          ></MultiSelectBox>
+        );
       } else {
-        return <SelectBox key={cacheKey} options={this.options!} {...await getInputRendererParameters(this, params)}></SelectBox>;
+        return (
+          <SelectBox
+            key={cacheKey}
+            options={this.options!}
+            {...await getInputRendererParameters(this, params)}
+          ></SelectBox>
+        );
       }
     })();
   }
@@ -79,11 +104,13 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
   /**
    * CustomOptionField 리스트 필터 렌더링 (기본 renderInstance 사용)
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
-    return this.renderInstance({ 
-      ...params, 
-      required: false, 
-      onChange: (value) => params.onChange(value) 
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
+    return this.renderInstance({
+      ...params,
+      required: false,
+      onChange: (value) => params.onChange(value),
     } as FieldRenderParameters);
   }
 
@@ -91,9 +118,8 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
    * CustomOptionField 리스트 아이템 렌더링
    */
   protected renderListItemInstance(props: ViewListProps): Promise<ViewListResult> {
-
     if (this.options === undefined || this.options.length === 0) {
-      return (async() => {
+      return (async () => {
         const options = await getCustomOptionValues(this.alias);
         this.options = options;
         return renderListOptionalField(this, props);
@@ -101,26 +127,26 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
     } else {
       return renderListOptionalField(this, props);
     }
-
   }
 
   private createCacheKey(renderType?: RenderType) {
-
     let key: string = ``;
-    for(const option of this.options!) {
-      key += `_${option.value}`
+    for (const option of this.options!) {
+      key += `_${option.value}`;
     }
 
     return hexHash(`${this.getName()}_${this.getCurrentValue(renderType)}_${key}`);
   }
 
   static create(props: CustomOptionFieldProps): CustomOptionField {
-    return new CustomOptionField(props.name, props.order, props.alias, props.multiple).copyFields(props, true);
+    return new CustomOptionField(props.name, props.order, props.alias, props.multiple).copyFields(
+      props,
+      true,
+    );
   }
 
-
   useListField(order?: number): this {
-    this.listConfig = {...this.listConfig, support: true, sortable: false, order: order};   // Select 필드는 Sort 를 지원하지 않는다.
+    this.listConfig = { ...this.listConfig, support: true, sortable: false, order: order }; // Select 필드는 Sort 를 지원하지 않는다.
     return this;
   }
 
@@ -137,13 +163,19 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
       const defaultValue = this.value.default;
 
       if (isTrue(this.multiple)) {
-        const isOriginalEmpty = fetchedValue === undefined || fetchedValue === null || (Array.isArray(fetchedValue) && fetchedValue.length === 0);
-        const isCurrentEmpty = currentValue === undefined || currentValue === null || (Array.isArray(currentValue) && currentValue.length === 0);
+        const isOriginalEmpty =
+          fetchedValue === undefined ||
+          fetchedValue === null ||
+          (Array.isArray(fetchedValue) && fetchedValue.length === 0);
+        const isCurrentEmpty =
+          currentValue === undefined ||
+          currentValue === null ||
+          (Array.isArray(currentValue) && currentValue.length === 0);
         if (isOriginalEmpty && isCurrentEmpty) {
           return false;
         }
       }
-      
+
       if (fetchedValue !== undefined) {
         return !isEquals(fetchedValue, currentValue);
       } else {
@@ -152,9 +184,6 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
     }
     return false;
   }
-
-
-
 }
 
 export async function getCustomOptionValues(alias: string): Promise<SelectOption[]> {
@@ -163,10 +192,15 @@ export async function getCustomOptionValues(alias: string): Promise<SelectOption
     return customOptionCache.get(alias)!;
   }
 
-  const response = await getExternalApiDataWithError({url: `${customOptionFetchUrl}/${alias}`, method: 'GET'});
+  const response = await getExternalApiDataWithError({
+    url: `${customOptionFetchUrl}/${alias}`,
+    method: 'GET',
+  });
   // 데이터가 정상적으로 들어왔다면 옵션 데이터를 생성해 반환한다. 오류가 발생했다면(alias 가 없거나 하는 경우) 빈 배열을 반환한다.
   if (response.data && !isEmpty(response.data.values)) {
-    const options = [...response.data.values.map((item: any) => ({value: item.value, label: item.label}))];
+    const options = [
+      ...response.data.values.map((item: any) => ({ value: item.value, label: item.label })),
+    ];
     customOptionCache.set(alias, options);
     return options;
   }
@@ -179,18 +213,18 @@ export async function getCustomOptionValues(alias: string): Promise<SelectOption
  */
 export async function prefetchCustomOptions(aliases: string[]): Promise<void> {
   // 이미 캐시에 있는 alias 제외
-  const uncachedAliases = aliases.filter(alias => !customOptionCache.has(alias));
+  const uncachedAliases = aliases.filter((alias) => !customOptionCache.has(alias));
 
   if (uncachedAliases.length === 0) {
     return;
   }
 
   const params = new URLSearchParams();
-  uncachedAliases.forEach(alias => params.append('aliases', alias));
+  uncachedAliases.forEach((alias) => params.append('aliases', alias));
 
   const response = await getExternalApiDataWithError({
     url: `${customOptionBulkFetchUrl}?${params.toString()}`,
-    method: 'GET'
+    method: 'GET',
   });
 
   if (response.data && Array.isArray(response.data)) {
@@ -198,7 +232,7 @@ export async function prefetchCustomOptions(aliases: string[]): Promise<void> {
       if (optionData.alias && !isEmpty(optionData.values)) {
         const options = optionData.values.map((item: any) => ({
           value: item.value,
-          label: item.label
+          label: item.label,
         }));
         customOptionCache.set(optionData.alias, options);
       }

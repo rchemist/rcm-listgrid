@@ -7,9 +7,9 @@
 
 'use client';
 
-import React, {memo} from 'react';
-import {EntityForm} from '../../../config/EntityForm';
-import {ViewEntityForm} from '../../form/ViewEntityForm';
+import React, { memo } from 'react';
+import { EntityForm } from '../../../config/EntityForm';
+import { ViewEntityForm } from '../../form/ViewEntityForm';
 
 // Icons removed - collapse button moved to row
 
@@ -45,23 +45,26 @@ export const SubCollectionInlineView = memo(
     onDelete,
     mappedBy,
   }: SubCollectionInlineViewProps) => {
-
     // buttonLinks에서 onClickList를 onCollapse로 대체
     const buttonLinks = {
       onClickList: async () => {
         onCollapse();
       },
-      onSave: onSave ? {
-        success: () => {
-          onSave();
-        }
-      } : undefined,
-      onDelete: onDelete ? {
-        success: () => {
-          onDelete();
-          onCollapse();
-        }
-      } : undefined,
+      onSave: onSave
+        ? {
+            success: () => {
+              onSave();
+            },
+          }
+        : undefined,
+      onDelete: onDelete
+        ? {
+            success: () => {
+              onDelete();
+              onCollapse();
+            },
+          }
+        : undefined,
     };
 
     return (
@@ -75,21 +78,25 @@ export const SubCollectionInlineView = memo(
         `}
       >
         {/* ViewEntityForm 컨텐츠 영역 - 시각적 구분을 위한 스타일 적용 */}
-        <div className="
+        <div
+          className="
           ml-4
           border-l-4 border-primary/30
           bg-white/50 dark:bg-gray-900/50
           rounded-r-lg
           overflow-x-hidden
           max-w-full
-        ">
+        "
+        >
           {/* 인라인 뷰 라벨 */}
-          <div className="
+          <div
+            className="
             bg-primary/20 text-primary dark:bg-primary/30 dark:text-primary-light
             text-xs font-medium
             px-3 py-1.5
             border-b border-primary/10
-          ">
+          "
+          >
             상세 정보
           </div>
           <div className="pl-4 pt-2">
@@ -108,7 +115,7 @@ export const SubCollectionInlineView = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 SubCollectionInlineView.displayName = 'SubCollectionInlineView';

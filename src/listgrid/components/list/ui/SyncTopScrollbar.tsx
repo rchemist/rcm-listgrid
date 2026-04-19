@@ -7,7 +7,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface SyncTopScrollbarProps {
   /** Target element ref to sync scroll with */

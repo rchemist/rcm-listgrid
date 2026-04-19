@@ -29,7 +29,7 @@ describe('useCardSubCollectionData', () => {
       mockFetch.mockImplementation(() => new Promise(() => {}));
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       expect(result.current.loading).toBe(true);
@@ -44,7 +44,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       expect(typeof result.current.refresh).toBe('function');
@@ -64,7 +64,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -85,7 +85,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData(fetchUrl, { mappedBy: 'parentId' })
+        useCardSubCollectionData(fetchUrl, { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -101,7 +101,7 @@ describe('useCardSubCollectionData', () => {
       mockFetch.mockRejectedValueOnce(new Error(errorMessage));
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -121,7 +121,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -153,7 +153,7 @@ describe('useCardSubCollectionData', () => {
         });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -183,11 +183,10 @@ describe('useCardSubCollectionData', () => {
 
       let url = 'http://api.example.com/items1';
       const { result, rerender } = renderHook(
-        ({ fetchUrl }) =>
-          useCardSubCollectionData(fetchUrl, { mappedBy: 'parentId' }),
+        ({ fetchUrl }) => useCardSubCollectionData(fetchUrl, { mappedBy: 'parentId' }),
         {
           initialProps: { fetchUrl: url },
-        }
+        },
       );
 
       await waitFor(() => {
@@ -213,11 +212,10 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result, rerender } = renderHook(
-        ({ config }) =>
-          useCardSubCollectionData('http://api.example.com/items', config),
+        ({ config }) => useCardSubCollectionData('http://api.example.com/items', config),
         {
           initialProps: { config: { mappedBy: 'parentId' } },
-        }
+        },
       );
 
       await waitFor(() => {
@@ -248,7 +246,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -274,7 +272,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -292,7 +290,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -310,7 +308,7 @@ describe('useCardSubCollectionData', () => {
       });
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       await waitFor(() => {
@@ -326,7 +324,7 @@ describe('useCardSubCollectionData', () => {
       mockFetch.mockImplementation(() => new Promise(() => {}));
 
       const { unmount } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       unmount();
@@ -340,15 +338,18 @@ describe('useCardSubCollectionData', () => {
       mockFetch.mockRejectedValueOnce(abortError);
 
       const { result } = renderHook(() =>
-        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' })
+        useCardSubCollectionData('http://api.example.com/items', { mappedBy: 'parentId' }),
       );
 
       // AbortError should not set error state
       // Since the mock rejects immediately, we might see loading remain true
       // or error be null depending on timing
-      await waitFor(() => {
-        expect(result.current.error).toBeNull();
-      }, { timeout: 1000 });
+      await waitFor(
+        () => {
+          expect(result.current.error).toBeNull();
+        },
+        { timeout: 1000 },
+      );
     });
   });
 });

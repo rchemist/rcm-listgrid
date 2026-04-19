@@ -7,9 +7,9 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {useCallback, useRef} from 'react';
-import {parseAsString, useQueryStates} from "../../../urlState";
-import {SearchForm} from '../../../form/SearchForm';
+import { useCallback, useRef } from 'react';
+import { parseAsString, useQueryStates } from '../../../urlState';
+import { SearchForm } from '../../../form/SearchForm';
 import {
   hasUrlParams,
   ListGridUrlState,
@@ -70,7 +70,7 @@ export interface UseListGridUrlStateReturn {
  */
 function resolveUrlSyncOptions(
   urlSync: UrlSyncOptions | boolean | undefined,
-  isMainEntity: boolean
+  isMainEntity: boolean,
 ): UrlSyncOptions {
   // If explicitly false, disable
   if (urlSync === false) {
@@ -102,7 +102,7 @@ function resolveUrlSyncOptions(
  * Custom hook for ListGrid URL state synchronization using nuqs
  */
 export function useListGridUrlState(
-  options: UseListGridUrlStateOptions
+  options: UseListGridUrlStateOptions,
 ): UseListGridUrlStateReturn {
   const { urlSync, isMainEntity, quickSearchPropertyName, orFields, sessionSearchForm } = options;
 
@@ -126,7 +126,7 @@ export function useListGridUrlState(
       history: 'replace',
       // Shallow routing to avoid full page reload
       shallow: true,
-    }
+    },
   );
 
   // Check if URL has any ListGrid params
@@ -169,7 +169,7 @@ export function useListGridUrlState(
         filters: filteredState.filters,
       });
     },
-    [isEnabled, quickSearchPropertyName, orFields, resolvedOptions, setUrlState]
+    [isEnabled, quickSearchPropertyName, orFields, resolvedOptions, setUrlState],
   );
 
   /**
@@ -187,7 +187,7 @@ export function useListGridUrlState(
         urlState as ListGridUrlState,
         resolvedOptions.sessionStorageFallback ? sessionSearchForm : undefined,
         quickSearchPropertyName,
-        orFields
+        orFields,
       );
 
       // Apply base form settings if merged form is empty
@@ -202,7 +202,7 @@ export function useListGridUrlState(
 
       return mergedForm;
     },
-    [isEnabled, urlState, sessionSearchForm, quickSearchPropertyName, orFields, resolvedOptions]
+    [isEnabled, urlState, sessionSearchForm, quickSearchPropertyName, orFields, resolvedOptions],
   );
 
   /**

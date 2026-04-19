@@ -5,29 +5,23 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {
-  ListableFormField,
-  ListableFormFieldProps
-} from './abstract';
-import React from "react";
-import {FieldRenderParameters} from '../../config/EntityField';
-import {TextInput} from "../../ui";
-import {
-  getInputRendererParameters
-} from '../helper/FieldRendererHelper';
-import {EntityForm} from '../../config/EntityForm';
-import {ValidateResult} from '../../validations/Validation';
-import {isBlank} from '../../utils/StringUtil';
-import {MinMaxStringLimit} from "../../form/Type";
+import { ListableFormField, ListableFormFieldProps } from './abstract';
+import React from 'react';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { TextInput } from '../../ui';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { EntityForm } from '../../config/EntityForm';
+import { ValidateResult } from '../../validations/Validation';
+import { isBlank } from '../../utils/StringUtil';
+import { MinMaxStringLimit } from '../../form/Type';
 
 interface MonthFieldProps extends ListableFormFieldProps {
-  limit?: MinMaxStringLimit
+  limit?: MinMaxStringLimit;
 }
 
 export class MonthField extends ListableFormField<MonthField> {
-
   // YYYY-MM
-  limit?: MinMaxStringLimit
+  limit?: MinMaxStringLimit;
 
   constructor(name: string, order: number, limit?: MinMaxStringLimit) {
     super(name, order, 'month');
@@ -39,14 +33,16 @@ export class MonthField extends ListableFormField<MonthField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <TextInput type={'month'}
-                        min={this.limit?.min}
-                        max={this.limit?.max}
-                        {...await getInputRendererParameters(this, params)}></TextInput>;
+      return (
+        <TextInput
+          type={'month'}
+          min={this.limit?.min}
+          max={this.limit?.max}
+          {...await getInputRendererParameters(this, params)}
+        ></TextInput>
+      );
     })();
   }
-
-
 
   /**
    * MonthField 인스턴스 생성
@@ -55,7 +51,7 @@ export class MonthField extends ListableFormField<MonthField> {
     return new MonthField(name, order, this.limit);
   }
 
-  withLimit(limit?: MinMaxStringLimit) : this{
+  withLimit(limit?: MinMaxStringLimit): this {
     this.limit = limit;
     return this;
   }
@@ -82,7 +78,6 @@ export class MonthField extends ListableFormField<MonthField> {
     if (!errored) {
       // 에러가 안 난 경우에만 limit 에 의한 validation 처리를 시작한다.
       if (this.limit !== undefined) {
-
         const value = await this.getCurrentValue(entityForm.getRenderType());
 
         if (!isBlank(value)) {
@@ -91,19 +86,16 @@ export class MonthField extends ListableFormField<MonthField> {
           if (this.limit.min !== undefined && this.limit.min > value) {
             return ValidateResult.fail(`최소 ${this.limit.min} 이상의 값을 선택해야 합니다.`);
           } else if (this.limit.max !== undefined && this.limit.max < value) {
-            return ValidateResult.fail(`최대 ${this.limit.max} 이하의 값을 선택해야 합니다.`)
+            return ValidateResult.fail(`최대 ${this.limit.max} 이하의 값을 선택해야 합니다.`);
           }
         }
-
       }
     }
 
     return result;
-    
   }
-  
+
   static create(props: MonthFieldProps): MonthField {
     return new MonthField(props.name, props.order, props.limit).copyFields(props, true);
   }
-  
 }

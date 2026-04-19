@@ -1,6 +1,6 @@
 import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import {CardSubCollectionField} from '../CardSubCollectionField';
-import {EntityForm} from '../EntityForm';
+import { CardSubCollectionField } from '../CardSubCollectionField';
+import { EntityForm } from '../EntityForm';
 
 // Mock SubCollectionField's ViewListGrid import
 vi.mock('../../components/list/ViewListGrid', () => ({
@@ -57,7 +57,8 @@ describe('CardSubCollectionField', () => {
         mappedBy: 'parentId',
       };
 
-      const dynamicFetchUrl = (parentForm: EntityForm) => `http://api.example.com/parent/${parentForm.id}/items`;
+      const dynamicFetchUrl = (parentForm: EntityForm) =>
+        `http://api.example.com/parent/${parentForm.id}/items`;
 
       const field = new CardSubCollectionField({
         entityForm: mockEntityForm,
@@ -79,7 +80,8 @@ describe('CardSubCollectionField', () => {
         mappedBy: 'parentId',
       };
 
-      const dynamicFetchUrl = (parentForm: EntityForm) => `http://api.example.com/parent/${parentForm.id}/items`;
+      const dynamicFetchUrl = (parentForm: EntityForm) =>
+        `http://api.example.com/parent/${parentForm.id}/items`;
 
       const field = new CardSubCollectionField({
         entityForm: mockEntityForm,

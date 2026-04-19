@@ -5,25 +5,29 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ListableFormField, ListableFormFieldProps, ViewListProps, ViewListResult} from './abstract';
-import React from "react";
-import {IAssetConfig, RenderType} from '../../config/Config';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {FileFieldValue} from "../../ui";
-import {LazyFileUploadInput as FileUploadInput} from "../../ui";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {isEmpty} from "../../utils";
-import {getAccessableAssetUrl} from "../../misc";
-import {IconDeviceFloppy} from "@tabler/icons-react";
-import {TextInput} from "../../ui";
-import {isBlank as isBlankString} from '../../utils/StringUtil';
+import {
+  ListableFormField,
+  ListableFormFieldProps,
+  ViewListProps,
+  ViewListResult,
+} from './abstract';
+import React from 'react';
+import { IAssetConfig, RenderType } from '../../config/Config';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { FileFieldValue } from '../../ui';
+import { LazyFileUploadInput as FileUploadInput } from '../../ui';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { isEmpty } from '../../utils';
+import { getAccessableAssetUrl } from '../../misc';
+import { IconDeviceFloppy } from '@tabler/icons-react';
+import { TextInput } from '../../ui';
+import { isBlank as isBlankString } from '../../utils/StringUtil';
 
 interface FileFieldProps extends ListableFormFieldProps {
   config?: IAssetConfig;
 }
 
 export class FileField extends ListableFormField<FileField> {
-
   config?: IAssetConfig;
 
   constructor(name: string, order: number, config?: IAssetConfig) {
@@ -42,7 +46,7 @@ export class FileField extends ListableFormField<FileField> {
       maxCount: this.config?.maxCount,
       extensions: this.config?.extensions,
       fileTypes: this.config?.fileTypes,
-    }
+    };
     return this;
   }
 
@@ -52,7 +56,7 @@ export class FileField extends ListableFormField<FileField> {
       maxCount: maxCount,
       extensions: this.config?.extensions,
       fileTypes: this.config?.fileTypes,
-    }
+    };
     return this;
   }
 
@@ -62,7 +66,7 @@ export class FileField extends ListableFormField<FileField> {
       maxCount: this.config?.maxCount,
       extensions: extension,
       fileTypes: this.config?.fileTypes,
-    }
+    };
     return this;
   }
 
@@ -72,7 +76,7 @@ export class FileField extends ListableFormField<FileField> {
       maxCount: this.config?.maxCount,
       extensions: this.config?.extensions,
       fileTypes: fileTypes,
-    }
+    };
     return this;
   }
 
@@ -81,7 +85,12 @@ export class FileField extends ListableFormField<FileField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <FileUploadInput config={this.config} {...await getInputRendererParameters(this, params)}></FileUploadInput>
+      return (
+        <FileUploadInput
+          config={this.config}
+          {...await getInputRendererParameters(this, params)}
+        ></FileUploadInput>
+      );
     })();
   }
 
@@ -95,13 +104,17 @@ export class FileField extends ListableFormField<FileField> {
   /**
    * FileField 리스트 필터 렌더링 (기본 텍스트 입력)
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
-      return <TextInput
-        name={`${this.name}_${params.entityForm.id}`}
-        onChange={(value: string) => params.onChange(value, 'LIKE')}
-        value={params.value}
-      />;
+      return (
+        <TextInput
+          name={`${this.name}_${params.entityForm.id}`}
+          onChange={(value: string) => params.onChange(value, 'LIKE')}
+          value={params.value}
+        />
+      );
     })();
   }
 
@@ -119,28 +132,34 @@ export class FileField extends ListableFormField<FileField> {
           const fileDownloadUrl = getAccessableAssetUrl(file.existFiles[0]!.url);
 
           return {
-            result: <div className="rcm-file-field-cell">
-              <div className="rcm-file-field-inner">
-                <a href={fileDownloadUrl}
-                  target="_blank" rel="noreferrer" className="rcm-file-field-link"><IconDeviceFloppy className="rcm-file-field-icon" />
-                  <span className="rcm-file-field-name">{file.existFiles[0]!.url}</span>
-                </a>
+            result: (
+              <div className="rcm-file-field-cell">
+                <div className="rcm-file-field-inner">
+                  <a
+                    href={fileDownloadUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rcm-file-field-link"
+                  >
+                    <IconDeviceFloppy className="rcm-file-field-icon" />
+                    <span className="rcm-file-field-name">{file.existFiles[0]!.url}</span>
+                  </a>
+                </div>
               </div>
-            </div>,
-            linkOnCell: false
+            ),
+            linkOnCell: false,
           };
         }
       }
 
       return {
-        result: null
+        result: null,
       };
     })();
   }
 
   static create(props: FileFieldProps): FileField {
-    return new FileField(props.name, props.order, props.config)
-      .copyFields(props, true);
+    return new FileField(props.name, props.order, props.config).copyFields(props, true);
   }
 
   async isBlank(renderType: RenderType = 'create'): Promise<boolean> {
@@ -183,7 +202,6 @@ export class FileField extends ListableFormField<FileField> {
         }
 
         return dirty;
-
       } else {
         // fetch 된 값이 없을 때는 default 값과 비교한다.
         let dirty = this.value.default === undefined || this.value.default === null;
@@ -192,9 +210,8 @@ export class FileField extends ListableFormField<FileField> {
           const fileValue = FileFieldValue.create(this.value.default);
           return fileValue.isDirty();
         } else {
-
           const value = this.value.current;
-          
+
           // 현재 값에 아무 파일이 없을 때
           if (this.value.current === undefined || this.value.current === null) {
             return false;
@@ -203,7 +220,6 @@ export class FileField extends ListableFormField<FileField> {
           if (value !== undefined && value !== null && value instanceof FileFieldValue) {
             return value.isDirty();
           }
-
         }
 
         return dirty;
@@ -211,5 +227,4 @@ export class FileField extends ListableFormField<FileField> {
     }
     return false;
   }
-
 }

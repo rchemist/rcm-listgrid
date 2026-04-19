@@ -7,16 +7,16 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {useEffect, useRef, useState} from "react";
-import {FilterButton} from "./FilterButton";
-import {FilterDropdown, FilterDropdownPlacement, FilterDropdownSize} from "./FilterDropdown";
-import {FilterView} from "./FilterView";
-import {QueryConditionType, SearchForm} from "../../../form/SearchForm";
-import {EntityForm} from '../../../config/EntityForm';
-import {AbstractManyToOneField, ListableFormField, OptionalField} from '../../fields/abstract';
-import {isBlank} from '../../../utils/StringUtil';
-import {useHeaderFilterStore} from "./headerFilterStore";
-import {isTrue} from '../../../utils/BooleanUtil';
+import { useEffect, useRef, useState } from 'react';
+import { FilterButton } from './FilterButton';
+import { FilterDropdown, FilterDropdownPlacement, FilterDropdownSize } from './FilterDropdown';
+import { FilterView } from './FilterView';
+import { QueryConditionType, SearchForm } from '../../../form/SearchForm';
+import { EntityForm } from '../../../config/EntityForm';
+import { AbstractManyToOneField, ListableFormField, OptionalField } from '../../fields/abstract';
+import { isBlank } from '../../../utils/StringUtil';
+import { useHeaderFilterStore } from './headerFilterStore';
+import { isTrue } from '../../../utils/BooleanUtil';
 
 interface HeaderFieldFilterProps {
   field: ListableFormField<any>;
@@ -61,7 +61,7 @@ export const HeaderFieldFilter = ({
     // 배열인 경우 length로 체크
     const hasValue = Array.isArray(filterValue)
       ? filterValue.length > 0
-      : (filterValue !== null && filterValue !== undefined && filterValue !== '');
+      : filterValue !== null && filterValue !== undefined && filterValue !== '';
 
     setHasFilter(hasValue);
   }, [searchForm, field]);
@@ -89,7 +89,7 @@ export const HeaderFieldFilter = ({
   }, [isOpen, searchForm]);
 
   const handleFilterChange = (name: string, value: any, op: QueryConditionType = 'EQUAL') => {
-    setTempSearchForm(prevForm => {
+    setTempSearchForm((prevForm) => {
       const newSearchForm = prevForm?.clone() ?? SearchForm.create();
       const targetField = entityForm.getField(name);
 
@@ -130,7 +130,7 @@ export const HeaderFieldFilter = ({
 
       // 필터 추가/수정/삭제
       const isEmpty = Array.isArray(value) ? value.length === 0 : isBlank(value);
-      if (isEmpty && (op !== 'NULL' && op !== 'NOT_NULL')) {
+      if (isEmpty && op !== 'NULL' && op !== 'NOT_NULL') {
         newSearchForm.removeFilter(name);
       } else {
         newSearchForm.handleAndFilter(name, value, op);
@@ -186,7 +186,11 @@ export const HeaderFieldFilter = ({
     }
 
     // 중간 크기: ManyToOne, Select, Number 등
-    if (fieldType === 'manyToOne' || field instanceof AbstractManyToOneField || fieldType === 'number') {
+    if (
+      fieldType === 'manyToOne' ||
+      field instanceof AbstractManyToOneField ||
+      fieldType === 'number'
+    ) {
       return 'md';
     }
 
@@ -207,33 +211,34 @@ export const HeaderFieldFilter = ({
         }}
       />
 
-      {isOpen && tempSearchForm && (() => {
-        // ManyToOneField인 경우 .id로 값을 가져옴 (AdvancedSearchForm과 동일)
-        const searchFieldName = field instanceof AbstractManyToOneField
-          ? field.getName() + '.id'
-          : field.getName();
-        const fieldValue = tempSearchForm.getSearchValue(searchFieldName);
-        const filterField = field.clone(false).withValue(fieldValue);
+      {isOpen &&
+        tempSearchForm &&
+        (() => {
+          // ManyToOneField인 경우 .id로 값을 가져옴 (AdvancedSearchForm과 동일)
+          const searchFieldName =
+            field instanceof AbstractManyToOneField ? field.getName() + '.id' : field.getName();
+          const fieldValue = tempSearchForm.getSearchValue(searchFieldName);
+          const filterField = field.clone(false).withValue(fieldValue);
 
-        return (
-          <FilterDropdown
-            isOpen={isOpen}
-            onClose={closeFilter}
-            onClear={handleClear}
-            onApply={handleApply}
-            size={getDropdownSize()}
-            placement={placement}
-            anchorRef={buttonRef}
-          >
-            <FilterView
-              entityForm={entityForm}
-              field={filterField}
-              value={fieldValue}
-              onChange={handleFilterChange}
-            />
-          </FilterDropdown>
-        );
-      })()}
+          return (
+            <FilterDropdown
+              isOpen={isOpen}
+              onClose={closeFilter}
+              onClear={handleClear}
+              onApply={handleApply}
+              size={getDropdownSize()}
+              placement={placement}
+              anchorRef={buttonRef}
+            >
+              <FilterView
+                entityForm={entityForm}
+                field={filterField}
+                value={fieldValue}
+                onChange={handleFilterChange}
+              />
+            </FilterDropdown>
+          );
+        })()}
     </div>
   );
 };

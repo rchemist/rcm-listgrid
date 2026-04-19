@@ -5,19 +5,20 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {filterMappedByFields, MappedByFieldFilterOptions} from './mappedByFieldFilter';
-import {ListableFormField} from '../../fields/abstract';
+import { filterMappedByFields, MappedByFieldFilterOptions } from './mappedByFieldFilter';
+import { ListableFormField } from '../../fields/abstract';
 
 describe('mappedByFieldFilter', () => {
   describe('filterMappedByFields', () => {
-    const createMockField = (fieldName: string): ListableFormField<any> => ({
-      name: fieldName,
-      label: `Label for ${fieldName}`,
-      type: 'string',
-      fieldType: 'text',
-      formFieldType: 'FormField',
-      render: () => null,
-    } as any);
+    const createMockField = (fieldName: string): ListableFormField<any> =>
+      ({
+        name: fieldName,
+        label: `Label for ${fieldName}`,
+        type: 'string',
+        fieldType: 'text',
+        formFieldType: 'FormField',
+        render: () => null,
+      }) as any;
 
     it('should filter out exact mappedBy field', () => {
       const fields = [
@@ -26,12 +27,12 @@ describe('mappedByFieldFilter', () => {
         createMockField('email'),
       ];
 
-      const result = filterMappedByFields(fields, {mappedBy: 'studentId'});
+      const result = filterMappedByFields(fields, { mappedBy: 'studentId' });
 
       expect(result).toHaveLength(2);
-      expect(result.map(f => f.name)).not.toContain('studentId');
-      expect(result.map(f => f.name)).toContain('name');
-      expect(result.map(f => f.name)).toContain('email');
+      expect(result.map((f) => f.name)).not.toContain('studentId');
+      expect(result.map((f) => f.name)).toContain('name');
+      expect(result.map((f) => f.name)).toContain('email');
     });
 
     it('should filter out base field when mappedBy ends with Id', () => {
@@ -41,10 +42,10 @@ describe('mappedByFieldFilter', () => {
         createMockField('name'),
       ];
 
-      const result = filterMappedByFields(fields, {mappedBy: 'studentId'});
+      const result = filterMappedByFields(fields, { mappedBy: 'studentId' });
 
       expect(result).toHaveLength(1);
-      expect(result.map(f => f.name)).toEqual(['name']);
+      expect(result.map((f) => f.name)).toEqual(['name']);
     });
 
     it('should filter out nested field patterns (student.*)', () => {
@@ -56,10 +57,10 @@ describe('mappedByFieldFilter', () => {
         createMockField('name'),
       ];
 
-      const result = filterMappedByFields(fields, {mappedBy: 'studentId'});
+      const result = filterMappedByFields(fields, { mappedBy: 'studentId' });
 
       expect(result).toHaveLength(1);
-      expect(result.map(f => f.name)).toEqual(['name']);
+      expect(result.map((f) => f.name)).toEqual(['name']);
     });
 
     it('should not filter if field is in includePatterns', () => {
@@ -75,8 +76,8 @@ describe('mappedByFieldFilter', () => {
       });
 
       expect(result).toHaveLength(2);
-      expect(result.map(f => f.name)).toContain('student.name');
-      expect(result.map(f => f.name)).toContain('name');
+      expect(result.map((f) => f.name)).toContain('student.name');
+      expect(result.map((f) => f.name)).toContain('name');
     });
 
     it('should handle mappedBy without Id suffix', () => {
@@ -86,10 +87,10 @@ describe('mappedByFieldFilter', () => {
         createMockField('name'),
       ];
 
-      const result = filterMappedByFields(fields, {mappedBy: 'teacher'});
+      const result = filterMappedByFields(fields, { mappedBy: 'teacher' });
 
       expect(result).toHaveLength(1);
-      expect(result.map(f => f.name)).toEqual(['name']);
+      expect(result.map((f) => f.name)).toEqual(['name']);
     });
 
     it('should respect excludePatterns option', () => {
@@ -106,12 +107,12 @@ describe('mappedByFieldFilter', () => {
       });
 
       expect(result).toHaveLength(1);
-      expect(result.map(f => f.name)).toEqual(['name']);
+      expect(result.map((f) => f.name)).toEqual(['name']);
     });
 
     it('should handle empty fields array', () => {
       const fields: ListableFormField<any>[] = [];
-      const result = filterMappedByFields(fields, {mappedBy: 'studentId'});
+      const result = filterMappedByFields(fields, { mappedBy: 'studentId' });
 
       expect(result).toHaveLength(0);
     });
@@ -124,9 +125,9 @@ describe('mappedByFieldFilter', () => {
         createMockField('phone'),
       ];
 
-      const result = filterMappedByFields(fields, {mappedBy: 'studentId'});
+      const result = filterMappedByFields(fields, { mappedBy: 'studentId' });
 
-      expect(result.map(f => f.name)).toEqual(['email', 'name', 'phone']);
+      expect(result.map((f) => f.name)).toEqual(['email', 'name', 'phone']);
     });
 
     it('should handle multiple nested levels', () => {
@@ -139,10 +140,10 @@ describe('mappedByFieldFilter', () => {
         createMockField('name'),
       ];
 
-      const result = filterMappedByFields(fields, {mappedBy: 'studentId'});
+      const result = filterMappedByFields(fields, { mappedBy: 'studentId' });
 
       expect(result).toHaveLength(1);
-      expect(result.map(f => f.name)).toEqual(['name']);
+      expect(result.map((f) => f.name)).toEqual(['name']);
     });
   });
 });

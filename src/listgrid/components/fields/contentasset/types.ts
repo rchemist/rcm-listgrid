@@ -18,13 +18,13 @@
 export interface ContentAsset {
   /** 백엔드 서버에서 받은 고유 식별자 */
   id?: string;
-  
+
   /** 컨텐츠 제목 (필수, 중복 불가) */
   title: string;
-  
+
   /** 부가 설명 텍스트 */
   content?: string;
-  
+
   /** 업로드된 파일의 URL */
   assetUrl: string;
 }
@@ -59,7 +59,7 @@ export const validateContentAssets = (assets: ContentAsset[]): ContentAssetValid
       errors.push({
         index,
         field: 'title',
-        message: '제목은 필수 입력 항목입니다.'
+        message: '제목은 필수 입력 항목입니다.',
       });
     }
 
@@ -68,7 +68,7 @@ export const validateContentAssets = (assets: ContentAsset[]): ContentAssetValid
       errors.push({
         index,
         field: 'title',
-        message: '동일한 제목이 이미 존재합니다.'
+        message: '동일한 제목이 이미 존재합니다.',
       });
     } else if (asset.title) {
       titles.add(asset.title.trim());
@@ -79,14 +79,14 @@ export const validateContentAssets = (assets: ContentAsset[]): ContentAssetValid
       errors.push({
         index,
         field: 'assetUrl',
-        message: '파일을 업로드해주세요.'
+        message: '파일을 업로드해주세요.',
       });
     }
   });
 
   return {
     isValid: errors.length === 0,
-    errors
+    errors,
   };
 };
 
@@ -96,7 +96,7 @@ export const validateContentAssets = (assets: ContentAsset[]): ContentAssetValid
 export const createEmptyContentAsset = (): ContentAsset => ({
   title: '',
   content: '',
-  assetUrl: ''
+  assetUrl: '',
 });
 
 /**
@@ -105,13 +105,13 @@ export const createEmptyContentAsset = (): ContentAsset => ({
 export interface ContentAssetFieldConfig {
   /** 최대 업로드 가능한 항목 수 */
   maxItems?: number;
-  
+
   /** 허용된 파일 타입 (예: ['image/*', 'application/pdf']) */
   acceptedFileTypes?: string[];
-  
+
   /** 최대 파일 크기 (bytes) */
   maxFileSize?: number;
-  
+
   /** 읽기 전용 모드 */
   readonly?: boolean;
 }

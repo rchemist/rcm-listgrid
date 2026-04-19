@@ -7,12 +7,7 @@ import { FieldType } from '../../../config/Config';
 import { Session } from '../../../auth/types';
 
 // Field types that should span full width in the card grid
-const FULL_WIDTH_FIELD_TYPES: FieldType[] = [
-  'textarea',
-  'html',
-  'markdown',
-  'contentAsset',
-];
+const FULL_WIDTH_FIELD_TYPES: FieldType[] = ['textarea', 'html', 'markdown', 'contentAsset'];
 
 export interface CardFieldRendererProps {
   /** Form field to render */
@@ -110,7 +105,8 @@ export const CardFieldRenderer: React.FC<CardFieldRendererProps> = ({
       `}
     >
       {/* Label */}
-      <dt className="
+      <dt
+        className="
         text-[11px] font-medium uppercase tracking-wider
         text-gray-400
         mb-1
@@ -118,31 +114,35 @@ export const CardFieldRenderer: React.FC<CardFieldRendererProps> = ({
         group-hover/field:text-gray-500
         dark:text-gray-500
         dark:group-hover/field:text-gray-400
-      ">
+      "
+      >
         {label}
       </dt>
 
       {/* Value */}
-      <dd className="
+      <dd
+        className="
         text-[13px] font-medium leading-relaxed
         text-gray-700 dark:text-gray-200
         min-h-[20px]
-      ">
+      "
+      >
         {isLoading ? (
-          <span className="
+          <span
+            className="
             inline-block h-5 w-24
             animate-pulse rounded-md
             bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100
             dark:from-gray-800 dark:via-gray-700 dark:to-gray-800
             bg-[length:200%_100%]
-          " />
+          "
+          />
         ) : (
-          <span className={`
-            ${shouldBeFullWidth
-              ? 'whitespace-pre-wrap break-words'
-              : 'line-clamp-2'
-            }
-          `}>
+          <span
+            className={`
+            ${shouldBeFullWidth ? 'whitespace-pre-wrap break-words' : 'line-clamp-2'}
+          `}
+          >
             {renderedValue}
           </span>
         )}

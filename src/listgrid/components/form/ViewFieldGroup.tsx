@@ -7,20 +7,20 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {EntityField} from '../../config/EntityField';
-import React, {useEffect, useMemo, useState} from "react";
-import {FormField, FULL_WIDTH_FIELD_TYPES} from '../fields/abstract';
-import {FieldRenderer} from './FieldRenderer';
-import {EntityFieldGroup} from '../../config/EntityFieldGroup';
-import {SubCollectionField} from '../../config/SubCollectionField';
-import {isEmpty} from "../../utils";
-import {SubCollectionRenderer} from './SubCollectionRenderer';
-import {EntityFormManageable} from './types/ViewEntityForm.types';
-import {getTranslation} from "../../utils/i18n";
-import {isBlank} from '../../utils/StringUtil';
-import {ViewHelpIcon} from './ui/ViewHelpIcon';
-import {Session} from '../../auth/types';
-import {useEntityFormTheme} from "./context/EntityFormThemeContext";
+import { EntityField } from '../../config/EntityField';
+import React, { useEffect, useMemo, useState } from 'react';
+import { FormField, FULL_WIDTH_FIELD_TYPES } from '../fields/abstract';
+import { FieldRenderer } from './FieldRenderer';
+import { EntityFieldGroup } from '../../config/EntityFieldGroup';
+import { SubCollectionField } from '../../config/SubCollectionField';
+import { isEmpty } from '../../utils';
+import { SubCollectionRenderer } from './SubCollectionRenderer';
+import { EntityFormManageable } from './types/ViewEntityForm.types';
+import { getTranslation } from '../../utils/i18n';
+import { isBlank } from '../../utils/StringUtil';
+import { ViewHelpIcon } from './ui/ViewHelpIcon';
+import { Session } from '../../auth/types';
+import { useEntityFormTheme } from './context/EntityFormThemeContext';
 
 /**
  * 필드와 서브콜렉션을 통합한 렌더링 아이템 타입
@@ -68,7 +68,16 @@ function getFieldColSpanClass(field: FormField<any>): string {
   return '';
 }
 
-export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollectionEntity, session, createStepFields, hideMappedByFields, ...props}: ViewFieldGroupProps) => {
+export const ViewFieldGroup = ({
+  entityForm,
+  setEntityForm,
+  readonly,
+  subCollectionEntity,
+  session,
+  createStepFields,
+  hideMappedByFields,
+  ...props
+}: ViewFieldGroupProps) => {
   const { classNames, cn } = useEntityFormTheme();
 
   // 현재 그룹의 필드, 서브콜렉션, 그룹 정보 상태
@@ -122,7 +131,7 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
     // 3. Nested pattern prefix (e.g., "student.", "enrollment.student.")
     const nestedPattern = `${baseField}.`;
 
-    return fields.filter(field => {
+    return fields.filter((field) => {
       if (!(field instanceof FormField)) {
         return true; // Keep non-FormField items
       }
@@ -148,13 +157,13 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
     // On mount, fetch fields, sub-collections, and group info asynchronously
     (async () => {
       const fieldInfo: {
-        fieldGroup?: EntityFieldGroup,
-        fields?: EntityField[]
+        fieldGroup?: EntityFieldGroup;
+        fields?: EntityField[];
       } = await entityForm?.getVisibleFields(props.tabId, props.groupId, session, createStepFields);
 
       setFieldGroup(fieldInfo?.fieldGroup);
       setFields(fieldInfo?.fields ?? []);
-      
+
       // fieldGroup의 config.open 값으로 초기 상태 설정
       // Set initial state based on fieldGroup's config.open value
       if (fieldInfo?.fieldGroup) {
@@ -162,8 +171,8 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
       }
 
       const collectionInfo: {
-        fieldGroup?: EntityFieldGroup,
-        collections?: SubCollectionField[]
+        fieldGroup?: EntityFieldGroup;
+        collections?: SubCollectionField[];
       } = await entityForm?.getVisibleCollections(props.tabId, props.groupId, session);
       setSubCollections(collectionInfo?.collections ?? []);
 
@@ -174,7 +183,14 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
       const fieldGroups = entityForm.getTab(props.tabId)?.fieldGroups ?? [];
       if (fieldGroups.length > 1) {
         for (const fieldGroup of fieldGroups) {
-          if (fieldGroup.id !== props.groupId && await entityForm.isViewableFieldGroup({tabId: props.tabId, fieldGroupId: fieldGroup.id, createStepFields})) {
+          if (
+            fieldGroup.id !== props.groupId &&
+            (await entityForm.isViewableFieldGroup({
+              tabId: props.tabId,
+              fieldGroupId: fieldGroup.id,
+              createStepFields,
+            }))
+          ) {
             collapsable = true;
             break;
           }
@@ -187,14 +203,13 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
   // 필드 또는 서브콜렉션이 하나라도 있으면 표시 (필터링된 필드 기준)
   // Show if there is at least one field or sub-collection (using filtered fields)
   const showFields = !isEmpty(filteredFields);
-  const showCollections = (entityForm?.id !== undefined && !isEmpty(subCollections));
+  const showCollections = entityForm?.id !== undefined && !isEmpty(subCollections);
 
   // 그룹 정보가 없거나, 표시할 필드/서브콜렉션이 없으면 렌더링하지 않음
   // If no group info or nothing to show, do not render
-  if (fieldGroup === undefined || !(showFields || showCollections))
-    return null;
+  if (fieldGroup === undefined || !(showFields || showCollections)) return null;
 
-  const {t} = getTranslation();
+  const { t } = getTranslation();
   const helpText = fieldGroup.description ? t(fieldGroup.description) : '';
 
   // SubCollection 인라인 모드: 컴팩트한 패널 박스 스타일
@@ -203,78 +218,128 @@ export const ViewFieldGroup = ({entityForm, setEntityForm, readonly, subCollecti
     ? 'rcm-fieldgroup-subcollection'
     : cn('rcm-fieldgroup', classNames.fieldGroup?.container);
 
-  return <>
-    <div className={containerClass}>
-      <div className={cn(open ? 'rcm-fieldgroup-header' : '', subCollectionEntity ? '' : classNames.fieldGroup?.header)}>
-        <div className="rcm-row-between">
-          <h5 className={cn('rcm-fieldgroup-title', subCollectionEntity ? '' : classNames.fieldGroup?.title)}>
-            {fieldGroup.label}
-            <div className={cn('rcm-row rcm-gap-sm', subCollectionEntity ? '' : classNames.fieldGroup?.actions)}>
-              {/* 도움말 아이콘: 그룹 설명이 있을 때만 표시 */}
-              {/* Help icon: only show if group has description */}
-              {!isBlank(helpText) && <ViewHelpIcon helpText={helpText}/>}
-              {/* 접기/펼치기 토글: collapsable일 때만 표시 */}
-              {/* Collapse/expand toggle: only show if collapsable */}
-            {collapsable && <span className={cn('rcm-fieldgroup-collapse', subCollectionEntity ? '' : classNames.fieldGroup?.collapseToggle)} onClick={() => {
-              setOpen(!open)
-            }}>
-
-              <div className={open ? '' : 'rcm-rotate-180'}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
-                                     fill="none">
-                                  <path stroke="#5B6B79" strokeLinecap="round" strokeLinejoin="round"
-                                        strokeMiterlimit="10" strokeWidth="1.5"
-                                        d="M19.92 15.05L13.4 8.53c-.77-.77-2.03-.77-2.8 0l-6.52 6.52"></path>
-                                </svg>
+  return (
+    <>
+      <div className={containerClass}>
+        <div
+          className={cn(
+            open ? 'rcm-fieldgroup-header' : '',
+            subCollectionEntity ? '' : classNames.fieldGroup?.header,
+          )}
+        >
+          <div className="rcm-row-between">
+            <h5
+              className={cn(
+                'rcm-fieldgroup-title',
+                subCollectionEntity ? '' : classNames.fieldGroup?.title,
+              )}
+            >
+              {fieldGroup.label}
+              <div
+                className={cn(
+                  'rcm-row rcm-gap-sm',
+                  subCollectionEntity ? '' : classNames.fieldGroup?.actions,
+                )}
+              >
+                {/* 도움말 아이콘: 그룹 설명이 있을 때만 표시 */}
+                {/* Help icon: only show if group has description */}
+                {!isBlank(helpText) && <ViewHelpIcon helpText={helpText} />}
+                {/* 접기/펼치기 토글: collapsable일 때만 표시 */}
+                {/* Collapse/expand toggle: only show if collapsable */}
+                {collapsable && (
+                  <span
+                    className={cn(
+                      'rcm-fieldgroup-collapse',
+                      subCollectionEntity ? '' : classNames.fieldGroup?.collapseToggle,
+                    )}
+                    onClick={() => {
+                      setOpen(!open);
+                    }}
+                  >
+                    <div className={open ? '' : 'rcm-rotate-180'}>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <path
+                          stroke="#5B6B79"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeMiterlimit="10"
+                          strokeWidth="1.5"
+                          d="M19.92 15.05L13.4 8.53c-.77-.77-2.03-.77-2.8 0l-6.52 6.52"
+                        ></path>
+                      </svg>
+                    </div>
+                  </span>
+                )}
               </div>
-            </span>}
-            </div>
-
-          </h5>
+            </h5>
+          </div>
         </div>
+        {open && (
+          <div
+            className={cn(
+              subCollectionEntity ? 'rcm-stack' : 'rcm-field-grid',
+              subCollectionEntity ? undefined : classNames.fieldGroup?.content,
+            )}
+          >
+            {/* 필드 렌더링: FormField만 FieldRenderer로 출력 (hideMappedByFields로 필터링됨) */}
+            {/* Render fields: only FormField is rendered by FieldRenderer (filtered by hideMappedByFields) */}
+            {filteredFields?.map((field, index) => {
+              if (field instanceof FormField) {
+                if (readonly) {
+                  field.withReadOnly(true);
+                }
+                // If the previous field has lineBreak, force this field to start at column 1
+                const prevField = index > 0 ? filteredFields?.[index - 1] : null;
+                const forceNewRow = prevField instanceof FormField && prevField.lineBreak;
+                const colSpanClass = getFieldColSpanClass(field);
+                const className = forceNewRow ? `${colSpanClass} rcm-col-start-1-lg` : colSpanClass;
+                return (
+                  <div key={field.getName()} className={className}>
+                    <FieldRenderer
+                      field={field}
+                      entityForm={entityForm}
+                      setEntityForm={setEntityForm}
+                      subCollectionEntity={subCollectionEntity}
+                      session={session}
+                      resetEntityForm={props.resetEntityForm}
+                    />
+                  </div>
+                );
+              } else {
+                return null;
+              }
+            })}
+
+            {/* 서브콜렉션 렌더링: subCollections가 있을 때만 출력 */}
+            {/* Render sub-collections: only if subCollections exist */}
+            {showCollections &&
+              subCollections?.map((collection) => {
+                if (readonly) {
+                  collection.withReadOnly(true);
+                }
+
+                return (
+                  <div
+                    key={`subCollection_${collection.getName()}_${entityForm.id}`}
+                    className="rcm-col-span-full"
+                  >
+                    <SubCollectionRenderer
+                      entityForm={entityForm}
+                      collection={collection}
+                      session={session}
+                    />
+                  </div>
+                );
+              })}
+          </div>
+        )}
       </div>
-      {open && <div className={cn(subCollectionEntity ? 'rcm-stack' : 'rcm-field-grid', subCollectionEntity ? undefined : classNames.fieldGroup?.content)}>
-        {/* 필드 렌더링: FormField만 FieldRenderer로 출력 (hideMappedByFields로 필터링됨) */}
-        {/* Render fields: only FormField is rendered by FieldRenderer (filtered by hideMappedByFields) */}
-        {filteredFields?.map((field, index) => {
-          if (field instanceof FormField) {
-            if (readonly) {
-              field.withReadOnly(true);
-            }
-            // If the previous field has lineBreak, force this field to start at column 1
-            const prevField = index > 0 ? filteredFields?.[index - 1] : null;
-            const forceNewRow = prevField instanceof FormField && prevField.lineBreak;
-            const colSpanClass = getFieldColSpanClass(field);
-            const className = forceNewRow ? `${colSpanClass} rcm-col-start-1-lg` : colSpanClass;
-            return <div key={field.getName()} className={className}>
-              <FieldRenderer field={field} entityForm={entityForm}
-                                  setEntityForm={setEntityForm} subCollectionEntity={subCollectionEntity}
-                                  session={session} resetEntityForm={props.resetEntityForm}/>
-            </div>
-          } else {
-            return null;
-          }
-        })}
-
-        {/* 서브콜렉션 렌더링: subCollections가 있을 때만 출력 */}
-        {/* Render sub-collections: only if subCollections exist */}
-        {showCollections &&
-          subCollections?.map((collection) => {
-
-            if (readonly) {
-              collection.withReadOnly(true);
-            }
-
-            return <div key={`subCollection_${collection.getName()}_${entityForm.id}`} className="rcm-col-span-full">
-              <SubCollectionRenderer
-                entityForm={entityForm}
-                collection={collection}
-                session={session}/>
-            </div>
-          })
-        }
-
-      </div>}
-    </div>
-  </>;
-}
+    </>
+  );
+};

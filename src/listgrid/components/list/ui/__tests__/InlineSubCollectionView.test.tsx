@@ -1,10 +1,14 @@
 import { describe, it, test, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import React from 'react';
-import {render, screen} from '@testing-library/react';
-import {InlineSubCollectionView} from '../InlineSubCollectionView';
-import {EntityForm} from '../../../../config/EntityForm';
-import {InlineRowAction, InlineRowActionColumn, InlineRowActionsConfig} from '../../../../config/InlineSubCollectionField';
-import {ViewListGrid} from '../../ViewListGrid';
+import { render, screen } from '@testing-library/react';
+import { InlineSubCollectionView } from '../InlineSubCollectionView';
+import { EntityForm } from '../../../../config/EntityForm';
+import {
+  InlineRowAction,
+  InlineRowActionColumn,
+  InlineRowActionsConfig,
+} from '../../../../config/InlineSubCollectionField';
+import { ViewListGrid } from '../../ViewListGrid';
 
 // Mock ViewListGrid component
 vi.mock('../../ViewListGrid', () => ({
@@ -61,25 +65,31 @@ describe('InlineSubCollectionView', () => {
       withParentId: vi.fn().mockReturnThis(),
       setValue: vi.fn(),
       fields: new Map<string, any>([
-        ['id', {
-          name: 'id',
-          type: 'text',
-          hidden: true,
-          getLabel: () => 'ID',
-          getName: () => 'id',
-          isSupportList: () => false,
-        }],
-        ['name', {
-          name: 'name',
-          type: 'text',
-          hidden: false,
-          getLabel: () => '이름',
-          getName: () => 'name',
-          isSupportList: () => true,
-          useListField: vi.fn(),
-          withListConfig: vi.fn(),
-          getListConfig: () => ({ support: true }),
-        }],
+        [
+          'id',
+          {
+            name: 'id',
+            type: 'text',
+            hidden: true,
+            getLabel: () => 'ID',
+            getName: () => 'id',
+            isSupportList: () => false,
+          },
+        ],
+        [
+          'name',
+          {
+            name: 'name',
+            type: 'text',
+            hidden: false,
+            getLabel: () => '이름',
+            getName: () => 'name',
+            isSupportList: () => true,
+            useListField: vi.fn(),
+            withListConfig: vi.fn(),
+            getListConfig: () => ({ support: true }),
+          },
+        ],
       ]),
     } as any;
 
@@ -99,7 +109,7 @@ describe('InlineSubCollectionView', () => {
           entityForm={mockEntityForm}
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       expect(screen.getByTestId('view-list-grid')).toBeInTheDocument();
@@ -114,7 +124,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           tooltip="This is a helpful tooltip"
-        />
+        />,
       );
 
       expect(screen.getByText('This is a helpful tooltip')).toBeInTheDocument();
@@ -129,7 +139,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           hideTitle={true}
-        />
+        />,
       );
 
       expect(screen.getByTestId('list-grid-hide-title')).toHaveTextContent('true');
@@ -145,7 +155,7 @@ describe('InlineSubCollectionView', () => {
           entityForm={mockEntityForm}
           relation={{ mappedBy: 'parentId' }}
           readonly={true}
-        />
+        />,
       );
 
       expect(screen.getByTestId('list-grid-readonly')).toHaveTextContent('true');
@@ -159,7 +169,7 @@ describe('InlineSubCollectionView', () => {
           entityForm={mockEntityForm}
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       expect(screen.getByTestId('list-grid-readonly')).toHaveTextContent('false');
@@ -175,7 +185,7 @@ describe('InlineSubCollectionView', () => {
           entityForm={mockEntityForm}
           relation={{ mappedBy: 'studentId', filterBy: 'student.id' }}
           readonly={false}
-        />
+        />,
       );
 
       expect(ViewListGrid).toHaveBeenCalled();
@@ -191,7 +201,7 @@ describe('InlineSubCollectionView', () => {
           entityForm={mockEntityForm}
           relation={{ mappedBy: 'parentId', valueProperty: 'customId' }}
           readonly={false}
-        />
+        />,
       );
 
       // ViewListGrid should receive the filters callback that will use valueProperty
@@ -207,21 +217,27 @@ describe('InlineSubCollectionView', () => {
       const clonedEntityForm = {
         withParentId: vi.fn().mockReturnThis(),
         fields: new Map([
-          ['name', {
-            name: 'name',
-            isSupportList: () => true,
-            useListField: vi.fn(),
-            withListConfig: vi.fn(),
-            getListConfig: () => ({ support: true }),
-          }],
-          ['status', {
-            name: 'status',
-            isSupportList: () => true,
-            useListField: vi.fn(),
-            withListConfig: vi.fn(),
-            getListConfig: () => ({ support: true }),
-            listConfig: { support: true },
-          }],
+          [
+            'name',
+            {
+              name: 'name',
+              isSupportList: () => true,
+              useListField: vi.fn(),
+              withListConfig: vi.fn(),
+              getListConfig: () => ({ support: true }),
+            },
+          ],
+          [
+            'status',
+            {
+              name: 'status',
+              isSupportList: () => true,
+              useListField: vi.fn(),
+              withListConfig: vi.fn(),
+              getListConfig: () => ({ support: true }),
+              listConfig: { support: true },
+            },
+          ],
         ]),
       };
 
@@ -235,7 +251,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           listFields={['name', 'status']}
-        />
+        />,
       );
 
       expect(mockEntityForm.clone).toHaveBeenCalledWith(true);
@@ -248,13 +264,16 @@ describe('InlineSubCollectionView', () => {
       const clonedEntityForm = {
         withParentId: vi.fn().mockReturnThis(),
         fields: new Map([
-          ['name', {
-            name: 'name',
-            isSupportList: () => true,
-            useListField: useListFieldMock,
-            withListConfig: withListConfigMock,
-            getListConfig: () => ({ support: true, filterable: true }),
-          }],
+          [
+            'name',
+            {
+              name: 'name',
+              isSupportList: () => true,
+              useListField: useListFieldMock,
+              withListConfig: withListConfigMock,
+              getListConfig: () => ({ support: true, filterable: true }),
+            },
+          ],
         ]),
       };
 
@@ -267,10 +286,8 @@ describe('InlineSubCollectionView', () => {
           entityForm={mockEntityForm}
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-          listFields={[
-            { name: 'name', listConfig: { filterable: false, sortable: true } },
-          ]}
-        />
+          listFields={[{ name: 'name', listConfig: { filterable: false, sortable: true } }]}
+        />,
       );
 
       expect(mockEntityForm.clone).toHaveBeenCalled();
@@ -284,13 +301,16 @@ describe('InlineSubCollectionView', () => {
       const clonedEntityForm = {
         withParentId: vi.fn().mockReturnThis(),
         fields: new Map([
-          ['name', {
-            name: 'name',
-            isSupportList: () => true,
-            useListField: vi.fn(),
-            withListConfig: withListConfigMock,
-            getListConfig: () => ({ support: true }),
-          }],
+          [
+            'name',
+            {
+              name: 'name',
+              isSupportList: () => true,
+              useListField: vi.fn(),
+              withListConfig: withListConfigMock,
+              getListConfig: () => ({ support: true }),
+            },
+          ],
         ]),
       };
 
@@ -308,7 +328,7 @@ describe('InlineSubCollectionView', () => {
             sortable: false,
             quickSearch: false,
           }}
-        />
+        />,
       );
 
       expect(mockEntityForm.clone).toHaveBeenCalled();
@@ -332,7 +352,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           rowActions={[]}
-        />
+        />,
       );
 
       expect(clonedEntityForm.fields.has('_rowActions__default')).toBe(false);
@@ -358,7 +378,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           rowActions={rowActions}
-        />
+        />,
       );
 
       expect(clonedEntityForm.fields.has('_rowActions__default')).toBe(true);
@@ -384,7 +404,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={true}
           rowActions={rowActions}
-        />
+        />,
       );
 
       // rowActions are now shown even in readonly mode
@@ -420,7 +440,7 @@ describe('InlineSubCollectionView', () => {
           readonly={false}
           rowActions={rowActions}
           rowActionsConfig={rowActionsConfig}
-        />
+        />,
       );
 
       // Verify that the action field was added
@@ -453,7 +473,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           rowActions={rowActions}
-        />
+        />,
       );
 
       const actionField = clonedEntityForm.fields.get('_rowActions__default');
@@ -480,7 +500,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           rowActions={rowActions}
-        />
+        />,
       );
 
       const actionField = clonedEntityForm.fields.get('_rowActions__default');
@@ -498,7 +518,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           pagination={{ pageSize: 20, clientSide: true }}
-        />
+        />,
       );
 
       expect(ViewListGrid).toHaveBeenCalled();
@@ -523,7 +543,7 @@ describe('InlineSubCollectionView', () => {
           entityForm={mockEntityForm}
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
-        />
+        />,
       );
 
       // Component should render with initial key
@@ -545,7 +565,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           viewListOptions={customViewListOptions as any}
-        />
+        />,
       );
 
       expect(ViewListGrid).toHaveBeenCalled();
@@ -568,17 +588,13 @@ describe('InlineSubCollectionView', () => {
           id: 'management',
           label: '관리',
           order: 100,
-          actions: [
-            { id: 'edit', label: '수정', onClick: async () => {} },
-          ],
+          actions: [{ id: 'edit', label: '수정', onClick: async () => {} }],
         },
         {
           id: 'shortcuts',
           label: '바로가기',
           order: 200,
-          actions: [
-            { id: 'view', label: '상세보기', onClick: async () => {} },
-          ],
+          actions: [{ id: 'view', label: '상세보기', onClick: async () => {} }],
         },
       ];
 
@@ -590,7 +606,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           rowActionColumns={rowActionColumns}
-        />
+        />,
       );
 
       // Should have two action fields with different ids
@@ -611,17 +627,13 @@ describe('InlineSubCollectionView', () => {
           id: 'first',
           label: '첫번째',
           order: 10,
-          actions: [
-            { id: 'action1', label: 'Action 1', onClick: async () => {} },
-          ],
+          actions: [{ id: 'action1', label: 'Action 1', onClick: async () => {} }],
         },
         {
           id: 'second',
           label: '두번째',
           order: 20,
-          actions: [
-            { id: 'action2', label: 'Action 2', onClick: async () => {} },
-          ],
+          actions: [{ id: 'action2', label: 'Action 2', onClick: async () => {} }],
         },
       ];
 
@@ -633,7 +645,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           rowActionColumns={rowActionColumns}
-        />
+        />,
       );
 
       const firstField = clonedEntityForm.fields.get('_rowActions_first');
@@ -653,18 +665,14 @@ describe('InlineSubCollectionView', () => {
 
       mockEntityForm.clone.mockReturnValue(clonedEntityForm as any);
 
-      const rowActions: InlineRowAction[] = [
-        { id: 'old', label: 'Old', onClick: async () => {} },
-      ];
+      const rowActions: InlineRowAction[] = [{ id: 'old', label: 'Old', onClick: async () => {} }];
 
       const rowActionColumns: InlineRowActionColumn[] = [
         {
           id: 'new',
           label: 'New',
           order: 10,
-          actions: [
-            { id: 'new-action', label: 'New Action', onClick: async () => {} },
-          ],
+          actions: [{ id: 'new-action', label: 'New Action', onClick: async () => {} }],
         },
       ];
 
@@ -677,7 +685,7 @@ describe('InlineSubCollectionView', () => {
           readonly={false}
           rowActions={rowActions}
           rowActionColumns={rowActionColumns}
-        />
+        />,
       );
 
       // Should use rowActionColumns, not the deprecated rowActions
@@ -698,15 +706,13 @@ describe('InlineSubCollectionView', () => {
           id: 'empty',
           label: 'Empty',
           order: 10,
-          actions: [],  // Empty actions array
+          actions: [], // Empty actions array
         },
         {
           id: 'nonempty',
           label: 'Non-Empty',
           order: 20,
-          actions: [
-            { id: 'action', label: 'Action', onClick: async () => {} },
-          ],
+          actions: [{ id: 'action', label: 'Action', onClick: async () => {} }],
         },
       ];
 
@@ -718,7 +724,7 @@ describe('InlineSubCollectionView', () => {
           relation={{ mappedBy: 'parentId' }}
           readonly={false}
           rowActionColumns={rowActionColumns}
-        />
+        />,
       );
 
       // Empty column should not create a field

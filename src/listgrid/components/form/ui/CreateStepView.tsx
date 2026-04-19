@@ -1,9 +1,9 @@
-import React from "react";
-import {Stepper} from "../../../ui";
-import {Group} from "../../../ui";
-import {EntityForm} from '../../../config/EntityForm';
-import {Session} from '../../../auth/types';
-import {useEntityFormTheme} from "../context/EntityFormThemeContext";
+import React from 'react';
+import { Stepper } from '../../../ui';
+import { Group } from '../../../ui';
+import { EntityForm } from '../../../config/EntityForm';
+import { Session } from '../../../auth/types';
+import { useEntityFormTheme } from '../context/EntityFormThemeContext';
 
 /**
  * Validate current step fields and determine if step can advance
@@ -71,23 +71,31 @@ export const CreateStepView = React.memo(function CreateStepView({
   const { classNames, cn, stepperRenderer, buttonLabels } = useEntityFormTheme();
   const createSteps = entityForm.getCreateStep()!;
 
-  const stepsForRenderer = React.useMemo(() =>
-    createSteps.map(step => ({
-      id: step.id,
-      label: step.label,
-      description: step.description,
-    })),
-    [createSteps]
+  const stepsForRenderer = React.useMemo(
+    () =>
+      createSteps.map((step) => ({
+        id: step.id,
+        label: step.label,
+        description: step.description,
+      })),
+    [createSteps],
   );
 
-  const handleStepClick = React.useCallback((step: number) => {
-    if (step < currentStep) {
-      setCurrentStep(step);
-    }
-  }, [currentStep, setCurrentStep]);
+  const handleStepClick = React.useCallback(
+    (step: number) => {
+      if (step < currentStep) {
+        setCurrentStep(step);
+      }
+    },
+    [currentStep, setCurrentStep],
+  );
 
   const handleNext = React.useCallback(async () => {
-    const { canAdvance, updatedForm } = await validateAndAdvanceStep(entityForm, currentStep, session);
+    const { canAdvance, updatedForm } = await validateAndAdvanceStep(
+      entityForm,
+      currentStep,
+      session,
+    );
     setEntityForm(updatedForm);
     if (canAdvance) {
       setCurrentStep(currentStep + 1);
@@ -99,9 +107,11 @@ export const CreateStepView = React.memo(function CreateStepView({
   }, [currentStep, setCurrentStep]);
 
   return (
-    <div className={cn("rcm-create-step-container", classNames.createStep?.container)}>
-      <div className={cn("rcm-create-step-panel", classNames.createStep?.panel)}>
-        <div className={cn("rcm-create-step-stepper-wrapper", classNames.createStep?.stepperWrapper)}>
+    <div className={cn('rcm-create-step-container', classNames.createStep?.container)}>
+      <div className={cn('rcm-create-step-panel', classNames.createStep?.panel)}>
+        <div
+          className={cn('rcm-create-step-stepper-wrapper', classNames.createStep?.stepperWrapper)}
+        >
           {showStepper ? (
             stepperRenderer ? (
               (() => {
@@ -116,30 +126,26 @@ export const CreateStepView = React.memo(function CreateStepView({
                 );
               })()
             ) : (
-              <Stepper
-                active={currentStep}
-                onStepClick={handleStepClick}
-              >
+              <Stepper active={currentStep} onStepClick={handleStepClick}>
                 {createSteps.map((step) => (
-                  <Stepper.Step
-                    key={step.id}
-                    label={step.label}
-                    description={step.description}
-                  />
+                  <Stepper.Step key={step.id} label={step.label} description={step.description} />
                 ))}
               </Stepper>
             )
           ) : (
-            <div className={cn("rcm-create-step-label", classNames.createStep?.stepLabel)}>
+            <div className={cn('rcm-create-step-label', classNames.createStep?.stepLabel)}>
               {createSteps[currentStep]!.label}
             </div>
           )}
         </div>
         {buttonPosition === 'top' && (
-          <Group justify="center" className={cn("rcm-create-step-button-group", classNames.createStep?.buttonGroup)}>
+          <Group
+            justify="center"
+            className={cn('rcm-create-step-button-group', classNames.createStep?.buttonGroup)}
+          >
             <button
               type="button"
-              className={cn("rcm-button", classNames.createStep?.prevButton)}
+              className={cn('rcm-button', classNames.createStep?.prevButton)}
               onClick={handlePrev}
               disabled={currentStep === 0}
             >
@@ -148,7 +154,7 @@ export const CreateStepView = React.memo(function CreateStepView({
             {currentStep < maxStep && (
               <button
                 type="button"
-                className={cn("rcm-button", classNames.createStep?.nextButton)}
+                className={cn('rcm-button', classNames.createStep?.nextButton)}
                 data-variant="primary"
                 onClick={handleNext}
                 disabled={currentStep === maxStep}
@@ -159,7 +165,7 @@ export const CreateStepView = React.memo(function CreateStepView({
             {currentStep === maxStep && (
               <button
                 type="button"
-                className={cn("rcm-button", classNames.createStep?.saveButton)}
+                className={cn('rcm-button', classNames.createStep?.saveButton)}
                 data-variant="primary"
                 onClick={onClickSaveButton}
               >

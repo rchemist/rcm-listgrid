@@ -7,13 +7,13 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React, {ReactNode, useCallback, useMemo, useState} from 'react';
-import {EntityForm} from '../../../config/EntityForm';
-import {Session} from '../../../auth/types';
-import {FilterItem, SearchForm} from '../../../form/SearchForm';
-import {ListGrid} from '../../../config/ListGrid';
-import {ViewListGrid} from '../ViewListGrid';
-import {ViewListGridOptionProps} from '../types/ViewListGrid.types';
+import React, { ReactNode, useCallback, useMemo, useState } from 'react';
+import { EntityForm } from '../../../config/EntityForm';
+import { Session } from '../../../auth/types';
+import { FilterItem, SearchForm } from '../../../form/SearchForm';
+import { ListGrid } from '../../../config/ListGrid';
+import { ViewListGrid } from '../ViewListGrid';
+import { ViewListGridOptionProps } from '../types/ViewListGrid.types';
 import {
   InlineGlobalListConfig,
   InlineListFieldConfig,
@@ -28,12 +28,12 @@ import {
   IListConfig,
   ListableFormField,
   ViewListProps,
-  ViewListResult
+  ViewListResult,
 } from '../../fields/abstract/ListableFormField';
-import {Tooltip} from '../../../ui';
-import {useLoadingStore} from '../../../loading';
-import {showAlert} from '../../../message';
-import {FieldRenderParameters} from '../../../config/EntityField';
+import { Tooltip } from '../../../ui';
+import { useLoadingStore } from '../../../loading';
+import { showAlert } from '../../../message';
+import { FieldRenderParameters } from '../../../config/EntityField';
 
 export interface InlineSubCollectionViewProps {
   parentEntityForm: EntityForm;
@@ -75,7 +75,7 @@ class InlineRowActionField extends ListableFormField<InlineRowActionField> {
     rowActions: InlineRowAction[],
     onActionHandler: (action: InlineRowAction, item: any) => Promise<void>,
     columnLabel?: string,
-    columnOrder?: number
+    columnOrder?: number,
   ) {
     const order = columnOrder ?? 9999;
     const fieldName = `_rowActions_${columnId}`;
@@ -99,7 +99,13 @@ class InlineRowActionField extends ListableFormField<InlineRowActionField> {
   }
 
   protected createInstance(name: string, order: number): InlineRowActionField {
-    return new InlineRowActionField(this.columnId, this.rowActions, this.onActionHandler, this.columnLabel, this.columnOrder);
+    return new InlineRowActionField(
+      this.columnId,
+      this.rowActions,
+      this.onActionHandler,
+      this.columnLabel,
+      this.columnOrder,
+    );
   }
 
   protected async renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
@@ -113,7 +119,7 @@ class InlineRowActionField extends ListableFormField<InlineRowActionField> {
       return { result: null, linkOnCell: false };
     }
 
-    const visibleActions = this.rowActions.filter(action => !action.hidden?.(item));
+    const visibleActions = this.rowActions.filter((action) => !action.hidden?.(item));
 
     if (visibleActions.length === 0) {
       return { result: null, linkOnCell: false };
@@ -121,7 +127,7 @@ class InlineRowActionField extends ListableFormField<InlineRowActionField> {
 
     const buttons = (
       <div className="rcm-inline-action-row">
-        {visibleActions.map(action => {
+        {visibleActions.map((action) => {
           const label = typeof action.label === 'function' ? action.label(item) : action.label;
           const isDisabled = action.disabled?.(item) ?? false;
 
@@ -181,39 +187,43 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
 
   // Refresh function for row actions
   const refresh = useCallback(() => {
-    setRefreshKey(prev => prev + 1);
+    setRefreshKey((prev) => prev + 1);
   }, []);
 
   // Handle row action click
-  const handleRowAction = useCallback(async (action: InlineRowAction, item: any) => {
-    // Check if disabled
-    if (action.disabled?.(item)) {
-      return;
-    }
-
-    // Confirmation if needed
-    if (action.confirm) {
-      const message = typeof action.confirm === 'function' ? action.confirm(item) : action.confirm;
-      const confirmed = window.confirm(message);
-      if (!confirmed) {
+  const handleRowAction = useCallback(
+    async (action: InlineRowAction, item: any) => {
+      // Check if disabled
+      if (action.disabled?.(item)) {
         return;
       }
-    }
 
-    try {
-      setOpenBaseLoading(true);
-      // Pass the configuredEntityForm from the ref
-      await action.onClick(item, entityForm.clone(true).withParentId(parentId), refresh);
-    } catch (error) {
-      console.error('Row action error:', error);
-      showAlert({
-        message: error instanceof Error ? error.message : '작업 중 오류가 발생했습니다.',
-        topLayer: true,
-      });
-    } finally {
-      setOpenBaseLoading(false);
-    }
-  }, [entityForm, parentId, refresh, setOpenBaseLoading]);
+      // Confirmation if needed
+      if (action.confirm) {
+        const message =
+          typeof action.confirm === 'function' ? action.confirm(item) : action.confirm;
+        const confirmed = window.confirm(message);
+        if (!confirmed) {
+          return;
+        }
+      }
+
+      try {
+        setOpenBaseLoading(true);
+        // Pass the configuredEntityForm from the ref
+        await action.onClick(item, entityForm.clone(true).withParentId(parentId), refresh);
+      } catch (error) {
+        console.error('Row action error:', error);
+        showAlert({
+          message: error instanceof Error ? error.message : '작업 중 오류가 발생했습니다.',
+          topLayer: true,
+        });
+      } finally {
+        setOpenBaseLoading(false);
+      }
+    },
+    [entityForm, parentId, refresh, setOpenBaseLoading],
+  );
 
   // Clone entityForm and apply field overrides
   const configuredEntityForm = useMemo(() => {
@@ -221,10 +231,10 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
 
     // Apply list field overrides
     if (listFields && listFields.length > 0) {
-      const fieldNames = listFields.map(f => typeof f === 'string' ? f : f.name);
+      const fieldNames = listFields.map((f) => (typeof f === 'string' ? f : f.name));
       const fieldConfigs = new Map<string, Partial<IListConfig>>();
 
-      listFields.forEach(f => {
+      listFields.forEach((f) => {
         if (typeof f !== 'string' && f.listConfig) {
           fieldConfigs.set(f.name, f.listConfig);
         }
@@ -284,14 +294,14 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
     // rowActionColumns is the new format, rowActions is deprecated but still supported for backward compatibility
     if (rowActionColumns && rowActionColumns.length > 0) {
       // Use new rowActionColumns format - each column becomes a separate field
-      rowActionColumns.forEach(column => {
+      rowActionColumns.forEach((column) => {
         if (column.actions && column.actions.length > 0) {
           const actionField = new InlineRowActionField(
             column.id,
             column.actions,
             handleRowAction,
             column.label,
-            column.order
+            column.order,
           );
           cloned.fields.set(`_rowActions_${column.id}`, actionField);
         }
@@ -303,13 +313,23 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
         rowActions,
         handleRowAction,
         rowActionsConfig?.label,
-        rowActionsConfig?.order
+        rowActionsConfig?.order,
       );
       cloned.fields.set('_rowActions__default', actionField);
     }
 
     return cloned;
-  }, [entityForm, parentId, listFields, globalListConfig, rowActions, rowActionsConfig, rowActionColumns, readonly, handleRowAction]);
+  }, [
+    entityForm,
+    parentId,
+    listFields,
+    globalListConfig,
+    rowActions,
+    rowActionsConfig,
+    rowActionColumns,
+    readonly,
+    handleRowAction,
+  ]);
 
   // Create ListGrid
   const listGrid = useMemo(() => {
@@ -317,47 +337,54 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
   }, [configuredEntityForm]);
 
   // Build filters with mappedBy
-  const buildFilters = useCallback(async (ef: EntityForm): Promise<{ condition: 'AND' | 'OR'; items: FilterItem[] }[]> => {
-    // Get mappedBy filter
-    const mappedBy = relation.mappedBy;
-    const filterBy = relation.filterBy ?? (mappedBy.endsWith('Id') ? mappedBy.replace('Id', '') + '.id' : mappedBy);
-    const valueProperty = relation.valueProperty ?? 'id';
+  const buildFilters = useCallback(
+    async (ef: EntityForm): Promise<{ condition: 'AND' | 'OR'; items: FilterItem[] }[]> => {
+      // Get mappedBy filter
+      const mappedBy = relation.mappedBy;
+      const filterBy =
+        relation.filterBy ??
+        (mappedBy.endsWith('Id') ? mappedBy.replace('Id', '') + '.id' : mappedBy);
+      const valueProperty = relation.valueProperty ?? 'id';
 
-    let mappedByValue: string | number | undefined;
-    if (valueProperty === 'id') {
-      mappedByValue = parentId;
-    } else {
-      const value = parentEntityForm.getValue(valueProperty);
-      if (typeof value === 'string' || typeof value === 'number') {
-        mappedByValue = value;
-      }
-    }
-
-    const mappedByFilter: FilterItem = {
-      name: filterBy,
-      value: mappedByValue !== undefined ? String(mappedByValue) : undefined,
-    };
-
-    // Apply user-defined filters if any
-    if (fetchOptions?.filters) {
-      const additionalFilters = await fetchOptions.filters(ef);
-      if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
-        const hasMappedByFilter = additionalFilters[0]!.items.some(
-          (item: FilterItem) => item.name === mappedByFilter.name
-        );
-        if (!hasMappedByFilter) {
-          additionalFilters[0]!.items.unshift(mappedByFilter);
+      let mappedByValue: string | number | undefined;
+      if (valueProperty === 'id') {
+        mappedByValue = parentId;
+      } else {
+        const value = parentEntityForm.getValue(valueProperty);
+        if (typeof value === 'string' || typeof value === 'number') {
+          mappedByValue = value;
         }
-        return additionalFilters;
       }
-    }
 
-    // Return default filter
-    return [{
-      condition: 'AND',
-      items: [mappedByFilter],
-    }];
-  }, [relation, parentId, parentEntityForm, fetchOptions]);
+      const mappedByFilter: FilterItem = {
+        name: filterBy,
+        value: mappedByValue !== undefined ? String(mappedByValue) : undefined,
+      };
+
+      // Apply user-defined filters if any
+      if (fetchOptions?.filters) {
+        const additionalFilters = await fetchOptions.filters(ef);
+        if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
+          const hasMappedByFilter = additionalFilters[0]!.items.some(
+            (item: FilterItem) => item.name === mappedByFilter.name,
+          );
+          if (!hasMappedByFilter) {
+            additionalFilters[0]!.items.unshift(mappedByFilter);
+          }
+          return additionalFilters;
+        }
+      }
+
+      // Return default filter
+      return [
+        {
+          condition: 'AND',
+          items: [mappedByFilter],
+        },
+      ];
+    },
+    [relation, parentId, parentEntityForm, fetchOptions],
+  );
 
   // Build ViewListGrid options
   const options: ViewListGridOptionProps = useMemo(() => {
@@ -387,11 +414,7 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
 
   return (
     <div className="inline-subcollection-view" key={`inline-sub-${refreshKey}`}>
-      {tooltip && (
-        <div className="rcm-inline-subcollection-tooltip">
-          {tooltip}
-        </div>
-      )}
+      {tooltip && <div className="rcm-inline-subcollection-tooltip">{tooltip}</div>}
       <ViewListGrid
         listGrid={listGrid}
         parentId={parentId}

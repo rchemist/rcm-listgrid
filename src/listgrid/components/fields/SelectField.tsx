@@ -5,16 +5,16 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React from "react";
-import {hexHash} from "../../utils/hash";
-import {CheckBoxChip} from "../../ui";
-import {MultiSelectBox} from "../../ui";
-import {RadioChip} from "../../ui";
-import {RadioInput} from "../../ui";
-import {SelectBox} from "../../ui";
-import {SelectOption} from "../../form/Type";
-import {FieldValue, RenderType} from '../../config/Config';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
+import React from 'react';
+import { hexHash } from '../../utils/hash';
+import { CheckBoxChip } from '../../ui';
+import { MultiSelectBox } from '../../ui';
+import { RadioChip } from '../../ui';
+import { RadioInput } from '../../ui';
+import { SelectBox } from '../../ui';
+import { SelectOption } from '../../form/Type';
+import { FieldValue, RenderType } from '../../config/Config';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
 import {
   OptionalField,
   OptionalFieldProps,
@@ -23,15 +23,15 @@ import {
   ViewListProps,
   ViewListResult,
   ViewRenderProps,
-  ViewRenderResult
+  ViewRenderResult,
 } from './abstract';
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {SelectFieldRenderer} from './SelectFieldRenderer';
-import {EntityForm} from '../../config/EntityForm';
-import {ValidateResult} from '../../validations/Validation';
-import {Badge} from "../../ui";
-import {ColorType} from "../../common/type";
-import {DynamicSelectFieldView} from "./view/DynamicSelectFieldView";
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { SelectFieldRenderer } from './SelectFieldRenderer';
+import { EntityForm } from '../../config/EntityForm';
+import { ValidateResult } from '../../validations/Validation';
+import { Badge } from '../../ui';
+import { ColorType } from '../../common/type';
+import { DynamicSelectFieldView } from './view/DynamicSelectFieldView';
 
 // SelectField loadOptions 캐시 (fieldName 기반, 동일 페이지 내에서 공유)
 const selectFieldOptionsCache = new Map<string, SelectOption[]>();
@@ -40,7 +40,6 @@ const selectFieldOptionsPending = new Map<string, Promise<SelectOption[]>>();
 
 // Checkbox 그룹으로 표시할 최대 옵션 수 (10개 미만이면 Checkbox, 10개 이상이면 MultiSelectBox)
 const CHECKBOX_THRESHOLD = 10;
-
 
 /**
  * 상태 변경 사유 입력 필드 설정
@@ -109,7 +108,7 @@ export interface ImmediateChangeProps {
    */
   onSubmit?: (
     entityForm: EntityForm,
-    submitData: { targetValue: FieldValue; formData: Record<string, any> }
+    submitData: { targetValue: FieldValue; formData: Record<string, any> },
   ) => Promise<false | Record<string, any> | void>;
 }
 
@@ -160,7 +159,13 @@ export class SelectField extends OptionalField<SelectField> {
   /** 옵션을 동적으로 로드하는 함수 */
   loadOptions?: OptionsLoader;
 
-  constructor(name: string, order: number, options?: SelectOption[], reason?: StatusChangeReason[], validateStatusChange?: StatusChangeValidation) {
+  constructor(
+    name: string,
+    order: number,
+    options?: SelectOption[],
+    reason?: StatusChangeReason[],
+    validateStatusChange?: StatusChangeValidation,
+  ) {
     super(name, order, 'select');
     this.options = options ?? [];
     this.reason = reason;
@@ -236,23 +241,35 @@ export class SelectField extends OptionalField<SelectField> {
     return (async () => {
       // combo 설정이 있으면 RadioInput 우선
       if (this.combo !== undefined && this.combo.direction !== undefined) {
-        return <RadioInput key={cacheKey}
-                          options={this.options!}
-                          combo={this.combo}
-                          {...await getInputRendererParameters(this, params)}></RadioInput>
+        return (
+          <RadioInput
+            key={cacheKey}
+            options={this.options!}
+            combo={this.combo}
+            {...await getInputRendererParameters(this, params)}
+          ></RadioInput>
+        );
       }
 
       // Chip UI 조건 충족 시 RadioChip 사용
       if (this.shouldRenderAsChip()) {
-        return <RadioChip key={cacheKey}
-                         options={this.options!}
-                         combo={{ direction: 'row' }}
-                         {...await getInputRendererParameters(this, params)}></RadioChip>;
+        return (
+          <RadioChip
+            key={cacheKey}
+            options={this.options!}
+            combo={{ direction: 'row' }}
+            {...await getInputRendererParameters(this, params)}
+          ></RadioChip>
+        );
       }
 
-      return <SelectBox key={cacheKey}
-                       options={this.options!}
-                       {...await getInputRendererParameters(this, params)}></SelectBox>;
+      return (
+        <SelectBox
+          key={cacheKey}
+          options={this.options!}
+          {...await getInputRendererParameters(this, params)}
+        ></SelectBox>
+      );
     })();
   }
 
@@ -273,7 +290,9 @@ export class SelectField extends OptionalField<SelectField> {
    * - 옵션 1-9개: Checkbox 그룹으로 모든 옵션을 한눈에 표시
    * - 옵션 10개 이상: MultiSelectBox(드롭다운)로 표시
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
       // 동적 옵션이 설정되고 아직 옵션이 로드되지 않은 경우
       if (this.loadOptions && (!this.options || this.options.length === 0)) {
@@ -286,36 +305,48 @@ export class SelectField extends OptionalField<SelectField> {
 
       // singleFilter가 true이면 RadioChip 사용 (단일 선택만 허용)
       if (this.singleFilter) {
-        return <RadioChip key={cacheKey}
+        return (
+          <RadioChip
+            key={cacheKey}
+            options={this.options!}
+            combo={{ direction: 'row' }}
+            {...await getInputRendererParameters(this, {
+              ...params,
+              required: false,
+              onChange: (value) => params.onChange(value),
+            })}
+          ></RadioChip>
+        );
+      }
+
+      // 옵션이 10개 이상이면 MultiSelectBox 사용
+      if (optionsCount >= CHECKBOX_THRESHOLD) {
+        return (
+          <MultiSelectBox
+            key={cacheKey}
+            options={this.options!}
+            {...await getInputRendererParameters(this, {
+              ...params,
+              required: false,
+              onChange: (value) => params.onChange(value),
+            })}
+          ></MultiSelectBox>
+        );
+      }
+
+      // 옵션이 10개 미만이면 Chip 스타일 Checkbox 그룹 사용 (모든 옵션을 한눈에 볼 수 있음)
+      return (
+        <CheckBoxChip
+          key={cacheKey}
           options={this.options!}
           combo={{ direction: 'row' }}
           {...await getInputRendererParameters(this, {
             ...params,
             required: false,
-            onChange: (value) => params.onChange(value)
-          })}></RadioChip>;
-      }
-
-      // 옵션이 10개 이상이면 MultiSelectBox 사용
-      if (optionsCount >= CHECKBOX_THRESHOLD) {
-        return <MultiSelectBox key={cacheKey}
-          options={this.options!}
-          {...await getInputRendererParameters(this, {
-            ...params,
-            required: false,
-            onChange: (value) => params.onChange(value)
-          })}></MultiSelectBox>;
-      }
-
-      // 옵션이 10개 미만이면 Chip 스타일 Checkbox 그룹 사용 (모든 옵션을 한눈에 볼 수 있음)
-      return <CheckBoxChip key={cacheKey}
-        options={this.options!}
-        combo={{ direction: 'row' }}
-        {...await getInputRendererParameters(this, {
-          ...params,
-          required: false,
-          onChange: (value) => params.onChange(value)
-        })}></CheckBoxChip>;
+            onChange: (value) => params.onChange(value),
+          })}
+        ></CheckBoxChip>
+      );
     })();
   }
 
@@ -381,7 +412,7 @@ export class SelectField extends OptionalField<SelectField> {
     }
 
     // options에서 해당 value의 label 찾기
-    const option = this.options?.find(opt => opt.value === value);
+    const option = this.options?.find((opt) => opt.value === value);
     const displayLabel = option?.label ?? String(value);
 
     // 상태값에 따른 색상 매핑 (ColorType 사용)
@@ -424,12 +455,12 @@ export class SelectField extends OptionalField<SelectField> {
             </span>
             <Badge color={color}>{displayLabel}</Badge>
           </span>
-        )
+        ),
       };
     }
 
     return {
-      result: <Badge color={color}>{displayLabel}</Badge>
+      result: <Badge color={color}>{displayLabel}</Badge>,
     };
   }
 
@@ -437,7 +468,13 @@ export class SelectField extends OptionalField<SelectField> {
    * SelectField 인스턴스 생성
    */
   protected createInstance(name: string, order: number): SelectField {
-    const instance = new SelectField(name, order, this.options ?? [], this.reason, this.validateStatusChange);
+    const instance = new SelectField(
+      name,
+      order,
+      this.options ?? [],
+      this.reason,
+      this.validateStatusChange,
+    );
     instance.enableImmediateChange = this.enableImmediateChange;
     instance.immediateChangeProps = this.immediateChangeProps;
     instance.loadOptions = this.loadOptions;
@@ -447,13 +484,19 @@ export class SelectField extends OptionalField<SelectField> {
   private createCacheKey(renderType?: RenderType) {
     let key: string = ``;
     for (const option of this.options!) {
-      key += `_${option.value}`
+      key += `_${option.value}`;
     }
     return hexHash(`${this.getName()}_${this.getCurrentValue(renderType)}_${key}`);
   }
 
   static create(props: SelectFieldProps): SelectField {
-    const field = new SelectField(props.name, props.order, props.options ?? [], props.reason, props.validateStatusChange);
+    const field = new SelectField(
+      props.name,
+      props.order,
+      props.options ?? [],
+      props.reason,
+      props.validateStatusChange,
+    );
     field.enableImmediateChange = props.enableImmediateChange;
     field.immediateChangeProps = props.immediateChangeProps;
     field.loadOptions = props.loadOptions;
@@ -541,7 +584,7 @@ export class SelectField extends OptionalField<SelectField> {
     if (typeof props === 'number') {
       props = { order: props };
     }
-    this.listConfig = { ...this.listConfig, support: true, sortable: false, order: props?.order };   // Select 필드는 Sort 를 지원하지 않는다.
+    this.listConfig = { ...this.listConfig, support: true, sortable: false, order: props?.order }; // Select 필드는 Sort 를 지원하지 않는다.
     this.listConfig.filterable = props?.filterable ?? true;
     return this;
   }
@@ -556,9 +599,9 @@ export class SelectField extends OptionalField<SelectField> {
  */
 export async function prefetchSelectFieldOptions(
   fields: SelectField[],
-  entityForm: EntityForm
+  entityForm: EntityForm,
 ): Promise<void> {
-  const fieldsToLoad = fields.filter(field => {
+  const fieldsToLoad = fields.filter((field) => {
     if (!field.loadOptions) return false;
     const cacheKey = field.getLoadOptionsCacheKey();
     // 이미 캐시에 있거나 로딩 중이면 제외

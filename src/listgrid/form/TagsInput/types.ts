@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {AdditionalColorType, ColorType, SizeType} from '../../common/type';
+import { AdditionalColorType, ColorType, SizeType } from '../../common/type';
 
 /**
  * 태그 아이템 인터페이스

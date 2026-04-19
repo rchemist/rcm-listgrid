@@ -5,39 +5,39 @@
 // `createParser` and consumes them through the adapter-provided hook.
 
 export interface UrlParser<T> {
-    parse: (value: string) => T | null;
-    serialize: (value: T) => string;
-    eq?: (a: T, b: T) => boolean;
+  parse: (value: string) => T | null;
+  serialize: (value: T) => string;
+  eq?: (a: T, b: T) => boolean;
 }
 
 export interface UrlStateSetOptions {
-    history?: 'push' | 'replace';
-    shallow?: boolean;
+  history?: 'push' | 'replace';
+  shallow?: boolean;
 }
 
 export type QueryStatesSetter = (
-    values: Record<string, any> | null | ((prev: Record<string, any>) => Record<string, any>),
-    options?: UrlStateSetOptions
+  values: Record<string, any> | null | ((prev: Record<string, any>) => Record<string, any>),
+  options?: UrlStateSetOptions,
 ) => any;
 
 export interface UrlStateServices {
-    /**
-     * Hook reading and writing URL query parameters via host-supplied parsers.
-     * Intentionally typed loosely; the Next.js adapter bridges to `nuqs.useQueryStates`.
-     */
-    useQueryStates: (
-        parsers: Record<string, UrlParser<any>>,
-        options?: UrlStateSetOptions
-    ) => [Record<string, any>, QueryStatesSetter];
+  /**
+   * Hook reading and writing URL query parameters via host-supplied parsers.
+   * Intentionally typed loosely; the Next.js adapter bridges to `nuqs.useQueryStates`.
+   */
+  useQueryStates: (
+    parsers: Record<string, UrlParser<any>>,
+    options?: UrlStateSetOptions,
+  ) => [Record<string, any>, QueryStatesSetter];
 }
 
 /** Framework-agnostic factory mirroring nuqs's `createParser`. */
 export function createParser<T>(config: UrlParser<T>): UrlParser<T> {
-    return { ...config };
+  return { ...config };
 }
 
 /** Simple pass-through string parser matching nuqs's `parseAsString`. */
 export const parseAsString: UrlParser<string> = {
-    parse: (v: string) => v,
-    serialize: (v: string) => v,
+  parse: (v: string) => v,
+  serialize: (v: string) => v,
 };

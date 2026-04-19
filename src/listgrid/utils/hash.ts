@@ -6,11 +6,11 @@
 // the framework-free migration.
 
 export function hexHash(value: string): string {
-    let h = 0x811c9dc5; // FNV offset basis, 32-bit
-    for (let i = 0; i < value.length; i++) {
-        h ^= value.charCodeAt(i);
-        // FNV prime 16777619, force 32-bit via Math.imul
-        h = Math.imul(h, 0x01000193);
-    }
-    return (h >>> 0).toString(16);
+  let h = 0x811c9dc5; // FNV offset basis, 32-bit
+  for (let i = 0; i < value.length; i++) {
+    h ^= value.charCodeAt(i);
+    // FNV prime 16777619, force 32-bit via Math.imul
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
 }

@@ -1,20 +1,24 @@
 import { EntityFormBase } from '../../config/form/EntityFormBase';
 import { FieldError } from '../../config/EntityFormTypes';
-import { isEmpty } from "../../utils";
+import { isEmpty } from '../../utils';
 import { mergeFieldErrors } from '../../config/EntityFormMethod';
 import { ManageEntityForm } from '../../config/Config';
 
 export abstract class EntityFormValidation extends EntityFormBase {
-
   constructor(name: string, url: string) {
     super(name, url);
   }
 
-  getFieldValidationState(fieldName: string): { validated: boolean; message?: string; color?: string } | undefined {
+  getFieldValidationState(
+    fieldName: string,
+  ): { validated: boolean; message?: string; color?: string } | undefined {
     return this.fieldValidationStates.get(fieldName);
   }
 
-  setFieldValidationState(fieldName: string, state: { validated: boolean; message?: string; color?: string }): void {
+  setFieldValidationState(
+    fieldName: string,
+    state: { validated: boolean; message?: string; color?: string },
+  ): void {
     this.fieldValidationStates.set(fieldName, state);
   }
 
@@ -36,11 +40,9 @@ export abstract class EntityFormValidation extends EntityFormBase {
   }
 
   getErrorMap(): Map<string, FieldError[]> {
-
     const errorMap = new Map<string, FieldError[]>();
 
     if (!isEmpty(this.errors)) {
-
       for (const error of this.errors!) {
         const fieldName = error.name;
 
@@ -49,7 +51,6 @@ export abstract class EntityFormValidation extends EntityFormBase {
         const tabId = field?.getTabId();
 
         if (tabId) {
-
           const tab = this.getTab(tabId);
 
           if (tab) {
@@ -86,14 +87,12 @@ export abstract class EntityFormValidation extends EntityFormBase {
     }
 
     return errorMap;
-
   }
 
   mergeError(name: string, errors: FieldError[]) {
     if (this.errors === undefined) {
       this.errors = errors;
     } else {
-
       if (errors !== undefined && errors.length > 0) {
         const newErrors: FieldError[] = [];
         for (const error of this.errors) {
@@ -117,7 +116,6 @@ export abstract class EntityFormValidation extends EntityFormBase {
         this.errors = newErrors;
       }
     }
-
   }
 
   withManageEntityForm(manageEntityForm: ManageEntityForm): this {
@@ -151,7 +149,4 @@ export abstract class EntityFormValidation extends EntityFormBase {
   isDeletable(): boolean {
     return this.manageEntityForm.delete;
   }
-
-  
-
 }

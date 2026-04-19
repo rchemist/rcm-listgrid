@@ -1,19 +1,37 @@
 import { EntityFormData } from './EntityFormData';
-import { AbstractManyToOneField, FormField, IListConfig, ListableFormField, OptionalField } from '../../components/fields/abstract';
-import { StatusCreatedAtFieldPreset, StatusCreatedAndUpdatedAtFieldPreset, ActiveField } from '../../components/fields/Preset';
-import { DEFAULT_TAB_INFO, DEFAULT_FIELD_GROUP_INFO, STATUS_TAB_INFO, CreateStep } from '../../config/Config';
+import {
+  AbstractManyToOneField,
+  FormField,
+  IListConfig,
+  ListableFormField,
+  OptionalField,
+} from '../../components/fields/abstract';
+import {
+  StatusCreatedAtFieldPreset,
+  StatusCreatedAndUpdatedAtFieldPreset,
+  ActiveField,
+} from '../../components/fields/Preset';
+import {
+  DEFAULT_TAB_INFO,
+  DEFAULT_FIELD_GROUP_INFO,
+  STATUS_TAB_INFO,
+  CreateStep,
+} from '../../config/Config';
 import { EntityField } from '../../config/EntityField';
-import { AddFieldItemProps, AlertMessage, DataTransferConfigProps } from '../../config/EntityFormTypes';
+import {
+  AddFieldItemProps,
+  AlertMessage,
+  DataTransferConfigProps,
+} from '../../config/EntityFormTypes';
 import { EntityTab } from '../../config/EntityTab';
 import { SubCollectionField } from '../../config/SubCollectionField';
-import { isTrue } from "../../utils/BooleanUtil";
-import { StringField } from '../../components/fields/StringField'; 
+import { isTrue } from '../../utils/BooleanUtil';
+import { StringField } from '../../components/fields/StringField';
 import { EntityForm } from '../../config/EntityForm';
 import { DataTransferConfig, DataTransferRule, DataField } from '../../transfer/Type';
 import { isEmpty } from '../../utils/CompareUtil';
 
 export abstract class EntityFormActions extends EntityFormData {
-
   constructor(name: string, url: string) {
     super(name, url);
   }
@@ -28,27 +46,27 @@ export abstract class EntityFormActions extends EntityFormData {
     const tab = this.getTab(field.getTabId());
 
     if (tab) {
-      order = (tab.order * 1000000) + order;
+      order = tab.order * 1000000 + order;
       const fieldGroup = this.getFieldGroup(tab.id, field.getFieldGroupId());
       if (fieldGroup) {
-        order = (fieldGroup.order * 10000) + order;
+        order = fieldGroup.order * 10000 + order;
       }
     }
     return order;
   }
 
   /**
-     * Alert 메시지를 제거합니다.
-     * @param includePersistent persistent 메시지도 제거할지 여부 (true면 persistent 메시지도 제거)
-     * @returns EntityForm 인스턴스
-     */
+   * Alert 메시지를 제거합니다.
+   * @param includePersistent persistent 메시지도 제거할지 여부 (true면 persistent 메시지도 제거)
+   * @returns EntityForm 인스턴스
+   */
   clearAlertMessages(includePersistent: boolean = false): this {
     if (includePersistent) {
       // persistent 메시지도 포함하여 모두 제거
       this.alertMessages = [];
     } else {
       // persistent가 true인 메시지만 남기고 제거
-      this.alertMessages = this.alertMessages.filter(msg => msg.persistent === true);
+      this.alertMessages = this.alertMessages.filter((msg) => msg.persistent === true);
     }
     return this;
   }
@@ -60,8 +78,8 @@ export abstract class EntityFormActions extends EntityFormData {
    */
   withAlertMessages(messages: AlertMessage[]): this {
     // 기존 메시지 중 같은 key가 없는 것만 유지
-    const existingKeys = new Set(messages.map(m => m.key));
-    const filteredExisting = this.alertMessages.filter(m => !existingKeys.has(m.key));
+    const existingKeys = new Set(messages.map((m) => m.key));
+    const filteredExisting = this.alertMessages.filter((m) => !existingKeys.has(m.key));
 
     // 새 메시지와 합치기
     this.alertMessages = [...filteredExisting, ...messages];
@@ -74,10 +92,9 @@ export abstract class EntityFormActions extends EntityFormData {
    * @returns EntityForm 인스턴스
    */
   removeAlertMessage(key: string): this {
-    this.alertMessages = this.alertMessages.filter(msg => msg.key !== key);
+    this.alertMessages = this.alertMessages.filter((msg) => msg.key !== key);
     return this;
   }
-
 
   withExcludeListFields(...excludeListFields: string[]): this {
     if (this.excludeListFields) {
@@ -89,18 +106,18 @@ export abstract class EntityFormActions extends EntityFormData {
   }
 
   /**
-* 현재 Alert 메시지들을 반환합니다.
-* @returns Alert 메시지 배열
-*/
+   * 현재 Alert 메시지들을 반환합니다.
+   * @returns Alert 메시지 배열
+   */
   getAlertMessages(): AlertMessage[] {
     return [...this.alertMessages];
   }
 
   /**
-     * 모든 메시지를 제거합니다. (현재는 Alert 메시지만 지원)
-     * @param includePersistent persistent 메시지도 제거할지 여부 (true면 persistent 메시지도 제거)
-     * @returns EntityForm 인스턴스
-     */
+   * 모든 메시지를 제거합니다. (현재는 Alert 메시지만 지원)
+   * @param includePersistent persistent 메시지도 제거할지 여부 (true면 persistent 메시지도 제거)
+   * @returns EntityForm 인스턴스
+   */
   clearAllMessages(includePersistent: boolean = false): this {
     // Alert 메시지 제거
     this.clearAlertMessages(includePersistent);
@@ -118,24 +135,22 @@ export abstract class EntityFormActions extends EntityFormData {
     return this;
   }
 
-
   withCreatedAtField(): this {
-    return this.addFields(StatusCreatedAtFieldPreset)
+    return this.addFields(StatusCreatedAtFieldPreset);
   }
 
   withCreatedAndUpdatedAtFields(): this {
-    return this.addFields(StatusCreatedAndUpdatedAtFieldPreset)
+    return this.addFields(StatusCreatedAndUpdatedAtFieldPreset);
   }
 
   addFields(props: AddFieldItemProps): this {
-
     if (props.items.length === 0) {
       return this;
     }
 
     const tab = props.tab ?? DEFAULT_TAB_INFO;
     const fieldGroup = props.fieldGroup ?? DEFAULT_FIELD_GROUP_INFO;
-    const overwrite = props.overwrite ?? false;  // 기본값은 false (중복 필드 추가 방지)
+    const overwrite = props.overwrite ?? false; // 기본값은 false (중복 필드 추가 방지)
 
     let entityTab: EntityTab;
 
@@ -147,14 +162,13 @@ export abstract class EntityFormActions extends EntityFormData {
       this.tabs.set(tab.id, entityTab);
     }
 
-
     for (const field of props.items) {
       // 중복 체크: overwrite가 false이고 이미 필드가 존재하면 건너뛴다
       if (!overwrite) {
         if (field instanceof FormField && this.fields.has(field.name)) {
-          continue;  // 이미 존재하는 필드는 추가하지 않음
+          continue; // 이미 존재하는 필드는 추가하지 않음
         } else if (field instanceof SubCollectionField && this.collections.has(field.name)) {
-          continue;  // 이미 존재하는 컬렉션은 추가하지 않음
+          continue; // 이미 존재하는 컬렉션은 추가하지 않음
         }
       }
 
@@ -168,27 +182,24 @@ export abstract class EntityFormActions extends EntityFormData {
       } else if (field instanceof SubCollectionField) {
         this.collections.set(field.name, target);
       }
-
     }
 
     return this;
   }
-
 
   removeField(fieldName: string) {
     this.fields.delete(fieldName);
   }
 
   /**
-     * Field 와 Collection 모두 EntityItem 을 인수로 받기 때문에 둘 간의 차이는 없다.
-     * @param props
-     */
+   * Field 와 Collection 모두 EntityItem 을 인수로 받기 때문에 둘 간의 차이는 없다.
+   * @param props
+   */
   addCollections(props: AddFieldItemProps): this {
     return this.addFields(props);
   }
 
   useListFields(...fieldNames: string[]): this {
-
     if (fieldNames.length === 0) {
       return this;
     }
@@ -203,10 +214,9 @@ export abstract class EntityFormActions extends EntityFormData {
     return this;
   }
 
-
   /**
-     * ListGrid 를 그릴 때 getListField() 를 호출하면 자동으로 리스트 필드를 만든다.
-     */
+   * ListGrid 를 그릴 때 getListField() 를 호출하면 자동으로 리스트 필드를 만든다.
+   */
   getListFields(): ListableFormField<any>[] {
     const listFields: ListableFormField<any>[] = [];
     const excludeFields = this.excludeListFields ?? [];
@@ -244,7 +254,6 @@ export abstract class EntityFormActions extends EntityFormData {
     return listFields;
   }
 
-
   getFilterableFields(): ListableFormField<any>[] {
     const filterFields: ListableFormField<any>[] = [];
 
@@ -259,36 +268,57 @@ export abstract class EntityFormActions extends EntityFormData {
           filterFields.push(field as ListableFormField<any>);
 
           // 이 필드의 type 이 manyToOne 인 경우에는 그 필드의 EntityForm 설정을 찾아서 name 필드가 있다면 검색 필터에 추가로 지정해 준다.
-          if (field instanceof AbstractManyToOneField && !('includeUser' in field && isTrue((field as any).includeUser))) {
+          if (
+            field instanceof AbstractManyToOneField &&
+            !('includeUser' in field && isTrue((field as any).includeUser))
+          ) {
             const entityForm = field.getEntityForm();
             if (entityForm && entityForm.hasField('name')) {
               const originNameField = entityForm.getField('name');
-              if (originNameField instanceof ListableFormField && isTrue(originNameField.getListConfig()?.filterable)) {
-                const nameField = new StringField(field.name + '.name', (field.order + 1))
+              if (
+                originNameField instanceof ListableFormField &&
+                isTrue(originNameField.getListConfig()?.filterable)
+              ) {
+                const nameField = new StringField(field.name + '.name', field.order + 1)
                   .withLabel(field.getLabel() + ' 이름')
                   .withViewHidden()
-                  .withListConfig({ order: field.listConfig?.order ? field.listConfig.order + 1 : field.order + 1, support: false, filterable: true, sortable: false, quickSearch: true, op: 'LIKE' });
+                  .withListConfig({
+                    order: field.listConfig?.order ? field.listConfig.order + 1 : field.order + 1,
+                    support: false,
+                    filterable: true,
+                    sortable: false,
+                    quickSearch: true,
+                    op: 'LIKE',
+                  });
                 filterFields.push(nameField);
                 manyToOneAdded = true;
               }
-
             }
           }
 
           // UserField with includeUser=true 체크
-          if (field instanceof AbstractManyToOneField && 'includeUser' in field && isTrue((field as any).includeUser)) {
+          if (
+            field instanceof AbstractManyToOneField &&
+            'includeUser' in field &&
+            isTrue((field as any).includeUser)
+          ) {
             const entityForm = field.getEntityForm();
             if (entityForm && entityForm.hasField('user.name')) {
-              const nameField = new StringField(field.name + '.user.name', (field.order + 1))
+              const nameField = new StringField(field.name + '.user.name', field.order + 1)
                 .withLabel(field.getLabel() + ' 이름')
                 .withViewHidden()
-                .withListConfig({ order: field.listConfig?.order ? field.listConfig.order + 1 : 0, support: false, filterable: true, sortable: false, quickSearch: true, op: 'LIKE' });
+                .withListConfig({
+                  order: field.listConfig?.order ? field.listConfig.order + 1 : 0,
+                  support: false,
+                  filterable: true,
+                  sortable: false,
+                  quickSearch: true,
+                  op: 'LIKE',
+                });
               filterFields.push(nameField);
               manyToOneAdded = true;
             }
           }
-
-
         }
         // 설정된 리스트 필드가 하나도 없는 경우를 대비해 첫번째 리스트 필드에 대해 따로 저장해 둔다.
         if (temp === undefined) {
@@ -327,14 +357,13 @@ export abstract class EntityFormActions extends EntityFormData {
   }
 
   getViewOrder(tabId: string, fieldGroupId: string, fieldOrder: number): number {
-
     const tab = this.getTab(tabId);
 
     if (tab) {
       const fieldGroup = tab.fieldGroups.find((group) => group.id === fieldGroupId);
 
       if (fieldGroup) {
-        return (tab.order * 10000) + (fieldGroup.order * 1000) + fieldOrder;
+        return tab.order * 10000 + fieldGroup.order * 1000 + fieldOrder;
       }
     }
 
@@ -342,7 +371,6 @@ export abstract class EntityFormActions extends EntityFormData {
   }
 
   withDataTransferConfig(props: DataTransferConfigProps): this {
-
     const config = new DataTransferConfig(props, this.getUrl());
 
     if (!config.export) {
@@ -369,19 +397,22 @@ export abstract class EntityFormActions extends EntityFormData {
     return this;
   }
 
-  private getDataFields(fieldNames: string[], dataTransferRules?: Map<string, DataTransferRule>): DataField[] {
+  private getDataFields(
+    fieldNames: string[],
+    dataTransferRules?: Map<string, DataTransferRule>,
+  ): DataField[] {
     const dataFields: DataField[] = [];
 
-    fieldNames.forEach(fieldName => {
-
+    fieldNames.forEach((fieldName) => {
       const field = this.getField(fieldName);
 
       if (field) {
         const dataField = DataField.create({
           name: field.name,
-          label: field.label !== undefined && typeof field.label === 'string' ? field.label : field.name,
+          label:
+            field.label !== undefined && typeof field.label === 'string' ? field.label : field.name,
           type: field.type,
-          dataTransferRule: dataTransferRules?.get(field.name)
+          dataTransferRule: dataTransferRules?.get(field.name),
         });
 
         if (field instanceof OptionalField) {
@@ -427,7 +458,9 @@ export abstract class EntityFormActions extends EntityFormData {
 
   private async getDataFieldsFromFields() {
     if (!(this instanceof EntityForm)) {
-      throw new Error('EntityFormActions.getDataFieldsFromFields() can only be called on EntityForm');
+      throw new Error(
+        'EntityFormActions.getDataFieldsFromFields() can only be called on EntityForm',
+      );
     }
     const dataFields: DataField[] = [];
     const fields = [...this.fields.values()];
@@ -435,14 +468,16 @@ export abstract class EntityFormActions extends EntityFormData {
     fields.sort((a, b) => a.order - b.order); // sort by order
 
     for (const field of fields) {
-
       const required = await field.isRequired({ entityForm: this });
 
       const dataField = DataField.create({
         name: field.getName(),
-        label: (field.label !== undefined && typeof field.label === 'string') ? field.label : field.getName(),
+        label:
+          field.label !== undefined && typeof field.label === 'string'
+            ? field.label
+            : field.getName(),
         type: field.type,
-        options: (field instanceof OptionalField) ? field.options ?? [] : undefined,
+        options: field instanceof OptionalField ? (field.options ?? []) : undefined,
         required: required,
       });
       dataFields.push(dataField);
@@ -453,9 +488,7 @@ export abstract class EntityFormActions extends EntityFormData {
   }
 
   async getDataTransferConfig(): Promise<DataTransferConfig | undefined> {
-
     if (this.dataTransferConfig) {
-
       const defaultFields = await this.getDataFieldsFromFields();
 
       this.dataTransferConfig.validateDataFields(defaultFields);
@@ -478,14 +511,11 @@ export abstract class EntityFormActions extends EntityFormData {
     this.neverDelete = neverDelete;
 
     if (neverDelete) {
-
       this.removeField('active');
 
       this.addFields({
         tab: STATUS_TAB_INFO,
-        items: [
-          ActiveField().withModifyOnly(),
-        ]
+        items: [ActiveField().withModifyOnly()],
       });
 
       this.withOnInitialize(async (entityForm: EntityForm) => {
@@ -497,10 +527,7 @@ export abstract class EntityFormActions extends EntityFormData {
         }
         return entityForm;
       });
-
-
     }
-
 
     return this;
   }
@@ -540,5 +567,4 @@ export abstract class EntityFormActions extends EntityFormData {
     this.setCreateStep(createStep);
     return this;
   }
-
 }

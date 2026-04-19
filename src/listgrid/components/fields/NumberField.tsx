@@ -4,28 +4,27 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-'use client'
+'use client';
 
-import React from "react";
+import React from 'react';
 import {
   ListableFormField,
   ListableFormFieldProps,
   ViewListProps,
   ViewListResult,
   ViewRenderProps,
-  ViewRenderResult
+  ViewRenderResult,
 } from './abstract';
-import {MinMaxLimit} from "../../form/Type";
-import {Currency, Double, NumberInput} from "../../ui";
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {formatPrice} from "../../misc";
-import {IconCoin, IconHash} from "@tabler/icons-react";
-import {NumberFilter} from './filter/NumberFilter';
-import {EntityForm} from "../../config/EntityForm";
-import {Session} from '../../auth/types';
-import {ValidateResult} from "../../validations/Validation";
-
+import { MinMaxLimit } from '../../form/Type';
+import { Currency, Double, NumberInput } from '../../ui';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { formatPrice } from '../../misc';
+import { IconCoin, IconHash } from '@tabler/icons-react';
+import { NumberFilter } from './filter/NumberFilter';
+import { EntityForm } from '../../config/EntityForm';
+import { Session } from '../../auth/types';
+import { ValidateResult } from '../../validations/Validation';
 
 interface NumberFieldProps extends ListableFormFieldProps {
   currency?: Currency;
@@ -34,20 +33,19 @@ interface NumberFieldProps extends ListableFormFieldProps {
 }
 
 export class NumberField extends ListableFormField<NumberField> {
-  
   // 이 숫자가 통화를 의미하는지
   currency?: Currency;
 
   // double 값이 있으면 소수점을 지원한다는 뜻
   double?: Double;
-  
+
   limit?: MinMaxLimit;
 
   withMin(min?: number): this {
     if (this.limit) {
       this.limit.min = min;
     } else {
-      this.limit = {min: min};
+      this.limit = { min: min };
     }
     return this;
   }
@@ -56,7 +54,7 @@ export class NumberField extends ListableFormField<NumberField> {
     if (this.limit) {
       this.limit.max = max;
     } else {
-      this.limit = {max: max};
+      this.limit = { max: max };
     }
     return this;
   }
@@ -76,7 +74,11 @@ export class NumberField extends ListableFormField<NumberField> {
     return this;
   }
 
-  constructor(name: string, order: number, props?: { limit?: MinMaxLimit, currency?: Currency, double?: Double }) {
+  constructor(
+    name: string,
+    order: number,
+    props?: { limit?: MinMaxLimit; currency?: Currency; double?: Double },
+  ) {
     super(name, order, 'number');
     this.limit = props?.limit;
     this.currency = props?.currency;
@@ -88,24 +90,34 @@ export class NumberField extends ListableFormField<NumberField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <NumberInput limit={this.limit} 
-                         currency={this.currency} 
-                         double={this.double} 
-                         {...await getInputRendererParameters(this, params)}></NumberInput>
+      return (
+        <NumberInput
+          limit={this.limit}
+          currency={this.currency}
+          double={this.double}
+          {...await getInputRendererParameters(this, params)}
+        ></NumberInput>
+      );
     })();
   }
 
   /**
    * NumberField 핵심 리스트 필터 렌더링 로직
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
-      return <NumberFilter onChange={(queryConditionType, value) => {
-        params.onChange(value, queryConditionType)
-      }}
-      onRemove={() => {
-        params.onChange('')
-      }}/>;
+      return (
+        <NumberFilter
+          onChange={(queryConditionType, value) => {
+            params.onChange(value, queryConditionType);
+          }}
+          onRemove={() => {
+            params.onChange('');
+          }}
+        />
+      );
     })();
   }
 
@@ -115,7 +127,7 @@ export class NumberField extends ListableFormField<NumberField> {
   protected renderListItemInstance(props: ViewListProps): Promise<ViewListResult> {
     if (props.item[this.name] !== undefined) {
       const numberValue = props.item[this.name];
-      return Promise.resolve({result: formatPrice(numberValue)});
+      return Promise.resolve({ result: formatPrice(numberValue) });
     }
     // 기본 값 표시
     const value = String(props.item[this.name] ?? '');
@@ -146,16 +158,24 @@ export class NumberField extends ListableFormField<NumberField> {
     // currency 설정이 있으면 통화 기호 추가
     if (this.currency) {
       const currencyCode = this.currency.currencyCode ?? 'KRW';
-      const currencySymbol = currencyCode === 'KRW' ? '원' :
-                            currencyCode === 'USD' ? '$' :
-                            currencyCode === 'EUR' ? '€' :
-                            currencyCode === 'JPY' ? '¥' :
-                            currencyCode === 'GBP' ? '£' : '';
+      const currencySymbol =
+        currencyCode === 'KRW'
+          ? '원'
+          : currencyCode === 'USD'
+            ? '$'
+            : currencyCode === 'EUR'
+              ? '€'
+              : currencyCode === 'JPY'
+                ? '¥'
+                : currencyCode === 'GBP'
+                  ? '£'
+                  : '';
 
       // position에 따라 기호 위치 결정
-      const displayText = (this.currency.position === 'after' || currencyCode === 'KRW')
-        ? `${formattedValue}${currencySymbol}`
-        : `${currencySymbol}${formattedValue}`;
+      const displayText =
+        this.currency.position === 'after' || currencyCode === 'KRW'
+          ? `${formattedValue}${currencySymbol}`
+          : `${currencySymbol}${formattedValue}`;
 
       // compact 모드: 텍스트만 반환
       if (props.compact) {
@@ -174,7 +194,7 @@ export class NumberField extends ListableFormField<NumberField> {
             </span>
             <span className="rcm-num-value rcm-num-value-emphasis">{displayText}</span>
           </span>
-        )
+        ),
       };
     }
 
@@ -195,7 +215,7 @@ export class NumberField extends ListableFormField<NumberField> {
           </span>
           <span className="rcm-num-value">{formattedValue}</span>
         </span>
-      )
+      ),
     };
   }
 
@@ -204,20 +224,29 @@ export class NumberField extends ListableFormField<NumberField> {
    */
   protected createInstance(name: string, order: number): NumberField {
     return new NumberField(name, order, {
-      limit: this.limit, 
-      currency: this.currency, 
-      double: this.double
+      limit: this.limit,
+      currency: this.currency,
+      double: this.double,
     });
   }
 
   static create(props: NumberFieldProps): NumberField {
-    return new NumberField(props.name, props.order, {limit: props.limit, currency: props.currency, double: props.double})
-      .copyFields(props, true);
+    return new NumberField(props.name, props.order, {
+      limit: props.limit,
+      currency: props.currency,
+      double: props.double,
+    }).copyFields(props, true);
   }
 
-  async validate(entityForm: EntityForm, session?: Session): Promise<ValidateResult | ValidateResult[]> {
+  async validate(
+    entityForm: EntityForm,
+    session?: Session,
+  ): Promise<ValidateResult | ValidateResult[]> {
     // hidden 또는 readonly인 경우 min/max 검증 건너뛰기
-    if (await this.isHidden({ entityForm, session }) || await this.isReadonly({ entityForm, session })) {
+    if (
+      (await this.isHidden({ entityForm, session })) ||
+      (await this.isReadonly({ entityForm, session }))
+    ) {
       return ValidateResult.success();
     }
 
@@ -233,10 +262,14 @@ export class NumberField extends ListableFormField<NumberField> {
         if (value !== undefined && value !== '') {
           const numberValue = Number(value);
           if (this.limit.min !== undefined && numberValue < this.limit.min) {
-            return ValidateResult.fail(`${this.getLabel()} 값은 ${this.limit.min} 이상이어야 합니다.`);
+            return ValidateResult.fail(
+              `${this.getLabel()} 값은 ${this.limit.min} 이상이어야 합니다.`,
+            );
           }
           if (this.limit.max !== undefined && numberValue > this.limit.max) {
-            return ValidateResult.fail(`${this.getLabel()} 값은 ${this.limit.max} 이하이어야 합니다.`);
+            return ValidateResult.fail(
+              `${this.getLabel()} 값은 ${this.limit.max} 이하이어야 합니다.`,
+            );
           }
         }
       }
@@ -248,7 +281,7 @@ export class NumberField extends ListableFormField<NumberField> {
 
   private hasError(result: ValidateResult | ValidateResult[]): boolean {
     if (Array.isArray(result)) {
-      return result.some(r => r.hasError());
+      return result.some((r) => r.hasError());
     }
     return result.hasError();
   }

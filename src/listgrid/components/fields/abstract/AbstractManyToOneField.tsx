@@ -5,9 +5,9 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ListableFormField, ListableFormFieldProps} from "./ListableFormField";
-import {ManyToOneConfig, RenderType} from '../../../config/Config';
-import type {CardItemConfig} from '../view/CardManyToOneView';
+import { ListableFormField, ListableFormFieldProps } from './ListableFormField';
+import { ManyToOneConfig, RenderType } from '../../../config/Config';
+import type { CardItemConfig } from '../view/CardManyToOneView';
 
 /**
  * CardView 렌더링 설정
@@ -75,8 +75,9 @@ export interface AbstractManyToOneFieldProps extends ListableFormFieldProps {
  * Abstract base class for ManyToOne relationship fields
  * This class provides common functionality for ManyToOneField and UserField
  */
-export abstract class AbstractManyToOneField<T extends AbstractManyToOneField<T>> extends ListableFormField<T> {
-
+export abstract class AbstractManyToOneField<
+  T extends AbstractManyToOneField<T>,
+> extends ListableFormField<T> {
   config: ManyToOneConfig;
 
   /** 카드뷰 사용 여부 */
@@ -120,7 +121,9 @@ export abstract class AbstractManyToOneField<T extends AbstractManyToOneField<T>
   /**
    * Get mapped ID and name from the current value
    */
-  async getMappedIdName(renderType: RenderType = 'create'): Promise<{id: any, name: any} | undefined> {
+  async getMappedIdName(
+    renderType: RenderType = 'create',
+  ): Promise<{ id: any; name: any } | undefined> {
     // ManyToOne으로 매핑되어 있는 값의 id 값을 가져온다.
     const value: any = await this.getCurrentValue(renderType);
 
@@ -129,9 +132,9 @@ export abstract class AbstractManyToOneField<T extends AbstractManyToOneField<T>
       const nameField = this.config.field?.name ?? 'name';
       try {
         if (nameField instanceof Function) {
-          return {id: value[idField], name: nameField(value)}
+          return { id: value[idField], name: nameField(value) };
         }
-        return {id: value[idField], name: value[nameField]};
+        return { id: value[idField], name: value[nameField] };
       } catch (e) {
         console.error(e);
       }

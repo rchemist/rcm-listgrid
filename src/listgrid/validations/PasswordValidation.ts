@@ -5,13 +5,11 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {RegexPasswordNormal} from "../misc";
-import {RegexValidation} from '../validations/RegexValidation';
+import { RegexPasswordNormal } from '../misc';
+import { RegexValidation } from '../validations/RegexValidation';
 
 export class PasswordValidation extends RegexValidation {
-
   constructor(id?: string, regex?: RegExp, message?: string) {
     super(id ?? 'PasswordValidation', regex ?? RegexPasswordNormal, message);
   }
-
 }

@@ -5,17 +5,17 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-'use client'
-import React, {Fragment} from "react";
-import {QuickSearchProps} from '../../config/ListGrid';
-import {ViewFieldManageable} from "./types/ViewListGrid.types";
-import {ListableFormField} from '../fields/abstract';
-import {Transition} from "@headlessui/react";
-import {SearchForm} from "../../form/SearchForm";
-import {SearchBarActions} from "./ui/SearchBarActions";
-import {QuickSearchInput} from "./ui/QuickSearchInput";
-import {useQuickSearchBar} from "./hooks/useQuickSearchBar";
-import {useListGridTheme} from "./context/ListGridThemeContext";
+'use client';
+import React, { Fragment } from 'react';
+import { QuickSearchProps } from '../../config/ListGrid';
+import { ViewFieldManageable } from './types/ViewListGrid.types';
+import { ListableFormField } from '../fields/abstract';
+import { Transition } from '@headlessui/react';
+import { SearchForm } from '../../form/SearchForm';
+import { SearchBarActions } from './ui/SearchBarActions';
+import { QuickSearchInput } from './ui/QuickSearchInput';
+import { useQuickSearchBar } from './hooks/useQuickSearchBar';
+import { useListGridTheme } from './context/ListGridThemeContext';
 
 export interface QuickSearchBarProps extends ViewFieldManageable {
   quickSearchProperty?: QuickSearchProps;
@@ -35,15 +35,9 @@ export interface QuickSearchBarProps extends ViewFieldManageable {
   hideAdvancedSearch?: boolean;
 }
 
-
 // == Main Component ==
 export const QuickSearchBar = (props: QuickSearchBarProps) => {
-  const {
-    loading,
-    subCollection,
-    onQuickSearch,
-    showAdvancedSearch,
-  } = props;
+  const { loading, subCollection, onQuickSearch, showAdvancedSearch } = props;
 
   const {
     search,
@@ -70,9 +64,9 @@ export const QuickSearchBar = (props: QuickSearchBarProps) => {
         leaveFrom="opacity-100 scale-100"
         leaveTo="opacity-0"
       >
-        <div className={themeClasses.searchBar?.container ?? "rcm-listgrid-searchbar"}>
-          <div className={themeClasses.searchBar?.innerWrapper ?? "rcm-listgrid-searchbar-inner"}>
-            <div className={themeClasses.searchBar?.layoutWrapper ?? "rcm-row-between rcm-gap-sm"}>
+        <div className={themeClasses.searchBar?.container ?? 'rcm-listgrid-searchbar'}>
+          <div className={themeClasses.searchBar?.innerWrapper ?? 'rcm-listgrid-searchbar-inner'}>
+            <div className={themeClasses.searchBar?.layoutWrapper ?? 'rcm-row-between rcm-gap-sm'}>
               <QuickSearchInput
                 search={search}
                 setSearch={setSearch}
@@ -94,5 +88,4 @@ export const QuickSearchBar = (props: QuickSearchBarProps) => {
       </Transition.Child>
     </Transition>
   );
-}
-
+};

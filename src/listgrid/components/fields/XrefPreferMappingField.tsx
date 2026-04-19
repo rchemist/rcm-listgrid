@@ -5,28 +5,31 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FormField, FormFieldProps} from './abstract';
-import {FieldRenderParameters} from '../../config/EntityField';
-import React from "react";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {EntityForm} from '../../config/EntityForm';
-import {XrefPreferMappingValue, XrefPreferMappingView} from './view/XrefPreferMappingView';
-import {RenderType} from '../../config/Config';
-import {isEmpty} from "../../utils";
-import {FilterItem} from "../../form/SearchForm";
+import { FormField, FormFieldProps } from './abstract';
+import { FieldRenderParameters } from '../../config/EntityField';
+import React from 'react';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { EntityForm } from '../../config/EntityForm';
+import { XrefPreferMappingValue, XrefPreferMappingView } from './view/XrefPreferMappingView';
+import { RenderType } from '../../config/Config';
+import { isEmpty } from '../../utils';
+import { FilterItem } from '../../form/SearchForm';
 
 export interface XrefPreferMappingFieldProps extends FormFieldProps {
   entityForm: EntityForm;
   showPreferred?: boolean;
-  filters?: FilterItem[] | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+  filters?:
+    | FilterItem[]
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
   preferredLabel?: string;
 }
 
-export class XrefPreferMappingField extends FormField<XrefPreferMappingField>{
-
+export class XrefPreferMappingField extends FormField<XrefPreferMappingField> {
   entityForm: EntityForm;
   showPreferred?: boolean;
-  filters?: FilterItem[] | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+  filters?:
+    | FilterItem[]
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
   preferredLabel?: string;
 
   constructor(props: XrefPreferMappingFieldProps) {
@@ -39,22 +42,26 @@ export class XrefPreferMappingField extends FormField<XrefPreferMappingField>{
   }
 
   public static create(props: XrefPreferMappingFieldProps): XrefPreferMappingField {
-    return new XrefPreferMappingField(props)
-      .copyFields(props, true);
+    return new XrefPreferMappingField(props).copyFields(props, true);
   }
 
   /**
    * XrefPreferMappingField 핵심 렌더링 로직 (원본 render 로직 보존)
    */
-  protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null | undefined> {
+  protected renderInstance(
+    params: FieldRenderParameters,
+  ): Promise<React.ReactNode | null | undefined> {
     return (async () => {
-      return <XrefPreferMappingView {...await getInputRendererParameters(this, {...params})}
-                              showPreferred={this.showPreferred}
-                                    entityForm={this.entityForm}
-                                    parentEntityForm={params.entityForm}
-                                    filters={this.filters}
-                                    preferredLabel={this.preferredLabel}
-      />;
+      return (
+        <XrefPreferMappingView
+          {...await getInputRendererParameters(this, { ...params })}
+          showPreferred={this.showPreferred}
+          entityForm={this.entityForm}
+          parentEntityForm={params.entityForm}
+          filters={this.filters}
+          preferredLabel={this.preferredLabel}
+        />
+      );
     })();
   }
 
@@ -62,13 +69,13 @@ export class XrefPreferMappingField extends FormField<XrefPreferMappingField>{
    * XrefPreferMappingField 인스턴스 생성
    */
   protected createInstance(name: string, order: number): XrefPreferMappingField {
-    return new XrefPreferMappingField({ 
-      name, 
-      order, 
-      entityForm: this.entityForm, 
-      showPreferred: this.showPreferred, 
-      filters: this.filters, 
-      preferredLabel: this.preferredLabel 
+    return new XrefPreferMappingField({
+      name,
+      order,
+      entityForm: this.entityForm,
+      showPreferred: this.showPreferred,
+      filters: this.filters,
+      preferredLabel: this.preferredLabel,
     });
   }
 
@@ -89,5 +96,4 @@ export class XrefPreferMappingField extends FormField<XrefPreferMappingField>{
     this.preferredLabel = preferredLabel;
     return this;
   }
-
 }

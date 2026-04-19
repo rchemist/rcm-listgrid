@@ -5,19 +5,17 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-'use client'
-import {FormField, FormFieldProps} from '../abstract';
-import {FieldRenderParameters} from '../../../config/EntityField';
+'use client';
+import { FormField, FormFieldProps } from '../abstract';
+import { FieldRenderParameters } from '../../../config/EntityField';
 
-import {getInputRendererParameters} from '../../helper/FieldRendererHelper';
-import {AddressFieldView} from "./AddressFieldView";
-
+import { getInputRendererParameters } from '../../helper/FieldRendererHelper';
+import { AddressFieldView } from './AddressFieldView';
 
 interface AddressMapFieldProps extends FormFieldProps {
   prefix?: string;
   showMap?: boolean;
 }
-
 
 export interface Address {
   state?: string;
@@ -29,9 +27,7 @@ export interface Address {
   latitude?: number;
 }
 
-
 export class AddressMapField extends FormField<AddressMapField> {
-
   showMap?: boolean;
 
   prefix?: string;
@@ -49,12 +45,17 @@ export class AddressMapField extends FormField<AddressMapField> {
   /**
    * AddressMapField 핵심 렌더링 로직 (원본 render 로직 보존)
    */
-  protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null | undefined> {
+  protected renderInstance(
+    params: FieldRenderParameters,
+  ): Promise<React.ReactNode | null | undefined> {
     return (async () => {
-      return <AddressFieldView {...await getInputRendererParameters(this, {...params})}
-                               showMap={this.showMap}
-                               prefix={this.prefix}
-      />;
+      return (
+        <AddressFieldView
+          {...await getInputRendererParameters(this, { ...params })}
+          showMap={this.showMap}
+          prefix={this.prefix}
+        />
+      );
     })();
   }
 
@@ -76,12 +77,7 @@ export class AddressMapField extends FormField<AddressMapField> {
     this.showMap = origin.showMap;
     return this;
   }
-
-  
-
 }
-
-
 
 export function appendLastDot(str?: string): string {
   if (!str || str.length === 0) {
@@ -92,6 +88,3 @@ export function appendLastDot(str?: string): string {
   }
   return str + '.';
 }
-
-
-

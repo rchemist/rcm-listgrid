@@ -5,22 +5,21 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {RuleBasedFieldsView} from './RuleBasedFieldView';
-import React from "react";
+import { RuleBasedFieldsView } from './RuleBasedFieldView';
+import React from 'react';
 import {
   ResultByRuleCondition,
   RuleBasedFieldProps,
   RuleConditionValue,
-  RuleFieldEntityForm
+  RuleFieldEntityForm,
 } from './Type';
 
 interface RuleFieldViewProps extends RuleBasedFieldProps {
   onSubmit: ResultByRuleCondition;
-  entityForms: RuleFieldEntityForm[]
+  entityForms: RuleFieldEntityForm[];
 }
 
 export const RuleFieldView = (props: RuleFieldViewProps) => {
-
   const value = getValue(props.value);
 
   function getValue(v: unknown) {
@@ -35,10 +34,8 @@ export const RuleFieldView = (props: RuleFieldViewProps) => {
       const newMap = new Map<number, RuleConditionValue>();
 
       Object.entries(v).map(([key, value]) => {
-
         const ruleCondition = RuleConditionValue.create(value);
         newMap.set(ruleCondition.id, ruleCondition);
-
       });
 
       return newMap;
@@ -46,16 +43,17 @@ export const RuleFieldView = (props: RuleFieldViewProps) => {
       // Map이 아니거나 변환이 불가능한 경우 빈 Map으로 설정
       return undefined;
     }
-
-
   }
 
-
-  return <div className={'border rounded-md p-4'}><RuleBasedFieldsView {...props}
-                                                                      value={value}
-                                                                       viewType={'field'}
-                                                                       onSubmitField={props.onSubmit}
-                                                                       onCancel={() => {
-                                                                       }}/></div>
-
-}
+  return (
+    <div className={'border rounded-md p-4'}>
+      <RuleBasedFieldsView
+        {...props}
+        value={value}
+        viewType={'field'}
+        onSubmitField={props.onSubmit}
+        onCancel={() => {}}
+      />
+    </div>
+  );
+};

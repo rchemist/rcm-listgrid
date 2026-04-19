@@ -5,8 +5,8 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {EntityForm} from '../config/EntityForm';
-import {FieldValue} from '../config/Config';
+import { EntityForm } from '../config/EntityForm';
+import { FieldValue } from '../config/Config';
 
 const DEFAULT_ERROR_MESSAGE = 'form.save.error.invalid';
 
@@ -24,7 +24,11 @@ export interface Validation {
    * @param value - 현재 필드의 필드값. FieldValue 타입인 경우 value.currentValue 가 현재 값
    * @param message - 상위 폼에서 넘어 온 기본 오류 메시지
    */
-  validate(entityForm: EntityForm, value: FieldValue | undefined, message?: string): Promise<ValidateResult>
+  validate(
+    entityForm: EntityForm,
+    value: FieldValue | undefined,
+    message?: string,
+  ): Promise<ValidateResult>;
 
   /**
    * 에러 메시지 반환
@@ -57,11 +61,9 @@ export class ValidateResult {
     this.message = message;
     return this;
   }
-
 }
 
 export abstract class ValidationItem implements Validation {
-
   protected constructor(id: string, message?: string) {
     this.id = `${id}`;
     this.message = message;
@@ -77,7 +79,11 @@ export abstract class ValidationItem implements Validation {
    * @param value
    * @param message
    */
-  abstract validate(entityForm: EntityForm, value: FieldValue, message?: string): Promise<ValidateResult>
+  abstract validate(
+    entityForm: EntityForm,
+    value: FieldValue,
+    message?: string,
+  ): Promise<ValidateResult>;
 
   getErrorMessage(): string {
     return this.message ?? DEFAULT_ERROR_MESSAGE;
@@ -88,8 +94,7 @@ export abstract class ValidationItem implements Validation {
    * @param entityForm
    * @param value
    */
-  getValueAsString(entityForm: EntityForm, value: FieldValue) : string {
-
+  getValueAsString(entityForm: EntityForm, value: FieldValue): string {
     const currentValue = value?.current;
     if (currentValue !== undefined) {
       if (currentValue === null) {
@@ -98,8 +103,7 @@ export abstract class ValidationItem implements Validation {
       return String(currentValue);
     }
 
-
-    return (entityForm.getRenderType() === 'update') ? value?.fetched : value?.default;
+    return entityForm.getRenderType() === 'update' ? value?.fetched : value?.default;
   }
 
   /**
@@ -107,9 +111,10 @@ export abstract class ValidationItem implements Validation {
    * @param entityForm
    * @param value
    */
-  getValueAsNumber(entityForm: EntityForm, value: FieldValue) : number {
-    return Number(value?.current ??
-    (entityForm.getRenderType() === 'update') ? value?.fetched : value?.default);
+  getValueAsNumber(entityForm: EntityForm, value: FieldValue): number {
+    return Number(
+      (value?.current ?? entityForm.getRenderType() === 'update') ? value?.fetched : value?.default,
+    );
   }
 
   /**
@@ -117,9 +122,10 @@ export abstract class ValidationItem implements Validation {
    * @param entityForm
    * @param value
    */
-  getValueAsBoolean(entityForm: EntityForm, value: FieldValue) : boolean {
-    return Boolean(value?.current ??
-    (entityForm.getRenderType() === 'update') ? value?.fetched : value?.default);
+  getValueAsBoolean(entityForm: EntityForm, value: FieldValue): boolean {
+    return Boolean(
+      (value?.current ?? entityForm.getRenderType() === 'update') ? value?.fetched : value?.default,
+    );
   }
 
   /**
@@ -127,9 +133,9 @@ export abstract class ValidationItem implements Validation {
    * @param error
    * @param message
    */
-  returnValidateResult(error: boolean, message?: string) : ValidateResult {
-    return error ? ValidateResult.fail(message ?? this.getErrorMessage()) : ValidateResult.success();
+  returnValidateResult(error: boolean, message?: string): ValidateResult {
+    return error
+      ? ValidateResult.fail(message ?? this.getErrorMessage())
+      : ValidateResult.success();
   }
-
 }
-

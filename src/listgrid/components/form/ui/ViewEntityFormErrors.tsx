@@ -1,9 +1,9 @@
-import React from "react";
-import {ShowNotifications} from '../../../components/helper/ShowNotifications';
-import {ViewEntityError} from '../ui/ViewEntityError';
-import {EntityForm} from '../../../config/EntityForm';
-import {FieldError} from '../../../config/EntityFormTypes';
-import {EntityTab} from '../../../config/EntityTab';
+import React from 'react';
+import { ShowNotifications } from '../../../components/helper/ShowNotifications';
+import { ViewEntityError } from '../ui/ViewEntityError';
+import { EntityForm } from '../../../config/EntityForm';
+import { FieldError } from '../../../config/EntityFormTypes';
+import { EntityTab } from '../../../config/EntityTab';
 
 /**
  * ViewEntityFormErrors 컴포넌트
@@ -25,25 +25,25 @@ interface ViewEntityFormErrorsProps {
   entityForm?: EntityForm;
 }
 
-export const ViewEntityFormErrors = React.memo(function ViewEntityFormErrors({ 
-  errors, 
-  entityErrorMap, 
-  notifications, 
-  onTabChange, 
+export const ViewEntityFormErrors = React.memo(function ViewEntityFormErrors({
+  errors,
+  entityErrorMap,
+  notifications,
+  onTabChange,
   tabs,
-  entityForm
+  entityForm,
 }: ViewEntityFormErrorsProps): React.ReactNode {
   // EntityTab 배열을 ViewEntityError에서 사용할 수 있는 형태로 변환
-  const tabInfo = tabs?.map(tab => ({ id: tab.id, label: tab.label }));
-  
+  const tabInfo = tabs?.map((tab) => ({ id: tab.id, label: tab.label }));
+
   return (
     <>
       {/*
       entityErrorMap 이 빈 값이 아니라면 errors 는 표시하지 않는다.
       */}
       {entityErrorMap.size === 0 && <ShowNotifications messages={errors} error={true} />}
-      <ViewEntityError 
-        errors={entityErrorMap} 
+      <ViewEntityError
+        errors={entityErrorMap}
         onTabChange={onTabChange}
         tabs={tabInfo}
         entityForm={entityForm}
@@ -51,4 +51,4 @@ export const ViewEntityFormErrors = React.memo(function ViewEntityFormErrors({
       <ShowNotifications messages={notifications} timeout={10000} showClose={true} />
     </>
   );
-}); 
+});

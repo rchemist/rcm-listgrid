@@ -5,17 +5,21 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {stringify} from "./jsonUtils";
-import {isTrue} from "./BooleanUtil";
+import { stringify } from './jsonUtils';
+import { isTrue } from './BooleanUtil';
 
 export function isBlank(data: unknown): boolean {
   return data === undefined || data === null || data === '';
 }
 
-export function appendString(str : string | null | undefined , added: string[] | string | null | undefined, splitter?: string): string {
-  str = (str === null || str === undefined) ? "" : str;
+export function appendString(
+  str: string | null | undefined,
+  added: string[] | string | null | undefined,
+  splitter?: string,
+): string {
+  str = str === null || str === undefined ? '' : str;
 
-  const split = splitter === undefined ? " " : splitter;
+  const split = splitter === undefined ? ' ' : splitter;
   if (isBlank(added)) {
     return str;
   }
@@ -97,8 +101,6 @@ export function defaultString(value: unknown, defaultValue: string = ''): string
   }
 }
 
-
-
 export function appendPrefix(str: string, prefix: string, split?: string) {
   if (!isBlank(split)) {
     prefix = prefix + split;
@@ -151,7 +153,6 @@ export function appendPrefixSuffix(str: string, prefix: string, suffix: string, 
   return appendSuffix(appendPrefix(str, prefix, split), suffix, split);
 }
 
-
 export function getHashCode(data: unknown): number {
   if (data === null || data === undefined) {
     return 0;
@@ -164,7 +165,7 @@ export function getHashCode(data: unknown): number {
     }
     for (let i = 0; i < data.length; i++) {
       const char = data.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash;
     }
     return hash;
@@ -188,9 +189,8 @@ export function removeTrailingSeparator(input: string, separator: string): strin
   }
 }
 
-export function startsWith(value: string, prefix: string, ignoreCase?: boolean) : boolean {
-  if (value === undefined || prefix === undefined)
-    return false;
+export function startsWith(value: string, prefix: string, ignoreCase?: boolean): boolean {
+  if (value === undefined || prefix === undefined) return false;
   if (isTrue(ignoreCase)) {
     return value.toLowerCase().startsWith(prefix.toLowerCase());
   } else {
@@ -198,9 +198,8 @@ export function startsWith(value: string, prefix: string, ignoreCase?: boolean) 
   }
 }
 
-export function endsWith(value?: string, postFix?: string, ignoreCase?: boolean) : boolean {
-  if (value === undefined || postFix === undefined)
-    return false;
+export function endsWith(value?: string, postFix?: string, ignoreCase?: boolean): boolean {
+  if (value === undefined || postFix === undefined) return false;
   if (isTrue(ignoreCase)) {
     return value.toLowerCase().endsWith(postFix.toLowerCase()) ?? false;
   } else {
@@ -211,7 +210,7 @@ export function endsWith(value?: string, postFix?: string, ignoreCase?: boolean)
 export function convertToCamelCase(input?: string): string {
   // 입력이 없거나 공백인 경우
   if (!input || input.trim().length === 0) {
-    return "";
+    return '';
   }
 
   // 공백 제거
@@ -223,7 +222,11 @@ export function convertToCamelCase(input?: string): string {
   // 두 번째 글자부터 반복하여 처리
   for (let i = 1; i < input.length; i++) {
     // 현재 문자와 이전 문자가 둘 다 대문자이고, 이전 문자가 마지막 문자열이 아닐 때
-    if (input.charAt(i).toUpperCase() === input.charAt(i) && input.charAt(i - 1).toUpperCase() === input.charAt(i - 1) && i !== input.length - 1) {
+    if (
+      input.charAt(i).toUpperCase() === input.charAt(i) &&
+      input.charAt(i - 1).toUpperCase() === input.charAt(i - 1) &&
+      i !== input.length - 1
+    ) {
       // 현재 문자를 소문자로 변환하여 결과에 추가
       result += input.charAt(i).toLowerCase();
     } else {
@@ -297,7 +300,6 @@ export function addKoreanWordPostfix(type: WordPostfixType, word?: string): stri
   return word; // 이 경우는 발생하지 않겠지만 안전성을 위해 추가
 }
 
-
 export function generateSlug(input?: string): string {
   if (isBlank(input) || input === undefined) {
     return '';
@@ -324,7 +326,7 @@ export function generateSlug(input?: string): string {
 
 export function camelCaseToSnakeCase(camel: string, upperCase: boolean): string {
   // 먼저 "-" 문자를 "_"로 대체
-  camel = camel.replace(/-/g, "_");
+  camel = camel.replace(/-/g, '_');
 
   let sb: string[] = [];
   const length = camel.length;
@@ -332,17 +334,16 @@ export function camelCaseToSnakeCase(camel: string, upperCase: boolean): string 
   for (let i = 0; i < length; ++i) {
     const char = camel.charAt(i);
 
-    if (char === char.toUpperCase() && char !== "_" && sb.length > 0) {
-      sb.push("_");
+    if (char === char.toUpperCase() && char !== '_' && sb.length > 0) {
+      sb.push('_');
     }
     sb.push(upperCase ? char.toUpperCase() : char.toLowerCase());
   }
 
-  return sb.join("");
+  return sb.join('');
 }
 
 export function splitWithSplitCode(value: string, split: string): string[] {
-
   if (isBlank(value)) {
     return [];
   }
@@ -364,7 +365,10 @@ export function splitWithSplitCode(value: string, split: string): string[] {
   return result;
 }
 
-export function equalsIgnoreBlank(value: string | null | undefined, other: string | null | undefined): boolean {
+export function equalsIgnoreBlank(
+  value: string | null | undefined,
+  other: string | null | undefined,
+): boolean {
   if (isBlank(value) && isBlank(other)) {
     return true;
   }

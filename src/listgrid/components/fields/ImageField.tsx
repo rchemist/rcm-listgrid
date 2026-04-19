@@ -5,23 +5,27 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ListableFormField, ListableFormFieldProps, ViewListProps, ViewListResult} from './abstract';
-import React from "react";
-import {IAssetConfig} from '../../config/Config';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {FileFieldValue} from "../../ui";
-import {LazyFileUploadInput as FileUploadInput} from "../../ui";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {isEmpty} from "../../utils";
-import {getAccessableAssetUrl} from "../../misc";
-import {TextInput} from "../../ui";
+import {
+  ListableFormField,
+  ListableFormFieldProps,
+  ViewListProps,
+  ViewListResult,
+} from './abstract';
+import React from 'react';
+import { IAssetConfig } from '../../config/Config';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { FileFieldValue } from '../../ui';
+import { LazyFileUploadInput as FileUploadInput } from '../../ui';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { isEmpty } from '../../utils';
+import { getAccessableAssetUrl } from '../../misc';
+import { TextInput } from '../../ui';
 
 interface ImageFieldProps extends ListableFormFieldProps {
   config?: IAssetConfig;
 }
 
 export class ImageField extends ListableFormField<ImageField> {
-
   config?: IAssetConfig;
 
   constructor(name: string, order: number, config?: IAssetConfig) {
@@ -29,8 +33,8 @@ export class ImageField extends ListableFormField<ImageField> {
     this.config = config;
     this.listConfig = {
       filterable: false,
-      sortable: false
-    }
+      sortable: false,
+    };
   }
 
   withConfig(config?: IAssetConfig): this {
@@ -44,7 +48,7 @@ export class ImageField extends ListableFormField<ImageField> {
       maxCount: this.config?.maxCount,
       extensions: this.config?.extensions,
       fileTypes: this.config?.fileTypes,
-    }
+    };
     return this;
   }
 
@@ -54,7 +58,7 @@ export class ImageField extends ListableFormField<ImageField> {
       maxCount: maxCount,
       extensions: this.config?.extensions,
       fileTypes: this.config?.fileTypes,
-    }
+    };
     return this;
   }
 
@@ -64,7 +68,7 @@ export class ImageField extends ListableFormField<ImageField> {
       maxCount: this.config?.maxCount,
       extensions: extension,
       fileTypes: this.config?.fileTypes,
-    }
+    };
     return this;
   }
 
@@ -74,7 +78,7 @@ export class ImageField extends ListableFormField<ImageField> {
       maxCount: this.config?.maxCount,
       extensions: this.config?.extensions,
       fileTypes: fileTypes,
-    }
+    };
     return this;
   }
 
@@ -88,8 +92,8 @@ export class ImageField extends ListableFormField<ImageField> {
         config = {
           maxCount: 1,
           extensions: ['png', 'jpeg', 'jpg', 'gif', 'webp', 'svg'],
-          fileTypes: ['image/*']
-        }
+          fileTypes: ['image/*'],
+        };
       } else {
         if (!config.fileTypes) {
           config.fileTypes = ['image/*'];
@@ -102,7 +106,12 @@ export class ImageField extends ListableFormField<ImageField> {
         }
       }
 
-      return <FileUploadInput config={config} {...await getInputRendererParameters(this, params)}></FileUploadInput>
+      return (
+        <FileUploadInput
+          config={config}
+          {...await getInputRendererParameters(this, params)}
+        ></FileUploadInput>
+      );
     })();
   }
 
@@ -116,13 +125,17 @@ export class ImageField extends ListableFormField<ImageField> {
   /**
    * ImageField 리스트 필터 렌더링 (기본 텍스트 입력)
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
-      return <TextInput
-        name={`${this.name}_${params.entityForm.id}`}
-        onChange={(value: string) => params.onChange(value, 'LIKE')}
-        value={params.value}
-      />;
+      return (
+        <TextInput
+          name={`${this.name}_${params.entityForm.id}`}
+          onChange={(value: string) => params.onChange(value, 'LIKE')}
+          value={params.value}
+        />
+      );
     })();
   }
 
@@ -139,39 +152,49 @@ export class ImageField extends ListableFormField<ImageField> {
           const imgUrl = getAccessableAssetUrl(file.existFiles[0]!.url);
 
           return {
-            result: <div className="rcm-image-field-cell">
-              <div className="rcm-image-field-hover-group">
-                <img
-                  className="rcm-image-field-thumb"
-                  src={`${imgUrl}`}
-                  onError={(event) => {
-                    event.currentTarget.src = '/assets/images/no-image.png'
-                  }}
-                  alt="primary image"/>
-                <div className="rcm-image-field-preview-wrap">
-                  <img className="rcm-image-field-preview"
-                       src={`${imgUrl}`}
-                       onError={(event) => {
-                         event.currentTarget.src = '/assets/images/no-image.png'
-                       }}
-                       alt="enlarged image"/>
+            result: (
+              <div className="rcm-image-field-cell">
+                <div className="rcm-image-field-hover-group">
+                  <img
+                    className="rcm-image-field-thumb"
+                    src={`${imgUrl}`}
+                    onError={(event) => {
+                      event.currentTarget.src = '/assets/images/no-image.png';
+                    }}
+                    alt="primary image"
+                  />
+                  <div className="rcm-image-field-preview-wrap">
+                    <img
+                      className="rcm-image-field-preview"
+                      src={`${imgUrl}`}
+                      onError={(event) => {
+                        event.currentTarget.src = '/assets/images/no-image.png';
+                      }}
+                      alt="enlarged image"
+                    />
+                  </div>
                 </div>
-              </div></div>
+              </div>
+            ),
           };
         }
       }
 
       return {
-        result: <div className="rcm-image-field-cell"><img
-          className="rcm-image-field-thumb rcm-image-field-thumb-placeholder"
-          src={`/assets/images/no-image.png`} alt="no image"/></div>
+        result: (
+          <div className="rcm-image-field-cell">
+            <img
+              className="rcm-image-field-thumb rcm-image-field-thumb-placeholder"
+              src={`/assets/images/no-image.png`}
+              alt="no image"
+            />
+          </div>
+        ),
       };
     })();
   }
 
   static create(props: ImageFieldProps): ImageField {
-    return new ImageField(props.name, props.order, props.config)
-      .copyFields(props, true);
+    return new ImageField(props.name, props.order, props.config).copyFields(props, true);
   }
-
 }

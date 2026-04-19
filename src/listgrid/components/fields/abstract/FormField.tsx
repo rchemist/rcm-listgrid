@@ -25,16 +25,20 @@ import {
   RequiredType,
   TooltipType,
   VIEW_HIDDEN,
-  ViewPreset
+  ViewPreset,
 } from '../../../config/Config';
-import {ValidateResult, Validation} from '../../../validations/Validation';
-import {EntityForm} from '../../../config/EntityForm';
-import React, {ReactNode} from "react";
-import {EntityField, FieldInfoParameters, FieldRenderParameters} from '../../../config/EntityField';
-import {isEqualCollection, isEquals} from "../../../misc";
-import {isTrue} from '../../../utils/BooleanUtil';
-import {addKoreanWordPostfix} from '../../../utils/StringUtil';
-import {Session} from '../../../auth/types';
+import { ValidateResult, Validation } from '../../../validations/Validation';
+import { EntityForm } from '../../../config/EntityForm';
+import React, { ReactNode } from 'react';
+import {
+  EntityField,
+  FieldInfoParameters,
+  FieldRenderParameters,
+} from '../../../config/EntityField';
+import { isEqualCollection, isEquals } from '../../../misc';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { addKoreanWordPostfix } from '../../../utils/StringUtil';
+import { Session } from '../../../auth/types';
 
 /**
  * Card View 아이콘 타입
@@ -95,13 +99,13 @@ export const FULL_WIDTH_FIELD_TYPES: FieldType[] = [
 ];
 
 export interface FormFieldProps {
-  value?: FieldValue;   // 필드값
+  value?: FieldValue; // 필드값
 
   // type 은 각 필드에서 알아서 설정된다. Props 로 넘기는 방식이 아니다.
   // type: FieldType;
 
   placeHolder?: PlaceHolderType; // placeHolder, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  required?: RequiredType;    // 필수값 여부, 이 값이 boolean 으로 지정된 경우에는 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  required?: RequiredType; // 필수값 여부, 이 값이 boolean 으로 지정된 경우에는 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
   validations?: Validation[];
 
   /**
@@ -109,26 +113,30 @@ export interface FormFieldProps {
    * @param field
    * @param renderType
    */
-  displayFunc?: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>;
+  displayFunc?: (
+    entityForm: EntityForm,
+    field: EntityField,
+    renderType?: RenderType,
+  ) => Promise<any>;
   overrideRender?: (params: FieldRenderParameters) => Promise<ReactNode | null | undefined>;
-  order: number;    // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
-  name: string;     // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
-  label?: LabelType;    // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
-  tooltip?: TooltipType;   // tooltip, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  helpText?: HelpTextType;   // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  hidden?: HiddenType;    // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  readonly?: ReadOnlyType;    // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  attributes?: Map<string, any> // 필드의 attributes
-  hideLabel?: boolean;    // 필드 렌더러에서 필드의 라벨을 표시할지 여부
-  requiredPermissions?: string[];  // 이 필드를 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 필드가 표시됨.
-  layout?: FieldLayoutType;   // 필드 레이아웃 타입 (auto: 자동, full: 전체 너비, half: 절반 너비)
-  lineBreak?: boolean;        // 이 필드 뒤에서 줄바꿈 (다음 필드가 새 줄에서 시작)
-  cardIcon?: CardIconType;    // Card View 모드에서 표시할 커스텀 아이콘
+  order: number; // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
+  name: string; // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
+  label?: LabelType; // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
+  tooltip?: TooltipType; // tooltip, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  helpText?: HelpTextType; // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  hidden?: HiddenType; // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  readonly?: ReadOnlyType; // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  attributes?: Map<string, any>; // 필드의 attributes
+  hideLabel?: boolean; // 필드 렌더러에서 필드의 라벨을 표시할지 여부
+  requiredPermissions?: string[]; // 이 필드를 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 필드가 표시됨.
+  layout?: FieldLayoutType; // 필드 레이아웃 타입 (auto: 자동, full: 전체 너비, half: 절반 너비)
+  lineBreak?: boolean; // 이 필드 뒤에서 줄바꿈 (다음 필드가 새 줄에서 시작)
+  cardIcon?: CardIconType; // Card View 모드에서 표시할 커스텀 아이콘
 
-  viewPreset?: ViewPreset;    // view preset 을 설정하면 readonly, hidden 을 한번에 설정할 수 있다. 이 값은 맨 마지막에 설정된다.
+  viewPreset?: ViewPreset; // view preset 을 설정하면 readonly, hidden 을 한번에 설정할 수 있다. 이 값은 맨 마지막에 설정된다.
 
   // // tab, fieldGroup 의 ID, 이 값은 EntityForm 이 initialize 될 때 자동으로 처리된다. 외부에서 입력할 필요가 없는 값이다.
-  form?: { tabId: string, fieldGroupId: string }
+  form?: { tabId: string; fieldGroupId: string };
 
   saveValue?: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>;
   maskedValueFunc?: (entityForm: EntityForm, value: any) => Promise<string>;
@@ -136,7 +144,6 @@ export interface FormFieldProps {
 }
 
 export abstract class FormField<T extends FormField<T>> implements EntityField {
-
   order: number;
   name: string;
   type: FieldType;
@@ -163,12 +170,16 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   layout?: FieldLayoutType;
   lineBreak?: boolean;
 
-  form?: { tabId: string, fieldGroupId: string }
+  form?: { tabId: string; fieldGroupId: string };
 
   validations?: Validation[];
   overrideRender?: (params: FieldRenderParameters) => Promise<React.ReactNode | null | undefined>;
   saveValue?: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>;
-  displayFunc?: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>;
+  displayFunc?: (
+    entityForm: EntityForm,
+    field: EntityField,
+    renderType?: RenderType,
+  ) => Promise<any>;
   maskedValueFunc?: (entityForm: EntityForm, value: any) => Promise<string>;
 
   /**
@@ -249,7 +260,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
             <IconComponent className="rcm-icon" data-size="sm" data-tone="muted" stroke={1.75} />
             <span>{text}</span>
           </span>
-        )
+        ),
       };
     }
     return { result: text };
@@ -273,9 +284,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   clone(includeValue?: boolean): T {
     const fieldTypeName = this.constructor.name;
 
-
-    const cloned = this.createInstance(this.name, this.order)
-      .copyFields(this, includeValue);
+    const cloned = this.createInstance(this.name, this.order).copyFields(this, includeValue);
 
     return cloned;
   }
@@ -301,7 +310,9 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     this.maskedValueFunc = origin.maskedValueFunc;
     this.hideLabel = origin.hideLabel;
     this.exceptOnSave = origin.exceptOnSave;
-    this.requiredPermissions = origin.requiredPermissions ? [...origin.requiredPermissions] : undefined;
+    this.requiredPermissions = origin.requiredPermissions
+      ? [...origin.requiredPermissions]
+      : undefined;
     this.cardIcon = origin.cardIcon;
     this.layout = origin.layout;
     this.lineBreak = origin.lineBreak;
@@ -324,7 +335,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     if (this.form) {
       this.form.tabId = tabId;
     } else {
-      this.form = { tabId: tabId, fieldGroupId: DEFAULT_FIELD_GROUP_INFO.id }
+      this.form = { tabId: tabId, fieldGroupId: DEFAULT_FIELD_GROUP_INFO.id };
     }
     return this;
   }
@@ -333,7 +344,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     if (this.form) {
       this.form.fieldGroupId = fieldGroupId;
     } else {
-      this.form = { tabId: DEFAULT_TAB_INFO.id, fieldGroupId }
+      this.form = { tabId: DEFAULT_TAB_INFO.id, fieldGroupId };
     }
     return this;
   }
@@ -342,24 +353,26 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     if (this.displayFunc) {
       return this.displayFunc(entityForm, this, renderType);
     }
-    
+
     const value = await this.getCurrentValue(renderType);
-    
+
     // ManyToOneField의 경우 빈 객체를 undefined로 변환하여 반환
     if (this.type === 'manyToOne' && value && typeof value === 'object') {
       // id 필드명 추출 (기본값: 'id')
       const idField = (this as any).config?.field?.id ?? 'id';
-      
+
       // id 필드가 비어있으면 undefined 반환
       if (value[idField] === undefined || value[idField] === null || value[idField] === '') {
         return undefined;
       }
     }
-    
+
     return value;
   }
 
-  withDisplayFunc(fn: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>): this {
+  withDisplayFunc(
+    fn: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>,
+  ): this {
     this.displayFunc = fn;
     return this;
   }
@@ -461,7 +474,9 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
    * 이 필드를 View 화면에서 렌더링하는 로직을 override 할 수 있습니다.
    * @param fn
    */
-  withOverrideRender(fn: (params: FieldRenderParameters) => Promise<React.ReactNode | null | undefined>): this {
+  withOverrideRender(
+    fn: (params: FieldRenderParameters) => Promise<React.ReactNode | null | undefined>,
+  ): this {
     this.overrideRender = fn;
     return this;
   }
@@ -483,7 +498,6 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
 
   // field 값이 변경되었는지 여부에 대한 판단
   isDirty(): boolean {
-
     if (this.value) {
       // fetched와 current가 모두 undefined면 아직 설정되지 않은 필드 → dirty 아님
       // (백엔드가 해당 필드를 응답에 포함하지 않은 경우)
@@ -506,15 +520,20 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
         if (Array.isArray(normalizedCurrent) && Array.isArray(normalizedDefault)) {
           return !isEqualCollection(normalizedCurrent, normalizedDefault, true);
         }
-        if (typeof normalizedCurrent === 'object' && normalizedCurrent !== null &&
-            typeof normalizedDefault === 'object' && normalizedDefault !== null) {
+        if (
+          typeof normalizedCurrent === 'object' &&
+          normalizedCurrent !== null &&
+          typeof normalizedDefault === 'object' &&
+          normalizedDefault !== null
+        ) {
           return !isEquals(normalizedCurrent, normalizedDefault);
         }
         return true;
       }
 
       // Update 모드: 기존 로직 유지
-      const originalValue = this.value.fetched !== undefined ? this.value.fetched : this.value.default;
+      const originalValue =
+        this.value.fetched !== undefined ? this.value.fetched : this.value.default;
       const currentValue = this.value.current;
 
       // 배열인 경우 순서와 관계없이 값이 동일하면 dirty가 아님
@@ -583,10 +602,13 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     if (value !== undefined && value !== null) {
       // value 가 FieldValue 타입인지 확인하고 해당 타입이면 값을 복사해 넣는다.
       // FieldValue는 정확히 current, default, fetched 속성만 가지고 있어야 함
-      const isFieldValue = typeof value === 'object' &&
-        (value.current !== undefined || value.default !== undefined || value.fetched !== undefined) &&
-        Object.keys(value).every(key => ['current', 'default', 'fetched'].includes(key));
-      
+      const isFieldValue =
+        typeof value === 'object' &&
+        (value.current !== undefined ||
+          value.default !== undefined ||
+          value.fetched !== undefined) &&
+        Object.keys(value).every((key) => ['current', 'default', 'fetched'].includes(key));
+
       if (isFieldValue) {
         this.value = { ...this.value, ...value };
       } else {
@@ -669,7 +691,6 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   }
 
   async getSaveValue(entityForm: EntityForm, renderType?: RenderType): Promise<any> {
-
     if (this.saveValue) {
       return this.saveValue(entityForm, this, renderType);
     }
@@ -695,7 +716,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     }
   }
 
-  withForm(form: { tabId: string, fieldGroupId: string }): this {
+  withForm(form: { tabId: string; fieldGroupId: string }): this {
     this.form = form;
     return this;
   }
@@ -705,9 +726,14 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return this;
   }
 
-  async validate(entityForm: EntityForm, session?: Session): Promise<ValidateResult | ValidateResult[]> {
-
-    if (await this.isHidden({ entityForm, session }) || await this.isReadonly({ entityForm, session })) {
+  async validate(
+    entityForm: EntityForm,
+    session?: Session,
+  ): Promise<ValidateResult | ValidateResult[]> {
+    if (
+      (await this.isHidden({ entityForm, session })) ||
+      (await this.isReadonly({ entityForm, session }))
+    ) {
       // hidden 으로 가려지거나 readonly 된 필드에 대해서는 validation 을 하지 않는다.
       return ValidateResult.success();
     }
@@ -722,7 +748,8 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     if (await this.isRequired({ entityForm, session })) {
       // 필수값인 경우
       if (await this.isBlank(entityForm.getRenderType())) {
-        const fieldLabel: string = typeof this.getLabel() === 'string' ? this.getLabel() + '' : this.getName();
+        const fieldLabel: string =
+          typeof this.getLabel() === 'string' ? this.getLabel() + '' : this.getName();
         return ValidateResult.fail(addKoreanWordPostfix('1', fieldLabel) + '  필수 값입니다.');
       }
     }
@@ -748,9 +775,9 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   withDefaultValue(value: any): this {
     this.value = {
       fetched: this.value?.fetched,
-      current: this.value?.current ?? value,   // current 에 값이 없다면 default 에 모두 동일한 값을 넣어 준다.
-      default: value
-    }
+      current: this.value?.current ?? value, // current 에 값이 없다면 default 에 모두 동일한 값을 넣어 준다.
+      default: value,
+    };
     return this;
   }
 
@@ -779,6 +806,6 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     if (!userPermissions || userPermissions.length === 0) {
       return false;
     }
-    return this.requiredPermissions.some(permission => userPermissions.includes(permission));
+    return this.requiredPermissions.some((permission) => userPermissions.includes(permission));
   }
-} 
+}

@@ -5,10 +5,10 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ValidateResult, ValidationItem} from '../validations/Validation';
-import {EntityForm} from '../config/EntityForm';
-import {FieldValue} from '../config/Config';
-import {isBlank} from '../utils/StringUtil';
+import { ValidateResult, ValidationItem } from '../validations/Validation';
+import { EntityForm } from '../config/EntityForm';
+import { FieldValue } from '../config/Config';
+import { isBlank } from '../utils/StringUtil';
 
 export class RequiredValidation extends ValidationItem {
   constructor(id: string, message?: string) {
@@ -16,12 +16,10 @@ export class RequiredValidation extends ValidationItem {
   }
 
   validate(entityForm: EntityForm, value: FieldValue, message?: string): Promise<ValidateResult> {
-
     const currentValue = this.getValueAsString(entityForm, value);
 
     const error = isBlank(currentValue);
 
     return Promise.resolve(this.returnValidateResult(error, message));
   }
-
 }

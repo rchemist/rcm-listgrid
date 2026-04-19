@@ -13,10 +13,10 @@
  *  limitations under the License.
  */
 
-import React, {useCallback, useState} from "react";
-import {TextInput} from "../../../../ui";
-import {Textarea} from "../../../../ui";
-import {useModalManagerStore} from '../../../../store';
+import React, { useCallback, useState } from 'react';
+import { TextInput } from '../../../../ui';
+import { Textarea } from '../../../../ui';
+import { useModalManagerStore } from '../../../../store';
 
 interface AddContentDialogProps {
   onAdd: (title: string, content?: string) => void;
@@ -27,45 +27,46 @@ interface AddContentDialogProps {
  * AddContentDialog
  * ContentAsset 항목 추가를 위한 다이얼로그 컴포넌트
  */
-export const AddContentDialog: React.FC<AddContentDialogProps> = ({
-  onAdd,
-  existingTitles
-}) => {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [titleError, setTitleError] = useState("");
-  
+export const AddContentDialog: React.FC<AddContentDialogProps> = ({ onAdd, existingTitles }) => {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [titleError, setTitleError] = useState('');
+
   const { closeTopModal } = useModalManagerStore();
 
   // 제목 유효성 검사
-  const validateTitle = useCallback((value: string): string => {
-    const trimmedValue = value.trim();
-    
-    if (!trimmedValue) {
-      return "제목은 필수 입력 항목입니다.";
-    }
-    
-    // 중복 검사 (대소문자 구분 없이)
-    const titleLower = trimmedValue.toLowerCase();
-    const isDuplicate = existingTitles.some(
-      existing => existing.toLowerCase() === titleLower
-    );
-    
-    if (isDuplicate) {
-      return "동일한 제목이 이미 존재합니다.";
-    }
-    
-    return "";
-  }, [existingTitles]);
+  const validateTitle = useCallback(
+    (value: string): string => {
+      const trimmedValue = value.trim();
+
+      if (!trimmedValue) {
+        return '제목은 필수 입력 항목입니다.';
+      }
+
+      // 중복 검사 (대소문자 구분 없이)
+      const titleLower = trimmedValue.toLowerCase();
+      const isDuplicate = existingTitles.some((existing) => existing.toLowerCase() === titleLower);
+
+      if (isDuplicate) {
+        return '동일한 제목이 이미 존재합니다.';
+      }
+
+      return '';
+    },
+    [existingTitles],
+  );
 
   // 제목 변경 핸들러
-  const handleTitleChange = useCallback((value: string) => {
-    setTitle(value);
-    // 타이핑 중에는 에러 메시지 제거
-    if (titleError) {
-      setTitleError("");
-    }
-  }, [titleError]);
+  const handleTitleChange = useCallback(
+    (value: string) => {
+      setTitle(value);
+      // 타이핑 중에는 에러 메시지 제거
+      if (titleError) {
+        setTitleError('');
+      }
+    },
+    [titleError],
+  );
 
   // 제목 블러 핸들러
   const handleTitleBlur = useCallback(() => {
@@ -81,10 +82,10 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
       setTitleError(error);
       return;
     }
-    
+
     // 콜백 호출
     onAdd(title.trim(), content.trim() || undefined);
-    
+
     // 모달 닫기
     closeTopModal();
   }, [title, content, validateTitle, onAdd, closeTopModal]);
@@ -95,18 +96,24 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
   }, [closeTopModal]);
 
   // Enter 키 핸들러
-  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleAdd();
-    }
-  }, [handleAdd]);
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleAdd();
+      }
+    },
+    [handleAdd],
+  );
 
   return (
     <div className="rcm-ca-dialog">
       <div>
         <label className="rcm-label">
-          제목 <span className="rcm-text" data-color="error">*</span>
+          제목{' '}
+          <span className="rcm-text" data-color="error">
+            *
+          </span>
         </label>
         <div onBlur={handleTitleBlur} onKeyPress={handleKeyPress}>
           <TextInput
@@ -114,17 +121,22 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
             value={title}
             onChange={handleTitleChange}
             placeHolder="제목을 입력하세요"
-            className={titleError ? "rcm-ca-input-error" : ""}
+            className={titleError ? 'rcm-ca-input-error' : ''}
           />
         </div>
         {titleError && (
-          <p className="rcm-text" data-color="error" data-size="sm">{titleError}</p>
+          <p className="rcm-text" data-color="error" data-size="sm">
+            {titleError}
+          </p>
         )}
       </div>
 
       <div>
         <label className="rcm-label">
-          설명 <span className="rcm-text" data-tone="muted" data-size="xs">(선택사항)</span>
+          설명{' '}
+          <span className="rcm-text" data-tone="muted" data-size="xs">
+            (선택사항)
+          </span>
         </label>
         <Textarea
           name="content"
@@ -136,12 +148,7 @@ export const AddContentDialog: React.FC<AddContentDialogProps> = ({
       </div>
 
       <div className="rcm-ca-dialog-footer">
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="rcm-button"
-          data-variant="outline"
-        >
+        <button type="button" onClick={handleCancel} className="rcm-button" data-variant="outline">
           취소
         </button>
         <button

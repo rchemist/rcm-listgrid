@@ -7,16 +7,16 @@
 
 'use client';
 
-import React, {useEffect, useState} from 'react';
-import {IconCopy, IconMessage} from '@tabler/icons-react';
-import {Tooltip} from '../../../ui';
-import {useModalManagerStore} from '../../../store';
-import {showToast} from '../../../message';
-import {readonlyClass} from '../../../ui';
-import {formatPhoneNumber, removePhoneNumberHyphens} from '../../../utils/PhoneUtil';
-import {SmsModal} from './SmsModal';
-import {Session} from '../../../auth';
-import {RenderType} from '../../../config/Config';
+import React, { useEffect, useState } from 'react';
+import { IconCopy, IconMessage } from '@tabler/icons-react';
+import { Tooltip } from '../../../ui';
+import { useModalManagerStore } from '../../../store';
+import { showToast } from '../../../message';
+import { readonlyClass } from '../../../ui';
+import { formatPhoneNumber, removePhoneNumberHyphens } from '../../../utils/PhoneUtil';
+import { SmsModal } from './SmsModal';
+import { Session } from '../../../auth';
+import { RenderType } from '../../../config/Config';
 
 interface PhoneNumberFieldViewProps {
   name: string;
@@ -96,13 +96,13 @@ export const PhoneNumberFieldView = ({
       await navigator.clipboard.writeText(rawNumber);
       showToast({
         message: '전화번호가 복사되었습니다.',
-        color: 'success'
+        color: 'success',
       });
     } catch (error) {
       console.error('Failed to copy:', error);
       showToast({
         message: '복사에 실패했습니다.',
-        color: 'danger'
+        color: 'danger',
       });
     }
   };
@@ -114,12 +114,7 @@ export const PhoneNumberFieldView = ({
       modalId,
       title: 'SMS 발송',
       size: 'md',
-      content: (
-        <SmsModal
-          phoneNumber={displayValue}
-          onClose={() => closeModal(modalId)}
-        />
-      ),
+      content: <SmsModal phoneNumber={displayValue} onClose={() => closeModal(modalId)} />,
     });
   };
 
@@ -147,24 +142,14 @@ export const PhoneNumberFieldView = ({
         <div className="rcm-input-addon">
           {canCopy && (
             <Tooltip label="전화번호 복사">
-              <button
-                type="button"
-                className="rcm-icon-btn"
-                data-size="sm"
-                onClick={handleCopy}
-              >
+              <button type="button" className="rcm-icon-btn" data-size="sm" onClick={handleCopy}>
                 <IconCopy className="rcm-icon" data-size="sm" />
               </button>
             </Tooltip>
           )}
           {canSendSms && (
             <Tooltip label="SMS 보내기">
-              <button
-                type="button"
-                className="rcm-icon-btn"
-                data-size="sm"
-                onClick={handleSms}
-              >
+              <button type="button" className="rcm-icon-btn" data-size="sm" onClick={handleSms}>
                 <IconMessage className="rcm-icon" data-size="sm" />
               </button>
             </Tooltip>

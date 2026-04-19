@@ -1,8 +1,8 @@
 'use client';
 
-import React from "react";
-import {SubCollectionBaseButtonProps} from "../../types/SubCollectionButtons.type";
-import {useListGridTheme} from "../../context/ListGridThemeContext";
+import React from 'react';
+import { SubCollectionBaseButtonProps } from '../../types/SubCollectionButtons.type';
+import { useListGridTheme } from '../../context/ListGridThemeContext';
 
 export interface CreateButtonProps {
   ableDelete: boolean;
@@ -27,8 +27,8 @@ export const CreateButton: React.FC<CreateButtonProps> = ({
 }) => {
   const { classNames: themeClasses } = useListGridTheme();
 
-  const deleteButtonClass = themeClasses.subCollectionButtons?.deleteButton ?? "rcm-button";
-  const addButtonClass = themeClasses.subCollectionButtons?.addButton ?? "rcm-button";
+  const deleteButtonClass = themeClasses.subCollectionButtons?.deleteButton ?? 'rcm-button';
+  const addButtonClass = themeClasses.subCollectionButtons?.addButton ?? 'rcm-button';
 
   return (
     <>

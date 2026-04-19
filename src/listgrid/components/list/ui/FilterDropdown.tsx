@@ -7,11 +7,11 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React, {Fragment, useCallback, useEffect, useRef, useState} from "react";
-import ReactDOM from "react-dom";
-import {Transition} from "@headlessui/react";
-import {IconX} from "@tabler/icons-react";
-import {getOverlayZIndex} from '../../../store';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { Transition } from '@headlessui/react';
+import { IconX } from '@tabler/icons-react';
+import { getOverlayZIndex } from '../../../store';
 
 export type FilterDropdownSize = 'sm' | 'md' | 'lg';
 export type FilterDropdownPlacement = 'left' | 'right';
@@ -51,10 +51,14 @@ export const FilterDropdown = ({
   // 크기별 너비 (px)
   const getDropdownWidth = () => {
     switch (size) {
-      case 'sm': return 260;
-      case 'md': return 360;
-      case 'lg': return 420;
-      default: return 260;
+      case 'sm':
+        return 260;
+      case 'md':
+        return 360;
+      case 'lg':
+        return 420;
+      default:
+        return 260;
     }
   };
 
@@ -123,17 +127,17 @@ export const FilterDropdown = ({
   // ESC 키 감지
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
+      document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener('keydown', handleEscape);
     };
   }, [isOpen, onClose]);
 
@@ -158,7 +162,9 @@ export const FilterDropdown = ({
         <div className="rcm-filter-dropdown-inner">
           {/* 헤더: 닫기 버튼 */}
           <div className="rcm-filter-dropdown-header">
-            <span className="rcm-text" data-size="sm" data-weight="semibold">필터</span>
+            <span className="rcm-text" data-size="sm" data-weight="semibold">
+              필터
+            </span>
             <button
               type="button"
               onClick={onClose}
@@ -171,9 +177,7 @@ export const FilterDropdown = ({
           </div>
 
           {/* 필터 UI */}
-          <div className="rcm-filter-dropdown-body">
-            {children}
-          </div>
+          <div className="rcm-filter-dropdown-body">{children}</div>
 
           {/* 버튼 영역 */}
           <div className="rcm-filter-dropdown-footer">

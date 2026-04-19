@@ -14,27 +14,25 @@ import {
   ViewListProps,
   ViewListResult,
   ViewRenderProps,
-  ViewRenderResult
+  ViewRenderResult,
 } from './abstract';
-import React from "react";
-import {ManyToOneConfig} from '../../config/Config';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {ManyToOneView} from './view/ManyToOneView';
-import {ManyToOneMultiFilterView} from './view/ManyToOneMultiFilterView';
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {isBlank} from '../../utils/StringUtil';
-import {ManyToOneListView} from "./view/ManyToOneListView";
-import {CardManyToOneView} from './view/CardManyToOneView';
-import {SelectBoxManyToOneView} from './view/SelectBoxManyToOneView';
-import {isTrue} from '../../utils/BooleanUtil';
+import React from 'react';
+import { ManyToOneConfig } from '../../config/Config';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { ManyToOneView } from './view/ManyToOneView';
+import { ManyToOneMultiFilterView } from './view/ManyToOneMultiFilterView';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { isBlank } from '../../utils/StringUtil';
+import { ManyToOneListView } from './view/ManyToOneListView';
+import { CardManyToOneView } from './view/CardManyToOneView';
+import { SelectBoxManyToOneView } from './view/SelectBoxManyToOneView';
+import { isTrue } from '../../utils/BooleanUtil';
 
 // import {EntityForm} from "../../config/EntityForm"; // Removed - not used
 
-export interface ManyToOneFieldProps extends AbstractManyToOneFieldProps {
-}
+export interface ManyToOneFieldProps extends AbstractManyToOneFieldProps {}
 
 export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
-
   constructor(name: string, order: number, manyToOne: ManyToOneConfig) {
     super(name, order, manyToOne);
   }
@@ -48,56 +46,64 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
     return (async () => {
       // 카드뷰 옵션이 활성화된 경우
       if (this.useCardView) {
-        return <CardManyToOneView
-          field={this}
-          entityForm={params.entityForm}
-          value={await this.getCurrentValue(params.entityForm.getRenderType())}
-          onChange={(value, propagation) => params.onChange?.(value, propagation)}
-          onError={params.onError ?? (() => {})}
-          clearError={params.clearError ?? (() => {})}
-          required={params.required ?? false}
-          readonly={params.readonly ?? false}
-          session={params.session}
-          columns={this.cardViewConfig?.columns}
-          mobileColumns={this.cardViewConfig?.mobileColumns}
-          pageSize={this.cardViewConfig?.pageSize}
-          showSearchButton={this.cardViewConfig?.showSearchButton}
-          showAllWhenEmpty={this.cardViewConfig?.showAllWhenEmpty}
-          emptyMessage={this.cardViewConfig?.emptyMessage}
-          gridClassName={this.cardViewConfig?.gridClassName}
-          cardConfig={this.cardViewConfig?.cardConfig}
-          searchFirst={this.cardViewConfig?.searchFirst}
-          searchPlaceholder={this.cardViewConfig?.searchPlaceholder}
-          searchFields={this.cardViewConfig?.searchFields}
-        />;
+        return (
+          <CardManyToOneView
+            field={this}
+            entityForm={params.entityForm}
+            value={await this.getCurrentValue(params.entityForm.getRenderType())}
+            onChange={(value, propagation) => params.onChange?.(value, propagation)}
+            onError={params.onError ?? (() => {})}
+            clearError={params.clearError ?? (() => {})}
+            required={params.required ?? false}
+            readonly={params.readonly ?? false}
+            session={params.session}
+            columns={this.cardViewConfig?.columns}
+            mobileColumns={this.cardViewConfig?.mobileColumns}
+            pageSize={this.cardViewConfig?.pageSize}
+            showSearchButton={this.cardViewConfig?.showSearchButton}
+            showAllWhenEmpty={this.cardViewConfig?.showAllWhenEmpty}
+            emptyMessage={this.cardViewConfig?.emptyMessage}
+            gridClassName={this.cardViewConfig?.gridClassName}
+            cardConfig={this.cardViewConfig?.cardConfig}
+            searchFirst={this.cardViewConfig?.searchFirst}
+            searchPlaceholder={this.cardViewConfig?.searchPlaceholder}
+            searchFields={this.cardViewConfig?.searchFields}
+          />
+        );
       }
 
       // 셀렉트박스뷰 옵션이 활성화된 경우
       if (this.useSelectBoxView) {
-        return <SelectBoxManyToOneView
-          field={this}
-          entityForm={params.entityForm}
-          value={await this.getCurrentValue(params.entityForm.getRenderType())}
-          onChange={(value, propagation) => params.onChange?.(value, propagation)}
-          onError={params.onError ?? (() => {})}
-          clearError={params.clearError ?? (() => {})}
-          required={params.required ?? false}
-          readonly={params.readonly ?? false}
-          session={params.session}
-          labelField={this.selectBoxViewConfig?.labelField}
-          valueField={this.selectBoxViewConfig?.valueField}
-          placeholder={this.selectBoxViewConfig?.placeholder}
-          nullValueLabel={this.selectBoxViewConfig?.nullValueLabel}
-          isSearchable={this.selectBoxViewConfig?.isSearchable}
-          menuPosition={this.selectBoxViewConfig?.menuPosition}
-          menuPlacement={this.selectBoxViewConfig?.menuPlacement}
-        />;
+        return (
+          <SelectBoxManyToOneView
+            field={this}
+            entityForm={params.entityForm}
+            value={await this.getCurrentValue(params.entityForm.getRenderType())}
+            onChange={(value, propagation) => params.onChange?.(value, propagation)}
+            onError={params.onError ?? (() => {})}
+            clearError={params.clearError ?? (() => {})}
+            required={params.required ?? false}
+            readonly={params.readonly ?? false}
+            session={params.session}
+            labelField={this.selectBoxViewConfig?.labelField}
+            valueField={this.selectBoxViewConfig?.valueField}
+            placeholder={this.selectBoxViewConfig?.placeholder}
+            nullValueLabel={this.selectBoxViewConfig?.nullValueLabel}
+            isSearchable={this.selectBoxViewConfig?.isSearchable}
+            menuPosition={this.selectBoxViewConfig?.menuPosition}
+            menuPlacement={this.selectBoxViewConfig?.menuPlacement}
+          />
+        );
       }
 
       // 기존 ManyToOneView 사용
-      return <ManyToOneView config={this.config}
-                            parentEntityForm={params.entityForm}
-                            {...await getInputRendererParameters(this, params)}/>
+      return (
+        <ManyToOneView
+          config={this.config}
+          parentEntityForm={params.entityForm}
+          {...await getInputRendererParameters(this, params)}
+        />
+      );
     })();
   }
 
@@ -105,7 +111,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
    * ManyToOneField 인스턴스 생성
    */
   protected createInstance(name: string, order: number): ManyToOneField {
-    const instance = new ManyToOneField(name, order, {...this.config});
+    const instance = new ManyToOneField(name, order, { ...this.config });
     // 카드뷰 속성 복사
     if (this.useCardView !== undefined) {
       instance.useCardView = this.useCardView;
@@ -127,23 +133,31 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
    * ManyToOneField 리스트 필터 렌더링
    * multiFilter가 true이면 다중 선택 UI를 렌더링
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     // multiFilter가 true이면 다중 선택 UI 렌더링
     if (isTrue(this.listConfig?.multiFilter)) {
       return (async () => {
-        return <ManyToOneMultiFilterView
-          name={this.name}
-          label={typeof this.label === 'string' ? this.label : this.name}
-          config={this.config}
-          parentEntityForm={params.entityForm}
-          value={params.value as string[] | undefined}
-          onChange={(values) => params.onChange(values, 'IN')}
-        />;
+        return (
+          <ManyToOneMultiFilterView
+            name={this.name}
+            label={typeof this.label === 'string' ? this.label : this.name}
+            config={this.config}
+            parentEntityForm={params.entityForm}
+            value={params.value as string[] | undefined}
+            onChange={(values) => params.onChange(values, 'IN')}
+          />
+        );
       })();
     }
 
     // 기본 단일 선택 UI 렌더링
-    return this.render({ ...params, required: false, onChange: (value, propagation) => params.onChange(value) } as FieldRenderParameters);
+    return this.render({
+      ...params,
+      required: false,
+      onChange: (value, propagation) => params.onChange(value),
+    } as FieldRenderParameters);
   }
 
   /**
@@ -152,7 +166,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
    */
   protected renderListItemInstance(props: ViewListProps): Promise<ViewListResult> {
     if (isBlank(props.item)) {
-      return Promise.resolve({result: null, linkOnCell: true});
+      return Promise.resolve({ result: null, linkOnCell: true });
     }
 
     return (async (): Promise<ViewListResult> => {
@@ -162,7 +176,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
       const targetEntity: any = await getManyToOneEntityValue(fieldName, parentObject, this.config);
 
       if (targetEntity === undefined) {
-        return {result: ''};
+        return { result: '' };
       }
 
       let value: any = undefined;
@@ -176,7 +190,9 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
         if (this.config.field?.name instanceof Function) {
           value = this.config.field?.name(targetEntity);
         } else {
-          const displayProperty: string = this.config.field?.name ? this.config.field.name.toString() : 'name';
+          const displayProperty: string = this.config.field?.name
+            ? this.config.field.name.toString()
+            : 'name';
 
           if (targetEntity[fieldName]?.[displayProperty]) {
             value = parentObject[fieldName]?.[displayProperty];
@@ -194,7 +210,14 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
       }
 
       if (value !== undefined) {
-        return {result: id === undefined ? value : <ManyToOneListView id={id} value={value} entityForm={this.config.entityForm}/>};
+        return {
+          result:
+            id === undefined ? (
+              value
+            ) : (
+              <ManyToOneListView id={id} value={value} entityForm={this.config.entityForm} />
+            ),
+        };
       }
 
       if (this.config.displayFunc !== undefined) {
@@ -203,14 +226,14 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
         const entity = targetEntity[fieldName];
 
         if (entity === undefined) {
-          return {result: await this.config.displayFunc(targetEntity)};
+          return { result: await this.config.displayFunc(targetEntity) };
         }
 
-        return {result: await this.config.displayFunc(entity)};
+        return { result: await this.config.displayFunc(entity) };
       }
 
       // config.field 의 재정의가 되지 않은 경우 - 기본 값 반환
-      return {result: ''};
+      return { result: '' };
     })();
   }
 
@@ -272,7 +295,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
               </span>
               <span className="font-medium">{displayValue}</span>
             </span>
-          )
+          ),
         };
       }
       return { result: displayValue };
@@ -300,7 +323,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
               </span>
               <span className="font-medium">{funcResult}</span>
             </span>
-          )
+          ),
         };
       }
 
@@ -315,7 +338,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
     if (typeof props === 'number') {
       props = { order: props };
     }
-    this.listConfig = {...this.listConfig, support: true, order: props?.order};
+    this.listConfig = { ...this.listConfig, support: true, order: props?.order };
     // quickSearch가 명시적으로 true로 설정된 경우에만 true로 설정
     this.listConfig.quickSearch = props?.quickSearch === true;
     this.listConfig.sortable = false;
@@ -388,9 +411,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
     this.selectBoxViewConfig = config;
     return this;
   }
-
 }
-
 
 /**
  * 중첩 경로를 파싱하여 부모 객체와 최종 필드명을 반환한다.
@@ -401,7 +422,7 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
  * @param item 대상 객체
  * @returns { parentObject: 부모 객체, fieldName: 최종 필드명 }
  */
-function parseNestedPath(path: string, item: any): { parentObject: any, fieldName: string } {
+function parseNestedPath(path: string, item: any): { parentObject: any; fieldName: string } {
   if (!path.includes('.')) {
     // 단순 필드명인 경우 (예: 'course')
     return { parentObject: item, fieldName: path };
@@ -448,7 +469,7 @@ export async function getManyToOneEntityValue(name: string, value: any, config: 
 
       try {
         targetEntity = (await fetchEntityForm.fetchData()).data.data;
-      }catch (e) {
+      } catch (e) {
         // nothing to do
       }
     } else {
@@ -457,20 +478,17 @@ export async function getManyToOneEntityValue(name: string, value: any, config: 
         // 객체값이 존재하면
         targetEntity = value[entityName];
       } else {
-
         // id 밖에 없다면 해당 ID 로 fetch 를 해 온 다음 targetEntity 에 해당 값을 넣어 준다.
         const fetchEntityForm = config.entityForm.clone(true);
         fetchEntityForm.id = value[name];
 
         try {
           targetEntity = (await fetchEntityForm.fetchData()).data.data;
-        }catch (e) {
+        } catch (e) {
           // nothing to do
         }
       }
     }
-
-
   } else {
     // URL 필터에서 ID만 넘어온 경우 (예: filters=curriculum.id:UUID)
     // value가 UUID 문자열이면 엔티티를 조회해야 함

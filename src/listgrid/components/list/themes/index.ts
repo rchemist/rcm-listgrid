@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-export { defaultListGridTheme } from "./defaultListGridTheme";
-export { mainListGridTheme } from "./variants/mainTheme";
-export { subCollectionListGridTheme } from "./variants/subCollectionTheme";
-export { modalListGridTheme } from "./variants/modalTheme";
+export { defaultListGridTheme } from './defaultListGridTheme';
+export { mainListGridTheme } from './variants/mainTheme';
+export { subCollectionListGridTheme } from './variants/subCollectionTheme';
+export { modalListGridTheme } from './variants/modalTheme';

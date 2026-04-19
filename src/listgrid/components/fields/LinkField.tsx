@@ -5,27 +5,24 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React from "react";
+import React from 'react';
 import {
   CheckButtonValidationField,
   CheckButtonValidationFieldProps,
   ViewListProps,
-  ViewListResult
+  ViewListResult,
 } from './abstract';
-import {TextInput} from "../../ui";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {LinkFieldView} from "./view/LinkFieldView";
-import {IconExternalLink} from "@tabler/icons-react";
-import {isBlank} from '../../utils/StringUtil';
-import {normalizeUrl} from "../../misc";
+import { TextInput } from '../../ui';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { LinkFieldView } from './view/LinkFieldView';
+import { IconExternalLink } from '@tabler/icons-react';
+import { isBlank } from '../../utils/StringUtil';
+import { normalizeUrl } from '../../misc';
 
-interface LinkFieldProps extends CheckButtonValidationFieldProps {
-
-}
+interface LinkFieldProps extends CheckButtonValidationFieldProps {}
 
 export class LinkField extends CheckButtonValidationField<LinkField> {
-
   constructor(name: string, order: number) {
     super(name, order, 'text');
   }
@@ -53,14 +50,19 @@ export class LinkField extends CheckButtonValidationField<LinkField> {
   /**
    * LinkField 리스트 필터 렌더링 (원본 renderListFilter 로직 보존)
    */
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
-      return <TextInput
-        name={`${this.name}_${params.entityForm.id}`}
-        onChange={(value: string) => {
-          params.onChange(value, 'LIKE');
-        }}
-        value={params.value}></TextInput>;
+      return (
+        <TextInput
+          name={`${this.name}_${params.entityForm.id}`}
+          onChange={(value: string) => {
+            params.onChange(value, 'LIKE');
+          }}
+          value={params.value}
+        ></TextInput>
+      );
     })();
   }
 
@@ -69,7 +71,7 @@ export class LinkField extends CheckButtonValidationField<LinkField> {
    */
   protected renderListItemInstance(props: ViewListProps): Promise<ViewListResult> {
     const value = String(props.item[this.name] ?? '');
-    
+
     if (isBlank(value)) {
       return Promise.resolve({ result: value });
     }
@@ -84,7 +86,7 @@ export class LinkField extends CheckButtonValidationField<LinkField> {
             className="rcm-link-cell-btn"
             onClick={(e) => {
               e.stopPropagation();
-              window.open(normalizeUrl(value), "_blank");
+              window.open(normalizeUrl(value), '_blank');
             }}
           >
             <IconExternalLink className="rcm-link-cell-icon" />
@@ -93,14 +95,12 @@ export class LinkField extends CheckButtonValidationField<LinkField> {
       </div>
     );
 
-    return Promise.resolve({ 
+    return Promise.resolve({
       result: linkElement,
     });
   }
 
-  static create(props: LinkFieldProps) : LinkField {
-    return new LinkField(props.name, props.order)
-      .copyFields(props, true);
+  static create(props: LinkFieldProps): LinkField {
+    return new LinkField(props.name, props.order).copyFields(props, true);
   }
-
 }

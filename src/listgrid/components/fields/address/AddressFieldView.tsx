@@ -1,13 +1,13 @@
 'use client';
-import {isTrue} from '../../../utils/BooleanUtil';
-import {defaultString, isBlank} from '../../../utils/StringUtil';
-import {KakaoMap} from '../address/KakaoMap';
-import {PostCodeSelector} from "./PostCodeSelector";
-import {InputRendererProps} from '../../../config/Config';
-import {EntityForm} from '../../../config/EntityForm';
-import {useEffect, useState} from "react";
-import {Address} from "./AddressMapField";
-import {getRuntimeConfig} from '../../../config/RuntimeConfig';
+import { isTrue } from '../../../utils/BooleanUtil';
+import { defaultString, isBlank } from '../../../utils/StringUtil';
+import { KakaoMap } from '../address/KakaoMap';
+import { PostCodeSelector } from './PostCodeSelector';
+import { InputRendererProps } from '../../../config/Config';
+import { EntityForm } from '../../../config/EntityForm';
+import { useEffect, useState } from 'react';
+import { Address } from './AddressMapField';
+import { getRuntimeConfig } from '../../../config/RuntimeConfig';
 
 interface AddressFieldViewProps extends InputRendererProps {
   showMap?: boolean;
@@ -17,8 +17,7 @@ interface AddressFieldViewProps extends InputRendererProps {
 
 const kakaoMapApiKey = getRuntimeConfig().kakaoMapAppKey;
 
-export const AddressFieldView = ({entityForm, onChange, ...props}: AddressFieldViewProps) => {
-
+export const AddressFieldView = ({ entityForm, onChange, ...props }: AddressFieldViewProps) => {
   // prefix 처리 로직
   const determinePrefix = (): string => {
     if (props.prefix) {
@@ -50,11 +49,10 @@ export const AddressFieldView = ({entityForm, onChange, ...props}: AddressFieldV
   const [address, setAddress] = useState<Address>();
 
   useEffect(() => {
-
     (async () => {
       const state = (await entityForm.getValue(getFieldName('state'))) ?? '';
       const city = (await entityForm.getValue(getFieldName('city'))) ?? '';
-      const postalCode = await entityForm.getValue(getFieldName('postalCode')) ?? '';
+      const postalCode = (await entityForm.getValue(getFieldName('postalCode'))) ?? '';
       const address1 = (await entityForm.getValue(getFieldName('address1'))) ?? '';
       const address2 = (await entityForm.getValue(getFieldName('address2'))) ?? '';
       const longitude = (await entityForm.getValue(getFieldName('longitude'))) ?? '';
@@ -71,62 +69,73 @@ export const AddressFieldView = ({entityForm, onChange, ...props}: AddressFieldV
         address1,
         address2,
         longitude,
-        latitude
+        latitude,
       });
-
-
     })();
 
-
     setClientView(true);
-
   }, [entityForm]);
 
   function onSetCoordinates(latitude: number, longitude: number) {
-    onChange({
-      state: defaultString(address!.state),
-      city: defaultString(address!.city),
-      address1: address!.address1,
-      address2: address!.address2,
-      postalCode: address!.postalCode,
-      longitude: longitude,
-      latitude: latitude,
-    }, true);
+    onChange(
+      {
+        state: defaultString(address!.state),
+        city: defaultString(address!.city),
+        address1: address!.address1,
+        address2: address!.address2,
+        postalCode: address!.postalCode,
+        longitude: longitude,
+        latitude: latitude,
+      },
+      true,
+    );
   }
 
-  return <div>
-    <PostCodeSelector
-      required={isTrue(props.required)}
-      address={address}
-      onSubmit={(address) => {
-        onChange({
-          state: defaultString(address.state),
-          city: defaultString(address.city),
-          address1: address.address1,
-          address2: address.address2,
-          postalCode: address.postalCode,
-          longitude: address.longitude,
-          latitude: address.latitude,
-        }, true);
-      }}
-      onRemove={() => {
-        onChange({
-          state: '',
-          city: '',
-          address1: '',
-          address2: '',
-          postalCode: '',
-          longitude: undefined,
-          latitude: undefined,
-        }, true);
-      }}/>
-    {(showMap) && <KakaoMap {...address}
-                            apiKey={kakaoMapApiKey}
-                            onSetCoordinates={(latitude, longitude) => {
-                              if (latitude !== address?.latitude || longitude !== address?.longitude) {
-                                onSetCoordinates(latitude, longitude);
-                              }
-                            }}/>}
-
-  </div>
-}
+  return (
+    <div>
+      <PostCodeSelector
+        required={isTrue(props.required)}
+        address={address}
+        onSubmit={(address) => {
+          onChange(
+            {
+              state: defaultString(address.state),
+              city: defaultString(address.city),
+              address1: address.address1,
+              address2: address.address2,
+              postalCode: address.postalCode,
+              longitude: address.longitude,
+              latitude: address.latitude,
+            },
+            true,
+          );
+        }}
+        onRemove={() => {
+          onChange(
+            {
+              state: '',
+              city: '',
+              address1: '',
+              address2: '',
+              postalCode: '',
+              longitude: undefined,
+              latitude: undefined,
+            },
+            true,
+          );
+        }}
+      />
+      {showMap && (
+        <KakaoMap
+          {...address}
+          apiKey={kakaoMapApiKey}
+          onSetCoordinates={(latitude, longitude) => {
+            if (latitude !== address?.latitude || longitude !== address?.longitude) {
+              onSetCoordinates(latitude, longitude);
+            }
+          }}
+        />
+      )}
+    </div>
+  );
+};

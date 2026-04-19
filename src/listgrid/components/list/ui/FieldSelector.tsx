@@ -7,10 +7,10 @@
  * You may obtain a copy of the License under controlled by GJCU
  */
 
-import React, {memo, useCallback, useMemo, useState} from 'react';
-import {ListableFormField} from '../../fields/abstract';
-import {getTranslation} from '../../../utils/i18n';
-import {IconCheck, IconSearch} from '@tabler/icons-react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { ListableFormField } from '../../fields/abstract';
+import { getTranslation } from '../../../utils/i18n';
+import { IconCheck, IconSearch } from '@tabler/icons-react';
 
 interface FieldSelectorProps {
   availableFields: ListableFormField<any>[];
@@ -57,20 +57,19 @@ const FieldSelectorInner = ({
 
   // availableFields에 포함된 필드 중 선택된 것만 카운트
   // (통합검색 모드에서 quickSearch 필드가 제외될 때 정확한 숫자 표시)
-  const selectedCount = availableFields.filter(field =>
-    selectedFieldNames.has(field.getName())
+  const selectedCount = availableFields.filter((field) =>
+    selectedFieldNames.has(field.getName()),
   ).length;
   const totalCount = availableFields.length;
 
   return (
     <div className="rcm-field-selector">
       {/* Header */}
-      <div
-        className="rcm-field-selector-header"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
+      <div className="rcm-field-selector-header" onClick={() => setIsExpanded(!isExpanded)}>
         <div className="rcm-field-selector-header-left">
-          <span className="rcm-text" data-weight="medium">검색 필드 선택</span>
+          <span className="rcm-text" data-weight="medium">
+            검색 필드 선택
+          </span>
           <span className="rcm-badge" data-color="primary" data-size="sm">
             {selectedCount}/{totalCount}
           </span>
@@ -112,7 +111,11 @@ const FieldSelectorInner = ({
           {/* Search and actions */}
           <div className="rcm-field-selector-search-row">
             <div className="rcm-field-selector-search-input-wrap">
-              <IconSearch className="rcm-icon rcm-field-selector-search-icon" data-size="sm" data-tone="muted" />
+              <IconSearch
+                className="rcm-icon rcm-field-selector-search-icon"
+                data-size="sm"
+                data-tone="muted"
+              />
               <input
                 type="text"
                 placeholder="필드 검색..."
@@ -158,8 +161,15 @@ const FieldSelectorInner = ({
                     data-interactive
                     data-state={isSelected ? 'selected' : undefined}
                   >
-                    <span className={`rcm-field-selector-chip-check ${isSelected ? 'rcm-field-selector-chip-check-selected' : ''}`}>
-                      {isSelected && <IconCheck className="rcm-icon rcm-field-selector-chip-check-icon" data-size="xs" />}
+                    <span
+                      className={`rcm-field-selector-chip-check ${isSelected ? 'rcm-field-selector-chip-check-selected' : ''}`}
+                    >
+                      {isSelected && (
+                        <IconCheck
+                          className="rcm-icon rcm-field-selector-chip-check-icon"
+                          data-size="xs"
+                        />
+                      )}
                     </span>
                     <span className="rcm-truncate">{field.viewLabel(t)}</span>
                   </button>

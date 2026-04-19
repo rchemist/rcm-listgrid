@@ -5,17 +5,16 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {EntityForm} from '../config/EntityForm';
-import {SearchForm} from "../form/SearchForm";
-import {AbstractManyToOneField, ListableFormField} from '../components/fields/abstract';
-import {LabelType} from '../config/Config';
-import {isTrue} from '../utils/BooleanUtil';
-import {PageResult} from "../form/Type";
-import {ReactNode} from "react";
-import {SubCollectionBaseButtonProps} from '../components/list/types/SubCollectionButtons.type';
+import { EntityForm } from '../config/EntityForm';
+import { SearchForm } from '../form/SearchForm';
+import { AbstractManyToOneField, ListableFormField } from '../components/fields/abstract';
+import { LabelType } from '../config/Config';
+import { isTrue } from '../utils/BooleanUtil';
+import { PageResult } from '../form/Type';
+import { ReactNode } from 'react';
+import { SubCollectionBaseButtonProps } from '../components/list/types/SubCollectionButtons.type';
 
 export class ListGrid {
-
   private readonly entityForm: EntityForm;
   private searchForm?: SearchForm;
 
@@ -29,7 +28,9 @@ export class ListGrid {
     this.entityForm = entityForm.clone(true);
   }
 
-  withOverrideFetch(overrideFetch?: (url: string, searchForm: SearchForm) => Promise<PageResult>): this {
+  withOverrideFetch(
+    overrideFetch?: (url: string, searchForm: SearchForm) => Promise<PageResult>,
+  ): this {
     this.overrideFetch = overrideFetch;
     return this;
   }
@@ -39,7 +40,7 @@ export class ListGrid {
     return this;
   }
 
-  getListFields() : ListableFormField<any>[]{
+  getListFields(): ListableFormField<any>[] {
     if (this.listFields === undefined) {
       this.listFields = this.entityForm.getListFields();
     }
@@ -47,10 +48,10 @@ export class ListGrid {
   }
 
   getQuickSearchProperty(findAllFields: boolean = true): QuickSearchProps | undefined {
-    let field: {name: string, label: LabelType, order: number} | undefined = undefined;
+    let field: { name: string; label: LabelType; order: number } | undefined = undefined;
 
-    const quickSearchFields: {name: string, label: LabelType, order: number}[] = [];
-    const listableFields: {name: string, label: LabelType, order: number}[] = [];
+    const quickSearchFields: { name: string; label: LabelType; order: number }[] = [];
+    const listableFields: { name: string; label: LabelType; order: number }[] = [];
 
     // 1. 먼저 모든 필드에서 quickSearch: true 가 명시적으로 설정된 필드를 수집
     // (support 값과 관계없이 quickSearch: true 설정이 있으면 대상이 됨)
@@ -65,11 +66,19 @@ export class ListGrid {
             if (targetEntityForm) {
               const nameField = targetEntityForm.getField('name');
               if (nameField) {
-                quickSearchFields.push({name: `${entityField.getName()}.name`, label: entityField.getLabel(), order: idx});
+                quickSearchFields.push({
+                  name: `${entityField.getName()}.name`,
+                  label: entityField.getLabel(),
+                  order: idx,
+                });
               }
             }
           } else {
-            quickSearchFields.push({name: entityField.getName(), label: entityField.getLabel(), order: idx});
+            quickSearchFields.push({
+              name: entityField.getName(),
+              label: entityField.getLabel(),
+              order: idx,
+            });
           }
         }
       }
@@ -78,7 +87,7 @@ export class ListGrid {
     // 2. listFields 수집 (listableFields 용도)
     let index = 0;
     this.getListFields().forEach((listField) => {
-      listableFields.push({name: listField.getName(), label: listField.getLabel(), order: index});
+      listableFields.push({ name: listField.getName(), label: listField.getLabel(), order: index });
       index++;
     });
 
@@ -89,7 +98,7 @@ export class ListGrid {
     // Fallback: quickSearch: true 필드가 없으면 자동으로 퀵서치 대상 필드 수집
     // Phase 2: StringField(type=text)만 자동 포함. ManyToOneField는 명시적 quickSearch: true 설정 시에만 Phase 1에서 수집됨
     if (field === undefined && isTrue(findAllFields) && listableFields.length > 0) {
-      const autoQuickSearchFields: {name: string, label: LabelType, order: number}[] = [];
+      const autoQuickSearchFields: { name: string; label: LabelType; order: number }[] = [];
 
       this.getListFields().forEach((listField, idx) => {
         // quickSearch: false가 명시적으로 설정된 필드는 자동탐색에서 제외
@@ -104,7 +113,7 @@ export class ListGrid {
           autoQuickSearchFields.push({
             name: listField.getName(),
             label: listField.getLabel(),
-            order: idx
+            order: idx,
           });
         }
       });
@@ -118,8 +127,8 @@ export class ListGrid {
           const otherFields = autoQuickSearchFields.slice(1);
           return {
             ...field,
-            orFields: otherFields.map(f => f.name),
-            orFieldLabels: otherFields.map(f => f.label),
+            orFields: otherFields.map((f) => f.name),
+            orFieldLabels: otherFields.map((f) => f.label),
           };
         }
       }
@@ -127,9 +136,9 @@ export class ListGrid {
 
     // Build orFields from multiple quickSearch fields (OR condition support)
     if (field !== undefined && quickSearchFields.length > 1) {
-      const otherFields = quickSearchFields.filter(f => f.name !== field!.name);
-      const orFields = otherFields.map(f => f.name);
-      const orFieldLabels = otherFields.map(f => f.label);
+      const otherFields = quickSearchFields.filter((f) => f.name !== field!.name);
+      const orFields = otherFields.map((f) => f.name);
+      const orFieldLabels = otherFields.map((f) => f.label);
 
       return {
         ...field,
@@ -142,9 +151,8 @@ export class ListGrid {
   }
 
   getSearchForm(): SearchForm {
-
     if (this.searchForm === undefined) {
-      this.searchForm = SearchForm.create()
+      this.searchForm = SearchForm.create();
     }
 
     return this.searchForm;
@@ -154,15 +162,18 @@ export class ListGrid {
     return this.entityForm;
   }
 
-  withSearchForm(searchForm: SearchForm) : this {
+  withSearchForm(searchForm: SearchForm): this {
     this.searchForm = searchForm;
     return this;
   }
 
-  async fetchData(fetchSearchForm?: SearchForm, extensionOptions?: {
-    entityFormName?: string;
-    extensionPoint?: string;
-  }) : Promise<PageResult> {
+  async fetchData(
+    fetchSearchForm?: SearchForm,
+    extensionOptions?: {
+      entityFormName?: string;
+      extensionPoint?: string;
+    },
+  ): Promise<PageResult> {
     const searchForm = fetchSearchForm ?? this.getSearchForm().clone();
 
     if (searchForm.isShouldReturnEmpty()) {
@@ -171,9 +182,8 @@ export class ListGrid {
         list: [],
         totalCount: 0,
         totalPage: 1,
-        searchForm: searchForm.withPage(0)
+        searchForm: searchForm.withPage(0),
       });
-
     }
 
     const url = this.getEntityForm().getUrl();
@@ -193,7 +203,6 @@ export class ListGrid {
     }
 
     return result;
-
   }
 
   getAdvancedSearchFields(): ListableFormField<any>[] {
@@ -223,17 +232,14 @@ export class ListGrid {
         fields.push(...appendFields);
         fields.sort((a, b) => a.order - b.order);
       }
-
     }
 
     return fields;
-
   }
 }
 
-
 export interface SubCollectionProps {
-  name?: string;   // collection 의 이름
+  name?: string; // collection 의 이름
   /**
    * 이 콜렉션의 엔티티에 상위 엔티티가 어떤 필드명으로 매핑되어 있는지.
    * 예를 들어 one Plant : many Transceivers 관계에서
@@ -242,12 +248,10 @@ export interface SubCollectionProps {
   mappedBy?: string;
   mappedValue?: any;
   buttons?: ((props: SubCollectionBaseButtonProps) => ReactNode)[];
-  add?: boolean;    // subcollection 에서 신규 등록을 지원하는지. 상위 Field 설정에서 readonly 를 설정했더라도 이 값이 true 면 신규 등록 버튼을 표시한다.
-  delete?: boolean;     // subCollection 에서 삭제를 지원하는지. 상위 Field 설정에서 readonly 를 설정했더라도 이 값이 true 면 삭제 버튼을 표시한다.
-  modifyOnView?: boolean;   // 서브콜렉션에서 리스트를 클릭했을 때 수정을 지원하는지. 이 값은 기본 true 이다.
+  add?: boolean; // subcollection 에서 신규 등록을 지원하는지. 상위 Field 설정에서 readonly 를 설정했더라도 이 값이 true 면 신규 등록 버튼을 표시한다.
+  delete?: boolean; // subCollection 에서 삭제를 지원하는지. 상위 Field 설정에서 readonly 를 설정했더라도 이 값이 true 면 삭제 버튼을 표시한다.
+  modifyOnView?: boolean; // 서브콜렉션에서 리스트를 클릭했을 때 수정을 지원하는지. 이 값은 기본 true 이다.
 }
-
-
 
 export interface QuickSearchProps {
   name: string;

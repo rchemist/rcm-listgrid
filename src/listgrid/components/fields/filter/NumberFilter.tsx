@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-'use client'
+'use client';
 
-import React, {useState} from "react";
-import {QueryConditionType} from "../../../form/SearchForm";
-import {SelectBox} from "../../../ui";
-import {TextInput} from "../../../ui";
-import {isBlank} from '../../../utils/StringUtil';
+import React, { useState } from 'react';
+import { QueryConditionType } from '../../../form/SearchForm';
+import { SelectBox } from '../../../ui';
+import { TextInput } from '../../../ui';
+import { isBlank } from '../../../utils/StringUtil';
 
 interface NumberFilterProps {
   onRemove: () => void;
@@ -61,56 +61,66 @@ export const NumberFilter = (props: NumberFilterProps) => {
     props.onRemove();
   }
 
-  return <div className={'flex w-full space-x-2'}>
-    <div className={'w-[140px]'}>
-      <SelectBox
-        value={type}
-        required={true}
-        name={'type'} options={[...NumberFilterTypes]}
-                 onChange={(value: QueryConditionType) => {
-                   changeType(value);
-                 }}
-      ></SelectBox>
+  return (
+    <div className={'flex w-full space-x-2'}>
+      <div className={'w-[140px]'}>
+        <SelectBox
+          value={type}
+          required={true}
+          name={'type'}
+          options={[...NumberFilterTypes]}
+          onChange={(value: QueryConditionType) => {
+            changeType(value);
+          }}
+        ></SelectBox>
+      </div>
+      <div className={'w-full flex space-x-2 items-center'}>
+        <TextInput
+          name={'start'}
+          type={'number'}
+          value={start ?? ''}
+          onChange={(value: string) => {
+            if (!isBlank(value) && isNaN(Number(value))) {
+              return;
+            }
+            setValue('start', value);
+          }}
+        ></TextInput>
+        {filterType.showEnd && (
+          <React.Fragment>
+            <span>~</span>
+            <TextInput
+              name={'end'}
+              type={'number'}
+              value={end ?? ''}
+              onChange={(value: string) => {
+                if (!isBlank(value) && isNaN(Number(value))) {
+                  return;
+                }
+                setValue('end', value);
+              }}
+            ></TextInput>
+          </React.Fragment>
+        )}
+      </div>
     </div>
-    <div className={'w-full flex space-x-2 items-center'}>
-      <TextInput name={'start'}
-                 type={"number"}
-                   value={start ?? ''}
-                   onChange={(value: string) => {
-                     if (!isBlank(value) && isNaN(Number(value))) {
-                       return;
-                     }
-                     setValue('start', value);
-                   }}></TextInput>
-      {filterType.showEnd && <React.Fragment>
-        <span>~</span>
-        <TextInput name={'end'}
-                   type={"number"}
-                     value={end ?? ''}
-                     onChange={(value: string) => {
-                       if (!isBlank(value) && isNaN(Number(value))) {
-                         return;
-                       }
-                       setValue('end', value);
-                     }}></TextInput>
-      </React.Fragment>}
-    </div>
-  </div>;
-}
-
+  );
+};
 
 interface NumberFilterType {
-  value: QueryConditionType, label: string, showEnd: boolean
+  value: QueryConditionType;
+  label: string;
+  showEnd: boolean;
 }
 
 const NumberFilterTypes: NumberFilterType[] = [
-  {value: 'BETWEEN', label: '범위', showEnd: true},
-  {value: 'EQUAL', label: '일치', showEnd: false},
-  {value: 'NOT_EQUAL', label: '불일치', showEnd: false},
-  {value: 'LESS_THAN', label: '미만', showEnd: false},
-  {value: 'LESS_THAN_EQUAL', label: '이하', showEnd: false},
-  {value: 'GREATER', label: '초과', showEnd: false},
-  {value: 'GREATER_THAN_EQUAL', label: '이상', showEnd: false},
+  { value: 'BETWEEN', label: '범위', showEnd: true },
+  { value: 'EQUAL', label: '일치', showEnd: false },
+  { value: 'NOT_EQUAL', label: '불일치', showEnd: false },
+  { value: 'LESS_THAN', label: '미만', showEnd: false },
+  { value: 'LESS_THAN_EQUAL', label: '이하', showEnd: false },
+  { value: 'GREATER', label: '초과', showEnd: false },
+  { value: 'GREATER_THAN_EQUAL', label: '이상', showEnd: false },
 ];
 
 function getNumberFilterType(type: QueryConditionType): NumberFilterType {

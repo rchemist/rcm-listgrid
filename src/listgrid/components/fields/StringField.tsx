@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React from "react";
+import React from 'react';
 import {
   CheckButtonValidationField,
   CheckButtonValidationFieldProps,
@@ -13,19 +13,18 @@ import {
   ViewListProps,
   ViewListResult,
   ViewRenderProps,
-  ViewRenderResult
+  ViewRenderResult,
 } from '../../components/fields/abstract';
-import {TextInput} from "../../ui";
-import {getInputRendererParameters} from '../../components/helper/FieldRendererHelper';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {CopyableTextView, CopyButton} from './view/CopyableTextView';
+import { TextInput } from '../../ui';
+import { getInputRendererParameters } from '../../components/helper/FieldRendererHelper';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { CopyableTextView, CopyButton } from './view/CopyableTextView';
 
 interface StringFieldProps extends CheckButtonValidationFieldProps {
   useCopy?: boolean;
 }
 
 export class StringField extends CheckButtonValidationField<StringField> {
-
   useCopy?: boolean;
 
   constructor(name: string, order: number, useCopy?: boolean) {
@@ -60,31 +59,28 @@ export class StringField extends CheckButtonValidationField<StringField> {
         return this.renderCheckButtonValidationField(params);
       }
 
-      return <TextInput {...await getInputRendererParameters(this, params)} {...extraProps}></TextInput>;
+      return (
+        <TextInput {...await getInputRendererParameters(this, params)} {...extraProps}></TextInput>
+      );
     };
 
     if (this.useCopy) {
       return (async () => {
         const value = await params.entityForm.getValue(this.name);
-        
+
         if (!value) {
           return renderNode();
         }
 
         // 복사 버튼이 붙으므로 우측 라운드와 테두리를 제거
-        const node = await renderNode({ 
-          className: 'rounded-r-none border-r-0' 
+        const node = await renderNode({
+          className: 'rounded-r-none border-r-0',
         });
-        
+
         return (
           <div className="rcm-input-group-stretch">
-            <div className="rcm-input-group-grow">
-              {node}
-            </div>
-            <CopyButton
-              value={String(value)}
-              className="rcm-copy-addon-wrap"
-            />
+            <div className="rcm-input-group-grow">{node}</div>
+            <CopyButton value={String(value)} className="rcm-copy-addon-wrap" />
           </div>
         );
       })();
@@ -93,14 +89,19 @@ export class StringField extends CheckButtonValidationField<StringField> {
     return renderNode();
   }
 
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
-      return <TextInput
-        name={`${this.name}_${params.entityForm.id}`}
-        onChange={(value: string) => {
-          params.onChange(value, 'LIKE');
-        }}
-        value={params.value}></TextInput>;
+      return (
+        <TextInput
+          name={`${this.name}_${params.entityForm.id}`}
+          onChange={(value: string) => {
+            params.onChange(value, 'LIKE');
+          }}
+          value={params.value}
+        ></TextInput>
+      );
     })();
   }
 
@@ -125,12 +126,7 @@ export class StringField extends CheckButtonValidationField<StringField> {
     // If copy is enabled, use CopyableTextView
     if (this.useCopy) {
       return {
-        result: (
-          <CopyableTextView
-            value={String(value)}
-            displayValue={textValue}
-          />
-        )
+        result: <CopyableTextView value={String(value)} displayValue={textValue} />,
       };
     }
 
@@ -145,7 +141,7 @@ export class StringField extends CheckButtonValidationField<StringField> {
             </span>
             <span className="font-medium">{textValue}</span>
           </span>
-        )
+        ),
       };
     }
 
@@ -176,12 +172,8 @@ export class StringField extends CheckButtonValidationField<StringField> {
     // If copy is enabled and we have a value, use CopyableTextView
     if (this.useCopy && value) {
       return {
-        result: (
-          <CopyableTextView
-            value={String(value)}
-          />
-        ),
-        linkOnCell: true
+        result: <CopyableTextView value={String(value)} />,
+        linkOnCell: true,
       };
     }
 
@@ -195,11 +187,7 @@ export class StringField extends CheckButtonValidationField<StringField> {
     return new StringField(name, order, this.useCopy);
   }
 
-
-
-  static create(props: StringFieldProps) : StringField {
-    return new StringField(props.name, props.order, props.useCopy)
-      .copyFields(props, true);
+  static create(props: StringFieldProps): StringField {
+    return new StringField(props.name, props.order, props.useCopy).copyFields(props, true);
   }
-
 }

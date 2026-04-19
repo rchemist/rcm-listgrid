@@ -1,11 +1,11 @@
-import {defaultString, isBlank, isEmpty, isTrue} from "../../utils";
-import {Session} from '../../auth';
-import {ResponseData} from "../../api";
-import {ReactNode} from "react";
-import {FormField, ListableFormField, OptionalField} from '../../components/fields/abstract';
-import {PostFetchListData} from '../../components/list/types/ViewListGrid.types';
-import {ClientExtensionConfig, ExtensionPoint} from '../../extensions/EntityFormExtension.types';
-import {DataTransferConfig} from '../../transfer/Type';
+import { defaultString, isBlank, isEmpty, isTrue } from '../../utils';
+import { Session } from '../../auth';
+import { ResponseData } from '../../api';
+import { ReactNode } from 'react';
+import { FormField, ListableFormField, OptionalField } from '../../components/fields/abstract';
+import { PostFetchListData } from '../../components/list/types/ViewListGrid.types';
+import { ClientExtensionConfig, ExtensionPoint } from '../../extensions/EntityFormExtension.types';
+import { DataTransferConfig } from '../../transfer/Type';
 import {
   CreateStep,
   EntityFormActionResult,
@@ -17,39 +17,37 @@ import {
   ModifyFetchedEntityFormFunc,
   OnInitializeFunc,
   RenderType,
-  TooltipType
+  TooltipType,
 } from '../../config/Config';
-import {EntityField} from '../../config/EntityField';
-import {EntityForm} from '../../config/EntityForm';
-import {EntityFormButtonType} from '../../config/EntityFormButton';
-import {AlertMessage, FieldError} from '../../config/EntityFormTypes';
-import {EntityTab} from '../../config/EntityTab';
-import {SubCollectionField} from '../../config/SubCollectionField';
-import {EntityFieldGroup} from '../../config/EntityFieldGroup';
-import {SelectOption} from "../../form/Type";
+import { EntityField } from '../../config/EntityField';
+import { EntityForm } from '../../config/EntityForm';
+import { EntityFormButtonType } from '../../config/EntityFormButton';
+import { AlertMessage, FieldError } from '../../config/EntityFormTypes';
+import { EntityTab } from '../../config/EntityTab';
+import { SubCollectionField } from '../../config/SubCollectionField';
+import { EntityFieldGroup } from '../../config/EntityFieldGroup';
+import { SelectOption } from '../../form/Type';
 
 export abstract class EntityFormBase {
-
   constructor(name: string, url: string) {
     this.name = name;
     this.url = url;
     this.version = new Date().getTime().toString();
     // 깊은 복사로 할당하여 원본이 변경되지 않도록 함
     this.manageEntityForm = {
-      ...MANAGE_ENTITY_ALL
+      ...MANAGE_ENTITY_ALL,
     };
   }
 
-
   version: string;
-  revisionEntityName?: string;    // revision 정보를 처리하기 위해 필요한 엔티티 이름 - page 에서 EntityForm 을 생성할 때 이 값을 넣어 주면 된다.
-  parentId?: string;    // ManyToOne 이나 SubCollection 등에서 부모 엔티티의 id 를 저장하기 위해 사용한다.
+  revisionEntityName?: string; // revision 정보를 처리하기 위해 필요한 엔티티 이름 - page 에서 EntityForm 을 생성할 때 이 값을 넣어 주면 된다.
+  parentId?: string; // ManyToOne 이나 SubCollection 등에서 부모 엔티티의 id 를 저장하기 위해 사용한다.
   id?: string;
   name: string;
   title?: {
-    title?: string
-    field?: string
-    view?: (entityForm: EntityForm) => Promise<ReactNode>
+    title?: string;
+    field?: string;
+    view?: (entityForm: EntityForm) => Promise<ReactNode>;
   };
   // Entity 데이터를 fetch 하는 backend api 의 url
   url: string;
@@ -87,13 +85,13 @@ export abstract class EntityFormBase {
   alertMessages: AlertMessage[] = [];
 
   // CheckButtonValidation 필드의 검증 상태 저장
-  fieldValidationStates: Map<string, { validated: boolean; message?: string; color?: string }> = new Map();
+  fieldValidationStates: Map<string, { validated: boolean; message?: string; color?: string }> =
+    new Map();
 
   appendAdvancedSearchFields?: ListableFormField<any>[];
 
   // Extension 관련 속성 - Client only
   clientExtensions: Map<ExtensionPoint, ClientExtensionConfig[]> = new Map();
-
 
   // 리스트 필드 제외 목록
   excludeListFields?: string[];
@@ -135,7 +133,16 @@ export abstract class EntityFormBase {
    * create form 을 만들어 서버로 전송하기 전에 데이터를 변경할 수 있는 기능을 제공한다.
    * data['필드명'] 으로 접근해 필드의 값을 변경할 수 있다.
    */
-  overrideSubmitData?: (entityForm: EntityForm, data: any) => Promise<{ data: any, modifiedFields?: string[], removePrevious?: boolean, error?: boolean, errors?: FieldError[] }>;
+  overrideSubmitData?: (
+    entityForm: EntityForm,
+    data: any,
+  ) => Promise<{
+    data: any;
+    modifiedFields?: string[];
+    removePrevious?: boolean;
+    error?: boolean;
+    errors?: FieldError[];
+  }>;
 
   /**
    * Data 를 fetch 할 때 로직을 오버라이드 한다.
@@ -177,7 +184,10 @@ export abstract class EntityFormBase {
     this.initialize({});
   }
 
-  abstract initialize(props: { session?: Session, list?: boolean }): Promise<EntityFormActionResult>;
+  abstract initialize(props: {
+    session?: Session;
+    list?: boolean;
+  }): Promise<EntityFormActionResult>;
 
   abstract clone(includeValue?: boolean): EntityFormBase;
 
@@ -191,14 +201,18 @@ export abstract class EntityFormBase {
     return this;
   }
 
-  withTitle(title?: string | {
-    title?: string
-    field?: string,
-    view?: (entityForm: EntityForm) => Promise<ReactNode>
-  }): this {
+  withTitle(
+    title?:
+      | string
+      | {
+          title?: string;
+          field?: string;
+          view?: (entityForm: EntityForm) => Promise<ReactNode>;
+        },
+  ): this {
     if (typeof title === 'string') {
       this.title = {
-        title: title
+        title: title,
       };
     } else {
       this.title = title;
@@ -225,8 +239,8 @@ export abstract class EntityFormBase {
   }
 
   /**
-       * ID 와 URL 이 모두 존재해야만 FETCH 가 가능하다.
-       */
+   * ID 와 URL 이 모두 존재해야만 FETCH 가 가능하다.
+   */
   isAbleFetch() {
     return !isBlank(this.url) && !isBlank(this.id);
   }
@@ -263,11 +277,9 @@ export abstract class EntityFormBase {
 
   async getTitle(append?: string, appendPostfix?: boolean): Promise<string> {
     append = defaultString(append);
-    const postFix = isTrue(appendPostfix) ? ' / ' + await this.getTitlePostfix() : '';
+    const postFix = isTrue(appendPostfix) ? ' / ' + (await this.getTitlePostfix()) : '';
     return isBlank(append) ? `${postFix}` : `${append}${postFix}`;
   }
-
-
 
   private async getTitlePostfix(): Promise<string> {
     if (this.title) {
@@ -282,8 +294,9 @@ export abstract class EntityFormBase {
       }
     }
 
-    return await this.getField('name')?.getCurrentValue(this.getRenderType()) ?? this.id ?? '신규 입력';
-
+    return (
+      (await this.getField('name')?.getCurrentValue(this.getRenderType())) ?? this.id ?? '신규 입력'
+    );
   }
 
   hasField(name: string): boolean {
@@ -323,24 +336,34 @@ export abstract class EntityFormBase {
     return this.tabs.get(tabId);
   }
 
-  async getViewableTabs(includeHide?: boolean, createStepFields?: string[], session?: Session): Promise<EntityTab[]> {
+  async getViewableTabs(
+    includeHide?: boolean,
+    createStepFields?: string[],
+    session?: Session,
+  ): Promise<EntityTab[]> {
     const tabs: EntityTab[] = [];
 
     // 권한 체크를 위해 session에서 userPermissions를 가져온다.
-    const userPermissions = session?.roles ?? session?.authentication?.roles ?? this.session?.roles ?? this.session?.authentication?.roles;
+    const userPermissions =
+      session?.roles ??
+      session?.authentication?.roles ??
+      this.session?.roles ??
+      this.session?.authentication?.roles;
 
     for (const tab of this.tabs.values()) {
-
       const append: boolean = isTrue(includeHide) || !isTrue(tab.hidden);
 
       if (append) {
-
         // 탭에 requiredPermissions가 설정되어 있고, 사용자에게 권한이 없으면 숨김
         if (!tab.isPermitted(userPermissions)) {
           continue;
         }
 
-        const fieldGroups = await this.getViewableFieldGroups({ tabId: tab.id, session, createStepFields: createStepFields });
+        const fieldGroups = await this.getViewableFieldGroups({
+          tabId: tab.id,
+          session,
+          createStepFields: createStepFields,
+        });
 
         if (fieldGroups.length > 0) {
           tabs.push(tab);
@@ -392,7 +415,11 @@ export abstract class EntityFormBase {
     return undefined;
   }
 
-  async getViewableFieldGroups(props: { tabId: string, session?: Session, createStepFields?: string[] }): Promise<string[]> {
+  async getViewableFieldGroups(props: {
+    tabId: string;
+    session?: Session;
+    createStepFields?: string[];
+  }): Promise<string[]> {
     const tabId = props.tabId;
     const session = props.session;
     const createStepFields = props.createStepFields ?? [];
@@ -402,7 +429,14 @@ export abstract class EntityFormBase {
       const viewableFieldGroups: string[] = [];
 
       for (const fieldGroup of tab.fieldGroups) {
-        if (await this.isViewableFieldGroup({ tabId, fieldGroupId: fieldGroup.id, session, createStepFields })) {
+        if (
+          await this.isViewableFieldGroup({
+            tabId,
+            fieldGroupId: fieldGroup.id,
+            session,
+            createStepFields,
+          })
+        ) {
           viewableFieldGroups.push(fieldGroup.id);
         }
       }
@@ -413,7 +447,12 @@ export abstract class EntityFormBase {
     return Promise.resolve([]);
   }
 
-  async isViewableFieldGroup(props: { tabId: string, fieldGroupId: string, session?: Session, createStepFields?: string[] }): Promise<boolean> {
+  async isViewableFieldGroup(props: {
+    tabId: string;
+    fieldGroupId: string;
+    session?: Session;
+    createStepFields?: string[];
+  }): Promise<boolean> {
     const tabId = props.tabId;
     const fieldGroupId = props.fieldGroupId;
     const session = props.session;
@@ -431,14 +470,13 @@ export abstract class EntityFormBase {
       const fieldGroup = tab.fieldGroups.find((group) => group.id === fieldGroupId);
 
       if (fieldGroup && this instanceof EntityForm) {
-
         // 필드그룹에 requiredPermissions가 설정되어 있고, 사용자에게 권한이 없으면 숨김
         if (!fieldGroup.isPermitted(userPermissions)) {
           return Promise.resolve(false);
         }
 
         for (const field of fieldGroup.fields) {
-          if (!isEmpty(props.createStepFields) && !(props.createStepFields!.includes(field.name))) {
+          if (!isEmpty(props.createStepFields) && !props.createStepFields!.includes(field.name)) {
             continue;
           }
 
@@ -449,20 +487,27 @@ export abstract class EntityFormBase {
               continue;
             }
 
-            const hidden = await entityField.isHidden({ entityForm: this, renderType: this.getRenderType(), session: session });
+            const hidden = await entityField.isHidden({
+              entityForm: this,
+              renderType: this.getRenderType(),
+              session: session,
+            });
 
             if (!hidden) {
               viewable = true;
               break;
             }
-
           }
 
           // SubCollection 은 update 시점에만 설정할 수 있다.
           if (!viewable && renderType === 'update') {
             const collection = this.collections.get(field.name);
             if (collection !== undefined) {
-              const hidden = await collection.isHidden({ entityForm: this, renderType: this.getRenderType(), session: session });
+              const hidden = await collection.isHidden({
+                entityForm: this,
+                renderType: this.getRenderType(),
+                session: session,
+              });
 
               if (!hidden) {
                 viewable = true;
@@ -473,16 +518,20 @@ export abstract class EntityFormBase {
         }
 
         return Promise.resolve(viewable);
-
       }
     }
 
     return Promise.resolve(viewable);
   }
 
-  async getVisibleFields(tabId: string, fieldGroupId: string, session?: Session, createStepFields?: string[]): Promise<{
-    fieldGroup?: EntityFieldGroup,
-    fields?: EntityField[]
+  async getVisibleFields(
+    tabId: string,
+    fieldGroupId: string,
+    session?: Session,
+    createStepFields?: string[],
+  ): Promise<{
+    fieldGroup?: EntityFieldGroup;
+    fields?: EntityField[];
   }> {
     const fieldGroup = this.getFieldGroup(tabId, fieldGroupId);
 
@@ -496,20 +545,25 @@ export abstract class EntityFormBase {
         const field = this.getField(f.name);
 
         if (field && field instanceof FormField) {
-
           if (this instanceof EntityForm) {
             // 권한이 없는 필드는 표시하지 않는다.
             if (!field.isPermitted(userPermissions)) {
               continue;
             }
 
-            const hidden = await field.isHidden({ entityForm: this, renderType: this.getRenderType(), session: session });
+            const hidden = await field.isHidden({
+              entityForm: this,
+              renderType: this.getRenderType(),
+              session: session,
+            });
 
-            if (!hidden && (isEmpty(createStepFields) || createStepFields?.includes(field.getName()))) {
+            if (
+              !hidden &&
+              (isEmpty(createStepFields) || createStepFields?.includes(field.getName()))
+            ) {
               fields.push(field as EntityField);
             }
           }
-
         }
       }
 
@@ -521,9 +575,13 @@ export abstract class EntityFormBase {
     return {};
   }
 
-  async getVisibleCollections(tabId: string, fieldGroupId: string, session?: Session): Promise<{
-    fieldGroup?: EntityFieldGroup,
-    collections?: SubCollectionField[]
+  async getVisibleCollections(
+    tabId: string,
+    fieldGroupId: string,
+    session?: Session,
+  ): Promise<{
+    fieldGroup?: EntityFieldGroup;
+    collections?: SubCollectionField[];
   }> {
     const fieldGroup = this.getFieldGroup(tabId, fieldGroupId);
 
@@ -535,13 +593,16 @@ export abstract class EntityFormBase {
 
         if (field) {
           if (this instanceof EntityForm) {
-            const hidden = await field.isHidden({ entityForm: this, renderType: this.getRenderType(), session: session });
+            const hidden = await field.isHidden({
+              entityForm: this,
+              renderType: this.getRenderType(),
+              session: session,
+            });
 
             if (!hidden) {
               collections.push(field);
             }
           }
-
         }
       }
 
@@ -570,14 +631,13 @@ export abstract class EntityFormBase {
   withFieldGroupConfig(tabId: string, fieldGroupId: string, config: FieldGroupConfig): this {
     const tab = this.getTab(tabId);
     if (tab) {
-      const fieldGroup = tab.fieldGroups.find(group => group.id === fieldGroupId);
+      const fieldGroup = tab.fieldGroups.find((group) => group.id === fieldGroupId);
       if (fieldGroup) {
         fieldGroup.config = { ...fieldGroup.config, ...config };
       }
     }
     return this;
   }
-
 
   getLabel(name: string): ReactNode {
     const field = this.getField(name);
@@ -624,23 +684,21 @@ export abstract class EntityFormBase {
   }
 
   withOptions(name: string, options: SelectOption[]): this {
-
     const field = this.getField(name);
     if (field instanceof OptionalField) {
       this.fields.set(name, field.withOptions(options) as EntityField);
     } else {
-      console.error(name, ' field is not optional field.')
+      console.error(name, ' field is not optional field.');
     }
 
     return this;
   }
 
   /**
- * 특정 tab 의 하위의 모든 fields 를 하나의 [] 로 리턴, 필드그룹의 표시 순서를 고려해 field 의 order 를 변경하며 clone 을 통해 원래 필드에 영향을 주지 않는다.
- * @param tabId
- */
+   * 특정 tab 의 하위의 모든 fields 를 하나의 [] 로 리턴, 필드그룹의 표시 순서를 고려해 field 의 order 를 변경하며 clone 을 통해 원래 필드에 영향을 주지 않는다.
+   * @param tabId
+   */
   getTabFields(tabId: string): EntityField[] {
-
     const tab = this.getTab(tabId);
 
     if (tab) {
@@ -678,31 +736,29 @@ export abstract class EntityFormBase {
   }
 
   withButtons(buttons: (entityForm: EntityForm) => Promise<EntityFormButtonType[]>): this {
-    this.buttons = [...this.buttons ?? [], buttons];
+    this.buttons = [...(this.buttons ?? []), buttons];
     return this;
   }
 
   withOnChanges(...onChanges: ModifyEntityFormFunc[]): this {
-    this.onChanges = [...this.onChanges ?? [], ...onChanges];
+    this.onChanges = [...(this.onChanges ?? []), ...onChanges];
     return this;
   }
 
   withOnFetchData(...onLoad: ModifyFetchedEntityFormFunc[]): this {
-    this.onFetchData = [...this.onFetchData ?? [], ...onLoad];
+    this.onFetchData = [...(this.onFetchData ?? []), ...onLoad];
     return this;
   }
 
   withOnInitialize(...onInitialize: OnInitializeFunc[]): this {
-    this.onInitialize = [...this.onInitialize ?? [], ...onInitialize];
+    this.onInitialize = [...(this.onInitialize ?? []), ...onInitialize];
     return this;
   }
 
   withOnPostFetchListData(...postFetchListData: PostFetchListData[]): this {
-    this.onFetchListData = [...this.onFetchListData ?? [], ...postFetchListData];
+    this.onFetchListData = [...(this.onFetchListData ?? []), ...postFetchListData];
     return this;
   }
-
-
 
   withOnSave(onSave?: (entityForm: EntityForm) => Promise<EntityFormActionResult>): this {
     this.onSave = onSave;
@@ -775,7 +831,7 @@ export abstract class EntityFormBase {
     });
     this.collections.forEach((value) => {
       value.withReadOnly(readonly);
-    })
+    });
   }
 
   setRevisionEntityNameIfBlank(path: string) {
@@ -783,5 +839,4 @@ export abstract class EntityFormBase {
       this.revisionEntityName = path;
     }
   }
-
 }

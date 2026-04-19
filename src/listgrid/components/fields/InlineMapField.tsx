@@ -5,23 +5,22 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {FormField, FormFieldProps} from './abstract';
-import React from "react";
-import {InlineMapConfig, MapKey} from '../../config/Config';
-import {FieldRenderParameters} from '../../config/EntityField';
-import {InlineMap, InlineMapPendingRef, KeyValue} from "../../ui";
-import {getInputRendererParameters} from '../helper/FieldRendererHelper';
-import {MinMaxLimit} from "../../form/Type";
-import {EntityForm} from '../../config/EntityForm';
-import {RenderType} from '../../config/Config';
+import { FormField, FormFieldProps } from './abstract';
+import React from 'react';
+import { InlineMapConfig, MapKey } from '../../config/Config';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { InlineMap, InlineMapPendingRef, KeyValue } from '../../ui';
+import { getInputRendererParameters } from '../helper/FieldRendererHelper';
+import { MinMaxLimit } from '../../form/Type';
+import { EntityForm } from '../../config/EntityForm';
+import { RenderType } from '../../config/Config';
 
 interface InlineMapFieldProps extends FormFieldProps {
-  config?: InlineMapConfig
+  config?: InlineMapConfig;
 }
 
 export class InlineMapField extends FormField<InlineMapField> {
-
-  config?: InlineMapConfig
+  config?: InlineMapConfig;
   pendingRef: { current: InlineMapPendingRef } = { current: { value: undefined, modified: false } };
 
   constructor(name: string, order: number, config?: InlineMapConfig) {
@@ -48,7 +47,13 @@ export class InlineMapField extends FormField<InlineMapField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
-      return <InlineMap config={this.config} pendingRef={this.pendingRef} {...await getInputRendererParameters(this, params)}></InlineMap>;
+      return (
+        <InlineMap
+          config={this.config}
+          pendingRef={this.pendingRef}
+          {...await getInputRendererParameters(this, params)}
+        ></InlineMap>
+      );
     })();
   }
 
@@ -61,27 +66,27 @@ export class InlineMapField extends FormField<InlineMapField> {
     return instance;
   }
 
-  withKeys(keys?: MapKey[]) : this{
-    this.config = {keys: keys, limit: this.config?.limit, resultType: this.config?.resultType};
+  withKeys(keys?: MapKey[]): this {
+    this.config = { keys: keys, limit: this.config?.limit, resultType: this.config?.resultType };
     return this;
   }
 
-  useResultMap() : this{
-    this.config = {keys: this.config?.keys, limit: this.config?.limit, resultType: 'Map'};
+  useResultMap(): this {
+    this.config = { keys: this.config?.keys, limit: this.config?.limit, resultType: 'Map' };
     return this;
   }
 
-  useKeyValue() : this {
-    this.config = {keys: this.config?.keys, limit: this.config?.limit, resultType: 'KeyValue'};
+  useKeyValue(): this {
+    this.config = { keys: this.config?.keys, limit: this.config?.limit, resultType: 'KeyValue' };
     return this;
   }
 
-  withLimit(limit?: MinMaxLimit) : this {
-    this.config = {keys: this.config?.keys, limit: limit, resultType: this.config?.resultType};
+  withLimit(limit?: MinMaxLimit): this {
+    this.config = { keys: this.config?.keys, limit: limit, resultType: this.config?.resultType };
     return this;
   }
 
-  withConfig(config?: InlineMapConfig) : this {
+  withConfig(config?: InlineMapConfig): this {
     this.config = config;
     return this;
   }
@@ -94,9 +99,7 @@ export class InlineMapField extends FormField<InlineMapField> {
     return super.withDefaultValue(value);
   }
 
-  static create(props: InlineMapFieldProps) : InlineMapField {
-    return new InlineMapField(props.name, props.order, props.config)
-      .copyFields(props, true);
+  static create(props: InlineMapFieldProps): InlineMapField {
+    return new InlineMapField(props.name, props.order, props.config).copyFields(props, true);
   }
-
 }

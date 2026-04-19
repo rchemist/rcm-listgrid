@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import {IconExternalLink, IconX} from '@tabler/icons-react';
-import {AlertItemProps} from '../types/ViewEntityFormAlerts.types';
-import {getAlertStyles} from '../hooks/useAlertManager';
+import { IconExternalLink, IconX } from '@tabler/icons-react';
+import { AlertItemProps } from '../types/ViewEntityFormAlerts.types';
+import { getAlertStyles } from '../hooks/useAlertManager';
 
 /**
  * AlertItem 컴포넌트
@@ -18,7 +18,7 @@ export const AlertItem = React.memo(function AlertItem({
   alert,
   onLinkClick,
   onClose,
-  t
+  t,
 }: AlertItemProps): React.ReactNode {
   const styles = getAlertStyles(alert.color);
   const IconComponent = styles.icon;
@@ -29,7 +29,9 @@ export const AlertItem = React.memo(function AlertItem({
     <div
       className={`${styles.className} rcm-alert-item ${isClickable ? 'rcm-cursor-pointer' : ''}`}
       data-tone={styles.dataTone}
-      onClick={hasLink && alert.link?.type !== 'external' ? () => onLinkClick(alert.link!) : undefined}
+      onClick={
+        hasLink && alert.link?.type !== 'external' ? () => onLinkClick(alert.link!) : undefined
+      }
     >
       <div className="rcm-alert-item-content">
         <IconComponent className="rcm-icon" data-size="md" />

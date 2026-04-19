@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {parse, stringify} from '../utils/jsonUtils';
+import { parse, stringify } from '../utils/jsonUtils';
 
 const cacheKey = 'listGridViewFields';
 
@@ -27,7 +27,7 @@ class CacheContext {
     this.data.set(cacheKey, fields);
   }
 
-  getFields(key: string, postFix?: string) : string[] {
+  getFields(key: string, postFix?: string): string[] {
     const cacheKey = this.createCacheKey(key, postFix);
     return this.data.get(cacheKey) ?? [];
   }
@@ -44,27 +44,23 @@ class CacheContext {
   toJson(): string {
     return stringify(this);
   }
-
 }
 
-export function getListFieldsFromCache(key: string, postFix?: string): string[] | undefined{
-  if (typeof window === 'undefined')
-    return undefined;
+export function getListFieldsFromCache(key: string, postFix?: string): string[] | undefined {
+  if (typeof window === 'undefined') return undefined;
   const cache = CacheContext.create(localStorage.getItem(cacheKey));
   return cache.getFields(key, postFix);
 }
 
 export function setListFieldsToCache(key: string, postFix: string | undefined, fields: string[]) {
-  if (typeof window === 'undefined')
-    return;
+  if (typeof window === 'undefined') return;
   const cache = CacheContext.create(localStorage.getItem(cacheKey));
   cache.setFields(key, postFix, fields);
   localStorage.setItem(cacheKey, cache.toJson());
 }
 
 export function clearListFieldsToCache(key: string, postFix: string | undefined) {
-  if (typeof window === 'undefined')
-    return;
+  if (typeof window === 'undefined') return;
   const cache = CacheContext.create(localStorage.getItem(cacheKey));
   cache.clearFields(key, postFix);
   localStorage.setItem(cacheKey, cache.toJson());

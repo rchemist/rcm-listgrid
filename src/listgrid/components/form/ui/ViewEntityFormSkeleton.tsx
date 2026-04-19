@@ -26,9 +26,7 @@ interface ViewEntityFormSkeletonProps {
 // targeting `.rcm-skeleton` via an unlayered selector.
 const size = (height: string | number, width?: string | number) => ({
   height: typeof height === 'number' ? `${height}px` : height,
-  ...(width !== undefined
-    ? { width: typeof width === 'number' ? `${width}px` : width }
-    : {}),
+  ...(width !== undefined ? { width: typeof width === 'number' ? `${width}px` : width } : {}),
 });
 
 /**
@@ -51,7 +49,7 @@ export const ViewEntityFormSkeleton = ({
 
   // 탭 정보 추출
   const tabs = Array.from(entityForm.tabs.values())
-    .filter(tab => !tab.hidden)
+    .filter((tab) => !tab.hidden)
     .sort((a, b) => a.order - b.order);
 
   const showTabs = tabs.length > 1;
@@ -92,24 +90,14 @@ export const ViewEntityFormSkeleton = ({
                   tabs.map((tab, index) => (
                     <div
                       key={tab.id}
-                      className={
-                        index === 0
-                          ? 'rcm-skeleton rcm-skeleton-accent'
-                          : 'rcm-skeleton'
-                      }
+                      className={index === 0 ? 'rcm-skeleton rcm-skeleton-accent' : 'rcm-skeleton'}
                       style={size(32, index === 0 ? 80 : 64)}
                     />
                   ))}
               </div>
               <div className="rcm-row">
-                <div
-                  className="rcm-skeleton rcm-skeleton-accent"
-                  style={size(28, 56)}
-                />
-                <div
-                  className="rcm-skeleton rcm-skeleton-danger"
-                  style={size(28, 56)}
-                />
+                <div className="rcm-skeleton rcm-skeleton-accent" style={size(28, 56)} />
+                <div className="rcm-skeleton rcm-skeleton-danger" style={size(28, 56)} />
               </div>
             </div>
           )}
@@ -158,12 +146,21 @@ export const ViewEntityFormSkeleton = ({
  * 필드그룹 스켈레톤
  */
 interface FieldGroupsSkeletonProps {
-  fieldGroups: { id: string; label: string; order?: number; fields: { name: string; order: number }[] }[];
+  fieldGroups: {
+    id: string;
+    label: string;
+    order?: number;
+    fields: { name: string; order: number }[];
+  }[];
   entityForm: EntityForm;
   subCollectionEntity?: boolean;
 }
 
-const FieldGroupsSkeleton = ({ fieldGroups, entityForm, subCollectionEntity }: FieldGroupsSkeletonProps) => {
+const FieldGroupsSkeleton = ({
+  fieldGroups,
+  entityForm,
+  subCollectionEntity,
+}: FieldGroupsSkeletonProps) => {
   const sortedGroups = [...fieldGroups].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   return (
@@ -187,11 +184,7 @@ const FieldGroupsSkeleton = ({ fieldGroups, entityForm, subCollectionEntity }: F
                 .map((fieldItem) => {
                   const field = entityForm.fields.get(fieldItem.name);
                   return (
-                    <FieldSkeleton
-                      key={fieldItem.name}
-                      fieldName={fieldItem.name}
-                      field={field}
-                    />
+                    <FieldSkeleton key={fieldItem.name} fieldName={fieldItem.name} field={field} />
                   );
                 })}
             </div>

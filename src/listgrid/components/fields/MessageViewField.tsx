@@ -5,16 +5,15 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ReactNode} from "react";
-import {FieldRenderParameters} from "../../config/EntityField";
-import {FormField, FormFieldProps} from "./abstract";
+import { ReactNode } from 'react';
+import { FieldRenderParameters } from '../../config/EntityField';
+import { FormField, FormFieldProps } from './abstract';
 
 interface MessageViewFieldProps extends FormFieldProps {
   message: ReactNode;
 }
 
 export class MessageViewField extends FormField<MessageViewField> {
-
   message: ReactNode;
 
   constructor(name: string, order: number, message: ReactNode) {
@@ -29,7 +28,7 @@ export class MessageViewField extends FormField<MessageViewField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<ReactNode | null> {
     return (async () => {
-      return <div>{this.message}</div>
+      return <div>{this.message}</div>;
     })();
   }
 
@@ -41,8 +40,6 @@ export class MessageViewField extends FormField<MessageViewField> {
   }
 
   static create(props: MessageViewFieldProps): MessageViewField {
-    return new MessageViewField(props.name, props.order, props.message)
-      .copyFields(props, true);
+    return new MessageViewField(props.name, props.order, props.message).copyFields(props, true);
   }
-
 }

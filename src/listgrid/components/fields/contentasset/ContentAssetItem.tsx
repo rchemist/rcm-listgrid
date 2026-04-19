@@ -13,14 +13,14 @@
  *  limitations under the License.
  */
 
-import React, {useCallback} from "react";
-import {InputRendererProps} from '../../../config/Config';
-import {EntityForm} from '../../../config/EntityForm';
-import {Session} from '../../../auth/types';
-import {useContentAsset} from "./hooks/useContentAsset";
-import {ContentAssetItemUI} from './components/ContentAssetItemUI';
-import {AddContentDialog} from './components/AddContentDialog';
-import {useModalManagerStore} from '../../../store';
+import React, { useCallback } from 'react';
+import { InputRendererProps } from '../../../config/Config';
+import { EntityForm } from '../../../config/EntityForm';
+import { Session } from '../../../auth/types';
+import { useContentAsset } from './hooks/useContentAsset';
+import { ContentAssetItemUI } from './components/ContentAssetItemUI';
+import { AddContentDialog } from './components/AddContentDialog';
+import { useModalManagerStore } from '../../../store';
 
 interface ContentAssetItemProps extends InputRendererProps {
   entityForm: EntityForm;
@@ -49,7 +49,7 @@ export const ContentAssetItem: React.FC<ContentAssetItemProps> = (props) => {
     validateAll,
     canAddMore,
     isEmpty,
-    isReadonly
+    isReadonly,
   } = useContentAsset({
     value: props.value,
     onChange: props.onChange,
@@ -57,7 +57,7 @@ export const ContentAssetItem: React.FC<ContentAssetItemProps> = (props) => {
     clearError: props.clearError,
     entityForm: props.entityForm,
     maxItems: props.maxItems,
-    readonly: props.readonly
+    readonly: props.readonly,
   });
 
   // GlobalModalManager 사용
@@ -69,8 +69,8 @@ export const ContentAssetItem: React.FC<ContentAssetItemProps> = (props) => {
   // 항목 추가 - 다이얼로그 열기
   const handleAddItem = useCallback(() => {
     openModal({
-      title: "컨텐츠 추가",
-      size: "sm",
+      title: '컨텐츠 추가',
+      size: 'sm',
       content: (
         <AddContentDialog
           onAdd={(title: string, content?: string) => {
@@ -84,36 +84,45 @@ export const ContentAssetItem: React.FC<ContentAssetItemProps> = (props) => {
               handleUpdateAsset(newIndex, 'content', content);
             }
           }}
-          existingTitles={assets.map(asset => asset.title)}
+          existingTitles={assets.map((asset) => asset.title)}
         />
       ),
       closeOnEscape: true,
-      closeOnClickOutside: true
+      closeOnClickOutside: true,
     });
   }, [openModal, handleAddAsset, handleUpdateAsset, assets]);
 
   // Title 변경 핸들러
-  const handleTitleChange = useCallback((index: number, value: string) => {
-    handleUpdateAsset(index, 'title', value);
-    // 타이핑 중에는 에러 제거
-    if (titleErrors[index]) {
-      setTitleErrors(prev => {
-        const newErrors = {...prev};
-        delete newErrors[index];
-        return newErrors;
-      });
-    }
-  }, [handleUpdateAsset, titleErrors, setTitleErrors]);
+  const handleTitleChange = useCallback(
+    (index: number, value: string) => {
+      handleUpdateAsset(index, 'title', value);
+      // 타이핑 중에는 에러 제거
+      if (titleErrors[index]) {
+        setTitleErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[index];
+          return newErrors;
+        });
+      }
+    },
+    [handleUpdateAsset, titleErrors, setTitleErrors],
+  );
 
   // Content 변경 핸들러
-  const handleContentChange = useCallback((index: number, value: string) => {
-    handleUpdateAsset(index, 'content', value);
-  }, [handleUpdateAsset]);
+  const handleContentChange = useCallback(
+    (index: number, value: string) => {
+      handleUpdateAsset(index, 'content', value);
+    },
+    [handleUpdateAsset],
+  );
 
   // 파일 업로드 진행률 핸들러
-  const handleUploadProgress = useCallback((_index: number) => (_progress: number) => {
-    // TODO: 진행률 UI 업데이트
-  }, []);
+  const handleUploadProgress = useCallback(
+    (_index: number) => (_progress: number) => {
+      // TODO: 진행률 UI 업데이트
+    },
+    [],
+  );
 
   return (
     <ContentAssetItemUI

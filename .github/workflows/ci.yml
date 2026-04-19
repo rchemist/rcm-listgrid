@@ -28,7 +28,7 @@ jobs:
         run: npm run lint
 
       - name: Format check
-        run: npm run format:check || echo "format drift — not failing build"
+        run: npm run format:check
 
       - name: Test + coverage (enforces vitest.config.ts thresholds)
         run: npm run test:coverage

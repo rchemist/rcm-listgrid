@@ -5,4 +5,4 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-export { defaultEntityFormTheme } from "./defaultTheme";
+export { defaultEntityFormTheme } from './defaultTheme';

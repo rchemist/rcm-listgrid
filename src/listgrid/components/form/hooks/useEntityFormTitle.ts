@@ -1,7 +1,7 @@
-import {EntityForm} from '../../../config/EntityForm';
-import {defaultString, isBlank} from '../../../utils/StringUtil';
-import {getTranslation} from "../../../utils/i18n";
-import {ReactNode} from "react";
+import { EntityForm } from '../../../config/EntityForm';
+import { defaultString, isBlank } from '../../../utils/StringUtil';
+import { getTranslation } from '../../../utils/i18n';
+import { ReactNode } from 'react';
 
 /**
  * EntityForm의 타이틀을 동적으로 계산해 반환하는 커스텀 훅
@@ -11,10 +11,10 @@ import {ReactNode} from "react";
  */
 export const useEntityFormTitle = ({
   entityForm,
-  customTitle
+  customTitle,
 }: {
-  entityForm: EntityForm,
-  customTitle?: string
+  entityForm: EntityForm;
+  customTitle?: string;
 }) => {
   const { t } = getTranslation();
   return async (form?: EntityForm): Promise<ReactNode> => {
@@ -55,4 +55,4 @@ export const useEntityFormTitle = ({
     }
     return title;
   };
-}; 
+};

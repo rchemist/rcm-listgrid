@@ -7,32 +7,40 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import React, {useEffect, useState} from "react";
-import {FormField, FormFieldProps} from '../fields/abstract';
-import {FieldRenderParameters, FilterRenderParameters} from '../../config/EntityField';
-import {SearchForm} from "../../form/SearchForm";
-import {PageResult} from "../../form/Type";
-import {useModalManagerStore} from '../../store';
-import {useSession} from '../../auth';
-import {ViewEntityForm} from '../form/ViewEntityForm';
-import {IconHistory} from "@tabler/icons-react";
-import {fDateTime} from "../../misc";
-import {EntityForm} from "../../config/EntityForm";
-import {Pagination} from "../../ui";
-import {getTranslation} from "../../utils/i18n";
+import React, { useEffect, useState } from 'react';
+import { FormField, FormFieldProps } from '../fields/abstract';
+import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
+import { SearchForm } from '../../form/SearchForm';
+import { PageResult } from '../../form/Type';
+import { useModalManagerStore } from '../../store';
+import { useSession } from '../../auth';
+import { ViewEntityForm } from '../form/ViewEntityForm';
+import { IconHistory } from '@tabler/icons-react';
+import { fDateTime } from '../../misc';
+import { EntityForm } from '../../config/EntityForm';
+import { Pagination } from '../../ui';
+import { getTranslation } from '../../utils/i18n';
 
-const revisionApiUrl = "/revision";
+const revisionApiUrl = '/revision';
 
 // Audit/timestamp fields excluded from diff (always change on every update)
 const AUDIT_FIELD_NAMES = new Set([
-  'updatedAt', 'dateUpdated', 'modifiedAt', 'dateModified',
-  'lastModified', 'lastModifiedDate', 'auditable',
+  'updatedAt',
+  'dateUpdated',
+  'modifiedAt',
+  'dateModified',
+  'lastModified',
+  'lastModifiedDate',
+  'auditable',
 ]);
 
 /**
  * Compare two revision data objects and return the set of field names that differ.
  */
-function getChangedFields(currentData: Record<string, any>, previousData: Record<string, any>): Set<string> {
+function getChangedFields(
+  currentData: Record<string, any>,
+  previousData: Record<string, any>,
+): Set<string> {
   const changed = new Set<string>();
   const allKeys = new Set([...Object.keys(currentData), ...Object.keys(previousData)]);
   for (const key of allKeys) {
@@ -55,15 +63,16 @@ const RevisionDiffWrapper: React.FC<{
 }> = ({ changedFields, fieldLabelMap, hasPreviousRevision, children }) => {
   const containerId = 'revision-diff-container';
 
-  const selectors = changedFields.size > 0
-    ? Array.from(changedFields)
-        .map(name => `#${containerId} [data-field-name="${name}"]`)
-        .join(',\n')
-    : '';
+  const selectors =
+    changedFields.size > 0
+      ? Array.from(changedFields)
+          .map((name) => `#${containerId} [data-field-name="${name}"]`)
+          .join(',\n')
+      : '';
 
   // Resolve display labels for changed fields (use label if available, skip otherwise)
   const changedFieldLabels = Array.from(changedFields)
-    .map(name => fieldLabelMap.get(name))
+    .map((name) => fieldLabelMap.get(name))
     .filter((label): label is string => !!label);
 
   return (
@@ -86,7 +95,9 @@ const RevisionDiffWrapper: React.FC<{
                 data-size="xs"
                 data-color="warning"
               ></span>
-              <span>이전 버전 대비 <strong>{changedFields.size}개</strong> 필드가 변경되었습니다</span>
+              <span>
+                이전 버전 대비 <strong>{changedFields.size}개</strong> 필드가 변경되었습니다
+              </span>
             </div>
             {changedFieldLabels.length > 0 && (
               <div className="rcm-revision-diff-labels">
@@ -146,14 +157,15 @@ export class RevisionField extends FormField<RevisionField> {
     return <RevisionFieldRenderer entityForm={entityForm} />;
   }
 
-  protected renderListFilterInstance(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilterInstance(
+    params: FilterRenderParameters,
+  ): Promise<React.ReactNode | null> {
     // 리스트 필터에서는 지원하지 않음
     return Promise.resolve(null);
   }
 
   static create(props: RevisionFieldProps): RevisionField {
-    return new RevisionField(props.name, props.order)
-      .copyFields(props, true);
+    return new RevisionField(props.name, props.order).copyFields(props, true);
   }
 }
 
@@ -225,18 +237,16 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
       const previousData = JSON.parse(previousRevision.json);
       changedFields = getChangedFields(revisionData, previousData);
       // 수정일 등 항상 변경되는 감사(audit) 필드 제외
-      changedFields = new Set(
-        [...changedFields].filter(name => !AUDIT_FIELD_NAMES.has(name))
-      );
+      changedFields = new Set([...changedFields].filter((name) => !AUDIT_FIELD_NAMES.has(name)));
     }
 
     // EntityForm 복제 및 초기화
     let revisionEntityForm = entityForm.clone(false);
     // 서버 fetch 대신 설정한 데이터로 고정하기 위해 url 을 비워둔다.
     revisionEntityForm.url = '';
-    revisionEntityForm.fields.delete('entityForm-revision');    // 리비전 필드는 보여주지 않는다.
+    revisionEntityForm.fields.delete('entityForm-revision'); // 리비전 필드는 보여주지 않는다.
     revisionEntityForm.collections.clear(); // 컬렉션은 Revision 의 관리 대상이 아니다.
-    revisionEntityForm.buttons = [];// 기존 엔티티폼의 사용자정의 버튼도 모두 제거한다.
+    revisionEntityForm.buttons = []; // 기존 엔티티폼의 사용자정의 버튼도 모두 제거한다.
 
     // 리비전 데이터로 값 설정
     revisionEntityForm = await revisionEntityForm.setFetchedValues(revisionData);
@@ -259,7 +269,11 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
       size: 'full',
       fullHeight: true,
       content: (
-        <RevisionDiffWrapper changedFields={changedFields} fieldLabelMap={fieldLabelMap} hasPreviousRevision={!!previousRevision}>
+        <RevisionDiffWrapper
+          changedFields={changedFields}
+          fieldLabelMap={fieldLabelMap}
+          hasPreviousRevision={!!previousRevision}
+        >
           <ViewEntityForm
             readonly={true}
             entityForm={revisionEntityForm}
@@ -280,7 +294,9 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
           data-size="lg"
           data-tone="disabled"
         />
-        <span className="rcm-text" data-size="sm" data-tone="muted">변경 내역을 불러오는 중...</span>
+        <span className="rcm-text" data-size="sm" data-tone="muted">
+          변경 내역을 불러오는 중...
+        </span>
       </div>
     );
   }
@@ -289,7 +305,9 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
     return (
       <div className="rcm-revision-state rcm-revision-state-empty">
         <IconHistory className="rcm-icon" data-size="lg" data-tone="disabled" />
-        <span className="rcm-text" data-size="sm" data-tone="muted">변경 내역이 없습니다.</span>
+        <span className="rcm-text" data-size="sm" data-tone="muted">
+          변경 내역이 없습니다.
+        </span>
       </div>
     );
   }
@@ -306,8 +324,8 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
             const itemClass = isLatest
               ? 'rcm-revision-item rcm-revision-item-latest'
               : isDelete || isCreate
-              ? 'rcm-revision-item rcm-revision-item-muted'
-              : 'rcm-revision-item rcm-revision-item-default';
+                ? 'rcm-revision-item rcm-revision-item-muted'
+                : 'rcm-revision-item rcm-revision-item-default';
             return (
               <div
                 key={revision.id}
@@ -315,15 +333,21 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
                 onClick={isClickable ? () => handleRevisionClick(revision, index) : undefined}
               >
                 <div className="rcm-revision-item-row">
-                  <span className="rcm-text" data-weight="medium">{revision.name}</span>
+                  <span className="rcm-text" data-weight="medium">
+                    {revision.name}
+                  </span>
                   <span className="rcm-text" data-size="xs" data-tone="muted">
                     {fDateTime(revision.createdAt, 'yyyy-MM-dd HH:mm:ss')}
                   </span>
                   {isLatest && (
-                    <span className="rcm-badge" data-color="info">현재 버전</span>
+                    <span className="rcm-badge" data-color="info">
+                      현재 버전
+                    </span>
                   )}
                   {isCreate && (
-                    <span className="rcm-badge" data-color="success">신규</span>
+                    <span className="rcm-badge" data-color="success">
+                      신규
+                    </span>
                   )}
                   {isDelete && (
                     <span className="rcm-badge" data-color="error">
@@ -337,11 +361,7 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
         </div>
         {totalPage > 1 && (
           <div className="rcm-revision-pagination">
-            <Pagination
-              total={totalPage}
-              value={currentPage + 1}
-              onChange={handlePageChange}
-            />
+            <Pagination total={totalPage} value={currentPage + 1} onChange={handlePageChange} />
           </div>
         )}
       </div>

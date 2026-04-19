@@ -5,7 +5,7 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ListableFormField} from '../../fields/abstract';
+import { ListableFormField } from '../../fields/abstract';
 
 export interface MappedByFieldFilterOptions {
   mappedBy: string;
@@ -29,9 +29,9 @@ export interface MappedByFieldFilterOptions {
  */
 export function filterMappedByFields(
   fields: ListableFormField<any>[],
-  options: MappedByFieldFilterOptions
+  options: MappedByFieldFilterOptions,
 ): ListableFormField<any>[] {
-  const {mappedBy, includePatterns = [], excludePatterns = []} = options;
+  const { mappedBy, includePatterns = [], excludePatterns = [] } = options;
 
   // Generate patterns to exclude
   const patternsToExclude = new Set<string>();
@@ -54,10 +54,10 @@ export function filterMappedByFields(
   const nestedPattern = `${baseField}.`;
 
   // 4. Add additional excludePatterns
-  excludePatterns.forEach(pattern => patternsToExclude.add(pattern));
+  excludePatterns.forEach((pattern) => patternsToExclude.add(pattern));
 
   // Filter fields
-  return fields.filter(field => {
+  return fields.filter((field) => {
     const fieldName = field.name;
 
     // Check if field is explicitly included

@@ -5,31 +5,23 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {
-  FieldType,
-  FieldValue,
-  PlaceHolderType,
-  RenderType,
-  RequiredType,
-} from '../config/Config';
-import {ReactNode} from "react";
-import {EntityForm} from '../config/EntityForm';
-import {ValidateResult, Validation} from '../validations/Validation';
-import {QueryConditionType} from "../form/SearchForm";
-import {EntityItem} from '../config/EntityItem';
-import {Session} from '../auth/types';
-
+import { FieldType, FieldValue, PlaceHolderType, RenderType, RequiredType } from '../config/Config';
+import { ReactNode } from 'react';
+import { EntityForm } from '../config/EntityForm';
+import { ValidateResult, Validation } from '../validations/Validation';
+import { QueryConditionType } from '../form/SearchForm';
+import { EntityItem } from '../config/EntityItem';
+import { Session } from '../auth/types';
 
 export interface EntityField extends EntityItem {
-
-  value?: FieldValue;   // 필드값
-  type: FieldType;    // 필드가 표시되는 방법. 모든 EntityField 는 render 메소드를 이용해 화면에 표시된다. 따라서 render 가 각 EntityField 의 구현체 별로 있어야 한다.
+  value?: FieldValue; // 필드값
+  type: FieldType; // 필드가 표시되는 방법. 모든 EntityField 는 render 메소드를 이용해 화면에 표시된다. 따라서 render 가 각 EntityField 의 구현체 별로 있어야 한다.
 
   placeHolder?: PlaceHolderType; // placeHolder, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  required?: RequiredType;    // 필수값 여부, 이 값이 boolean 으로 지정된 경우에는 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  required?: RequiredType; // 필수값 여부, 이 값이 boolean 으로 지정된 경우에는 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
   validations?: Validation[];
   exceptOnSave?: boolean;
-  requiredPermissions?: string[];  // 이 필드를 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 필드가 표시됨.
+  requiredPermissions?: string[]; // 이 필드를 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 필드가 표시됨.
 
   /**
    * ViewField 할 때 사용할 수 있다.
@@ -37,7 +29,7 @@ export interface EntityField extends EntityItem {
    * 이 정보는 저장 용도로는 사용되지 않는다.
    */
   attributes?: Map<string, any>;
-  
+
   /**
    * CheckButtonValidation의 검증 상태를 저장
    * 탭 전환 시에도 상태를 유지하기 위함
@@ -52,7 +44,11 @@ export interface EntityField extends EntityItem {
    * @param field
    * @param renderType
    */
-  displayFunc?: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>;
+  displayFunc?: (
+    entityForm: EntityForm,
+    field: EntityField,
+    renderType?: RenderType,
+  ) => Promise<any>;
 
   /**
    * view 를 오버라이드 해 사용자정의 렌더링을 처리하는 경우 이 값을 설정한다.
@@ -76,9 +72,13 @@ export interface EntityField extends EntityItem {
 
   isBlank(renderType?: RenderType): Promise<boolean>;
 
-  withDisplayFunc(fn: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>): this
+  withDisplayFunc(
+    fn: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>,
+  ): this;
 
-  withOverrideRender(fn: (params: FieldRenderParameters) => Promise<ReactNode | null | undefined>): this;
+  withOverrideRender(
+    fn: (params: FieldRenderParameters) => Promise<ReactNode | null | undefined>,
+  ): this;
 
   withPlaceHolder(placeHolder?: PlaceHolderType): this;
 
@@ -127,7 +127,6 @@ export interface EntityField extends EntityItem {
    * @returns 렌더링 결과
    */
   viewValue(props: ViewValueProps): Promise<ViewValueResult>;
-
 }
 
 export interface ViewValueProps {
@@ -142,46 +141,45 @@ export interface ViewValueResult {
   result: ReactNode | null;
 }
 
-
 export interface FieldRenderParameters {
-  entityForm: EntityForm,
-  session?: Session,
+  entityForm: EntityForm;
+  session?: Session;
   /**
    * 필드 값이 변경될 때마다 호출된다.
    * @param value
    * @param propagation 상위로 onChange 를 전파할 지 여부, 기본은 true, textarea 나 HTML 에디터 필드와 같은 경우 글자가 변경될 때 마다 상위 전파를 하면 안 되기 때문에 이 값을 선택적으로 설정하게 한다.
    */
-  onChange: (value: any, propagation?: boolean) => void,
-  onError?: (message: string) => void,
-  clearError?: () => void,
-  required?: boolean,
-  readonly?: boolean,
-  placeHolder?: string,
-  helpText?: ReactNode,
-  subCollectionEntity?: boolean,
+  onChange: (value: any, propagation?: boolean) => void;
+  onError?: (message: string) => void;
+  clearError?: () => void;
+  required?: boolean;
+  readonly?: boolean;
+  placeHolder?: string;
+  helpText?: ReactNode;
+  subCollectionEntity?: boolean;
   /**
    * EntityForm을 업데이트하고 리렌더링을 트리거하는 메서드
    * @param updater EntityForm을 업데이트하는 함수
    */
-  updateEntityForm?: (updater: (entityForm: EntityForm) => Promise<EntityForm>) => Promise<void>,
+  updateEntityForm?: (updater: (entityForm: EntityForm) => Promise<EntityForm>) => Promise<void>;
   /**
    * EntityForm을 리셋하고 초기화 상태로 되돌리는 메서드
    * @param delay 리로드 전 지연 시간 (밀리초)
    * @param preserveState 현재 탭 위치 등의 상태 유지 여부
    */
-  resetEntityForm?: (delay?: number, preserveState?: boolean) => Promise<void>,
+  resetEntityForm?: (delay?: number, preserveState?: boolean) => Promise<void>;
 }
 
 export interface FilterRenderParameters {
-  entityForm: EntityForm,
-  onChange: (value: any, op?: QueryConditionType) => void,
-  placeHolder?: string,
-  helpText?: string,
-  value?: Promise<any>
+  entityForm: EntityForm;
+  onChange: (value: any, op?: QueryConditionType) => void;
+  placeHolder?: string;
+  helpText?: string;
+  value?: Promise<any>;
 }
 
 export interface FieldInfoParameters {
-  entityForm?: EntityForm,
-  session?: Session,
-  renderType?: RenderType,
+  entityForm?: EntityForm;
+  session?: Session;
+  renderType?: RenderType;
 }

@@ -7,15 +7,15 @@
  * You may obtain a copy of the License under controlled by Rchemist
  */
 
-import {ManyToOneConfig} from '../../../config/Config';
-import React, {useEffect, useState} from "react";
-import {IconPlus, IconX} from "@tabler/icons-react";
-import {ViewListGrid} from '../../list/ViewListGrid';
-import {ListGrid} from '../../../config/ListGrid';
-import {TreeSelectView} from './TreeSelectView';
-import {SearchForm} from "../../../form/SearchForm";
-import {EntityForm} from '../../../config/EntityForm';
-import {useModalManagerStore} from '../../../store';
+import { ManyToOneConfig } from '../../../config/Config';
+import React, { useEffect, useState } from 'react';
+import { IconPlus, IconX } from '@tabler/icons-react';
+import { ViewListGrid } from '../../list/ViewListGrid';
+import { ListGrid } from '../../../config/ListGrid';
+import { TreeSelectView } from './TreeSelectView';
+import { SearchForm } from '../../../form/SearchForm';
+import { EntityForm } from '../../../config/EntityForm';
+import { useModalManagerStore } from '../../../store';
 
 interface SelectedItem {
   id: string;
@@ -28,7 +28,7 @@ interface ManyToOneMultiFilterViewProps {
   label?: string;
   config: ManyToOneConfig;
   parentEntityForm: EntityForm;
-  value?: string[];  // Array of IDs
+  value?: string[]; // Array of IDs
   onChange: (value: string[]) => void;
 }
 
@@ -65,7 +65,7 @@ export const ManyToOneMultiFilterView = ({
               items.push({
                 id: id,
                 name: displayName,
-                data: data
+                data: data,
               });
             }
           } catch (e) {
@@ -73,7 +73,7 @@ export const ManyToOneMultiFilterView = ({
             items.push({
               id: id,
               name: id,
-              data: { id }
+              data: { id },
             });
           }
         }
@@ -90,11 +90,11 @@ export const ManyToOneMultiFilterView = ({
       if (filter.length > 0) {
         for (const filterItem of filter) {
           if (filterItem) {
-            newSearchForm.withFilter("AND", ...(await filterItem(parentEntityForm)));
+            newSearchForm.withFilter('AND', ...(await filterItem(parentEntityForm)));
           }
         }
         if (entityForm.neverDelete) {
-          newSearchForm.handleAndFilter("active", "true");
+          newSearchForm.handleAndFilter('active', 'true');
         }
       }
 
@@ -121,27 +121,30 @@ export const ManyToOneMultiFilterView = ({
     const itemId = item[idField];
 
     // Check if already selected
-    if (selectedItems.some(selected => selected.id === itemId)) {
+    if (selectedItems.some((selected) => selected.id === itemId)) {
       return;
     }
 
     (async () => {
       const displayName = await getDisplayName(item);
-      const newItems = [...selectedItems, {
-        id: itemId,
-        name: displayName,
-        data: item
-      }];
+      const newItems = [
+        ...selectedItems,
+        {
+          id: itemId,
+          name: displayName,
+          data: item,
+        },
+      ];
 
       setSelectedItems(newItems);
-      onChange(newItems.map(i => i.id));
+      onChange(newItems.map((i) => i.id));
     })();
   };
 
   const handleRemoveItem = (itemId: string) => {
-    const newItems = selectedItems.filter(item => item.id !== itemId);
+    const newItems = selectedItems.filter((item) => item.id !== itemId);
     setSelectedItems(newItems);
-    onChange(newItems.map(i => i.id));
+    onChange(newItems.map((i) => i.id));
   };
 
   const handleSelectModal = () => {
@@ -153,7 +156,7 @@ export const ManyToOneMultiFilterView = ({
 
     // Add NOT_IN filter to exclude already selected items
     if (selectedItems.length > 0) {
-      const selectedIds = selectedItems.map(item => item.id);
+      const selectedIds = selectedItems.map((item) => item.id);
       modalSearchForm.handleAndFilter(idField, selectedIds, 'NOT_IN');
     }
 
@@ -192,7 +195,7 @@ export const ManyToOneMultiFilterView = ({
             />
           )}
         </div>
-      )
+      ),
     });
   };
 
@@ -218,11 +221,7 @@ export const ManyToOneMultiFilterView = ({
         ))}
 
         {/* Add button */}
-        <button
-          type="button"
-          onClick={handleSelectModal}
-          className="rcm-m2o-multi-add"
-        >
+        <button type="button" onClick={handleSelectModal} className="rcm-m2o-multi-add">
           <IconPlus className="rcm-m2o-multi-add-icon" />
           <span>추가</span>
         </button>

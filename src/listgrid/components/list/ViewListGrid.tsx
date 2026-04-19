@@ -6,37 +6,37 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License under controlled by Rchemist
  */
-"use client";
-import {Pagination} from "../../ui";
-import React, {useCallback, useEffect, useId, useMemo, useRef} from "react";
-import {EntireChecker} from './ui/EntireChecker';
-import {LoadingOverlay} from "../../ui";
-import {HeaderField} from './ui/HeaderField';
-import {AdvancedSearchFormV2 as AdvancedSearchForm} from './AdvancedSearchFormV2';
-import {isTrue} from '../../utils/BooleanUtil';
-import {ListGridHeader} from './ListGridHeader';
-import {SubCollectionButtons} from './SubCollectionButtons';
-import {QuickSearchBar} from './QuickSearchBar';
-import {RowItem} from './RowItem';
-import {ViewListGridProps} from "./types/ViewListGrid.types";
-import {useListGridLogic} from "./hooks/useListGridLogic";
-import {ListableFormField} from "../fields/abstract";
-import {ShowNotifications} from '../helper/ShowNotifications';
-import {Stack} from "../../ui";
-import {SubCollectionViewModal} from "./ui/SubCollectionViewModal";
-import {hasAnyRole, useSession} from '../../auth';
-import {perfLog} from './utils/performanceLogger';
+'use client';
+import { Pagination } from '../../ui';
+import React, { useCallback, useEffect, useId, useMemo, useRef } from 'react';
+import { EntireChecker } from './ui/EntireChecker';
+import { LoadingOverlay } from '../../ui';
+import { HeaderField } from './ui/HeaderField';
+import { AdvancedSearchFormV2 as AdvancedSearchForm } from './AdvancedSearchFormV2';
+import { isTrue } from '../../utils/BooleanUtil';
+import { ListGridHeader } from './ListGridHeader';
+import { SubCollectionButtons } from './SubCollectionButtons';
+import { QuickSearchBar } from './QuickSearchBar';
+import { RowItem } from './RowItem';
+import { ViewListGridProps } from './types/ViewListGrid.types';
+import { useListGridLogic } from './hooks/useListGridLogic';
+import { ListableFormField } from '../fields/abstract';
+import { ShowNotifications } from '../helper/ShowNotifications';
+import { Stack } from '../../ui';
+import { SubCollectionViewModal } from './ui/SubCollectionViewModal';
+import { hasAnyRole, useSession } from '../../auth';
+import { perfLog } from './utils/performanceLogger';
 import {
   getListGridThemeByVariant,
   ListGridThemeProvider,
-  useListGridTheme
+  useListGridTheme,
 } from './context/ListGridThemeContext';
-import type {ListGridThemeVariant, ViewListGridClassNames} from './types/ViewListGridTheme.types';
-import {EntityFormScopeProvider, useEntityFormScope} from './context/EntityFormScopeContext';
-import {useSubCollectionExpansion} from './hooks/useSubCollectionExpansion';
-import {ViewListGridSkeleton} from './ui/ViewListGridSkeleton';
-import {filterMappedByFields} from './utils/mappedByFieldFilter';
-import {SyncTopScrollbar} from './ui/SyncTopScrollbar';
+import type { ListGridThemeVariant, ViewListGridClassNames } from './types/ViewListGridTheme.types';
+import { EntityFormScopeProvider, useEntityFormScope } from './context/EntityFormScopeContext';
+import { useSubCollectionExpansion } from './hooks/useSubCollectionExpansion';
+import { ViewListGridSkeleton } from './ui/ViewListGridSkeleton';
+import { filterMappedByFields } from './utils/mappedByFieldFilter';
+import { SyncTopScrollbar } from './ui/SyncTopScrollbar';
 
 /**
  * Pagination container component that properly handles containerRef for responsive sizing
@@ -61,7 +61,7 @@ const PaginationContainer: React.FC<PaginationContainerProps> = ({
   return (
     <div
       ref={containerRef}
-      className={themeClasses.pagination?.container ?? "rcm-listgrid-pagination"}
+      className={themeClasses.pagination?.container ?? 'rcm-listgrid-pagination'}
     >
       <Pagination
         total={totalPage}
@@ -129,16 +129,11 @@ export const ViewListGrid = (props: ViewListGridProps) => {
   const shouldUseInlineMode = isSubCollection && currentDepth <= maxInlineDepth;
 
   // Expansion state management for inline mode
-  const {
-    expandedItems,
-    isExpanded,
-    toggleExpansion,
-    collapseItem,
-    canExpand,
-  } = useSubCollectionExpansion({
-    maxExpandedItems: parentScope.maxExpandedItems,
-    expansionMode: parentScope.expansionMode,
-  });
+  const { expandedItems, isExpanded, toggleExpansion, collapseItem, canExpand } =
+    useSubCollectionExpansion({
+      maxExpandedItems: parentScope.maxExpandedItems,
+      expansionMode: parentScope.expansionMode,
+    });
 
   // Performance debugging
   const renderStartTime = useRef<number>(performance.now());
@@ -190,13 +185,19 @@ export const ViewListGrid = (props: ViewListGridProps) => {
     }
   }, [rows]);
 
-  const handleNotifications = useCallback((messages: string[]) => {
-    showMessages(false, messages);
-  }, [showMessages]);
+  const handleNotifications = useCallback(
+    (messages: string[]) => {
+      showMessages(false, messages);
+    },
+    [showMessages],
+  );
 
-  const handleErrors = useCallback((messages: string[]) => {
-    showMessages(true, messages);
-  }, [showMessages]);
+  const handleErrors = useCallback(
+    (messages: string[]) => {
+      showMessages(true, messages);
+    },
+    [showMessages],
+  );
 
   // Hook은 조건문 전에 호출되어야 함
   const sessionFromHook = useSession();
@@ -308,7 +309,7 @@ export const ViewListGrid = (props: ViewListGridProps) => {
 
   if (searchForm === undefined) {
     return (
-      <div className={themeClasses.loading?.container ?? "relative"}>
+      <div className={themeClasses.loading?.container ?? 'relative'}>
         <LoadingOverlay visible={true} />
         <ViewListGridSkeleton
           pageSize={10}
@@ -322,58 +323,59 @@ export const ViewListGrid = (props: ViewListGridProps) => {
   }
 
   const emptyList = rows.length === 0;
-  
+
   // 선택 옵션 통합
   const selectionOptions = props.options?.selection;
-  
+
   // 삭제 버튼 표시 로직
   const deleteButtonConfig = selectionOptions?.deleteButton;
   const showDeleteButton = deleteButtonConfig === false ? false : deleteButtonConfig?.show;
-  const activeTrashIcon = !(
-    loading ||
-    checkedItems.length === 0 ||
-    manyToOne !== undefined ||
-    deleteButtonConfig === false
-  ) && (
-    showDeleteButton === undefined ? true : 
-    typeof showDeleteButton === 'function' ? 
-      showDeleteButton(checkedItems) : 
-      showDeleteButton
-  );
-  
+  const activeTrashIcon =
+    !(
+      loading ||
+      checkedItems.length === 0 ||
+      manyToOne !== undefined ||
+      deleteButtonConfig === false
+    ) &&
+    (showDeleteButton === undefined
+      ? true
+      : typeof showDeleteButton === 'function'
+        ? showDeleteButton(checkedItems)
+        : showDeleteButton);
+
   // 체크박스 표시 로직
   const showCheckbox = selectionOptions?.enabled;
-  
+
   // selection이 있지만 실제 사용할 기능이 없는 경우 체크
-  const hasSelectionFeatures = !!(selectionOptions && (
+  const hasSelectionFeatures = !!(
+    selectionOptions &&
     // actions가 있거나
-    (selectionOptions.actions && selectionOptions.actions.length > 0) ||
-    // deleteButton이 명시적으로 false가 아니거나 (undefined인 경우 기본 삭제 버튼 표시)
-    selectionOptions.deleteButton !== false ||
-    // 선택 변경 콜백이 있거나
-    !!selectionOptions.onSelectionChange ||
-    // 기타 선택 관련 기능이 있는 경우
-    !!selectionOptions.selectableFilter ||
-    !!selectionOptions.validateSelection
-  ));
-  
+    ((selectionOptions.actions && selectionOptions.actions.length > 0) ||
+      // deleteButton이 명시적으로 false가 아니거나 (undefined인 경우 기본 삭제 버튼 표시)
+      selectionOptions.deleteButton !== false ||
+      // 선택 변경 콜백이 있거나
+      !!selectionOptions.onSelectionChange ||
+      // 기타 선택 관련 기능이 있는 경우
+      !!selectionOptions.selectableFilter ||
+      !!selectionOptions.validateSelection)
+  );
+
   // 체크박스 컬럼은 항상 표시 (번호 표시를 위해) - readonly 여부와 상관없이
   const enableCheckItem: boolean = !emptyList;
-  
+
   // 실제 체크박스 input 표시 여부
-  const showCheckboxInput: boolean = enableCheckItem && (
-    showCheckbox === undefined ? 
-      // enabled가 undefined인 경우
-      (selectionOptions ? 
-        // selection 설정이 있으면 기능 여부 확인
-        hasSelectionFeatures : 
-        // selection 설정이 없으면 readonly가 아닐 때만 true
-        !props.options?.readonly
-      ) :
-    typeof showCheckbox === 'function' ?
-      showCheckbox(entityForm) :
-      showCheckbox
-  );
+  const showCheckboxInput: boolean =
+    enableCheckItem &&
+    (showCheckbox === undefined
+      ? // enabled가 undefined인 경우
+        selectionOptions
+        ? // selection 설정이 있으면 기능 여부 확인
+          hasSelectionFeatures
+        : // selection 설정이 없으면 readonly가 아닐 때만 true
+          !props.options?.readonly
+      : typeof showCheckbox === 'function'
+        ? showCheckbox(entityForm)
+        : showCheckbox);
   const draggable = props.options?.onDrag !== undefined;
   const showSearchBar = isTrue(props.options?.filterable, true);
   const supportPriority: boolean =
@@ -382,237 +384,316 @@ export const ViewListGrid = (props: ViewListGridProps) => {
 
   const page = searchForm?.getPage() ?? 0;
 
-  return <EntityFormScopeProvider
-    depth={currentDepth}
-    maxInlineDepth={maxInlineDepth}
-    maxExpandedItems={parentScope.maxExpandedItems}
-    expansionMode={parentScope.expansionMode}
-    parentEntityForm={entityForm}
-  >
-    <ListGridThemeProvider variant={themeVariant}>
-    <ListGridHeader hideTitle={isSubCollection}
-                    cacheable={isTrue(props.options?.cacheable, true)}
-                    entityForm={entityForm}
-                    dataTransferConfig={dataTransferConfig}
-                    session={session}
-                    checkedItems={checkedItems}
-                    buttons={props.options?.headerButtons}
-                    isSubCollection={isSubCollection}
-                    addNew={props.options?.createOrUpdate?.addNew}
-                    setErrors={handleErrors}
-                    supportPriority={supportPriority}
-                    setManagePriority={() => {setManagePriority(!managePriority)}}
-                    setNotifications={handleNotifications}
-                    enableHandleData={enableHandleData} 
-                    router={router} 
-                    path={path} 
-                    readonly={readonly}
-                    activeTrashIcon={activeTrashIcon} 
-                    searchForm={searchForm!} 
-                    deleteItems={deleteItems} 
-                    selectionOptions={selectionOptions}
-                    rows={rows}
-                    refresh={fetchData} 
-                    title={title}></ListGridHeader>
-    <div className={panelClassName}>
-      {props.options?.topContent && props.parentId && (
-        <div className="rcm-listgrid-top-content">
-          {props.options.topContent(props.parentId, searchForm)}
-        </div>
-      )}
-      {isSubCollection && <SubCollectionButtons activeTrashIcon={activeTrashIcon}
-                                                searchForm={searchForm!}
-                                                totalCount={totalCount}
-                                                onChangeSearchForm={() => {
-                                                  // no-op: previously declared an async arrow without invoking it
-                                                }}
-                                                parentId={props.parentId!}
-                                                checkedItems={checkedItems}
-                                                rows={rows}
-                                                supportPriority={supportPriority}
-                                                setManagePriority={() => {setManagePriority(!managePriority)}}
-                                                add={props.options?.subCollection?.add !== undefined ? isTrue(props.options?.subCollection?.add, !isTrue(props.options.readonly)) : enableHandleData}
-                                                delete={isTrue(props.options?.subCollection?.delete, true)}
-                                                buttons={props.options?.subCollection?.buttons}
-                                                collectionName={props.options?.subCollection?.name}
-                                                mappedBy={props.options?.subCollection?.mappedBy}
-                                                mappedValue={props.options?.subCollection?.mappedValue}
-                                                createOrUpdate={props.options?.createOrUpdate}
-                                                setErrors={handleErrors}
-                                                setNotifications={handleNotifications}
-                                                onRefresh={() => {
-                                                  fetchData();
-                                                }}
-                                                deleteItems={deleteItems} entityForm={entityForm}/>
-      }
-      {showSearchBar && <AdvancedSearchForm fields={advancedSearchFields} entityForm={entityForm}
-                          listFieldNames={listFieldNames}
-                          searchForm={searchForm!}
-                          show={showAdvancedSearch}
-                          subCollection={isSubCollection}
-                          popup={!!props.options?.popup}
-                          onClose={() => {
-                            setShowAdvancedSearch(false)
-                          }}
-                          onSubmit={(searchForm) => {
-                            (async () => {
-                              await onChangeSearchForm(entityForm, searchForm.clone(), false, true);
-                            })();
-                          }}
-                          onReset={() => {
-                            (async ()=>{
-                              const cleanSearchForm = await getCleanSearchForm();
-                              await onChangeSearchForm(entityForm, cleanSearchForm, true);
-                            })();
-                          }}
-                          quickSearchProperty={quickSearchProperty!}/>}
-      <Stack gap={0}>
-        {showSearchBar && <QuickSearchBar loading={loading}
-                                          searchForm={searchForm!}
-                                          onChangeSearchForm={(newSearchForm) => {
-                                            (async () => {
-                                              await onChangeSearchForm(entityForm, newSearchForm);
-                                            })();
-                                          }}
-                                          onQuickSearch={(search) => {
-                                            performQuickSearch(search);
-                                          }}
-                                          hidePageSize={isTrue(props.options?.hidePageSize, false)}
-                                          subCollection={isSubCollection}
-                                          quickSearchValue={search}
-                                          listFields={listFields}
-                                          quickSearchProperty={quickSearchProperty}
-                                          enableHandleData={enableHandleData}
-                                          showAdvancedSearch={showAdvancedSearch}
-                                          onOpenAdvancedSearch={() => {
-                                            setShowAdvancedSearch(true)
-                                          }}
-                                          viewFields={viewFields ?? []}
-                                          setViewFields={setViewFields}
-                                          entityUrl={entityForm.getUrl()}
-                                          subCollectionName={props.options?.subCollection?.name}
-                                          hideAdvancedSearch={props.options?.hideAdvancedSearch}
-        />}
-
-        {loading && <React.Fragment>
-          <LoadingOverlay visible={loading}/>
-          <ViewListGridSkeleton
-            pageSize={searchForm?.getPageSize() ?? 10}
-            fields={listFields}
-            isSubCollection={isSubCollection}
-            showCheckbox={showCheckboxInput}
-            isPopup={!!props.options?.popup}
-          />
-        </React.Fragment>}
-        <ShowNotifications messages={errors} error={true} showClose={true} timeout={10000}/>
-        <ShowNotifications messages={notifications} timeout={10000}/>
-        {!loading && (
-          <div className={props.options?.popup
-            ? themeClasses.popup?.container ?? 'max-h-[70vh] flex flex-col overflow-y-auto p-0'
-            : themeClasses.table?.contentWrapper ?? 'overflow-y-auto p-0'
-          }>
-            <div className={themeClasses.table?.container ?? "rcm-scroll-y"}>
-              <SyncTopScrollbar targetRef={tableContainerRef} />
-              <div
-                ref={tableContainerRef}
-                className={themeClasses.table?.responsiveWrapper ?? "rcm-skeleton-table-wrapper"}
-              >
-                <table className={themeClasses.table?.table ?? "table-hover w-full"}>
-                  <thead className={themeClasses.table?.thead ?? 'border-t border-b border-white-light dark:border-[#17263c]'}>
-                  <tr>
-                    {managePriority && <th><div>&nbsp;</div></th>}{/*// priority 조절 핸들바의 th 를 마련한다.*/}
-                    {enableCheckItem && <th>
-                      <EntireChecker total={rows.length} subCollection={isSubCollection}
-                                     listIds={rows.map((item: { id: string }) => item.id)}
-                                     checkedItems={checkedItems}
-                                     setCheckedItems={(itemIds: string[]) => setCheckedItems(itemIds)}
-                                     selectionOptions={selectionOptions}
-                                     rows={rows}
-                                     showCheckboxInput={showCheckboxInput}
-                      />
-                    </th>}
-                    {isTrue(openInNewWindow?.enabled) && isAdmin && !onSelect && <th className={themeClasses.headerCell?.openNewWindowCell ?? 'w-2 whitespace-nowrap hidden md:table-cell'}></th>}
-                    {onSelect && <th className={themeClasses.headerCell?.selectCell ?? 'w-2 whitespace-nowrap'}></th>}
-                    <HeaderField fields={filteredListFields}
-                                 gridId={gridId}
-                                 draggable={draggable}
-                                 sortable={isTrue(props.options?.sortable, true)}
-                                 viewFields={viewFields ?? []}
-                                 searchForm={searchForm!}
-                                 entityForm={entityForm}
-                                 quickSearchFieldNames={quickSearchFieldNames}
-                                 quickSearchValue={search}
-                                 onChangeSearchForm={(searchForm, resetPage) => {
-                      (async () => {
-                        await onChangeSearchForm(entityForm, searchForm, false, resetPage);
-                      })();
-                    }}/>
-                  </tr>
-                  </thead>
-                  {/*<tbody className={''}>*/}
-                  <RowItem
-                    {...{
-                      list: rows,
-                      managePriority: managePriority,
-                      sortRowsPriority: sortRowsPriority,
-                      isSubCollection: isSubCollection,
-                      viewMode: props.viewMode ?? 'page',
-                      useAccordion: props.options?.useAccordion,
-                      startNumber: props.options?.hidePagination ? rows.length : ((totalCount ?? 0) - (searchForm!.getPage() * searchForm!.getPageSize())),
-                      viewFields: viewFields ?? [],
-                      checkedItems,
-                      setCheckedItems,
-                      onSelect: onSelect ? (item, setId) => {
-                        onSelect?.(item, setId ?? setManagedId)
-                      } : undefined,
-                      enableCheckItem,
-                      onRefresh: fetchData,
-                      router,
-                      path,
-                      onDrag: props.options?.onDrag,
-                      fields: filteredListFields,
-                      entityForm,
-                      session: session,
-                      isAdmin: isAdmin,
-                      messages: props.options?.messages,
-                      selectionOptions: selectionOptions,
-                      showCheckboxInput: showCheckboxInput,
-                      openInNewWindow: openInNewWindow,
-                      // Inline expansion props for SubCollection
-                      inlineExpansion: shouldUseInlineMode ? {
-                        expandedItems,
-                        isExpanded,
-                        toggleExpansion,
-                        collapseItem,
-                        canExpand,
-                        setManagedId,
-                      } : undefined,
-                      // SubCollection mappedBy for auto-hiding parent reference fields
-                      mappedBy: props.options?.subCollection?.mappedBy,
-                      // 인라인/상세 뷰에서 수정 불가 여부
-                      inlineViewReadonly: isTrue(props.options?.readonly) || !isTrue(props.options?.subCollection?.modifyOnView, true),
-                    }}
-                    key={searchForm!.getCacheKey()}/>
-                  {/*</tbody>*/}
-                </table>
-              </div>
+  return (
+    <EntityFormScopeProvider
+      depth={currentDepth}
+      maxInlineDepth={maxInlineDepth}
+      maxExpandedItems={parentScope.maxExpandedItems}
+      expansionMode={parentScope.expansionMode}
+      parentEntityForm={entityForm}
+    >
+      <ListGridThemeProvider variant={themeVariant}>
+        <ListGridHeader
+          hideTitle={isSubCollection}
+          cacheable={isTrue(props.options?.cacheable, true)}
+          entityForm={entityForm}
+          dataTransferConfig={dataTransferConfig}
+          session={session}
+          checkedItems={checkedItems}
+          buttons={props.options?.headerButtons}
+          isSubCollection={isSubCollection}
+          addNew={props.options?.createOrUpdate?.addNew}
+          setErrors={handleErrors}
+          supportPriority={supportPriority}
+          setManagePriority={() => {
+            setManagePriority(!managePriority);
+          }}
+          setNotifications={handleNotifications}
+          enableHandleData={enableHandleData}
+          router={router}
+          path={path}
+          readonly={readonly}
+          activeTrashIcon={activeTrashIcon}
+          searchForm={searchForm!}
+          deleteItems={deleteItems}
+          selectionOptions={selectionOptions}
+          rows={rows}
+          refresh={fetchData}
+          title={title}
+        ></ListGridHeader>
+        <div className={panelClassName}>
+          {props.options?.topContent && props.parentId && (
+            <div className="rcm-listgrid-top-content">
+              {props.options.topContent(props.parentId, searchForm)}
             </div>
-            {(!emptyList && !isTrue(props.options?.hidePagination, false)) && (
-              <PaginationContainer
-                themeClasses={themeClasses}
-                totalPage={totalPage}
-                page={page}
-                changePage={changePage}
-                isPopup={!!props.options?.popup}
+          )}
+          {isSubCollection && (
+            <SubCollectionButtons
+              activeTrashIcon={activeTrashIcon}
+              searchForm={searchForm!}
+              totalCount={totalCount}
+              onChangeSearchForm={() => {
+                // no-op: previously declared an async arrow without invoking it
+              }}
+              parentId={props.parentId!}
+              checkedItems={checkedItems}
+              rows={rows}
+              supportPriority={supportPriority}
+              setManagePriority={() => {
+                setManagePriority(!managePriority);
+              }}
+              add={
+                props.options?.subCollection?.add !== undefined
+                  ? isTrue(props.options?.subCollection?.add, !isTrue(props.options.readonly))
+                  : enableHandleData
+              }
+              delete={isTrue(props.options?.subCollection?.delete, true)}
+              buttons={props.options?.subCollection?.buttons}
+              collectionName={props.options?.subCollection?.name}
+              mappedBy={props.options?.subCollection?.mappedBy}
+              mappedValue={props.options?.subCollection?.mappedValue}
+              createOrUpdate={props.options?.createOrUpdate}
+              setErrors={handleErrors}
+              setNotifications={handleNotifications}
+              onRefresh={() => {
+                fetchData();
+              }}
+              deleteItems={deleteItems}
+              entityForm={entityForm}
+            />
+          )}
+          {showSearchBar && (
+            <AdvancedSearchForm
+              fields={advancedSearchFields}
+              entityForm={entityForm}
+              listFieldNames={listFieldNames}
+              searchForm={searchForm!}
+              show={showAdvancedSearch}
+              subCollection={isSubCollection}
+              popup={!!props.options?.popup}
+              onClose={() => {
+                setShowAdvancedSearch(false);
+              }}
+              onSubmit={(searchForm) => {
+                (async () => {
+                  await onChangeSearchForm(entityForm, searchForm.clone(), false, true);
+                })();
+              }}
+              onReset={() => {
+                (async () => {
+                  const cleanSearchForm = await getCleanSearchForm();
+                  await onChangeSearchForm(entityForm, cleanSearchForm, true);
+                })();
+              }}
+              quickSearchProperty={quickSearchProperty!}
+            />
+          )}
+          <Stack gap={0}>
+            {showSearchBar && (
+              <QuickSearchBar
+                loading={loading}
+                searchForm={searchForm!}
+                onChangeSearchForm={(newSearchForm) => {
+                  (async () => {
+                    await onChangeSearchForm(entityForm, newSearchForm);
+                  })();
+                }}
+                onQuickSearch={(search) => {
+                  performQuickSearch(search);
+                }}
+                hidePageSize={isTrue(props.options?.hidePageSize, false)}
+                subCollection={isSubCollection}
+                quickSearchValue={search}
+                listFields={listFields}
+                quickSearchProperty={quickSearchProperty}
+                enableHandleData={enableHandleData}
+                showAdvancedSearch={showAdvancedSearch}
+                onOpenAdvancedSearch={() => {
+                  setShowAdvancedSearch(true);
+                }}
+                viewFields={viewFields ?? []}
+                setViewFields={setViewFields}
+                entityUrl={entityForm.getUrl()}
+                subCollectionName={props.options?.subCollection?.name}
+                hideAdvancedSearch={props.options?.hideAdvancedSearch}
               />
             )}
-          </div>
-        )}
-      </Stack>
-    </div>
-    {/* Modal for deep nesting (depth > maxInlineDepth) or non-SubCollection */}
-    {managedId && !shouldUseInlineMode && <SubCollectionViewModal entityForm={entityForm} managedId={managedId} props={props} setManagedId={setManagedId} fetchData={fetchData} setOpenBaseLoading={setOpenBaseLoading} mappedBy={props.options?.subCollection?.mappedBy}/>}
-  </ListGridThemeProvider>
-  </EntityFormScopeProvider>;
-};
 
+            {loading && (
+              <React.Fragment>
+                <LoadingOverlay visible={loading} />
+                <ViewListGridSkeleton
+                  pageSize={searchForm?.getPageSize() ?? 10}
+                  fields={listFields}
+                  isSubCollection={isSubCollection}
+                  showCheckbox={showCheckboxInput}
+                  isPopup={!!props.options?.popup}
+                />
+              </React.Fragment>
+            )}
+            <ShowNotifications messages={errors} error={true} showClose={true} timeout={10000} />
+            <ShowNotifications messages={notifications} timeout={10000} />
+            {!loading && (
+              <div
+                className={
+                  props.options?.popup
+                    ? (themeClasses.popup?.container ??
+                      'max-h-[70vh] flex flex-col overflow-y-auto p-0')
+                    : (themeClasses.table?.contentWrapper ?? 'overflow-y-auto p-0')
+                }
+              >
+                <div className={themeClasses.table?.container ?? 'rcm-scroll-y'}>
+                  <SyncTopScrollbar targetRef={tableContainerRef} />
+                  <div
+                    ref={tableContainerRef}
+                    className={
+                      themeClasses.table?.responsiveWrapper ?? 'rcm-skeleton-table-wrapper'
+                    }
+                  >
+                    <table className={themeClasses.table?.table ?? 'table-hover w-full'}>
+                      <thead
+                        className={
+                          themeClasses.table?.thead ??
+                          'border-t border-b border-white-light dark:border-[#17263c]'
+                        }
+                      >
+                        <tr>
+                          {managePriority && (
+                            <th>
+                              <div>&nbsp;</div>
+                            </th>
+                          )}
+                          {/*// priority 조절 핸들바의 th 를 마련한다.*/}
+                          {enableCheckItem && (
+                            <th>
+                              <EntireChecker
+                                total={rows.length}
+                                subCollection={isSubCollection}
+                                listIds={rows.map((item: { id: string }) => item.id)}
+                                checkedItems={checkedItems}
+                                setCheckedItems={(itemIds: string[]) => setCheckedItems(itemIds)}
+                                selectionOptions={selectionOptions}
+                                rows={rows}
+                                showCheckboxInput={showCheckboxInput}
+                              />
+                            </th>
+                          )}
+                          {isTrue(openInNewWindow?.enabled) && isAdmin && !onSelect && (
+                            <th
+                              className={
+                                themeClasses.headerCell?.openNewWindowCell ??
+                                'w-2 whitespace-nowrap hidden md:table-cell'
+                              }
+                            ></th>
+                          )}
+                          {onSelect && (
+                            <th
+                              className={
+                                themeClasses.headerCell?.selectCell ?? 'w-2 whitespace-nowrap'
+                              }
+                            ></th>
+                          )}
+                          <HeaderField
+                            fields={filteredListFields}
+                            gridId={gridId}
+                            draggable={draggable}
+                            sortable={isTrue(props.options?.sortable, true)}
+                            viewFields={viewFields ?? []}
+                            searchForm={searchForm!}
+                            entityForm={entityForm}
+                            quickSearchFieldNames={quickSearchFieldNames}
+                            quickSearchValue={search}
+                            onChangeSearchForm={(searchForm, resetPage) => {
+                              (async () => {
+                                await onChangeSearchForm(entityForm, searchForm, false, resetPage);
+                              })();
+                            }}
+                          />
+                        </tr>
+                      </thead>
+                      {/*<tbody className={''}>*/}
+                      <RowItem
+                        {...{
+                          list: rows,
+                          managePriority: managePriority,
+                          sortRowsPriority: sortRowsPriority,
+                          isSubCollection: isSubCollection,
+                          viewMode: props.viewMode ?? 'page',
+                          useAccordion: props.options?.useAccordion,
+                          startNumber: props.options?.hidePagination
+                            ? rows.length
+                            : (totalCount ?? 0) - searchForm!.getPage() * searchForm!.getPageSize(),
+                          viewFields: viewFields ?? [],
+                          checkedItems,
+                          setCheckedItems,
+                          onSelect: onSelect
+                            ? (item, setId) => {
+                                onSelect?.(item, setId ?? setManagedId);
+                              }
+                            : undefined,
+                          enableCheckItem,
+                          onRefresh: fetchData,
+                          router,
+                          path,
+                          onDrag: props.options?.onDrag,
+                          fields: filteredListFields,
+                          entityForm,
+                          session: session,
+                          isAdmin: isAdmin,
+                          messages: props.options?.messages,
+                          selectionOptions: selectionOptions,
+                          showCheckboxInput: showCheckboxInput,
+                          openInNewWindow: openInNewWindow,
+                          // Inline expansion props for SubCollection
+                          inlineExpansion: shouldUseInlineMode
+                            ? {
+                                expandedItems,
+                                isExpanded,
+                                toggleExpansion,
+                                collapseItem,
+                                canExpand,
+                                setManagedId,
+                              }
+                            : undefined,
+                          // SubCollection mappedBy for auto-hiding parent reference fields
+                          mappedBy: props.options?.subCollection?.mappedBy,
+                          // 인라인/상세 뷰에서 수정 불가 여부
+                          inlineViewReadonly:
+                            isTrue(props.options?.readonly) ||
+                            !isTrue(props.options?.subCollection?.modifyOnView, true),
+                        }}
+                        key={searchForm!.getCacheKey()}
+                      />
+                      {/*</tbody>*/}
+                    </table>
+                  </div>
+                </div>
+                {!emptyList && !isTrue(props.options?.hidePagination, false) && (
+                  <PaginationContainer
+                    themeClasses={themeClasses}
+                    totalPage={totalPage}
+                    page={page}
+                    changePage={changePage}
+                    isPopup={!!props.options?.popup}
+                  />
+                )}
+              </div>
+            )}
+          </Stack>
+        </div>
+        {/* Modal for deep nesting (depth > maxInlineDepth) or non-SubCollection */}
+        {managedId && !shouldUseInlineMode && (
+          <SubCollectionViewModal
+            entityForm={entityForm}
+            managedId={managedId}
+            props={props}
+            setManagedId={setManagedId}
+            fetchData={fetchData}
+            setOpenBaseLoading={setOpenBaseLoading}
+            mappedBy={props.options?.subCollection?.mappedBy}
+          />
+        )}
+      </ListGridThemeProvider>
+    </EntityFormScopeProvider>
+  );
+};

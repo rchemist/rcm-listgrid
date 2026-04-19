@@ -10,5 +10,5 @@ export {
   ListGridThemeProvider,
   useListGridTheme,
   getListGridThemeByVariant,
-} from "./ListGridThemeContext";
-export type { ListGridThemeProviderProps } from "./ListGridThemeContext";
+} from './ListGridThemeContext';
+export type { ListGridThemeProviderProps } from './ListGridThemeContext';
