@@ -308,7 +308,7 @@ export class SearchForm {
   static deserialize(data: any): SearchForm {
     try {
       if (data) {
-        const obj = typeof data === 'string' ? parse(data) : data;
+        const obj = typeof data === 'string' ? parse<Record<string, unknown>>(data) : data;
         return this.createByObject(obj);
       } else {
         return SearchForm.create();

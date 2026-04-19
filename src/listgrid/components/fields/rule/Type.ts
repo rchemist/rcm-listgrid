@@ -35,7 +35,7 @@ export class RuleConditionValue {
 
   public static create(data: unknown): RuleConditionValue {
     if (typeof data === 'string') {
-      const result = parse(data) as RuleConditionValue;
+      const result = parse<RuleConditionValue>(data);
 
       const value = new RuleConditionValue(result.id, result.condition, result.targetEntityPrefix);
 

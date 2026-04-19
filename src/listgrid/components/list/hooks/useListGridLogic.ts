@@ -159,14 +159,20 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
       const refinedMessages: string[] = [];
       for (const message of messages) {
         if (message.includes('{"error":')) {
-          const json = parse(message);
+          const json = parse<{
+            error: {
+              message?: string;
+              fieldError?: Record<string, string | undefined>;
+            };
+          }>(message);
           if (json.error.message) {
             refinedMessages.push(json.error.message);
           }
           if (json.error.fieldError) {
             for (const field in json.error.fieldError) {
-              if (json.error.fieldError[field]) {
-                refinedMessages.push(json.error.fieldError[field]);
+              const fieldErr = json.error.fieldError[field];
+              if (fieldErr) {
+                refinedMessages.push(fieldErr);
               }
             }
           }

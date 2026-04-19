@@ -13,7 +13,7 @@ class CacheContext {
   public static create(value: string | null): CacheContext {
     const cache = new CacheContext();
     if (value) {
-      const data = parse(value);
+      const data = parse<{ data: Record<string, string[]> }>(value);
       cache.data = new Map<string, string[]>(Object.entries(data.data));
     }
 

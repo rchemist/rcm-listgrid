@@ -128,7 +128,7 @@ export const DeleteButton = ({
                   const error = deleteResult.errors[0];
                   if (typeof error === 'string') {
                     try {
-                      const json = parse(error);
+                      const json = parse<{ error?: unknown }>(error);
                       if (json.error) {
                         const entityError = EntityError.create(json);
                         setErrors(
