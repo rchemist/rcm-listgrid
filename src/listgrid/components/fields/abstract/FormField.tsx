@@ -7,6 +7,7 @@
 
 import {
   ADD_ONLY,
+  ConditionalValue,
   DEFAULT_FIELD_GROUP_INFO,
   DEFAULT_TAB_INFO,
   FieldType,
@@ -45,6 +46,18 @@ import { Session } from '../../../auth/types';
  * Tabler Icons 등의 아이콘 컴포넌트를 지원
  */
 export type CardIconType = React.ComponentType<{ className?: string; stroke?: number }>;
+
+/**
+ * FieldInfoParameters → ConditionalValue 변환.
+ * exactOptionalPropertyTypes 아래에서 undefined 필드는 생략해야 해서 필요.
+ */
+function toConditionalValue(props: FieldInfoParameters): ConditionalValue {
+  const result: ConditionalValue = {};
+  if (props.entityForm !== undefined) result.entityForm = props.entityForm;
+  if (props.renderType !== undefined) result.renderType = props.renderType;
+  if (props.session !== undefined) result.session = props.session;
+  return result;
+}
 
 /**
  * View 모드 렌더링을 위한 파라미터
@@ -293,29 +306,30 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     if (includeValue) {
       this.value = { ...origin.value };
     }
-    this.form = origin.form;
-    this.tooltip = origin.tooltip;
-    this.helpText = origin.helpText;
-    this.placeHolder = origin.placeHolder;
-    this.hidden = origin.hidden;
-    this.label = origin.label;
-    this.readonly = origin.readonly;
-    this.required = origin.required;
-    this.form = origin.form;
+    if (origin.form !== undefined) this.form = origin.form;
+    if (origin.tooltip !== undefined) this.tooltip = origin.tooltip;
+    if (origin.helpText !== undefined) this.helpText = origin.helpText;
+    if (origin.placeHolder !== undefined) this.placeHolder = origin.placeHolder;
+    if (origin.hidden !== undefined) this.hidden = origin.hidden;
+    if (origin.label !== undefined) this.label = origin.label;
+    if (origin.readonly !== undefined) this.readonly = origin.readonly;
+    if (origin.required !== undefined) this.required = origin.required;
     this.validations = origin.validations ? [...origin.validations] : [];
-    this.attributes = origin.attributes;
-    this.overrideRender = origin.overrideRender;
-    this.displayFunc = origin.displayFunc;
-    this.saveValue = origin.saveValue;
-    this.maskedValueFunc = origin.maskedValueFunc;
-    this.hideLabel = origin.hideLabel;
-    this.exceptOnSave = origin.exceptOnSave;
-    this.requiredPermissions = origin.requiredPermissions
-      ? [...origin.requiredPermissions]
-      : undefined;
-    this.cardIcon = origin.cardIcon;
-    this.layout = origin.layout;
-    this.lineBreak = origin.lineBreak;
+    if (origin.attributes !== undefined) this.attributes = origin.attributes;
+    if (origin.overrideRender !== undefined) this.overrideRender = origin.overrideRender;
+    if (origin.displayFunc !== undefined) this.displayFunc = origin.displayFunc;
+    if (origin.saveValue !== undefined) this.saveValue = origin.saveValue;
+    if (origin.maskedValueFunc !== undefined) this.maskedValueFunc = origin.maskedValueFunc;
+    if (origin.hideLabel !== undefined) this.hideLabel = origin.hideLabel;
+    if (origin.exceptOnSave !== undefined) this.exceptOnSave = origin.exceptOnSave;
+    if (origin.requiredPermissions !== undefined) {
+      this.requiredPermissions = [...origin.requiredPermissions];
+    } else {
+      delete this.requiredPermissions;
+    }
+    if (origin.cardIcon !== undefined) this.cardIcon = origin.cardIcon;
+    if (origin.layout !== undefined) this.layout = origin.layout;
+    if (origin.lineBreak !== undefined) this.lineBreak = origin.lineBreak;
     if (origin.viewPreset !== undefined) {
       this.withViewPreset(origin.viewPreset);
     }
@@ -405,8 +419,8 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
 
   withViewPreset(type?: ViewPreset): this {
     if (type) {
-      this.hidden = type.hidden;
-      this.readonly = type.readonly;
+      if (type.hidden !== undefined) this.hidden = type.hidden;
+      if (type.readonly !== undefined) this.readonly = type.readonly;
     }
     return this;
   }
@@ -430,7 +444,8 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
    * ```
    */
   withCardIcon(icon?: CardIconType): this {
-    this.cardIcon = icon;
+    if (icon !== undefined) this.cardIcon = icon;
+    else delete this.cardIcon;
     return this;
   }
 
@@ -564,27 +579,31 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   }
 
   withTooltip(tooltip?: TooltipType): this {
-    this.tooltip = tooltip;
+    if (tooltip !== undefined) this.tooltip = tooltip;
+    else delete this.tooltip;
     return this;
   }
 
   withHelpText(helpText?: HelpTextType): this {
-    this.helpText = helpText;
+    if (helpText !== undefined) this.helpText = helpText;
+    else delete this.helpText;
     return this;
   }
 
   withPlaceHolder(placeHolder?: PlaceHolderType): this {
-    this.placeHolder = placeHolder;
+    if (placeHolder !== undefined) this.placeHolder = placeHolder;
+    else delete this.placeHolder;
     return this;
   }
 
   withHidden(hidden?: HiddenType): this {
-    this.hidden = hidden;
+    if (hidden !== undefined) this.hidden = hidden;
+    else delete this.hidden;
     return this;
   }
 
   withLabel(label?: LabelType): this {
-    this.label = label;
+    if (label !== undefined) this.label = label;
     return this;
   }
 
@@ -654,27 +673,27 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   }
 
   async getTooltip(props: FieldInfoParameters): Promise<ReactNode> {
-    return await getConditionalReactNode(props, this.tooltip);
+    return await getConditionalReactNode(toConditionalValue(props), this.tooltip);
   }
 
   async getHelpText(props: FieldInfoParameters): Promise<ReactNode> {
-    return await getConditionalReactNode(props, this.helpText);
+    return await getConditionalReactNode(toConditionalValue(props), this.helpText);
   }
 
   async getPlaceHolder(props: FieldInfoParameters): Promise<string> {
-    return await getConditionalString(props, this.placeHolder);
+    return await getConditionalString(toConditionalValue(props), this.placeHolder);
   }
 
   async isRequired(props: FieldInfoParameters): Promise<boolean> {
-    return await getConditionalBoolean(props, this.required);
+    return await getConditionalBoolean(toConditionalValue(props), this.required);
   }
 
   async isHidden(props: FieldInfoParameters): Promise<boolean> {
-    return await getConditionalBoolean(props, this.hidden);
+    return await getConditionalBoolean(toConditionalValue(props), this.hidden);
   }
 
   async isReadonly(props: FieldInfoParameters): Promise<boolean> {
-    return await getConditionalBoolean(props, this.readonly);
+    return await getConditionalBoolean(toConditionalValue(props), this.readonly);
   }
 
   async getCurrentValue(renderType?: RenderType): Promise<any> {
@@ -730,10 +749,10 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     entityForm: EntityForm,
     session?: Session,
   ): Promise<ValidateResult | ValidateResult[]> {
-    if (
-      (await this.isHidden({ entityForm, session })) ||
-      (await this.isReadonly({ entityForm, session }))
-    ) {
+    const infoParams: FieldInfoParameters =
+      session !== undefined ? { entityForm, session } : { entityForm };
+
+    if ((await this.isHidden(infoParams)) || (await this.isReadonly(infoParams))) {
       // hidden 으로 가려지거나 readonly 된 필드에 대해서는 validation 을 하지 않는다.
       return ValidateResult.success();
     }
@@ -745,7 +764,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
       return ValidateResult.success();
     }
 
-    if (await this.isRequired({ entityForm, session })) {
+    if (await this.isRequired(infoParams)) {
       // 필수값인 경우
       if (await this.isBlank(entityForm.getRenderType())) {
         const fieldLabel: string =

@@ -14,15 +14,15 @@ import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 import { MinMaxLimit } from '../../form/Type';
 
 interface TextareaFieldProps extends FormFieldProps {
-  rows?: number;
+  rows?: number | undefined;
 
-  limit?: MinMaxLimit;
+  limit?: MinMaxLimit | undefined;
 }
 
 export class TextareaField extends FormField<TextareaField> {
-  rows?: number;
+  rows?: number | undefined;
 
-  limit?: MinMaxLimit;
+  limit?: MinMaxLimit | undefined;
 
   constructor(name: string, order: number, rows?: number, limit?: MinMaxLimit) {
     super(name, order, 'textarea');

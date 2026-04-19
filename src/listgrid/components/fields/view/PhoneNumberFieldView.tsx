@@ -21,14 +21,14 @@ import { RenderType } from '../../../config/Config';
 interface PhoneNumberFieldViewProps {
   name: string;
   value: string | null | undefined;
-  onChange: (value: string, commit?: boolean) => void;
-  onError?: (message: string) => void;
-  readonly?: boolean;
-  placeHolder?: string;
-  regex?: { pattern: RegExp; message: string };
-  enableSms?: boolean;
-  session?: Session;
-  renderType?: RenderType;
+  onChange: (value: string, commit?: boolean | undefined) => void;
+  onError?: ((message: string) => void) | undefined;
+  readonly?: boolean | undefined;
+  placeHolder?: string | undefined;
+  regex?: { pattern: RegExp; message: string } | undefined;
+  enableSms?: boolean | undefined;
+  session?: Session | undefined;
+  renderType?: RenderType | undefined;
 }
 
 export const PhoneNumberFieldView = ({

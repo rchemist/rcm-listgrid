@@ -26,30 +26,30 @@ export interface MultiSelectFieldProps extends MultipleOptionalFieldProps {
    * 즉시 변경 기능 활성화 여부.
    * true로 설정하면 옵션 선택 즉시 API를 호출하여 상태를 변경합니다.
    */
-  enableImmediateChange?: boolean;
+  enableImmediateChange?: boolean | undefined;
 
   /**
    * 상태 변경 시 사유 입력 설정.
    * 특정 상태로 변경 시 사유 입력을 요구할 수 있습니다.
    */
-  reason?: StatusChangeReason[];
+  reason?: StatusChangeReason[] | undefined;
 
   /**
    * 상태 변경 시 검증 로직 설정.
    * 상태 변경 전에 추가적인 검증을 수행할 수 있습니다.
    */
-  validateStatusChange?: StatusChangeValidation;
+  validateStatusChange?: StatusChangeValidation | undefined;
 }
 
 export class MultiSelectField extends MultipleOptionalField<MultiSelectField> {
   /** 즉시 변경 기능 활성화 여부 */
-  enableImmediateChange?: boolean;
+  enableImmediateChange?: boolean | undefined;
 
   /** 상태 변경 시 사유 입력 설정 */
-  reason?: StatusChangeReason[];
+  reason?: StatusChangeReason[] | undefined;
 
   /** 상태 변경 시 검증 로직 */
-  validateStatusChange?: StatusChangeValidation;
+  validateStatusChange?: StatusChangeValidation | undefined;
 
   constructor(
     name: string,

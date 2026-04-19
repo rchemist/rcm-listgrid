@@ -16,7 +16,7 @@ import { MinMaxStringLimit } from '../../../form/Type';
 
 export interface DatetimeFilterProps extends FilterRenderParameters {
   name: string;
-  limit?: MinMaxStringLimit;
+  limit?: MinMaxStringLimit | undefined;
 }
 
 export const DatetimeFilter = (props: DatetimeFilterProps) => {

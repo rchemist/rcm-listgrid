@@ -24,11 +24,11 @@ import { TextInput } from '../../ui';
 import { isBlank as isBlankString } from '../../utils/StringUtil';
 
 interface FileFieldProps extends ListableFormFieldProps {
-  config?: IAssetConfig;
+  config?: IAssetConfig | undefined;
 }
 
 export class FileField extends ListableFormField<FileField> {
-  config?: IAssetConfig;
+  config?: IAssetConfig | undefined;
 
   constructor(name: string, order: number, config?: IAssetConfig) {
     super(name, order, 'file');

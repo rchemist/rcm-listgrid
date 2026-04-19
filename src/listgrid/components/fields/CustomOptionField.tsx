@@ -26,12 +26,12 @@ const customOptionCache = new Map<string, SelectOption[]>();
 
 interface CustomOptionFieldProps extends OptionalFieldProps {
   alias: string;
-  multiple?: boolean;
+  multiple?: boolean | undefined;
 }
 
 export class CustomOptionField extends OptionalField<CustomOptionField> {
   alias: string;
-  multiple?: boolean;
+  multiple?: boolean | undefined;
 
   constructor(name: string, order: number, alias: string, multiple?: boolean) {
     super(name, order, 'custom');

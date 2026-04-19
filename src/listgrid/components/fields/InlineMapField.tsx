@@ -16,11 +16,11 @@ import { EntityForm } from '../../config/EntityForm';
 import { RenderType } from '../../config/Config';
 
 interface InlineMapFieldProps extends FormFieldProps {
-  config?: InlineMapConfig;
+  config?: InlineMapConfig | undefined;
 }
 
 export class InlineMapField extends FormField<InlineMapField> {
-  config?: InlineMapConfig;
+  config?: InlineMapConfig | undefined;
   pendingRef: { current: InlineMapPendingRef } = { current: { value: undefined, modified: false } };
 
   constructor(name: string, order: number, config?: InlineMapConfig) {
@@ -67,22 +67,38 @@ export class InlineMapField extends FormField<InlineMapField> {
   }
 
   withKeys(keys?: MapKey[]): this {
-    this.config = { keys: keys, limit: this.config?.limit, resultType: this.config?.resultType };
+    this.config = {
+      ...(keys !== undefined ? { keys } : {}),
+      ...(this.config?.limit !== undefined ? { limit: this.config.limit } : {}),
+      ...(this.config?.resultType !== undefined ? { resultType: this.config.resultType } : {}),
+    };
     return this;
   }
 
   useResultMap(): this {
-    this.config = { keys: this.config?.keys, limit: this.config?.limit, resultType: 'Map' };
+    this.config = {
+      ...(this.config?.keys !== undefined ? { keys: this.config.keys } : {}),
+      ...(this.config?.limit !== undefined ? { limit: this.config.limit } : {}),
+      resultType: 'Map',
+    };
     return this;
   }
 
   useKeyValue(): this {
-    this.config = { keys: this.config?.keys, limit: this.config?.limit, resultType: 'KeyValue' };
+    this.config = {
+      ...(this.config?.keys !== undefined ? { keys: this.config.keys } : {}),
+      ...(this.config?.limit !== undefined ? { limit: this.config.limit } : {}),
+      resultType: 'KeyValue',
+    };
     return this;
   }
 
   withLimit(limit?: MinMaxLimit): this {
-    this.config = { keys: this.config?.keys, limit: limit, resultType: this.config?.resultType };
+    this.config = {
+      ...(this.config?.keys !== undefined ? { keys: this.config.keys } : {}),
+      ...(limit !== undefined ? { limit } : {}),
+      ...(this.config?.resultType !== undefined ? { resultType: this.config.resultType } : {}),
+    };
     return this;
   }
 

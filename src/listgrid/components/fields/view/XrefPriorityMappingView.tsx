@@ -20,16 +20,17 @@ import { useModalManagerStore } from '../../../store';
 
 interface XrefPriorityMappingViewProps extends InputRendererProps {
   entityForm: EntityForm;
-  excludeId?: string;
-  add?: boolean; // 대상 entity 의 새로운 데이터를 추가할 수 있는지 여부
-  parentEntityForm?: EntityForm;
+  excludeId?: string | undefined;
+  add?: boolean | undefined; // 대상 entity 의 새로운 데이터를 추가할 수 있는지 여부
+  parentEntityForm?: EntityForm | undefined;
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
 }
 
 export interface XrefPriorityMappingValue {
-  mapped?: XrefPriorityValue[];
+  mapped?: XrefPriorityValue[] | undefined;
 }
 
 interface XrefPriorityValue {

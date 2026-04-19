@@ -10,8 +10,8 @@ import { Address } from './AddressMapField';
 import { getRuntimeConfig } from '../../../config/RuntimeConfig';
 
 interface AddressFieldViewProps extends InputRendererProps {
-  showMap?: boolean;
-  prefix?: string;
+  showMap?: boolean | undefined;
+  prefix?: string | undefined;
   entityForm: EntityForm;
 }
 
@@ -118,8 +118,6 @@ export const AddressFieldView = ({ entityForm, onChange, ...props }: AddressFiel
               address1: '',
               address2: '',
               postalCode: '',
-              longitude: undefined,
-              latitude: undefined,
             },
             true,
           );

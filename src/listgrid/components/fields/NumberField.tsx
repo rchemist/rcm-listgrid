@@ -43,34 +43,43 @@ export class NumberField extends ListableFormField<NumberField> {
 
   withMin(min?: number): this {
     if (this.limit) {
-      this.limit.min = min;
+      if (min !== undefined) this.limit.min = min;
+      else delete this.limit.min;
     } else {
-      this.limit = { min: min };
+      const newLimit: MinMaxLimit = {};
+      if (min !== undefined) newLimit.min = min;
+      this.limit = newLimit;
     }
     return this;
   }
 
   withMax(max?: number): this {
     if (this.limit) {
-      this.limit.max = max;
+      if (max !== undefined) this.limit.max = max;
+      else delete this.limit.max;
     } else {
-      this.limit = { max: max };
+      const newLimit: MinMaxLimit = {};
+      if (max !== undefined) newLimit.max = max;
+      this.limit = newLimit;
     }
     return this;
   }
 
   withLimit(limit?: MinMaxLimit): this {
-    this.limit = limit;
+    if (limit !== undefined) this.limit = limit;
+    else delete this.limit;
     return this;
   }
 
   withCurrency(currency?: Currency): this {
-    this.currency = currency;
+    if (currency !== undefined) this.currency = currency;
+    else delete this.currency;
     return this;
   }
 
   withDouble(double?: Double): this {
-    this.double = double;
+    if (double !== undefined) this.double = double;
+    else delete this.double;
     return this;
   }
 
@@ -80,9 +89,9 @@ export class NumberField extends ListableFormField<NumberField> {
     props?: { limit?: MinMaxLimit; currency?: Currency; double?: Double },
   ) {
     super(name, order, 'number');
-    this.limit = props?.limit;
-    this.currency = props?.currency;
-    this.double = props?.double;
+    if (props?.limit !== undefined) this.limit = props.limit;
+    if (props?.currency !== undefined) this.currency = props.currency;
+    if (props?.double !== undefined) this.double = props.double;
   }
 
   /**
@@ -223,19 +232,19 @@ export class NumberField extends ListableFormField<NumberField> {
    * NumberField 인스턴스 생성
    */
   protected createInstance(name: string, order: number): NumberField {
-    return new NumberField(name, order, {
-      limit: this.limit,
-      currency: this.currency,
-      double: this.double,
-    });
+    const ctorProps: { limit?: MinMaxLimit; currency?: Currency; double?: Double } = {};
+    if (this.limit !== undefined) ctorProps.limit = this.limit;
+    if (this.currency !== undefined) ctorProps.currency = this.currency;
+    if (this.double !== undefined) ctorProps.double = this.double;
+    return new NumberField(name, order, ctorProps);
   }
 
   static create(props: NumberFieldProps): NumberField {
-    return new NumberField(props.name, props.order, {
-      limit: props.limit,
-      currency: props.currency,
-      double: props.double,
-    }).copyFields(props, true);
+    const ctorProps: { limit?: MinMaxLimit; currency?: Currency; double?: Double } = {};
+    if (props.limit !== undefined) ctorProps.limit = props.limit;
+    if (props.currency !== undefined) ctorProps.currency = props.currency;
+    if (props.double !== undefined) ctorProps.double = props.double;
+    return new NumberField(props.name, props.order, ctorProps).copyFields(props, true);
   }
 
   async validate(

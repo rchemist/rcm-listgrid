@@ -16,12 +16,12 @@ import { isBlank } from '../../utils/StringUtil';
 import { MinMaxStringLimit } from '../../form/Type';
 
 interface MonthFieldProps extends ListableFormFieldProps {
-  limit?: MinMaxStringLimit;
+  limit?: MinMaxStringLimit | undefined;
 }
 
 export class MonthField extends ListableFormField<MonthField> {
   // YYYY-MM
-  limit?: MinMaxStringLimit;
+  limit?: MinMaxStringLimit | undefined;
 
   constructor(name: string, order: number, limit?: MinMaxStringLimit) {
     super(name, order, 'month');

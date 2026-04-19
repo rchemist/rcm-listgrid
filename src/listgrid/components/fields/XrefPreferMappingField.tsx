@@ -17,20 +17,22 @@ import { FilterItem } from '../../form/SearchForm';
 
 export interface XrefPreferMappingFieldProps extends FormFieldProps {
   entityForm: EntityForm;
-  showPreferred?: boolean;
+  showPreferred?: boolean | undefined;
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
-  preferredLabel?: string;
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
+  preferredLabel?: string | undefined;
 }
 
 export class XrefPreferMappingField extends FormField<XrefPreferMappingField> {
   entityForm: EntityForm;
-  showPreferred?: boolean;
+  showPreferred?: boolean | undefined;
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
-  preferredLabel?: string;
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
+  preferredLabel?: string | undefined;
 
   constructor(props: XrefPreferMappingFieldProps) {
     super(props.name, props.order, 'xrefMapping');
@@ -52,9 +54,10 @@ export class XrefPreferMappingField extends FormField<XrefPreferMappingField> {
     params: FieldRenderParameters,
   ): Promise<React.ReactNode | null | undefined> {
     return (async () => {
+      const inputParams = await getInputRendererParameters(this, { ...params });
       return (
         <XrefPreferMappingView
-          {...await getInputRendererParameters(this, { ...params })}
+          {...(inputParams as React.ComponentProps<typeof XrefPreferMappingView>)}
           showPreferred={this.showPreferred}
           entityForm={this.entityForm}
           parentEntityForm={params.entityForm}

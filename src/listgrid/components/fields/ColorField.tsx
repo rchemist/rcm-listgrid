@@ -17,7 +17,7 @@ export class ColorField extends ListableFormField<ColorField> {
   protected renderInstance(params: FieldRenderParameters): Promise<ReactNode | null> {
     return (async () => {
       const inputParam = { ...(await getInputRendererParameters(this, params)) };
-      return <ColorInputField {...inputParam}></ColorInputField>;
+      return <ColorInputField {...(inputParam as ColorInputFieldProps)}></ColorInputField>;
     })();
   }
 
@@ -52,7 +52,7 @@ async function renderColorListField(
 }
 
 interface ColorInputFieldProps extends InputRendererProps {
-  withAlpha?: boolean;
+  withAlpha?: boolean | undefined;
 }
 
 const ColorInputField = ({

@@ -20,11 +20,11 @@ import { EntityForm } from '../../../../config/EntityForm';
 interface UseContentAssetProps {
   value: ContentAsset[] | undefined;
   onChange: (value: ContentAsset[]) => void;
-  onError?: (message: string) => void;
-  clearError?: () => void;
+  onError?: ((message: string) => void) | undefined;
+  clearError?: (() => void) | undefined;
   entityForm: EntityForm;
-  maxItems?: number;
-  readonly?: boolean;
+  maxItems?: number | undefined;
+  readonly?: boolean | undefined;
 }
 
 /**

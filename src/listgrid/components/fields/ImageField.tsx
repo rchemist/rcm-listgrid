@@ -22,11 +22,11 @@ import { getAccessableAssetUrl } from '../../misc';
 import { TextInput } from '../../ui';
 
 interface ImageFieldProps extends ListableFormFieldProps {
-  config?: IAssetConfig;
+  config?: IAssetConfig | undefined;
 }
 
 export class ImageField extends ListableFormField<ImageField> {
-  config?: IAssetConfig;
+  config?: IAssetConfig | undefined;
 
   constructor(name: string, order: number, config?: IAssetConfig) {
     super(name, order, 'file');

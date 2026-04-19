@@ -32,12 +32,14 @@ export abstract class CheckButtonValidationField<
   withCheckButtonValidation(
     checkButtonValidation?: (entityForm: EntityForm, value: string) => Promise<ValidateResult>,
   ): this {
-    this.checkButtonValidation = checkButtonValidation;
+    if (checkButtonValidation !== undefined) this.checkButtonValidation = checkButtonValidation;
+    else delete this.checkButtonValidation;
     return this;
   }
 
   withCheckButtonLabel(checkButtonLabel?: string): this {
-    this.checkButtonLabel = checkButtonLabel;
+    if (checkButtonLabel !== undefined) this.checkButtonLabel = checkButtonLabel;
+    else delete this.checkButtonLabel;
     return this;
   }
 

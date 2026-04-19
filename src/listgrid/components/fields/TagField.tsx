@@ -21,11 +21,15 @@ import { isEmpty } from '../../utils';
 // CSS module removed in Stage 8 (host app supplies styling)
 const classes: Record<string, string> = {};
 interface TagFieldProps extends MultipleOptionalFieldProps {
-  tagValidation?: (value: string) => TagValidationResult | Promise<TagValidationResult>;
+  tagValidation?:
+    | ((value: string) => TagValidationResult | Promise<TagValidationResult>)
+    | undefined;
 }
 
 export class TagField extends MultipleOptionalField<TagField> {
-  tagValidation?: (value: string) => TagValidationResult | Promise<TagValidationResult>;
+  tagValidation?:
+    | ((value: string) => TagValidationResult | Promise<TagValidationResult>)
+    | undefined;
 
   constructor(name: string, order: number, options?: SelectOption[], limit?: MinMaxLimit) {
     super(name, order, 'tag', options, limit);

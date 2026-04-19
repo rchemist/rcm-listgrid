@@ -9,6 +9,7 @@ import {
   AbstractManyToOneField,
   AbstractManyToOneFieldProps,
   CardViewConfig,
+  IListConfig,
   SelectBoxViewConfig,
   UserListFieldProps,
   ViewListProps,
@@ -56,18 +57,40 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
             clearError={params.clearError ?? (() => {})}
             required={params.required ?? false}
             readonly={params.readonly ?? false}
-            session={params.session}
-            columns={this.cardViewConfig?.columns}
-            mobileColumns={this.cardViewConfig?.mobileColumns}
-            pageSize={this.cardViewConfig?.pageSize}
-            showSearchButton={this.cardViewConfig?.showSearchButton}
-            showAllWhenEmpty={this.cardViewConfig?.showAllWhenEmpty}
-            emptyMessage={this.cardViewConfig?.emptyMessage}
-            gridClassName={this.cardViewConfig?.gridClassName}
-            cardConfig={this.cardViewConfig?.cardConfig}
-            searchFirst={this.cardViewConfig?.searchFirst}
-            searchPlaceholder={this.cardViewConfig?.searchPlaceholder}
-            searchFields={this.cardViewConfig?.searchFields}
+            {...(params.session !== undefined && { session: params.session })}
+            {...(this.cardViewConfig?.columns !== undefined && {
+              columns: this.cardViewConfig.columns,
+            })}
+            {...(this.cardViewConfig?.mobileColumns !== undefined && {
+              mobileColumns: this.cardViewConfig.mobileColumns,
+            })}
+            {...(this.cardViewConfig?.pageSize !== undefined && {
+              pageSize: this.cardViewConfig.pageSize,
+            })}
+            {...(this.cardViewConfig?.showSearchButton !== undefined && {
+              showSearchButton: this.cardViewConfig.showSearchButton,
+            })}
+            {...(this.cardViewConfig?.showAllWhenEmpty !== undefined && {
+              showAllWhenEmpty: this.cardViewConfig.showAllWhenEmpty,
+            })}
+            {...(this.cardViewConfig?.emptyMessage !== undefined && {
+              emptyMessage: this.cardViewConfig.emptyMessage,
+            })}
+            {...(this.cardViewConfig?.gridClassName !== undefined && {
+              gridClassName: this.cardViewConfig.gridClassName,
+            })}
+            {...(this.cardViewConfig?.cardConfig !== undefined && {
+              cardConfig: this.cardViewConfig.cardConfig,
+            })}
+            {...(this.cardViewConfig?.searchFirst !== undefined && {
+              searchFirst: this.cardViewConfig.searchFirst,
+            })}
+            {...(this.cardViewConfig?.searchPlaceholder !== undefined && {
+              searchPlaceholder: this.cardViewConfig.searchPlaceholder,
+            })}
+            {...(this.cardViewConfig?.searchFields !== undefined && {
+              searchFields: this.cardViewConfig.searchFields,
+            })}
           />
         );
       }
@@ -84,24 +107,41 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
             clearError={params.clearError ?? (() => {})}
             required={params.required ?? false}
             readonly={params.readonly ?? false}
-            session={params.session}
-            labelField={this.selectBoxViewConfig?.labelField}
-            valueField={this.selectBoxViewConfig?.valueField}
-            placeholder={this.selectBoxViewConfig?.placeholder}
-            nullValueLabel={this.selectBoxViewConfig?.nullValueLabel}
-            isSearchable={this.selectBoxViewConfig?.isSearchable}
-            menuPosition={this.selectBoxViewConfig?.menuPosition}
-            menuPlacement={this.selectBoxViewConfig?.menuPlacement}
+            {...(params.session !== undefined && { session: params.session })}
+            {...(this.selectBoxViewConfig?.labelField !== undefined && {
+              labelField: this.selectBoxViewConfig.labelField,
+            })}
+            {...(this.selectBoxViewConfig?.valueField !== undefined && {
+              valueField: this.selectBoxViewConfig.valueField,
+            })}
+            {...(this.selectBoxViewConfig?.placeholder !== undefined && {
+              placeholder: this.selectBoxViewConfig.placeholder,
+            })}
+            {...(this.selectBoxViewConfig?.nullValueLabel !== undefined && {
+              nullValueLabel: this.selectBoxViewConfig.nullValueLabel,
+            })}
+            {...(this.selectBoxViewConfig?.isSearchable !== undefined && {
+              isSearchable: this.selectBoxViewConfig.isSearchable,
+            })}
+            {...(this.selectBoxViewConfig?.menuPosition !== undefined && {
+              menuPosition: this.selectBoxViewConfig.menuPosition,
+            })}
+            {...(this.selectBoxViewConfig?.menuPlacement !== undefined && {
+              menuPlacement: this.selectBoxViewConfig.menuPlacement,
+            })}
           />
         );
       }
 
       // 기존 ManyToOneView 사용
+      const inputParams = await getInputRendererParameters(this, params);
+      const { attributes: _ignoredAttrs, ...restInput } = inputParams;
       return (
         <ManyToOneView
           config={this.config}
           parentEntityForm={params.entityForm}
-          {...await getInputRendererParameters(this, params)}
+          {...restInput}
+          {...(inputParams.attributes !== undefined && { attributes: inputParams.attributes })}
         />
       );
     })();
@@ -338,7 +378,9 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
     if (typeof props === 'number') {
       props = { order: props };
     }
-    this.listConfig = { ...this.listConfig, support: true, order: props?.order };
+    const base: IListConfig = { ...this.listConfig, support: true };
+    if (props?.order !== undefined) base.order = props.order;
+    this.listConfig = base;
     // quickSearch가 명시적으로 true로 설정된 경우에만 true로 설정
     this.listConfig.quickSearch = props?.quickSearch === true;
     this.listConfig.sortable = false;
@@ -384,7 +426,8 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
    */
   withCardView(config?: CardViewConfig): this {
     this.useCardView = true;
-    this.cardViewConfig = config;
+    if (config !== undefined) this.cardViewConfig = config;
+    else delete this.cardViewConfig;
     return this;
   }
 
@@ -408,7 +451,8 @@ export class ManyToOneField extends AbstractManyToOneField<ManyToOneField> {
    */
   withSelectBoxView(config?: SelectBoxViewConfig): this {
     this.useSelectBoxView = true;
-    this.selectBoxViewConfig = config;
+    if (config !== undefined) this.selectBoxViewConfig = config;
+    else delete this.selectBoxViewConfig;
     return this;
   }
 }

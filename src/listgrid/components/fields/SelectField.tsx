@@ -16,6 +16,7 @@ import { SelectOption } from '../../form/Type';
 import { FieldValue, RenderType } from '../../config/Config';
 import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
 import {
+  IListConfig,
   OptionalField,
   OptionalFieldProps,
   renderListOptionalField,
@@ -168,8 +169,8 @@ export class SelectField extends OptionalField<SelectField> {
   ) {
     super(name, order, 'select');
     this.options = options ?? [];
-    this.reason = reason;
-    this.validateStatusChange = validateStatusChange;
+    if (reason !== undefined) this.reason = reason;
+    if (validateStatusChange !== undefined) this.validateStatusChange = validateStatusChange;
   }
 
   /**
@@ -204,9 +205,9 @@ export class SelectField extends OptionalField<SelectField> {
             combo={this.combo}
             value={inputParams.value}
             onChange={inputParams.onChange}
-            readonly={inputParams.readonly}
-            required={inputParams.required}
-            placeHolder={inputParams.placeHolder}
+            readonly={inputParams.readonly ?? false}
+            required={inputParams.required ?? false}
+            placeHolder={inputParams.placeHolder ?? ''}
           />
         );
       })();
@@ -475,9 +476,13 @@ export class SelectField extends OptionalField<SelectField> {
       this.reason,
       this.validateStatusChange,
     );
-    instance.enableImmediateChange = this.enableImmediateChange;
-    instance.immediateChangeProps = this.immediateChangeProps;
-    instance.loadOptions = this.loadOptions;
+    if (this.enableImmediateChange !== undefined) {
+      instance.enableImmediateChange = this.enableImmediateChange;
+    }
+    if (this.immediateChangeProps !== undefined) {
+      instance.immediateChangeProps = this.immediateChangeProps;
+    }
+    if (this.loadOptions !== undefined) instance.loadOptions = this.loadOptions;
     return instance;
   }
 
@@ -497,9 +502,13 @@ export class SelectField extends OptionalField<SelectField> {
       props.reason,
       props.validateStatusChange,
     );
-    field.enableImmediateChange = props.enableImmediateChange;
-    field.immediateChangeProps = props.immediateChangeProps;
-    field.loadOptions = props.loadOptions;
+    if (props.enableImmediateChange !== undefined) {
+      field.enableImmediateChange = props.enableImmediateChange;
+    }
+    if (props.immediateChangeProps !== undefined) {
+      field.immediateChangeProps = props.immediateChangeProps;
+    }
+    if (props.loadOptions !== undefined) field.loadOptions = props.loadOptions;
     return field.copyFields(props, true);
   }
 
@@ -566,7 +575,8 @@ export class SelectField extends OptionalField<SelectField> {
    * @param reason 사유 입력 설정 배열
    */
   withReason(reason?: StatusChangeReason[]): this {
-    this.reason = reason;
+    if (reason !== undefined) this.reason = reason;
+    else delete this.reason;
     return this;
   }
 
@@ -576,7 +586,8 @@ export class SelectField extends OptionalField<SelectField> {
    * @param validateStatusChange 검증 로직 설정
    */
   withValidateStatusChange(validateStatusChange?: StatusChangeValidation): this {
-    this.validateStatusChange = validateStatusChange;
+    if (validateStatusChange !== undefined) this.validateStatusChange = validateStatusChange;
+    else delete this.validateStatusChange;
     return this;
   }
 
@@ -584,7 +595,9 @@ export class SelectField extends OptionalField<SelectField> {
     if (typeof props === 'number') {
       props = { order: props };
     }
-    this.listConfig = { ...this.listConfig, support: true, sortable: false, order: props?.order }; // Select 필드는 Sort 를 지원하지 않는다.
+    const base: IListConfig = { ...this.listConfig, support: true, sortable: false };
+    if (props?.order !== undefined) base.order = props.order;
+    this.listConfig = base;
     this.listConfig.filterable = props?.filterable ?? true;
     return this;
   }

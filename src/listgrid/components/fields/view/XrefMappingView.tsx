@@ -23,12 +23,13 @@ import { useModalManagerStore } from '../../../store';
 
 interface XrefMappingViewProps extends InputRendererProps {
   entityForm: EntityForm;
-  excludeId?: string;
-  add?: boolean;
-  parentEntityForm?: EntityForm;
+  excludeId?: string | undefined;
+  add?: boolean | undefined;
+  parentEntityForm?: EntityForm | undefined;
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
 }
 
 export interface XrefMappingValue {

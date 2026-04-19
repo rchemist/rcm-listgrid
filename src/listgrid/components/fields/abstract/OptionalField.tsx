@@ -15,6 +15,7 @@ import { ComboProps, FieldType, RenderType } from '../../../config/Config';
 import { MinMaxLimit, SelectOption } from '../../../form/Type';
 import { ValidateResult } from '../../../validations/Validation';
 import { EntityForm } from '../../../config/EntityForm';
+import { FieldInfoParameters } from '../../../config/EntityField';
 import { Session } from '../../../auth/types';
 import { hexHash } from '../../../utils/hash';
 import { isEquals } from '../../../misc';
@@ -77,17 +78,20 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
    * @param props direction 설정
    */
   withComboType(props?: ComboProps): this {
-    this.combo = props;
+    if (props !== undefined) this.combo = props;
+    else delete this.combo;
     return this;
   }
 
   withOptions(options?: SelectOption[]): this {
-    this.options = options ? [...options] : undefined;
+    if (options !== undefined) this.options = [...options];
+    else delete this.options;
     return this;
   }
 
   withPreservedOptions(options?: SelectOption[]): this {
-    this.preservedOptions = options ? [...options] : undefined;
+    if (options !== undefined) this.preservedOptions = [...options];
+    else delete this.preservedOptions;
     return this;
   }
 
@@ -149,7 +153,11 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
 
   changeOptions(options: SelectOption[], defaultValue?: any): boolean {
     if (this.preservedOptions === undefined || !isEqualOptions(this.options, options)) {
-      this.preservedOptions = this.options ? [...this.options] : undefined;
+      if (this.options !== undefined) {
+        this.preservedOptions = [...this.options];
+      } else {
+        delete this.preservedOptions;
+      }
       this.options = [...options];
 
       if (defaultValue !== undefined) {
@@ -166,7 +174,7 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
       if (!isEqualOptions(this.preservedOptions, this.options)) {
         this.resetValue(renderType);
         this.options = [...this.preservedOptions];
-        this.preservedOptions = undefined;
+        delete this.preservedOptions;
         return true;
       }
     }
@@ -205,7 +213,8 @@ export abstract class MultipleOptionalField<
    * @param limit
    */
   withLimit(limit?: MinMaxLimit): this {
-    this.limit = limit;
+    if (limit !== undefined) this.limit = limit;
+    else delete this.limit;
     return this;
   }
 
@@ -214,7 +223,10 @@ export abstract class MultipleOptionalField<
    * @param min
    */
   withMin(min?: number): this {
-    this.limit = { min: min, max: this.limit?.max };
+    const newLimit: MinMaxLimit = {};
+    if (min !== undefined) newLimit.min = min;
+    if (this.limit?.max !== undefined) newLimit.max = this.limit.max;
+    this.limit = newLimit;
     return this;
   }
 
@@ -223,7 +235,10 @@ export abstract class MultipleOptionalField<
    * @param max
    */
   withMax(max?: number): this {
-    this.limit = { min: this.limit?.min, max: max };
+    const newLimit: MinMaxLimit = {};
+    if (this.limit?.min !== undefined) newLimit.min = this.limit.min;
+    if (max !== undefined) newLimit.max = max;
+    this.limit = newLimit;
     return this;
   }
 
@@ -244,8 +259,8 @@ export abstract class MultipleOptionalField<
     limit?: MinMaxLimit,
   ) {
     super(name, order, type);
-    this.options = options;
-    this.limit = limit;
+    if (options !== undefined) this.options = options;
+    if (limit !== undefined) this.limit = limit;
   }
 
   protected copyFields(origin: OptionalFieldProps, includeValue: boolean = true): this {
@@ -256,13 +271,16 @@ export abstract class MultipleOptionalField<
     entityForm: EntityForm,
     session?: Session,
   ): Promise<ValidateResult | ValidateResult[]> {
-    return await this.validateWithLimit({
+    const infoParams: FieldInfoParameters =
+      session !== undefined ? { entityForm, session } : { entityForm };
+    const validateProps: ValidateWithLimitProps = {
       previousResult: await super.validate(entityForm, session),
       entityForm: entityForm,
-      required: await this.isRequired({ entityForm, session }),
-      limit: this.limit,
+      required: await this.isRequired(infoParams),
       value: this.getCurrentValue(entityForm.getRenderType()),
-    });
+    };
+    if (this.limit !== undefined) validateProps.limit = this.limit;
+    return await this.validateWithLimit(validateProps);
   }
 
   private async validateWithLimit(props: ValidateWithLimitProps) {

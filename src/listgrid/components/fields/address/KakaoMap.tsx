@@ -12,10 +12,10 @@ import { useState } from 'react';
 import { isBlank } from '../../../utils/StringUtil';
 
 interface KakaoMapProps {
-  latitude?: number;
-  longitude?: number;
-  address1?: string;
-  address2?: string;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
+  address1?: string | undefined;
+  address2?: string | undefined;
   onSetCoordinates: (latitude: number, longitude: number) => void;
   apiKey: string;
 }

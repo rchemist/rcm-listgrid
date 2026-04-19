@@ -82,11 +82,11 @@ export type ResultByCount = (count: number) => void;
 export type ResultByRuleCondition = (result: Map<number, RuleConditionValue>) => void;
 
 export interface RuleBasedFieldProps {
-  value?: Map<number, RuleConditionValue>;
-  onRefresh?: () => void;
-  setNotifications?: (notifications: string[]) => void;
-  parentId?: string;
-  fieldName?: string;
+  value?: Map<number, RuleConditionValue> | undefined;
+  onRefresh?: (() => void) | undefined;
+  setNotifications?: ((notifications: string[]) => void) | undefined;
+  parentId?: string | undefined;
+  fieldName?: string | undefined;
 }
 
 /**

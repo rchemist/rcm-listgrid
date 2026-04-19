@@ -160,7 +160,11 @@ export class StringField extends CheckButtonValidationField<StringField> {
       try {
         value = await this.displayFunc(props.entityForm, this);
       } finally {
-        this.value = originalValue;
+        if (originalValue !== undefined) {
+          this.value = originalValue;
+        } else {
+          delete this.value;
+        }
       }
     }
 

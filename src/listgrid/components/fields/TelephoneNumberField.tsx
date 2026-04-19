@@ -30,11 +30,11 @@ interface TelephoneNumberFieldProps extends ListableFormFieldProps {
 interface TelephoneNumberInputProps {
   name: string;
   value: string | null | undefined;
-  onChange: (value: string, commit?: boolean) => void;
-  onError?: (message: string) => void;
-  readonly?: boolean;
-  placeHolder?: string;
-  regex?: { pattern: RegExp; message: string };
+  onChange: (value: string, commit?: boolean | undefined) => void;
+  onError?: ((message: string) => void) | undefined;
+  readonly?: boolean | undefined;
+  placeHolder?: string | undefined;
+  regex?: { pattern: RegExp; message: string } | undefined;
 }
 
 /**
@@ -116,7 +116,9 @@ export class TelephoneNumberField extends ListableFormField<TelephoneNumberField
 
   constructor(name: string, order: number, validations?: Validation[]) {
     super(name, order, 'text');
-    this.validations = validations;
+    if (validations !== undefined) {
+      this.validations = validations;
+    }
   }
 
   /**

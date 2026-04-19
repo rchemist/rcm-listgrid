@@ -44,9 +44,10 @@ export class XrefAvailableDateMappingField extends FormField<XrefAvailableDateMa
     params: FieldRenderParameters,
   ): Promise<React.ReactNode | null | undefined> {
     return (async () => {
+      const inputParams = await getInputRendererParameters(this, { ...params });
       return (
         <XrefAvailableDateMappingView
-          {...await getInputRendererParameters(this, { ...params })}
+          {...(inputParams as React.ComponentProps<typeof XrefAvailableDateMappingView>)}
           entityForm={this.entityForm}
         />
       );

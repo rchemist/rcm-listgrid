@@ -26,14 +26,14 @@ import { ViewHelpText } from '../form/ui/ViewHelpText';
 import { Tooltip } from '../../ui';
 
 interface MultipleAssetFieldProps extends FormFieldProps {
-  tags?: string[];
-  fileTypes?: string[];
+  tags?: string[] | undefined;
+  fileTypes?: string[] | undefined;
 }
 
 export class MultipleAssetField extends FormField<MultipleAssetField> {
-  tags?: string[];
+  tags?: string[] | undefined;
 
-  fileTypes?: string[];
+  fileTypes?: string[] | undefined;
 
   constructor(name: string, order: number, tags?: string[], fileTypes?: string[]) {
     super(name, order, 'custom');
@@ -46,11 +46,12 @@ export class MultipleAssetField extends FormField<MultipleAssetField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
+      const inputParams = await getInputRendererParameters(this, params);
       return (
         <MultipleAssetFieldView
           fileTypes={this.fileTypes}
           tags={this.tags}
-          {...await getInputRendererParameters(this, params)}
+          {...(inputParams as React.ComponentProps<typeof MultipleAssetFieldView>)}
         ></MultipleAssetFieldView>
       );
     })();
@@ -72,18 +73,20 @@ export class MultipleAssetField extends FormField<MultipleAssetField> {
 }
 
 export interface MultipleAssetForm {
-  assets?: AssetItem[];
-  preferred?: string;
+  assets?: AssetItem[] | undefined;
+  preferred?: string | undefined;
 }
 
 export interface AssetItem {
-  name?: string;
-  description?: string;
+  name?: string | undefined;
+  description?: string | undefined;
   url: string;
 }
 
 function deepCopy(value?: MultipleAssetForm): MultipleAssetForm {
-  const newValue: MultipleAssetForm = { preferred: value?.preferred };
+  const newValue: MultipleAssetForm = {
+    ...(value?.preferred !== undefined ? { preferred: value.preferred } : {}),
+  };
 
   if (value?.assets !== undefined && value.assets.length > 0) {
     const newAssets: AssetItem[] = [];
@@ -97,8 +100,8 @@ function deepCopy(value?: MultipleAssetForm): MultipleAssetForm {
 }
 
 interface MultipleAssetFieldViewProps extends InputRendererProps {
-  tags?: string[];
-  fileTypes?: string[];
+  tags?: string[] | undefined;
+  fileTypes?: string[] | undefined;
 }
 
 const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {

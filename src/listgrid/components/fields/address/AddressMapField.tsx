@@ -13,24 +13,24 @@ import { getInputRendererParameters } from '../../helper/FieldRendererHelper';
 import { AddressFieldView } from './AddressFieldView';
 
 interface AddressMapFieldProps extends FormFieldProps {
-  prefix?: string;
-  showMap?: boolean;
+  prefix?: string | undefined;
+  showMap?: boolean | undefined;
 }
 
 export interface Address {
-  state?: string;
-  city?: string;
+  state?: string | undefined;
+  city?: string | undefined;
   address1: string;
   address2: string;
   postalCode: string;
-  longitude?: number;
-  latitude?: number;
+  longitude?: number | undefined;
+  latitude?: number | undefined;
 }
 
 export class AddressMapField extends FormField<AddressMapField> {
-  showMap?: boolean;
+  showMap?: boolean | undefined;
 
-  prefix?: string;
+  prefix?: string | undefined;
 
   constructor(name: string, order: number, showMap?: boolean, prefix?: string) {
     super(name, order, 'custom');
@@ -49,9 +49,10 @@ export class AddressMapField extends FormField<AddressMapField> {
     params: FieldRenderParameters,
   ): Promise<React.ReactNode | null | undefined> {
     return (async () => {
+      const inputParams = await getInputRendererParameters(this, { ...params });
       return (
         <AddressFieldView
-          {...await getInputRendererParameters(this, { ...params })}
+          {...(inputParams as React.ComponentProps<typeof AddressFieldView>)}
           showMap={this.showMap}
           prefix={this.prefix}
         />

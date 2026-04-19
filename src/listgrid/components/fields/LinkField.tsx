@@ -36,7 +36,12 @@ export class LinkField extends CheckButtonValidationField<LinkField> {
     }
 
     return (async () => {
-      return <LinkFieldView {...await getInputRendererParameters(this, params)}></LinkFieldView>;
+      const inputParams = await getInputRendererParameters(this, params);
+      return (
+        <LinkFieldView
+          {...(inputParams as React.ComponentProps<typeof LinkFieldView>)}
+        ></LinkFieldView>
+      );
     })();
   }
 

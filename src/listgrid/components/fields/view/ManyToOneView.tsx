@@ -174,12 +174,13 @@ export const ManyToOneView = ({
   const handleSelectModal = () => {
     const modalId = `manytoone-select-${props.name}`;
     const isTree = !!config.tree;
+    const maxHeightValue = isTree ? undefined : '90vh';
     openModal({
       modalId,
       title: `${props.label} 검색`,
       size: isTree ? 'lg' : '5xl',
       fullHeight: isTree ? false : true,
-      maxHeight: isTree ? undefined : '90vh',
+      ...(maxHeightValue !== undefined ? { maxHeight: maxHeightValue } : {}),
       content: (
         <div
           className={`modal-content flex flex-col overflow-hidden ${isTree ? '' : 'max-h-[85vh]'}`}
@@ -198,9 +199,11 @@ export const ManyToOneView = ({
               listGrid={new ListGrid(entityForm).withSearchForm(searchForm!)}
               options={{
                 popup: true,
-                filterable: config.filterable,
+                ...(config.filterable !== undefined ? { filterable: config.filterable } : {}),
                 readonly: true,
-                hideAdvancedSearch: config.hideAdvancedSearch,
+                ...(config.hideAdvancedSearch !== undefined
+                  ? { hideAdvancedSearch: config.hideAdvancedSearch }
+                  : {}),
                 selection: {
                   enabled: false,
                 },

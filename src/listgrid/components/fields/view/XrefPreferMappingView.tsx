@@ -35,31 +35,32 @@ import { isBlank } from '../../../utils/StringUtil';
 
 interface XrefPreferMappingViewProps extends InputRendererProps {
   entityForm: EntityForm;
-  showPreferred?: boolean;
-  parentEntityForm?: EntityForm;
+  showPreferred?: boolean | undefined;
+  parentEntityForm?: EntityForm | undefined;
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
-  preferredLabel?: string;
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
+  preferredLabel?: string | undefined;
 }
 
 export interface XrefPreferMappingValue {
-  mapped?: XrefPreferValue[];
+  mapped?: XrefPreferValue[] | undefined;
 }
 
 interface XrefPreferValue {
   id: string;
-  preferred?: boolean;
+  preferred?: boolean | undefined;
 }
 
 const PreferredMappingEntityForm = (mapping: {
   config: ManyToOneConfig;
-  value?: XrefPreferValue[];
+  value?: XrefPreferValue[] | undefined;
   name: string;
   label: string;
-  exceptId?: any[];
+  exceptId?: any[] | undefined;
   preferredViewPreset: ViewPreset;
-  preferredLabel?: string;
+  preferredLabel?: string | undefined;
 }): EntityForm => {
   return new EntityForm(mapping.label, '').addFields({
     items: [
@@ -139,25 +140,26 @@ export const XrefPreferMappingView = ({ entityForm, ...props }: XrefPreferMappin
     viewSearchForm.withFilter('AND', ...filters);
   }
 
+  const xrefFilter =
+    isEmpty(idList) && filters.length === 0
+      ? undefined
+      : [
+          (entityForm: EntityForm) => {
+            const filterItems: FilterItem[] = [];
+            if (!isEmpty(idList)) {
+              filterItems.push({ name: 'id', queryConditionType: 'NOT_IN', values: idList });
+            }
+            if (filters.length > 0) {
+              filterItems.push(...filters);
+            }
+            return Promise.resolve(filterItems);
+          },
+        ];
   const xrefEntityForm = PreferredMappingEntityForm({
     value: mappingValue.mapped,
     config: {
       entityForm: entityForm,
-      filter:
-        isEmpty(idList) && filters.length === 0
-          ? undefined
-          : [
-              (entityForm: EntityForm) => {
-                const filterItems: FilterItem[] = [];
-                if (!isEmpty(idList)) {
-                  filterItems.push({ name: 'id', queryConditionType: 'NOT_IN', values: idList });
-                }
-                if (filters.length > 0) {
-                  filterItems.push(...filters);
-                }
-                return Promise.resolve(filterItems);
-              },
-            ],
+      ...(xrefFilter !== undefined ? { filter: xrefFilter } : {}),
     },
     name: 'mapping',
     label: labelText!,

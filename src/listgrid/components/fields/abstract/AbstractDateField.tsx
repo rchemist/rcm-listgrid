@@ -28,8 +28,8 @@ export abstract class AbstractDateField<
     range?: boolean,
   ) {
     super(name, order, type);
-    this.limit = limit;
-    this.range = range;
+    if (limit !== undefined) this.limit = limit;
+    if (range !== undefined) this.range = range;
   }
 
   /**
@@ -37,7 +37,8 @@ export abstract class AbstractDateField<
    * @param range
    */
   withRange(range?: boolean): this {
-    this.range = range;
+    if (range !== undefined) this.range = range;
+    else delete this.range;
     return this;
   }
 
@@ -46,7 +47,8 @@ export abstract class AbstractDateField<
    * @param limit
    */
   withLimit(limit?: MinMaxStringLimit): this {
-    this.limit = limit;
+    if (limit !== undefined) this.limit = limit;
+    else delete this.limit;
     return this;
   }
 
@@ -55,7 +57,10 @@ export abstract class AbstractDateField<
    * @param min
    */
   withMin(min?: string): this {
-    this.limit = { min: min, max: this.limit?.max };
+    const newLimit: MinMaxStringLimit = {};
+    if (min !== undefined) newLimit.min = min;
+    if (this.limit?.max !== undefined) newLimit.max = this.limit.max;
+    this.limit = newLimit;
     return this;
   }
 
@@ -64,7 +69,10 @@ export abstract class AbstractDateField<
    * @param max
    */
   withMax(max?: string): this {
-    this.limit = { min: this.limit?.min, max: max };
+    const newLimit: MinMaxStringLimit = {};
+    if (this.limit?.min !== undefined) newLimit.min = this.limit.min;
+    if (max !== undefined) newLimit.max = max;
+    this.limit = newLimit;
     return this;
   }
 

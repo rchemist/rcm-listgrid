@@ -18,23 +18,25 @@ import { isEmpty } from '../../utils';
 import { FilterItem } from '../../form/SearchForm';
 
 export interface XrefMappingFieldProps extends FormFieldProps {
-  supportPriority?: boolean;
-  excludeId?: string; // 목록에서 반드시 제외해야 할 id 가 있다면 입력한다. 예를 들어 카테고리에서 상위 카테고리를 선택할 때 XrefMappingForm 을 사용한다면 자기 자신의 id 값을 excludeId 로 설정하면 된다.
-  add?: boolean; // XrefMappingField 에서 대상 엔티티폼을 새로 추가할 수 있는지 여부, 기본값은 false
+  supportPriority?: boolean | undefined;
+  excludeId?: string | undefined; // 목록에서 반드시 제외해야 할 id 가 있다면 입력한다. 예를 들어 카테고리에서 상위 카테고리를 선택할 때 XrefMappingForm 을 사용한다면 자기 자신의 id 값을 excludeId 로 설정하면 된다.
+  add?: boolean | undefined; // XrefMappingField 에서 대상 엔티티폼을 새로 추가할 수 있는지 여부, 기본값은 false
   entityForm: EntityForm;
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
 }
 
 export class XrefMappingField extends FormField<XrefMappingField> {
   entityForm: EntityForm;
-  supportPriority?: boolean;
-  excludeId?: string; // 목록에서 반드시 제외해야 할 id 가 있다면 입력한다. 예를 들어 카테고리에서 상위 카테고리를 선택할 때 XrefMappingForm 을 사용한다면 자기 자신의 id 값을 excludeId 로 설정하면 된다.
-  add?: boolean; // XrefMappingField 에서 대상 엔티티폼을 새로 추가할 수 있는지 여부, 기본값은 false
+  supportPriority?: boolean | undefined;
+  excludeId?: string | undefined; // 목록에서 반드시 제외해야 할 id 가 있다면 입력한다. 예를 들어 카테고리에서 상위 카테고리를 선택할 때 XrefMappingForm 을 사용한다면 자기 자신의 id 값을 excludeId 로 설정하면 된다.
+  add?: boolean | undefined; // XrefMappingField 에서 대상 엔티티폼을 새로 추가할 수 있는지 여부, 기본값은 false
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
 
   constructor({
     name,
@@ -61,10 +63,11 @@ export class XrefMappingField extends FormField<XrefMappingField> {
     params: FieldRenderParameters,
   ): Promise<React.ReactNode | null | undefined> {
     return (async () => {
+      const inputParams = await getInputRendererParameters(this, { ...params });
       if (isTrue(this.supportPriority)) {
         return (
           <XrefPriorityMappingView
-            {...await getInputRendererParameters(this, { ...params })}
+            {...(inputParams as React.ComponentProps<typeof XrefPriorityMappingView>)}
             parentEntityForm={params.entityForm}
             entityForm={this.entityForm}
             excludeId={this.excludeId}
@@ -76,7 +79,7 @@ export class XrefMappingField extends FormField<XrefMappingField> {
 
       return (
         <XrefMappingView
-          {...await getInputRendererParameters(this, { ...params })}
+          {...(inputParams as React.ComponentProps<typeof XrefMappingView>)}
           parentEntityForm={params.entityForm}
           entityForm={this.entityForm}
           excludeId={this.excludeId}

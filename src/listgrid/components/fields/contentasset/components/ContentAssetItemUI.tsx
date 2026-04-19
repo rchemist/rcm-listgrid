@@ -27,8 +27,8 @@ interface ContentAssetItemUIProps {
   readonly: boolean;
   canAddMore: boolean;
   isEmpty: boolean;
-  acceptedFileTypes?: string[];
-  maxFileSize?: number;
+  acceptedFileTypes?: string[] | undefined;
+  maxFileSize?: number | undefined;
   onUpdateAsset: (index: number, field: keyof ContentAsset, value: any) => void;
   onTitleBlur: (index: number, value: string) => void;
   onTitleChange: (index: number, value: string) => void;
@@ -41,7 +41,7 @@ interface ContentAssetItemUIProps {
     onProgress?: (progress: number) => void,
   ) => Promise<void>;
   onUploadProgress: (index: number) => (progress: number) => void;
-  fieldErrors?: string[];
+  fieldErrors?: string[] | undefined;
 }
 
 /**

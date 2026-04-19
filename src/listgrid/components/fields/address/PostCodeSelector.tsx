@@ -12,9 +12,9 @@ const classes: Record<string, string> = {};
 import DaumPostcode from 'react-daum-postcode';
 
 interface PostCodeSelectorProps {
-  address?: Address;
+  address?: Address | undefined;
   onSubmit: (address: Address) => void;
-  onRemove?: () => void;
+  onRemove?: (() => void) | undefined;
   required: boolean;
 }
 
@@ -211,8 +211,6 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
           address1: '',
           address2: '',
           postalCode: '',
-          latitude: undefined,
-          longitude: undefined,
         };
         props.onSubmit(address);
       }
@@ -235,14 +233,16 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
     }
 
     if (validated) {
+      const longitudeValue = isBlank(longitude) ? undefined : Number(longitude);
+      const latitudeValue = isBlank(latitude) ? undefined : Number(latitude);
       const address: Address = {
         state: state ?? address1!.split(' ')[0]!,
         city: city ?? address1!.split(' ')[1]!,
         address1: address1!,
         address2: address2!,
         postalCode: postalCode!,
-        longitude: isBlank(longitude) ? undefined : Number(longitude),
-        latitude: isBlank(latitude) ? undefined : Number(latitude),
+        ...(longitudeValue !== undefined ? { longitude: longitudeValue } : {}),
+        ...(latitudeValue !== undefined ? { latitude: latitudeValue } : {}),
       };
       props.onSubmit(address);
       setOpen(false);

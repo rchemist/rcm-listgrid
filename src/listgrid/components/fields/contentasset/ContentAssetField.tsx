@@ -57,12 +57,14 @@ export class ContentAssetField extends FormField<ContentAssetField> {
       const inputParams = await getInputRendererParameters(this, params);
       return (
         <ContentAssetItem
-          {...inputParams}
+          {...(inputParams as React.ComponentProps<typeof ContentAssetItem>)}
           entityForm={params.entityForm}
-          session={params.session}
-          maxItems={this.maxItems}
-          acceptedFileTypes={this.acceptedFileTypes}
-          maxFileSize={this.maxFileSize}
+          {...(params.session !== undefined ? { session: params.session } : {})}
+          {...(this.maxItems !== undefined ? { maxItems: this.maxItems } : {})}
+          {...(this.acceptedFileTypes !== undefined
+            ? { acceptedFileTypes: this.acceptedFileTypes }
+            : {})}
+          {...(this.maxFileSize !== undefined ? { maxFileSize: this.maxFileSize } : {})}
         />
       );
     })();

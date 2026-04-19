@@ -42,14 +42,14 @@ interface StatusChangeValidation {
 interface SelectFieldRendererProps {
   name: string;
   value: FieldValue;
-  fetchedValue?: FieldValue; // 서버에서 가져온 원본 값
+  fetchedValue?: FieldValue | undefined; // 서버에서 가져온 원본 값
   options: SelectOption[];
   onChange: (value: FieldValue) => void;
   entityForm: EntityForm;
-  reason?: StatusChangeReason[];
-  validateStatusChange?: StatusChangeValidation;
-  immediateChangeProps?: ImmediateChangeProps;
-  disabled?: boolean;
+  reason?: StatusChangeReason[] | undefined;
+  validateStatusChange?: StatusChangeValidation | undefined;
+  immediateChangeProps?: ImmediateChangeProps | undefined;
+  disabled?: boolean | undefined;
 }
 
 export const SelectFieldRenderer: React.FC<SelectFieldRendererProps> = ({

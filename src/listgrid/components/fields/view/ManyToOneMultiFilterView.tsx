@@ -25,10 +25,10 @@ interface SelectedItem {
 
 interface ManyToOneMultiFilterViewProps {
   name: string;
-  label?: string;
+  label?: string | undefined;
   config: ManyToOneConfig;
   parentEntityForm: EntityForm;
-  value?: string[]; // Array of IDs
+  value?: string[] | undefined; // Array of IDs
   onChange: (value: string[]) => void;
 }
 
@@ -180,7 +180,7 @@ export const ManyToOneMultiFilterView = ({
               listGrid={new ListGrid(entityForm).withSearchForm(modalSearchForm)}
               options={{
                 popup: true,
-                filterable: config.filterable,
+                ...(config.filterable !== undefined ? { filterable: config.filterable } : {}),
                 readonly: true,
                 selection: {
                   enabled: false,

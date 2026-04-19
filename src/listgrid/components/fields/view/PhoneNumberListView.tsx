@@ -20,8 +20,8 @@ import { formatPhoneNumber } from '../../../utils/PhoneUtil';
 interface PhoneNumberListViewProps {
   phoneNumber: string;
   formattedValue: string;
-  enableSms?: boolean;
-  session?: Session;
+  enableSms?: boolean | undefined;
+  session?: Session | undefined;
 }
 
 export const PhoneNumberListView = ({

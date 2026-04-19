@@ -26,11 +26,11 @@ interface BirthdayFieldProps extends ListableFormFieldProps {
 interface BirthdayInputProps {
   name: string;
   value: string;
-  onChange: (value: string, commit?: boolean) => void;
-  readonly?: boolean;
-  hasError?: boolean;
-  placeholder?: string;
-  includeHyphen?: boolean;
+  onChange: (value: string, commit?: boolean | undefined) => void;
+  readonly?: boolean | undefined;
+  hasError?: boolean | undefined;
+  placeholder?: string | undefined;
+  includeHyphen?: boolean | undefined;
 }
 
 /**

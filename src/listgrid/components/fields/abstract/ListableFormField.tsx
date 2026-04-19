@@ -61,41 +61,41 @@ export interface ViewListResult {
 
 export interface IListConfig {
   // 목록 표시 여부
-  support?: boolean;
+  support?: boolean | undefined;
 
   // 퀵서치로 사용 가능한지
   // 이 값이 true인 필드가 여러 개인 경우 order 값이 가장 낮은(우선순위가 높은) 필드를 사용
-  quickSearch?: boolean;
+  quickSearch?: boolean | undefined;
 
   // 검색 가능 여부, default 는 true
-  filterable?: boolean;
+  filterable?: boolean | undefined;
 
   // 정렬 가능 여부, default 는 true
-  sortable?: boolean;
+  sortable?: boolean | undefined;
 
   // 목록에 표시될 때의 순서
   // 지정하지 않으면 field 자체의 order 를 사용
-  order?: number;
+  order?: number | undefined;
 
   // 목록에 표시될 때 라벨
   // 지정하지 않으면 필드 자체의 라벨 사용
-  label?: LabelType;
+  label?: LabelType | undefined;
 
   // 목록에 표시될 때 TD 내에 정렬 방향 ('left' | 'center' | 'right')
   // 기본값은 left
-  align?: TextAlignType;
+  align?: TextAlignType | undefined;
 
   // 목록에 필드값을 출력할 때 별도의 포맷 변환처리 없이 일반 문자열로 다루고 싶을 때 이 값을 true 로 한다.
-  viewRaw?: boolean;
+  viewRaw?: boolean | undefined;
 
   // 필터 처리할 때 QueryCondition 타입, 필터의 속성마다 컨디션이 다를 수 있다.
   // tag 필드인 경우에는 in 이 될 수 있고, date 관련 필드는 between 이 될 수 있다.
-  op?: QueryConditionType;
+  op?: QueryConditionType | undefined;
 
   // 다중 필터 사용 여부 (ManyToOne 필드에서 복수 선택 가능)
   // true인 경우 IN operator를 사용하여 여러 값을 선택 가능
   // 기본값은 false (단일 선택, EQUAL operator)
-  multiFilter?: boolean;
+  multiFilter?: boolean | undefined;
 }
 
 export interface UserListFieldProps {
@@ -262,7 +262,9 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
       props = { order: props };
     }
 
-    this.listConfig = { ...this.listConfig, support: true, order: props?.order };
+    const base: IListConfig = { ...this.listConfig, support: true };
+    if (props?.order !== undefined) base.order = props.order;
+    this.listConfig = base;
     // quickSearch는 명시적으로 설정된 경우에만 적용
     // (원칙: quickSearch: true가 명시적으로 설정된 필드들만 대상으로 한다)
     if (props?.quickSearch !== undefined) {
@@ -287,7 +289,7 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
         this.listConfig.support = true;
       }
     } else {
-      this.listConfig = undefined;
+      delete this.listConfig;
     }
     return this;
   }
@@ -295,14 +297,16 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
   withOverrideRenderListItem(
     overrideRenderList?: (props: ViewListProps) => Promise<ViewListResult>,
   ): this {
-    this.overrideRenderListItem = overrideRenderList;
+    if (overrideRenderList !== undefined) this.overrideRenderListItem = overrideRenderList;
+    else delete this.overrideRenderListItem;
     return this;
   }
 
   withOverrideRenderListFilter(
     overrideRenderFilter?: (params: FilterRenderParameters) => Promise<React.ReactNode | null>,
   ): this {
-    this.overrideRenderListFilter = overrideRenderFilter;
+    if (overrideRenderFilter !== undefined) this.overrideRenderListFilter = overrideRenderFilter;
+    else delete this.overrideRenderListFilter;
     return this;
   }
 

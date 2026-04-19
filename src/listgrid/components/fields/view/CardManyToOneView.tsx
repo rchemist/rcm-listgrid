@@ -295,7 +295,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
             listGrid={new ListGrid(config.entityForm).withSearchForm(searchForm)}
             options={{
               popup: true,
-              filterable: config.filterable,
+              ...(config.filterable !== undefined ? { filterable: config.filterable } : {}),
               readonly: true,
               selection: { enabled: false },
               manyToOne: {

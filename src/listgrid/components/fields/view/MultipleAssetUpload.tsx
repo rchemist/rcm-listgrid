@@ -14,9 +14,9 @@ import { FileFieldValue, FileUploadInput } from '../../../ui';
 import { useEffect, useState } from 'react';
 
 interface ProductAssetUploadProps {
-  url?: string;
+  url?: string | undefined;
   onChange: (url: string) => void;
-  fileTypes?: string[];
+  fileTypes?: string[] | undefined;
 }
 
 const assetProcessUrl = '/asset/upload-file';

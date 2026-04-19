@@ -36,21 +36,22 @@ import withReactContent from 'sweetalert2-react-content';
 
 interface XrefPriceMappingViewProps extends InputRendererProps {
   entityForm: EntityForm;
-  parentEntityForm?: EntityForm;
+  parentEntityForm?: EntityForm | undefined;
   initPrice: (entityForm: EntityForm, rowValue: any) => Promise<void>;
-  priceHelpText?: string;
+  priceHelpText?: string | undefined;
   filters?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
 }
 
 export interface XrefPriceMappingValue {
-  mapped?: XrefPriceValue[];
+  mapped?: XrefPriceValue[] | undefined;
 }
 
 interface XrefPriceValue {
   id: string;
-  price?: number;
+  price?: number | undefined;
 }
 
 const PriceMappingEntityForm = (

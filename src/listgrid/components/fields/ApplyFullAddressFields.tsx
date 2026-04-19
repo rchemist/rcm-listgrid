@@ -117,11 +117,11 @@ export const applyFullAddressFields = (entityForm: EntityForm, props?: FullAddre
   }
 
   const AddressField = (fieldProps: {
-    type?: 'number' | 'string';
+    type?: 'number' | 'string' | undefined;
     name: AddressFieldType;
     order: number;
     label: string;
-    prefix?: string;
+    prefix?: string | undefined;
   }): FormField<any> => {
     const type = fieldProps.type ?? 'string';
     const order = props?.order?.[fieldProps.name] ?? fieldProps.order;
@@ -158,8 +158,8 @@ export const applyFullAddressFields = (entityForm: EntityForm, props?: FullAddre
   };
 
   entityForm.addFields({
-    tab: props?.tab,
-    fieldGroup: props?.fieldGroup,
+    ...(props?.tab !== undefined ? { tab: props.tab } : {}),
+    ...(props?.fieldGroup !== undefined ? { fieldGroup: props.fieldGroup } : {}),
     items: [
       new AddressMapField(
         `${addressMapFieldName}`,

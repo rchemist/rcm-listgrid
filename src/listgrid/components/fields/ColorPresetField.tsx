@@ -9,7 +9,7 @@ import { Popover } from '../../ui';
 import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 
 export class ColorPresetField extends ListableFormField<ColorPresetField> {
-  presets?: string[];
+  presets?: string[] | undefined;
 
   constructor(name: string, order: number, presets?: string[]) {
     super(name, order, 'text');
@@ -22,7 +22,12 @@ export class ColorPresetField extends ListableFormField<ColorPresetField> {
   protected renderInstance(params: FieldRenderParameters): Promise<ReactNode | null> {
     return (async () => {
       const inputParam = { ...(await getInputRendererParameters(this, params)) };
-      return <ColorPresetFieldView presets={this.presets} {...inputParam}></ColorPresetFieldView>;
+      return (
+        <ColorPresetFieldView
+          presets={this.presets}
+          {...(inputParam as ColorPresetFieldProps)}
+        ></ColorPresetFieldView>
+      );
     })();
   }
 
@@ -57,7 +62,7 @@ async function renderColorListField(
 }
 
 interface ColorPresetFieldProps extends InputRendererProps {
-  presets?: string[];
+  presets?: string[] | undefined;
 }
 
 // 색상을 선택하는 버튼을 렌더링한다.

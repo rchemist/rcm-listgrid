@@ -27,11 +27,11 @@ import { RenderType } from '../../config/Config';
 import { IconCheck, IconX } from '@tabler/icons-react';
 
 interface BooleanFieldProps extends OptionalFieldProps {
-  emptyLabel?: string;
+  emptyLabel?: string | undefined;
 }
 
 export class BooleanField extends OptionalField<BooleanField> {
-  emptyLabel?: string;
+  emptyLabel?: string | undefined;
 
   constructor(name: string, order: number, emptyLabel?: string) {
     super(name, order, 'boolean');

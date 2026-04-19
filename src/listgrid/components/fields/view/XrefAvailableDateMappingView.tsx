@@ -49,15 +49,16 @@ export interface XrefAvailableDateValue {
 }
 
 const AvailableMappingEntityForm = (mapping: {
-  value?: XrefAvailableDateValue[];
+  value?: XrefAvailableDateValue[] | undefined;
   config: ManyToOneConfig;
   name: string;
   label: string;
   requiredAvailable: boolean;
   filter?:
     | FilterItem[]
-    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>);
-  parentEntityForm?: EntityForm;
+    | ((entityForm: EntityForm, parentEntityForm?: EntityForm) => Promise<FilterItem[]>)
+    | undefined;
+  parentEntityForm?: EntityForm | undefined;
 }): EntityForm => {
   const mappingField = new ManyToOneField(mapping.name, 100, mapping.config)
     .withLabel(mapping.label)
