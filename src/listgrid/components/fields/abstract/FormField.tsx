@@ -111,8 +111,8 @@ export const FULL_WIDTH_FIELD_TYPES: FieldType[] = [
   'revision',
 ];
 
-export interface FormFieldProps {
-  value?: FieldValue; // 필드값
+export interface FormFieldProps<TValue = any, TForm extends object = any> {
+  value?: FieldValue<TValue>; // 필드값
 
   // type 은 각 필드에서 알아서 설정된다. Props 로 넘기는 방식이 아니다.
   // type: FieldType;
@@ -127,10 +127,10 @@ export interface FormFieldProps {
    * @param renderType
    */
   displayFunc?: (
-    entityForm: EntityForm,
+    entityForm: EntityForm<TForm>,
     field: EntityField,
     renderType?: RenderType,
-  ) => Promise<any>;
+  ) => Promise<TValue>;
   overrideRender?: (params: FieldRenderParameters) => Promise<ReactNode | null | undefined>;
   order: number; // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
   name: string; // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
@@ -151,12 +151,20 @@ export interface FormFieldProps {
   // // tab, fieldGroup 의 ID, 이 값은 EntityForm 이 initialize 될 때 자동으로 처리된다. 외부에서 입력할 필요가 없는 값이다.
   form?: { tabId: string; fieldGroupId: string };
 
-  saveValue?: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>;
-  maskedValueFunc?: (entityForm: EntityForm, value: any) => Promise<string>;
+  saveValue?: (
+    entityForm: EntityForm<TForm>,
+    field: EntityField,
+    renderType?: RenderType,
+  ) => Promise<TValue>;
+  maskedValueFunc?: (entityForm: EntityForm<TForm>, value: TValue) => Promise<string>;
   exceptOnSave?: boolean;
 }
 
-export abstract class FormField<T extends FormField<T>> implements EntityField {
+export abstract class FormField<
+  TSelf extends FormField<TSelf, TValue, TForm>,
+  TValue = any,
+  TForm extends object = any,
+> implements EntityField {
   order: number;
   name: string;
   type: FieldType;
@@ -168,7 +176,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     this.type = type;
   }
 
-  value?: FieldValue;
+  value?: FieldValue<TValue>;
   tooltip?: TooltipType;
   helpText?: HelpTextType;
   placeHolder?: PlaceHolderType;
@@ -187,19 +195,23 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
 
   validations?: Validation[];
   overrideRender?: (params: FieldRenderParameters) => Promise<React.ReactNode | null | undefined>;
-  saveValue?: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>;
-  displayFunc?: (
-    entityForm: EntityForm,
+  saveValue?: (
+    entityForm: EntityForm<TForm>,
     field: EntityField,
     renderType?: RenderType,
-  ) => Promise<any>;
-  maskedValueFunc?: (entityForm: EntityForm, value: any) => Promise<string>;
+  ) => Promise<TValue>;
+  displayFunc?: (
+    entityForm: EntityForm<TForm>,
+    field: EntityField,
+    renderType?: RenderType,
+  ) => Promise<TValue>;
+  maskedValueFunc?: (entityForm: EntityForm<TForm>, value: TValue) => Promise<string>;
 
   /**
    * 새로운 필드 인스턴스를 생성하는 추상 메소드
    * 각 구체 클래스에서 자신의 타입으로 구현해야 함
    */
-  protected abstract createInstance(name: string, order: number): T;
+  protected abstract createInstance(name: string, order: number): TSelf;
 
   /**
    * 각 필드의 핵심 렌더링 로직을 구현하는 추상 메소드
@@ -294,7 +306,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
    * 공통 clone 로직 - 모든 필드에서 사용
    * StateTracker 로직 포함
    */
-  clone(includeValue?: boolean): T {
+  clone(includeValue?: boolean): TSelf {
     const fieldTypeName = this.constructor.name;
 
     const cloned = this.createInstance(this.name, this.order).copyFields(this, includeValue);
@@ -302,7 +314,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return cloned;
   }
 
-  protected copyFields(origin: FormFieldProps, includeValue: boolean = true): this {
+  protected copyFields(origin: FormFieldProps<TValue, TForm>, includeValue: boolean = true): this {
     if (includeValue) {
       this.value = { ...origin.value };
     }
@@ -363,12 +375,12 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return this;
   }
 
-  async getDisplayValue(entityForm: EntityForm, renderType?: RenderType): Promise<any> {
+  async getDisplayValue(entityForm: EntityForm<TForm>, renderType?: RenderType): Promise<any> {
     if (this.displayFunc) {
       return this.displayFunc(entityForm, this, renderType);
     }
 
-    const value = await this.getCurrentValue(renderType);
+    const value: any = await this.getCurrentValue(renderType);
 
     // ManyToOneField의 경우 빈 객체를 undefined로 변환하여 반환
     if (this.type === 'manyToOne' && value && typeof value === 'object') {
@@ -385,7 +397,11 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   }
 
   withDisplayFunc(
-    fn: (entityForm: EntityForm, field: EntityField, renderType?: RenderType) => Promise<any>,
+    fn: (
+      entityForm: EntityForm<TForm>,
+      field: EntityField,
+      renderType?: RenderType,
+    ) => Promise<TValue>,
   ): this {
     this.displayFunc = fn;
     return this;
@@ -396,7 +412,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
    * When the field is readonly and has a value, the maskedValueFunc is called
    * to produce a masked display string. The original value is never modified.
    */
-  withMaskedValue(fn: (entityForm: EntityForm, value: any) => Promise<string>): this {
+  withMaskedValue(fn: (entityForm: EntityForm<TForm>, value: TValue) => Promise<string>): this {
     this.maskedValueFunc = fn;
     return this;
   }
@@ -617,7 +633,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return this;
   }
 
-  withValue(value: any): this {
+  withValue(value: TValue | FieldValue<TValue> | any): this {
     if (value !== undefined && value !== null) {
       // value 가 FieldValue 타입인지 확인하고 해당 타입이면 값을 복사해 넣는다.
       // FieldValue는 정확히 current, default, fetched 속성만 가지고 있어야 함
@@ -696,7 +712,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return await getConditionalBoolean(toConditionalValue(props), this.readonly);
   }
 
-  async getCurrentValue(renderType?: RenderType): Promise<any> {
+  async getCurrentValue(renderType?: RenderType): Promise<TValue | undefined> {
     const renderTypeValue = renderType ?? 'create';
     if (this.value !== undefined) {
       // current 값이 명시적으로 설정된 경우 (undefined 포함) 해당 값을 반환
@@ -709,7 +725,10 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return undefined;
   }
 
-  async getSaveValue(entityForm: EntityForm, renderType?: RenderType): Promise<any> {
+  async getSaveValue(
+    entityForm: EntityForm<TForm>,
+    renderType?: RenderType,
+  ): Promise<TValue | undefined> {
     if (this.saveValue) {
       return this.saveValue(entityForm, this, renderType);
     }
@@ -717,7 +736,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return this.getCurrentValue(renderType);
   }
 
-  async getFetchedValue(): Promise<any> {
+  async getFetchedValue(): Promise<TValue | undefined> {
     if (this.value !== undefined) {
       return this.value?.fetched;
     }
@@ -727,10 +746,11 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   resetValue(renderType?: RenderType) {
     const renderTypeValue = renderType ?? 'create';
     if (this.value) {
-      if (renderTypeValue === 'update') {
-        this.value.current = this.value.fetched;
+      const resetTo = renderTypeValue === 'update' ? this.value.fetched : this.value.default;
+      if (resetTo === undefined) {
+        delete this.value.current;
       } else {
-        this.value.current = this.value.default;
+        this.value.current = resetTo;
       }
     }
   }
@@ -746,7 +766,7 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
   }
 
   async validate(
-    entityForm: EntityForm,
+    entityForm: EntityForm<TForm>,
     session?: Session,
   ): Promise<ValidateResult | ValidateResult[]> {
     const infoParams: FieldInfoParameters =
@@ -791,12 +811,13 @@ export abstract class FormField<T extends FormField<T>> implements EntityField {
     return ValidateResult.success();
   }
 
-  withDefaultValue(value: any): this {
-    this.value = {
-      fetched: this.value?.fetched,
-      current: this.value?.current ?? value, // current 에 값이 없다면 default 에 모두 동일한 값을 넣어 준다.
-      default: value,
-    };
+  withDefaultValue(value: TValue | any): this {
+    const next: FieldValue<TValue> = { default: value };
+    const fetched = this.value?.fetched;
+    if (fetched !== undefined) next.fetched = fetched;
+    const currentSource = this.value?.current ?? value;
+    if (currentSource !== undefined) next.current = currentSource;
+    this.value = next;
     return this;
   }
 

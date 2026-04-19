@@ -9,14 +9,19 @@ import { ListableFormField, ListableFormFieldProps } from './ListableFormField';
 import { FieldType } from '../../../config/Config';
 import { MinMaxStringLimit } from '../../../form/Type';
 
-export interface AbstractDateFieldProps extends ListableFormFieldProps {
+export interface AbstractDateFieldProps<
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormFieldProps<TValue, TForm> {
   limit?: MinMaxStringLimit;
   range?: boolean;
 }
 
 export abstract class AbstractDateField<
-  T extends AbstractDateField<T>,
-> extends ListableFormField<T> {
+  TSelf extends AbstractDateField<TSelf, TValue, TForm>,
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormField<TSelf, TValue, TForm> {
   limit?: MinMaxStringLimit;
   range?: boolean;
 
@@ -76,7 +81,10 @@ export abstract class AbstractDateField<
     return this;
   }
 
-  protected copyFields(origin: ListableFormFieldProps, includeValue: boolean = true): this {
+  protected copyFields(
+    origin: ListableFormFieldProps<TValue, TForm>,
+    includeValue: boolean = true,
+  ): this {
     return super.copyFields(origin, includeValue).withLimit(this.limit).withRange(this.range);
   }
 }

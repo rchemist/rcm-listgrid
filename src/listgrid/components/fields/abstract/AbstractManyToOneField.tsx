@@ -59,7 +59,10 @@ export interface SelectBoxViewConfig {
   menuPlacement?: 'auto' | 'bottom' | 'top';
 }
 
-export interface AbstractManyToOneFieldProps extends ListableFormFieldProps {
+export interface AbstractManyToOneFieldProps<
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormFieldProps<TValue, TForm> {
   config: ManyToOneConfig;
   /** 카드뷰 사용 여부 */
   useCardView?: boolean;
@@ -76,8 +79,10 @@ export interface AbstractManyToOneFieldProps extends ListableFormFieldProps {
  * This class provides common functionality for ManyToOneField and UserField
  */
 export abstract class AbstractManyToOneField<
-  T extends AbstractManyToOneField<T>,
-> extends ListableFormField<T> {
+  TSelf extends AbstractManyToOneField<TSelf, TValue, TForm>,
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormField<TSelf, TValue, TForm> {
   config: ManyToOneConfig;
 
   /** 카드뷰 사용 여부 */

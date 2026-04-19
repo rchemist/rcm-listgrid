@@ -48,7 +48,10 @@ export interface ChipConfig {
 const DEFAULT_CHIP_MAX_OPTIONS = 10;
 const DEFAULT_CHIP_MAX_LABEL_LENGTH = 8;
 
-export interface OptionalFieldProps extends ListableFormFieldProps {
+export interface OptionalFieldProps<
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormFieldProps<TValue, TForm> {
   combo?: ComboProps; // radio 나 checkbox 타입 으로 보여져야 하는 경우 추가 설정
   options?: SelectOption[]; // option 정보
   preservedOptions?: SelectOption[]; // onChange 의 결과로 option 이 변경되었다면, 롤백을 위해 이 값을 저장해 둔다.
@@ -56,7 +59,11 @@ export interface OptionalFieldProps extends ListableFormFieldProps {
   singleFilter?: boolean; // 목록 필터에서 단일 선택만 허용 (true: EQUAL, false/undefined: IN)
 }
 
-export abstract class OptionalField<T extends OptionalField<T>> extends ListableFormField<T> {
+export abstract class OptionalField<
+  TSelf extends OptionalField<TSelf, TValue, TForm>,
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormField<TSelf, TValue, TForm> {
   combo?: ComboProps; // radio 나 checkbox 타입 으로 보여져야 하는 경우 추가 설정
   options?: SelectOption[]; // option 정보
   preservedOptions?: SelectOption[]; // onChange 의 결과로 option 이 변경되었다면, 롤백을 위해 이 값을 저장해 둔다.
@@ -151,7 +158,7 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
     return true;
   }
 
-  changeOptions(options: SelectOption[], defaultValue?: any): boolean {
+  changeOptions(options: SelectOption[], defaultValue?: TValue): boolean {
     if (this.preservedOptions === undefined || !isEqualOptions(this.options, options)) {
       if (this.options !== undefined) {
         this.preservedOptions = [...this.options];
@@ -181,7 +188,10 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
     return false;
   }
 
-  protected copyFields(origin: OptionalFieldProps, includeValue: boolean = true): this {
+  protected copyFields(
+    origin: OptionalFieldProps<TValue, TForm>,
+    includeValue: boolean = true,
+  ): this {
     const result = super
       .copyFields(origin, includeValue)
       .withComboType(origin.combo)
@@ -197,13 +207,18 @@ export abstract class OptionalField<T extends OptionalField<T>> extends Listable
   }
 }
 
-export interface MultipleOptionalFieldProps extends OptionalFieldProps {
+export interface MultipleOptionalFieldProps<
+  TValue = any,
+  TForm extends object = any,
+> extends OptionalFieldProps<TValue, TForm> {
   limit?: MinMaxLimit;
 }
 
 export abstract class MultipleOptionalField<
-  T extends MultipleOptionalField<T>,
-> extends OptionalField<T> {
+  TSelf extends MultipleOptionalField<TSelf, TValue, TForm>,
+  TValue = any,
+  TForm extends object = any,
+> extends OptionalField<TSelf, TValue, TForm> {
   limit?: MinMaxLimit;
 
   /**
@@ -263,12 +278,15 @@ export abstract class MultipleOptionalField<
     if (limit !== undefined) this.limit = limit;
   }
 
-  protected copyFields(origin: OptionalFieldProps, includeValue: boolean = true): this {
+  protected copyFields(
+    origin: OptionalFieldProps<TValue, TForm>,
+    includeValue: boolean = true,
+  ): this {
     return super.copyFields(origin, includeValue).withLimit(this.limit);
   }
 
   async validate(
-    entityForm: EntityForm,
+    entityForm: EntityForm<TForm>,
     session?: Session,
   ): Promise<ValidateResult | ValidateResult[]> {
     const infoParams: FieldInfoParameters =

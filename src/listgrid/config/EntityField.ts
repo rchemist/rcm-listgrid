@@ -86,7 +86,7 @@ export interface EntityField extends EntityItem {
 
   withValue(value: any): this;
 
-  getDisplayValue(entityForm: EntityForm, renderType?: RenderType): Promise<string>;
+  getDisplayValue(entityForm: EntityForm, renderType?: RenderType): Promise<any>;
 
   getPlaceHolder(props: FieldInfoParameters): Promise<string>;
 

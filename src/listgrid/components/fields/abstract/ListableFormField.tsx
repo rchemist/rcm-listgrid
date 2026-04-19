@@ -106,7 +106,10 @@ export interface UserListFieldProps {
   multiFilter?: boolean;
 }
 
-export interface ListableFormFieldProps extends FormFieldProps {
+export interface ListableFormFieldProps<
+  TValue = any,
+  TForm extends object = any,
+> extends FormFieldProps<TValue, TForm> {
   listConfig?: IListConfig;
 
   // static create 에서만 사용되는 편의성 필드. 이 값이 true 면 useListField() 를 한 것과 동일한 효과를 가진다.
@@ -117,7 +120,11 @@ export interface ListableFormFieldProps extends FormFieldProps {
   overrideRenderListFilter?(params: FilterRenderParameters): Promise<React.ReactNode | null>;
 }
 
-export abstract class ListableFormField<T extends ListableFormField<T>> extends FormField<T> {
+export abstract class ListableFormField<
+  TSelf extends ListableFormField<TSelf, TValue, TForm>,
+  TValue = any,
+  TForm extends object = any,
+> extends FormField<TSelf, TValue, TForm> {
   listConfig?: IListConfig;
 
   overrideRenderListItem?: (props: ViewListProps) => Promise<ViewListResult>;
@@ -375,10 +382,10 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
    */
   withSaveValue(
     saveValue: (
-      entityForm: EntityForm,
+      entityForm: EntityForm<TForm>,
       field: EntityField,
       renderType?: RenderType,
-    ) => Promise<any>,
+    ) => Promise<TValue>,
   ): this {
     this.saveValue = saveValue;
     return this;
@@ -419,7 +426,10 @@ export abstract class ListableFormField<T extends ListableFormField<T>> extends 
     return isTrue(this.getListConfig()?.sortable, true);
   }
 
-  protected copyFields(origin: ListableFormFieldProps, includeValue: boolean = true): this {
+  protected copyFields(
+    origin: ListableFormFieldProps<TValue, TForm>,
+    includeValue: boolean = true,
+  ): this {
     super
       .copyFields(origin, includeValue)
       .withListConfig(origin.listConfig)

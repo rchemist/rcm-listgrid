@@ -13,15 +13,20 @@ import { FieldInfoParameters, FieldRenderParameters } from '../../../config/Enti
 import { CheckButtonValidationInput } from '../../../ui';
 import { isEmpty } from '../../../utils';
 
-export interface CheckButtonValidationFieldProps extends ListableFormFieldProps {
-  checkButtonValidation?: (entityForm: EntityForm, value: string) => Promise<ValidateResult>;
+export interface CheckButtonValidationFieldProps<
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormFieldProps<TValue, TForm> {
+  checkButtonValidation?: (entityForm: EntityForm<TForm>, value: string) => Promise<ValidateResult>;
   checkButtonLabel?: string;
 }
 
 export abstract class CheckButtonValidationField<
-  T extends CheckButtonValidationField<T>,
-> extends ListableFormField<T> {
-  checkButtonValidation?: (entityForm: EntityForm, value: string) => Promise<ValidateResult>;
+  TSelf extends CheckButtonValidationField<TSelf, TValue, TForm>,
+  TValue = any,
+  TForm extends object = any,
+> extends ListableFormField<TSelf, TValue, TForm> {
+  checkButtonValidation?: (entityForm: EntityForm<TForm>, value: string) => Promise<ValidateResult>;
 
   checkButtonLabel?: string;
 
@@ -30,7 +35,10 @@ export abstract class CheckButtonValidationField<
    * @param checkButtonValidation
    */
   withCheckButtonValidation(
-    checkButtonValidation?: (entityForm: EntityForm, value: string) => Promise<ValidateResult>,
+    checkButtonValidation?: (
+      entityForm: EntityForm<TForm>,
+      value: string,
+    ) => Promise<ValidateResult>,
   ): this {
     if (checkButtonValidation !== undefined) this.checkButtonValidation = checkButtonValidation;
     else delete this.checkButtonValidation;
@@ -44,7 +52,7 @@ export abstract class CheckButtonValidationField<
   }
 
   protected copyFields(
-    origin: CheckButtonValidationFieldProps,
+    origin: CheckButtonValidationFieldProps<TValue, TForm>,
     includeValue: boolean = true,
   ): this {
     return super
