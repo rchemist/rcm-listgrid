@@ -62,7 +62,7 @@ export abstract class CheckButtonValidationField<
   }
 
   protected renderCheckButtonValidationField(
-    params: FieldRenderParameters,
+    params: FieldRenderParameters<TForm, TValue>,
   ): Promise<ReactNode | null> {
     return (async () => {
       const entityForm = params.entityForm;
@@ -86,11 +86,11 @@ export abstract class CheckButtonValidationField<
               validated: true,
               color: 'success',
             });
-            params.onChange(value);
+            params.onChange(value as TValue);
           }}
           onClear={() => {
             entityForm.clearFieldValidationState(this.getName());
-            params.onChange('');
+            params.onChange('' as TValue);
           }}
           onCheck={async (value: any) => {
             if (!isEmpty(this.validations)) {
@@ -140,7 +140,7 @@ export abstract class CheckButtonValidationField<
     })();
   }
 
-  async isRequired(props: FieldInfoParameters): Promise<boolean> {
+  async isRequired(props: FieldInfoParameters<TForm>): Promise<boolean> {
     const required = await super.isRequired(props);
     return Promise.resolve(required);
   }

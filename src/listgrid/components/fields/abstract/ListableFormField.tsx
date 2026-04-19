@@ -117,7 +117,9 @@ export interface ListableFormFieldProps<
 
   overrideRenderListItem?: (props: ViewListProps) => Promise<ViewListResult>;
 
-  overrideRenderListFilter?(params: FilterRenderParameters): Promise<React.ReactNode | null>;
+  overrideRenderListFilter?(
+    params: FilterRenderParameters<TForm, TValue>,
+  ): Promise<React.ReactNode | null>;
 }
 
 export abstract class ListableFormField<
@@ -129,14 +131,16 @@ export abstract class ListableFormField<
 
   overrideRenderListItem?: (props: ViewListProps) => Promise<ViewListResult>;
 
-  overrideRenderListFilter?(params: FilterRenderParameters): Promise<React.ReactNode | null>;
+  overrideRenderListFilter?(
+    params: FilterRenderParameters<TForm, TValue>,
+  ): Promise<React.ReactNode | null>;
 
   /**
    * 각 필드의 핵심 리스트 필터 렌더링 로직을 구현하는 추상 메소드
    * null을 반환하면 기본 필터 로직(원본 renderListFilter)을 적용
    */
   protected async renderListFilterInstance(
-    params: FilterRenderParameters,
+    params: FilterRenderParameters<TForm, TValue>,
   ): Promise<React.ReactNode | null> {
     return null;
   }
@@ -167,7 +171,9 @@ export abstract class ListableFormField<
    * 설정된 오버라이드가 없으면 #renderListFilter 를 실행한다.
    * @param params
    */
-  async viewListFilter(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  async viewListFilter(
+    params: FilterRenderParameters<TForm, TValue>,
+  ): Promise<React.ReactNode | null> {
     if (this.overrideRenderListFilter) {
       return this.overrideRenderListFilter?.(params);
     }
@@ -177,7 +183,9 @@ export abstract class ListableFormField<
   /**
    * 리스트 필터 렌더링 - renderListFilterInstance가 null이면 원본 기본 로직 사용
    */
-  protected renderListFilter(params: FilterRenderParameters): Promise<React.ReactNode | null> {
+  protected renderListFilter(
+    params: FilterRenderParameters<TForm, TValue>,
+  ): Promise<React.ReactNode | null> {
     return (async () => {
       const customFilter = await this.renderListFilterInstance(params);
       if (customFilter !== null) {
@@ -200,12 +208,12 @@ export abstract class ListableFormField<
   protected renderListFilterOriginal({
     onChange,
     ...params
-  }: FilterRenderParameters): Promise<React.ReactNode | null> {
+  }: FilterRenderParameters<TForm, TValue>): Promise<React.ReactNode | null> {
     return this.render({
       ...params,
       required: false,
-      onChange: (value) => onChange(value),
-    } as FieldRenderParameters);
+      onChange: (value: TValue) => onChange(value),
+    } as FieldRenderParameters<TForm, TValue>);
   }
 
   /**
@@ -310,7 +318,9 @@ export abstract class ListableFormField<
   }
 
   withOverrideRenderListFilter(
-    overrideRenderFilter?: (params: FilterRenderParameters) => Promise<React.ReactNode | null>,
+    overrideRenderFilter?: (
+      params: FilterRenderParameters<TForm, TValue>,
+    ) => Promise<React.ReactNode | null>,
   ): this {
     if (overrideRenderFilter !== undefined) this.overrideRenderListFilter = overrideRenderFilter;
     else delete this.overrideRenderListFilter;

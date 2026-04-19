@@ -51,7 +51,9 @@ export type CardIconType = React.ComponentType<{ className?: string; stroke?: nu
  * FieldInfoParameters → ConditionalValue 변환.
  * exactOptionalPropertyTypes 아래에서 undefined 필드는 생략해야 해서 필요.
  */
-function toConditionalValue(props: FieldInfoParameters): ConditionalValue {
+function toConditionalValue<TForm extends object = any>(
+  props: FieldInfoParameters<TForm>,
+): ConditionalValue {
   const result: ConditionalValue = {};
   if (props.entityForm !== undefined) result.entityForm = props.entityForm;
   if (props.renderType !== undefined) result.renderType = props.renderType;
@@ -131,7 +133,9 @@ export interface FormFieldProps<TValue = any, TForm extends object = any> {
     field: EntityField,
     renderType?: RenderType,
   ) => Promise<TValue>;
-  overrideRender?: (params: FieldRenderParameters) => Promise<ReactNode | null | undefined>;
+  overrideRender?: (
+    params: FieldRenderParameters<TForm, TValue>,
+  ) => Promise<ReactNode | null | undefined>;
   order: number; // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
   name: string; // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
   label?: LabelType; // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
@@ -194,7 +198,9 @@ export abstract class FormField<
   form?: { tabId: string; fieldGroupId: string };
 
   validations?: Validation[];
-  overrideRender?: (params: FieldRenderParameters) => Promise<React.ReactNode | null | undefined>;
+  overrideRender?: (
+    params: FieldRenderParameters<TForm, TValue>,
+  ) => Promise<React.ReactNode | null | undefined>;
   saveValue?: (
     entityForm: EntityForm<TForm>,
     field: EntityField,
@@ -217,7 +223,9 @@ export abstract class FormField<
    * 각 필드의 핵심 렌더링 로직을 구현하는 추상 메소드
    * 기존 render() 메소드의 핵심 부분만 구현
    */
-  protected abstract renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null>;
+  protected abstract renderInstance(
+    params: FieldRenderParameters<TForm, TValue>,
+  ): Promise<React.ReactNode | null>;
 
   /**
    * View 모드에서 필드 값을 렌더링하는 메소드
@@ -475,7 +483,9 @@ export abstract class FormField<
     return this;
   }
 
-  async view(params: FieldRenderParameters): Promise<React.ReactNode | null | undefined> {
+  async view(
+    params: FieldRenderParameters<TForm, TValue>,
+  ): Promise<React.ReactNode | null | undefined> {
     if (this.overrideRender) {
       const result = await this.overrideRender(params);
 
@@ -490,7 +500,9 @@ export abstract class FormField<
    * 공통 render 로직 - 모든 필드에서 사용
    * StateTracker, Performance tracking, Error handling 포함
    */
-  public render(params: FieldRenderParameters): Promise<React.ReactNode | null | undefined> {
+  public render(
+    params: FieldRenderParameters<TForm, TValue>,
+  ): Promise<React.ReactNode | null | undefined> {
     const fieldTypeName = this.constructor.name;
 
     return (async () => {
@@ -506,7 +518,9 @@ export abstract class FormField<
    * @param fn
    */
   withOverrideRender(
-    fn: (params: FieldRenderParameters) => Promise<React.ReactNode | null | undefined>,
+    fn: (
+      params: FieldRenderParameters<TForm, TValue>,
+    ) => Promise<React.ReactNode | null | undefined>,
   ): this {
     this.overrideRender = fn;
     return this;
@@ -688,27 +702,27 @@ export abstract class FormField<
     return this.getName();
   }
 
-  async getTooltip(props: FieldInfoParameters): Promise<ReactNode> {
+  async getTooltip(props: FieldInfoParameters<TForm>): Promise<ReactNode> {
     return await getConditionalReactNode(toConditionalValue(props), this.tooltip);
   }
 
-  async getHelpText(props: FieldInfoParameters): Promise<ReactNode> {
+  async getHelpText(props: FieldInfoParameters<TForm>): Promise<ReactNode> {
     return await getConditionalReactNode(toConditionalValue(props), this.helpText);
   }
 
-  async getPlaceHolder(props: FieldInfoParameters): Promise<string> {
+  async getPlaceHolder(props: FieldInfoParameters<TForm>): Promise<string> {
     return await getConditionalString(toConditionalValue(props), this.placeHolder);
   }
 
-  async isRequired(props: FieldInfoParameters): Promise<boolean> {
+  async isRequired(props: FieldInfoParameters<TForm>): Promise<boolean> {
     return await getConditionalBoolean(toConditionalValue(props), this.required);
   }
 
-  async isHidden(props: FieldInfoParameters): Promise<boolean> {
+  async isHidden(props: FieldInfoParameters<TForm>): Promise<boolean> {
     return await getConditionalBoolean(toConditionalValue(props), this.hidden);
   }
 
-  async isReadonly(props: FieldInfoParameters): Promise<boolean> {
+  async isReadonly(props: FieldInfoParameters<TForm>): Promise<boolean> {
     return await getConditionalBoolean(toConditionalValue(props), this.readonly);
   }
 
@@ -769,7 +783,7 @@ export abstract class FormField<
     entityForm: EntityForm<TForm>,
     session?: Session,
   ): Promise<ValidateResult | ValidateResult[]> {
-    const infoParams: FieldInfoParameters =
+    const infoParams: FieldInfoParameters<TForm> =
       session !== undefined ? { entityForm, session } : { entityForm };
 
     if ((await this.isHidden(infoParams)) || (await this.isReadonly(infoParams))) {

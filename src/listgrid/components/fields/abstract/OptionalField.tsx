@@ -289,7 +289,7 @@ export abstract class MultipleOptionalField<
     entityForm: EntityForm<TForm>,
     session?: Session,
   ): Promise<ValidateResult | ValidateResult[]> {
-    const infoParams: FieldInfoParameters =
+    const infoParams: FieldInfoParameters<TForm> =
       session !== undefined ? { entityForm, session } : { entityForm };
     const validateProps: ValidateWithLimitProps = {
       previousResult: await super.validate(entityForm, session),
