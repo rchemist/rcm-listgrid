@@ -141,15 +141,15 @@ export interface ViewValueResult {
   result: ReactNode | null;
 }
 
-export interface FieldRenderParameters {
-  entityForm: EntityForm;
+export interface FieldRenderParameters<T extends object = any, TValue = any> {
+  entityForm: EntityForm<T>;
   session?: Session;
   /**
    * 필드 값이 변경될 때마다 호출된다.
    * @param value
    * @param propagation 상위로 onChange 를 전파할 지 여부, 기본은 true, textarea 나 HTML 에디터 필드와 같은 경우 글자가 변경될 때 마다 상위 전파를 하면 안 되기 때문에 이 값을 선택적으로 설정하게 한다.
    */
-  onChange: (value: any, propagation?: boolean) => void;
+  onChange: (value: TValue, propagation?: boolean) => void;
   onError?: (message: string) => void;
   clearError?: () => void;
   required?: boolean;
@@ -161,7 +161,9 @@ export interface FieldRenderParameters {
    * EntityForm을 업데이트하고 리렌더링을 트리거하는 메서드
    * @param updater EntityForm을 업데이트하는 함수
    */
-  updateEntityForm?: (updater: (entityForm: EntityForm) => Promise<EntityForm>) => Promise<void>;
+  updateEntityForm?: (
+    updater: (entityForm: EntityForm<T>) => Promise<EntityForm<T>>,
+  ) => Promise<void>;
   /**
    * EntityForm을 리셋하고 초기화 상태로 되돌리는 메서드
    * @param delay 리로드 전 지연 시간 (밀리초)
@@ -170,16 +172,16 @@ export interface FieldRenderParameters {
   resetEntityForm?: (delay?: number, preserveState?: boolean) => Promise<void>;
 }
 
-export interface FilterRenderParameters {
-  entityForm: EntityForm;
-  onChange: (value: any, op?: QueryConditionType) => void;
+export interface FilterRenderParameters<T extends object = any, TValue = any> {
+  entityForm: EntityForm<T>;
+  onChange: (value: TValue, op?: QueryConditionType) => void;
   placeHolder?: string;
   helpText?: string;
-  value?: Promise<any>;
+  value?: Promise<TValue>;
 }
 
-export interface FieldInfoParameters {
-  entityForm?: EntityForm | undefined;
+export interface FieldInfoParameters<T extends object = any> {
+  entityForm?: EntityForm<T> | undefined;
   session?: Session | undefined;
   renderType?: RenderType | undefined;
 }
