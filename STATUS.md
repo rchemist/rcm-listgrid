@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (v0.3 Task C + D 완료 — coverage 8.1% → **17.1%** / **900 tests** + 1 todo / **exactOptionalPropertyTypes 승격** (430 errors → 0, 116 파일) / tsconfig strict 옵션 **5 개 전부 true**. 다음: Task E (generic refactor) 또는 배포 판단.)
+마지막 업데이트: 2026-04-19 (v0.3 Task E 세션 1 완료 — **설계 문서 `docs/GENERIC_DESIGN.md` 작성**. `EntityForm<T extends object = any>` + `FormField<TSelf, TValue = any, TForm extends object = any>` 구조 확정. 기본값 `any` 로 소비자 무수정 호환. 예상 any 감축 ~70~90 건. 구현은 세션 2.)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -10,7 +10,21 @@
 
 **배포된 현재 버전**: `v0.1.0-alpha.45` (v0.2 backlog 소진 — 테스트 포팅 마감 + `any` 정리 + `noImplicitAny: true`)
 
-**이번 세션 성과 (v0.3 Task D — exactOpt 승격)**:
+**이번 세션 성과 (v0.3 Task E 세션 1 — Generic refactor 설계)**:
+- `docs/GENERIC_DESIGN.md` 작성 (11 섹션, 세션 2 구현용 단일 진입점)
+- 핵심 결정:
+  - `EntityForm<T extends object = any>` — 키 narrowing (`getValue<K extends keyof T & string>(name: K): Promise<T[K]>`). 기본값 any 로 `new EntityForm(...)` 무수정 호환
+  - `FormField` 의 기존 F-bounded 셀프 타입을 `TSelf` 로 rename + `TValue = any, TForm extends object = any` append. 33+ concrete 서브클래스 무수정
+  - `FieldValue<TValue = any>` — current/fetched/default 승격
+  - Inheritance chain (EntityFormBase → ... → EntityForm 6 클래스) 전부 `<T>` 전파
+  - `FieldRenderParameters<T, TValue>` 는 phase 2 (세션 2 스코프 외 — UI 컴포넌트 층 영향 폭증)
+  - UIProvider `ComponentType<any>` 유지 (의도된 any, DECISIONS #21)
+- gjcu 호스트 사용 패턴 측정: `new EntityForm(...)` 13 개소, `extends FormField<Self>` 1 개소 (RelatedMemoField), `entityForm.getValue('x')` 10+ 개소, cast 패턴 1 개소. **무수정 컴파일 예상**
+- 예상 any 감축: 306 → ~200~230 (승격 가능 70~90 건 목록화). UIProvider wrapper / parse() / attributes 는 유지
+- Breaking change 판정: 타입/런타임 모두 호환. **alpha.46 minor bump 권고**. v0.2.0 major 불필요
+- 구현은 **세션 2** (1 에이전트로 충분. 5 phase 순서 엄수)
+
+**이전 세션 성과 (v0.3 Task D — exactOpt 승격)**:
 - `exactOptionalPropertyTypes: true` 승격. 430 errors → 0 (3 병렬 에이전트 + 1 재개)
   - D-1 (config/transfer/form): 151 → 0. EntityForm 29, InlineSubCollectionField 18, SubCollectionField 15, EntityFormBase 14, transfer/Type 17 등
   - D-2 (components/fields): 190 → 0 (2 분할: 101 + 89). FormField 25, SelectField 14, OptionalField 12, ManyToOneField 11 등 + abstract/ 베이스 + Xref/Address/ContentAsset 계열
@@ -40,7 +54,7 @@
 - 미승격: `exactOptionalPropertyTypes` (430 errs, v0.3 Task D)
 
 **다음 세션 후보 (v0.3 잔여)**:
-- **Task E**: `EntityForm<T>` / `FieldValue<T>` generic refactor (breaking change, v0.2 major bump 검토). 2 세션 분할 권장 (설계 → 구현). `docs/NEXT_SESSION.md` § 4
+- **Task E 세션 2**: 구현. `docs/GENERIC_DESIGN.md` § 5 (Phase 1~5) 순서대로 1 에이전트 dispatch. § 9 의 프롬프트 사용
 - **배포 판단**: Task D 의 public API 타입 확장 (`x?: T` → `x?: T | undefined`) 은 소비자 호환 (TypeScript 구문 호환 + 런타임 동일). alpha.46 배포는 선택 — gjcu 가 exactOpt 활성화 상태면 도움, 아니면 대기
 - 시각 회귀 수동 검증 + Playwright 스냅샷 regression suite (DECISIONS #63 권고)
 

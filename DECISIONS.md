@@ -464,6 +464,50 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #70 v0.3 Task E 세션 1 — Generic refactor 설계 (`EntityForm<T>` / `FormField<TSelf, TValue, TForm>`)
+
+Task E 를 2 세션으로 분할 (설계 → 구현). 이 엔트리는 세션 1 산출물 (`docs/GENERIC_DESIGN.md`) 의 결정 기록. 구현 결과는 세션 2 이후 별도 엔트리.
+
+**핵심 결정 (변경 불가 포인트)**:
+
+1. **`EntityForm<T extends object = any>`** — entity 스키마 T 로 제네릭화. `Record<string, unknown>` 대신 `object` 로 constraint 한 이유: `keyof T` 를 좁은 union 으로 보존해야 `getValue<K extends keyof T & string>(name: K): Promise<T[K]>` 의 키 narrowing 이 실효. `= any` default 로 `new EntityForm(...)` bare call 호환.
+
+2. **FormField 기존 T 를 `TSelf` 로 rename + `TValue = any, TForm extends object = any` append** — `FormField<T extends FormField<T>>` 의 F-bounded 셀프 타입은 33+ 서브클래스의 `class XxxField extends FormField<XxxField>` 에서 쓰이므로 제거 불가. 앞이 아닌 **뒤에** 추가해서 `<Self>` 만 쓴 기존 서브클래스 전부 무수정 동작.
+
+3. **Inheritance chain 전부 제네릭 전파** — `EntityFormBase → EntityFormValidation → EntityFormData → EntityFormActions → EntityFormExtensions → EntityForm` 6 클래스. 각 `extends Parent<T>` 로 T 내려보냄.
+
+4. **`FieldValue<TValue = any>`** — `current/fetched/default` 승격. 가장 효과적인 any 감축 지점 (`FormField.value?: FieldValue<TValue>` 전파).
+
+5. **`FieldRenderParameters` 는 이 Task 에서 제외** — UI 컴포넌트 층 (FieldRenderer / ViewEntityForm 등) 까지 제네릭 전파가 폭증하므로 별도 Task F 로 분리. 구현 세션은 config 층만.
+
+6. **UIProvider `ComponentType<any>` 유지** — 의도된 any (DECISIONS #21). React 컴포넌트 prop 다형성은 제네릭으로 해결 불가.
+
+7. **기본값 전부 `= any`** — 소비자 무수정 호환 계약. gjcu 호스트 측정 결과 13 개소 `new EntityForm(...)` + 1 개소 `extends FormField<Self>` 전부 무수정 컴파일 예상.
+
+**소비자 영향 측정** (gjcu admin 기준):
+- `new EntityForm(...)`: 13 개소 → `EntityForm<any>` 로 암묵 유지
+- `extends FormField<Self>`: 1 개소 (RelatedMemoField) → default any 로 무수정
+- `entityForm.getValue('name')`: 10+ 개소 → `Promise<any>` 유지 (옵션으로 `EntityForm<User>` 승격 시 narrowing)
+- `getField('x') as SubClass` cast 패턴: 1 개소 → 변경 없음 (필드클래스 ↔ 엔티티키 1:1 매핑 불가 — generic 으로 해결 안 됨)
+
+**Any 감축 예상**: 306 → ~200~230. 승격 가능 ~70~90 건 (FieldValue 3, getField/getValue 관련 15, displayFunc/saveValue 8, getCurrentValue 등 10, setFetchedValue 1, withValue/setValue 6, config/form 내부 ~25). 유지: UIProvider wrapper, parse(), attributes: Map<string, any>, ConditionalProps.value.
+
+**Breaking change 판정**: 타입/런타임 모두 호환. overload 시그니처 순서 (구체 → 일반) 로 `T = any` 시 `keyof any & string` = `string` 으로 축약 → 기존 호출 무변경 해석. **alpha.46 minor bump 권고**. v0.2.0 major bump 불필요 (소비자 관점 차이 없음).
+
+**구현 전략**: **1 에이전트** (3 병렬 불가 — 전역 타입 시그니처 변경은 중간 상태가 깨짐). 5 phase 순서:
+1. foundation types (FieldValue, EntityField, ModifyEntityFormFunc)
+2. abstract chain 제네릭화 (5 abstract + EntityForm)
+3. 메소드 overload 추가 (getField / getValue / setValue / withValue)
+4. FormField 체인 (FormField + 5 abstract fields)
+5. 검증 (type-check + test + lint + format + build + gjcu 재설치)
+
+**설계 변경 포인트** (원 설계 대비):
+- `docs/NEXT_SESSION.md` § 4 의 초기 제안 `FormField<TValue = any, TForm = any>` → **`FormField<TSelf, TValue, TForm>`** 3-param 으로 수정. 이유: 기존 서브클래스 33+ 개의 `FormField<T>` 사용 (T=subclass) 을 무수정 호환하려면 F-bounded 셀프 타입 유지 필수. 제거하면 33+ concrete 필드 + gjcu host subclass 모두 수정 필요 → 설계 목표 (backward-compat) 위배.
+
+**Why 세션 분리**: 세션 1 에서 설계 vagueness 를 제거하지 않으면 구현 세션에서 반복 수정 (제네릭 파라미터 위치 / constraint / 전파 범위 변경) 이 메인 context 폭증의 주범이 됨. gjcu 사용 패턴 측정 + F-bounded 셀프 타입 유지 결정이 설계 단계에서 확정되어야 구현 세션은 기계적 리팩터로 수렴.
+
+**산출물**: `docs/GENERIC_DESIGN.md` (11 섹션). 세션 2 진입 시 § 0 TL;DR + § 5 구현 전략 + § 9 프롬프트 를 순서대로 따름.
+
 ### #69 v0.3 Task D — exactOptionalPropertyTypes 승격 (430 errors → 0)
 
 `docs/NEXT_SESSION.md` § 3 (Task D) 실행. 3 병렬 에이전트로 영역별 분담:
