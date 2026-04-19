@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (v0.3 Task F 세션 2 완료 — **FieldRenderParameters<T, TValue> / FilterRenderParameters<T, TValue> / FieldInfoParameters<T> 제네릭화 + FormField 체인 render/filter/info 시그니처 전파**. 33+ concrete 필드 무수정 호환. 900 tests / type-check / lint / format / build 전 품질 게이트 PASS. gjcu overlay type-check 0 errors 유지. 배포는 별도 판단.)
+마지막 업데이트: 2026-04-19 (v0.3 Task G 세션 2 완료 — **`parse<T = unknown>` 제네릭화 + jsonUtils/parse 일원화 + `ViewRenderProps<TForm>` / `ViewValueProps<TForm>` 제네릭화 + `ViewValueProps.compact?` 선행 버그 fix**. 내부 11 소비자 narrow. 33+ concrete 필드 무수정 호환. any 284 → 280 (−4 표면 grep). 900 tests / type-check / lint / format / build 전 품질 게이트 PASS. gjcu overlay type-check 0 errors 유지. 배포는 별도 판단.)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,31 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.47` (gjcu 실측 호환성 보완 — 공개 API export 확장 + Session.getUser optional 화 + SearchForm.handleAndFilter 시그니처 확장). **Task F 는 alpha.48 배포 대기 중** (메인 판단 예정).
+**배포된 현재 버전**: `v0.1.0-alpha.47` (gjcu 실측 호환성 보완 — 공개 API export 확장 + Session.getUser optional 화 + SearchForm.handleAndFilter 시그니처 확장). **Task F 는 alpha.48, Task G 는 alpha.49 배포 대기 중** (메인 판단 예정).
 
-**이번 세션 성과 (v0.3 Task F 세션 2 — FieldRenderParameters<T, TValue> 제네릭 전파)**:
+**이번 세션 성과 (v0.3 Task G 세션 2 — parse<T=unknown> + ViewRenderProps<TForm> 제네릭화)**:
+- Phase 1 (parse foundation + jsonUtils 일원화):
+  - `misc/index.ts:298` `parse(str): any` → `parse<T = unknown>(str): T` 승격 (primary). 기본값 unknown 으로 호출자 opt-in narrow
+  - `utils/jsonUtils.ts:88` duplicate `parse` 구현 제거, `export { parse } from '../misc'` re-export 로 축소 — 기존 import 경로 100% 호환 유지
+  - misc 내부 storage helper 4 호출처 narrow: `getLocalStorageItem` / `getSessionStorageItem` 의 spread 엣지는 `parse<{value, expiry?}>`, `getLocalStorageObject` / `getSessionStorageObject` 는 `parse<T>` 간결화 (`as T` 제거)
+- Phase 2 (parse 내부 소비자 narrow, 11 개소):
+  - `config/EntityForm.tsx:741` / `config/EntityFormMethod.ts:102` / `components/fields/SelectFieldRenderer.tsx:285`: `parse<{ error?: unknown } & Record<string, unknown>>(response.error)` 에러 파싱
+  - `components/list/hooks/useListGridLogic.ts:162`: `parse<{ error: { message?, fieldError? } }>(message)` 스키마 narrow
+  - `config/AdvancedSearchOpenCache.ts:14` / `config/ListGridViewFieldCache.ts:16`: `parse<{ data: Record<string, ...> }>(value)` 캐시 스키마 narrow
+  - `components/form/ui/buttons/DeleteButton.tsx:131`: `parse<{ error?: unknown }>(error)` narrow
+  - `components/fields/rule/Type.ts:38`: `parse(data) as RuleConditionValue` → `parse<RuleConditionValue>(data)` 간결화
+  - `form/SearchForm.ts:311`: `parse<Record<string, unknown>>(data)` — createByObject 시그니처 맞춤
+- Phase 3 (ViewRenderProps / ViewValueProps 제네릭화):
+  - `components/fields/abstract/FormField.tsx`: `ViewRenderProps<TForm extends object = any>` (item: TForm, entityForm?: EntityForm<TForm>, compact? 유지). `renderViewInstance(props: ViewRenderProps<TForm>)` / `viewValue(props: ViewRenderProps<TForm>)` 시그니처에 TForm 전파. 내부 `props.item[this.name]` 접근은 `(props.item as Record<string, unknown>)[this.name]` narrow — TForm default any 호환 유지하면서 명시 TForm 일 때 타입-안전
+  - `config/EntityField.ts`: `ViewValueProps<TForm extends object = any>` (item: TForm, entityForm?: EntityForm<TForm>) + **`compact?: boolean` 추가** — CardFieldSection/CardFieldRenderer 가 이미 `compact: true` 를 넘기던 선행 버그 fix (DECISIONS #74)
+- Phase 4 (concrete 필드 무수정 호환 검증): 9 서브클래스 (StringField / NumberField / SelectField / BooleanField / DateField / HtmlField / ManyToOneField / ListableFormField / abstract/index 재export) 의 `renderViewInstance(props: ViewRenderProps)` bare 오버라이드 무수정 (ViewRenderProps<any> 해석으로 TForm=any default 전파)
+- any count (표면 grep `: any` src 내 비테스트): 284 → 280 (−4). 4 감축 위치: `misc/parse`, `jsonUtils/parse`, `ViewRenderProps.item`, `ViewValueProps.item`. 논리적 narrow 효과는 호출처 11 + renderViewInstance TForm opt-in (33+ 서브클래스 가능) 범위에서 축적
+- gjcu-academic-front overlay type-check: **0 errors 유지** (baseline alpha.47 대비 회귀 0). parse default 변경 (`any` → `unknown`) 의 실측 영향 0 — gjcu 에 `parse(json).foo` 같은 직접 dereference 패턴 없음
+- 소비자 영향: 타입 레벨 semi-breaking (parse default 변경) — 런타임 무변경. ViewRenderProps/ViewValueProps 는 default = any 로 backward-compat. 소비자 마이그레이션 경로: `parse<T>(...)` 또는 `as T` 캐스트
+- 모든 품질 게이트 PASS: type-check / 900 tests + 1 todo / lint 0 errors / format / build
+- commits: `a5fdb91` (Phase 1), `4ef46b6` (Phase 2), `65cf8ba` (Phase 3)
+
+**이전 세션 성과 (v0.3 Task F 세션 2 — FieldRenderParameters<T, TValue> 제네릭 전파)**:
 - Phase 1 (foundation, `config/EntityField.ts`): 3 인터페이스 제네릭화
   - `FieldRenderParameters<T extends object = any, TValue = any>`: `entityForm: EntityForm<T>`, `onChange: (value: TValue, propagation?) => void`, `updateEntityForm?` 콜백 `EntityForm<T>` 전파
   - `FilterRenderParameters<T extends object = any, TValue = any>`: `entityForm: EntityForm<T>`, `onChange: (value: TValue, op?) => void`, `value?: Promise<TValue>`

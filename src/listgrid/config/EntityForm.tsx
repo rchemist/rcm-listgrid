@@ -738,9 +738,7 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
             } else if (typeof response.error === 'string') {
               // response.error가 문자열인 경우 JSON 파싱 시도
               try {
-                const parsed = parse<{ error?: unknown } & Record<string, unknown>>(
-                  response.error,
-                );
+                const parsed = parse<{ error?: unknown } & Record<string, unknown>>(response.error);
                 errorObject = parsed.error ?? parsed;
                 jsonError = true;
               } catch (parseError) {

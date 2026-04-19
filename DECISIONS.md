@@ -464,6 +464,69 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #74 v0.3 Task G 세션 2 — `parse<T = unknown>` + jsonUtils 일원화 + `ViewRenderProps<TForm>` / `ViewValueProps<TForm>` 제네릭화 구현
+
+`docs/TASK_G_DESIGN.md` (세션 1 설계) § 5 의 Phase 1~5 순서대로 1 에이전트 구현. 설계와 거의 동일하게 진행 — 설계 보정 없음. 부수 작업으로 `ViewValueProps.compact?` 선행 버그 fix 포함.
+
+**구현 결과**:
+- Phase 1 (parse foundation + jsonUtils 일원화):
+  - `misc/index.ts:298` `parse(str): any` → `parse<T = unknown>(str): T` 제네릭 승격. 기본값 `unknown` 으로 호출자 opt-in narrow. `as T` 캐스트로 JSON.parse 런타임 동작 불변
+  - `utils/jsonUtils.ts:88` duplicate `parse` 구현 제거 후 `export { parse } from '../misc'` re-export 로 축소. replacer/reviver/stringify 는 jsonUtils 에 유지 (설계 § 2.2)
+  - misc 내부 storage helper narrow (섹션 2.7 엣지):
+    - `getLocalStorageItem`: `{...parse<{value, expiry?}>(itemJson)}` — spread `{...unknown}` 이 `{}` 로 widening 되는 엣지 회피
+    - `getSessionStorageItem`: `parse<{value, expiry?}>(itemJson)` 으로 narrow (obj.value / obj.expiry 접근)
+    - `getLocalStorageObject` / `getSessionStorageObject`: `parse<T>(value!)` 간결화 (기존 `parse(value!) as T` → `parse<T>(value!)`)
+- Phase 2 (parse 내부 소비자 narrow, 11 개소):
+  - 에러 파싱 3 개소 (`config/EntityForm.tsx:741` / `config/EntityFormMethod.ts:102` / `components/fields/SelectFieldRenderer.tsx:285`): `parse<{ error?: unknown } & Record<string, unknown>>(response.error)` — `parsed.error ?? parsed` fallback 패턴에 맞춤
+  - `components/list/hooks/useListGridLogic.ts:162` showMessages: `parse<{ error: { message?, fieldError? } }>(message)` 정확한 스키마 narrow. `json.error.fieldError[field]` 접근 시 undefined 체크 보강 (`const fieldErr = json.error.fieldError[field]; if (fieldErr) ...`)
+  - 캐시 2 개소 (`config/AdvancedSearchOpenCache.ts:14` / `config/ListGridViewFieldCache.ts:16`): `parse<{ data: Record<string, ...> }>(value)` — `new Map<string, T>(Object.entries(data.data))` 호환
+  - `components/form/ui/buttons/DeleteButton.tsx:131`: `parse<{ error?: unknown }>(error)` — `json.error` 존재 체크만
+  - `components/fields/rule/Type.ts:38`: `parse(data) as RuleConditionValue` → `parse<RuleConditionValue>(data)` 간결화 (설계 § 5.2 권고)
+  - `form/SearchForm.ts:311` deserialize: `parse<Record<string, unknown>>(data)` — createByObject 시그니처가 `Record<string, unknown>` 이라 맞춤
+- Phase 3 (ViewRenderProps / ViewValueProps 제네릭화):
+  - `components/fields/abstract/FormField.tsx`:
+    - `ViewRenderProps<TForm extends object = any>` 승격. `item: TForm`, `entityForm?: EntityForm<TForm>`. compact? 유지
+    - `renderViewInstance(props: ViewRenderProps<TForm>)` / `viewValue(props: ViewRenderProps<TForm>)` 시그니처에 TForm 전파
+    - renderViewInstance 내부 `props.item[this.name]` 접근은 `(props.item as Record<string, unknown>)[this.name]` narrow — TForm default any 일 때 기존 any 인덱싱과 동일, 명시 TForm 일 때는 Record cast 로 string index 허용
+    - 중첩 객체 name/title/label 접근도 `value as { name?, title?, label? }` 로 좁힘 (이전 `value.name` any 접근이 TForm 제네릭화로 unknown 이 됐음)
+    - wrapWithCardIcon 은 ViewRenderResult 반환 — 무수정
+  - `config/EntityField.ts`:
+    - `ViewValueProps<TForm extends object = any>` 승격 (`item: TForm`, `entityForm?: EntityForm<TForm>`)
+    - **`compact?: boolean` 추가** — 선행 버그 fix. CardFieldSection:76 / CardFieldRenderer:73 이 이미 `field.viewValue({ item, entityForm, compact: true })` 로 compact 를 넘기고 있었음. ViewValueProps 에 compact 선언이 없어 구조적 typing 으로 통과하던 상태. Task G 에서 타입 계약 정합성 확보 — optional 이라 exactOpt 호환, soft-compat
+    - EntityField 인터페이스 `viewValue(props: ViewValueProps): Promise<ViewValueResult>` 무수정 — default `= any` 자동 호환
+- Phase 4 (concrete 9 서브클래스 무수정 검증): `renderViewInstance(props: ViewRenderProps)` bare 오버라이드 (StringField / NumberField / SelectField / BooleanField / DateField / HtmlField / ManyToOneField / ListableFormField + abstract/index.ts type 재export) 전부 **무수정 동작**. `ViewRenderProps<any>` 해석으로 TForm=any default 전파. type-check PASS 로 실증
+- Phase 5 (검증): type-check PASS, 900 tests + 1 todo PASS, lint 0 errors, format (prettier 자동 2 파일 줄바꿈 재정렬), build PASS. gjcu-academic-front overlay type-check **0 errors 유지** (baseline alpha.47 대비 peer 회귀 0)
+
+**실측 수치**:
+- any count (표면 grep `: any` src 내 비테스트): 284 → **280** (−4). 4 감축 위치는 `misc/parse`, `jsonUtils/parse`, `ViewRenderProps.item`, `ViewValueProps.item`. 실질 narrow 효과는 호출처 11 + renderViewInstance TForm opt-in (33+ 서브클래스 가능) 범위에서 축적
+- 테스트: 900 → 900 passing + 1 todo (회귀 0)
+- type-check / lint (0 errors) / format:check / build: 전부 PASS
+- gjcu-academic-front apps/admin type-check: **0 errors 유지** — baseline 동일. parse default `any` → `unknown` 전환의 실측 영향 0. gjcu 에 `parse(json).foo` 직접 dereference 패턴이 없어 타입 레벨 semi-breaking 이 실측에서는 소비자 영향 0 으로 확인
+- 커밋 (라이브러리 repo, 3 구현 + 1 메타):
+  - `a5fdb91` refactor(generic): Phase 1 — parse<T=unknown> + jsonUtils 일원화 (G-1)
+  - `4ef46b6` refactor(generic): Phase 2 — parse 내부 소비자 narrow (G-2)
+  - `65cf8ba` refactor(generic): Phase 3 — ViewRenderProps/ViewValueProps<TForm> 제네릭화 (G-3)
+  - `[meta]` chore: v0.3 Task G 세션 2 마감 — parse unknown + ViewRenderProps generic (G-4)
+
+**설계와 달라진 점**: 없음. 설계 § 5 의 Phase 1~5 순서 그대로 진행. 구현 중 보정 포인트:
+- `FormField.renderViewInstance` 의 `props.item[this.name]` 와 `value.name / value.title / value.label` 접근 — 설계 § 2.7 에서는 spread 엣지만 언급, 실제 구현에서 `props.item` 이 TForm (unknown 과 달리 any 아님) 이라서 string 인덱싱 불가 → `as Record<string, unknown>` cast. TForm=any default 경로에서는 기존 any 인덱싱과 의미 동일하고, TForm 명시 시 Record cast 로 의도적 loose 유지. 이 Cast 는 "renderViewInstance 가 generic field base 에서 `this.name` 이 TForm 의 어느 key 인지 정적으로 모른다" 는 본질적 런타임 다형성 때문에 불가피. 설계에 추가 기록하지 않음 (사소한 구현 디테일)
+- `useListGridLogic.ts` showMessages 의 `fieldError[field]` 접근에서 `noUncheckedIndexedAccess` 대응 — Record index 값이 undefined 가능하므로 지역 변수로 narrow 후 체크. 설계 § 4.1 에는 표시 안 됨
+
+**Why (Task G 의 의미)**:
+- Task E/F 로 config 층 + UI 파라미터 층 제네릭화가 안정 착지. Task G 는 "**남은 2 개 잔여 항목** (parse + ViewRenderProps) 을 정리해 v0.3 any 정리 사이클을 닫는" 성격 — #73 § "Task G 후보 순서 제안" 의 (1) + (3) 에 해당 (attributes Map 은 v0.2.0 major 까지 유보)
+- parse default `any` → `unknown` 전환은 타입 레벨 semi-breaking 이지만, 라이브러리 내부 11 호출처를 모두 narrow 로 정리한 상태라 라이브러리 표면은 opt-in generic + `as T` 캐스트 두 가지로 일관. `as T` 캐스트 금지 규칙 (설계 § 11) 이 아니라 "`parse<T>(...)` 가 더 간결하다" 는 권장 — 기존 `parse(...) as T` 패턴도 유지되며 동작
+- ViewValueProps.compact 선행 버그 fix 는 Task E 세션 2 의 viewValue 반환타입 불일치 (#71) 와 유사한 패턴 — 제네릭화 작업 중 드러난 구조적 호환 갭을 소소하게 fix. optional 이라 exactOpt 호환
+- **v0.3 Task 사이클 마감 의미**: Task E + F + G 로 v0.3 에서 착수한 "승격 가능한 의도된 any" 의 주요 후보 3 개 (FieldRenderParameters, parse, ViewRenderProps) 중 3 개가 처리됨. 남은 "의도된 any 유지" (UIProvider ComponentType<any>, attributes Map, dynamic registry, ViewListProps / CardItem item) 는 **v0.2.0 major bump 마일스톤** 까지 유지. Task H (ViewListProps 제네릭화) 는 별도 설계/구현 가능하나 Task G 스코프 외
+
+**How to apply**:
+- 배포 (alpha.49) 는 메인 판단 후 진행. 배포 루프는 #72 패턴 그대로 — (1) `echo "0.1.0-alpha.49" | bash deploy.sh` (2) gjcu overlay 로 선검증 (이미 본 세션에서 0 errors 확인) (3) gjcu package.json bump + npm install
+- 소비자 마이그레이션 가이드 (설계 § 7 초안):
+  - parse: 기존 `parse(json)` 에서 dereference 하는 코드가 있으면 `parse<T>(json)` 또는 `parse(json) as T` 로 변경. 런타임 동작 무변경
+  - ViewRenderProps / ViewValueProps: bare `renderViewInstance(props: ViewRenderProps)` 는 그대로 동작. 옵트인 `renderViewInstance(props: ViewRenderProps<User>)` 로 item narrow 가능
+- 배포 판단: **alpha.49 minor bump** 권고 (설계 § 6.3). parse default 변경은 타입 레벨 semi-breaking 이지만 gjcu 실측에서 소비자 영향 0 — major bump 정당화 약함. v0.2.0 major bump 은 attributes Map 등과 묶는 것이 자연스러움 (별도 마일스톤)
+
+---
+
 ### #73 v0.3 Task F 세션 2 — `FieldRenderParameters<T, TValue>` / `FilterRenderParameters<T, TValue>` / `FieldInfoParameters<T>` 제네릭화 + FormField 체인 render/filter/info 시그니처 전파 구현
 
 `docs/FIELD_RENDERER_GENERIC_DESIGN.md` (세션 1 #73 설계) § 5 의 Phase 1~5 순서대로 1 에이전트 구현. 설계와 거의 동일하게 진행 — 설계 보정 없음.
