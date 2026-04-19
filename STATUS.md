@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (v0.3 Task E 세션 2 완료 — **Generic refactor 구현 완료**. `EntityForm<T extends object = any>` + `FormField<TSelf, TValue = any, TForm extends object = any>` 승격. 기본값 `any` 로 소비자 무수정 호환. 900+ tests PASS, type-check/lint/build 모두 PASS.)
+마지막 업데이트: 2026-04-19 (v0.3 Task E 세션 3 완료 — **alpha.46/47 배포 + gjcu 실측 호환성 보완**. Task E 회귀 0 확인 (alpha.46) + gjcu swap 완성 양방향 수정으로 gjcu `apps/admin` type-check **0 errors** 달성 (alpha.47). 900 tests / type-check / lint / build 전 품질 게이트 PASS.)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,24 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.45` (v0.2 backlog 소진 — 테스트 포팅 마감 + `any` 정리 + `noImplicitAny: true`)
+**배포된 현재 버전**: `v0.1.0-alpha.47` (gjcu 실측 호환성 보완 — 공개 API export 확장 + Session.getUser optional 화 + SearchForm.handleAndFilter 시그니처 확장)
 
-**이번 세션 성과 (v0.3 Task E 세션 2 — Generic refactor 구현)**:
+**이번 세션 성과 (v0.3 Task E 세션 3 — alpha.46/47 배포 + gjcu 실측 0 errors)**:
+- **alpha.46 배포 + 회귀 검증** (release commit `5ab160e`, tag `v0.1.0-alpha.46`):
+  - gjcu-academic-front 에 dist overlay → `apps/admin` type-check. alpha.45 / alpha.46 둘 다 760 errors, **고유 위치 diff = 0** (Task E 로 인한 peer 회귀 0 확인). 차이 39 건은 TS compiler 의 에러 메시지 포맷 변화만 (`FormFieldProps` → `FormFieldProps<any, any>`)
+  - 결론: Task E 설계 § 3.3 "무수정 호환" 전제 실측 통과. 760 errors 는 alpha.45 부터 있던 선행 상태
+- **gjcu 760 에러 분류**:
+  - 41 `TS2305 has no exported member` (FormFieldProps 39 + ViewEntityFormClassNames 2)
+  - 25 `TS2307 Cannot find module` (gjcu 의 packages/ui/listgrid 디렉토리 삭제된 후 상대경로 `../listgrid/*` 가 남음 — swap 브랜치 미완)
+  - 3 `TS2724 Did you mean` (XrefMappingValue / AbstractManyToOneFieldProps)
+  - 나머지는 위 누락의 연쇄 (TS2339/TS2322/TS2345)
+- **양방향 수정으로 0 errors 달성 → alpha.47 배포** (release tag `v0.1.0-alpha.47`):
+  - 라이브러리: `index.ts` 공개 API 확장 (FormFieldProps / SearchForm / PageResult / XrefMappingValue / ViewEntityFormClassNames 등 wildcard + 명시 export), `auth/types.ts` Session.getUser optional 화 + 호출부 3 건 옵셔널 체이닝, `form/SearchForm.ts` handleAndFilter 에 `number[] | boolean[]` 허용
+  - gjcu (별도 repo, uncommitted — 유저 확인 후 커밋): 상대경로 치환 21 파일 + SearchForm/Type barrel 단순화 + apps/admin 2 파일 + `.getUser?.()` 7 파일 + 개별 타입 fix 4 파일
+- **gjcu main merge**: 작업 중 origin/main 4 commits 를 swap 브랜치에 merge (local `871effbd`). conflict 1 건 (`SemesterEntityForm.tsx` import 경로) 은 swap 쪽 `@rcm/listgrid` 채택으로 해결. `f55acc88` (PasswordStrength focus 유실 fix) 은 gjcu UIProvider 내부 구현만 — 라이브러리 반영 불필요
+- 모든 품질 게이트 PASS: type-check PASS, 900 tests PASS, lint 0 errors, build PASS, gjcu type-check 0 errors
+
+**이전 세션 성과 (v0.3 Task E 세션 2 — Generic refactor 구현)**:
 - Phase 1 (foundation): `FieldValue<TValue = any>`, `ModifyEntityFormFunc<T = any>` / `ModifyFetchedEntityFormFunc<T>` / `OnInitializeFunc<T>` 제네릭화
 - Phase 2 (abstract chain): EntityFormBase → Validation → Data → Actions → Extensions → EntityForm 6 클래스에 `<T extends object = any>` 전파. clone/cloneWithEntityForm/merge 반환타입 `EntityForm<T>` 로 승격. onChanges/onFetchData/onInitialize/onSave/postDelete/overrideFetchData/buttons/headerArea 등 callback 시그니처 `EntityForm<T>` 승격
 - Phase 3 (keyof T overloads): getField / getValue / setValue / changeValue / setFetchedValue 에 `<K extends keyof T & string>` overload 추가. 구체→일반 순서로 유지해 T=any 일 때 기존 string 경로 그대로 매칭
@@ -64,9 +79,10 @@
 - 미승격: `exactOptionalPropertyTypes` (430 errs, v0.3 Task D)
 
 **다음 세션 후보 (v0.3 잔여)**:
-- **배포 판단**: Task E 의 generic 승격은 타입/런타임 모두 호환 (default=any). alpha.46 배포는 선택 — gjcu 가 엔티티 타입을 활용할 준비가 되면 `new EntityForm<User>(...)` 로 점진 승격 가능
+- **gjcu 커밋 확인**: experiment/rcm-listgrid-swap 브랜치에 uncommitted 변경 다수 (상대경로 swap 완성 + 라이브러리 변경 대응). 유저 검토 후 커밋
 - **Task F 후보**: `FieldRenderParameters<T, TValue>` — UI 컴포넌트 층 제네릭화 (FieldRenderer / ViewEntityForm 등 전파). Task E 에서 의도적으로 제외된 범위. 규모 중간
 - **Task G 후보**: `parse()` → `unknown` 전환 (런타임 검증 도구 결합 시 의미)
+- **gjcu 장기 cleanup**: `packages/ui/form/SearchForm.ts` 재export barrel 삭제 (host 가 `@rcm/listgrid` 직접 import), `packages/ui/api/types/ResponseData.ts` 중복 정리
 - 시각 회귀 수동 검증 + Playwright 스냅샷 regression suite (DECISIONS #63 권고)
 
 **alpha.37~40 하이라이트**:

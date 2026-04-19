@@ -464,6 +464,62 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #72 alpha.46~47 배포 + gjcu 호스트 실측 — Task E 회귀 0 확인 + gjcu swap 완성으로 type-check 0 errors 달성
+
+Task E (#70/#71) 의 "default `= any` 로 소비자 무수정 호환" 전제 (#70 § 3.3) 검증을 위해 gjcu-academic-front (admin workspace) 실측. Task E 제네릭 승격 자체는 **peer 회귀 0 건** 으로 확인됐으나, gjcu 의 `packages/ui/listgrid` 디렉토리 삭제 (swap 브랜치 미완) + 라이브러리 공개 API export 누락으로 **760 errors 의 baseline** 이 드러남. 유저 요구 ("gjcu 아무 에러도 안 나야 해") 에 따라 양방향 수정으로 **0 errors** 달성. alpha.46 → alpha.47 2 단계 배포.
+
+**alpha.46 (Task E 회귀 검증)**:
+- `echo "0.1.0-alpha.46" | bash deploy.sh` → release repo commit `5ab160e` + tag `v0.1.0-alpha.46`
+- dist overlay 로 선검증: alpha.45 (760 errors) 와 alpha.46 (760 errors) 의 **고유 위치 diff = 0** (신규 위치 0, 해결된 위치 0). 차이 39 건은 에러 메시지 텍스트 포맷 변화만 (`FormFieldProps` → `FormFieldProps<any, any>`) — Task E 제네릭 승격으로 TS compiler 가 파라미터를 에코하는 방식이 달라진 것, 의미는 동일
+- **결론**: Task E 가 gjcu 에 peer 회귀를 일으키지 않음. 760 에러는 선행 상태 (swap 브랜치 미완 + export 누락)
+
+**gjcu 760 에러 분류**:
+- `TS2305 has no exported member` 41 건 (`FormFieldProps` 39 / `ViewEntityFormClassNames` 2)
+- `TS2307 Cannot find module` 25 건 (`../listgrid/config/Config` 18 등 — gjcu 내부 packages/ui/listgrid 디렉토리 삭제됨)
+- `TS2724 Did you mean` 3 건 (`XrefMappingValue` 2 / `AbstractManyToOneFieldProps` 1)
+- 나머지 TS2339/TS2322/TS2345 대부분은 위 누락의 연쇄
+
+**alpha.47 (양방향 수정으로 0 errors)**:
+
+A. **라이브러리 (rcm-listgrid) 추가 수정** — backward-compat 유지:
+- `src/listgrid/index.ts` 확장:
+  - 기존 개별 export 에 wildcard 를 병행: `FormField` / `AbstractManyToOneField` / `AbstractDateField` 파일 `export *` (단 `CheckButtonValidationField` 는 `Config.ts` 와 Props 이름 충돌 → 명시 export 로 회피)
+  - `SearchForm` / `PageResult` / `getQueryConditionTypes` 등 class + helper 7개, 타입 10개 (`FilterItem` / `SearchValue` / `Direction` / `SelectOption` / `EntityWithId` / `XrefMappingValue` 등) 를 명시 export
+  - `ViewEntityFormTheme.types` wildcard 추가 (`ViewEntityFormClassNames` 공개)
+- `src/listgrid/auth/types.ts` — `Session.getUser` 을 `optional` 로 변경. Host 의 plain session 객체 (getUser 메소드 없음) 와 구조적 호환. 호출부 3 건 (`ManyToOneView`, `useEntityFormSave`, `useListGridLogic`) 에서 `session.getUser?.()` 옵셔널 체이닝으로 대응
+- `src/listgrid/form/SearchForm.ts` — `handleAndFilter` value 파라미터에 `number[] | boolean[]` 허용 (내부적으로 string[] 으로 직렬화)
+- `echo "0.1.0-alpha.47" | bash deploy.sh` → release repo tag `v0.1.0-alpha.47`
+
+B. **gjcu (별도 repo, uncommitted)** — `experiment/rcm-listgrid-swap` 브랜치의 swap 완성분:
+- 상대경로 `../listgrid/*` → `@rcm/listgrid` 치환 21 파일 (`packages/ui/form/*.tsx`, `packages/ui/menu/MenuPermissionChecker.ts`)
+- `packages/ui/form/SearchForm.ts` / `Type.ts` 를 `@rcm/listgrid` re-export barrel 로 단순화 (790+ LOC class 중복 제거)
+- `apps/admin/src/app/(defaults)/academic/course/correction/page.tsx` / `NotificationTemplateEntityForm.tsx` 상대경로 fix
+- `.getUser()` → `.getUser?.()` 7 파일 (Session.getUser optional 화 대응)
+- 개별 타입 fix 4 파일 (`PracticeBoardField` / `EntityMultiSelect` / `EvaluationResultStatisticsField` / `SurveyEntityForm`)
+- **gjcu `apps/admin` type-check = 0 errors**. 커밋 은 유저 판단 (experiment/rcm-listgrid-swap 브랜치에 머무름)
+
+**중간에 origin/main pull**:
+- 실측 중 유저 지시로 gjcu main 의 4 commits (94610256/0b18159a/f55acc88/01ba1be3) 를 swap 브랜치에 merge (local merge commit `871effbd`). conflict 1 건 (`SemesterEntityForm.tsx` import 경로) 는 swap 쪽 `@rcm/listgrid` 채택으로 해결
+- `f55acc88` (PasswordStrength focus 유실 fix) 는 gjcu UIProvider 내부 구현만 수정 — 라이브러리에 반영 불필요 (계약 무변경)
+
+**Why**:
+- **실측 없는 "호환 예상" 은 위험**: 설계 세션 (#70 § 3.3) 은 "gjcu 타입 에러 0 개 예상" 이라 판정했으나 실측은 760 이었음. 이론 호환성 (Task E 회귀 0) 과 실제 사용 호환성 (기존 누락 포함 전체) 은 다른 차원
+- **overlay 먼저 → 배포 나중**: npm 이 github tag 를 commit hash 로 lockfile 에 pin 하므로 `npm install` 만으로는 신규 tag 를 감지 못함. 로컬 rsync overlay 는 배포 없이 빠른 피드백 가능 → rollback 비용 0
+- **alpha.46/47 2 단계 배포**: Task E 회귀 0 확인 (alpha.46) 을 독립 마일스톤으로 박제 → 이후 export 보완 / Session.getUser optional 등 gjcu 실측 기반 fix 는 alpha.47 로 분리. 타입 호환성의 "개별 변경 책임" 을 명확히 할 수 있음 (만약 향후 Task E 자체에 문제가 드러나면 alpha.46 기준으로 회귀 분석 가능)
+
+**How to apply**:
+- 향후 generic / 공개 API 리팩터 (Task F — FieldRenderParameters 제네릭화 등) 배포 시에도 동일 루프: (1) 로컬 build + gjcu overlay (2) 에러 diff (baseline vs candidate, **고유 위치 기준** — 메시지 텍스트 매칭은 false positive 발생) (3) 라이브러리 backward-compat 보완 (4) gjcu 도메인 쪽 수정 (5) 최종 type-check 0 후 정식 배포
+- 공개 API 원칙: "**호스트가 import 하는 이름은 공개 API**" — `FormFieldProps` 처럼 `extends` 로 쓰이는 타입은 명시 export 필수. wildcard export 는 이름 충돌 시 `export type { X } from '...'` 로 회피
+- `Session.getUser` 같은 **soft-contract interface**: 호스트가 plain object 로 세션을 주입할 가능성을 고려 → 메소드는 optional (`?`), 호출은 옵셔널 체이닝. 초기 Stage 2 (#16) 에서 명시적 interface 로 고정했으나 실 사용 시 구조적 호환을 우선하는 방향으로 완화
+
+**커밋 (라이브러리 repo)**: 3 commits — (1) 소스 변경 (index.ts / auth/types / SearchForm / 호출부 3) (2) alpha.47 deploy 산출물 (package.json / lock) (3) meta (DECISIONS #72 / STATUS). gjcu workspace 는 별도 repo 이므로 유저가 확인 후 커밋
+
+**남은 후속 작업**:
+- **Task F 후보** (세션 1 — 설계): `FieldRenderParameters<T, TValue>` 제네릭화 — UI 컴포넌트 층 전파. GENERIC_DESIGN.md § 2.8 참고. 규모 중간
+- **Task G 후보**: `parse()` → `unknown` 전환 (런타임 검증 도구 결합 시 의미)
+- **gjcu 장기 cleanup** (유저 재량): `packages/ui/form/SearchForm.ts` 의 re-export barrel 삭제 (host 가 `@rcm/listgrid` 직접 import) + `packages/ui/api/types/ResponseData.ts` 중복 정리. 로직 무변경, 선택적
+- **시각 회귀 수동 검증 + Playwright 스냅샷** (DECISIONS #63 권고) — alpha.28~45 기간 CSS 리팩터의 시각 회귀 감지 없음
+
 ### #71 v0.3 Task E 세션 2 — Generic refactor 구현 완료
 
 `docs/GENERIC_DESIGN.md` § 5 의 5 phase 순서대로 1 에이전트 구현. 세션 1 (#70) 의 설계를 거의 그대로 따름. 설계와 달라진 점은 아래 "설계 보정" 섹션 참고.
