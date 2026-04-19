@@ -129,11 +129,23 @@ export interface EntityField extends EntityItem {
   viewValue(props: ViewValueProps): Promise<ViewValueResult>;
 }
 
-export interface ViewValueProps {
+/**
+ * EntityField.viewValue 의 props 타입.
+ * FormField.viewValue 가 사용하는 ViewRenderProps 와 구조적으로 동일 —
+ * TForm 제네릭화 (default `any`) + `compact?: boolean` 선행 버그 fix
+ * (CardFieldSection/CardFieldRenderer 호출부가 이미 compact: true 를
+ * 넘기고 있었음. Task G 에서 타입 계약 정합성 확보. DECISIONS #74).
+ */
+export interface ViewValueProps<TForm extends object = any> {
   /** 아이템 데이터 (필드 값을 포함한 객체) */
-  item: any;
+  item: TForm;
   /** 엔티티 폼 인스턴스 (옵션) */
-  entityForm?: EntityForm;
+  entityForm?: EntityForm<TForm>;
+  /**
+   * Compact 모드 - 아이콘 없이 깔끔한 텍스트만 표시.
+   * CardSubCollectionField 등에서 여러 필드를 나열할 때 사용.
+   */
+  compact?: boolean;
 }
 
 export interface ViewValueResult {

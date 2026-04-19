@@ -64,12 +64,15 @@ function toConditionalValue<TForm extends object = any>(
 /**
  * View 모드 렌더링을 위한 파라미터
  * CardSubCollectionField 등에서 필드 값을 View 모드로 표시할 때 사용
+ *
+ * TForm 은 item 타입 (entity row) 으로, FormField<TSelf, TValue, TForm>
+ * 의 TForm 과 동일 의미. default `any` 로 소비자 무수정 호환 (Task G).
  */
-export interface ViewRenderProps {
+export interface ViewRenderProps<TForm extends object = any> {
   /** 아이템 데이터 (필드 값을 포함한 객체) */
-  item: any;
+  item: TForm;
   /** 엔티티 폼 인스턴스 (옵션) */
-  entityForm?: EntityForm;
+  entityForm?: EntityForm<TForm>;
   /**
    * Compact 모드 - 아이콘 없이 깔끔한 텍스트만 표시
    * CardSubCollectionField 등에서 여러 필드를 나열할 때 사용
@@ -235,8 +238,8 @@ export abstract class FormField<
    * @param props View 렌더링에 필요한 파라미터
    * @returns 렌더링 결과
    */
-  protected async renderViewInstance(props: ViewRenderProps): Promise<ViewRenderResult> {
-    const value = props.item[this.name];
+  protected async renderViewInstance(props: ViewRenderProps<TForm>): Promise<ViewRenderResult> {
+    const value = (props.item as Record<string, unknown>)[this.name];
     const compact = props.compact;
 
     // null, undefined, 빈 문자열 처리
@@ -256,9 +259,10 @@ export abstract class FormField<
 
     // 객체 처리 (name, title, label 순서로 표시)
     if (typeof value === 'object' && !Array.isArray(value)) {
-      if (value.name) return this.wrapWithCardIcon(String(value.name), compact);
-      if (value.title) return this.wrapWithCardIcon(String(value.title), compact);
-      if (value.label) return this.wrapWithCardIcon(String(value.label), compact);
+      const obj = value as { name?: unknown; title?: unknown; label?: unknown };
+      if (obj.name) return this.wrapWithCardIcon(String(obj.name), compact);
+      if (obj.title) return this.wrapWithCardIcon(String(obj.title), compact);
+      if (obj.label) return this.wrapWithCardIcon(String(obj.label), compact);
       return { result: JSON.stringify(value) };
     }
 
@@ -306,7 +310,7 @@ export abstract class FormField<
    * @param props View 렌더링에 필요한 파라미터
    * @returns 렌더링 결과
    */
-  public async viewValue(props: ViewRenderProps): Promise<ViewRenderResult> {
+  public async viewValue(props: ViewRenderProps<TForm>): Promise<ViewRenderResult> {
     return this.renderViewInstance(props);
   }
 
