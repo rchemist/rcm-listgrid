@@ -20,7 +20,6 @@ import {
   InlinePaginationOptions,
   InlineRowAction,
   InlineRowActionColumn,
-  InlineRowActionsConfig,
   InlineSubCollectionFetchOptions,
   InlineSubCollectionRelation,
 } from '../../../config/InlineSubCollectionField';
@@ -43,10 +42,6 @@ export interface InlineSubCollectionViewProps {
   readonly?: boolean;
   session?: Session;
   listFields?: (string | InlineListFieldConfig)[];
-  /** @deprecated Use rowActionColumns instead */
-  rowActions?: InlineRowAction[];
-  /** @deprecated Use rowActionColumns instead */
-  rowActionsConfig?: InlineRowActionsConfig;
   /** Row action columns - supports multiple action columns */
   rowActionColumns?: InlineRowActionColumn[];
   pagination?: InlinePaginationOptions;
@@ -171,8 +166,6 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
   readonly = false,
   session,
   listFields,
-  rowActions,
-  rowActionsConfig,
   rowActionColumns,
   pagination,
   globalListConfig,
@@ -297,9 +290,7 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
     }
 
     // Add row action columns if defined
-    // rowActionColumns is the new format, rowActions is deprecated but still supported for backward compatibility
     if (rowActionColumns && rowActionColumns.length > 0) {
-      // Use new rowActionColumns format - each column becomes a separate field
       rowActionColumns.forEach((column) => {
         if (column.actions && column.actions.length > 0) {
           const actionField = new InlineRowActionField(
@@ -312,16 +303,6 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
           cloned.fields.set(`_rowActions_${column.id}`, actionField);
         }
       });
-    } else if (rowActions && rowActions.length > 0) {
-      // Backward compatibility: convert old rowActions to single column
-      const actionField = new InlineRowActionField(
-        '_default',
-        rowActions,
-        handleRowAction,
-        rowActionsConfig?.label,
-        rowActionsConfig?.order,
-      );
-      cloned.fields.set('_rowActions__default', actionField);
     }
 
     return cloned;
@@ -330,8 +311,6 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
     parentId,
     listFields,
     globalListConfig,
-    rowActions,
-    rowActionsConfig,
     rowActionColumns,
     readonly,
     handleRowAction,

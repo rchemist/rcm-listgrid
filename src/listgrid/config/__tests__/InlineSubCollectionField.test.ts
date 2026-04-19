@@ -3,7 +3,6 @@ import {
   InlineListFieldConfig,
   InlineRowAction,
   InlineRowActionColumn,
-  InlineRowActionsConfig,
   InlineSubCollectionField,
 } from '../InlineSubCollectionField';
 import { EntityForm } from '../EntityForm';
@@ -140,148 +139,6 @@ describe('InlineSubCollectionField', () => {
     });
   });
 
-  describe('rowActions configuration', () => {
-    const relation = { mappedBy: 'parentId' };
-
-    it('should accept rowActions array', () => {
-      const rowActions: InlineRowAction[] = [
-        {
-          id: 'edit',
-          label: '수정',
-          onClick: async () => {},
-        },
-        {
-          id: 'delete',
-          label: '삭제',
-          onClick: async () => {},
-          confirm: '정말 삭제하시겠습니까?',
-        },
-      ];
-
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-        rowActions,
-      });
-
-      expect(field.inlineRowActions).toEqual(rowActions);
-      expect(field.inlineRowActions?.length).toBe(2);
-    });
-
-    it('should support withRowActions method', () => {
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-      });
-
-      const action: InlineRowAction = {
-        id: 'test',
-        label: 'Test',
-        onClick: async () => {},
-      };
-
-      const modified = field.withRowActions(action);
-      expect(modified.inlineRowActions).toEqual([action]);
-    });
-
-    it('should support rowAction with dynamic label', () => {
-      const dynamicLabel = (item: any) => `Edit ${item.name}`;
-
-      const rowActions: InlineRowAction[] = [
-        {
-          id: 'edit',
-          label: dynamicLabel,
-          onClick: async () => {},
-        },
-      ];
-
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-        rowActions,
-      });
-
-      expect(field.inlineRowActions?.[0].label).toBe(dynamicLabel);
-    });
-
-    it('should support rowAction with disabled and hidden functions', () => {
-      const rowActions: InlineRowAction[] = [
-        {
-          id: 'edit',
-          label: '수정',
-          onClick: async () => {},
-          disabled: (item) => item.locked === true,
-          hidden: (item) => item.deleted === true,
-        },
-      ];
-
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-        rowActions,
-      });
-
-      expect(field.inlineRowActions?.[0].disabled).toBeDefined();
-      expect(field.inlineRowActions?.[0].hidden).toBeDefined();
-    });
-  });
-
-  describe('rowActionsConfig configuration', () => {
-    const relation = { mappedBy: 'parentId' };
-
-    it('should accept rowActionsConfig', () => {
-      const rowActionsConfig: InlineRowActionsConfig = {
-        order: 1,
-        label: '관리',
-      };
-
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-        rowActionsConfig,
-      });
-
-      expect(field.inlineRowActionsConfig).toEqual(rowActionsConfig);
-    });
-
-    it('should support withRowActionsConfig method', () => {
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-      });
-
-      const config: InlineRowActionsConfig = { order: 5, label: '액션' };
-      const modified = field.withRowActionsConfig(config);
-
-      expect(modified.inlineRowActionsConfig).toEqual(config);
-    });
-
-    it('should allow partial rowActionsConfig', () => {
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-        rowActionsConfig: { order: 2 }, // only order, no label
-      });
-
-      expect(field.inlineRowActionsConfig?.order).toBe(2);
-      expect(field.inlineRowActionsConfig?.label).toBeUndefined();
-    });
-  });
-
   describe('pagination configuration', () => {
     const relation = { mappedBy: 'parentId' };
 
@@ -404,8 +261,13 @@ describe('InlineSubCollectionField', () => {
     const relation = { mappedBy: 'parentId' };
 
     it('should clone all properties correctly', () => {
-      const rowActions: InlineRowAction[] = [
-        { id: 'edit', label: '수정', onClick: async () => {} },
+      const rowActionColumns: InlineRowActionColumn[] = [
+        {
+          id: 'mgmt',
+          label: '관리',
+          order: 2,
+          actions: [{ id: 'edit', label: '수정', onClick: async () => {} }],
+        },
       ];
 
       const field = new InlineSubCollectionField({
@@ -415,8 +277,7 @@ describe('InlineSubCollectionField', () => {
         name: 'items',
         label: 'Items',
         listFields: ['name', 'status'],
-        rowActions,
-        rowActionsConfig: { order: 2, label: '관리' },
+        rowActionColumns,
         pagination: { pageSize: 15 },
         globalListConfig: { filterable: false },
         hideTitle: true,
@@ -428,8 +289,7 @@ describe('InlineSubCollectionField', () => {
       expect(cloned.order).toBe(1);
       expect(cloned.relation).toEqual(relation);
       expect(cloned.inlineListFields).toEqual(['name', 'status']);
-      expect(cloned.inlineRowActions).toEqual(rowActions);
-      expect(cloned.inlineRowActionsConfig).toEqual({ order: 2, label: '관리' });
+      expect(cloned.inlineRowActionColumns).toEqual(rowActionColumns);
       expect(cloned.inlinePagination?.pageSize).toBe(15);
       expect(cloned.inlineGlobalListConfig?.filterable).toBe(false);
       expect(cloned.hideTitle).toBe(true);
@@ -507,56 +367,6 @@ describe('InlineSubCollectionField', () => {
       expect(modified.inlineRowActionColumns).toEqual(columns);
     });
 
-    it('should convert deprecated rowActions to rowActionColumns', () => {
-      const rowActions: InlineRowAction[] = [
-        { id: 'edit', label: '수정', onClick: async () => {} },
-        { id: 'delete', label: '삭제', onClick: async () => {} },
-      ];
-
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-        rowActions,
-        rowActionsConfig: { order: 5, label: '작업' },
-      });
-
-      // Should have converted to rowActionColumns
-      expect(field.inlineRowActionColumns).toBeDefined();
-      expect(field.inlineRowActionColumns?.length).toBe(1);
-      expect(field.inlineRowActionColumns?.[0].id).toBe('_default');
-      expect(field.inlineRowActionColumns?.[0].label).toBe('작업');
-      expect(field.inlineRowActionColumns?.[0].order).toBe(5);
-      expect(field.inlineRowActionColumns?.[0].actions).toEqual(rowActions);
-    });
-
-    it('should prefer rowActionColumns over deprecated rowActions', () => {
-      const rowActions: InlineRowAction[] = [{ id: 'old', label: 'Old', onClick: async () => {} }];
-
-      const rowActionColumns: InlineRowActionColumn[] = [
-        {
-          id: 'new',
-          label: 'New',
-          order: 10,
-          actions: [{ id: 'new-action', label: 'New Action', onClick: async () => {} }],
-        },
-      ];
-
-      const field = new InlineSubCollectionField({
-        entityForm: mockEntityForm,
-        relation,
-        order: 1,
-        name: 'items',
-        rowActions,
-        rowActionColumns,
-      });
-
-      // Should use rowActionColumns, not the converted rowActions
-      expect(field.inlineRowActionColumns).toEqual(rowActionColumns);
-      expect(field.inlineRowActionColumns?.[0].id).toBe('new');
-    });
-
     it('should clone rowActionColumns correctly', () => {
       const rowActionColumns: InlineRowActionColumn[] = [
         {
@@ -599,7 +409,12 @@ describe('InlineSubCollectionField', () => {
         .withListFields('name', 'status')
         .withPagination({ pageSize: 25 })
         .withGlobalListConfig({ filterable: false })
-        .withRowActionsConfig({ order: 1, label: '액션' })
+        .withRowActionColumns({
+          id: 'actions',
+          label: '액션',
+          order: 1,
+          actions: [{ id: 'test', label: 'Test', onClick: async () => {} }],
+        })
         .withHideTitle(true);
 
       expect(configured.label).toBe('Custom Items');
@@ -609,7 +424,7 @@ describe('InlineSubCollectionField', () => {
       expect(configured.inlineListFields).toEqual(['name', 'status']);
       expect(configured.inlinePagination?.pageSize).toBe(25);
       expect(configured.inlineGlobalListConfig?.filterable).toBe(false);
-      expect(configured.inlineRowActionsConfig).toEqual({ order: 1, label: '액션' });
+      expect(configured.inlineRowActionColumns?.[0]?.id).toBe('actions');
       expect(configured.hideTitle).toBe(true);
     });
   });

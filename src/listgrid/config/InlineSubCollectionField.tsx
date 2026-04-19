@@ -56,17 +56,6 @@ export interface InlineRowAction {
 }
 
 /**
- * Row actions column configuration
- * @deprecated Use InlineRowActionColumn instead
- */
-export interface InlineRowActionsConfig {
-  /** Column order (default: 9999 - last column) */
-  order?: number;
-  /** Column header label (default: '작업') */
-  label?: string;
-}
-
-/**
  * Row action column configuration
  * Allows multiple action columns with different positions and labels
  */
@@ -150,12 +139,6 @@ export class InlineSubCollectionField extends SubCollectionField {
   /** List fields to display - can be field names or detailed config */
   inlineListFields?: (string | InlineListFieldConfig)[] | undefined;
 
-  /** Row action buttons @deprecated Use rowActionColumns instead */
-  inlineRowActions?: InlineRowAction[] | undefined;
-
-  /** Row actions column configuration @deprecated Use rowActionColumns instead */
-  inlineRowActionsConfig?: InlineRowActionsConfig | undefined;
-
   /** Row action columns - supports multiple action columns */
   inlineRowActionColumns?: InlineRowActionColumn[] | undefined;
 
@@ -178,10 +161,6 @@ export class InlineSubCollectionField extends SubCollectionField {
     hidden?: HiddenType | undefined;
     readonly?: ReadOnlyType | undefined;
     listFields?: (string | InlineListFieldConfig)[] | undefined;
-    /** @deprecated Use rowActionColumns instead */
-    rowActions?: InlineRowAction[] | undefined;
-    /** @deprecated Use rowActionColumns instead */
-    rowActionsConfig?: InlineRowActionsConfig | undefined;
     /** Row action columns - supports multiple action columns */
     rowActionColumns?: InlineRowActionColumn[] | undefined;
     pagination?: InlinePaginationOptions | undefined;
@@ -206,26 +185,7 @@ export class InlineSubCollectionField extends SubCollectionField {
     this.inlinePagination = props.pagination;
     this.inlineGlobalListConfig = props.globalListConfig;
     this.hideTitle = props.hideTitle;
-
-    // Always set deprecated props for backward compatibility
-    this.inlineRowActions = props.rowActions;
-    this.inlineRowActionsConfig = props.rowActionsConfig;
-
-    // Handle rowActionColumns with backward compatibility
-    if (props.rowActionColumns && props.rowActionColumns.length > 0) {
-      // Use new rowActionColumns format
-      this.inlineRowActionColumns = props.rowActionColumns;
-    } else if (props.rowActions && props.rowActions.length > 0) {
-      // Convert deprecated rowActions to rowActionColumns for backward compatibility
-      this.inlineRowActionColumns = [
-        {
-          id: '_default',
-          label: props.rowActionsConfig?.label ?? '작업',
-          order: props.rowActionsConfig?.order ?? 9999,
-          actions: props.rowActions,
-        },
-      ];
-    }
+    this.inlineRowActionColumns = props.rowActionColumns;
 
     // Set default fetchOptions
     const defaultFetchOptions: InlineSubCollectionFetchOptions = {
@@ -256,41 +216,6 @@ export class InlineSubCollectionField extends SubCollectionField {
    */
   withListFields(...fields: (string | InlineListFieldConfig)[]): this {
     this.inlineListFields = fields;
-    return this;
-  }
-
-  /**
-   * Set row actions
-   * @deprecated Use withRowActionColumns instead
-   */
-  withRowActions(...actions: InlineRowAction[]): this {
-    this.inlineRowActions = actions;
-    // Convert to rowActionColumns for backward compatibility
-    this.inlineRowActionColumns = [
-      {
-        id: '_default',
-        label: this.inlineRowActionsConfig?.label ?? '작업',
-        order: this.inlineRowActionsConfig?.order ?? 9999,
-        actions: actions,
-      },
-    ];
-    return this;
-  }
-
-  /**
-   * Set row actions column configuration
-   * @deprecated Use withRowActionColumns instead
-   */
-  withRowActionsConfig(config: InlineRowActionsConfig): this {
-    this.inlineRowActionsConfig = config;
-    // Update existing rowActionColumns if present
-    if (this.inlineRowActionColumns && this.inlineRowActionColumns.length > 0) {
-      const defaultColumn = this.inlineRowActionColumns.find((col) => col.id === '_default');
-      if (defaultColumn) {
-        defaultColumn.label = config.label ?? defaultColumn.label;
-        defaultColumn.order = config.order ?? defaultColumn.order;
-      }
-    }
     return this;
   }
 
@@ -348,8 +273,6 @@ export class InlineSubCollectionField extends SubCollectionField {
       hidden: this.hidden,
       readonly: this.readonly,
       listFields: this.inlineListFields,
-      rowActions: this.inlineRowActions,
-      rowActionsConfig: this.inlineRowActionsConfig,
       rowActionColumns: this.inlineRowActionColumns,
       pagination: this.inlinePagination,
       globalListConfig: this.inlineGlobalListConfig,
@@ -445,10 +368,6 @@ export class InlineSubCollectionField extends SubCollectionField {
       readonly,
       ...(session !== undefined ? { session } : {}),
       ...(this.inlineListFields !== undefined ? { listFields: this.inlineListFields } : {}),
-      ...(this.inlineRowActions !== undefined ? { rowActions: this.inlineRowActions } : {}),
-      ...(this.inlineRowActionsConfig !== undefined
-        ? { rowActionsConfig: this.inlineRowActionsConfig }
-        : {}),
       ...(this.inlineRowActionColumns !== undefined
         ? { rowActionColumns: this.inlineRowActionColumns }
         : {}),
