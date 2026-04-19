@@ -245,7 +245,7 @@ export function getResponsiveClasses(
       return valueMap(val);
     }
     if (typeof valueMap === 'object' && valueMap !== null && val in valueMap) {
-      return valueMap[val];
+      return valueMap[val]!;
     }
     return val.toString();
   };

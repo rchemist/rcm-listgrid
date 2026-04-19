@@ -120,7 +120,7 @@ function getCroppedDate(value: string): string {
 
   const available = getDatetimeFromMappingValue(value);
 
-  return fDate(available[0]) + ' ~ ' + fDate(available[1]!);
+  return fDate(available[0]!) + ' ~ ' + fDate(available[1]!);
 }
 
 export const XrefAvailableDateMappingView = ({ entityForm, ...props }: XrefAvailableDateMappingViewProps) => {

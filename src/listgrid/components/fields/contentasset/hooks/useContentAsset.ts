@@ -91,10 +91,12 @@ export const useContentAsset = ({
     const newTitleErrors: {[key: number]: string} = {};
     Object.keys(titleErrors).forEach(key => {
       const oldIndex = parseInt(key);
+      const err = titleErrors[oldIndex];
+      if (err === undefined) return;
       if (oldIndex < index) {
-        newTitleErrors[oldIndex] = titleErrors[oldIndex];
+        newTitleErrors[oldIndex] = err;
       } else if (oldIndex > index) {
-        newTitleErrors[oldIndex - 1] = titleErrors[oldIndex];
+        newTitleErrors[oldIndex - 1] = err;
       }
     });
     setTitleErrors(newTitleErrors);
@@ -116,7 +118,7 @@ export const useContentAsset = ({
   ) => {
     const newAssets = [...assets];
     newAssets[index] = {
-      ...newAssets[index],
+      ...newAssets[index]!,
       [field]: value
     };
 
@@ -130,7 +132,7 @@ export const useContentAsset = ({
       setErrors(validation.errors);
       
       if (validation.errors.length > 0 && onError) {
-        const firstError = validation.errors[0];
+        const firstError = validation.errors[0]!;
         onError(firstError.message);
       } else if (clearError) {
         clearError();
@@ -223,10 +225,10 @@ export const useContentAsset = ({
     if (!validation.isValid || hasTitleErrors) {
       if (onError) {
         if (validation.errors.length > 0) {
-          onError(validation.errors[0].message);
+          onError(validation.errors[0]!.message);
         } else if (hasTitleErrors) {
-          const firstErrorIndex = Object.keys(titleErrors)[0];
-          onError(titleErrors[parseInt(firstErrorIndex)]);
+          const firstErrorIndex = Object.keys(titleErrors)[0]!;
+          onError(titleErrors[parseInt(firstErrorIndex)]!);
         }
       }
       return false;

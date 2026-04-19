@@ -153,7 +153,7 @@ function parseFilterSegment(segment: string): FilterItem | null {
 
   // Format: field:op:value (3 parts)
   if (parts.length >= 3) {
-    const opKey = parts[1].toLowerCase();
+    const opKey = parts[1]!.toLowerCase();
     const queryConditionType = OPERATOR_MAP[opKey] as QueryConditionType | undefined;
     if (queryConditionType) {
       // Join remaining parts in case value contains ':'

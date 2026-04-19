@@ -387,7 +387,7 @@ export const CardManyToOneView: React.FC<CardManyToOneViewProps> = ({
         queryConditionType: 'LIKE' as const,
       }));
       if (searchFilters.length === 1) {
-        searchForm.withFilter("AND", searchFilters[0]);
+        searchForm.withFilter("AND", searchFilters[0]!);
       } else {
         // 여러 필드에 대해 OR 검색
         searchForm.withFilter("OR", ...searchFilters);

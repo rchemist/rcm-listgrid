@@ -48,7 +48,7 @@ export const MultipleAssetUpload = (props: ProductAssetUploadProps) => {
     setFileValue(value);
     const currentFiles = value.getCurrentFileList();
     if (currentFiles.length > 0) {
-      const file = currentFiles[0];
+      const file = currentFiles[0]!;
       props.onChange(file.url);
     } else {
       props.onChange('');

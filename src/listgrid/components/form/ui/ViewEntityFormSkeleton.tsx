@@ -134,7 +134,7 @@ export const ViewEntityFormSkeleton = ({
           {/* 필드그룹 스켈레톤 */}
           {tabs.length > 0 && (
             <FieldGroupsSkeleton
-              fieldGroups={tabs[0].fieldGroups}
+              fieldGroups={tabs[0]!.fieldGroups}
               entityForm={entityForm}
               subCollectionEntity={subCollectionEntity}
             />

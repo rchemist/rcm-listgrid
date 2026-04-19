@@ -26,7 +26,7 @@ function toNuqsParsers(
 ): Record<string, ReturnType<typeof nuqsCreateParser>> {
     const out: Record<string, ReturnType<typeof nuqsCreateParser>> = {};
     for (const key of Object.keys(parsers)) {
-        const p = parsers[key];
+        const p = parsers[key]!;
         out[key] = nuqsCreateParser({
             parse: p.parse,
             serialize: p.serialize,

@@ -287,11 +287,11 @@ export class EntityForm extends EntityFormExtensions {
             const keyParts = key.split('.');
             let objectValue: any = fetchedEntity;
             for (let i = 0; i < keyParts.length - 1; i++) {
-              objectValue = objectValue?.[keyParts[i]];
+              objectValue = objectValue?.[keyParts[i]!];
               if (objectValue === undefined || objectValue === null) break;
             }
             if (objectValue !== undefined && objectValue !== null) {
-              const fieldName = keyParts[keyParts.length - 1];
+              const fieldName = keyParts[keyParts.length - 1]!;
               if (objectValue[fieldName] !== undefined) {
                 field.value = { current: objectValue[fieldName], fetched: objectValue[fieldName], default: field.value?.default };
               }
@@ -528,14 +528,14 @@ export class EntityForm extends EntityFormExtensions {
         // 재귀적으로 중첩 객체에 접근한다. (score.student.name 같은 3단계 이상 중첩 지원)
         let objectValue: any = entity;
         for (let i = 0; i < keyParts.length - 1; i++) {
-          objectValue = objectValue?.[keyParts[i]];
+          objectValue = objectValue?.[keyParts[i]!];
           if (objectValue === undefined || objectValue === null) {
             break;
           }
         }
 
         if (objectValue !== undefined && objectValue !== null) {
-          const fieldName = keyParts[keyParts.length - 1];
+          const fieldName = keyParts[keyParts.length - 1]!;
           field.value = { current: objectValue[fieldName], fetched: objectValue[fieldName], default: field.value?.default };
         }
       } else {

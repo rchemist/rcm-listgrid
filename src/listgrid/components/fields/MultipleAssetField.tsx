@@ -215,7 +215,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                          }}>
                       <button className="rcm-asset-btn-fill">
                         {function () {
-                          if (isBlank(value?.assets?.[index].url)) {
+                          if (isBlank(value?.assets?.[index]?.url)) {
                             // 데이터 없음
                             if (readonly) {
                               return null;
@@ -224,10 +224,10 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                             }
                           } else {
 
-                            const imgUrl = getAccessableAssetUrl(value!.assets![index].url);
+                            const imgUrl = getAccessableAssetUrl(value!.assets![index]!.url);
 
                             return <img className="rcm-asset-img"
-                                        alt={`${value?.assets?.[index].description ?? ''}`}
+                                        alt={`${value?.assets?.[index]?.description ?? ''}`}
                                         onError={(event) => {
                                           event.currentTarget.src = '/assets/images/no-image.png'
                                         }}
@@ -274,8 +274,8 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
           </div>
           <TextInput
             placeHolder={'이미지 유형'}
-            value={currentIndex === undefined ? '' : defaultString(value?.assets?.[currentIndex].name)}
-            readonly={currentIndex !== undefined && tags.includes(defaultString(value?.assets?.[currentIndex ?? 0].name))}
+            value={currentIndex === undefined ? '' : defaultString(value?.assets?.[currentIndex]?.name)}
+            readonly={currentIndex !== undefined && tags.includes(defaultString(value?.assets?.[currentIndex ?? 0]?.name))}
             onChange={(value: string) => {
               setError('');
               if (isBlank(value)) {
@@ -306,7 +306,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
           <TextInput
             placeHolder={'Alt tag'}
             tooltip={{label: '이미지가 표시될 때 &lt;img> 태그에 alt 속성값을 정의할 수 있습니다.'}}
-            value={defaultString(value?.assets?.[currentIndex ?? 0].description)}
+            value={defaultString(value?.assets?.[currentIndex ?? 0]?.description)}
             onChange={(value: string) => {
               const currentItem: AssetItem = {...currentEdit};
               currentItem.description = value;

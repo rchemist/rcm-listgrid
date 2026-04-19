@@ -15,7 +15,7 @@ export async function validateAndAdvanceStep(
 ): Promise<{ canAdvance: boolean; updatedForm: EntityForm }> {
   const fieldNames: string[] = [];
   for (let i = 0; i <= currentStep; i++) {
-    const step = entityForm.getCreateStep()![i];
+    const step = entityForm.getCreateStep()![i]!;
     fieldNames.push(...step.fields);
   }
   const result = await entityForm.validate({ fieldNames, session });
@@ -131,7 +131,7 @@ export const CreateStepView = React.memo(function CreateStepView({
             )
           ) : (
             <div className={cn("rcm-create-step-label", classNames.createStep?.stepLabel)}>
-              {createSteps[currentStep].label}
+              {createSteps[currentStep]!.label}
             </div>
           )}
         </div>

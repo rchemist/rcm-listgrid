@@ -341,12 +341,12 @@ export const InlineSubCollectionView: React.FC<InlineSubCollectionViewProps> = (
     // Apply user-defined filters if any
     if (fetchOptions?.filters) {
       const additionalFilters = await fetchOptions.filters(ef);
-      if (additionalFilters.length > 0 && additionalFilters[0].items) {
-        const hasMappedByFilter = additionalFilters[0].items.some(
+      if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
+        const hasMappedByFilter = additionalFilters[0]!.items.some(
           (item: FilterItem) => item.name === mappedByFilter.name
         );
         if (!hasMappedByFilter) {
-          additionalFilters[0].items.unshift(mappedByFilter);
+          additionalFilters[0]!.items.unshift(mappedByFilter);
         }
         return additionalFilters;
       }

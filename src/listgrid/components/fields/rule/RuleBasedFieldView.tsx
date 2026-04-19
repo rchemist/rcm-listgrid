@@ -130,7 +130,7 @@ export const RuleBasedFieldsView = (props: RuleBasedFieldViewProps) => {
         return form;
       }
     }
-    return props.entityForms[0];
+    return props.entityForms[0]!;
   }
 
   return <>

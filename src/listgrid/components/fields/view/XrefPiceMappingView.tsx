@@ -379,7 +379,7 @@ export const XrefPriceMappingView = ({entityForm, parentEntityForm, ...props}: X
       }
 
       if (!found) {
-        mappingValue.mapped[0].price = undefined;
+        mappingValue.mapped[0]!.price = undefined;
       }
 
     }

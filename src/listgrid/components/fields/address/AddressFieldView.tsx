@@ -26,7 +26,7 @@ export const AddressFieldView = ({entityForm, onChange, ...props}: AddressFieldV
     }
     // name에 .이 포함되어 있다면 . 앞의 문자열이 prefix
     if (props.name && props.name.includes('.')) {
-      return props.name.split('.')[0];
+      return props.name.split('.')[0]!;
     }
     return '';
   };

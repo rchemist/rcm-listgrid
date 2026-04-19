@@ -177,7 +177,7 @@ export function removeTrailingSeparator(input: string, separator: string): strin
   const parts: string[] = input.split(separator);
 
   // 배열의 마지막 요소를 가져옵니다.
-  const lastPart: string = parts[parts.length - 1];
+  const lastPart: string = parts[parts.length - 1]!;
 
   // 마지막 요소가 공백이 아니라면 '/'를 포함한 부분을 제거하고 반환합니다.
   if (lastPart.trim() !== '') {
@@ -267,7 +267,7 @@ export function addKoreanWordPostfix(type: WordPostfixType, word?: string): stri
   const HANGUL_END = 0xd7a3;
 
   // 단어의 마지막 글자를 가져옴
-  const lastChar = word[word.length - 1];
+  const lastChar = word[word.length - 1]!;
 
   // 마지막 글자가 한글인 경우
   if (lastChar.charCodeAt(0) >= HANGUL_START && lastChar.charCodeAt(0) <= HANGUL_END) {

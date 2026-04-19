@@ -65,7 +65,7 @@ export class DateField extends AbstractDateField<DateField> {
       let value = (await this.getCurrentValue(params.entityForm.getRenderType()));
       if (value) {
         if (this.range && Array.isArray(value)) {
-          value = `${fDate(value[0])} ~ ${fDate(value[1])}`;
+          value = `${fDate(value[0]!)} ~ ${fDate(value[1]!)}`;
         } else {
           value = fDate(value + '');
         }

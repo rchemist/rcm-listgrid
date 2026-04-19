@@ -734,13 +734,13 @@ export async function getImportedRangeDateValue(value: any) : Promise<any> {
     const valueString = value + '';
     if (valueString.includes(' ~ ')) {
       const values = valueString.split(' ~ ');
-      return [fDate(values[0]), fDate(values[1])];
+      return [fDate(values[0]!), fDate(values[1]!)];
     } else if (valueString.includes('~')) {
       const values = valueString.split('~');
-      return [fDate(values[0]), fDate(values[1])];
+      return [fDate(values[0]!), fDate(values[1]!)];
     } else if (valueString.includes(',')) {
       const values = valueString.split(',');
-      return [fDate(values[0]), fDate(values[1])];
+      return [fDate(values[0]!), fDate(values[1]!)];
     } else {
       // 단일값
       return fDate(value);
@@ -754,13 +754,13 @@ export async function getImportedRangeDatetimeValue(value: any) : Promise<any> {
     const valueString = value + '';
     if (valueString.includes(' ~ ')) {
       const values = valueString.split(' ~ ');
-      return [fDateTime(values[0]), fDateTime(values[1])];
+      return [fDateTime(values[0]!), fDateTime(values[1]!)];
     } else if (valueString.includes('~')) {
       const values = valueString.split('~');
-      return [fDateTime(values[0]), fDateTime(values[1])];
+      return [fDateTime(values[0]!), fDateTime(values[1]!)];
     } else if (valueString.includes(',')) {
       const values = valueString.split(',');
-      return [fDateTime(values[0]), fDateTime(values[1])];
+      return [fDateTime(values[0]!), fDateTime(values[1]!)];
     } else {
       // 단일값
       return fDateTime(value);

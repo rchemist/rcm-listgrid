@@ -289,7 +289,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
   const createStepFields = useMemo(() => {
     const fields: string[] = [];
     if (useCreateStep && entityForm) {
-      fields.push(...entityForm.getCreateStep()![currentStep].fields);
+      fields.push(...entityForm.getCreateStep()![currentStep]!.fields);
     }
     return fields;
   }, [useCreateStep, entityForm, currentStep]);

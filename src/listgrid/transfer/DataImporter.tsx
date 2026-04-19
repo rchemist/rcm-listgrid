@@ -72,6 +72,7 @@ export const DataImporter = (props: ImporterProps) => {
     if (currentFiles.length === 0) return;
 
     const file = currentFiles[0];
+    if (!file) return;
     let result = [];
 
     if (file instanceof File) {

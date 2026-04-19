@@ -241,7 +241,7 @@ export function normalizeUrl(url: string): string {
 // logic strips the trailing segment up to (and including) the last separator.
 export function removeTrailingSeparator(input: string, separator: string): string {
     const parts = input.split(separator);
-    const lastPart = parts[parts.length - 1];
+    const lastPart = parts[parts.length - 1]!;
     if (lastPart.trim() !== '') {
         return input.slice(0, input.lastIndexOf(separator));
     }

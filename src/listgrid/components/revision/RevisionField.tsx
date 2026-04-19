@@ -215,7 +215,7 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
     // DELETE 리비전은 json이 없으므로 건너뛰고 다음 유효한 리비전을 찾는다
     let previousRevision: Revision | undefined;
     for (let i = index + 1; i < revisions.length; i++) {
-      if (revisions[i].type !== 'DELETE' && revisions[i].json) {
+      if (revisions[i]!.type !== 'DELETE' && revisions[i]!.json) {
         previousRevision = revisions[i];
         break;
       }

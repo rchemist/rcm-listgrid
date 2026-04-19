@@ -44,7 +44,7 @@ export function searchFormToUrlState(
   const sorts = searchForm.getSorts();
   if (sorts.size > 0) {
     // Get the first sort (primary sort)
-    const [field, direction] = Array.from(sorts.entries())[0];
+    const [field, direction] = Array.from(sorts.entries())[0]!;
     // Only include if not the default createdAt:DESC
     if (field !== 'createdAt' || direction !== 'DESC') {
       urlState.sort = { field, direction };
@@ -231,8 +231,8 @@ export function getQuickSearchFromSearchForm(
   }
 
   const filters = searchForm.getFilter(quickSearchPropertyName);
-  if (filters.length > 0 && filters[0].filters.length > 0) {
-    return filters[0].filters[0].value ?? '';
+  if (filters.length > 0 && filters[0]!.filters.length > 0) {
+    return filters[0]!.filters[0]!.value ?? '';
   }
 
   return '';

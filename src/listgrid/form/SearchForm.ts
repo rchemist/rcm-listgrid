@@ -739,7 +739,7 @@ export class SearchForm {
     subFilters.set('OR', orFilters);
 
     const quickSearchFilter: FilterItem = {
-      name: fields[0], // 퀵서치 가능 필드 중 첫 번째 사용
+      name: fields[0]!, // 퀵서치 가능 필드 중 첫 번째 사용
       value: undefined,
       subFilters: subFilters,
     };

@@ -213,7 +213,7 @@ export const XrefPreferMappingView = ({entityForm, ...props}: XrefPreferMappingV
           }
         }
         if (!found) {
-          mappingValue.mapped[0].preferred = true;
+          mappingValue.mapped[0]!.preferred = true;
         }
       }
 
@@ -296,7 +296,7 @@ export const XrefPreferMappingView = ({entityForm, ...props}: XrefPreferMappingV
       }
 
       if (!found) {
-        mappingValue.mapped[0].preferred = true;
+        mappingValue.mapped[0]!.preferred = true;
       }
     }
 

@@ -52,8 +52,8 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
     for (const field of listFields) {
       if (field.getName().includes(".")) {
         const objectNames = field.getName().split(".");
-        const objectName = objectNames[0];
-        const objectField = objectNames[1];
+        const objectName = objectNames[0]!;
+        const objectField = objectNames[1]!;
         const objectFields = map.get(objectName) ?? [];
         objectFields.push(objectField);
         map.set(objectName, objectFields);

@@ -178,7 +178,7 @@ export class BooleanField extends OptionalField<BooleanField> {
 
     if (await this.isRequired({renderType})) {
       if (value === undefined) {
-        const value = this.options?.[0].value ?? false;
+        const value = this.options?.[0]?.value ?? false;
         this.withValue(value);
         return value;
       }

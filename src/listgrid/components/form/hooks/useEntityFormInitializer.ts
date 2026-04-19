@@ -111,7 +111,7 @@ export const useEntityFormInitializer = ({
         const createStepFields: string[] = [];
         if (entityForm.getCreateStep()) {
           // entityForm.createStep 을 order 로 sort 한다.
-          createStepFields.push(...entityForm.getCreateStep()![0].fields);
+          createStepFields.push(...entityForm.getCreateStep()![0]!.fields);
         }
 
         const tabs = await entityForm.getViewableTabs(false, createStepFields);

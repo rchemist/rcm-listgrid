@@ -30,9 +30,9 @@ export const useEntityFormTitle = ({
       if (f.title.field.includes('.')) {
         // manyToOne 필드의 값을 가져온 후 . 다음의 필드값을 가져온다.
         const [fieldName, subFieldName] = f.title.field.split('.');
-        const fieldValue = await f.getValue(fieldName);
+        const fieldValue = await f.getValue(fieldName!);
         if (fieldValue) {
-          const nameValue = fieldValue[subFieldName];
+          const nameValue = fieldValue[subFieldName!];
           if (nameValue) {
             title = t(title) + ' > ' + nameValue;
           }

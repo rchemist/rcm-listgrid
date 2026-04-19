@@ -381,13 +381,13 @@ export class InlineSubCollectionField extends SubCollectionField {
     // Apply user-defined filters if any
     if (this.fetchOptions?.filters) {
       const additionalFilters = await this.fetchOptions.filters(parentEntityForm);
-      if (additionalFilters.length > 0 && additionalFilters[0].items) {
+      if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
         // Check if mappedBy filter already exists
-        const hasMappedByFilter = additionalFilters[0].items.some(
+        const hasMappedByFilter = additionalFilters[0]!.items.some(
           (item: FilterItem) => item.name === mappedByFilter.name
         );
         if (!hasMappedByFilter) {
-          additionalFilters[0].items.unshift(mappedByFilter);
+          additionalFilters[0]!.items.unshift(mappedByFilter);
         }
         // Apply all filters
         additionalFilters.forEach(filterGroup => {

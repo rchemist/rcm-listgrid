@@ -197,7 +197,7 @@ export const CardItem: React.FC<CardItemProps> = ({
     patternsToExclude.add(baseField);
 
     // Also add the first segment for nested paths
-    const firstSegment = mappedBy.split('.')[0];
+    const firstSegment = mappedBy.split('.')[0]!;
     if (firstSegment !== mappedBy) {
       patternsToExclude.add(firstSegment);
     }
@@ -239,7 +239,7 @@ export const CardItem: React.FC<CardItemProps> = ({
         const viewableTabs = await itemEntityForm.getViewableTabs(false, undefined, session) ?? [];
         if (isMounted && viewableTabs.length > 0) {
           setTabs(viewableTabs);
-          setSelectedTabId(viewableTabs[0].id);
+          setSelectedTabId(viewableTabs[0]!.id);
         } else if (isMounted) {
           setIsLoading(false);
         }

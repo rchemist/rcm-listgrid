@@ -40,8 +40,8 @@ export const ViewEntityFormAlerts = React.memo(function ViewEntityFormAlerts({
     return (
       <div className="rcm-alerts-single">
         <AlertItem
-          key={'alert-' + visibleAlerts[0].key}
-          alert={visibleAlerts[0]}
+          key={'alert-' + visibleAlerts[0]!.key}
+          alert={visibleAlerts[0]!}
           onLinkClick={handleLinkClick}
           onClose={handleCloseAlert}
           t={t}

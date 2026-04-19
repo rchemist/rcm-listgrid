@@ -29,7 +29,7 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
 
 
   const fields: DataField[] = props.fields.filter((field) => {
-    return initialData![0].find((item) => item.name === field.getName()) !== undefined;
+    return initialData![0]!.find((item) => item.name === field.getName()) !== undefined;
   });
 
   // 업데이트 모드가 허용된 경우에만 id 필드를 노출한다.
@@ -54,7 +54,7 @@ export const DataImportSample: FC<DataImportSampleProps> = ({ sampleFileName: ex
 
       let shouldAddId = allowUpdate;
       if (shouldAddId) {
-        const row = initialData[0];
+        const row = initialData[0]!;
         for (const data of row) {
           if (data.name === 'id') {
             shouldAddId = false;

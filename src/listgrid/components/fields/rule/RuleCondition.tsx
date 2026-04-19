@@ -57,7 +57,7 @@ export const RuleCondition = (props: RuleConditionProps) => {
   function changeValue(index: number, value: any) {
     setFieldValues(prevFieldValues => {
       const newFieldValues = [...prevFieldValues];
-      newFieldValues[index].values = value;
+      newFieldValues[index]!.values = value;
       changeFilterValues(newFieldValues);
       return newFieldValues;
     });
@@ -78,8 +78,8 @@ export const RuleCondition = (props: RuleConditionProps) => {
 
   function changeQueryConditionType(index: number, type: QueryConditionType) {
     const newFieldValues = [...fieldValues];
-    newFieldValues[index].queryConditionType = type;
-    newFieldValues[index].values = [];
+    newFieldValues[index]!.queryConditionType = type;
+    newFieldValues[index]!.values = [];
     changeFilterValues(newFieldValues);
   }
 
@@ -146,7 +146,7 @@ export const RuleCondition = (props: RuleConditionProps) => {
             newFieldValues.push({
               id: getMaxConditionId(),
               name: selected as string,
-              queryConditionType: queryConditionTypes[0].value as QueryConditionType,
+              queryConditionType: queryConditionTypes[0]!.value as QueryConditionType,
               values: []
             });
 

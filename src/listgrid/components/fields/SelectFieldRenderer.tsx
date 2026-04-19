@@ -291,9 +291,9 @@ export const SelectFieldRenderer: React.FC<SelectFieldRendererProps> = ({
               } else if (typeof errorObject.fieldError === 'object') {
                 const entries = Object.entries(errorObject.fieldError);
                 if (entries.length > 0) {
-                  const firstErrors = entries[0][1] as string[];
+                  const firstErrors = entries[0]![1] as string[];
                   if (firstErrors && firstErrors.length > 0) {
-                    errorMessage = firstErrors[0];
+                    errorMessage = firstErrors[0]!;
                   }
                 }
               }

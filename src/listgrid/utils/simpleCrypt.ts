@@ -66,7 +66,7 @@ function generateUUID(): string {
   // Convert WordArray to byte array
   const byteArray: number[] = [];
   for (let i = 0; i < bytes.length; i++) {
-    const word = bytes[i];
+    const word = bytes[i]!;
     byteArray.push((word >> 24) & 0xff);
     byteArray.push((word >> 16) & 0xff);
     byteArray.push((word >> 8) & 0xff);
@@ -74,9 +74,9 @@ function generateUUID(): string {
   }
 
   // Set the version to 4 (0100)
-  byteArray[6] = (byteArray[6] & 0x0f) | 0x40;
+  byteArray[6] = (byteArray[6]! & 0x0f) | 0x40;
   // Set the variant to 8, 9, A, or B (10xx)
-  byteArray[8] = (byteArray[8] & 0x3f) | 0x80;
+  byteArray[8] = (byteArray[8]! & 0x3f) | 0x80;
 
   const byteToHex: string[] = [];
   for (let i = 0; i < 256; ++i) {
@@ -84,13 +84,13 @@ function generateUUID(): string {
   }
 
   return (
-    byteToHex[byteArray[0]] + byteToHex[byteArray[1]] +
-    byteToHex[byteArray[2]] + byteToHex[byteArray[3]] + '-' +
-    byteToHex[byteArray[4]] + byteToHex[byteArray[5]] + '-' +
-    byteToHex[byteArray[6]] + byteToHex[byteArray[7]] + '-' +
-    byteToHex[byteArray[8]] + byteToHex[byteArray[9]] + '-' +
-    byteToHex[byteArray[10]] + byteToHex[byteArray[11]] +
-    byteToHex[byteArray[12]] + byteToHex[byteArray[13]] +
-    byteToHex[byteArray[14]] + byteToHex[byteArray[15]]
+    byteToHex[byteArray[0]!]! + byteToHex[byteArray[1]!]! +
+    byteToHex[byteArray[2]!]! + byteToHex[byteArray[3]!]! + '-' +
+    byteToHex[byteArray[4]!]! + byteToHex[byteArray[5]!]! + '-' +
+    byteToHex[byteArray[6]!]! + byteToHex[byteArray[7]!]! + '-' +
+    byteToHex[byteArray[8]!]! + byteToHex[byteArray[9]!]! + '-' +
+    byteToHex[byteArray[10]!]! + byteToHex[byteArray[11]!]! +
+    byteToHex[byteArray[12]!]! + byteToHex[byteArray[13]!]! +
+    byteToHex[byteArray[14]!]! + byteToHex[byteArray[15]!]!
   );
 }

@@ -83,9 +83,9 @@ export const ExcelDownload = async (props: ExcelDownloadProps) => {
 
     // 헤더와 데이터 분리
     const [headerRow, ...dataRows] = props.data;
-    
+
     // 헤더에서 컬럼 순서와 레이블 가져오기
-    const columnOrder = headerRow.map(col => ({
+    const columnOrder = headerRow!.map(col => ({
       name: col.name,
       label: col.value
     }));
@@ -111,6 +111,7 @@ export const ExcelDownload = async (props: ExcelDownloadProps) => {
       for (let R = 1; R <= range.e.r; ++R) { // 헤더 이후 데이터 행부터
         for (let C = 0; C <= range.e.c; ++C) {
           const colName = columnOrder[C]?.name;
+          if (!colName) continue;
           const field = fieldMap.get(colName);
 
           if (field) {

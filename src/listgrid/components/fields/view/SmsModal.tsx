@@ -66,7 +66,7 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
           setSenderList(senderCache.permittedPhoneNumbers);
           // If there's only one sender, auto-select it
           if (senderCache.permittedPhoneNumbers.length === 1) {
-            setSenderAddress(senderCache.permittedPhoneNumbers[0].phoneNumber);
+            setSenderAddress(senderCache.permittedPhoneNumbers[0]!.phoneNumber);
           }
         }
       } catch (error) {

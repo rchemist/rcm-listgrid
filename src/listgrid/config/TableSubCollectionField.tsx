@@ -157,12 +157,12 @@ export class TableSubCollectionField extends SubCollectionField {
 
     if (this.fetchOptions?.filters) {
       const additionalFilters = await this.fetchOptions.filters(parentEntityForm);
-      if (additionalFilters.length > 0 && additionalFilters[0].items) {
-        const hasMappedByFilter = additionalFilters[0].items.some(
+      if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
+        const hasMappedByFilter = additionalFilters[0]!.items.some(
           (item: FilterItem) => item.name === mappedByFilter.name
         );
         if (!hasMappedByFilter) {
-          additionalFilters[0].items.unshift(mappedByFilter);
+          additionalFilters[0]!.items.unshift(mappedByFilter);
         }
         additionalFilters.forEach(filterGroup => {
           searchForm.withFilter(filterGroup.condition, ...filterGroup.items);

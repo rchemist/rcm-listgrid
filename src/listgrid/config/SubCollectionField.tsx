@@ -276,13 +276,13 @@ export class SubCollectionField implements EntityItem {
       if (userFilters) {
         // 사용자 정의 filters가 있으면 실행하고 mappedBy 필터를 첫 번째 조건에 추가
         const additionalFilters = await userFilters(ef);
-        if (additionalFilters.length > 0 && additionalFilters[0].items) {
+        if (additionalFilters.length > 0 && additionalFilters[0]!.items) {
           // mappedBy 필터가 이미 있는지 확인하고 없으면 추가
-          const hasMappedByFilter = additionalFilters[0].items.some(
+          const hasMappedByFilter = additionalFilters[0]!.items.some(
             (item: FilterItem) => item.name === mappedByFilter.name
           );
           if (!hasMappedByFilter) {
-            additionalFilters[0].items.unshift(mappedByFilter);
+            additionalFilters[0]!.items.unshift(mappedByFilter);
           }
         }
         return additionalFilters;

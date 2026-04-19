@@ -83,7 +83,7 @@ export class ListGrid {
     });
 
     if (quickSearchFields.length > 0) {
-      field = quickSearchFields[0];
+      field = quickSearchFields[0]!;
     }
 
     // Fallback: quickSearch: true 필드가 없으면 자동으로 퀵서치 대상 필드 수집
@@ -111,7 +111,7 @@ export class ListGrid {
 
       // 자동 수집된 필드가 있으면 사용
       if (autoQuickSearchFields.length > 0) {
-        field = autoQuickSearchFields[0];
+        field = autoQuickSearchFields[0]!;
 
         // 여러 필드가 있으면 OR 조건으로 결합
         if (autoQuickSearchFields.length > 1) {
