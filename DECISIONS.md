@@ -464,6 +464,54 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #73 v0.3 Task F 세션 2 — `FieldRenderParameters<T, TValue>` / `FilterRenderParameters<T, TValue>` / `FieldInfoParameters<T>` 제네릭화 + FormField 체인 render/filter/info 시그니처 전파 구현
+
+`docs/FIELD_RENDERER_GENERIC_DESIGN.md` (세션 1 #73 설계) § 5 의 Phase 1~5 순서대로 1 에이전트 구현. 설계와 거의 동일하게 진행 — 설계 보정 없음.
+
+**구현 결과**:
+- Phase 1 (foundation, `config/EntityField.ts`):
+  - `FieldRenderParameters<T extends object = any, TValue = any>`: `entityForm: EntityForm<T>`, `onChange: (value: TValue, propagation?) => void`, `updateEntityForm?` 콜백 인자/반환 `EntityForm<T>` 전파
+  - `FilterRenderParameters<T extends object = any, TValue = any>`: `entityForm: EntityForm<T>`, `onChange: (value: TValue, op?) => void`, `value?: Promise<TValue>`
+  - `FieldInfoParameters<T extends object = any>`: `entityForm?: EntityForm<T> | undefined`
+  - `EntityField` 인터페이스는 무수정 — default `= any` 자동 호환 (메소드 시그니처에 `FieldRenderParameters` bare 로 써도 `FieldRenderParameters<any, any>` 해석)
+- Phase 2 (FormField chain):
+  - `FormField<TSelf, TValue, TForm>`: `renderInstance` / `render` / `view` / `overrideRender` / `withOverrideRender` 파라미터에 `FieldRenderParameters<TForm, TValue>` 전파. `isRequired` / `isHidden` / `isReadonly` / `getPlaceHolder` / `getTooltip` / `getHelpText` 에 `FieldInfoParameters<TForm>` 전파. `toConditionalValue<TForm>` 헬퍼 함수 제네릭화. `validate()` 내부 `infoParams` 지역타입 승격
+  - `ListableFormField<TSelf, TValue, TForm>`: `renderListFilter` / `renderListFilterInstance` / `renderListFilterOriginal` / `viewListFilter` / `overrideRenderListFilter` / `withOverrideRenderListFilter` 에 `FilterRenderParameters<TForm, TValue>` 전파. renderListFilterOriginal 내부 re-wrap 시 `onChange: (value: TValue) => onChange(value)` + `as FieldRenderParameters<TForm, TValue>` 캐스트
+  - `CheckButtonValidationField<TSelf, TValue, TForm>`: `renderCheckButtonValidationField(params: FieldRenderParameters<TForm, TValue>)` + `isRequired(props: FieldInfoParameters<TForm>)`. 내부 `onValid(value: any)` / `onClear()` 의 `params.onChange(value)` 호출 시 `value as TValue` / `'' as TValue` 명시 캐스트 (string → TValue)
+  - `OptionalField` / `MultipleOptionalField`: `validate()` 내부 `infoParams` 타입 `FieldInfoParameters<TForm>` 승격
+  - `AbstractManyToOneField` / `AbstractDateField`: 독자 render 메소드 없음 — 수정 불필요 (설계 § 2.6 확인 사항)
+- Phase 3 (concrete 33+ 검증): `src/listgrid/components/fields/*.tsx` 의 `renderInstance(params: FieldRenderParameters)` 선언 **전부 무수정 동작** (type-check PASS). default = any 경로로 호환 전제 실증
+- Phase 4 (helper):
+  - `FieldRendererHelper.getInputRendererParameters<TForm = any, TValue = any>(field: FormField<any, TValue, TForm>, params: FieldRenderParameters<TForm, TValue>)` 로 제네릭 함수 승격. 기존 호출처 `getInputRendererParameters(this, params)` 는 TS 가 `this` 의 TForm/TValue 를 infer 해서 무수정 호환
+  - `FieldRenderer` / `ViewEntityForm` / `RuleFieldRenderer`: 무수정 (설계 § 2.7 에서 명시 — React 컴포넌트 자체는 제네릭화 제외)
+- Phase 5 (검증): type-check PASS, 900 tests + 1 todo PASS, lint 0 errors, format, build PASS. gjcu-academic-front overlay type-check **0 errors 유지** (baseline alpha.47 대비 peer 회귀 0)
+
+**실측 수치**:
+- any count (표면 grep `: any`): 286 → 284 (−2). 실질적 narrow 효과는 간접적 — renderInstance 내부에서 `params.entityForm.getValue('x')` 가 `Promise<T['x']>` 로, `params.onChange(value)` 가 `(value: TValue) => void` 로 narrow (TForm/TValue 를 concrete 로 지정한 경우에 한함). 설계 § 4.1 예상 20~30 대비 표면상 적지만 narrow 가능성은 Task E 와 동일 수준
+- 테스트: 900 → 900 passing + 1 todo (회귀 0)
+- type-check / lint (0 errors) / format:check / build: 전부 PASS
+- gjcu-academic-front apps/admin type-check: 0 errors 유지 (baseline 동일, 고유 위치 diff 0)
+
+**설계와 달라진 점**: 없음. 설계 § 5 의 Phase 1~5 순서 그대로 진행. 유일한 사소한 추가: CheckButtonValidationField 의 `onValid(value: any)` 콜백에서 `params.onChange(value as TValue)` 명시 캐스트 필요 — 설계 § 5.3 위험 표의 "StringField 에서 `params.onChange(123)` 통과" 와 반대 케이스 (CheckButtonValidationInput 의 `onValid: (value: any)` 시그니처가 loose 하므로 TValue 로 명시 캐스트). 설계에 추가 기록하지 않음 (사소한 구현 디테일)
+
+**커밋 (라이브러리 repo, 4 commits)**:
+- `d6831f9` refactor(generic): Phase 1 — FieldRenderParameters<T,TValue> foundation (F-1)
+- `5bed342` refactor(generic): Phase 2 — FormField chain renderInstance/render/view signature (F-2)
+- Phase 3 (concrete 검증): 수정 없음 — 커밋 스킵
+- `b0d63b7` refactor(generic): Phase 4 — helper signature propagation (F-4)
+- `[meta]` chore: v0.3 Task F 세션 2 마감 — FieldRenderParameters generic (F-5)
+
+**Why (세션 분리 및 접근 방식)**:
+- Task E (#70/#71) 의 `FormField<TSelf, TValue, TForm>` 체인이 alpha.47 로 안정 착지한 뒤 "render 시점 전파" 를 국소적으로 이어붙이는 작업. Task E 기반 없이는 narrow 의 의미가 없음
+- UI 컴포넌트 층 3 인터페이스 (`FieldRenderParameters` / `FilterRenderParameters` / `FieldInfoParameters`) 가 33+ concrete 필드의 renderInstance 시그니처에 걸쳐 있어 Task E 에서 의도적으로 스코프 제외 (#70 § 2.8). Task F 로 분리하여 Task E 의 F-bounded 셀프 타입 이슈와 교차하지 않도록 함
+- 결과적으로 Task E (1 에이전트, 1 세션, peer 회귀 0) 와 동일 복잡도로 수렴 — 설계 § 5.1 예상 부합
+- `FieldRenderer` React 컴포넌트 자체는 제네릭화 제외: JSX 제네릭 컴포넌트 문법 (`<FieldRenderer<T, V> />`) 의 소비자 학습 비용, Next.js RSC serializable 제약, 범용 컨테이너 (여러 FormField 타입 한 트리) 제약. narrowing 책임은 필드 서브클래스의 `renderInstance` 에 집중 — natural fit
+
+**How to apply**:
+- 배포 (alpha.48) 는 메인 판단 후 진행. 배포 루프는 #72 패턴 그대로 — (1) `echo "0.1.0-alpha.48" | bash deploy.sh` (2) gjcu overlay 로 선검증 (이미 본 세션에서 0 errors 확인) (3) gjcu package.json bump + npm install
+- 소비자 옵트인 승격 가이드: `renderInstance(params: FieldRenderParameters<Post, string>)` 로 명시하면 `params.onChange(42)` 같은 잘못된 호출이 컴파일 에러로 드러남. 기존 `renderInstance(params: FieldRenderParameters)` 선언은 무수정으로 계속 동작
+- Task G 후보 순서 제안: (1) `parse()` → `unknown` 전환 (런타임 검증 도구 결합) (2) `attributes: Map<string, any>` → `Map<string, unknown>` (v0.2.0 major bump) (3) ViewRenderProps / ViewListProps 제네릭화 — 각각 별도 Task 로
+
 ### #72 alpha.46~47 배포 + gjcu 호스트 실측 — Task E 회귀 0 확인 + gjcu swap 완성으로 type-check 0 errors 달성
 
 Task E (#70/#71) 의 "default `= any` 로 소비자 무수정 호환" 전제 (#70 § 3.3) 검증을 위해 gjcu-academic-front (admin workspace) 실측. Task E 제네릭 승격 자체는 **peer 회귀 0 건** 으로 확인됐으나, gjcu 의 `packages/ui/listgrid` 디렉토리 삭제 (swap 브랜치 미완) + 라이브러리 공개 API export 누락으로 **760 errors 의 baseline** 이 드러남. 유저 요구 ("gjcu 아무 에러도 안 나야 해") 에 따라 양방향 수정으로 **0 errors** 달성. alpha.46 → alpha.47 2 단계 배포.

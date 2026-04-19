@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (v0.3 Task E 세션 3 완료 — **alpha.46/47 배포 + gjcu 실측 호환성 보완**. Task E 회귀 0 확인 (alpha.46) + gjcu swap 완성 양방향 수정으로 gjcu `apps/admin` type-check **0 errors** 달성 (alpha.47). 900 tests / type-check / lint / build 전 품질 게이트 PASS.)
+마지막 업데이트: 2026-04-19 (v0.3 Task F 세션 2 완료 — **FieldRenderParameters<T, TValue> / FilterRenderParameters<T, TValue> / FieldInfoParameters<T> 제네릭화 + FormField 체인 render/filter/info 시그니처 전파**. 33+ concrete 필드 무수정 호환. 900 tests / type-check / lint / format / build 전 품질 게이트 PASS. gjcu overlay type-check 0 errors 유지. 배포는 별도 판단.)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,28 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.47` (gjcu 실측 호환성 보완 — 공개 API export 확장 + Session.getUser optional 화 + SearchForm.handleAndFilter 시그니처 확장)
+**배포된 현재 버전**: `v0.1.0-alpha.47` (gjcu 실측 호환성 보완 — 공개 API export 확장 + Session.getUser optional 화 + SearchForm.handleAndFilter 시그니처 확장). **Task F 는 alpha.48 배포 대기 중** (메인 판단 예정).
 
-**이번 세션 성과 (v0.3 Task E 세션 3 — alpha.46/47 배포 + gjcu 실측 0 errors)**:
+**이번 세션 성과 (v0.3 Task F 세션 2 — FieldRenderParameters<T, TValue> 제네릭 전파)**:
+- Phase 1 (foundation, `config/EntityField.ts`): 3 인터페이스 제네릭화
+  - `FieldRenderParameters<T extends object = any, TValue = any>`: `entityForm: EntityForm<T>`, `onChange: (value: TValue, propagation?) => void`, `updateEntityForm?` 콜백 `EntityForm<T>` 전파
+  - `FilterRenderParameters<T extends object = any, TValue = any>`: `entityForm: EntityForm<T>`, `onChange: (value: TValue, op?) => void`, `value?: Promise<TValue>`
+  - `FieldInfoParameters<T extends object = any>`: `entityForm?: EntityForm<T> | undefined`
+  - `EntityField` 인터페이스 무수정 (default = any 자동 호환)
+- Phase 2 (FormField chain): 6 abstract (FormField / ListableFormField / OptionalField / MultipleOptionalField / CheckButtonValidationField / AbstractManyToOneField / AbstractDateField) 의 render / filter / info 메소드 시그니처 `<TForm, TValue>` 전파
+  - FormField: `renderInstance` / `render` / `view` / `overrideRender` / `withOverrideRender` + `isRequired` / `isHidden` / `isReadonly` / `getPlaceHolder` / `getTooltip` / `getHelpText` + `toConditionalValue` 헬퍼 / `validate` 내부 infoParams
+  - ListableFormField: `renderListFilter` / `renderListFilterInstance` / `renderListFilterOriginal` / `viewListFilter` / `overrideRenderListFilter` / `withOverrideRenderListFilter`
+  - CheckButtonValidationField: `renderCheckButtonValidationField` / `isRequired` 전파 + `onValid/onClear` 내부 `params.onChange(value as TValue)` 명시 캐스트 (string → TValue)
+  - AbstractManyToOneField / AbstractDateField: 독자 render 메소드 없음 — 수정 불필요
+- Phase 3 (concrete 필드 검증): 33+ concrete 필드 서브클래스 `renderInstance(params: FieldRenderParameters)` 전부 default = any 경로로 **무수정 동작** 확인 (type-check PASS)
+- Phase 4 (helper 전파): `FieldRendererHelper.getInputRendererParameters` 를 제네릭 함수 `<TForm = any, TValue = any>(field: FormField<any, TValue, TForm>, params: FieldRenderParameters<TForm, TValue>)` 로 승격. `FieldRenderer` / `ViewEntityForm` / `RuleFieldRenderer` 무수정 (설계 § 2.7 / § 5.4)
+- any count (표면 grep): 286 → 284 (−2). 실질적 narrow 효과는 간접적 (renderInstance 내부 params.onChange 가 TValue 로 narrow, params.entityForm 이 EntityForm<TForm> 으로 narrow)
+- gjcu-academic-front overlay type-check: **0 errors 유지** (baseline alpha.47 대비 회귀 0)
+- 소비자 영향: breaking 0. default `= any` 경로로 모든 기존 소비자 무수정 호환. Opt-in narrow 기회 제공 (`renderInstance(params: FieldRenderParameters<Post, string>)` 패턴)
+- 모든 품질 게이트 PASS: type-check / 900 tests + 1 todo / lint 0 errors / format / build
+- commits: `d6831f9` (Phase 1), `5bed342` (Phase 2), `b0d63b7` (Phase 4)
+
+**이전 세션 성과 (v0.3 Task E 세션 3 — alpha.46/47 배포 + gjcu 실측 0 errors)**:
 - **alpha.46 배포 + 회귀 검증** (release commit `5ab160e`, tag `v0.1.0-alpha.46`):
   - gjcu-academic-front 에 dist overlay → `apps/admin` type-check. alpha.45 / alpha.46 둘 다 760 errors, **고유 위치 diff = 0** (Task E 로 인한 peer 회귀 0 확인). 차이 39 건은 TS compiler 의 에러 메시지 포맷 변화만 (`FormFieldProps` → `FormFieldProps<any, any>`)
   - 결론: Task E 설계 § 3.3 "무수정 호환" 전제 실측 통과. 760 errors 는 alpha.45 부터 있던 선행 상태
@@ -79,9 +98,9 @@
 - 미승격: `exactOptionalPropertyTypes` (430 errs, v0.3 Task D)
 
 **다음 세션 후보 (v0.3 잔여)**:
+- **alpha.48 배포**: Task F 구현 완료 (minor bump 권고, 설계 § 6.3). 메인 판단 후 배포 (deploy.sh + gjcu package.json bump)
 - **gjcu 커밋 확인**: experiment/rcm-listgrid-swap 브랜치에 uncommitted 변경 다수 (상대경로 swap 완성 + 라이브러리 변경 대응). 유저 검토 후 커밋
-- **Task F 후보**: `FieldRenderParameters<T, TValue>` — UI 컴포넌트 층 제네릭화 (FieldRenderer / ViewEntityForm 등 전파). Task E 에서 의도적으로 제외된 범위. 규모 중간
-- **Task G 후보**: `parse()` → `unknown` 전환 (런타임 검증 도구 결합 시 의미)
+- **Task G 후보**: `parse()` → `unknown` 전환 (런타임 검증 도구 결합 시 의미) / `attributes: Map<string, any>` → `Map<string, unknown>` (v0.2.0 major bump 후보) / ViewRenderProps / ViewListProps 제네릭화
 - **gjcu 장기 cleanup**: `packages/ui/form/SearchForm.ts` 재export barrel 삭제 (host 가 `@rcm/listgrid` 직접 import), `packages/ui/api/types/ResponseData.ts` 중복 정리
 - 시각 회귀 수동 검증 + Playwright 스냅샷 regression suite (DECISIONS #63 권고)
 
