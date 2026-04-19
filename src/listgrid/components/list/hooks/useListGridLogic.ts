@@ -222,7 +222,7 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
           const context: ClientExtensionContext = {
             entityForm,
             ...(session ? { session } : {}),
-            ...(session?.getUser() != null ? { user: session.getUser() } : {}),
+            ...(session?.getUser?.() != null ? { user: session.getUser!() } : {}),
           };
 
           finalSearchForm = await entityForm.executeClientExtensions(
@@ -263,7 +263,7 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
                 const context: ClientExtensionContext = {
                   entityForm,
                   ...(session ? { session } : {}),
-                  ...(session?.getUser() != null ? { user: session.getUser() } : {}),
+                  ...(session?.getUser?.() != null ? { user: session.getUser!() } : {}),
                 };
 
                 processedResult = await entityForm.executeClientExtensions(

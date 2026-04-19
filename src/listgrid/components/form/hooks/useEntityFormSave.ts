@@ -66,7 +66,7 @@ export const useEntityFormSave = ({
       const context: ClientExtensionContext = {
         entityForm: entityForm,
         ...(session ? { session } : {}),
-        ...(session?.getUser() != null ? { user: session.getUser() } : {}),
+        ...(session?.getUser?.() != null ? { user: session.getUser!() } : {}),
       };
 
       // Pre Extension 실행 (Create/Update 구분)
@@ -90,7 +90,7 @@ export const useEntityFormSave = ({
         const context: ClientExtensionContext = {
           entityForm: finalEntityForm,
           ...(session ? { session } : {}),
-          ...(session?.getUser() != null ? { user: session.getUser() } : {}),
+          ...(session?.getUser?.() != null ? { user: session.getUser!() } : {}),
         };
 
         const extensionPoint =

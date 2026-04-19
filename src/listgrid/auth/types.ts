@@ -23,6 +23,9 @@ export interface Session {
     roles?: string[];
     [key: string]: unknown;
   };
-  getUser: () => SessionUser | null | undefined;
+  // getUser is optional so host apps that pass plain session objects (without
+  // a `getUser()` accessor) remain structurally assignable. Runtime code in
+  // the library always guards the call with `typeof session.getUser === 'function'`.
+  getUser?: () => SessionUser | null | undefined;
   [key: string]: unknown;
 }

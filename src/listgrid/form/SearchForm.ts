@@ -366,7 +366,7 @@ export class SearchForm {
   // value can be a primitive string/number/boolean or an array of them
   handleAndFilter(
     fieldName: string,
-    value: string | number | boolean | string[] | null | undefined,
+    value: string | number | boolean | readonly (string | number | boolean)[] | null | undefined,
     op?: QueryConditionType,
     not?: boolean,
   ): this {
@@ -380,7 +380,9 @@ export class SearchForm {
     } else {
       let duplicated = false;
       const filterValue: string | undefined = Array.isArray(value) ? undefined : String(value);
-      const filterValues: string[] | undefined = Array.isArray(value) ? value : undefined;
+      const filterValues: string[] | undefined = Array.isArray(value)
+        ? (value as readonly (string | number | boolean)[]).map((v) => String(v))
+        : undefined;
 
       this.filters.forEach((filterItems) => {
         filterItems.forEach((filterItem) => {

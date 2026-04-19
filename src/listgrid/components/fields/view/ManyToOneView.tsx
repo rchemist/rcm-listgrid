@@ -67,7 +67,7 @@ export const ManyToOneView = ({
     }
     if (typeof config.modifiable === 'object' && config.modifiable.roles) {
       // session이 없으면 false
-      const userRoles = session?.getUser()?.roles;
+      const userRoles = session?.getUser?.()?.roles;
       if (!userRoles) {
         return false;
       }

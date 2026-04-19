@@ -130,6 +130,29 @@ export { ViewListGrid } from './components/list/ViewListGrid';
 export { ViewEntityForm } from './components/form/ViewEntityForm';
 export { FieldRenderer } from './components/form/FieldRenderer';
 
+// SearchForm — filter + sort + paging DSL used by list views. Host apps that
+// previously had their own `SearchForm` should re-export from here to avoid
+// two incompatible nominal types.
+export {
+  SearchForm,
+  getQueryConditionTypes,
+  getQueryConditionValueType,
+  getQueryConditionHelpText,
+} from './form/SearchForm';
+export type {
+  FilterItem,
+  SearchValue,
+  SearchValueConfig,
+  Direction,
+  QueryConditionType,
+  QueryConditionValueType,
+} from './form/SearchForm';
+export { PageResult } from './form/Type';
+export type { SelectOption, MinMaxLimit, MinMaxStringLimit, EntityWithId } from './form/Type';
+
+// XrefMapping value shape — raw serialized value carried by XrefMappingField.
+export type { XrefMappingValue } from './components/fields/view/XrefMappingView';
+
 // Configuration
 export * from './config/Config';
 export * from './config/ListGrid';
@@ -337,12 +360,24 @@ export * from './components/fields/contentasset/hooks/useContentAsset';
 // @gjcu migration compatibility (wildcard for files whose helper
 // functions and companion exports were previously hidden by a
 // narrower `export { X }` line).
+export * from './components/fields/abstract/FormField';
 export * from './components/fields/abstract/ListableFormField';
 export * from './components/fields/abstract/OptionalField';
+export type {
+  AbstractManyToOneFieldProps,
+  CardViewConfig,
+  SelectBoxViewConfig,
+} from './components/fields/abstract/AbstractManyToOneField';
+export type { AbstractDateFieldProps } from './components/fields/abstract/AbstractDateField';
+// Note: abstract/CheckButtonValidationField also exports a Props type with the
+// same name as config/Config's CheckButtonValidationFieldProps (distinct shape).
+// The Config.ts one is the public one. The abstract version is used only for
+// class inheritance and is not re-exported to avoid ambiguity.
 export * from './components/fields/ApplyFullAddressFields';
 export * from './components/fields/CustomOptionField';
 export * from './components/fields/view/CardManyToOneView';
 export * from './components/form/context/EntityFormThemeContext';
+export * from './components/form/types/ViewEntityFormTheme.types';
 export * from './config/SubCollectionField';
 export * from './config/CardSubCollectionField';
 export * from './config/TableSubCollectionField';
