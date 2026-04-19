@@ -16,13 +16,6 @@ export interface ViewEntityFormAlertsProps {
 }
 
 export interface AlertStyles {
-  /**
-   * @deprecated Use `className` + `dataTone`. Kept for backward-compatibility;
-   * now returns `'rcm-notice'` without tone modifier classes.
-   */
-  bg: string;
-  hoverBg: string;
-  text: string;
   /** Icon component (e.g. Tabler icons) — accepts standard SVG/icon props. */
   icon: ComponentType<SVGProps<SVGSVGElement> & { size?: number | string; stroke?: number }>;
   /** Primitive class to apply on the alert root (`rcm-notice`). */
