@@ -84,7 +84,8 @@ const simpleStringify = (object: Record<string, unknown>): string => {
   return JSON.stringify(object);
 };
 
-// intentional: JSON.parse returns arbitrary data and consumers dereference fields directly
-export function parse(str: string): any {
-  return JSON.parse(str, reviver);
-}
+// Re-export from `misc` — `parse<T = unknown>` is the canonical generic
+// implementation. Prior duplicate definition was merged in Task G (DECISIONS #74).
+// This re-export preserves existing `import { parse } from '../utils/jsonUtils'`
+// paths for backward-compat.
+export { parse } from '../misc';

@@ -294,9 +294,12 @@ export function stringify(obj: unknown, beautify?: boolean): string {
   }
 }
 
-// intentional: JSON.parse returns arbitrary data and consumers dereference fields directly
-export function parse(str: string): any {
-  return JSON.parse(str, reviver);
+// Generic JSON parser with Map reviver support.
+// Default type parameter is `unknown` — callers should narrow explicitly via
+// `parse<T>(str)` or `parse(str) as T`. This is stricter than prior `any`
+// contract and nudges consumers toward explicit schema knowledge.
+export function parse<T = unknown>(str: string): T {
+  return JSON.parse(str, reviver) as T;
 }
 
 // -- Storage helpers (from LocalStorageUtils.ts / SessionStorageUtil.ts) ---
@@ -349,7 +352,9 @@ export function getLocalStorageItem(key: string): string | undefined {
   const itemJson = localStorage.getItem(key);
   if (!itemJson) return undefined;
   try {
-    const item = CachedStorageItem.create({ ...parse(itemJson) });
+    const item = CachedStorageItem.create({
+      ...parse<{ value: string; expiry?: number }>(itemJson),
+    });
     if (item.isAvailable()) return item.getData();
     localStorage.removeItem(key);
   } catch (e) {
@@ -365,7 +370,7 @@ export function getLocalStorageObject<T>(
   const value = getLocalStorageItem(key);
   if (isBlank(value)) return undefined;
   if (customParse !== undefined) return customParse(value!);
-  return parse(value!) as T;
+  return parse<T>(value!);
 }
 
 export function removeSessionStorageItem(key: string): void {
@@ -387,7 +392,7 @@ export function getSessionStorageItem(key: string): string | undefined {
   const itemJson = sessionStorage.getItem(key);
   if (!itemJson) return undefined;
   try {
-    const obj = parse(itemJson);
+    const obj = parse<{ value: string; expiry?: number }>(itemJson);
     const item = new CachedStorageItem(obj.value, obj.expiry);
     if (item.isAvailable()) return item.getData();
     sessionStorage.removeItem(key);
@@ -404,7 +409,7 @@ export function getSessionStorageObject<T>(
   const value = getSessionStorageItem(key);
   if (value === undefined) return undefined;
   if (customParse !== undefined) return customParse(value);
-  return parse(value!) as T;
+  return parse<T>(value!);
 }
 
 // -- Server / asset URL helpers (from Server.ts) ---------------------------
