@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (v0.3 Task C 완료 — coverage 8.1% → **16.9%** / **900 tests** + 1 todo (525 개 추가, 43 files) / config 11.7%→34.2%, form 6.97%→94.5%, misc 6.78%→92.4%, fields/abstract 1.18%→60.86% / store·menu·router·urlState 100% / vitest thresholds 16/14/17/16. 다음: Task D (exactOpt 430 errors).)
+마지막 업데이트: 2026-04-19 (v0.3 Task C + D 완료 — coverage 8.1% → **17.1%** / **900 tests** + 1 todo / **exactOptionalPropertyTypes 승격** (430 errors → 0, 116 파일) / tsconfig strict 옵션 **5 개 전부 true**. 다음: Task E (generic refactor) 또는 배포 판단.)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -10,7 +10,18 @@
 
 **배포된 현재 버전**: `v0.1.0-alpha.45` (v0.2 backlog 소진 — 테스트 포팅 마감 + `any` 정리 + `noImplicitAny: true`)
 
-**이번 세션 성과 (v0.3 Task C — coverage 상향)**:
+**이번 세션 성과 (v0.3 Task D — exactOpt 승격)**:
+- `exactOptionalPropertyTypes: true` 승격. 430 errors → 0 (3 병렬 에이전트 + 1 재개)
+  - D-1 (config/transfer/form): 151 → 0. EntityForm 29, InlineSubCollectionField 18, SubCollectionField 15, EntityFormBase 14, transfer/Type 17 등
+  - D-2 (components/fields): 190 → 0 (2 분할: 101 + 89). FormField 25, SelectField 14, OptionalField 12, ManyToOneField 11 등 + abstract/ 베이스 + Xref/Address/ContentAsset 계열
+  - D-3 (list+form+revision+validations+ui+adapters): 89 → 0. ViewListGrid, FieldRenderer, useEntityFormLogic 등
+- 수정 패턴: TS2412 (201) — interface 옵셔널 필드에 `| undefined` 명시 / TS2375 (122) — 객체 리터럴 undefined 제거 또는 조건부 스프레드 / TS2379 (94) — 함수 인자 undefined 제거 / TS2532 (8) — narrow
+- 의도된 any (DECISIONS #21/#65/Task E 대상) 는 유지. ComponentType<any> wrapper, entity 스키마 any 는 Task E generic refactor 에서 해소
+- tsconfig strict 옵션 **5/5 전부 true**: strict + noImplicitAny + noImplicitReturns + noFallthroughCasesInSwitch + noUncheckedIndexedAccess + exactOptionalPropertyTypes
+- 116 파일 수정 (타입 annotation only, 런타임 동작 무변경). 3 commit 블록 (D-1/D-2/D-3) + meta commit
+- 모든 품질 게이트 PASS (type-check / test 900+1 / lint 0 errs / format:check / coverage 17.13% / build)
+
+**이전 세션 성과 (v0.3 Task C — coverage 상향)**:
 - **테스트**: 375 → **900 passing** + 1 todo (525 개 추가, 43 files, 3 병렬 에이전트)
   - C-1 (config/): 164 tests (Config 55, OnChangeEntityForm 22, EntityFormMethod 23, EntityTab 15, EntityFieldGroup 13 등 9 파일)
   - C-2 (form/misc/store/message/menu/router/urlState): 202 tests (misc 70, SearchForm 69, store 17, 나머지 6 영역)
@@ -29,8 +40,8 @@
 - 미승격: `exactOptionalPropertyTypes` (430 errs, v0.3 Task D)
 
 **다음 세션 후보 (v0.3 잔여)**:
-- **Task D**: `exactOptionalPropertyTypes` 승격 (430 errors). 에러 타입별 fix 가이드는 `docs/NEXT_SESSION.md` § 3
-- **Task E**: `EntityForm<T>` / `FieldValue<T>` generic refactor (breaking change, v0.2 major bump 검토). 2 세션 분할 권장
+- **Task E**: `EntityForm<T>` / `FieldValue<T>` generic refactor (breaking change, v0.2 major bump 검토). 2 세션 분할 권장 (설계 → 구현). `docs/NEXT_SESSION.md` § 4
+- **배포 판단**: Task D 의 public API 타입 확장 (`x?: T` → `x?: T | undefined`) 은 소비자 호환 (TypeScript 구문 호환 + 런타임 동일). alpha.46 배포는 선택 — gjcu 가 exactOpt 활성화 상태면 도움, 아니면 대기
 - 시각 회귀 수동 검증 + Playwright 스냅샷 regression suite (DECISIONS #63 권고)
 
 **alpha.37~40 하이라이트**:

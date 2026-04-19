@@ -464,6 +464,46 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #69 v0.3 Task D — exactOptionalPropertyTypes 승격 (430 errors → 0)
+
+`docs/NEXT_SESSION.md` § 3 (Task D) 실행. 3 병렬 에이전트로 영역별 분담:
+
+1. **D-1 (config/transfer/form)**: 151 → 0, 24 파일. EntityForm 29, InlineSubCollectionField 18, SubCollectionField 15, EntityFormBase 14, TableSubCollectionField/CardSubCollectionField 8+8, transfer/Type 17 등
+2. **D-2 (components/fields)**: 190 → 0, 52 파일. **2 세션 분할** (첫 세션 101 개 수정 후 병렬 응답 실패로 중단 → 재개 세션이 잔여 89 처리). FormField 25 (abstract), SelectField 14, OptionalField 12, ManyToOneField 11, NumberField 10, ApplyFullAddressFields 8, ListableFormField/Xref 계열/Address/ContentAsset 등
+3. **D-3 (list+form+revision+validations+ui+adapters)**: 89 → 0, 40 파일. ViewListGrid 6, FieldRenderer 9, 그 외 list/form hooks, validations/UIProvider 옵셔널 프로퍼티 정리
+
+**에러 타입 분포 (원본 430)**:
+- TS2412 — 옵셔널 타입 불일치 (`x?: T` ← `T | undefined`): 201
+- TS2375 — 객체 리터럴 `x: undefined` 포함: 122
+- TS2379 — 함수 인자 `undefined` 전달: 94
+- TS2532/2769/2345/2322: 13
+
+**수정 패턴**:
+- **TS2412 (대부분)**: public `interface Foo { x?: T }` → `{ x?: T | undefined }` 로 넓힘. 호출자 관점에서 완전히 호환 (JS 런타임 동일, 생략/undefined 전달 모두 가능)
+- **TS2412 (internal)**: 클래스 내부에서 `this.x = undefined` → `delete this.x` (동일 런타임 효과) 또는 `if (val !== undefined) this.x = val` narrow
+- **TS2375 JSX**: `<View prop={x}>` 에서 x 가 undefined 가능 시 조건부 스프레드 `{...(x !== undefined ? { prop: x } : {})}` 패턴
+- **TS2379**: 메소드 시그니처에 `arg?: T | undefined` 명시
+- **TS2375 spread cast**: `{...await getInputRendererParameters(this, params) as React.ComponentProps<typeof X>}` 로 InputRendererProps 의 옵셔널 필드 호환성 확보 (Xref/Address/Color 계열 Views)
+
+**tsconfig 변경**:
+- `"exactOptionalPropertyTypes": true` 추가. tsconfig.build.json 은 extends 로 자동 상속
+- 이로써 strict 옵션 **5 종 전부 true**: strict + noImplicitAny + noImplicitReturns + noFallthroughCasesInSwitch + noUncheckedIndexedAccess + exactOptionalPropertyTypes
+
+**메인 컨텍스트 보호 원칙 실전 검증**:
+- 메인은 큰 파일 (EntityForm.tsx 839 줄, FormField.tsx 809 줄) 을 직접 읽지 않음. 에이전트 3 개가 영역별로 읽고 고정 포맷 리포트 반환
+- 2차 병렬 dispatch 시 3 응답 중 2 개가 internal error 로 회수 불가. 하지만 git diff 로 실제 파일 수정은 반영되어 있음 확인 → **부분 진행 후 재개 가능**. 이 실패 모드 이후 세션 정책: 병렬 실패 시 git status / tsc error count 로 상태 회수, 실패 영역만 직렬 재 dispatch
+
+**public API 변경 영향**:
+- 모든 변경이 `x?: T` → `x?: T | undefined` 형태로 **넓어지는 방향**. 기존 소비자 (gjcu) 는 호환
+- IListConfig, Address, MultipleAssetForm/AssetItem, XrefPrice/Prefer/PriorityMappingValue 등 export interface 옵셔널 필드도 동일
+- 런타임 동작 0 변경. 타입 annotation only
+
+**Why**: `exactOptionalPropertyTypes: false` 상태에서는 `{ x: undefined }` 와 `{}` 이 타입상 동일하게 처리되어 "의도적으로 누락" vs "의도적으로 undefined 대입" 이 구분 안 됨. `true` 승격으로 이 모호성 제거. 향후 옵셔널 필드의 존재 여부 체크 (`'x' in obj` vs `obj.x !== undefined`) 가 실제 의미를 가짐
+
+**배포 판단**: public API 타입이 확장만 되었고 런타임 변경 0. 소비자 (gjcu) 에서 exactOpt 활성화 여부에 따라 이득이 다름 — 활성화 상태면 이 라이브러리 업그레이드로 타입 체크가 더 촘촘해짐, 비활성화 상태면 영향 없음. **alpha.46 배포는 선택적**. Task E 완료 시 함께 배포하는 것도 가능
+
+**v0.3 잔여**: Task E (EntityForm<T> / FieldValue<T> generic refactor). 이후 v0.2.0 major bump 검토
+
 ### #68 v0.3 Task C — coverage 8.1% → 16.9% (config/form/fields 테스트 525 개 추가)
 
 `docs/NEXT_SESSION.md` § 2 (Task C) 실행. 3 병렬 에이전트로 영역별 분담:
