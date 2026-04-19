@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (alpha.45 — **v0.2 backlog 소진**. 테스트 포팅 5 파일 마감 (8 files / 133 tests), `any` 459 → 328 (−131), `noImplicitAny: true` 승격. HTTP 303 확인.)
+마지막 업데이트: 2026-04-19 (alpha.45 + 후속 정비 — **품질 게이트 완전 강제**. 375 tests / 8.1% coverage / strict 옵션 4개 승격 / ESLint v10 flat config / Prettier CI 강제. 다음 세션: `docs/NEXT_SESSION.md` 참조 — v0.3 backlog (Task C coverage / D exactOpt / E generic).)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
