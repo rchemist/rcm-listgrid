@@ -135,17 +135,3 @@ export const getIndicatorTone = (color: string): 'info' | 'success' | 'warning' 
   }
 };
 
-// Deprecated: legacy class-name mapping, kept for backward-compat of public API.
-// JSX now prefers `getIndicatorTone` + `data-tone`.
-export const getColorIndicator = (color: string): string => {
-  switch (color) {
-    case 'danger':
-      return 'rcm-alerts-indicator-error';
-    case 'warning':
-      return 'rcm-alerts-indicator-warning';
-    case 'success':
-      return 'rcm-alerts-indicator-success';
-    default:
-      return 'rcm-alerts-indicator-info';
-  }
-};
