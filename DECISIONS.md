@@ -464,6 +464,38 @@ Phase 8 에서 defaultListGridTheme / defaultTheme / subCollectionTheme 의 "rcm
 **grep 검증**: `rcm-button-primary` / `-outline` / `-danger` / `-outline-danger` / `-secondary` / `-sm` / `-icon` 모두 src/**/*.{ts,tsx} 참조 0. components.css 에도 해당 셀렉터 0.
 **유예 사항**: ViewListGridTheme.types 의 일부 theme slot (searchInput.button, advancedSearch.*, filterDropdown.*, priority.* 등) 은 현재 JSX 에서 소비되지 않지만 v0.2 major bump 전까지 공개 API breaking 을 피하고자 slot 자체는 유지 (string 만 비움). "TODO: remove in v0.2" JSDoc 으로 표시.
 
+### #67 품질 게이트 완전 강제 — noUncheckedIndexedAccess + prettier + utils 테스트
+
+DECISIONS #66 에 이어 품질 게이트 3 건을 hard-enforced 상태로 마감.
+
+1. **`noUncheckedIndexedAccess: true` 승격** — 118 errors 를 2 병렬 에이전트가 영역별로 분담:
+   - 영역 A (utils/adapters/config/transfer/form/misc): 58 → 0. simpleCrypt 20, EntityForm 7, Type 6 등
+   - 영역 B (components/*): 60 → 0. useContentAsset 7, MultipleAssetField 6, searchFormUrlSync 4 등
+   - Fix 패턴: 루프 / length 가드 뒤 `arr[i]!`, `split` / `Object.keys` 결과 `parts[n]!`, optional data `?.` 또는 `?? fallback`
+   - 43 파일 수정. 런타임 동작/public API 무변경
+
+2. **Prettier 일괄 포맷** — 299 파일 `npm run format` 으로 공백/따옴표/trailing comma 통일. CI 의 `format:check || echo` 제거 → 실패 시 빌드 fail
+
+3. **utils + common 테스트 대량 추가** — 11 파일에 242 tests 작성 (BooleanUtil/StringUtil/CompareUtil/PhoneUtil/jsonUtils/classNames/cn/hash/i18n/simpleCrypt/common-func)
+   - utils 2.3% → 93.04%, common 0% → 94.18%, 전체 4.5% → **8.1%**
+   - simpleCrypt: roundtrip (ASCII/Unicode/empty)
+   - hash.ts: FNV-1a 알려진 벡터로 검증
+   - i18n: dictionary / factory / runtime switch 패턴 커버
+   - vitest.config.ts thresholds 상향: statements 4→8, branches 2→6, functions 3→6, lines 4→8 (baseline 바로 아래)
+
+**세션 누적 품질 게이트 상태** (DECISIONS #64~#67 종합):
+- `npm run type-check`: strict + noImplicit{Any,Returns} + noFallthroughCasesInSwitch + noUncheckedIndexedAccess
+- `npm run lint`: 0 errors 강제 (ESLint v10 flat config)
+- `npm run format:check`: 0 drift 강제 (Prettier)
+- `npm run test:coverage`: thresholds 강제 (8%/6%/6%/8%)
+- CI 는 위 4 개 + build + dist 검증. 하나라도 깨지면 PR fail
+
+**Why**: "품질 게이트가 존재하는 상태" 와 "게이트가 실제로 기능하는 상태" 는 다르다. alpha.44 에서 ESLint / CI 는 설정만 있었고 `|| echo` 로 실패를 숨기고 있었음. #66~#67 로 모든 게이트가 실제로 blocking 하도록 정비. 이제부터 기여자는 type / lint / format / coverage 중 하나라도 깨면 PR 이 통과하지 않음 → **오픈소스 협업 표준 품질** 달성.
+
+**배포 판단**: 모든 변경이 dev-facing + pure assertion. 런타임 동일. alpha.46 배포 불필요.
+
+**v0.3 재확정**: (1) coverage 점진 상향 (8.1% → 20%+, config/form/fields 테스트) (2) `exactOptionalPropertyTypes` 승격 (430 errors — foundation 파일 대거 수정 필요) (3) `EntityForm<T>` / `FieldValue<T>` generic refactor 로 의도된 any 해소 (4) Playwright 스냅샷 regression suite (DECISIONS #63 권고)
+
 ### #66 alpha.45 후속 정비 — ESLint v10 flat config + strict 옵션 + coverage 임계치
 
 alpha.45 배포 직후 CI/품질 gate 정비 3 건을 한 세션에 완료.
