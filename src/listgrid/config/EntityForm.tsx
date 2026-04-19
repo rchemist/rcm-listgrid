@@ -177,7 +177,7 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
 
     // initialize 후 entityForm 에 id 가 있으면 fetch 도 해 온다.
     // dataPreloaded가 true이면 이미 setFetchedValues()로 데이터가 로드되었으므로 중복 fetch를 건너뛴다.
-    let fetchedEntity: any = null;
+    let fetchedEntity: (T & Record<string, any>) | null = null;
     if (!list) {
       if (this.isAbleFetch() && !this.dataPreloaded) {
         try {

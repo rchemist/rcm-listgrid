@@ -81,7 +81,7 @@ export abstract class EntityFormBase<T extends object = any> {
 
   // setFetchedValues()에서 받은 원본 엔티티 객체를 저장한다.
   // 등록된 필드가 아닌 엔티티의 임의 속성에 접근할 때 사용한다.
-  fetchedEntity?: any;
+  fetchedEntity?: T | undefined;
 
   // Alert 메시지 관리
   alertMessages: AlertMessage[] = [];
@@ -325,17 +325,17 @@ export abstract class EntityFormBase<T extends object = any> {
     return this.getField(name)?.getCurrentValue(this.getRenderType());
   }
 
-  getFetchedEntity(): any {
+  getFetchedEntity(): T | undefined {
     return this.fetchedEntity;
   }
 
-  // intentional: values object is a generic entity payload
-  async getValues(): Promise<Record<string, any>> {
+  // intentional: values object is a generic entity payload (shape driven by registered fields)
+  async getValues(): Promise<Partial<T> & Record<string, any>> {
     const values: Record<string, any> = {};
     for (const field of this.fields.values()) {
       values[field.getName()] = await field.getCurrentValue(this.getRenderType());
     }
-    return values;
+    return values as Partial<T> & Record<string, any>;
   }
 
   hasTab(id: string): boolean {
