@@ -393,7 +393,7 @@ describe('FormField - clone', () => {
 
 describe('FormField - withAttributes / withValidations / withCardIcon / withOverrideRender', () => {
   it('withAttributes stores the Map', () => {
-    const attrs = new Map<string, any>([['k', 'v']]);
+    const attrs = new Map<string, unknown>([['k', 'v']]);
     const f = make().withAttributes(attrs);
     expect(f.attributes).toBe(attrs);
   });

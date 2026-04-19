@@ -146,7 +146,7 @@ export interface FormFieldProps<TValue = any, TForm extends object = any> {
   helpText?: HelpTextType; // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
   hidden?: HiddenType; // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
   readonly?: ReadOnlyType; // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  attributes?: Map<string, any>; // 필드의 attributes
+  attributes?: Map<string, unknown>; // 필드의 attributes
   hideLabel?: boolean; // 필드 렌더러에서 필드의 라벨을 표시할지 여부
   requiredPermissions?: string[]; // 이 필드를 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 필드가 표시됨.
   layout?: FieldLayoutType; // 필드 레이아웃 타입 (auto: 자동, full: 전체 너비, half: 절반 너비)
@@ -192,7 +192,7 @@ export abstract class FormField<
   readonly?: ReadOnlyType;
   required?: RequiredType;
   hideLabel?: boolean;
-  attributes?: Map<string, any>;
+  attributes?: Map<string, unknown>;
   requiredPermissions?: string[];
   cardIcon?: CardIconType;
   layout?: FieldLayoutType;
@@ -690,7 +690,7 @@ export abstract class FormField<
     return this.name;
   }
 
-  withAttributes(attributes: Map<string, any>): this {
+  withAttributes(attributes: Map<string, unknown>): this {
     this.attributes = attributes;
     return this;
   }

@@ -28,7 +28,7 @@ export interface EntityField extends EntityItem {
    * 필드를 커스텀으로 표시하게 하는데 필요한 여러 정보를 자유롭게 사용할 수 있다.
    * 이 정보는 저장 용도로는 사용되지 않는다.
    */
-  attributes?: Map<string, any>;
+  attributes?: Map<string, unknown>;
 
   /**
    * CheckButtonValidation의 검증 상태를 저장
@@ -102,7 +102,7 @@ export interface EntityField extends EntityItem {
 
   withDefaultValue(value: any): this;
 
-  withAttributes(attributes: Map<string, any>): this;
+  withAttributes(attributes: Map<string, unknown>): this;
 
   getFetchedValue(): Promise<any>;
 

@@ -178,7 +178,7 @@ export abstract class EntityFormBase<T extends object = any> {
    * 엔티티폼을 커스텀으로 표시하게 하는데 필요한 여러 정보를 자유롭게 사용할 수 있다.
    * 이 정보는 저장 용도로는 사용되지 않는다.
    */
-  attributes?: Map<string, any> | undefined;
+  attributes?: Map<string, unknown> | undefined;
 
   /**
    * ViewEntityForm에서 헤더 버튼과 Alert 영역 사이에 표시될 커스텀 영역
@@ -775,7 +775,7 @@ export abstract class EntityFormBase<T extends object = any> {
     return this;
   }
 
-  withAttributes(attributes?: Map<string, any>): this {
+  withAttributes(attributes?: Map<string, unknown>): this {
     this.attributes = attributes;
     return this;
   }
@@ -785,14 +785,14 @@ export abstract class EntityFormBase<T extends object = any> {
     return this;
   }
 
-  getAttributes(): Map<string, any> {
+  getAttributes(): Map<string, unknown> {
     // 새 Map 을 생성해 내보낸다.
-    return this.attributes ? new Map(this.attributes) : new Map<string, any>();
+    return this.attributes ? new Map(this.attributes) : new Map<string, unknown>();
   }
 
-  putAttribute(key: string, value: any): this {
+  putAttribute(key: string, value: unknown): this {
     if (this.attributes === undefined) {
-      this.attributes = new Map<string, any>();
+      this.attributes = new Map<string, unknown>();
     }
     this.attributes.set(key, value);
     return this;
@@ -809,10 +809,10 @@ export abstract class EntityFormBase<T extends object = any> {
     return this.attributes ? this.attributes.has(key) : false;
   }
 
-  addAttributeToField(fieldName: string, key: string, value: any) {
+  addAttributeToField(fieldName: string, key: string, value: unknown) {
     const field = this.getField(fieldName);
     if (field) {
-      const attributes: Map<string, any> = field.attributes ?? new Map<string, any>();
+      const attributes: Map<string, unknown> = field.attributes ?? new Map<string, unknown>();
       attributes.set(key, value);
       field.attributes = attributes;
       this.fields.set(field.name, field);
@@ -822,14 +822,14 @@ export abstract class EntityFormBase<T extends object = any> {
   removeAttributeToField(fieldName: string, key: string) {
     const field = this.getField(fieldName);
     if (field) {
-      const attributes: Map<string, any> = field.attributes ?? new Map<string, any>();
+      const attributes: Map<string, unknown> = field.attributes ?? new Map<string, unknown>();
       attributes.delete(key);
       field.attributes = attributes;
       this.fields.set(field.name, field);
     }
   }
 
-  getFieldAttributes(fieldName: string): Map<string, any> | undefined {
+  getFieldAttributes(fieldName: string): Map<string, unknown> | undefined {
     const field = this.getField(fieldName);
     return field?.attributes;
   }

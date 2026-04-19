@@ -99,7 +99,7 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
 
     entityForm.excludeListFields = this.excludeListFields ? [...this.excludeListFields] : undefined;
     entityForm.sessionRequired = this.sessionRequired;
-    entityForm.attributes = this.attributes ? new Map<string, any>(this.attributes) : undefined;
+    entityForm.attributes = this.attributes ? new Map<string, unknown>(this.attributes) : undefined;
 
     entityForm.cacheKeyFunc = this.cacheKeyFunc;
     entityForm.onChanges = this.onChanges ? [...this.onChanges] : undefined;
