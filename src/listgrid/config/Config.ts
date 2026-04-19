@@ -84,10 +84,10 @@ export type ValuedString = (props: ConditionalValue) => Promise<string>;
 export type ValuedBoolean = (props: ConditionalValue) => Promise<boolean>;
 export type ValuedReactNode = (props: ConditionalValue) => Promise<ReactNode>;
 
-export interface FieldValue {
-  current?: any;
-  fetched?: any;
-  default?: any;
+export interface FieldValue<TValue = any> {
+  current?: TValue;
+  fetched?: TValue;
+  default?: TValue;
 }
 
 export interface OptionalBoolean {
@@ -459,12 +459,18 @@ export type InlineMapConfig = {
   label?: { key?: string; value?: string };
 };
 
-export type ModifyEntityFormFunc = (entityForm: EntityForm, name?: string) => Promise<EntityForm>;
-export type ModifyFetchedEntityFormFunc = (
-  entityForm: EntityForm,
+export type ModifyEntityFormFunc<T extends object = any> = (
+  entityForm: EntityForm<T>,
+  name?: string,
+) => Promise<EntityForm<T>>;
+export type ModifyFetchedEntityFormFunc<T extends object = any> = (
+  entityForm: EntityForm<T>,
   response?: any,
-) => Promise<EntityForm>;
-export type OnInitializeFunc = (entityForm: EntityForm, session?: Session) => Promise<EntityForm>;
+) => Promise<EntityForm<T>>;
+export type OnInitializeFunc<T extends object = any> = (
+  entityForm: EntityForm<T>,
+  session?: Session,
+) => Promise<EntityForm<T>>;
 
 export type TabInfo = {
   id: string;

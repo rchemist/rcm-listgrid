@@ -15,7 +15,7 @@ import { EntityField } from '../../config/EntityField';
 import { EntityFieldGroup } from '../../config/EntityFieldGroup';
 import { EntityTab } from '../../config/EntityTab';
 
-export abstract class EntityFormData extends EntityFormValidation {
+export abstract class EntityFormData<T extends object = any> extends EntityFormValidation<T> {
   constructor(name: string, url: string) {
     super(name, url);
   }
@@ -48,7 +48,7 @@ export abstract class EntityFormData extends EntityFormValidation {
     return this;
   }
 
-  setValues(cloned: EntityFormBase): this {
+  setValues(cloned: EntityFormBase<T>): this {
     // fields 의 value 를 복사해 붙인다.
     this.fields.forEach((field, key) => {
       const clonedField = cloned.getField(key);

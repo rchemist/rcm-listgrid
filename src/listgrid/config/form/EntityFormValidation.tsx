@@ -4,7 +4,7 @@ import { isEmpty } from '../../utils';
 import { mergeFieldErrors } from '../../config/EntityFormMethod';
 import { ManageEntityForm } from '../../config/Config';
 
-export abstract class EntityFormValidation extends EntityFormBase {
+export abstract class EntityFormValidation<T extends object = any> extends EntityFormBase<T> {
   constructor(name: string, url: string) {
     super(name, url);
   }

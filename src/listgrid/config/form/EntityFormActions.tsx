@@ -31,7 +31,7 @@ import { EntityForm } from '../../config/EntityForm';
 import { DataTransferConfig, DataTransferRule, DataField } from '../../transfer/Type';
 import { isEmpty } from '../../utils/CompareUtil';
 
-export abstract class EntityFormActions extends EntityFormData {
+export abstract class EntityFormActions<T extends object = any> extends EntityFormData<T> {
   constructor(name: string, url: string) {
     super(name, url);
   }

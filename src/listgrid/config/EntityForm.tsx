@@ -41,17 +41,17 @@ import { PhoneNumberField } from '../components/fields/PhoneNumberField';
 import { createSmsHistoryField } from '../extensions/FieldExtensions';
 import { hasAnyRole } from '../auth';
 
-export class EntityForm extends EntityFormExtensions {
+export class EntityForm<T extends object = any> extends EntityFormExtensions<T> {
   constructor(name: string, url: string) {
     super(name, url);
   }
 
-  clone(includeValue?: boolean): EntityForm {
-    const cloned = new EntityForm(this.name, this.url);
+  clone(includeValue?: boolean): EntityForm<T> {
+    const cloned = new EntityForm<T>(this.name, this.url);
     return this.cloneWithEntityForm(cloned, includeValue);
   }
 
-  cloneWithEntityForm(entityForm: EntityForm, includeValue?: boolean): EntityForm {
+  cloneWithEntityForm(entityForm: EntityForm<T>, includeValue?: boolean): EntityForm<T> {
     entityForm.parentId = this.parentId;
     entityForm.id = this.id;
     entityForm.title = this.title;
@@ -137,7 +137,7 @@ export class EntityForm extends EntityFormExtensions {
     return Promise.resolve();
   }
 
-  merge(origin: EntityForm): this {
+  merge(origin: EntityForm<T>): this {
     // entityForm 의 모든 속성을 cloned 의 속성으로 덮어 쓴다.
     origin.cloneWithEntityForm(this, true);
     return this;
@@ -514,7 +514,7 @@ export class EntityForm extends EntityFormExtensions {
 
   withOverrideSubmitData(
     fn: (
-      entityForm: EntityForm,
+      entityForm: EntityForm<T>,
       data: any,
     ) => Promise<{
       data: any;
@@ -528,7 +528,7 @@ export class EntityForm extends EntityFormExtensions {
     return this;
   }
 
-  public async setFetchedValues(entity: any): Promise<EntityForm> {
+  public async setFetchedValues(entity: Partial<T> | any): Promise<EntityForm<T>> {
     // 원본 엔티티 객체를 저장 (등록된 필드 외 속성 접근용)
     this.fetchedEntity = entity;
 
@@ -573,12 +573,12 @@ export class EntityForm extends EntityFormExtensions {
       }
     });
 
-    let entityForm = this as unknown as EntityForm;
+    let entityForm = this as unknown as EntityForm<T>;
     // onFetchData 콜백 실행
     if (this.onFetchData && !isEmpty(this.onFetchData) && this instanceof EntityForm) {
       for (const postFetch of [...this.onFetchData]) {
         try {
-          entityForm = await postFetch(this, entity);
+          entityForm = await postFetch(this as unknown as EntityForm<T>, entity);
         } catch (e) {
           // nothing to do
           console.error(e);
@@ -634,7 +634,7 @@ export class EntityForm extends EntityFormExtensions {
     // 필드 에러 초기화
     this.errors = [];
 
-    let form = this.clone(true) as EntityForm;
+    let form = this.clone(true) as EntityForm<T>;
 
     if (renderType === 'update' && !this.isDirty()) {
       // update 에서 변경된 정보가 전혀 없다면 수정할 내용이 없다는 에러를 낸다.
@@ -1037,7 +1037,7 @@ export class EntityForm extends EntityFormExtensions {
 
   withCheckDuplicate(
     fieldName: string,
-    checkDuplicate: (entityForm: EntityForm, value: string) => Promise<ValidateResult>,
+    checkDuplicate: (entityForm: EntityForm<T>, value: string) => Promise<ValidateResult>,
   ): this {
     const field = this.getField(fieldName);
 

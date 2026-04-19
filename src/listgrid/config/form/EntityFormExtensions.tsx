@@ -9,7 +9,7 @@ import {
 } from '../../extensions/EntityFormExtension.types';
 import { EntityFormActions } from '../../config/form/EntityFormActions';
 
-export abstract class EntityFormExtensions extends EntityFormActions {
+export abstract class EntityFormExtensions<T extends object = any> extends EntityFormActions<T> {
   constructor(name: string, url: string) {
     super(name, url);
   }

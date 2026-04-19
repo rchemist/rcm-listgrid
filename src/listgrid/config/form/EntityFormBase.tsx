@@ -28,7 +28,7 @@ import { SubCollectionField } from '../../config/SubCollectionField';
 import { EntityFieldGroup } from '../../config/EntityFieldGroup';
 import { SelectOption } from '../../form/Type';
 
-export abstract class EntityFormBase {
+export abstract class EntityFormBase<T extends object = any> {
   constructor(name: string, url: string) {
     this.name = name;
     this.url = url;
@@ -48,7 +48,7 @@ export abstract class EntityFormBase {
     | {
         title?: string;
         field?: string;
-        view?: (entityForm: EntityForm) => Promise<ReactNode>;
+        view?: (entityForm: EntityForm<T>) => Promise<ReactNode>;
       }
     | undefined;
   // Entity 데이터를 fetch 하는 backend api 의 url
@@ -102,25 +102,25 @@ export abstract class EntityFormBase {
   // 반드시 세션이 필요한 경우 true 로 설정한다.
   sessionRequired?: boolean | undefined;
 
-  cacheKeyFunc?: ((entityForm: EntityForm) => string) | undefined;
+  cacheKeyFunc?: ((entityForm: EntityForm<T>) => string) | undefined;
 
   // 필드값이 변경될 때 마다 실행되는 확장 포인트
   // 예를 들어 X 필드의 값이 특정값일 때 Y 필드의 상태를 조정한다거나 할 수 있다.
-  onChanges?: ModifyEntityFormFunc[] | undefined;
+  onChanges?: ModifyEntityFormFunc<T>[] | undefined;
 
   // EntityForm 데이터를 fetch 한 후 EntityForm 을 변조하기 위한 확장 포인트
   // 예를 들어 커스텀필드 기능을 제공할 때 원래 entity 를 fetch 한 후, 해당 entity 와 연결된 커스텀필드의 정보를 다시 fetch 하는 로직을 추가할 수 있다.
-  onFetchData?: ModifyFetchedEntityFormFunc[] | undefined;
+  onFetchData?: ModifyFetchedEntityFormFunc<T>[] | undefined;
 
   // 최초 EntityForm 이 활성화 될 때 EntityForm 을 변조하기 위한 확장 포인트
   // initialize 는 fetch 후에 실행된다.
   // 예를 들어 커스텀필드 기능을 제공하려고 하면, initialize 확장을 통해 해당 엔티티의 커스텀필드 configuration 정보를 확인하고 entityForm 에 필드를 추가한다.
-  onInitialize?: OnInitializeFunc[] | undefined;
+  onInitialize?: OnInitializeFunc<T>[] | undefined;
 
   onFetchListData?: PostFetchListData[] | undefined;
 
   // save 로직 override 를 위한 확장 포인트
-  onSave?: ((entityForm: EntityForm) => Promise<EntityFormActionResult>) | undefined;
+  onSave?: ((entityForm: EntityForm<T>) => Promise<EntityFormActionResult>) | undefined;
 
   // save 로직이 완료되고 난 후 확장 포인트, ViewEntityForm 에도 postSave 가 있는데, 그 값과는 관계가 없다.
   // 왜 이게 두개냐면, react 의 state, hook 과 같은 이벤트를 entityForm 내부에서는 사용할 수가 없기 때문이다.
@@ -129,7 +129,7 @@ export abstract class EntityFormBase {
 
   // delete 로직이 완료되고 난 후 확장 포인트, idList 가 undefined 가 아닌 경우 목록에서 복수로 삭제했다는 뜻이다. 이때는 idList 를 가지고 뭔가를 해야 한다.
   // postSave 와 마찬가지로 화면 제어를 하기 위한 postDelete 는 ViewEntityForm 에서 설정해야 한다.
-  postDelete?: ((entityForm: EntityForm, idList?: any[]) => Promise<void>) | undefined;
+  postDelete?: ((entityForm: EntityForm<T>, idList?: any[]) => Promise<void>) | undefined;
 
   /*
    * create form 을 만들어 서버로 전송하기 전에 데이터를 변경할 수 있는 기능을 제공한다.
@@ -137,7 +137,7 @@ export abstract class EntityFormBase {
    */
   overrideSubmitData?:
     | ((
-        entityForm: EntityForm,
+        entityForm: EntityForm<T>,
         data: any,
       ) => Promise<{
         data: any;
@@ -152,7 +152,9 @@ export abstract class EntityFormBase {
    * Data 를 fetch 할 때 로직을 오버라이드 한다.
    * overrideFetchData 가 정의되어 있으면 메소드 fetchData 의 최상단에서 오버라이드 된다.
    */
-  overrideFetchData?: ((url: string, entityForm: EntityForm) => Promise<ResponseData>) | undefined;
+  overrideFetchData?:
+    | ((url: string, entityForm: EntityForm<T>) => Promise<ResponseData>)
+    | undefined;
 
   /**
    * data upload / download 설정
@@ -169,7 +171,7 @@ export abstract class EntityFormBase {
    * EntityForm 상태에 따른 동적 버튼 추가
    * EntityFormButton 또는 EntityFormReactNodeButton 타입을 반환
    */
-  buttons?: ((entityForm: EntityForm) => Promise<EntityFormButtonType[]>)[] | undefined;
+  buttons?: ((entityForm: EntityForm<T>) => Promise<EntityFormButtonType[]>)[] | undefined;
 
   /**
    * ViewEntityForm 할 때 사용할 수 있다.
@@ -182,7 +184,7 @@ export abstract class EntityFormBase {
    * ViewEntityForm에서 헤더 버튼과 Alert 영역 사이에 표시될 커스텀 영역
    * sticky 포지셔닝으로 스크롤 시 상단에 고정됨
    */
-  headerArea?: ((entityForm: EntityForm) => Promise<ReactNode>) | undefined;
+  headerArea?: ((entityForm: EntityForm<T>) => Promise<ReactNode>) | undefined;
 
   async reload(): Promise<void> {
     this.initialize({});
@@ -193,7 +195,7 @@ export abstract class EntityFormBase {
     list?: boolean;
   }): Promise<EntityFormActionResult>;
 
-  abstract clone(includeValue?: boolean): EntityFormBase;
+  abstract clone(includeValue?: boolean): EntityFormBase<T>;
 
   withMenuUrl(menuUrl?: string): this {
     this.menuUrl = menuUrl;
@@ -211,7 +213,7 @@ export abstract class EntityFormBase {
       | {
           title?: string;
           field?: string;
-          view?: (entityForm: EntityForm) => Promise<ReactNode>;
+          view?: (entityForm: EntityForm<T>) => Promise<ReactNode>;
         },
   ): this {
     if (typeof title === 'string') {
@@ -274,7 +276,7 @@ export abstract class EntityFormBase {
     return this;
   }
 
-  withPostDelete(postDelete: (entityForm: EntityForm, idList?: any[]) => Promise<void>): this {
+  withPostDelete(postDelete: (entityForm: EntityForm<T>, idList?: any[]) => Promise<void>): this {
     this.postDelete = postDelete;
     return this;
   }
@@ -739,22 +741,22 @@ export abstract class EntityFormBase {
     return this.revisionEntityName || this.menuUrl || this.name;
   }
 
-  withButtons(buttons: (entityForm: EntityForm) => Promise<EntityFormButtonType[]>): this {
+  withButtons(buttons: (entityForm: EntityForm<T>) => Promise<EntityFormButtonType[]>): this {
     this.buttons = [...(this.buttons ?? []), buttons];
     return this;
   }
 
-  withOnChanges(...onChanges: ModifyEntityFormFunc[]): this {
+  withOnChanges(...onChanges: ModifyEntityFormFunc<T>[]): this {
     this.onChanges = [...(this.onChanges ?? []), ...onChanges];
     return this;
   }
 
-  withOnFetchData(...onLoad: ModifyFetchedEntityFormFunc[]): this {
+  withOnFetchData(...onLoad: ModifyFetchedEntityFormFunc<T>[]): this {
     this.onFetchData = [...(this.onFetchData ?? []), ...onLoad];
     return this;
   }
 
-  withOnInitialize(...onInitialize: OnInitializeFunc[]): this {
+  withOnInitialize(...onInitialize: OnInitializeFunc<T>[]): this {
     this.onInitialize = [...(this.onInitialize ?? []), ...onInitialize];
     return this;
   }
@@ -764,7 +766,7 @@ export abstract class EntityFormBase {
     return this;
   }
 
-  withOnSave(onSave?: (entityForm: EntityForm) => Promise<EntityFormActionResult>): this {
+  withOnSave(onSave?: (entityForm: EntityForm<T>) => Promise<EntityFormActionResult>): this {
     this.onSave = onSave;
     return this;
   }
@@ -774,7 +776,7 @@ export abstract class EntityFormBase {
     return this;
   }
 
-  withHeaderArea(headerArea: (entityForm: EntityForm) => Promise<ReactNode>): this {
+  withHeaderArea(headerArea: (entityForm: EntityForm<T>) => Promise<ReactNode>): this {
     this.headerArea = headerArea;
     return this;
   }
