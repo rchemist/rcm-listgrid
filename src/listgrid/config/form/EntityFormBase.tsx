@@ -309,6 +309,8 @@ export abstract class EntityFormBase<T extends object = any> {
     return this.fields.has(name);
   }
 
+  getField<K extends keyof T & string>(name: K): EntityField | undefined;
+  getField(name: string): EntityField | undefined;
   getField(name: string): EntityField | undefined {
     return this.fields.get(name);
   }
@@ -317,6 +319,8 @@ export abstract class EntityFormBase<T extends object = any> {
     return this.collections.get(name);
   }
 
+  async getValue<K extends keyof T & string>(name: K): Promise<T[K]>;
+  async getValue(name: string): Promise<any>;
   async getValue(name: string): Promise<any> {
     return this.getField(name)?.getCurrentValue(this.getRenderType());
   }

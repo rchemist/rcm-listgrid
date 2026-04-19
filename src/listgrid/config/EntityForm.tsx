@@ -143,6 +143,8 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
     return this;
   }
 
+  setFetchedValue<K extends keyof T & string>(fieldName: K, value: T[K]): this;
+  setFetchedValue(fieldName: string, value: any): this;
   setFetchedValue(fieldName: string, value: any): this {
     const field = this.getField(fieldName);
     if (field) {

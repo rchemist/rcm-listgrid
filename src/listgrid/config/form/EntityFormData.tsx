@@ -39,6 +39,8 @@ export abstract class EntityFormData<T extends object = any> extends EntityFormV
    * @param value
    * @returns
    */
+  setValue<K extends keyof T & string>(fieldName: K, value: T[K]): this;
+  setValue(fieldName: string, value: any): this;
   setValue(fieldName: string, value: any): this {
     const field = this.getField(fieldName);
     if (field) {
@@ -66,6 +68,8 @@ export abstract class EntityFormData<T extends object = any> extends EntityFormV
    * @param value
    * @returns
    */
+  changeValue<K extends keyof T & string>(fieldName: K, value: T[K]): this;
+  changeValue(fieldName: string, value: any): this;
   changeValue(fieldName: string, value: any): this {
     const field = this.getField(fieldName);
     if (field) {
