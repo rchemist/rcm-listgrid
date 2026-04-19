@@ -134,4 +134,3 @@ export const getIndicatorTone = (color: string): 'info' | 'success' | 'warning' 
       return 'info';
   }
 };
-

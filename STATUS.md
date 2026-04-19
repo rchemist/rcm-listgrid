@@ -1,6 +1,6 @@
 # @rcm/listgrid — 현재 상태
 
-마지막 업데이트: 2026-04-19 (v0.3 Task G 세션 2 완료 — **`parse<T = unknown>` 제네릭화 + jsonUtils/parse 일원화 + `ViewRenderProps<TForm>` / `ViewValueProps<TForm>` 제네릭화 + `ViewValueProps.compact?` 선행 버그 fix**. 내부 11 소비자 narrow. 33+ concrete 필드 무수정 호환. any 284 → 280 (−4 표면 grep). 900 tests / type-check / lint / format / build 전 품질 게이트 PASS. gjcu overlay type-check 0 errors 유지. 배포는 별도 판단.)
+마지막 업데이트: 2026-04-19 (v0.2.0 major bump 구현 완료 — **6 breaking change (A-1 attributes Map<string, unknown>, A-2 headerButtons slot 제거, A-3 InlineSubCollectionField.rowActions deprecated API 제거, B-4 ViewEntityFormTheme deprecated slot 5개 제거, B-5 AlertStyles bg/hoverBg/text 제거, B-6 useAlertManager.getColorIndicator 제거) + CHANGELOG.md v0.2.0 섹션 추가**. Task F (alpha.48) + Task G (alpha.49) 통합 major. any 280 → 278 (−2). tests 900 → 884 (deprecated rowActions/rowActionsConfig 케이스 의도적 삭제, −16). 전 품질 게이트 PASS (type-check / lint / format / build). gjcu overlay type-check **0 errors** (migration 후속 수정 없이 즉시 통과). 배포는 메인 판단 (deploy.sh + v0.2.0 tag + gjcu package.json bump).)
 
 이 문서는 **작업 재개용 단일 진입점**입니다. 아키텍처 결정과 과거 맥락은 `DECISIONS.md`에 있고, 이 문서는 **지금 어디에 있고 다음에 뭘 해야 하는지**만 정리합니다.
 
@@ -8,9 +8,23 @@
 
 ## 0. 지금 당장 알아야 할 것
 
-**배포된 현재 버전**: `v0.1.0-alpha.47` (gjcu 실측 호환성 보완 — 공개 API export 확장 + Session.getUser optional 화 + SearchForm.handleAndFilter 시그니처 확장). **Task F 는 alpha.48, Task G 는 alpha.49 배포 대기 중** (메인 판단 예정).
+**배포된 현재 버전**: `v0.1.0-alpha.47` (gjcu 실측 호환성 보완 — 공개 API export 확장 + Session.getUser optional 화 + SearchForm.handleAndFilter 시그니처 확장). **Task F + Task G + v0.2.0 major bump 통합 배포 대기 중** (메인 판단 예정. v0.2.0 tag 하나로 alpha.48/49 대체).
 
-**이번 세션 성과 (v0.3 Task G 세션 2 — parse<T=unknown> + ViewRenderProps<TForm> 제네릭화)**:
+**이번 세션 성과 (v0.2.0 major bump — 6 breaking + Task F/G 통합 마일스톤)**:
+- Phase 1 (A-1 attributes Map<string, unknown>): `EntityField.attributes`, `FormField.attributes`, `FormFieldProps.attributes`, `EntityForm(Base).attributes` + `getAttributes / withAttributes / putAttribute / addAttributeToField / getFieldAttributes / removeAttributeToField` 시그니처 + `ConditionalProps.attributes` (Config.ts). value 타입 `any` → `unknown`. EntityForm.clone Map 리터럴 + FormField.test Map 리터럴 동반. gjcu 실측 영향: `as` cast 이미 자리잡은 관용 + `unknown === 'literal'` 비교 허용 → 0 errors (migration 불필요)
+- Phase 2 (A-2 headerButtons slot 제거): `ViewListGridClassNames.headerButtons?` (+ 11 sub-slot) 인터페이스 삭제 + `defaultListGridTheme.headerButtons` 엔트리 삭제. DECISIONS #61 유예 사항 실행 — HeaderActionButtons JSX 가 이미 rcm-button + data-variant primitive 사용
+- Phase 3 (A-3 InlineSubCollectionField deprecated 제거): InlineRowActionsConfig interface, inlineRowActions/inlineRowActionsConfig 필드, withRowActions/withRowActionsConfig 메소드, constructor props.rowActions/rowActionsConfig, rowActions → rowActionColumns 변환 로직, InlineSubCollectionViewProps.rowActions/rowActionsConfig 전부 삭제. 관련 테스트 케이스 의도적 삭제 (900 → 884, −16). rowActionColumns / withRowActionColumns / InlineRowActionColumn 만 잔존
+- Phase 4 (B-4 ViewEntityFormTheme 5 deprecated slot 제거): TabPanelStyles.container/emptyMessage (→ panel/empty), FieldGroupStyles.headerWrapper/icons/collapseIcon (→ header/actions/collapseToggle). defaultTheme.ts 키 전환. 소비 JSX (ViewFieldGroup.tsx / ViewTabPanel.tsx) 는 이미 new 이름 사용 중
+- Phase 5 (B-5 AlertStyles legacy 정리): bg/hoverBg/text 필드 삭제 + getAlertStyles base object `{ className: 'rcm-notice' }` 만 반환. className + dataTone 조합으로 통일
+- Phase 6 (B-6 getColorIndicator 제거): useAlertManager 에서 함수 삭제 + ViewEntityFormAlerts.tsx import/JSX 리팩터 (`rcm-alerts-indicator ${getColorIndicator(color)}` → className="rcm-alerts-indicator" data-tone=...)
+- Phase 7 (docs + gjcu 실측): CHANGELOG.md v0.2.0 섹션 (BREAKING CHANGES 6 + Task F/G NEW FEATURES + Migration Path). STATUS.md / DECISIONS 업데이트. **gjcu overlay type-check 0 errors** (attributes 호출 패턴 cast 없이도 TS 5.x `unknown === literal` 통과)
+- any count: 280 → 278 (−2 표면 grep — `putAttribute value: any` + `addAttributeToField value: any` → `unknown`. Map<string, any> → Map<string, unknown> 변환은 grep 패턴과 불일치)
+- 전 품질 게이트 PASS: type-check / 884 tests + 1 todo / lint 0 errors / format:check / build
+- commits: `a723e4b` (A-1), `5a1450c` (A-2), `7290aaf` (A-3), `96a58bc` (B-4), `973419e` (B-5), `6bc8aac` (B-6)
+- **gjcu 수정 없음** (uncommitted 변경 0, migration 불필요)
+- 주의: package.json version bump 는 실행하지 않음 — 배포 시 deploy.sh 가 처리
+
+**이전 세션 성과 (v0.3 Task G 세션 2 — parse<T=unknown> + ViewRenderProps<TForm> 제네릭화)**:
 - Phase 1 (parse foundation + jsonUtils 일원화):
   - `misc/index.ts:298` `parse(str): any` → `parse<T = unknown>(str): T` 승격 (primary). 기본값 unknown 으로 호출자 opt-in narrow
   - `utils/jsonUtils.ts:88` duplicate `parse` 구현 제거, `export { parse } from '../misc'` re-export 로 축소 — 기존 import 경로 100% 호환 유지

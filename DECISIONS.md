@@ -917,3 +917,72 @@ alpha.40: 잔여 Tailwind/gjcu-custom 하드코딩 전량 제거. 3 블록 병�
 4. 블록별 commit 분리 → 회귀 시 특정 commit 만 rollback
 **Why**: Opus 4.7 1M context 라도 4,390 줄 base.css + 600+ 줄 JSX 를 9 번 (각 블록 + split + cleanup) 반복 읽으면 한 세션이 200k+ 토큰 소비. 에이전트 격리 시 메인은 ~30k 선 유지 가능 → 한 세션에서 Phase 6 잔여 + 7 + 8 (3 phase) 완료 달성.
 **적용 범위**: 향후 Phase 9 (v0.2 cleanup) 도 동일 패턴. 새 기능 개발 (non-refactor) 도 큰 파일이 관여하면 동일하게 적용.
+
+---
+
+## 2026-04-19 (v0.2.0 major bump 구현 — 6 breaking + Task F/G 통합)
+
+### #75 v0.2.0 major bump — 6 breaking + Task F/G 통합 마일스톤 구현
+
+`docs/V020_BREAKING_DESIGN.md` (세션 1 설계, #74 유예분) 의 Phase 1~7 순서대로 1 에이전트 구현. 설계 Phase 1~6 은 독립 breaking 이므로 각 단위 commit. Phase 7 = docs + gjcu 실측 + STATUS/DECISIONS 업데이트.
+
+**구현 결과 (Phase 1~6)**:
+- **Phase 1 (A-1 attributes Map<string, unknown>)** — `EntityField.attributes`, `FormField.attributes` + `FormFieldProps.attributes`, `EntityForm(Base).attributes` + 헬퍼 메소드 (`getAttributes / withAttributes / putAttribute / addAttributeToField / removeAttributeToField / getFieldAttributes`), `ConditionalProps.attributes` (Config.ts) 의 value 타입 `any` → `unknown`. EntityForm.clone 의 `new Map<string, any>` 리터럴 + FormField.test 의 `new Map<string, any>` 동반. 지역 변수 `value: any` 도 `value: unknown` 으로.
+- **Phase 2 (A-2 ViewListGridTheme.headerButtons slot 제거)** — DECISIONS #61 유예 사항 실행. `ViewListGridClassNames.headerButtons?` (+ 11 sub-slot: wrapper/default/primary/outline/danger/icon/delete/refresh/download/upload/create) 인터페이스 블록 삭제 + `defaultListGridTheme.headerButtons` 엔트리 삭제. HeaderActionButtons JSX 는 이미 `rcm-button` + `data-variant` primitive 직접 사용 — JSX 수정 불필요.
+- **Phase 3 (A-3 InlineSubCollectionField.rowActions deprecated API 제거)** — 제거 항목:
+  - `InlineRowActionsConfig` interface
+  - `InlineSubCollectionField.inlineRowActions`, `inlineRowActionsConfig` 필드
+  - `withRowActions()`, `withRowActionsConfig()` 메소드
+  - Constructor props.rowActions / props.rowActionsConfig
+  - rowActions → rowActionColumns 변환 로직 (constructor + render() spread + View useMemo)
+  - `InlineSubCollectionViewProps.rowActions` / `rowActionsConfig`
+  - 소비 JSX `InlineSubCollectionView.tsx` 의 import / 매개변수 / 내부 변환 분기 전부 삭제
+  - 잔존 API: `rowActionColumns` / `withRowActionColumns` / `InlineRowActionColumn` (gjcu 이미 100% 전환 상태)
+  - 테스트 파일 (`__tests__/InlineSubCollectionField.test.ts`, `__tests__/InlineSubCollectionView.test.tsx`) 의 deprecated 케이스 삭제 + 기존 clone/chain-builder 테스트에서도 rowActions/rowActionsConfig 참조를 rowActionColumns 로 대체
+- **Phase 4 (B-4 ViewEntityFormTheme 5 deprecated slot 제거)** — 대상:
+  - `ViewEntityFormTabPanelStyles.container` (→ `panel`)
+  - `ViewEntityFormTabPanelStyles.emptyMessage` (→ `empty`)
+  - `ViewFieldGroupStyles.headerWrapper` (→ `header`)
+  - `ViewFieldGroupStyles.icons` (→ `actions`)
+  - `ViewFieldGroupStyles.collapseIcon` (→ `collapseToggle`)
+  - defaultTheme.ts 도 new 이름으로 전환. 소비 JSX (`ViewFieldGroup.tsx` / `ViewTabPanel.tsx`) 는 이미 new 이름 사용 중이라 JSX 수정 없음
+- **Phase 5 (B-5 AlertStyles legacy 정리)** — `AlertStyles` 인터페이스에서 `bg` (deprecated — 'rcm-notice' 반환) / `hoverBg` (미사용) / `text` (미사용) 필드 삭제. `getAlertStyles` base object 도 `{ className: 'rcm-notice' }` 만 반환. 소비자 (`AlertItem.tsx`) 는 이미 className/dataTone 만 사용
+- **Phase 6 (B-6 getColorIndicator 제거)** — class-name legacy mapping 함수 제거. `ViewEntityFormAlerts.tsx` JSX 에서 `rcm-alerts-indicator ${getColorIndicator(color)}` concat 을 `className="rcm-alerts-indicator"` + `data-tone={getIndicatorTone(color)}` 로 단순화. `getIndicatorTone` + data-tone 로 통일
+
+**Phase 7 (docs + gjcu 실측)**:
+- `CHANGELOG.md` 생성 (프로젝트 root, 기존에 없었음) — v0.2.0 섹션: BREAKING CHANGES 6 개별 항목 (before/after 코드 예시) + NEW FEATURES (Task F/G 요약) + Migration Path (에러 메시지별 해결 가이드)
+- `STATUS.md` 업데이트 — 상단 0절 + "이번 세션 성과" 블록 + 이전 세션 계단 보정
+- 이 엔트리 (#75) 추가
+- **gjcu overlay 실측**: `rsync dist/` → gjcu node_modules + `apps/admin` type-check. **0 errors** (migration 후속 수정 없이 즉시 통과)
+  - A-1 실측: gjcu 의 `.getAttributes().get(key)` 호출 패턴 ~20 개소 중 cast 없는 케이스 (`const bypass = ef.getAttributes().get('bypassSyllabusFilter')`, `const collaboMode = ef.getAttributes().get('collaboMode')` 등) 다수 존재. 그러나 이후 사용 패턴이 `!bypass` / `!collaboMode` / `collaboMode === 'custom'` 로 TS 5.x 의 `unknown` 비교 허용에 해당 → type-check 통과
+  - A-2/A-3/B-4/B-5/B-6: grep 0 → 영향 0
+
+**실측 수치**:
+- any count (표면 grep `: any` src 내 비테스트): 280 → **278** (−2). 2 감축 위치는 EntityFormBase 의 `putAttribute(value: any)` / `addAttributeToField(value: any)` → `unknown`. `Map<string, any>` → `Map<string, unknown>` 변환은 `: any` grep 패턴과 불일치 (`any>` 로 끝남) — 설계 § 4.1 의 "16 건 감축" 예상은 grep 패턴 오차였음. 실질 승격 범위는 설계대로 15+ 위치 정리 완료
+- 테스트: 900 → **884** passing + 1 todo (−16, 의도적: rowActions/rowActionsConfig deprecated 케이스 + "convert deprecated rowActions" + "prefer over deprecated" 테스트 의도 삭제)
+- type-check / lint (0 errors) / format:check / build: 전부 PASS
+- gjcu-academic-front apps/admin type-check: **0 errors** — v0.2.0 후보로 migration 불필요. 소비자는 "`npm install @rcm/listgrid@0.2.0`" 만으로 끝
+- 커밋 (라이브러리 repo, 6 구현 + 1 meta + 기타 meta 는 별도):
+  - `a723e4b` refactor(breaking)!: v0.2.0 A-1 — attributes: Map<string, unknown>
+  - `5a1450c` refactor(breaking)!: v0.2.0 A-2 — remove ViewListGridTheme.headerButtons slot
+  - `7290aaf` refactor(breaking)!: v0.2.0 A-3 — remove InlineSubCollectionField.rowActions deprecated API
+  - `96a58bc` refactor(breaking)!: v0.2.0 B-4 — remove ViewEntityFormTheme deprecated slots
+  - `973419e` refactor(breaking)!: v0.2.0 B-5 — AlertStyles 에서 bg/hoverBg/text 제거
+  - `6bc8aac` refactor(breaking)!: v0.2.0 B-6 — remove useAlertManager.getColorIndicator
+
+**설계와 달라진 점**:
+- 설계 § 4.1 의 any 감축 예상 (16 건) vs 실측 (2 건) 차이 — `Map<string, any>` 가 `: any` grep 패턴과 불일치해서 애초에 표면 카운트에 반영 안 됐던 위치였음. 실질 승격 범위 (15+ 위치 + 소비자 책임 반환) 는 설계대로 완료되었고, 표면 카운트는 원래 일관되지 않았다는 기록 (v0.3 후속 any 정리 시 grep 패턴 확장 필요)
+- EntityForm.tsx:868 의 `const dataMap = new Map<string, any>()` 은 save data 용 로컬 변수 (필드별 save value 저장) 로 `attributes` 가 아닌 다른 목적이라 유지 — 설계 § 5.2 Phase 1 의 "attributes + ConditionalProps + helper 시그니처" 스코프 내에서는 대상 아님. 추후 Task H+ 에서 재검토 가능
+- gjcu 쪽 uncommitted 변경 **0 파일** — migration 불필요. 설계 § 5.3 위험 완화의 "cast 추가 5~8 개소" 는 TS 5.x `unknown === 'literal'` 허용 규칙 때문에 실제 컴파일 에러로 발현하지 않음. 더 엄격한 migration (`typeof raw === 'string'` 체크) 은 소비자 재량으로 남김
+- package.json version bump 실행 안 함 (설계 § 9 규칙대로 deploy.sh 가 처리) — 현재 `0.1.0-alpha.47` 유지
+
+**Why (v0.2.0 의 의미)**:
+- Task E (alpha.46/47 배포 완료, #70/71/72) + Task F (alpha.48 대기, #73) + Task G (alpha.49 대기, #74) 로 타입 엄격성이 안정 착지 — exactOpt + TSelf/TForm/TValue + FieldRenderParameters<T, TValue> + parse unknown + ViewRenderProps<TForm>. 이 위에서 공개 API breaking 을 한 번에 정리
+- **소비자 migration 1 회로 완결**: gjcu 는 alpha.48/49 interim 을 거치지 않고 alpha.47 → v0.2.0 직행. 실측 **0 errors** → migration cost 사실상 0
+- `@deprecated` / "TODO: remove in v0.2" 주석 기준 수렴: A-3 (InlineSubCollectionField deprecated 6 개) + B-4 (ViewEntityFormTheme deprecated 5 개) + B-5 (AlertStyles bg deprecated 1 개) + B-6 (getColorIndicator deprecated 1 개) = 13 개 deprecated 제거. `Map<string, any>` 의도된 any (DECISIONS #21/#70/#71/#73/#74 에서 반복 major bump 후보 마킹) 도 해소
+- v0.3.0 후보 (Task H+) 로 이월: ViewListProps / ViewListResult 제네릭화 (row `item: any`), FieldRenderer React 컴포넌트 자체 제네릭화, SubCollectionField.attributes Record<string, any> unify
+
+**How to apply**:
+- 배포는 메인 판단 후 진행. deploy.sh 가 package.json version (현재 alpha.47) 을 `0.2.0` 으로 bump + release repo push + git tag `v0.2.0` + alpha.48/49 (interim) tag skip 또는 별도 처리
+- 소비자 마이그레이션 가이드: `CHANGELOG.md` v0.2.0 섹션 (6 breaking 각각 before/after 예시 포함) + `docs/V020_BREAKING_DESIGN.md` § 3 (경로 상세)
+- 배포 판단: **v0.2.0 major bump 확정** (설계 § 6.3). gjcu 실측 0 errors 로 "major bump 이지만 실질 migration cost 0" 상태 — alpha 라인 마감 + 공개 API 청소 + Task F/G 통합을 한 태그로 단일 릴리즈
