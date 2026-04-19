@@ -8,9 +8,9 @@ import { Tooltip } from '../../ui';
 import { Link } from '../../router';
 import { IconExternalLink } from '@tabler/icons-react';
 
-export async function getInputRendererParameters(
-  field: FormField<any>,
-  params: FieldRenderParameters,
+export async function getInputRendererParameters<TForm extends object = any, TValue = any>(
+  field: FormField<any, TValue, TForm>,
+  params: FieldRenderParameters<TForm, TValue>,
 ) {
   return {
     ...params,
