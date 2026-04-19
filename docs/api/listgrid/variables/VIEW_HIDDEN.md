@@ -1,0 +1,11 @@
+[**@rcm/listgrid API Reference**](../../README.md)
+
+***
+
+[@rcm/listgrid API Reference](../../README.md) / [listgrid](../README.md) / VIEW\_HIDDEN
+
+# Variable: VIEW\_HIDDEN
+
+> `const` **VIEW\_HIDDEN**: [`ViewPreset`](../type-aliases/ViewPreset.md)
+
+Defined in: [listgrid/config/Config.ts:289](https://github.com/rchemist/rcm-listgrid/blob/2083fe08ca61f7122b1b79503d82286ad7b6b04e/src/listgrid/config/Config.ts#L289)

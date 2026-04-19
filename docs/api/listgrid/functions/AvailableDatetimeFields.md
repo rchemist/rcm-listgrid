@@ -1,0 +1,25 @@
+[**@rcm/listgrid API Reference**](../../README.md)
+
+***
+
+[@rcm/listgrid API Reference](../../README.md) / [listgrid](../README.md) / AvailableDatetimeFields
+
+# Function: AvailableDatetimeFields()
+
+> **AvailableDatetimeFields**(`target`, `props?`): [`DatetimeField`](../classes/DatetimeField.md)[]
+
+Defined in: [listgrid/components/fields/Preset.tsx:194](https://github.com/rchemist/rcm-listgrid/blob/2083fe08ca61f7122b1b79503d82286ad7b6b04e/src/listgrid/components/fields/Preset.tsx#L194)
+
+## Parameters
+
+### target
+
+`string`
+
+### props?
+
+`AvailableDatetimeFieldProps`
+
+## Returns
+
+[`DatetimeField`](../classes/DatetimeField.md)[]

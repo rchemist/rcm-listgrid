@@ -1,0 +1,33 @@
+[**@rcm/listgrid API Reference**](../../README.md)
+
+***
+
+[@rcm/listgrid API Reference](../../README.md) / [listgrid](../README.md) / AlertMessageLink
+
+# Interface: AlertMessageLink
+
+Defined in: [listgrid/config/EntityFormTypes.ts:63](https://github.com/rchemist/rcm-listgrid/blob/2083fe08ca61f7122b1b79503d82286ad7b6b04e/src/listgrid/config/EntityFormTypes.ts#L63)
+
+## Properties
+
+### type?
+
+> `optional` **type?**: `"tab"` \| `"field"` \| `"external"` \| `"modal"`
+
+Defined in: [listgrid/config/EntityFormTypes.ts:71](https://github.com/rchemist/rcm-listgrid/blob/2083fe08ca61f7122b1b79503d82286ad7b6b04e/src/listgrid/config/EntityFormTypes.ts#L71)
+
+***
+
+### value
+
+> **value**: `string` \| [`ModalOptions`](ModalOptions.md)
+
+Defined in: [listgrid/config/EntityFormTypes.ts:72](https://github.com/rchemist/rcm-listgrid/blob/2083fe08ca61f7122b1b79503d82286ad7b6b04e/src/listgrid/config/EntityFormTypes.ts#L72)
+
+***
+
+### target?
+
+> `optional` **target?**: `"_self"` \| `"_blank"` \| `"_parent"` \| `"_top"`
+
+Defined in: [listgrid/config/EntityFormTypes.ts:73](https://github.com/rchemist/rcm-listgrid/blob/2083fe08ca61f7122b1b79503d82286ad7b6b04e/src/listgrid/config/EntityFormTypes.ts#L73)

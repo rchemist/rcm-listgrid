@@ -22,9 +22,18 @@ Each app reimplements this with its own UI kit + backend conventions. `@rcm/list
 
 ## Install
 
-```bash
-npm install @rcm/listgrid
-```
+> **Note**: not yet on npm. Until the first npm publish, install via the GitHub release repo:
+>
+> ```jsonc
+> // package.json
+> {
+>   "dependencies": {
+>     "@rcm/listgrid": "github:rchemist/rchemist-rcm-listgrid-release#v0.2.0"
+>   }
+> }
+> ```
+>
+> Once published, this becomes `npm install @rcm/listgrid`.
 
 Then import the stylesheet once at your app root:
 
@@ -108,14 +117,17 @@ function Root({ children }) {
 ```tsx
 import { EntityForm, StringField, NumberField, BooleanField } from '@rcm/listgrid';
 
-const userForm = new EntityForm('user', '/api/users')
-  .addFields([
-    StringField('name').required(),
-    StringField('email').required(),
-    NumberField('age'),
-    BooleanField('active').default(true),
-  ]);
+const userForm = new EntityForm('user', '/api/users').addFields({
+  items: [
+    new StringField('name', 1).withRequired(true),
+    new StringField('email', 2).withRequired(true),
+    new NumberField('age', 3),
+    new BooleanField('active', 4),
+  ],
+});
 ```
+
+> Fields are constructed with `(name, order)`. `addFields` expects `{ items: [...] }` (an object, not a bare array) — you can also pass `tab` / `fieldGroup` / `overwrite` options in the same call.
 
 ### 3. Render the list / form
 
@@ -247,9 +259,23 @@ Requires a browser with container queries and `color-mix()` — **2023+**:
 
 ---
 
+## API reference
+
+Auto-generated TypeDoc output: [`docs/api/README.md`](./docs/api/README.md). Regenerate with `npm run docs`.
+
+---
+
 ## Status
 
-**Pre-1.0** (`0.1.0-alpha.x`). API is stabilizing but some theme slots are marked `/** @deprecated — remove in v0.2 */` and the primitive list may grow. See [`DECISIONS.md`](./DECISIONS.md) for the full design log and [`docs/ROADMAP.md`](./docs/ROADMAP.md) for the extraction history from its original gjcu-academic-front home.
+**`v0.2.0` — first public minor.** The alpha line (`0.1.0-alpha.1` through `0.1.0-alpha.49`) is closed; deprecated theme slots and legacy `any`-leaks across the public API have been cleaned up. The surface is stable enough for external adoption, and Task E/F/G generics (`EntityForm<T>`, `FormField<TSelf, TValue, TForm>`, `FieldRenderParameters<T, TValue>`, `parse<T>`) give per-entity key narrowing where you opt in.
+
+**Not yet on npm.** Install via the [GitHub release repo](https://github.com/rchemist/rchemist-rcm-listgrid-release) — see the [Install](#install) section. The first npm publish will follow once the reference `UIProvider` adapter lands (see [`docs/ROADMAP.md`](./docs/ROADMAP.md) Stage 6).
+
+**New to the library?** Start with [`docs/getting-started.md`](./docs/getting-started.md) — it walks through each provider contract and the most common adoption traps.
+
+**Upgrading from an alpha?** See [`CHANGELOG.md`](./CHANGELOG.md) for the full v0.2.0 release notes and [`docs/MIGRATION.md`](./docs/MIGRATION.md) for a step-by-step migration guide with before/after code samples.
+
+The library was extracted from a production project ([`docs/ROADMAP.md`](./docs/ROADMAP.md) tracks the Stage 0 → Stage 7 extraction history); design decisions behind every non-trivial choice live in [`DECISIONS.md`](./DECISIONS.md).
 
 ---
 
