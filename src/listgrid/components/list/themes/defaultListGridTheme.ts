@@ -36,20 +36,6 @@ export const defaultListGridTheme: ViewListGridClassNames = {
     buttonGroup: 'rcm-listgrid-button-group',
   },
 
-  headerButtons: {
-    wrapper: 'rcm-row rcm-gap-sm',
-    default: 'rcm-button',
-    primary: 'rcm-button',
-    outline: 'rcm-button',
-    danger: 'rcm-button',
-    icon: 'rcm-button',
-    delete: 'rcm-button',
-    refresh: 'rcm-button',
-    download: 'rcm-button',
-    upload: 'rcm-button',
-    create: 'rcm-button',
-  },
-
   panel: {
     container: 'rcm-listgrid-panel',
     mainEntity: 'rcm-listgrid-panel-main',
