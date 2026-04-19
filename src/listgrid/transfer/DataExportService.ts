@@ -45,24 +45,24 @@ function getNestedValue(obj: any, path: string): any {
 }
 
 export interface ExportServiceProps {
-  searchForm?: SearchForm;
-  url?: string;
+  searchForm?: SearchForm | undefined;
+  url?: string | undefined;
   fields: DataField[];
-  restrictCount?: number;
-  pagePerCount?: number;
-  setExportable?: (exportable: boolean) => void;
-  setFailedCount?: (count: number) => void;
-  setProgress?: (progress: number) => void;
-  data?: SampleDataItem[][]; // fetch 를 하지 않고 주어진 데이터만 export 하게 할 경우
-  setData?: (data: DataRowSet) => void;
-  setError?: (errorMessage: string) => void;
-  editorFields?: string[];
-  addedFields?: (row: DataRow) => Promise<DataRow>;
+  restrictCount?: number | undefined;
+  pagePerCount?: number | undefined;
+  setExportable?: ((exportable: boolean) => void) | undefined;
+  setFailedCount?: ((count: number) => void) | undefined;
+  setProgress?: ((progress: number) => void) | undefined;
+  data?: SampleDataItem[][] | undefined; // fetch 를 하지 않고 주어진 데이터만 export 하게 할 경우
+  setData?: ((data: DataRowSet) => void) | undefined;
+  setError?: ((errorMessage: string) => void) | undefined;
+  editorFields?: string[] | undefined;
+  addedFields?: ((row: DataRow) => Promise<DataRow>) | undefined;
 }
 
 export class DataExportService {
-  searchForm?: SearchForm;
-  url?: string;
+  searchForm?: SearchForm | undefined;
+  url?: string | undefined;
   fields: DataField[];
   restrictCount: number;
   pagePerCount: number;
@@ -74,9 +74,9 @@ export class DataExportService {
   setError: (errorMessage: string) => void;
 
   processing: boolean = false;
-  total?: DataExportCount;
+  total?: DataExportCount | undefined;
   editorFields: string[] = [];
-  addedFields?: (row: DataRow) => Promise<DataRow>;
+  addedFields?: ((row: DataRow) => Promise<DataRow>) | undefined;
 
   constructor({
     searchForm,

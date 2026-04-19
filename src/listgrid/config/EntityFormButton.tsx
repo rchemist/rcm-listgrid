@@ -52,13 +52,13 @@ export type EntityFormButtonType = EntityFormButton | EntityFormReactNodeButton;
 
 export class EntityFormButton {
   readonly id: string; // id 가 save 이거나 delete 인 경우에는 기존의 entityForm 버튼을 대체한다.
-  icon?: ReactNode;
-  label?: LabelType;
-  className?: string;
-  onClick?: (props: EntityFormButtonProps) => Promise<EntityForm>;
-  disabled?: (props: EntityFormButtonProps) => Promise<boolean>;
-  hidden?: (props: EntityFormButtonProps) => Promise<boolean>;
-  tooltip?: (props: EntityFormButtonProps) => Promise<ReactNode>;
+  icon?: ReactNode | undefined;
+  label?: LabelType | undefined;
+  className?: string | undefined;
+  onClick?: ((props: EntityFormButtonProps) => Promise<EntityForm>) | undefined;
+  disabled?: ((props: EntityFormButtonProps) => Promise<boolean>) | undefined;
+  hidden?: ((props: EntityFormButtonProps) => Promise<boolean>) | undefined;
+  tooltip?: ((props: EntityFormButtonProps) => Promise<ReactNode>) | undefined;
 
   constructor(id: string) {
     this.id = id;

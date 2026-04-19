@@ -71,7 +71,7 @@ export function processApiError(
   form?: EntityForm,
 ): {
   fieldErrors: FieldError[];
-  globalError?: string;
+  globalError?: string | undefined;
   hasError: boolean;
 } {
   const fieldErrors: FieldError[] = [];

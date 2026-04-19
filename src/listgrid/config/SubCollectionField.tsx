@@ -34,36 +34,36 @@ import { ViewListGrid } from '../components/list/ViewListGrid';
 export class SubCollectionField implements EntityItem {
   order: number; // 필드 표시 순서, 필요하다면 list 의 필드 순서를 별도로 지정할 수 있다.
   name: string; // 필드 이름 - 시스템에서 사용하는 이름으로, 하나의 엔티티 폼에서 필드는 반드시 유니크 해야 한다. equlas 비교를 해야 하기 때문에 가급적 영문/숫자를 이용한다.
-  label?: LabelType; // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
-  helpText?: HelpTextType; // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  hidden?: HiddenType; // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  readonly?: ReadOnlyType; // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
-  dynamicUrl?: (parentEntityForm: EntityForm) => string; // sub collection 의 url 이 parent entityForm 의 id 기반으로 생성된다면 이 메소드를 통해 url 을 동적으로 생성할 수 있다.
+  label?: LabelType | undefined; // 화면에 표시되는 필드의 label. i18n 을 자동 지원한다.
+  helpText?: HelpTextType | undefined; // helpText, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  hidden?: HiddenType | undefined; // 필드 표시 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  readonly?: ReadOnlyType | undefined; // 수정 불가 여부, boolean 으로 지정된 경우에는 그냥 신규/수정 모두 동일하게 처리되고, 그 외에는 상황에 맞게 분리돼 표시된다.
+  dynamicUrl?: ((parentEntityForm: EntityForm) => string) | undefined; // sub collection 의 url 이 parent entityForm 의 id 기반으로 생성된다면 이 메소드를 통해 url 을 동적으로 생성할 수 있다.
 
   // // tab, fieldGroup 의 ID, 이 값은 EntityForm 이 initialize 될 때 자동으로 처리된다. 외부에서 입력할 필요가 없는 값이다.
-  form?: { tabId: string; fieldGroupId: string };
+  form?: { tabId: string; fieldGroupId: string } | undefined;
 
   entityForm: EntityForm;
-  hideLabel?: boolean;
+  hideLabel?: boolean | undefined;
 
   relation: SubCollectionRelation;
 
   // EntityForm 에서 리스트로 지정한 필드 중 subCollection 에서만 따로 목록 조회 필드를 정의하고 싶을 때 사용한다.
-  listViewFields?: string[];
+  listViewFields?: string[] | undefined;
 
-  viewListOptions?: ViewListGridOptionProps;
+  viewListOptions?: ViewListGridOptionProps | undefined;
 
   constructor(props: {
     entityForm: EntityForm;
     relation: SubCollectionRelation;
     order: number;
     name: string;
-    label?: LabelType;
-    helpText?: HelpTextType;
-    hidden?: HiddenType;
-    readonly?: ReadOnlyType;
-    dynamicUrl?: (parentEntityForm: EntityForm) => string;
-    viewListOptions?: ViewListGridOptionProps;
+    label?: LabelType | undefined;
+    helpText?: HelpTextType | undefined;
+    hidden?: HiddenType | undefined;
+    readonly?: ReadOnlyType | undefined;
+    dynamicUrl?: ((parentEntityForm: EntityForm) => string) | undefined;
+    viewListOptions?: ViewListGridOptionProps | undefined;
   }) {
     this.entityForm = props.entityForm;
     this.relation = props.relation;
@@ -223,7 +223,7 @@ export class SubCollectionField implements EntityItem {
           if (this.listViewFields!.includes(field.name)) {
             field.useListField();
           } else {
-            field.listConfig = undefined;
+            delete field.listConfig;
           }
         }
       });
@@ -314,7 +314,7 @@ export class SubCollectionField implements EntityItem {
     return Promise.resolve(
       <ViewListGrid
         listGrid={listGrid}
-        parentId={entityForm.id}
+        {...(entityForm.id !== undefined ? { parentId: entityForm.id } : {})}
         options={{
           ...options,
           subCollection: subCollection,

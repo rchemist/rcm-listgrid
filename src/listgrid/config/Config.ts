@@ -74,10 +74,10 @@ export type ReadOnlyType = ConditionalBooleanValue;
 export type RequiredType = ConditionalBooleanValue;
 
 export interface ConditionalValue {
-  entityForm?: EntityForm;
-  renderType?: RenderType;
-  value?: FieldValue;
-  session?: Session; // session 을 가지고 condition value 를 계산하려면 반드시 ViewEntityForm 이나 ViewListGrid 를 생성할 때 useSession() 을 호출해서 session 값이 존재할 때만 EntityForm 을 활성화 해야 한다. useSession() 값의 변화를 EntityForm 이 감지하지 못하기 때문이다.
+  entityForm?: EntityForm | undefined;
+  renderType?: RenderType | undefined;
+  value?: FieldValue | undefined;
+  session?: Session | undefined; // session 을 가지고 condition value 를 계산하려면 반드시 ViewEntityForm 이나 ViewListGrid 를 생성할 때 useSession() 을 호출해서 session 값이 존재할 때만 EntityForm 을 활성화 해야 한다. useSession() 값의 변화를 EntityForm 이 감지하지 못하기 때문이다.
 }
 
 export type ValuedString = (props: ConditionalValue) => Promise<string>;
@@ -411,16 +411,16 @@ export interface ParentSearchWith {
 }
 
 export interface IAssetConfig {
-  maxSize?: number; // 개별 파일의 크기 제한이 있는지 mb 단위, 아무 것도 설정하지 않으면 기본값은 10mb
-  maxCount?: number; // 한번에 몇개의 파일을 업로드할 수 있는지, 아무것도 설정하지 않으면 기본값은 1개
-  extensions?: string[]; // 허용되는 확장자, 지정하지 않으면 모두 허용
-  fileTypes?: string[]; // 허용되는 파일 타입 - ['image/*'], ...
+  maxSize?: number | undefined; // 개별 파일의 크기 제한이 있는지 mb 단위, 아무 것도 설정하지 않으면 기본값은 10mb
+  maxCount?: number | undefined; // 한번에 몇개의 파일을 업로드할 수 있는지, 아무것도 설정하지 않으면 기본값은 1개
+  extensions?: string[] | undefined; // 허용되는 확장자, 지정하지 않으면 모두 허용
+  fileTypes?: string[] | undefined; // 허용되는 파일 타입 - ['image/*'], ...
 }
 
 export class AssetConfig implements IAssetConfig {
-  maxSize?: number; // 개별 파일의 크기 제한이 있는지 mb 단위
-  maxCount?: number; // 한번에 몇개의 파일을 업로드할 수 있는지
-  extensions?: string[]; // 허용되는 확장자, 지정하지 않으면 모두 허용
+  maxSize?: number | undefined; // 개별 파일의 크기 제한이 있는지 mb 단위
+  maxCount?: number | undefined; // 한번에 몇개의 파일을 업로드할 수 있는지
+  extensions?: string[] | undefined; // 허용되는 확장자, 지정하지 않으면 모두 허용
 
   public static create(maxSize?: number, maxCount?: number, ...extensions: string[]): AssetConfig {
     return new AssetConfig()
@@ -470,9 +470,9 @@ export type TabInfo = {
   id: string;
   label: string;
   order: number;
-  hidden?: boolean; // Status 탭과 같이 일반적인 형태로 표시되지 않는 탭은 hidden 을 true 로 처리한다.
-  description?: string | React.ReactNode;
-  requiredPermissions?: string[]; // 이 탭을 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 탭이 표시됨.
+  hidden?: boolean | undefined; // Status 탭과 같이 일반적인 형태로 표시되지 않는 탭은 hidden 을 true 로 처리한다.
+  description?: string | React.ReactNode | undefined;
+  requiredPermissions?: string[] | undefined; // 이 탭을 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 탭이 표시됨.
 };
 
 export type FieldGroupConfig = {
@@ -483,9 +483,9 @@ export type FieldGroupInfo = {
   id: string;
   label: string;
   order: number;
-  description?: string;
-  config?: FieldGroupConfig;
-  requiredPermissions?: string[]; // 이 필드그룹을 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 필드그룹이 표시됨.
+  description?: string | undefined;
+  config?: FieldGroupConfig | undefined;
+  requiredPermissions?: string[] | undefined; // 이 필드그룹을 보기 위해 필요한 권한 목록. 사용자가 이 중 하나라도 가지고 있으면 필드그룹이 표시됨.
 };
 
 export const DEFAULT_TAB_INFO: TabInfo = {

@@ -22,19 +22,19 @@ import { SelectOption } from '../form/Type';
 export interface IDataTransferProperty {
   name: string;
   propertyName: string;
-  helpText?: string;
-  order?: number;
-  tabId?: string;
-  fieldGroupId?: string;
+  helpText?: string | undefined;
+  order?: number | undefined;
+  tabId?: string | undefined;
+  fieldGroupId?: string | undefined;
 }
 
 export class DataTransferProperty implements IDataTransferProperty {
   name: string;
   propertyName: string;
-  helpText?: string;
-  order?: number;
-  tabId?: string;
-  fieldGroupId?: string;
+  helpText?: string | undefined;
+  order?: number | undefined;
+  tabId?: string | undefined;
+  fieldGroupId?: string | undefined;
 
   constructor(data: IDataTransferProperty) {
     this.name = data.name;
@@ -105,10 +105,10 @@ export interface DataManageType {
 
 export interface IDataTransferConfig {
   type: DataManageType;
-  export?: TransferConfig;
-  import?: ImportTransferConfig;
-  refreshView?: boolean;
-  exportFileName?: string;
+  export?: TransferConfig | undefined;
+  import?: ImportTransferConfig | undefined;
+  refreshView?: boolean | undefined;
+  exportFileName?: string | undefined;
 }
 
 export const DataTransferAll: DataManageType = {
@@ -146,45 +146,49 @@ export type SampleDataItem = {
 
 export interface ImportTransferConfig extends TransferConfig {
   // 엑셀 업로드 시 샘플 데이터
-  sampleData?: SampleDataItem[][];
+  sampleData?: SampleDataItem[][] | undefined;
 
   // 엑셀 업로드 시 파싱 결과 조작 - 업로드가 끝난 후 업로드 된 결과를 가지고 추가 처리를 해야 할 때 사용한다.
-  overrideParseResult?: (
-    formData: DataRowSet,
-    response: unknown,
-  ) => { success: boolean; result: DataTransferResult; error?: string; errorView?: ReactNode };
+  overrideParseResult?:
+    | ((
+        formData: DataRowSet,
+        response: unknown,
+      ) => { success: boolean; result: DataTransferResult; error?: string; errorView?: ReactNode })
+    | undefined;
 
-  mode?: {
-    create?: boolean;
-    update?: boolean;
-  };
+  mode?:
+    | {
+        create?: boolean;
+        update?: boolean;
+      }
+    | undefined;
 }
 
 export interface ExportTransferConfig extends TransferConfig {}
 
 export interface TransferConfig {
-  fields?: DataField[];
+  fields?: DataField[] | undefined;
 
   // 엑셀 업로드 / 다운로드 시 api 호출 경로
-  url?: string;
+  url?: string | undefined;
 
   // 엑셀 업로드/다운로드 시 모달 창 하단 설명
-  description?: ReactNode;
+  description?: ReactNode | undefined;
 
   // 엑셀 데이터가 formData 로 저장된 후 실제 API 를 호출하기 전에 formData 에 필드를 추가할 수 있다.
   // formData 자체를 조작하는 overrideFormData 와 달리 row 단위로 실행되며 단순히 필드를 추가할 때 쉽게 사용하기 위해 추가한다.
-  addedFields?: (row: DataRow) => Promise<DataRow>;
+  addedFields?: ((row: DataRow) => Promise<DataRow>) | undefined;
 
   // 엑셀 업로드/다운로드 시 폼 데이터 조작 - 전체 데이터에 대해 조작한다.
-  overrideFormData?: (formData: DataRowSet) => Promise<DataRowSet>;
+  overrideFormData?: ((formData: DataRowSet) => Promise<DataRowSet>) | undefined;
 }
 
 export class DataTransferConfig implements IDataTransferConfig {
   type: DataManageType;
-  export?: ExportTransferConfig = { fields: [] };
-  import?: ImportTransferConfig = { fields: [] };
+  export?: ExportTransferConfig | undefined = { fields: [] };
+  import?: ImportTransferConfig | undefined = { fields: [] };
 
-  exportFileName?: string;
+  exportFileName?: string | undefined;
 
   constructor(data: IDataTransferConfig, url: string) {
     this.type = data.type ? data.type : { exportable: true, importable: true };
@@ -454,20 +458,20 @@ export interface DataFieldProps {
   name: string;
   label: string;
   type: FieldType;
-  description?: string;
-  required?: boolean; // import 할 때 validation 용으로 사용한다.
-  options?: SelectOption[];
-  dataTransferRule?: DataTransferRule;
+  description?: string | undefined;
+  required?: boolean | undefined; // import 할 때 validation 용으로 사용한다.
+  options?: SelectOption[] | undefined;
+  dataTransferRule?: DataTransferRule | undefined;
 }
 
 export class DataField {
   private readonly name: string;
   private readonly label: string;
   private readonly type: FieldType;
-  private description?: string;
-  private required?: boolean;
-  private options?: SelectOption[];
-  private dataTransferRule?: DataTransferRule;
+  private description?: string | undefined;
+  private required?: boolean | undefined;
+  private options?: SelectOption[] | undefined;
+  private dataTransferRule?: DataTransferRule | undefined;
 
   constructor({
     name,

@@ -97,8 +97,12 @@ export class PageResult {
         url: url,
         method: 'POST',
         formData: searchForm,
-        entityFormName: extensionOptions?.entityFormName,
-        extensionPoint: extensionOptions?.extensionPoint,
+        ...(extensionOptions?.entityFormName !== undefined
+          ? { entityFormName: extensionOptions.entityFormName }
+          : {}),
+        ...(extensionOptions?.extensionPoint !== undefined
+          ? { extensionPoint: extensionOptions.extensionPoint }
+          : {}),
         serverProxy: serverProxy,
       });
 

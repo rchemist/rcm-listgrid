@@ -27,18 +27,18 @@ import { LoadingOverlay } from '../ui';
 interface ExportProcessorProps {
   process: boolean;
   fields: DataField[];
-  url?: string;
+  url?: string | undefined;
   onProcessed: () => void;
-  maxCount?: number;
-  countPerPage?: number;
-  searchForm?: SearchForm;
-  exportFileName?: string;
-  data?: SampleDataItem[][];
-  password?: string;
-  addedFields?: (row: DataRow) => Promise<DataRow>;
+  maxCount?: number | undefined;
+  countPerPage?: number | undefined;
+  searchForm?: SearchForm | undefined;
+  exportFileName?: string | undefined;
+  data?: SampleDataItem[][] | undefined;
+  password?: string | undefined;
+  addedFields?: ((row: DataRow) => Promise<DataRow>) | undefined;
 
   // 엑셀 업로드 시 폼 데이터 조작
-  overrideFormData?: (formData: DataRowSet) => Promise<DataRowSet>;
+  overrideFormData?: ((formData: DataRowSet) => Promise<DataRowSet>) | undefined;
 }
 
 export const DataExportProcessor = ({

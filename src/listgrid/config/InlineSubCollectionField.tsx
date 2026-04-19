@@ -74,9 +74,9 @@ export interface InlineRowActionColumn {
   /** Unique column identifier */
   id: string;
   /** Column header label (default: '작업') */
-  label?: string;
+  label?: string | undefined;
   /** Column order in the list (default: 9999) */
-  order?: number;
+  order?: number | undefined;
   /** Actions to display in this column */
   actions: InlineRowAction[];
 }
@@ -144,50 +144,50 @@ export interface InlineSubCollectionFetchOptions {
  */
 export class InlineSubCollectionField extends SubCollectionField {
   // Inline-specific properties
-  tooltip?: TooltipType;
-  fetchOptions?: InlineSubCollectionFetchOptions;
+  tooltip?: TooltipType | undefined;
+  fetchOptions?: InlineSubCollectionFetchOptions | undefined;
 
   /** List fields to display - can be field names or detailed config */
-  inlineListFields?: (string | InlineListFieldConfig)[];
+  inlineListFields?: (string | InlineListFieldConfig)[] | undefined;
 
   /** Row action buttons @deprecated Use rowActionColumns instead */
-  inlineRowActions?: InlineRowAction[];
+  inlineRowActions?: InlineRowAction[] | undefined;
 
   /** Row actions column configuration @deprecated Use rowActionColumns instead */
-  inlineRowActionsConfig?: InlineRowActionsConfig;
+  inlineRowActionsConfig?: InlineRowActionsConfig | undefined;
 
   /** Row action columns - supports multiple action columns */
-  inlineRowActionColumns?: InlineRowActionColumn[];
+  inlineRowActionColumns?: InlineRowActionColumn[] | undefined;
 
   /** Pagination options */
-  inlinePagination?: InlinePaginationOptions;
+  inlinePagination?: InlinePaginationOptions | undefined;
 
   /** Global ListConfig applied to all fields */
-  inlineGlobalListConfig?: InlineGlobalListConfig;
+  inlineGlobalListConfig?: InlineGlobalListConfig | undefined;
 
   /** Hide title */
-  hideTitle?: boolean;
+  hideTitle?: boolean | undefined;
 
   constructor(props: {
     entityForm: EntityForm;
     relation: InlineSubCollectionRelation;
     order: number;
     name: string;
-    label?: LabelType;
-    helpText?: HelpTextType;
-    hidden?: HiddenType;
-    readonly?: ReadOnlyType;
-    listFields?: (string | InlineListFieldConfig)[];
+    label?: LabelType | undefined;
+    helpText?: HelpTextType | undefined;
+    hidden?: HiddenType | undefined;
+    readonly?: ReadOnlyType | undefined;
+    listFields?: (string | InlineListFieldConfig)[] | undefined;
     /** @deprecated Use rowActionColumns instead */
-    rowActions?: InlineRowAction[];
+    rowActions?: InlineRowAction[] | undefined;
     /** @deprecated Use rowActionColumns instead */
-    rowActionsConfig?: InlineRowActionsConfig;
+    rowActionsConfig?: InlineRowActionsConfig | undefined;
     /** Row action columns - supports multiple action columns */
-    rowActionColumns?: InlineRowActionColumn[];
-    pagination?: InlinePaginationOptions;
-    globalListConfig?: InlineGlobalListConfig;
-    fetchOptions?: InlineSubCollectionFetchOptions;
-    hideTitle?: boolean;
+    rowActionColumns?: InlineRowActionColumn[] | undefined;
+    pagination?: InlinePaginationOptions | undefined;
+    globalListConfig?: InlineGlobalListConfig | undefined;
+    fetchOptions?: InlineSubCollectionFetchOptions | undefined;
+    hideTitle?: boolean | undefined;
   }) {
     // Call parent constructor
     super({
@@ -437,6 +437,32 @@ export class InlineSubCollectionField extends SubCollectionField {
       initialSearchForm = await this.buildSearchForm(entityForm);
     }
 
+    const viewProps = {
+      parentEntityForm: entityForm,
+      parentId: entityForm.id!,
+      entityForm: this.entityForm,
+      relation: this.relation as InlineSubCollectionRelation,
+      readonly,
+      ...(session !== undefined ? { session } : {}),
+      ...(this.inlineListFields !== undefined ? { listFields: this.inlineListFields } : {}),
+      ...(this.inlineRowActions !== undefined ? { rowActions: this.inlineRowActions } : {}),
+      ...(this.inlineRowActionsConfig !== undefined
+        ? { rowActionsConfig: this.inlineRowActionsConfig }
+        : {}),
+      ...(this.inlineRowActionColumns !== undefined
+        ? { rowActionColumns: this.inlineRowActionColumns }
+        : {}),
+      ...(this.inlinePagination !== undefined ? { pagination: this.inlinePagination } : {}),
+      ...(this.inlineGlobalListConfig !== undefined
+        ? { globalListConfig: this.inlineGlobalListConfig }
+        : {}),
+      ...(this.fetchOptions !== undefined ? { fetchOptions: this.fetchOptions } : {}),
+      ...(initialSearchForm !== undefined ? { initialSearchForm } : {}),
+      tooltip,
+      ...(this.hideTitle !== undefined ? { hideTitle: this.hideTitle } : {}),
+      ...(this.viewListOptions !== undefined ? { viewListOptions: this.viewListOptions } : {}),
+    };
+
     return (
       <React.Suspense
         fallback={
@@ -445,25 +471,7 @@ export class InlineSubCollectionField extends SubCollectionField {
           </div>
         }
       >
-        <InlineSubCollectionView
-          parentEntityForm={entityForm}
-          parentId={entityForm.id!}
-          entityForm={this.entityForm}
-          relation={this.relation as InlineSubCollectionRelation}
-          readonly={readonly}
-          session={session}
-          listFields={this.inlineListFields}
-          rowActions={this.inlineRowActions}
-          rowActionsConfig={this.inlineRowActionsConfig}
-          rowActionColumns={this.inlineRowActionColumns}
-          pagination={this.inlinePagination}
-          globalListConfig={this.inlineGlobalListConfig}
-          fetchOptions={this.fetchOptions}
-          initialSearchForm={initialSearchForm}
-          tooltip={tooltip}
-          hideTitle={this.hideTitle}
-          viewListOptions={this.viewListOptions}
-        />
+        <InlineSubCollectionView {...viewProps} />
       </React.Suspense>
     );
   }

@@ -40,24 +40,26 @@ export abstract class EntityFormBase {
   }
 
   version: string;
-  revisionEntityName?: string; // revision 정보를 처리하기 위해 필요한 엔티티 이름 - page 에서 EntityForm 을 생성할 때 이 값을 넣어 주면 된다.
-  parentId?: string; // ManyToOne 이나 SubCollection 등에서 부모 엔티티의 id 를 저장하기 위해 사용한다.
-  id?: string;
+  revisionEntityName?: string | undefined; // revision 정보를 처리하기 위해 필요한 엔티티 이름 - page 에서 EntityForm 을 생성할 때 이 값을 넣어 주면 된다.
+  parentId?: string | undefined; // ManyToOne 이나 SubCollection 등에서 부모 엔티티의 id 를 저장하기 위해 사용한다.
+  id?: string | undefined;
   name: string;
-  title?: {
-    title?: string;
-    field?: string;
-    view?: (entityForm: EntityForm) => Promise<ReactNode>;
-  };
+  title?:
+    | {
+        title?: string;
+        field?: string;
+        view?: (entityForm: EntityForm) => Promise<ReactNode>;
+      }
+    | undefined;
   // Entity 데이터를 fetch 하는 backend api 의 url
   url: string;
   // 이 값이 존재하면 ManyToOne 매핑에서 해당 URL 로 조회 기능을 제공할 수 있다.
-  menuUrl?: string;
-  readonly?: boolean;
+  menuUrl?: string | undefined;
+  readonly?: boolean | undefined;
 
-  session?: Session;
+  session?: Session | undefined;
 
-  createStep?: CreateStep[];
+  createStep?: CreateStep[] | undefined;
   manageEntityForm: ManageEntityForm;
 
   // 필드가 표시될 탭 구성
@@ -68,14 +70,14 @@ export abstract class EntityFormBase {
   collections: Map<string, SubCollectionField> = new Map<string, SubCollectionField>();
 
   // 에러 여부
-  errors?: FieldError[];
+  errors?: FieldError[] | undefined;
   // 화면 새로고침 여부
   // onChanges 와 같은 함수가 실행되어 reload 를 해야 한다면 이 값을 true 로 변경한다. 기본적으로는 undefined 이며, reload 가 끝난 후에는 다시 undefined 로 변경한다.
-  shouldReload?: boolean;
+  shouldReload?: boolean | undefined;
 
   // setFetchedValues()가 호출되어 데이터가 이미 로드되었는지 여부
   // true이면 initialize()에서 중복 fetch를 건너뛴다.
-  dataPreloaded?: boolean;
+  dataPreloaded?: boolean | undefined;
 
   // setFetchedValues()에서 받은 원본 엔티티 객체를 저장한다.
   // 등록된 필드가 아닌 엔티티의 임의 속성에 접근할 때 사용한다.
@@ -88,97 +90,99 @@ export abstract class EntityFormBase {
   fieldValidationStates: Map<string, { validated: boolean; message?: string; color?: string }> =
     new Map();
 
-  appendAdvancedSearchFields?: ListableFormField<any>[];
+  appendAdvancedSearchFields?: ListableFormField<any>[] | undefined;
 
   // Extension 관련 속성 - Client only
   clientExtensions: Map<ExtensionPoint, ClientExtensionConfig[]> = new Map();
 
   // 리스트 필드 제외 목록
-  excludeListFields?: string[];
+  excludeListFields?: string[] | undefined;
 
   // sessionRequired: boolean = false;
   // 반드시 세션이 필요한 경우 true 로 설정한다.
-  sessionRequired?: boolean;
+  sessionRequired?: boolean | undefined;
 
-  cacheKeyFunc?: (entityForm: EntityForm) => string;
+  cacheKeyFunc?: ((entityForm: EntityForm) => string) | undefined;
 
   // 필드값이 변경될 때 마다 실행되는 확장 포인트
   // 예를 들어 X 필드의 값이 특정값일 때 Y 필드의 상태를 조정한다거나 할 수 있다.
-  onChanges?: ModifyEntityFormFunc[];
+  onChanges?: ModifyEntityFormFunc[] | undefined;
 
   // EntityForm 데이터를 fetch 한 후 EntityForm 을 변조하기 위한 확장 포인트
   // 예를 들어 커스텀필드 기능을 제공할 때 원래 entity 를 fetch 한 후, 해당 entity 와 연결된 커스텀필드의 정보를 다시 fetch 하는 로직을 추가할 수 있다.
-  onFetchData?: ModifyFetchedEntityFormFunc[];
+  onFetchData?: ModifyFetchedEntityFormFunc[] | undefined;
 
   // 최초 EntityForm 이 활성화 될 때 EntityForm 을 변조하기 위한 확장 포인트
   // initialize 는 fetch 후에 실행된다.
   // 예를 들어 커스텀필드 기능을 제공하려고 하면, initialize 확장을 통해 해당 엔티티의 커스텀필드 configuration 정보를 확인하고 entityForm 에 필드를 추가한다.
-  onInitialize?: OnInitializeFunc[];
+  onInitialize?: OnInitializeFunc[] | undefined;
 
-  onFetchListData?: PostFetchListData[];
+  onFetchListData?: PostFetchListData[] | undefined;
 
   // save 로직 override 를 위한 확장 포인트
-  onSave?: (entityForm: EntityForm) => Promise<EntityFormActionResult>;
+  onSave?: ((entityForm: EntityForm) => Promise<EntityFormActionResult>) | undefined;
 
   // save 로직이 완료되고 난 후 확장 포인트, ViewEntityForm 에도 postSave 가 있는데, 그 값과는 관계가 없다.
   // 왜 이게 두개냐면, react 의 state, hook 과 같은 이벤트를 entityForm 내부에서는 사용할 수가 없기 때문이다.
   // 따라서 화면을 제어하거나 react hook 을 이용하려면 ViewEntityForm 의 postSave 를 이용해야 한다.
-  postSave?: (result: EntityFormActionResult) => Promise<void>;
+  postSave?: ((result: EntityFormActionResult) => Promise<void>) | undefined;
 
   // delete 로직이 완료되고 난 후 확장 포인트, idList 가 undefined 가 아닌 경우 목록에서 복수로 삭제했다는 뜻이다. 이때는 idList 를 가지고 뭔가를 해야 한다.
   // postSave 와 마찬가지로 화면 제어를 하기 위한 postDelete 는 ViewEntityForm 에서 설정해야 한다.
-  postDelete?: (entityForm: EntityForm, idList?: any[]) => Promise<void>;
+  postDelete?: ((entityForm: EntityForm, idList?: any[]) => Promise<void>) | undefined;
 
   /*
    * create form 을 만들어 서버로 전송하기 전에 데이터를 변경할 수 있는 기능을 제공한다.
    * data['필드명'] 으로 접근해 필드의 값을 변경할 수 있다.
    */
-  overrideSubmitData?: (
-    entityForm: EntityForm,
-    data: any,
-  ) => Promise<{
-    data: any;
-    modifiedFields?: string[];
-    removePrevious?: boolean;
-    error?: boolean;
-    errors?: FieldError[];
-  }>;
+  overrideSubmitData?:
+    | ((
+        entityForm: EntityForm,
+        data: any,
+      ) => Promise<{
+        data: any;
+        modifiedFields?: string[];
+        removePrevious?: boolean;
+        error?: boolean;
+        errors?: FieldError[];
+      }>)
+    | undefined;
 
   /**
    * Data 를 fetch 할 때 로직을 오버라이드 한다.
    * overrideFetchData 가 정의되어 있으면 메소드 fetchData 의 최상단에서 오버라이드 된다.
    */
-  overrideFetchData?: (url: string, entityForm: EntityForm) => Promise<ResponseData>;
+  overrideFetchData?: ((url: string, entityForm: EntityForm) => Promise<ResponseData>) | undefined;
 
   /**
    * data upload / download 설정
    */
-  dataTransferConfig?: DataTransferConfig;
+  dataTransferConfig?: DataTransferConfig | undefined;
 
   /**
    * 삭제는 안 되고 active 값만 변경되는 경우
    * 삭제 모달의 메시지가 변경된다.
    */
-  neverDelete?: boolean;
+  neverDelete?: boolean | undefined;
 
   /**
    * EntityForm 상태에 따른 동적 버튼 추가
    * EntityFormButton 또는 EntityFormReactNodeButton 타입을 반환
    */
-  buttons?: ((entityForm: EntityForm) => Promise<EntityFormButtonType[]>)[];
+  buttons?: ((entityForm: EntityForm) => Promise<EntityFormButtonType[]>)[] | undefined;
 
   /**
    * ViewEntityForm 할 때 사용할 수 있다.
    * 엔티티폼을 커스텀으로 표시하게 하는데 필요한 여러 정보를 자유롭게 사용할 수 있다.
    * 이 정보는 저장 용도로는 사용되지 않는다.
    */
-  attributes?: Map<string, any>;
+  attributes?: Map<string, any> | undefined;
 
   /**
    * ViewEntityForm에서 헤더 버튼과 Alert 영역 사이에 표시될 커스텀 영역
    * sticky 포지셔닝으로 스크롤 시 상단에 고정됨
    */
-  headerArea?: (entityForm: EntityForm) => Promise<ReactNode>;
+  headerArea?: ((entityForm: EntityForm) => Promise<ReactNode>) | undefined;
 
   async reload(): Promise<void> {
     this.initialize({});
@@ -417,8 +421,8 @@ export abstract class EntityFormBase {
 
   async getViewableFieldGroups(props: {
     tabId: string;
-    session?: Session;
-    createStepFields?: string[];
+    session?: Session | undefined;
+    createStepFields?: string[] | undefined;
   }): Promise<string[]> {
     const tabId = props.tabId;
     const session = props.session;
@@ -450,8 +454,8 @@ export abstract class EntityFormBase {
   async isViewableFieldGroup(props: {
     tabId: string;
     fieldGroupId: string;
-    session?: Session;
-    createStepFields?: string[];
+    session?: Session | undefined;
+    createStepFields?: string[] | undefined;
   }): Promise<boolean> {
     const tabId = props.tabId;
     const fieldGroupId = props.fieldGroupId;

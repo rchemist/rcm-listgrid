@@ -204,12 +204,12 @@ export const DataImportSample: FC<DataImportSampleProps> = ({
 export default DataImportSample;
 
 interface SampleDataButtonProps {
-  processing?: boolean;
+  processing?: boolean | undefined;
   exportKey: number;
-  setProcessing?: (processing: boolean) => void;
+  setProcessing?: ((processing: boolean) => void) | undefined;
   setExportKey: (exportKey: number) => void;
-  fileName?: string;
-  data?: SampleDataItem[][];
+  fileName?: string | undefined;
+  data?: SampleDataItem[][] | undefined;
   fields: DataField[];
 }
 

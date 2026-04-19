@@ -12,18 +12,20 @@ export class EntityFieldGroup {
   id: string;
   label: string;
   order: number;
-  span?: {
-    base?: SpanValue;
-    xs?: SpanValue;
-    sm?: SpanValue;
-    md?: SpanValue;
-    lg?: SpanValue;
-    xl?: SpanValue;
-  };
+  span?:
+    | {
+        base?: SpanValue;
+        xs?: SpanValue;
+        sm?: SpanValue;
+        md?: SpanValue;
+        lg?: SpanValue;
+        xl?: SpanValue;
+      }
+    | undefined;
   fields: FieldGroupItem[] = [];
-  description?: string;
-  config?: FieldGroupConfig;
-  requiredPermissions?: string[];
+  description?: string | undefined;
+  config?: FieldGroupConfig | undefined;
+  requiredPermissions?: string[] | undefined;
 
   constructor(config?: FieldGroupInfo) {
     this.id = config?.id ?? 'default';

@@ -56,8 +56,8 @@ export interface FieldError {
   name: string;
   label: string | ReactNode | false;
   errors: string[];
-  tabId?: string;
-  errorId?: string;
+  tabId?: string | undefined;
+  errorId?: string | undefined;
 }
 
 export interface AlertMessageLink {
@@ -83,5 +83,5 @@ export interface AlertMessage {
 }
 
 export interface DataTransferConfigProps extends IDataTransferConfig {
-  fieldNames?: string[];
+  fieldNames?: string[] | undefined;
 }

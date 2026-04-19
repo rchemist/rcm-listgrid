@@ -16,13 +16,15 @@ import { SubCollectionBaseButtonProps } from '../components/list/types/SubCollec
 
 export class ListGrid {
   private readonly entityForm: EntityForm;
-  private searchForm?: SearchForm;
+  private searchForm?: SearchForm | undefined;
 
-  private listFields?: ListableFormField<any>[];
+  private listFields?: ListableFormField<any>[] | undefined;
 
-  private overrideFetch?: (url: string, searchForm: SearchForm) => Promise<PageResult>;
+  private overrideFetch?:
+    | ((url: string, searchForm: SearchForm) => Promise<PageResult>)
+    | undefined;
 
-  private overrideFetchResult?: (result: PageResult) => Promise<PageResult>;
+  private overrideFetchResult?: ((result: PageResult) => Promise<PageResult>) | undefined;
 
   constructor(entityForm: EntityForm) {
     this.entityForm = entityForm.clone(true);
@@ -261,10 +263,10 @@ export interface QuickSearchProps {
    * When specified, quick search will search across all fields using OR condition
    * @example ['name', 'email', 'phone'] - searches all three fields
    */
-  orFields?: string[];
+  orFields?: string[] | undefined;
   /**
    * Labels for orFields, used to generate combined placeholder text
    * @example ['이메일', '전화번호'] for orFields ['email', 'phone']
    */
-  orFieldLabels?: LabelType[];
+  orFieldLabels?: LabelType[] | undefined;
 }

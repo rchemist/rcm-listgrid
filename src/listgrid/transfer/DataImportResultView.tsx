@@ -162,9 +162,9 @@ export const DataImportResultView: FC<DataImportResultViewProps> = ({ result, fi
 };
 
 export interface ImportErrorViewProps {
-  importError?: string;
-  errorMessage?: string;
-  importErrorView?: ReactNode;
+  importError?: string | undefined;
+  errorMessage?: string | undefined;
+  importErrorView?: ReactNode | undefined;
 }
 
 export const ImportErrorView: FC<ImportErrorViewProps> = (props) => {

@@ -884,11 +884,11 @@ export class SearchForm {
 
 export interface FilterItem {
   name: string;
-  value?: string;
-  values?: string[];
-  queryConditionType?: QueryConditionType;
-  not?: boolean;
-  subFilters?: Map<'AND' | 'OR', FilterItem[]>;
+  value?: string | undefined;
+  values?: string[] | undefined;
+  queryConditionType?: QueryConditionType | undefined;
+  not?: boolean | undefined;
+  subFilters?: Map<'AND' | 'OR', FilterItem[]> | undefined;
 }
 
 export type Direction = 'ASC' | 'DESC';

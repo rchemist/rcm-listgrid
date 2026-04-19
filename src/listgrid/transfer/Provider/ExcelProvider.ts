@@ -11,16 +11,16 @@ import * as XLSX from 'xlsx-js-style';
 import { DataField, DataRowSet, isDataRowSet } from '../Type';
 
 export interface ExcelDownloadLogOptions {
-  condition?: Record<string, any> | string;
+  condition?: Record<string, any> | string | undefined;
 }
 
 export interface ExcelDownloadProps {
   data: DataRowSet; // any 제거
   fileName: string;
-  excludeHeader?: boolean;
-  password?: string;
-  logOptions?: ExcelDownloadLogOptions;
-  fields?: DataField[];
+  excludeHeader?: boolean | undefined;
+  password?: string | undefined;
+  logOptions?: ExcelDownloadLogOptions | undefined;
+  fields?: DataField[] | undefined;
 }
 
 export async function logExcelDownload(

@@ -14,7 +14,7 @@ import { EntityItem } from '../config/EntityItem';
 import { Session } from '../auth/types';
 
 export interface EntityField extends EntityItem {
-  value?: FieldValue; // 필드값
+  value?: FieldValue | undefined; // 필드값
   type: FieldType; // 필드가 표시되는 방법. 모든 EntityField 는 render 메소드를 이용해 화면에 표시된다. 따라서 render 가 각 EntityField 의 구현체 별로 있어야 한다.
 
   placeHolder?: PlaceHolderType; // placeHolder, string 으로 지정된 경우에는 그냥 신규/수정 모두 동일한 메시지가 표시되고, 그 외에는 상황에 맞게 분리돼 표시된다.
@@ -179,7 +179,7 @@ export interface FilterRenderParameters {
 }
 
 export interface FieldInfoParameters {
-  entityForm?: EntityForm;
-  session?: Session;
-  renderType?: RenderType;
+  entityForm?: EntityForm | undefined;
+  session?: Session | undefined;
+  renderType?: RenderType | undefined;
 }

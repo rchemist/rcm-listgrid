@@ -28,13 +28,13 @@ interface DataImportPreviewViewerProps {
   fields: DataField[];
   onSubmit: () => void;
   cancelImport: () => void;
-  onImportSuccess?: () => void;
-  importResult?: DataTransferResult;
+  onImportSuccess?: (() => void) | undefined;
+  importResult?: DataTransferResult | undefined;
   preview: boolean;
-  importError?: string;
-  errorMessage?: string;
+  importError?: string | undefined;
+  errorMessage?: string | undefined;
   viewError: boolean;
-  importErrorView?: ReactNode;
+  importErrorView?: ReactNode | undefined;
 }
 
 export const DataImportProcessor = ({

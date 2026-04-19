@@ -14,10 +14,10 @@ export class EntityTab {
   id: string;
   label: string;
   order: number;
-  hidden?: boolean;
+  hidden?: boolean | undefined;
   description?: string | React.ReactNode;
   fieldGroups: EntityFieldGroup[] = [];
-  requiredPermissions?: string[];
+  requiredPermissions?: string[] | undefined;
 
   constructor(config?: TabInfo) {
     this.id = config?.id ?? 'default';

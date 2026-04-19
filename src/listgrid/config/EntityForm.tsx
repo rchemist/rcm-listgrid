@@ -990,7 +990,10 @@ export class EntityForm extends EntityFormExtensions {
     };
   }
 
-  async validate(props?: { fieldNames?: string[]; session?: Session }): Promise<FieldError[]> {
+  async validate(props?: {
+    fieldNames?: string[] | undefined;
+    session?: Session | undefined;
+  }): Promise<FieldError[]> {
     const fieldNames = props?.fieldNames;
     const session = props?.session;
 

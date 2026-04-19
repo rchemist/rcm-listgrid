@@ -110,24 +110,24 @@ export interface CardSubCollectionFetchOptions {
  */
 export class CardSubCollectionField extends SubCollectionField {
   // Card-specific properties
-  tooltip?: TooltipType;
+  tooltip?: TooltipType | undefined;
   fetchUrl: string;
-  fetchUrlFunction?: (parentEntityForm: EntityForm) => string;
-  cardConfig?: CardConfig;
-  fetchOptions?: CardSubCollectionFetchOptions;
+  fetchUrlFunction?: ((parentEntityForm: EntityForm) => string) | undefined;
+  cardConfig?: CardConfig | undefined;
+  fetchOptions?: CardSubCollectionFetchOptions | undefined;
 
   constructor(props: {
     entityForm: EntityForm;
     relation: CardSubCollectionRelation;
     order: number;
     name: string;
-    label?: LabelType;
-    helpText?: HelpTextType;
-    hidden?: HiddenType;
-    readonly?: ReadOnlyType;
-    fetchUrl?: string | ((parentEntityForm: EntityForm) => string);
-    cardConfig?: CardConfig;
-    fetchOptions?: CardSubCollectionFetchOptions;
+    label?: LabelType | undefined;
+    helpText?: HelpTextType | undefined;
+    hidden?: HiddenType | undefined;
+    readonly?: ReadOnlyType | undefined;
+    fetchUrl?: string | ((parentEntityForm: EntityForm) => string) | undefined;
+    cardConfig?: CardConfig | undefined;
+    fetchOptions?: CardSubCollectionFetchOptions | undefined;
   }) {
     // Call parent constructor
     super({
@@ -295,6 +295,20 @@ export class CardSubCollectionField extends SubCollectionField {
       initialSearchForm = await this.buildSearchForm(entityForm);
     }
 
+    const viewProps = {
+      parentEntityForm: entityForm,
+      parentId: entityForm.id!,
+      entityForm: this.entityForm,
+      fetchUrl,
+      ...(this.cardConfig !== undefined ? { cardConfig: this.cardConfig } : {}),
+      relation: this.relation as CardSubCollectionRelation,
+      readonly,
+      ...(session !== undefined ? { session } : {}),
+      ...(this.fetchOptions !== undefined ? { fetchOptions: this.fetchOptions } : {}),
+      ...(initialSearchForm !== undefined ? { initialSearchForm } : {}),
+      tooltip,
+    };
+
     return (
       <React.Suspense
         fallback={
@@ -303,19 +317,7 @@ export class CardSubCollectionField extends SubCollectionField {
           </div>
         }
       >
-        <CardSubCollectionView
-          parentEntityForm={entityForm}
-          parentId={entityForm.id!}
-          entityForm={this.entityForm}
-          fetchUrl={fetchUrl}
-          cardConfig={this.cardConfig}
-          relation={this.relation as CardSubCollectionRelation}
-          readonly={readonly}
-          session={session}
-          fetchOptions={this.fetchOptions}
-          initialSearchForm={initialSearchForm}
-          tooltip={tooltip}
-        />
+        <CardSubCollectionView {...viewProps} />
       </React.Suspense>
     );
   }
