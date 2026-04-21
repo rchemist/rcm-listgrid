@@ -1,0 +1,33 @@
+/*
+ * @rchemist/listgrid — default stylesheet entry point.
+ *
+ * Import once from your host application (typically your global CSS or app
+ * layout file):
+ *
+ *   import "@rchemist/listgrid/styles.css";
+ *
+ * This pulls in five cascading layers of declarations:
+ *   1. Design tokens (`tokens.css`) — :root CSS variables. Override these to
+ *      rebrand the library without touching any class rules.
+ *   2. Primitives (`primitives.css`) — low-level primitive classes
+ *      (`rcm-input`, `rcm-button`, `rcm-badge`, …).
+ *   3. Layouts (`layouts.css`) — structural composite classes (flex/grid
+ *      layout for panels, cards, forms, subcollections, …). Loaded AFTER
+ *      primitives so composites can override primitive properties.
+ *   4. Components (`components.css`) — residual component-specific styles
+ *      (modals, dropdowns, tabs, spinners, specialty cells, …).
+ *   5. Base (`base.css`) — global `:where(.rcm-root)` settings, reset-like
+ *      declarations, utility classes, and global keyframes. Last so
+ *      utilities naturally win by cascade order.
+ *
+ * Skip this import if you want to ship your own CSS that targets the library's
+ * scoped class names directly. The class-name contract (`rcm-field-root`,
+ * `rcm-button`, etc.) is documented across the split stylesheets and is a
+ * supported customization surface.
+ */
+
+@import './tokens.css';
+@import './primitives.css';
+@import './layouts.css';
+@import './components.css';
+@import './base.css';

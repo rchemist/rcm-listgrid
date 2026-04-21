@@ -1,0 +1,3206 @@
+/*
+ * @rchemist/listgrid layouts stylesheet (Phase 7 split).
+ *
+ * Structural composite classes — flex/grid layout for the listgrid panel,
+ * cards, forms, subcollections, etc. Loaded AFTER primitives.css so composite
+ * classes can override primitive properties, and BEFORE components.css /
+ * base.css so those can tweak or override layout pieces.
+ */
+
+/* BEGIN — unlayered (see top comment for rationale) */
+/* ------------------------------------------------------------------ *
+     * Layout primitives
+     * ------------------------------------------------------------------ */
+.rcm-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-md);
+}
+
+.rcm-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-row-center {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-row-between {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-grid {
+  display: grid;
+  gap: var(--rcm-space-md);
+}
+
+/* ------------------------------------------------------------------ *
+     * Field — generic wrapper for every form field
+     * ------------------------------------------------------------------ */
+.rcm-field-root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-xs);
+}
+
+.rcm-field-label {
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text);
+}
+
+.rcm-field-label-required::after {
+  content: ' *';
+  color: var(--rcm-color-error);
+}
+
+.rcm-field-description {
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-field-error {
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-error);
+}
+
+.rcm-field-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--rcm-size-input-height);
+  padding: 0 var(--rcm-space-md);
+  font-family: inherit;
+  font-size: var(--rcm-font-size-md);
+  line-height: var(--rcm-line-height-normal);
+  color: var(--rcm-color-text);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+  transition: border-color var(--rcm-transition-fast);
+}
+
+.rcm-field-input:hover {
+  border-color: var(--rcm-color-border-hover);
+}
+
+.rcm-field-input:focus,
+.rcm-field-input:focus-visible {
+  outline: none;
+  border-color: var(--rcm-color-border-focus);
+}
+
+.rcm-field-input[aria-invalid='true'] {
+  border-color: var(--rcm-color-error);
+}
+
+.rcm-field-input[disabled],
+.rcm-field-input[readonly] {
+  background: var(--rcm-color-surface-disabled);
+  color: var(--rcm-color-text-disabled);
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------ *
+     * Field selector (Advanced Search 에서 검색 필드 선택)
+     * ------------------------------------------------------------------ */
+.rcm-field-selector {
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-field-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--rcm-space-sm) var(--rcm-space-md);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-field-selector-header:hover {
+  background: var(--rcm-color-surface-muted);
+}
+
+.rcm-field-selector-header-left,
+.rcm-field-selector-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+/* .rcm-field-selector-title / -count / -hint / -toggle / -chevron removed — JSX uses rcm-text / rcm-badge / rcm-icon-btn / rcm-icon primitives. */
+
+.rcm-field-selector-body {
+  border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+.rcm-field-selector-search-row {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  padding: var(--rcm-space-sm) var(--rcm-space-md);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+.rcm-field-selector-search-input-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.rcm-field-selector-search-icon {
+  position: absolute;
+  left: var(--rcm-space-sm);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* .rcm-field-selector-search-input / -action* removed — JSX uses rcm-input / rcm-button primitives. */
+
+.rcm-field-selector-list {
+  max-height: 12rem;
+  overflow-y: auto;
+}
+
+.rcm-field-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--rcm-space-xs);
+  padding: var(--rcm-space-sm);
+}
+
+@media (min-width: 640px) {
+  .rcm-field-selector-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .rcm-field-selector-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* .rcm-field-selector-chip / -chip-selected removed — JSX uses rcm-chip data-state="selected". */
+
+.rcm-field-selector-chip-check {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  border: var(--rcm-border-width) solid var(--rcm-color-border-hover);
+  border-radius: var(--rcm-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rcm-field-selector-chip-check-selected {
+  background: var(--rcm-color-primary);
+  border-color: var(--rcm-color-primary);
+}
+
+.rcm-field-selector-chip-check-icon {
+  color: var(--rcm-color-primary-text);
+}
+
+.rcm-field-selector-empty {
+  text-align: center;
+  padding: var(--rcm-space-lg);
+}
+
+/* ------------------------------------------------------------------ *
+     * Card view — section 카드 (FieldGroup 카드 렌더링) + field row
+     * ------------------------------------------------------------------ */
+.rcm-card-section {
+  background: color-mix(in srgb, var(--rcm-color-surface-muted) 50%, var(--rcm-color-surface));
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  overflow: hidden;
+}
+
+.rcm-card-section-header {
+  padding: 0.625rem var(--rcm-space-lg);
+  background: var(--rcm-color-surface-muted);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+  cursor: pointer;
+}
+
+.rcm-card-section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rcm-card-section-title {
+  margin: 0;
+  font-size: var(--rcm-font-size-xs);
+  font-weight: var(--rcm-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-card-section-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-card-section-help-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--rcm-color-text-muted);
+  cursor: help;
+}
+
+.rcm-card-section-toggle {
+  padding: 2px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--rcm-radius-sm);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-card-section-toggle:hover {
+  background: var(--rcm-color-surface-hover);
+}
+
+.rcm-card-section-chevron {
+  width: 1rem;
+  height: 1rem;
+  color: var(--rcm-color-text-muted);
+  transition: transform 200ms;
+}
+
+.rcm-card-section-body {
+  margin: 0;
+  padding: var(--rcm-space-sm) var(--rcm-space-lg);
+}
+
+.rcm-card-field-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding: 0.625rem 0;
+  border-bottom: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+}
+
+.rcm-card-field-row:last-child {
+  border-bottom: 0;
+}
+
+.rcm-card-field-label {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+  font-size: var(--rcm-font-size-xs);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-card-field-value {
+  grid-column: span 2 / span 2;
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text);
+}
+
+.rcm-card-field-help-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: var(--rcm-color-text-muted);
+  cursor: help;
+}
+
+.rcm-card-field-help-text {
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-text-disabled);
+}
+
+.rcm-card-field-value-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.rcm-card-field-loading {
+  display: inline-block;
+  height: 1rem;
+  width: 5rem;
+  background: var(--rcm-color-surface-muted);
+  border-radius: var(--rcm-radius-sm);
+  animation: rcm-pulse 2s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------------ *
+     * CardManyToOneView — 카드 형태의 ManyToOne 선택 UI
+     * ------------------------------------------------------------------ */
+.rcm-card-m2o-wrapper {
+  width: 100%;
+}
+.rcm-card-m2o-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-md);
+}
+
+.rcm-card-m2o {
+  position: relative;
+  padding: var(--rcm-space-lg);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  background: var(--rcm-color-surface);
+  transition: all var(--rcm-transition-fast);
+}
+
+.rcm-card-m2o-clickable {
+  cursor: pointer;
+}
+
+.rcm-card-m2o-clickable:hover {
+  box-shadow: var(--rcm-shadow-sm);
+}
+
+.rcm-card-m2o-selected {
+  border-color: color-mix(in srgb, var(--rcm-color-primary) 40%, transparent);
+  background: color-mix(in srgb, var(--rcm-color-primary) 2%, var(--rcm-color-surface));
+}
+
+.rcm-card-m2o-default {
+  border-color: var(--rcm-color-border);
+}
+
+.rcm-card-m2o-default:hover {
+  border-color: var(--rcm-color-border-hover);
+}
+
+.rcm-card-m2o-check {
+  position: absolute;
+  right: var(--rcm-space-sm);
+  top: var(--rcm-space-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--rcm-color-primary) 70%, transparent);
+  color: var(--rcm-color-primary-text);
+}
+
+.rcm-card-m2o-image-wrap {
+  margin-bottom: var(--rcm-space-md);
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--rcm-radius-md);
+  background: var(--rcm-color-surface-muted);
+}
+
+.rcm-card-m2o-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* .rcm-card-m2o-badge / -badge-primary / -badge-neutral / -title removed — JSX uses rcm-badge + rcm-text. */
+
+.rcm-card-m2o-title-sm {
+  font-size: var(--rcm-font-size-sm);
+}
+
+.rcm-card-m2o-description {
+  margin-top: var(--rcm-space-xs);
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-card-m2o-description-clamp {
+  font-size: var(--rcm-font-size-xs);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.rcm-card-m2o-action {
+  margin-top: var(--rcm-space-sm);
+}
+
+.rcm-card-m2o-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-md);
+}
+
+/* .rcm-card-m2o-action-btn* removed — JSX uses rcm-button data-variant primitive. */
+
+.rcm-card-m2o-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.rcm-card-m2o-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--rcm-color-primary);
+  border-top-color: transparent;
+  border-radius: 9999px;
+  animation: rcm-spin 1s linear infinite;
+}
+
+.rcm-card-m2o-spinner-inverse {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--rcm-color-primary-text);
+  border-top-color: transparent;
+}
+
+.rcm-card-m2o-empty-readonly {
+  padding: var(--rcm-space-lg) 0;
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-card-m2o-change-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--rcm-space-lg);
+  padding-bottom: 0.75rem;
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+/* .rcm-card-m2o-change-title / -change-cancel removed — JSX uses rcm-text + rcm-button. */
+
+.rcm-card-m2o-search-section {
+  margin-bottom: var(--rcm-space-lg);
+}
+
+.rcm-card-m2o-search-row {
+  position: relative;
+  display: flex;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-card-m2o-search-input-wrap {
+  position: relative;
+  flex: 1;
+}
+
+.rcm-card-m2o-search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--rcm-color-text-muted);
+  pointer-events: none;
+}
+
+.rcm-card-m2o-search-input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  font-size: var(--rcm-font-size-sm);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border-hover);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-card-m2o-search-input:focus {
+  outline: none;
+  border-color: var(--rcm-color-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--rcm-color-primary) 20%, transparent);
+}
+
+.rcm-card-m2o-search-clear {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--rcm-color-text-muted);
+  cursor: pointer;
+  transition: color var(--rcm-transition-fast);
+}
+
+.rcm-card-m2o-search-clear:hover {
+  color: var(--rcm-color-text);
+}
+
+/* .rcm-card-m2o-search-submit removed — JSX uses rcm-button data-variant="primary". */
+
+.rcm-card-m2o-search-status {
+  margin-top: var(--rcm-space-sm);
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-card-m2o-search-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  color: var(--rcm-color-text-disabled);
+}
+
+.rcm-card-m2o-search-empty-icon {
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+/* .rcm-card-m2o-search-empty-text removed — JSX uses rcm-text. */
+
+.rcm-card-m2o-grid {
+  display: grid;
+  gap: var(--rcm-space-lg);
+}
+
+.rcm-card-m2o-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-card-m2o-pagination {
+  margin-top: var(--rcm-space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rcm-space-sm);
+}
+
+/* .rcm-card-m2o-page-nav removed — JSX uses rcm-icon-btn. */
+
+.rcm-card-m2o-page-numbers {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* .rcm-card-m2o-page / -page-active removed — JSX uses rcm-button data-variant. */
+
+/* ------------------------------------------------------------------ *
+     * CardItem — 리스트 카드 variant (group hover + header + tabs + body)
+     * ------------------------------------------------------------------ */
+.rcm-card-item {
+  position: relative;
+  border-radius: 0.75rem;
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  box-shadow: var(--rcm-shadow-sm);
+  transition: all 200ms;
+}
+
+.rcm-card-item-hover:hover {
+  border-color: var(--rcm-color-border-hover);
+  box-shadow: var(--rcm-shadow-md);
+}
+
+.rcm-card-item-clickable {
+  cursor: pointer;
+}
+
+.rcm-card-item-body {
+  padding: var(--rcm-space-lg);
+}
+
+.rcm-card-item-header {
+  padding: var(--rcm-space-lg) 1.25rem;
+  border-bottom: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+}
+
+.rcm-card-item-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.rcm-card-item-header-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.rcm-card-item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.rcm-card-item-title {
+  font-size: var(--rcm-font-size-md);
+  font-weight: var(--rcm-font-weight-semibold);
+  color: var(--rcm-color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.rcm-card-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--rcm-transition-fast);
+}
+
+.rcm-card-item:hover .rcm-card-item-actions {
+  opacity: 1;
+}
+
+/* rcm-card-item-action-btn* removed in Phase 6 — JSX now uses rcm-icon-btn primitive. */
+
+.rcm-card-item-chevron-wrap {
+  padding: 0.375rem;
+}
+
+/* .rcm-card-item-chevron-icon removed — JSX uses rcm-icon data-size data-tone. */
+
+.rcm-card-item-tabbar {
+  padding: 0.75rem 1.25rem 0;
+  border-bottom: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+}
+
+.rcm-card-item-tabnav {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: -1px;
+  overflow-x: auto;
+}
+
+.rcm-card-item-tab {
+  padding: var(--rcm-space-sm) 0.75rem;
+  font-size: var(--rcm-font-size-xs);
+  font-weight: var(--rcm-font-weight-medium);
+  border-top-left-radius: var(--rcm-radius-lg);
+  border-top-right-radius: var(--rcm-radius-lg);
+  background: transparent;
+  border: 0;
+  color: var(--rcm-color-text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--rcm-transition-fast),
+    color var(--rcm-transition-fast);
+}
+
+.rcm-card-item-tab:hover {
+  background: var(--rcm-color-surface-muted);
+  color: var(--rcm-color-text);
+}
+
+.rcm-card-item-tab-active {
+  background: var(--rcm-color-surface-muted);
+  color: var(--rcm-color-text);
+  border-bottom: 2px solid var(--rcm-color-primary);
+}
+
+.rcm-card-item-empty {
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text-disabled);
+  font-style: italic;
+  text-align: center;
+  padding: var(--rcm-space-lg) 0;
+}
+
+.rcm-card-item-sections,
+.rcm-card-item-skel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rcm-card-item-skel-group {
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+  border-radius: var(--rcm-radius-lg);
+  padding: var(--rcm-space-lg);
+}
+
+.rcm-card-item-skel-line {
+  height: 1rem;
+  background: var(--rcm-color-surface-muted);
+  border-radius: var(--rcm-radius-sm);
+  animation: rcm-pulse 2s ease-in-out infinite;
+}
+
+.rcm-card-item-skel-line-title {
+  width: 8rem;
+  height: 1.5rem;
+}
+.rcm-card-item-skel-line-subtitle {
+  width: 12rem;
+}
+.rcm-card-item-skel-line-label {
+  height: 0.75rem;
+  width: 4rem;
+}
+.rcm-card-item-skel-line-value {
+  height: 0.75rem;
+  width: 6rem;
+  grid-column: span 2;
+}
+
+.rcm-card-item-skel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-card-item-skel-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--rcm-space-lg);
+}
+
+.rcm-card-item-subcollections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-lg);
+  padding-top: var(--rcm-space-sm);
+}
+
+.rcm-card-item-sub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-card-item-sub-label {
+  margin: 0;
+  font-size: var(--rcm-font-size-xs);
+  font-weight: var(--rcm-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-card-item-sub-view {
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+  background: color-mix(in srgb, var(--rcm-color-surface-muted) 30%, var(--rcm-color-surface));
+  border-radius: var(--rcm-radius-lg);
+  padding: 0.75rem;
+}
+
+.rcm-card-item-sub-loading-wrap {
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+  border-radius: var(--rcm-radius-lg);
+  padding: var(--rcm-space-lg);
+}
+
+.rcm-card-item-sub-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--rcm-space-lg) 0;
+}
+
+.rcm-card-item-sub-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--rcm-color-primary);
+  border-top-color: transparent;
+  border-radius: 9999px;
+  animation: rcm-spin 1s linear infinite;
+}
+
+/* ------------------------------------------------------------------ *
+     * Advanced search form (Full layout: header + filters + quicksearch + footer)
+     * ------------------------------------------------------------------ */
+@media (min-width: 1280px) {
+  .rcm-adv-search-outer {
+    margin: 0 0.75rem 0.75rem;
+  }
+}
+
+.rcm-adv-search-scroll {
+  display: flex;
+  height: 100%;
+  flex: 1;
+  overflow: auto;
+}
+
+.rcm-adv-search-inner {
+  width: 100%;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 80vh;
+  container-type: inline-size;
+  container-name: rcm-adv-search;
+  overflow-y: auto;
+}
+
+.rcm-adv-search-inner-compact {
+  padding: 0.75rem 0;
+  background: transparent;
+}
+
+.rcm-adv-search-inner-panel {
+  padding: 0.75rem var(--rcm-space-lg);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+  border-radius: var(--rcm-radius-lg);
+  box-shadow: var(--rcm-shadow-sm);
+}
+
+.rcm-adv-search-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--rcm-space-sm);
+  border-bottom: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+}
+
+.rcm-adv-search-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-adv-search-header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-md);
+}
+
+.rcm-adv-search-header-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--rcm-color-primary);
+}
+
+/* .rcm-adv-search-title removed — JSX uses rcm-text data-weight="semibold". */
+
+.rcm-adv-search-count {
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-text-muted);
+  background: var(--rcm-color-surface-muted);
+  padding: 0.125rem var(--rcm-space-sm);
+  border-radius: var(--rcm-radius-sm);
+}
+
+.rcm-adv-search-view-toggle {
+  padding: 0.375rem;
+  background: transparent;
+  border: 0;
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-adv-search-view-toggle:hover {
+  background: var(--rcm-color-surface-muted);
+}
+
+.rcm-adv-search-view-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-adv-search-qs-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: var(--rcm-space-sm) 0.75rem;
+  background: var(--rcm-color-info-surface);
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-info) 30%, transparent);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-adv-search-qs-label {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  cursor: pointer;
+}
+
+.rcm-adv-search-qs-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--rcm-color-primary);
+}
+
+.rcm-adv-search-qs-title {
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-info);
+}
+
+.rcm-adv-search-qs-hint {
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-info);
+}
+
+.rcm-adv-search-qs-input-panel {
+  padding: 0.75rem;
+  background: var(--rcm-color-surface-muted);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-adv-search-qs-input-label {
+  display: block;
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text);
+  margin-bottom: 0.375rem;
+}
+
+/* .rcm-adv-search-qs-input removed — JSX uses rcm-input primitive. */
+
+.rcm-adv-search-qs-description {
+  margin-top: 0.25rem;
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-adv-search-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 1rem;
+}
+
+/* Container-query based columns so modal/popup AdvSearch (narrow container)
+     * tops out at 2 columns even on wide viewports, while full-width inline
+     * usage (wide container) reaches 3. Breakpoints refer to the
+     * rcm-adv-search container's inline size, not the viewport. */
+@container rcm-adv-search (min-width: 640px) {
+  .rcm-adv-search-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container rcm-adv-search (min-width: 1200px) {
+  .rcm-adv-search-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.rcm-adv-search-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.rcm-adv-search-empty {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-adv-search-empty-text {
+  font-size: var(--rcm-font-size-sm);
+}
+
+.rcm-adv-search-empty-action {
+  margin-top: var(--rcm-space-sm);
+  color: var(--rcm-color-primary);
+  font-size: var(--rcm-font-size-sm);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.rcm-adv-search-empty-action:hover {
+  color: var(--rcm-color-primary-hover);
+}
+
+.rcm-adv-search-footer {
+  padding-top: 0.75rem;
+  border-top: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-border) 50%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-adv-search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.rcm-adv-search-btn-submit {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+     * RevisionField (변경 이력) + diff wrapper
+     * ------------------------------------------------------------------ */
+.rcm-revision-diff-container {
+  height: 100%;
+  min-height: 100%;
+}
+
+.rcm-revision-diff-banner {
+  padding: var(--rcm-space-sm) 0.75rem;
+  margin: var(--rcm-space-sm) var(--rcm-space-lg) 0;
+  border-radius: var(--rcm-radius-md);
+  font-size: var(--rcm-font-size-sm);
+}
+
+.rcm-revision-diff-banner-changed {
+  background: var(--rcm-color-warning-surface);
+  border: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-warning) 30%, transparent);
+  color: var(--rcm-color-warning);
+}
+
+.rcm-revision-diff-banner-same {
+  background: var(--rcm-color-success-surface);
+  border: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-success) 30%, transparent);
+  color: var(--rcm-color-success);
+}
+
+.rcm-revision-diff-banner-row {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+/* .rcm-revision-diff-indicator removed — JSX uses rcm-icon-frame data-color="warning". */
+
+.rcm-revision-diff-labels {
+  margin-top: 0.375rem;
+  margin-left: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+/* .rcm-revision-diff-label-chip removed — JSX uses rcm-tag data-color="warning". */
+
+.rcm-revision-state {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  padding: var(--rcm-space-lg);
+}
+
+.rcm-revision-state-empty {
+  color: var(--rcm-color-text-muted);
+}
+
+/* .rcm-revision-state-icon / -state-text removed — JSX uses rcm-icon + rcm-text. */
+
+.rcm-revision-state-icon-spin {
+  animation: rcm-spin 1s linear infinite;
+}
+
+.rcm-revision-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-revision-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  background: var(--rcm-color-surface-muted);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-revision-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.rcm-revision-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--rcm-space-sm);
+  border-radius: var(--rcm-radius-md);
+  font-size: var(--rcm-font-size-sm);
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-revision-item-latest {
+  background: var(--rcm-color-info-surface);
+  color: var(--rcm-color-info);
+  cursor: pointer;
+}
+
+.rcm-revision-item-latest:hover {
+  background: color-mix(in srgb, var(--rcm-color-info) 20%, var(--rcm-color-surface));
+}
+
+.rcm-revision-item-muted {
+  background: var(--rcm-color-surface-muted);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-revision-item-default {
+  background: var(--rcm-color-surface);
+  cursor: pointer;
+}
+
+.rcm-revision-item-default:hover {
+  background: var(--rcm-color-surface-hover);
+}
+
+.rcm-revision-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* .rcm-revision-item-name / -item-date removed — JSX uses rcm-text. */
+
+/* .rcm-revision-badge* removed — JSX uses rcm-badge data-color primitive. */
+
+.rcm-revision-pagination {
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+  display: flex;
+  justify-content: center;
+}
+
+/* ------------------------------------------------------------------ *
+     * ContentAsset (파일/컨텐츠 첨부 필드)
+     * ------------------------------------------------------------------ */
+.rcm-ca-loading {
+  padding: var(--rcm-space-lg);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-ca-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-lg);
+}
+
+.rcm-ca-empty {
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  padding: 2rem;
+  text-align: center;
+}
+
+/* .rcm-ca-empty-text removed — JSX uses rcm-text data-tone="muted". */
+
+.rcm-ca-add-btn {
+  margin: var(--rcm-space-lg) auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  padding: var(--rcm-space-sm) var(--rcm-space-lg);
+  background: var(--rcm-color-primary);
+  color: var(--rcm-color-primary-text);
+  border: 0;
+  border-radius: var(--rcm-radius-lg);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-ca-add-btn:hover {
+  background: var(--rcm-color-primary-hover);
+}
+
+/* .rcm-ca-add-btn-text removed — JSX uses plain span inheriting from parent button. */
+
+.rcm-ca-add-btn-row {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--rcm-space-sm);
+}
+
+.rcm-ca-item {
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  padding: var(--rcm-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: box-shadow var(--rcm-transition-fast);
+}
+
+.rcm-ca-item:hover {
+  box-shadow: var(--rcm-shadow-md);
+}
+
+.rcm-ca-item-error {
+  border-color: color-mix(in srgb, var(--rcm-color-error) 30%, transparent);
+  background: var(--rcm-color-error-surface);
+}
+
+.rcm-ca-item-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.rcm-ca-item-title-col {
+  flex: 1;
+}
+
+/* .rcm-ca-item-label / -required / -optional / -item-error-msg removed — JSX uses rcm-label / rcm-text primitives. */
+
+.rcm-ca-input-error {
+  border-color: var(--rcm-color-error) !important;
+}
+
+.rcm-ca-item-remove-wrap {
+  padding-top: 1.5rem;
+}
+
+/* .rcm-ca-item-remove removed — JSX uses rcm-icon-btn data-color="error". */
+
+.rcm-ca-errors {
+  margin-top: var(--rcm-space-sm);
+}
+
+/* .rcm-ca-error removed — JSX uses rcm-text data-color="error" data-size="sm". */
+
+.rcm-ca-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-lg);
+}
+
+.rcm-ca-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--rcm-space-sm);
+  padding-top: var(--rcm-space-sm);
+}
+
+/* ------------------------------------------------------------------ *
+     * TreeSelectView (트리 노드)
+     * ------------------------------------------------------------------ */
+.rcm-tree-node {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.rcm-tree-node-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: var(--rcm-space-sm);
+  flex-shrink: 0;
+}
+
+.rcm-tree-node-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--rcm-color-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--rcm-radius-sm);
+  cursor: pointer;
+  transition:
+    color var(--rcm-transition-fast),
+    background var(--rcm-transition-fast);
+}
+
+.rcm-tree-node-toggle:hover {
+  color: var(--rcm-color-text);
+  background: var(--rcm-color-surface-muted);
+}
+
+.rcm-tree-node-leaf {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rcm-tree-node-leaf-dot {
+  width: 0.25rem;
+  height: 0.25rem;
+  background: var(--rcm-color-text-disabled);
+  border-radius: 9999px;
+}
+
+.rcm-tree-node-btn {
+  flex: 1;
+  text-align: left;
+  padding: var(--rcm-space-sm) 0.75rem;
+  background: transparent;
+  border: var(--rcm-border-width) solid transparent;
+  border-radius: var(--rcm-radius-md);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text);
+  cursor: pointer;
+  transition: all 200ms;
+}
+
+.rcm-tree-node-btn:hover {
+  background: var(--rcm-color-info-surface);
+  border-color: color-mix(in srgb, var(--rcm-color-info) 30%, transparent);
+}
+
+.rcm-tree-node-span {
+  flex: 1;
+  padding: var(--rcm-space-sm) 0.75rem;
+  color: var(--rcm-color-text-disabled);
+  font-size: var(--rcm-font-size-sm);
+}
+
+/* ------------------------------------------------------------------ *
+     * Input group (field stretched + copy/link button addon)
+     * ------------------------------------------------------------------ */
+.rcm-input-group-stretch {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
+
+.rcm-input-group-grow {
+  flex-grow: 1;
+}
+
+.rcm-input-group-full {
+  display: flex;
+  width: 100%;
+}
+
+.rcm-input-group-full-center {
+  display: flex;
+  width: 100%;
+  align-items: center;
+}
+
+.rcm-input-group-full-relative {
+  position: relative;
+  display: flex;
+  width: 100%;
+}
+
+/* ------------------------------------------------------------------ *
+     * Multiple asset field (여러 파일 첨부 테이블)
+     * ------------------------------------------------------------------ */
+.rcm-asset-th-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.rcm-asset-btn-fill {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.rcm-asset-add-btn {
+  display: flex;
+  white-space: nowrap;
+  min-width: 95px;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 0.75rem;
+  background: var(--rcm-color-text-muted);
+  color: var(--rcm-color-primary-text);
+  font-weight: var(--rcm-font-weight-semibold);
+  border: var(--rcm-border-width) solid var(--rcm-color-text-muted);
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-asset-add-btn:hover {
+  background: color-mix(in srgb, var(--rcm-color-text-muted) 85%, black);
+}
+
+.rcm-asset-th-remove {
+  flex-shrink: 0;
+  margin-left: var(--rcm-space-sm);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* MultipleAssetField outer container */
+.rcm-asset-outer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: var(--rcm-space-sm);
+  padding: var(--rcm-space-md) var(--rcm-space-sm);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+}
+
+/* Horizontal scroll wrapper (replaces legacy .table-responsive) */
+.rcm-asset-table-responsive {
+  overflow-x: auto;
+}
+
+/* Responsive grid — 2 cols on sm, 6 cols on md */
+.rcm-asset-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--rcm-space-md);
+}
+
+@media (min-width: 640px) {
+  .rcm-asset-grid {
+    grid-template-columns: repeat(2, 1fr);
+    min-width: 400px;
+  }
+}
+
+@media (min-width: 768px) {
+  .rcm-asset-grid {
+    grid-template-columns: repeat(6, 1fr);
+    min-width: 860px;
+  }
+}
+
+/* Asset cell table + header */
+.rcm-asset-table {
+  width: 100%;
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-bottom-left-radius: var(--rcm-radius-md);
+  border-bottom-right-radius: var(--rcm-radius-md);
+}
+
+.rcm-asset-th {
+  padding: 0 var(--rcm-space-sm);
+}
+
+@media (min-width: 640px) {
+  .rcm-asset-th {
+    width: 12.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .rcm-asset-th {
+    width: 5rem;
+    max-width: 5rem;
+  }
+}
+
+.rcm-asset-th-name {
+  flex-grow: 1;
+}
+
+.rcm-asset-th-name-compact {
+  max-width: 70%;
+}
+
+.rcm-asset-th-remove-btn {
+  display: flex;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Asset image cell */
+.rcm-asset-td {
+  padding: var(--rcm-space-sm);
+  min-width: 120px;
+  min-height: 120px;
+}
+
+.rcm-asset-td-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.rcm-asset-placeholder-icon {
+  color: var(--rcm-color-text-muted);
+  font-weight: var(--rcm-font-weight-normal);
+}
+
+.rcm-asset-img {
+  height: 100%;
+  width: auto;
+  max-width: 6rem;
+  object-fit: cover;
+}
+
+/* Add column (right-most "+ 추가" button) */
+.rcm-asset-add-col {
+  height: 100%;
+}
+
+.rcm-asset-add-table {
+  height: 100%;
+  max-width: 13.125rem;
+}
+
+@media (min-width: 768px) {
+  .rcm-asset-add-table {
+    max-width: 8.125rem;
+  }
+}
+
+.rcm-asset-add-td {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 100%;
+  padding: var(--rcm-space-sm);
+}
+
+/* MultipleAssetField modal body + labels */
+.rcm-asset-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-md);
+}
+
+.rcm-asset-modal-label {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--rcm-space-xs);
+  margin-left: 0.125rem;
+  font-size: 0.7rem;
+  font-weight: var(--rcm-font-weight-bold);
+}
+
+.rcm-asset-modal-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--rcm-space-md) 0;
+}
+
+.rcm-asset-modal-error {
+  margin-bottom: var(--rcm-space-sm);
+  font-size: 0.8rem;
+  color: var(--rcm-color-error);
+}
+
+/* ------------------------------------------------------------------ *
+     * QuickSearch input (리스트 상단 통합검색 박스)
+     * ------------------------------------------------------------------ */
+.rcm-quick-search-wrap {
+  display: flex;
+  flex: 0 1 auto;
+  max-width: 100%;
+}
+
+.rcm-quick-search-input {
+  max-width: 300px;
+  min-width: 300px;
+  padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+  font-weight: normal;
+  color: var(--rcm-color-text);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border-hover);
+  border-radius: var(--rcm-radius-md);
+}
+
+.rcm-quick-search-input:focus {
+  outline: none;
+  border-color: var(--rcm-color-primary);
+}
+
+.rcm-quick-search-input:disabled {
+  background: var(--rcm-color-surface-disabled);
+  cursor: not-allowed;
+}
+
+.rcm-quick-search-input::placeholder {
+  color: var(--rcm-color-text-disabled);
+}
+
+.rcm-quick-search-addon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  font-weight: var(--rcm-font-weight-semibold);
+  color: var(--rcm-color-error);
+}
+
+.rcm-quick-search-addon-search {
+  margin-left: -2rem;
+}
+.rcm-quick-search-addon-clear {
+  margin-left: -2.75rem;
+}
+
+.rcm-quick-search-btn {
+  display: flex;
+  min-height: 1.5rem;
+  min-width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.rcm-quick-search-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--rcm-color-text);
+}
+
+/* ------------------------------------------------------------------ *
+     * ListGrid theme defaults (referenced by defaultListGridTheme.ts)
+     * ------------------------------------------------------------------ */
+.rcm-listgrid-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--rcm-space-sm);
+  margin-top: var(--rcm-space-sm);
+}
+
+.rcm-listgrid-title-container {
+  min-width: 200px;
+  max-width: 100%;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.rcm-listgrid-title {
+  display: flex;
+  align-items: center;
+  min-height: 60px;
+  padding: var(--rcm-space-sm) 0;
+  font-size: 1.8rem;
+  font-weight: var(--rcm-font-weight-bold);
+  line-height: var(--rcm-line-height-tight);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.rcm-listgrid-button-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-listgrid-panel {
+  flex: 1;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-listgrid-panel-main {
+  margin-top: var(--rcm-space-xl);
+  padding: var(--rcm-space-md) var(--rcm-space-lg);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  box-shadow: var(--rcm-shadow-sm);
+}
+
+.rcm-listgrid-panel-sub {
+  margin-top: var(--rcm-space-sm);
+  padding: var(--rcm-space-lg) 0;
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+}
+
+.rcm-listgrid-searchbar {
+  flex: 1;
+  width: 100%;
+  margin-bottom: var(--rcm-space-sm);
+}
+
+.rcm-listgrid-searchbar-inner {
+  width: 100%;
+  padding: 0 var(--rcm-space-lg);
+}
+
+.rcm-listgrid-search-input {
+  width: 100%;
+  padding-right: 2.25rem;
+  border-radius: var(--rcm-radius-full);
+  background: var(--rcm-color-surface-muted);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  height: var(--rcm-size-input-height);
+}
+
+.rcm-listgrid-search-input:focus {
+  outline: none;
+  border-color: var(--rcm-color-primary);
+  background: var(--rcm-color-surface);
+}
+
+.rcm-listgrid-search-icon {
+  position: absolute;
+  right: var(--rcm-space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-listgrid-search-clear {
+  position: absolute;
+  right: 2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--rcm-color-text-muted);
+  cursor: pointer;
+}
+
+.rcm-listgrid-search-clear:hover {
+  color: var(--rcm-color-text);
+}
+
+.rcm-listgrid-thead {
+  background: var(--rcm-color-surface-muted);
+  border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+/* Header 우측 액션 버튼 그룹 (다운로드 / 업로드 / 삭제 / 신규 입력 등) */
+.rcm-header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--rcm-space-sm);
+  white-space: nowrap;
+}
+
+/* 검색 바 우측 액션 영역 (페이지 사이즈 셀렉터 / 통합 검색 버튼) */
+.rcm-search-bar-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--rcm-space-sm);
+  margin-top: var(--rcm-space-lg);
+  margin-bottom: var(--rcm-space-sm);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .rcm-search-bar-actions {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .rcm-search-bar-actions {
+    margin-top: var(--rcm-space-sm);
+    margin-bottom: var(--rcm-space-sm);
+  }
+}
+
+.rcm-search-bar-pagesize {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  justify-content: flex-end;
+}
+
+@media (min-width: 768px) {
+  .rcm-search-bar-pagesize {
+    margin-right: var(--rcm-space-sm);
+  }
+}
+
+.rcm-search-bar-pagesize-select {
+  width: 140px;
+  min-width: 140px;
+}
+
+.rcm-search-bar-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* `sm:block` + `hidden` 조합의 scoped 치환: 기본 감춤, sm 이상에서 표시 */
+.rcm-hide-below-sm {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .rcm-hide-below-sm {
+    display: block;
+  }
+}
+
+.rcm-listgrid-thead th {
+  padding: var(--rcm-space-md) var(--rcm-space-md);
+  font-weight: var(--rcm-font-weight-semibold);
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.rcm-listgrid-tbody {
+  overflow: auto;
+}
+
+.rcm-listgrid-tbody td {
+  padding: var(--rcm-space-md);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+.rcm-listgrid-row-hover:hover {
+  background: var(--rcm-color-surface-hover);
+}
+
+.rcm-listgrid-row-selected {
+  background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
+}
+
+.rcm-listgrid-row-dragging {
+  opacity: 0.5;
+}
+
+.rcm-listgrid-empty {
+  display: flex;
+  min-height: 400px;
+  align-items: center;
+  justify-content: center;
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-listgrid-pagination {
+  width: 100%;
+  padding: var(--rcm-space-xl) 0;
+  display: flex;
+  justify-content: center;
+}
+
+.rcm-listgrid-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: var(--rcm-space-xs);
+  width: 16rem;
+  max-height: 20rem;
+  overflow-y: auto;
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+  box-shadow: var(--rcm-shadow-md);
+  z-index: var(--rcm-z-dropdown);
+}
+
+.rcm-listgrid-dropdown-left {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  margin-top: var(--rcm-space-xs);
+  width: 16rem;
+  padding: var(--rcm-space-lg);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+  box-shadow: var(--rcm-shadow-md);
+  z-index: var(--rcm-z-dropdown);
+}
+
+.rcm-listgrid-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: var(--rcm-space-sm) var(--rcm-space-lg);
+  cursor: pointer;
+}
+
+.rcm-listgrid-dropdown-item:hover {
+  background: var(--rcm-color-surface-hover);
+}
+
+.rcm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: var(--rcm-z-modal);
+}
+
+.rcm-modal-container {
+  position: fixed;
+  inset: 1rem;
+  background: var(--rcm-color-surface);
+  border-radius: var(--rcm-radius-lg);
+  box-shadow: var(--rcm-shadow-lg);
+  z-index: var(--rcm-z-modal);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.rcm-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--rcm-space-lg) var(--rcm-space-xl);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+.rcm-modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: var(--rcm-space-xl);
+}
+
+.rcm-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--rcm-space-sm);
+  padding: var(--rcm-space-lg) var(--rcm-space-xl);
+  border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+.rcm-progress-bar {
+  height: 0.5rem;
+  background: var(--rcm-color-surface-hover);
+  border-radius: var(--rcm-radius-full);
+  overflow: hidden;
+}
+
+/* ------------------------------------------------------------------ *
+     * ViewEntityForm panel / layout
+     *
+     * Matches the original three-div structure:
+     *   <layoutWrapper>        (flex column, vertical pt)
+     *     <panel>              (border, bg, rounded, no horizontal padding)
+     *       <inner>            (horizontal padding lives here)
+     *         {children}
+     * ------------------------------------------------------------------ */
+.rcm-form-layout-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-xs);
+  padding-top: var(--rcm-space-md);
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 1280px) {
+  .rcm-form-layout-wrapper {
+    flex-direction: row;
+  }
+}
+
+.rcm-form-panel {
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  padding: var(--rcm-space-xs) 0;
+  box-shadow: var(--rcm-shadow-sm);
+}
+
+.rcm-form-panel-inline {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
+.rcm-form-scroll-container {
+  position: relative;
+  height: 100%;
+}
+
+.rcm-form-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--rcm-color-surface);
+}
+
+.rcm-form-header {
+  margin-top: var(--rcm-space-xs);
+  width: 100%;
+  min-width: 0;
+}
+
+.rcm-form-header-title {
+  margin-bottom: var(--rcm-space-md);
+}
+
+.rcm-form-header-buttons {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.rcm-form-header-area {
+  margin-top: var(--rcm-space-sm);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+/* Inline 모드에서 탭과 버튼을 한 줄에 배치하는 row */
+.rcm-form-tab-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--rcm-space-sm);
+}
+
+.rcm-form-tab-row-border {
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+.rcm-form-tab-row-tabs {
+  flex: 1;
+}
+
+/* Inline 탭 row 안의 버튼 영역 — 컴팩트 버튼 스타일 */
+.rcm-form-tab-buttons {
+  flex-shrink: 0;
+  margin-left: var(--rcm-space-sm);
+}
+
+.rcm-form-tab-buttons button {
+  padding: 0.25rem 0.75rem !important;
+  font-size: var(--rcm-font-size-sm) !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding-bottom: 0.125rem !important;
+}
+
+/* Inline 탭 리스트 (scroll wrapper 없이 flex row 로만) */
+.rcm-tab-list-inline {
+  display: flex;
+  flex-direction: row;
+  white-space: nowrap;
+}
+
+/* 일반 탭 scroll wrapper */
+.rcm-tab-scroll {
+  position: relative;
+  width: 100%;
+  white-space: nowrap;
+}
+
+/* 범용 hide utility (display:none) */
+.rcm-hide {
+  display: none !important;
+}
+
+/* 스켈레톤 placeholder (lazy load 중 공간 확보) */
+.rcm-skeleton-placeholder-xs {
+  height: 1rem;
+}
+.rcm-skeleton-placeholder-tab {
+  height: 2rem;
+  background: var(--rcm-color-surface-muted);
+  border-radius: var(--rcm-radius-md);
+  animation: rcm-pulse 2s ease-in-out infinite;
+}
+.rcm-skeleton-placeholder-panel {
+  height: 24rem;
+  background: var(--rcm-color-surface-muted);
+  border-radius: var(--rcm-radius-md);
+  animation: rcm-pulse 2s ease-in-out infinite;
+}
+.rcm-skeleton-placeholder-md {
+  height: 8rem;
+  background: var(--rcm-color-surface-muted);
+  border-radius: var(--rcm-radius-md);
+  animation: rcm-pulse 2s ease-in-out infinite;
+}
+.rcm-skeleton-placeholder-lg {
+  height: 3rem;
+}
+.rcm-skeleton-placeholder-fill {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes rcm-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.rcm-form-panel-inner {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 0.375rem; /* 6px — matches `pl-1.5` */
+  padding-right: 0.375rem;
+}
+
+@media (min-width: 768px) {
+  .rcm-form-panel-inner {
+    padding-left: var(--rcm-space-md); /* 12px — matches `md:pl-3` */
+    padding-right: var(--rcm-space-md);
+  }
+}
+
+/* Save/List/Delete button row at the top of ViewEntityForm.
+     * Replaces Tailwind's `md:flex md:justify-end md:w-full` which do not
+     * generate when library JSX is outside the host's tailwind content scan. */
+.rcm-form-buttons-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (min-width: 768px) {
+  .rcm-form-buttons-scroll {
+    overflow-x: visible;
+  }
+}
+
+.rcm-form-buttons-row {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .rcm-form-buttons-row {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+     * CreateStepView — 다단계 생성 패널
+     * Replaces Tailwind `flex flex-col gap-2.5 pt-5 xl:flex-row`
+     * + `panel relative flex-1 rounded-xl p-5` compound styles.
+     * ------------------------------------------------------------------ */
+.rcm-create-step-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem; /* gap-2.5 */
+  padding-top: var(--rcm-space-xl); /* pt-5 */
+}
+
+@media (min-width: 1280px) {
+  .rcm-create-step-container {
+    flex-direction: row;
+  }
+}
+
+.rcm-create-step-panel {
+  position: relative;
+  flex: 1;
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  padding: var(--rcm-space-lg); /* p-5 ≈ 1.25rem */
+  box-shadow: var(--rcm-shadow-sm);
+}
+
+.rcm-create-step-stepper-wrapper {
+  margin-bottom: var(--rcm-space-sm);
+}
+
+.rcm-create-step-label {
+  font-size: var(--rcm-font-size-lg); /* text-lg */
+  font-weight: var(--rcm-font-weight-semibold);
+  color: var(--rcm-color-text);
+}
+
+/* CreateStepView 내부 버튼 그룹 (Group justify="center" + pt-2 space-x-2) */
+.rcm-create-step-button-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rcm-space-sm);
+  padding-top: var(--rcm-space-xs);
+}
+
+/* CreateStepButtons 하단 버튼 스트립 (flex justify-center gap-3) */
+.rcm-create-step-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--rcm-space-md);
+}
+
+/* ViewEntityForm 하단 footer (인라인 모드가 아닐 때 버튼 영역)
+     * Replaces Tailwind `mt-6 flex flex-col items-center gap-3`. */
+.rcm-form-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rcm-space-md);
+  margin-top: var(--rcm-space-xl);
+}
+
+/* ------------------------------------------------------------------ *
+     * FieldGroup container (replaces a .panel compound + responsive
+     * Tailwind utilities which don't generate for library JSX outside the
+     * host's content scan). Compact subCollection variant separate.
+     * ------------------------------------------------------------------ */
+.rcm-fieldgroup {
+  position: relative;
+  margin-bottom: var(--rcm-space-md);
+  padding: var(--rcm-space-xs);
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  .rcm-fieldgroup {
+    margin-bottom: var(--rcm-space-lg);
+    padding: var(--rcm-space-lg);
+    background: var(--rcm-color-surface);
+    border: var(--rcm-border-width) solid var(--rcm-color-border);
+    border-radius: var(--rcm-radius-lg);
+    box-shadow: var(--rcm-shadow-md);
+  }
+}
+
+.rcm-fieldgroup-subcollection {
+  position: relative;
+  margin-bottom: var(--rcm-space-sm);
+  padding: var(--rcm-space-md);
+  background: var(--rcm-color-surface-muted);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+}
+
+.rcm-fieldgroup-header {
+  margin-bottom: var(--rcm-space-sm);
+}
+
+@media (min-width: 768px) {
+  .rcm-fieldgroup-header {
+    margin-bottom: var(--rcm-space-md);
+  }
+}
+
+.rcm-fieldgroup-title {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-semibold);
+  color: var(--rcm-color-text);
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .rcm-fieldgroup-title {
+    font-size: var(--rcm-font-size-md);
+  }
+}
+
+.rcm-fieldgroup-collapse {
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text-muted);
+  cursor: pointer;
+}
+
+.rcm-rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* ------------------------------------------------------------------ *
+     * FieldRenderer — label, required/dirty icons, tooltip, value, help
+     * ------------------------------------------------------------------ */
+.rcm-field-label-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: -2px;
+}
+
+.rcm-field-label-wrapper-with-tooltip {
+  justify-content: space-between;
+}
+
+/* Label + required/dirty icon row — no gap between label and trailing icon,
+     * matching the original `<div class="flex items-center">` layout. */
+.rcm-field-label-row {
+  display: flex;
+  align-items: center;
+}
+
+.rcm-field-label {
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-text-muted);
+  font-weight: var(--rcm-font-weight-normal);
+}
+
+@media (min-width: 768px) {
+  .rcm-field-label {
+    font-size: var(--rcm-font-size-sm);
+  }
+}
+
+.rcm-field-icon-wrap {
+  margin-bottom: 2px;
+}
+
+@media (min-width: 768px) {
+  .rcm-field-icon-wrap {
+    margin-bottom: 4px;
+  }
+}
+
+.rcm-field-icon {
+  width: 0.625rem;
+  height: 0.625rem;
+  cursor: help;
+}
+
+@media (min-width: 768px) {
+  .rcm-field-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+}
+
+.rcm-field-icon-required {
+  color: var(--rcm-color-error);
+}
+
+.rcm-field-icon-dirty {
+  color: var(--rcm-color-warning);
+}
+
+.rcm-field-tooltip-icon {
+  font-size: 11px;
+  color: var(--rcm-color-text-muted);
+  cursor: help;
+}
+
+.rcm-field-value {
+  max-width: 100%;
+  text-wrap: wrap;
+}
+
+.rcm-field-help {
+  display: inline-block;
+  font-size: 11px;
+  color: var(--rcm-color-text-muted);
+  margin-top: var(--rcm-space-xs);
+}
+
+/* ------------------------------------------------------------------ *
+     * Field layout — responsive grid + col-span / col-start helpers.
+     *
+     * These replace Tailwind's `col-span-full` / `lg:col-start-1` /
+     * `grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3` utilities that
+     * would otherwise require host's Tailwind scanner to include
+     * `node_modules/@rchemist/listgrid/**` — which isn't realistic for library
+     * consumers. These scoped rules ship with our stylesheet directly.
+     * ------------------------------------------------------------------ */
+.rcm-field-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  column-gap: var(--rcm-space-lg);
+  row-gap: var(--rcm-space-md);
+}
+
+@media (min-width: 1024px) {
+  .rcm-field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1536px) {
+  .rcm-field-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.rcm-col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* Forces a field to start at column 1 on lg+ breakpoints so a previous
+     * field's `lineBreak` actually breaks the row. Below lg the grid is
+     * 1-column anyway so no col-start override is needed. */
+@media (min-width: 1024px) {
+  .rcm-col-start-1-lg {
+    grid-column-start: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+     * Alert items (sticky form alert stack in ViewEntityFormAlerts)
+     * ------------------------------------------------------------------ */
+.rcm-alerts-single {
+  margin-bottom: var(--rcm-space-lg);
+}
+
+.rcm-alerts-multi {
+  margin-bottom: var(--rcm-space-lg);
+}
+
+.rcm-alerts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--rcm-space-md);
+  background: var(--rcm-color-surface-muted);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-alerts-header-collapsed {
+  border-radius: var(--rcm-radius-md);
+}
+
+.rcm-alerts-header-expanded {
+  border-top-left-radius: var(--rcm-radius-md);
+  border-top-right-radius: var(--rcm-radius-md);
+  border-bottom: 0;
+}
+
+.rcm-alerts-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-alerts-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: var(--rcm-color-info);
+}
+
+.rcm-alerts-indicator-error {
+  background: var(--rcm-color-error);
+}
+.rcm-alerts-indicator-warning {
+  background: var(--rcm-color-warning);
+}
+.rcm-alerts-indicator-success {
+  background: var(--rcm-color-success);
+}
+.rcm-alerts-indicator-info {
+  background: var(--rcm-color-info);
+}
+
+/* .rcm-alerts-header-title removed — JSX uses rcm-text data-weight="medium". */
+
+/* .rcm-alerts-toggle / -chevron removed — JSX uses rcm-icon-btn + rcm-icon. */
+
+.rcm-alerts-body {
+  background: var(--rcm-color-surface);
+  border-left: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-right: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-bottom-left-radius: var(--rcm-radius-md);
+  border-bottom-right-radius: var(--rcm-radius-md);
+  overflow: hidden;
+  transition:
+    max-height 300ms,
+    opacity 300ms;
+}
+
+.rcm-alerts-body-collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.rcm-alerts-body-expanded {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.rcm-alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-sm);
+  padding: var(--rcm-space-sm);
+}
+
+/* ------------------------------------------------------------------ *
+     * Alert item (individual alert row)
+     * ------------------------------------------------------------------ */
+.rcm-alert-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rcm-space-md);
+}
+
+.rcm-alert-item-content {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rcm-space-md);
+  flex: 1;
+}
+
+/* .rcm-alert-item-icon / -message / -description / -external* removed — JSX uses rcm-icon / rcm-text / rcm-button[data-variant="link"]. */
+
+.rcm-alert-item-body {
+  flex: 1;
+}
+
+/* .rcm-alert-item-close / -close-icon removed — JSX uses rcm-icon-btn + rcm-icon. */
+
+/* ------------------------------------------------------------------ *
+     * Panels / containers (surface with padding, used for dialog sections)
+     * ------------------------------------------------------------------ */
+.rcm-panel {
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+  padding: var(--rcm-space-lg);
+}
+
+.rcm-panel-muted {
+  background: var(--rcm-color-surface-muted);
+}
+
+.rcm-field-indent {
+  padding-left: var(--rcm-space-xl);
+}
+
+.rcm-field-input-compact {
+  max-width: 24rem;
+}
+
+.rcm-cursor-pointer {
+  cursor: pointer;
+}
+
+.rcm-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-xl);
+  padding: var(--rcm-space-xl);
+}
+
+.rcm-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: var(--rcm-space-xl);
+}
+
+.rcm-action-bar-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--rcm-space-sm);
+  padding-top: var(--rcm-space-lg);
+}
+
+/* ------------------------------------------------------------------ *
+     * Checkable row (used in data-export field selector and similar lists)
+     * ------------------------------------------------------------------ */
+.rcm-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  padding: var(--rcm-space-sm);
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-checkbox-row:hover {
+  background: var(--rcm-color-surface-hover);
+}
+
+.rcm-checkbox-label {
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text);
+  cursor: pointer;
+  user-select: none;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ *
+     * SubCollection views — shared toolbar / empty / error / pagination
+     * shell used by TableSubCollectionView, CardSubCollectionView, and
+     * any future sibling that renders a list of related entities.
+     * ------------------------------------------------------------------ */
+.rcm-subcollection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-lg);
+}
+
+.rcm-subcollection-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-md);
+}
+
+@media (min-width: 640px) {
+  .rcm-subcollection-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.rcm-subcollection-search {
+  position: relative;
+  flex: 1 1 auto;
+  max-width: 28rem;
+}
+
+.rcm-subcollection-search-input {
+  display: block;
+  width: 100%;
+  height: var(--rcm-size-input-height);
+  padding: 0 2.5rem;
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  box-shadow: var(--rcm-shadow-sm);
+  transition: border-color var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-search-input::placeholder {
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-subcollection-search-input:focus {
+  outline: none;
+  border-color: var(--rcm-color-primary);
+}
+
+.rcm-subcollection-search-icon {
+  position: absolute;
+  left: var(--rcm-space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--rcm-color-text-muted);
+  transition: color var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-search-icon-focused {
+  color: var(--rcm-color-primary);
+}
+
+.rcm-subcollection-search-clear {
+  position: absolute;
+  right: var(--rcm-space-md);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--rcm-color-text-muted);
+  cursor: pointer;
+  transition: color var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-search-clear:hover {
+  color: var(--rcm-color-text);
+}
+
+.rcm-subcollection-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-subcollection-count {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+  padding: var(--rcm-space-xs) var(--rcm-space-md);
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text-muted);
+  background: var(--rcm-color-surface-muted);
+  border-radius: var(--rcm-radius-md);
+}
+
+.rcm-subcollection-count-accent {
+  color: var(--rcm-color-primary);
+  font-weight: var(--rcm-font-weight-semibold);
+}
+
+.rcm-subcollection-count-sep {
+  color: var(--rcm-color-border-hover);
+}
+
+.rcm-subcollection-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  color: var(--rcm-color-text-muted);
+  background: var(--rcm-color-surface-muted);
+  border: 0;
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition:
+    background var(--rcm-transition-fast),
+    color var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-icon-btn:hover {
+  background: var(--rcm-color-surface-hover);
+  color: var(--rcm-color-text);
+}
+
+.rcm-subcollection-icon-btn-help {
+  cursor: help;
+}
+
+.rcm-subcollection-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+  height: var(--rcm-size-button-height);
+  padding: 0 var(--rcm-space-lg);
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-primary-text);
+  background: var(--rcm-color-primary);
+  border: 0;
+  border-radius: var(--rcm-radius-md);
+  box-shadow: var(--rcm-shadow-sm);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-add-btn:hover {
+  background: var(--rcm-color-primary-hover);
+}
+
+.rcm-subcollection-add-btn-label {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .rcm-subcollection-add-btn-label {
+    display: inline;
+  }
+}
+
+.rcm-subcollection-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--rcm-space-2xl) var(--rcm-space-lg);
+  background: var(--rcm-color-surface-muted);
+  border: var(--rcm-border-width) dashed var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  text-align: center;
+}
+
+.rcm-subcollection-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  margin-bottom: var(--rcm-space-lg);
+  background: var(--rcm-color-surface-hover);
+  border-radius: var(--rcm-radius-lg);
+  color: var(--rcm-color-text-disabled);
+}
+
+.rcm-subcollection-empty-title {
+  font-size: var(--rcm-font-size-md);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text-muted);
+  margin: 0;
+}
+
+.rcm-subcollection-empty-hint {
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text-disabled);
+  margin-top: var(--rcm-space-xs);
+}
+
+.rcm-subcollection-empty-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+  margin-top: var(--rcm-space-lg);
+  padding: var(--rcm-space-xs) var(--rcm-space-lg);
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-primary);
+  background: color-mix(in srgb, var(--rcm-color-primary) 8%, transparent);
+  border: 0;
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-empty-action:hover {
+  background: color-mix(in srgb, var(--rcm-color-primary) 16%, transparent);
+}
+
+.rcm-subcollection-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rcm-space-lg);
+  padding: var(--rcm-space-xl);
+  background: var(--rcm-color-error-surface);
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-error) 25%, transparent);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-subcollection-error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  background: color-mix(in srgb, var(--rcm-color-error) 15%, transparent);
+  border-radius: var(--rcm-radius-lg);
+  color: var(--rcm-color-error);
+}
+
+.rcm-subcollection-error-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rcm-subcollection-error-title {
+  font-size: var(--rcm-font-size-md);
+  font-weight: var(--rcm-font-weight-semibold);
+  color: var(--rcm-color-error);
+  margin: 0;
+}
+
+.rcm-subcollection-error-message {
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text-muted);
+  margin-top: var(--rcm-space-xs);
+}
+
+.rcm-subcollection-error-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+  margin-top: var(--rcm-space-lg);
+  padding: var(--rcm-space-xs) var(--rcm-space-lg);
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-error);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-error) 25%, transparent);
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-error-retry:hover {
+  background: var(--rcm-color-error-surface);
+}
+
+/* Skeleton variants */
+.rcm-subcollection-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-md);
+}
+
+.rcm-subcollection-skeleton-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rcm-space-lg);
+}
+
+.rcm-subcollection-skeleton-search {
+  height: 2.25rem;
+  width: 16rem;
+  background: var(--rcm-color-surface-hover);
+  border-radius: var(--rcm-radius-lg);
+  animation: rcm-pulse 1.5s ease-in-out infinite;
+}
+
+.rcm-subcollection-skeleton-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-subcollection-skeleton-pill {
+  height: 2rem;
+  width: 4rem;
+  background: var(--rcm-color-surface-hover);
+  border-radius: var(--rcm-radius-md);
+  animation: rcm-pulse 1.5s ease-in-out infinite;
+}
+
+.rcm-subcollection-skeleton-table {
+  overflow: hidden;
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-subcollection-skeleton-thead {
+  height: 2.5rem;
+  background: var(--rcm-color-surface-muted);
+  animation: rcm-pulse 1.5s ease-in-out infinite;
+}
+
+.rcm-subcollection-skeleton-tr {
+  height: 2.5rem;
+  background: var(--rcm-color-surface);
+  border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+  animation: rcm-pulse 1.5s ease-in-out infinite;
+}
+
+.rcm-subcollection-skeleton-card {
+  height: 13rem;
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+  box-shadow: var(--rcm-shadow-sm);
+  overflow: hidden;
+}
+
+.rcm-subcollection-skeleton-card-header {
+  height: 3.5rem;
+  background: var(--rcm-color-surface-muted);
+  padding: var(--rcm-space-lg);
+}
+
+.rcm-subcollection-skeleton-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-md);
+  padding: var(--rcm-space-lg);
+}
+
+.rcm-subcollection-skeleton-card-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--rcm-space-lg);
+}
+
+.rcm-subcollection-skeleton-card-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-xs);
+}
+
+.rcm-subcollection-skeleton-label {
+  height: 0.75rem;
+  width: 3rem;
+  background: var(--rcm-color-surface-hover);
+  border-radius: var(--rcm-radius-sm);
+  animation: rcm-pulse 1.5s ease-in-out infinite;
+}
+
+.rcm-subcollection-skeleton-value {
+  height: 1rem;
+  width: 5rem;
+  background: var(--rcm-color-surface-hover);
+  border-radius: var(--rcm-radius-sm);
+  animation: rcm-pulse 1.5s ease-in-out infinite;
+}
+
+/* Table body */
+.rcm-subcollection-table-wrapper {
+  overflow-x: auto;
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-subcollection-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--rcm-font-size-sm);
+}
+
+.rcm-subcollection-table thead tr {
+  background: var(--rcm-color-surface-muted);
+}
+
+.rcm-subcollection-table th {
+  padding: var(--rcm-space-md);
+  border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
+  text-align: center;
+  font-size: var(--rcm-font-size-xs);
+  font-weight: var(--rcm-font-weight-semibold);
+  color: var(--rcm-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.rcm-subcollection-th-no {
+  width: 3rem;
+}
+
+.rcm-subcollection-table tbody tr {
+  background: var(--rcm-color-surface);
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-table tbody tr:hover {
+  background: var(--rcm-color-surface-hover);
+}
+
+.rcm-subcollection-table tbody tr + tr {
+  border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+.rcm-subcollection-table td {
+  padding: var(--rcm-space-sm) var(--rcm-space-md);
+  text-align: center;
+  color: var(--rcm-color-text);
+}
+
+.rcm-subcollection-td-no {
+  color: var(--rcm-color-text-disabled);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Card grid */
+.rcm-subcollection-card-grid {
+  display: grid;
+  gap: var(--rcm-space-lg);
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .rcm-subcollection-card-grid-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  .rcm-subcollection-card-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rcm-subcollection-card-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .rcm-subcollection-card-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Pagination */
+.rcm-subcollection-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rcm-space-sm);
+  padding-top: var(--rcm-space-md);
+}
+
+.rcm-subcollection-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--rcm-color-text-muted);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition:
+    background var(--rcm-transition-fast),
+    color var(--rcm-transition-fast);
+}
+
+.rcm-subcollection-page-btn:hover:not(:disabled) {
+  background: var(--rcm-color-surface-hover);
+  color: var(--rcm-color-text);
+}
+
+.rcm-subcollection-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.rcm-subcollection-page-info {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+  padding: 0 var(--rcm-space-md);
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text-muted);
+}
+
+.rcm-subcollection-page-info-current {
+  color: var(--rcm-color-primary);
+  font-weight: var(--rcm-font-weight-semibold);
+}
+
+.rcm-subcollection-page-size-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--rcm-space-sm);
+  padding: var(--rcm-space-xs) var(--rcm-space-sm);
+  font-size: var(--rcm-font-size-xs);
+  color: var(--rcm-color-text-disabled);
+  background: var(--rcm-color-surface-muted);
+  border-radius: var(--rcm-radius-sm);
+}
+/* END — unlayered */
+
+/* END — unlayered */

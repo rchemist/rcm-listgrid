@@ -1,0 +1,1 @@
+export { defaultEntityFormTheme } from './defaultTheme';

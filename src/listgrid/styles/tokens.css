@@ -1,0 +1,218 @@
+/*
+ * @rchemist/listgrid design tokens.
+ *
+ * These CSS custom properties are the primary customization surface for host
+ * applications. Override any of them in your own stylesheet (loaded after
+ * @rchemist/listgrid's styles) to rebrand the library without touching class rules.
+ *
+ * Example (host CSS):
+ *   @import "@rchemist/listgrid/styles.css";
+ *   :root {
+ *     --rcm-color-primary: #1e40af;
+ *     --rcm-font-family: "Pretendard", sans-serif;
+ *   }
+ *
+ * All tokens are intentionally NEUTRAL — no brand colors, no company-specific
+ * type choices. Hosts are expected to override at least the color tokens to
+ * match their brand.
+ */
+
+:root {
+  /* Typography ------------------------------------------------------- */
+  --rcm-font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
+    'Helvetica Neue', sans-serif;
+  --rcm-font-family-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+  --rcm-font-size-xs: 0.75rem;
+  --rcm-font-size-sm: 0.875rem;
+  --rcm-font-size-md: 1rem;
+  --rcm-font-size-lg: 1.125rem;
+  --rcm-font-size-xl: 1.25rem;
+  --rcm-line-height-tight: 1.25;
+  --rcm-line-height-normal: 1.5;
+  --rcm-font-weight-normal: 400;
+  --rcm-font-weight-medium: 500;
+  --rcm-font-weight-semibold: 600;
+  --rcm-font-weight-bold: 700;
+
+  /* Colors — functional primary + neutral surfaces -------------------- */
+  /* Primary defaults to a universal blue matching common UI libraries
+     * (Mantine, MUI, Chakra all use blue defaults). Hosts rebrand by
+     * overriding --rcm-color-primary / -hover / -text in their own CSS. */
+  --rcm-color-primary: #2563eb; /* blue-600 */
+  --rcm-color-primary-hover: #1d4ed8; /* blue-700 */
+  --rcm-color-primary-text: #ffffff;
+
+  /* Secondary accent — used for addon/detail actions (e.g. ManyToOne
+     * lookup/clear buttons). Defaults to a neutral-friendly purple so it
+     * visually distinguishes from primary CTAs. Hosts rebrand as needed. */
+  --rcm-color-secondary: #805dca;
+  --rcm-color-secondary-hover: #6c4db6;
+  --rcm-color-secondary-surface: #ebe4f7;
+  --rcm-color-secondary-text: #ffffff;
+
+  --rcm-color-surface: #ffffff;
+  --rcm-color-surface-muted: #f9fafb;
+  --rcm-color-surface-hover: #f3f4f6;
+  --rcm-color-surface-disabled: #f3f4f6;
+
+  --rcm-color-text: #111827;
+  --rcm-color-text-muted: #6b7280;
+  --rcm-color-text-disabled: #9ca3af;
+  --rcm-color-text-inverse: #ffffff;
+
+  --rcm-color-border: #e5e7eb;
+  --rcm-color-border-hover: #d1d5db;
+  --rcm-color-border-focus: #374151;
+
+  --rcm-color-success: #15803d;
+  --rcm-color-success-surface: #f0fdf4;
+  --rcm-color-warning: #b45309;
+  --rcm-color-warning-surface: #fffbeb;
+  --rcm-color-error: #dc2626;
+  --rcm-color-error-surface: #fef2f2;
+  --rcm-color-info: #1d4ed8;
+  --rcm-color-info-surface: #eff6ff;
+
+  /* Accent — used for Data Import sample table header (indigo default).
+     * Hosts override for a branded data-import look. */
+  --rcm-color-accent: #4f46e5; /* indigo-600 */
+  --rcm-color-accent-border: #6366f1; /* indigo-500 */
+  --rcm-color-accent-subtext: #c7d2fe; /* indigo-200 */
+  --rcm-color-accent-text: #ffffff;
+  --rcm-color-accent-star: #fca5a5; /* red-300 (required-field star on accent bg) */
+
+  /* Spacing (4px base) ------------------------------------------------ */
+  --rcm-space-0: 0;
+  --rcm-space-xs: 0.25rem; /* 4px */
+  --rcm-space-sm: 0.5rem; /* 8px */
+  --rcm-space-md: 0.75rem; /* 12px */
+  --rcm-space-lg: 1rem; /* 16px */
+  --rcm-space-xl: 1.5rem; /* 24px */
+  --rcm-space-2xl: 2rem; /* 32px */
+
+  /* Sizing ------------------------------------------------------------ */
+  --rcm-size-input-height: 2.25rem; /* 36px */
+  --rcm-size-button-height: 2.25rem;
+  --rcm-size-icon-sm: 1rem;
+  --rcm-size-icon-md: 1.25rem;
+  --rcm-size-icon-lg: 1.5rem;
+
+  /* Borders / Radius -------------------------------------------------- */
+  --rcm-border-width: 1px;
+  --rcm-radius-sm: 0.25rem;
+  --rcm-radius-md: 0.375rem;
+  --rcm-radius-lg: 0.5rem;
+  --rcm-radius-full: 9999px;
+
+  /* Elevation --------------------------------------------------------- */
+  --rcm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --rcm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --rcm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+  /* Motion ------------------------------------------------------------ */
+  --rcm-transition-fast: 120ms ease;
+  --rcm-transition-normal: 200ms ease;
+
+  /* Z-index ----------------------------------------------------------- */
+  --rcm-z-dropdown: 1000;
+  --rcm-z-modal: 1100;
+  --rcm-z-toast: 1200;
+  --rcm-z-tooltip: 1300;
+}
+
+/* ====================================================================== *
+ * Dark mode — opt-in via `[data-theme="dark"]` on a host ancestor (e.g.
+ *   <html data-theme="dark">), or automatic via `prefers-color-scheme`.
+ *
+ * Only surface/text/border/shadow tokens flip; brand colors (primary,
+ * secondary, info, success, warning, error) keep their values — hosts that
+ * want fully dark brand shades should override them explicitly.
+ * ====================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --rcm-color-surface: #1a1d23;
+    --rcm-color-surface-muted: #242830;
+    --rcm-color-surface-hover: #2d323b;
+    --rcm-color-surface-disabled: #2d323b;
+
+    --rcm-color-text: #e5e7eb;
+    --rcm-color-text-muted: #9ca3af;
+    --rcm-color-text-disabled: #6b7280;
+    --rcm-color-text-inverse: #111827;
+
+    --rcm-color-border: #374151;
+    --rcm-color-border-hover: #4b5563;
+    --rcm-color-border-focus: #d1d5db;
+
+    --rcm-color-info-surface: #1e3a5f;
+    --rcm-color-success-surface: #14532d;
+    --rcm-color-warning-surface: #78350f;
+    --rcm-color-error-surface: #7f1d1d;
+
+    --rcm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --rcm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+    --rcm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
+  }
+}
+
+/* Explicit opt-in override: `<html data-theme="dark">` wins regardless of
+ * system preference. Same token values as the prefers-color-scheme block. */
+[data-theme='dark'] {
+  --rcm-color-surface: #1a1d23;
+  --rcm-color-surface-muted: #242830;
+  --rcm-color-surface-hover: #2d323b;
+  --rcm-color-surface-disabled: #2d323b;
+
+  --rcm-color-text: #e5e7eb;
+  --rcm-color-text-muted: #9ca3af;
+  --rcm-color-text-disabled: #6b7280;
+  --rcm-color-text-inverse: #111827;
+
+  --rcm-color-border: #374151;
+  --rcm-color-border-hover: #4b5563;
+  --rcm-color-border-focus: #d1d5db;
+
+  --rcm-color-info-surface: #1e3a5f;
+  --rcm-color-success-surface: #14532d;
+  --rcm-color-warning-surface: #78350f;
+  --rcm-color-error-surface: #7f1d1d;
+
+  --rcm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --rcm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.5);
+  --rcm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.6);
+}
+
+/* Force light (opt-out of system dark).
+ * Must redeclare the light token values so this block wins over the
+ * `@media (prefers-color-scheme: dark)` override that targets :root.
+ * Without these declarations, setting `<html data-theme="light">` only
+ * flips `color-scheme` while the dark token values remain applied. */
+[data-theme='light'] {
+  color-scheme: light;
+
+  --rcm-color-surface: #ffffff;
+  --rcm-color-surface-muted: #f9fafb;
+  --rcm-color-surface-hover: #f3f4f6;
+  --rcm-color-surface-disabled: #f3f4f6;
+
+  --rcm-color-text: #111827;
+  --rcm-color-text-muted: #6b7280;
+  --rcm-color-text-disabled: #9ca3af;
+  --rcm-color-text-inverse: #ffffff;
+
+  --rcm-color-border: #e5e7eb;
+  --rcm-color-border-hover: #d1d5db;
+  --rcm-color-border-focus: #374151;
+
+  --rcm-color-info-surface: #eff6ff;
+  --rcm-color-success-surface: #f0fdf4;
+  --rcm-color-warning-surface: #fffbeb;
+  --rcm-color-error-surface: #fef2f2;
+
+  --rcm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --rcm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --rcm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}

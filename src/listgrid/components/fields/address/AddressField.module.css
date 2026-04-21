@@ -1,0 +1,27 @@
+.subRow {
+  margin-top: 0.5rem;
+}
+
+.title {
+  font-weight: bold;
+}
+
+.error {
+  color: #f00;
+  font-size: 0.8rem;
+  padding-left: 0.5rem;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+  padding: 1rem 0 0;
+}
+
+.modalWrapper {
+  width: 100%;
+  padding: 2rem;
+}

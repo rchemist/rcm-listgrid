@@ -1,0 +1,116 @@
+/*
+ * @rchemist/listgrid base stylesheet (Phase 7 split).
+ *
+ * Contains only global root, reset-like declarations, and utility classes.
+ * Layout-oriented composite classes live in `layouts.css`; residual
+ * component-specific styles live in `components.css`. Both import BEFORE
+ * this file so utilities and `.rcm-root` settings can still reference or
+ * tweak component-owned pieces.
+ *
+ * Rules remain unlayered so they beat Tailwind's preflight universal reset.
+ * Host apps override by writing CSS AFTER this file loads — plain cascade
+ * order handles it without `!important`:
+ *
+ *   import "@rchemist/listgrid/styles.css";
+ *
+ *   // In your own stylesheet, loaded after the import above:
+ *   .rcm-button { border-radius: 20px; }     // wins by cascade order
+ *
+ * Class-name contract: every class in this file uses the `rcm-` prefix and
+ * is part of the public contract. Host CSS that targets `rcm-*` selectors
+ * is a supported customization path.
+ */
+
+/* BEGIN — unlayered (see top comment for rationale) */
+/* ------------------------------------------------------------------ *
+     * Root / surfaces
+     * ------------------------------------------------------------------ */
+.rcm-root {
+  font-family: var(--rcm-font-family);
+  font-size: var(--rcm-font-size-md);
+  line-height: var(--rcm-line-height-normal);
+  color: var(--rcm-color-text);
+}
+
+.rcm-surface {
+  background: var(--rcm-color-surface);
+  color: var(--rcm-color-text);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+}
+
+/* ------------------------------------------------------------------ *
+     * Readonly helper (replaces packages/ui readonlyClass)
+     * ------------------------------------------------------------------ */
+.rcm-readonly {
+  background: var(--rcm-color-surface-disabled);
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------------ *
+     * Text utilities (size + color, kept minimal)
+     * ------------------------------------------------------------------ */
+.rcm-heading-sm {
+  font-size: var(--rcm-font-size-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text);
+  margin: 0 0 var(--rcm-space-lg) 0;
+}
+
+.rcm-text-xs {
+  font-size: var(--rcm-font-size-xs);
+}
+.rcm-text-sm {
+  font-size: var(--rcm-font-size-sm);
+}
+.rcm-text-muted {
+  color: var(--rcm-color-text-muted);
+}
+.rcm-text-emphasis {
+  color: var(--rcm-color-text);
+  font-weight: var(--rcm-font-weight-medium);
+}
+.rcm-text-info {
+  color: var(--rcm-color-info);
+}
+.rcm-text-warning {
+  color: var(--rcm-color-warning);
+}
+.rcm-text-error {
+  color: var(--rcm-color-error);
+}
+
+/* ------------------------------------------------------------------ *
+     * Utility helpers (sparingly — don't recreate Tailwind here)
+     * ------------------------------------------------------------------ */
+.rcm-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rcm-scroll-y {
+  overflow-y: auto;
+}
+
+.rcm-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Programmatic focus ring toggled via classList when scrolling to a field
+     * (ViewEntityFormAlerts → onFieldFocus). Replaces Tailwind `ring-2 ring-primary`. */
+.rcm-field-focus-ring {
+  outline: 2px solid var(--rcm-color-primary);
+  outline-offset: 2px;
+}
+
+/* END — unlayered */
