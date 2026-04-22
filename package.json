@@ -73,6 +73,7 @@
         "build": "tsc -p tsconfig.build.json && npm run build:styles",
         "build:styles": "mkdir -p dist/styles && cp src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/layouts.css src/listgrid/styles/components.css src/listgrid/styles/base.css dist/styles/ && cat src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/layouts.css src/listgrid/styles/components.css src/listgrid/styles/base.css > dist/styles.css",
         "clean": "rm -rf dist",
+        "prepublishOnly": "npm run clean && npm run type-check && npm test && npm run build",
         "lint": "eslint 'src/**/*.{ts,tsx}'",
         "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
         "format": "prettier --write 'src/**/*.{ts,tsx,css,json}'",

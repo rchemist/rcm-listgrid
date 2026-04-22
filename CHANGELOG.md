@@ -2,6 +2,34 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.7] - 2026-04-22
+
+### Bug fixes
+
+#### `PostCodeSelector`: 상세주소 입력 중 포커스·입력값 유실
+
+`PostCodeSelector` 의 `useEffect` 가 의존성 배열에 `props` 전체를 받아, 부모(`AddressFieldView`)가 재렌더될 때마다 `initializeData()` 가 재실행되면서 사용자가 타이핑한 `address2` 로컬 state 가 fetched 값으로 되돌아가던 버그를 수정.
+
+- 초기화 시점을 모달 open 토글로 한정 (`[props]` → `[open]`)
+- 편집 중(open=true) 부모 재렌더에도 내부 state 유지 → 포커스/입력 보존
+- 모달이 닫혔다가 다시 열리면 최신 `props.address` 로 재초기화되어 외부 변경 반영에도 문제 없음
+
+**영향 파일**: `src/listgrid/components/fields/address/PostCodeSelector.tsx`
+
+#### `CardManyToOneView` 검색 입력: 돋보기 아이콘이 placeholder 텍스트를 가림
+
+`.rcm-card-m2o-search-input` (특이도 `0,1,0`) 규칙이 `primitives.css` 의 `.rcm-input[data-size='sm']` (특이도 `0,2,0`) 에 눌려 left padding 이 리셋되며, 절대 배치된 돋보기 아이콘(`left: 0.75rem`)이 placeholder 를 가리던 버그를 수정.
+
+- 셀렉터를 `.rcm-card-m2o-search-input.rcm-input` 로 변경하여 특이도 `0,2,0` 동률 확보
+- 번들 순서(`primitives → layouts`)상 `layouts.css` 규칙이 tie-break 승리 → 아이콘 공간용 left padding(2.5rem) 유지
+- `:focus` 상태 규칙도 동일 셀렉터로 맞춤
+
+**영향 파일**: `src/listgrid/styles/layouts.css`
+
+### Compatibility
+
+공개 API 변경 없음. `^0.2.6` 범위 소비자는 `npm install` 로 자동 업그레이드.
+
 ## [0.2.0] - 2026-04-XX
 
 ### Summary

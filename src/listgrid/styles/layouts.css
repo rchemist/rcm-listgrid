@@ -511,7 +511,10 @@
   pointer-events: none;
 }
 
-.rcm-card-m2o-search-input {
+/* 특이도를 (0,2,0)으로 맞춰 primitives.css 의 .rcm-input[data-size='sm'] 과 동률을 만든다.
+   번들 순서(primitives → layouts)상 동률 시 layouts.css 규칙이 승리하여
+   아이콘 공간 확보를 위한 left padding 이 유지된다. */
+.rcm-card-m2o-search-input.rcm-input {
   width: 100%;
   padding: 0.625rem 1rem 0.625rem 2.5rem;
   font-size: var(--rcm-font-size-sm);
@@ -520,7 +523,7 @@
   border-radius: var(--rcm-radius-lg);
 }
 
-.rcm-card-m2o-search-input:focus {
+.rcm-card-m2o-search-input.rcm-input:focus {
   outline: none;
   border-color: var(--rcm-color-primary);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--rcm-color-primary) 20%, transparent);

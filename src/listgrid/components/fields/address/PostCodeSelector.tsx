@@ -38,8 +38,14 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
   const required = props.required;
 
   useEffect(() => {
-    initializeData();
-  }, [props]);
+    // 모달이 열릴 때만 props.address 값으로 내부 상태를 초기화한다.
+    // 편집 중(open=true 유지)에는 부모 재렌더로 props 참조가 바뀌어도 재초기화하지 않아
+    // 사용자가 상세주소(address2) 등에 입력한 값이 유실되지 않도록 한다.
+    if (open) {
+      initializeData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   return (
     <>
