@@ -2,7 +2,13 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
-## [0.2.7] - 2026-04-22
+## [0.2.8] - 2026-04-22
+
+### CI/CD
+
+GitHub Actions `publish.yml` 에서 Trusted Publishing 을 쓰려면 npm CLI >= 11.5.1 이 필요하나, Node 22 번들 npm 은 10.x 라 0.2.7 태그 푸시 후 OIDC 토큰이 레지스트리로 전달되지 않아 publish 가 실패하였다. 워크플로우에 `npm install -g npm@latest` 단계를 추가하여 해결.
+
+0.2.7 은 npm 레지스트리에 게시되지 못했고, 본 릴리스(0.2.8)가 동일한 버그 픽스를 포함하여 실제 배포되는 첫 버전이다.
 
 ### Bug fixes
 
