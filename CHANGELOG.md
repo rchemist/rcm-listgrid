@@ -2,6 +2,27 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.11] - 2026-04-23
+
+### Bug fixes
+
+#### `XrefPreferMappingView` / `XrefAvailableDateMappingView`: 불러오기 후 전체 목록 표시 + 저장 실패
+
+두 뷰의 "불러오기" 모달에서 내부 `ManyToOneField('mapping', ...)` 서브폼을 띄우고 사용자가 선택한 대상을 `form.getSubmitFormData()` 결과에서 꺼내 쓰는 구조였으나, `EntityForm.getSubmitFormData()` 내부의 `processManyToOneField` 헬퍼는 모든 `AbstractManyToOneField` 값을 `${fieldName}Id` 키로 저장한다. 즉 이 두 파일은 `'mapping'` 키로 값을 읽고 있어 항상 `undefined` 를 얻었고, 결과적으로 `mappingValue.mapped` 에 `{ id: undefined, preferred: false }` 가 push 되어 다음 증상으로 이어졌다:
+
+1. 재렌더 시 `idList = [undefined].filter(Boolean)` 로 빈 배열이 되어 `viewSearchForm` 에 `IN values=[]` 필터가 걸리고, 서버는 빈 `IN` 을 "필터 없음" 으로 취급해 **전체 교수/학과 목록** 을 반환한다 (`XrefPreferMappingField` 기준 "담당 교수 불러오기 후 모든 교수가 리스트에 표시됨").
+2. 상위 엔티티 저장 시 페이로드의 `mapped` 가 `[{ id: undefined }]` 로 직렬화되어 서버에서 무시되고, UI 는 "저장되었습니다" 메시지를 띄우나 실제 매핑은 저장되지 않는다.
+
+두 뷰의 키를 `'mappingId'` 로 수정한다. 자매 파일 `XrefPiceMappingView.tsx` 는 이미 `formData.data['mappingId']` 를 올바르게 쓰고 있어, 이 파일이 기준 패턴임을 교차 확인했다. `XrefMappingView` / `XrefPriorityMappingView` 는 모달에서 `ManyToOneField` 서브폼이 아니라 `ListGrid` 를 직접 띄우고 `onSelect: (item) => onChange(item.id)` 로 id 를 바로 받는 다른 아키텍처라 영향 없음.
+
+**영향 파일**:
+- `src/listgrid/components/fields/view/XrefPreferMappingView.tsx`
+- `src/listgrid/components/fields/view/XrefAvailableDateMappingView.tsx`
+
+### Compatibility
+
+공개 API 변경 없음. `^0.2.10` 범위 소비자는 `npm install` 로 자동 업그레이드.
+
 ## [0.2.10] - 2026-04-23
 
 ### Bug fixes

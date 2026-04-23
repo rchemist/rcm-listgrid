@@ -199,7 +199,11 @@ export const XrefAvailableDateMappingView = ({
 
     const formData: SubmitFormData = await form.getSubmitFormData();
 
-    const target = formData.data['mapping'];
+    // processManyToOneField stores the ManyToOneField value as `${name}Id` on formData.data,
+    // so the inner 'mapping' field is read as 'mappingId'. Reading 'mapping' here would yield
+    // undefined and cause the outer view to query the backend with an empty `IN []` filter,
+    // which the backend treats as "no filter" and returns the entire list.
+    const target = formData.data['mappingId'];
 
     if (!isEmpty(mappingValue.mapped)) {
       let duplicated = false;
