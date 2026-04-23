@@ -2,6 +2,26 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.10] - 2026-04-23
+
+### Bug fixes
+
+#### `PostCodeSelector` 주소 검색 모달 UI 깨짐
+
+지난 `0.2.9` 릴리스의 `[props] → [open]` 수정은 `useEffect` 의 재초기화 문제만 다뤘으나, 실제 사용 환경에서는 (1) 모달 내부 레이아웃 CSS 가 전혀 적용되지 않고 (2) 상세주소 타이핑 시 여전히 포커스가 매 글자마다 유실되는 문제가 남아 있었다. 본 릴리스에서 두 문제를 모두 정리한다.
+
+- **CSS 누락 수정**: `PostCodeSelector.tsx` 에서 `const classes = {}` 로 인해 모든 `className={classes.xxx}` 가 `undefined` 로 렌더되어 모달 내부에 정렬/간격 스타일이 전무했던 문제를 수정. `rcm-postcode-form`, `rcm-postcode-row`, `rcm-postcode-input-row`, `rcm-postcode-submit-row` 등 명시적 클래스로 대체하고 `components.css` 에 해당 규칙을 추가. 결과: "주소 검색" 버튼이 두 줄로 깨지는 현상, 각 입력 행의 좌측 치우침, "주소 입력" 버튼 중앙 정렬 부재 등이 해소된다.
+- **상세주소 타이핑 포커스 유실 근본 수정**: 모달 본문을 별도 `PostCodeSelectorForm` 컴포넌트로 분리하고 `React.memo(Component, () => true)` 로 외부 재렌더를 완전히 차단. 내부 state 는 lazy initializer 로 최초 1회만 `initialAddress` 에서 복사하며, `props.onSubmit` 은 "주소 입력" 버튼 클릭 시점에만 호출된다. 부모 `PostCodeSelector` 는 모달 open 시점에 `sessionKey` 를 증가시켜 세션마다 새 Form 인스턴스를 마운트하고, `onSubmit` 은 ref 패턴으로 안정된 참조로 래핑한다. 결과: 상위 `useEntityFormLogic` / `FieldRenderer` 가 어떤 이유로든 재렌더되어도 모달 내부 입력은 재렌더되지 않으며 포커스가 유지된다.
+- **controlled input 고정**: `address2` 의 초기값을 `useState<string>()` 에서 `useState<string>(() => ... ?? '')` 로 변경해 첫 타이핑 시 uncontrolled → controlled 전이가 일어나지 않도록 한다.
+
+**영향 파일**:
+- `src/listgrid/components/fields/address/PostCodeSelector.tsx`
+- `src/listgrid/styles/components.css`
+
+### Compatibility
+
+공개 API 변경 없음. `^0.2.9` 범위 소비자는 `npm install` 로 자동 업그레이드.
+
 ## [0.2.9] - 2026-04-22
 
 ### CI/CD

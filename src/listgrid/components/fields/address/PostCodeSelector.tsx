@@ -1,14 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useRef, useState } from 'react';
 import { Address } from './AddressMapField';
 import { isBlank } from '../../../utils/StringUtil';
-import { Box } from '../../../ui';
 import { Flex } from '../../../ui';
-import { Grid } from '../../../ui';
 import { Modal } from '../../../ui';
-import clsx from 'clsx';
-// CSS module removed in Stage 8 (host app supplies styling)
-const classes: Record<string, string> = {};
 import DaumPostcode from 'react-daum-postcode';
 
 interface PostCodeSelectorProps {
@@ -18,34 +13,37 @@ interface PostCodeSelectorProps {
   required: boolean;
 }
 
+/**
+ * 외부 (AddressFieldView / EntityForm) 상호작용을 담당하는 껍데기.
+ * 모달 본문은 아래 PostCodeSelectorForm 으로 분리해 외부 재렌더에 완전히 격리한다.
+ */
 export const PostCodeSelector = (props: PostCodeSelectorProps) => {
   const [open, setOpen] = useState(false);
+  const [sessionKey, setSessionKey] = useState(0);
 
-  const [openDaumPostCode, setOpenDaumPostCode] = useState(false);
+  // props.onSubmit 이 부모 재렌더마다 새 참조가 되어도 Form 내부 memo 비교를 깨지 않도록
+  // 안정된 핸들러를 ref 패턴으로 구성한다.
+  const onSubmitRef = useRef(props.onSubmit);
+  onSubmitRef.current = props.onSubmit;
 
-  const [postalCode, setPostalCode] = useState<string>();
-  const [state, setState] = useState<string>();
-  const [city, setCity] = useState<string>();
-  const [address1, setAddress1] = useState<string>();
-  const [address2, setAddress2] = useState<string>();
-  const [longitude, setLongitude] = useState<number>();
-  const [latitude, setLatitude] = useState<number>();
+  const handleSubmit = useCallback((address: Address) => {
+    onSubmitRef.current(address);
+    setOpen(false);
+  }, []);
 
-  const [error, setError] = useState('');
+  const handleOpen = () => {
+    // 모달을 열 때마다 sessionKey 를 증가시켜 Form 인스턴스를 새로 마운트한다.
+    // lazy initializer 가 initialAddress 로부터 깨끗이 초기화된다.
+    setSessionKey((k) => k + 1);
+    setOpen(true);
+  };
 
-  const disabled = isBlank(postalCode);
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const required = props.required;
-
-  useEffect(() => {
-    // 모달이 열릴 때만 props.address 값으로 내부 상태를 초기화한다.
-    // 편집 중(open=true 유지)에는 부모 재렌더로 props 참조가 바뀌어도 재초기화하지 않아
-    // 사용자가 상세주소(address2) 등에 입력한 값이 유실되지 않도록 한다.
-    if (open) {
-      initializeData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  const hasAddress = !isBlank(props.address?.postalCode);
 
   return (
     <>
@@ -54,20 +52,16 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
           type="button"
           className="rcm-button"
           data-variant="primary"
-          onClick={() => {
-            setOpen(!open);
-          }}
+          onClick={handleOpen}
         >
           주소 찾기
         </button>
-        {!required && !isBlank(postalCode) && (
+        {!required && hasAddress && (
           <button
             type="button"
             className="rcm-button"
             data-variant="outline"
-            onClick={() => {
-              removeAddress();
-            }}
+            onClick={removeAddress}
           >
             주소 제거
           </button>
@@ -76,10 +70,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
       {open && (
         <Modal
           opened={open}
-          onClose={() => {
-            initializeData();
-            setOpen(false);
-          }}
+          onClose={handleClose}
           closeOnClickOutside={true}
           closeOnEscape={true}
           /* lockScroll={true} */
@@ -88,110 +79,12 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
           zIndex={11000}
           title="주소 검색"
         >
-          <div style={{ padding: `2rem` }}>
-            <Grid className={classes.row} gutter={16} align="center">
-              <Grid.Col span={2} className={clsx(classes.title, 'text-right pr-2')}>
-                우편번호
-              </Grid.Col>
-              <Grid.Col span={10}>
-                <div className="rcm-postcode-input-row">
-                  <input
-                    type="text"
-                    value={postalCode}
-                    disabled={true}
-                    readOnly={true}
-                    className="rcm-input"
-                  />
-                  <button
-                    type="button"
-                    className="rcm-button"
-                    data-variant="primary"
-                    onClick={() => {
-                      setOpenDaumPostCode(true);
-                    }}
-                  >
-                    주소 검색
-                  </button>
-                </div>
-              </Grid.Col>
-            </Grid>
-            <Grid className={clsx(classes.row, classes.subRow)} gutter={16} align="center">
-              <Grid.Col span={2} className={clsx(classes.title, 'text-right pr-2')}>
-                주소
-              </Grid.Col>
-              <Grid.Col span={10}>
-                <input
-                  type="text"
-                  value={address1}
-                  placeholder={'주소 검색을 눌러 주소를 선택하세요'}
-                  readOnly={true}
-                  disabled={true}
-                  className="rcm-input"
-                />
-              </Grid.Col>
-            </Grid>
-            {!disabled && (
-              <Grid className={clsx(classes.row, classes.subRow)} gutter={16} align="center">
-                <Grid.Col span={2} className={clsx(classes.title, 'text-right pr-2')}>
-                  상세 주소
-                </Grid.Col>
-                <Grid.Col span={10}>
-                  <input
-                    type="text"
-                    value={address2}
-                    placeholder={'상세 주소를 입력하세요'}
-                    onChange={(e: any) => {
-                      setAddress2(e.target.value ?? '');
-                    }}
-                    className="rcm-input"
-                  />
-                  {!isBlank(error) && <Box className={classes.error}>{error}</Box>}
-                </Grid.Col>
-              </Grid>
-            )}
-            <Box className={classes.buttonContainer}>
-              <button
-                type="button"
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  disabled || isBlank(address2)
-                    ? 'btn btn-outline-primary border border-gray-300 text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2'
-                    : 'btn btn-outline-primary border border-blue-500 text-blue-500 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                }`}
-                disabled={disabled || isBlank(address2)}
-                onClick={() => {
-                  validateAndSubmit();
-                }}
-              >
-                주소 입력
-              </button>
-            </Box>
-          </div>
-        </Modal>
-      )}
-      {openDaumPostCode && (
-        <Modal
-          opened={openDaumPostCode}
-          onClose={() => {
-            setOpenDaumPostCode(false);
-          }}
-          closeOnClickOutside={false}
-          closeOnEscape={true}
-          /* lockScroll={true} */
-          position="center"
-          zIndex={12000}
-        >
-          <DaumPostcode
-            onComplete={(data: any) => {
-              setState(data.sido);
-              setCity(data.sigungu);
-              setAddress1(data.roadAddress);
-              setAddress2('');
-              setPostalCode(data.zonecode);
-              setLongitude(data.longitude);
-              setLatitude(data.latitude);
-              setOpenDaumPostCode(false);
-            }}
-          ></DaumPostcode>
+          <PostCodeSelectorForm
+            key={sessionKey}
+            initialAddress={props.address}
+            required={required}
+            onSubmit={handleSubmit}
+          />
         </Modal>
       )}
     </>
@@ -199,15 +92,6 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
 
   function removeAddress() {
     if (!required) {
-      setState('');
-      setCity('');
-      setAddress1('');
-      setAddress2('');
-      setPostalCode('');
-      setLatitude(undefined);
-      setLongitude(undefined);
-
-      // onRemove 콜백이 있으면 사용, 없으면 기존 방식 사용
       if (props.onRemove) {
         props.onRemove();
       } else {
@@ -222,48 +106,162 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
       }
     }
   }
+};
 
-  function validateAndSubmit() {
-    let validated = true;
+interface PostCodeSelectorFormProps {
+  initialAddress?: Address | undefined;
+  required: boolean;
+  onSubmit: (address: Address) => void;
+}
+
+/**
+ * 모달 내부 전용 입력 폼.
+ * - initialAddress 는 최초 1회 lazy initializer 로만 소비한다 (이후 prop 변화 무시).
+ * - address2 는 빈 문자열로 시작해 controlled input 으로 고정 (uncontrolled→controlled 전이 차단).
+ * - props.onSubmit 은 "주소 입력" 버튼을 누를 때만 호출. 타이핑은 로컬 state 만 갱신.
+ * - React.memo(() => true) 로 부모 재렌더에 완전히 격리하여 타이핑 중 포커스 유실을 방지.
+ *   세션 전환은 부모에서 key 변경으로 처리하므로 prop 업데이트를 막아도 문제 없음.
+ */
+const PostCodeSelectorFormImpl = (props: PostCodeSelectorFormProps) => {
+  const [postalCode, setPostalCode] = useState<string>(
+    () => props.initialAddress?.postalCode ?? '',
+  );
+  const [state, setState] = useState<string>(() => props.initialAddress?.state ?? '');
+  const [city, setCity] = useState<string>(() => props.initialAddress?.city ?? '');
+  const [address1, setAddress1] = useState<string>(
+    () => props.initialAddress?.address1 ?? '',
+  );
+  const [address2, setAddress2] = useState<string>(
+    () => props.initialAddress?.address2 ?? '',
+  );
+  const [longitude, setLongitude] = useState<number | undefined>(
+    () => props.initialAddress?.longitude,
+  );
+  const [latitude, setLatitude] = useState<number | undefined>(
+    () => props.initialAddress?.latitude,
+  );
+  const [error, setError] = useState('');
+  const [openDaumPostCode, setOpenDaumPostCode] = useState(false);
+
+  const disabled = isBlank(postalCode);
+  const submitDisabled = disabled || isBlank(address2);
+
+  const handleDaumComplete = (data: any) => {
+    setState(data.sido);
+    setCity(data.sigungu);
+    setAddress1(data.roadAddress);
+    setAddress2('');
+    setPostalCode(data.zonecode);
+    setLongitude(data.longitude);
+    setLatitude(data.latitude);
+    setOpenDaumPostCode(false);
+  };
+
+  const validateAndSubmit = () => {
     setError('');
     if (isBlank(address1)) {
       setError('주소 선택을 눌러 주소를 입력하세요');
-      validated = false;
+      return;
     }
+    if (isBlank(address2)) {
+      setError('상세 주소를 반드시 입력해야 합니다.');
+      return;
+    }
+    const longitudeValue = isBlank(longitude) ? undefined : Number(longitude);
+    const latitudeValue = isBlank(latitude) ? undefined : Number(latitude);
+    const address: Address = {
+      state: state || address1.split(' ')[0]!,
+      city: city || address1.split(' ')[1]!,
+      address1,
+      address2,
+      postalCode,
+      ...(longitudeValue !== undefined ? { longitude: longitudeValue } : {}),
+      ...(latitudeValue !== undefined ? { latitude: latitudeValue } : {}),
+    };
+    props.onSubmit(address);
+  };
 
-    if (validated) {
-      if (isBlank(address2)) {
-        setError('상세 주소를 반드시 입력해야 합니다.');
-        validated = false;
-      }
-    }
-
-    if (validated) {
-      const longitudeValue = isBlank(longitude) ? undefined : Number(longitude);
-      const latitudeValue = isBlank(latitude) ? undefined : Number(latitude);
-      const address: Address = {
-        state: state ?? address1!.split(' ')[0]!,
-        city: city ?? address1!.split(' ')[1]!,
-        address1: address1!,
-        address2: address2!,
-        postalCode: postalCode!,
-        ...(longitudeValue !== undefined ? { longitude: longitudeValue } : {}),
-        ...(latitudeValue !== undefined ? { latitude: latitudeValue } : {}),
-      };
-      props.onSubmit(address);
-      setOpen(false);
-    }
-  }
-
-  function initializeData() {
-    if (props.address) {
-      setCity(props.address.city);
-      setState(props.address.state);
-      setPostalCode(props.address.postalCode);
-      setAddress1(props.address.address1);
-      setAddress2(props.address.address2);
-      setLongitude(props.address.longitude);
-      setLatitude(props.address.latitude);
-    }
-  }
+  return (
+    <div className="rcm-postcode-form">
+      <div className="rcm-postcode-row">
+        <div className="rcm-postcode-row-label">우편번호</div>
+        <div className="rcm-postcode-row-content">
+          <div className="rcm-postcode-input-row">
+            <input
+              type="text"
+              value={postalCode}
+              disabled
+              readOnly
+              className="rcm-input"
+            />
+            <button
+              type="button"
+              className="rcm-button"
+              data-variant="primary"
+              onClick={() => setOpenDaumPostCode(true)}
+            >
+              주소 검색
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="rcm-postcode-row">
+        <div className="rcm-postcode-row-label">주소</div>
+        <div className="rcm-postcode-row-content">
+          <input
+            type="text"
+            value={address1}
+            placeholder="주소 검색을 눌러 주소를 선택하세요"
+            readOnly
+            disabled
+            className="rcm-input rcm-postcode-input-full"
+          />
+        </div>
+      </div>
+      {!disabled && (
+        <div className="rcm-postcode-row">
+          <div className="rcm-postcode-row-label">상세 주소</div>
+          <div className="rcm-postcode-row-content">
+            <input
+              type="text"
+              value={address2}
+              placeholder="상세 주소를 입력하세요"
+              onChange={(e) => setAddress2(e.target.value ?? '')}
+              className="rcm-input rcm-postcode-input-full"
+            />
+            {!isBlank(error) && <div className="rcm-postcode-error">{error}</div>}
+          </div>
+        </div>
+      )}
+      <div className="rcm-postcode-submit-row">
+        <button
+          type="button"
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+            submitDisabled
+              ? 'btn btn-outline-primary border border-gray-300 text-gray-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2'
+              : 'btn btn-outline-primary border border-blue-500 text-blue-500 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+          }`}
+          disabled={submitDisabled}
+          onClick={validateAndSubmit}
+        >
+          주소 입력
+        </button>
+      </div>
+      {openDaumPostCode && (
+        <Modal
+          opened={openDaumPostCode}
+          onClose={() => setOpenDaumPostCode(false)}
+          closeOnClickOutside={false}
+          closeOnEscape={true}
+          /* lockScroll={true} */
+          position="center"
+          zIndex={12000}
+        >
+          <DaumPostcode onComplete={handleDaumComplete} />
+        </Modal>
+      )}
+    </div>
+  );
 };
+
+const PostCodeSelectorForm = memo(PostCodeSelectorFormImpl, () => true);

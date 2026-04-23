@@ -721,9 +721,60 @@
 /* ------------------------------------------------------------------ *
      * PostCodeSelector (주소 선택기)
      * ------------------------------------------------------------------ */
+.rcm-postcode-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-md);
+}
+
+.rcm-postcode-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: var(--rcm-space-md);
+  align-items: center;
+}
+
+.rcm-postcode-row-label {
+  text-align: right;
+  padding-right: var(--rcm-space-sm);
+  font-weight: var(--rcm-font-weight-medium);
+  color: var(--rcm-color-text);
+}
+
+.rcm-postcode-row-content {
+  min-width: 0;
+}
+
 .rcm-postcode-input-row {
   display: flex;
   gap: var(--rcm-space-sm);
+  align-items: center;
+}
+
+.rcm-postcode-input-row > .rcm-input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.rcm-postcode-input-row > .rcm-button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.rcm-postcode-input-full {
+  width: 100%;
+}
+
+.rcm-postcode-submit-row {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--rcm-space-sm);
+}
+
+.rcm-postcode-error {
+  margin-top: var(--rcm-space-xs);
+  color: var(--rcm-color-error);
+  font-size: var(--rcm-font-size-sm);
 }
 
 /* ------------------------------------------------------------------ *
