@@ -37,12 +37,32 @@ export {
 } from './store';
 export type { ModalOptions } from './store';
 
-// Field extension registry — host apps register domain-specific field classes.
-export { registerSmsHistoryField, createSmsHistoryField } from './extensions/FieldExtensions';
+// Field extension registry — host apps register domain-specific field classes
+// and opt into domain-specific auto-injection behaviours.
+export {
+  registerSmsHistoryField,
+  createSmsHistoryField,
+  registerPhoneNumberSmsHistoryInject,
+  getPhoneNumberSmsHistoryInjectConfig,
+} from './extensions/FieldExtensions';
+export type {
+  SmsHistoryFieldConstructor,
+  PhoneNumberSmsHistoryInjectConfig,
+} from './extensions/FieldExtensions';
 
-// Runtime configuration — replaces hard-coded process.env.NEXT_PUBLIC_* access.
-export { configureRuntime, getRuntimeConfig } from './config/RuntimeConfig';
-export type { RuntimeConfig } from './config/RuntimeConfig';
+// Runtime configuration — replaces hard-coded process.env.NEXT_PUBLIC_* access
+// and hosts the endpoint/permission registries for framework-agnostic wiring.
+export {
+  configureRuntime,
+  getRuntimeConfig,
+  getEndpoint,
+  getPermission,
+} from './config/RuntimeConfig';
+export type {
+  RuntimeConfig,
+  ListGridEndpoints,
+  ListGridPermissions,
+} from './config/RuntimeConfig';
 
 // i18n extension point — host injects a translator factory at bootstrap.
 export { configureTranslator, getTranslation } from './utils/i18n';

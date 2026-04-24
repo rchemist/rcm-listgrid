@@ -13,8 +13,7 @@ import { fDateTime } from '../../misc';
 import { EntityForm } from '../../config/EntityForm';
 import { Pagination } from '../../ui';
 import { getTranslation } from '../../utils/i18n';
-
-const revisionApiUrl = '/revision';
+import { getEndpoint } from '../../config/RuntimeConfig';
 
 // Audit/timestamp fields excluded from diff (always change on every update)
 const AUDIT_FIELD_NAMES = new Set([
@@ -126,12 +125,24 @@ interface Revision {
 interface RevisionFieldProps extends FormFieldProps {}
 
 export class RevisionField extends FormField<RevisionField> {
+  private apiUrlOverride?: string;
+
   constructor(name: string, order: number) {
     super(name, order, 'revision');
   }
 
   protected createInstance(name: string, order: number): RevisionField {
     return new RevisionField(name, order);
+  }
+
+  /** Override the revision API URL for this field instance. */
+  withApiUrl(url: string): this {
+    this.apiUrlOverride = url;
+    return this;
+  }
+
+  getApiUrl(): string {
+    return this.apiUrlOverride ?? getEndpoint('revisionApi');
   }
 
   protected async renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
@@ -147,7 +158,7 @@ export class RevisionField extends FormField<RevisionField> {
       return null;
     }
 
-    return <RevisionFieldRenderer entityForm={entityForm} />;
+    return <RevisionFieldRenderer entityForm={entityForm} apiUrl={this.getApiUrl()} />;
   }
 
   protected renderListFilterInstance(
@@ -164,9 +175,10 @@ export class RevisionField extends FormField<RevisionField> {
 
 interface RevisionFieldRendererProps {
   entityForm: EntityForm;
+  apiUrl: string;
 }
 
-const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityForm }) => {
+const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityForm, apiUrl }) => {
   const [revisions, setRevisions] = useState<Revision[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPage, setTotalPage] = useState(0);
@@ -192,7 +204,7 @@ const RevisionFieldRenderer: React.FC<RevisionFieldRendererProps> = ({ entityFor
         .withPage(page)
         .withPageSize(10);
 
-      const searchResult = await PageResult.fetchListData(revisionApiUrl, searchForm);
+      const searchResult = await PageResult.fetchListData(apiUrl, searchForm);
 
       if (searchResult && searchResult.list) {
         setRevisions(searchResult.list as Revision[]);

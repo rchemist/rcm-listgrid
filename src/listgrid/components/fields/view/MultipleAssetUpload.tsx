@@ -2,7 +2,7 @@
 
 'use client';
 
-import { ASSET_SERVER_URL, removeAssetServerPrefix } from '../../../misc';
+import { removeAssetServerPrefix } from '../../../misc';
 import { getTranslation } from '../../../utils/i18n';
 import { FileFieldValue, FileUploadInput } from '../../../ui';
 import { useEffect, useState } from 'react';
@@ -12,10 +12,6 @@ interface ProductAssetUploadProps {
   onChange: (url: string) => void;
   fileTypes?: string[] | undefined;
 }
-
-const assetProcessUrl = '/asset/upload-file';
-const assetServerUrl = ASSET_SERVER_URL;
-const ASSET_PREFIX = '/static-resource/';
 
 export const MultipleAssetUpload = (props: ProductAssetUploadProps) => {
   const maxFiles = 1;

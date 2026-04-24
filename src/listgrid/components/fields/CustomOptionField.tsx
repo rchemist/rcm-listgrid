@@ -17,9 +17,7 @@ import { getExternalApiDataWithError, isEmpty, isEquals } from '../../misc';
 import { CheckBox } from '../../ui';
 import { isTrue } from '../../utils/BooleanUtil';
 import { MultiSelectBox } from '../../ui';
-
-const customOptionFetchUrl = '/option/by-alias';
-const customOptionBulkFetchUrl = '/option/by-aliases';
+import { getEndpoint } from '../../config/RuntimeConfig';
 
 // alias별 options 캐시 (동일 페이지 내에서 공유)
 const customOptionCache = new Map<string, SelectOption[]>();
@@ -32,13 +30,34 @@ interface CustomOptionFieldProps extends OptionalFieldProps {
 export class CustomOptionField extends OptionalField<CustomOptionField> {
   alias: string;
   multiple?: boolean | undefined;
+  private fetchUrlOverride?: string;
+  private bulkFetchUrlOverride?: string;
 
   constructor(name: string, order: number, alias: string, multiple?: boolean) {
     super(name, order, 'custom');
     this.alias = alias;
-    // this.tooltip = <div>이 선택 옵션은 <a href='/academic/system/option'>시스템 옵션</a> 에서 시스템 ID <span style={{ fontWeight: `bold`, marginRight: `4px` }}>{alias}</span> 로 등록된 옵션값 입니다.</div>;
     this.multiple = multiple ?? false;
     this.layout = 'half';
+  }
+
+  /** Override the single-alias fetch URL for this field instance. */
+  withFetchUrl(url: string): this {
+    this.fetchUrlOverride = url;
+    return this;
+  }
+
+  /** Override the bulk-alias fetch URL for this field instance. */
+  withBulkFetchUrl(url: string): this {
+    this.bulkFetchUrlOverride = url;
+    return this;
+  }
+
+  getFetchUrl(): string {
+    return this.fetchUrlOverride ?? getEndpoint('customOptionByAlias');
+  }
+
+  getBulkFetchUrl(): string {
+    return this.bulkFetchUrlOverride ?? getEndpoint('customOptionByAliases');
   }
 
   /**
@@ -193,7 +212,7 @@ export async function getCustomOptionValues(alias: string): Promise<SelectOption
   }
 
   const response = await getExternalApiDataWithError({
-    url: `${customOptionFetchUrl}/${alias}`,
+    url: `${getEndpoint('customOptionByAlias')}/${alias}`,
     method: 'GET',
   });
   // 데이터가 정상적으로 들어왔다면 옵션 데이터를 생성해 반환한다. 오류가 발생했다면(alias 가 없거나 하는 경우) 빈 배열을 반환한다.
@@ -223,7 +242,7 @@ export async function prefetchCustomOptions(aliases: string[]): Promise<void> {
   uncachedAliases.forEach((alias) => params.append('aliases', alias));
 
   const response = await getExternalApiDataWithError({
-    url: `${customOptionBulkFetchUrl}?${params.toString()}`,
+    url: `${getEndpoint('customOptionByAliases')}?${params.toString()}`,
     method: 'GET',
   });
 

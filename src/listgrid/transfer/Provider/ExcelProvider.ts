@@ -2,6 +2,7 @@ import { isTrue } from '../../utils/BooleanUtil';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx-js-style';
 import { DataField, DataRowSet, isDataRowSet } from '../Type';
+import { getEndpoint } from '../../config/RuntimeConfig';
 
 export interface ExcelDownloadLogOptions {
   condition?: Record<string, any> | string | undefined;
@@ -26,7 +27,7 @@ export async function logExcelDownload(
     const conditionStr = raw.substring(0, 2000);
     const { callExternalHttpRequest } = await import('../../utils/RequestUtil');
     await callExternalHttpRequest({
-      url: '/excel-download-history/add',
+      url: getEndpoint('excelDownloadHistory'),
       method: 'POST',
       formData: { url, condition: conditionStr, usePassword },
     });

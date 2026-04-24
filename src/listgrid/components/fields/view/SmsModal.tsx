@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { RequestUtil } from '../../../misc';
 import { showAlert, showSuccess } from '../../../message';
+import { getEndpoint } from '../../../config/RuntimeConfig';
 
 interface PermittedPhoneNumber {
   name: string;
@@ -50,7 +51,7 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
       setLoadingSenderList(true);
       try {
         const response = await RequestUtil.getExternalApiDataWithError({
-          url: '/api/v1/sms-sender/list',
+          url: getEndpoint('smsSenderList'),
           method: 'GET',
         });
 
@@ -106,7 +107,7 @@ export const SmsModal = ({ phoneNumber, onClose }: SmsModalProps) => {
       };
 
       const response = await RequestUtil.getExternalApiDataWithError({
-        url: '/notification/send',
+        url: getEndpoint('smsNotificationSend'),
         method: 'POST',
         formData: notificationQueue,
       });

@@ -15,22 +15,21 @@ interface PhoneNumberListViewProps {
   formattedValue: string;
   enableSms?: boolean | undefined;
   session?: Session | undefined;
+  /** Permission to send SMS, resolved by PhoneNumberField at render time. */
+  canSendSmsByPermission?: boolean | undefined;
 }
 
 export const PhoneNumberListView = ({
   phoneNumber,
   formattedValue,
   enableSms,
-  session,
+  canSendSmsByPermission,
 }: PhoneNumberListViewProps) => {
   const { openModal, closeModal } = useModalManagerStore();
 
-  // Check if user has admin role
-  const roles = session?.authentication?.roles ?? session?.roles ?? [];
-  const isAdmin = roles.includes('ROLE_ADMIN');
-
-  // SMS can be sent if: admin + enableSms + phoneNumber
-  const canSendSms = isAdmin && enableSms && phoneNumber;
+  // SMS can be sent if: permitted + enableSms + phoneNumber
+  // `canSendSmsByPermission` is evaluated and injected by PhoneNumberField.
+  const canSendSms = canSendSmsByPermission && enableSms && phoneNumber;
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();

@@ -13,6 +13,7 @@ import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 import { isEmpty } from '../../utils';
 import { getAccessableAssetUrl } from '../../misc';
 import { TextInput } from '../../ui';
+import { getEndpoint } from '../../config/RuntimeConfig';
 
 interface ImageFieldProps extends ListableFormFieldProps {
   config?: IAssetConfig | undefined;
@@ -152,7 +153,7 @@ export class ImageField extends ListableFormField<ImageField> {
                     className="rcm-image-field-thumb"
                     src={`${imgUrl}`}
                     onError={(event) => {
-                      event.currentTarget.src = '/assets/images/no-image.png';
+                      event.currentTarget.src = getEndpoint('noImageFallback');
                     }}
                     alt="primary image"
                   />
@@ -161,7 +162,7 @@ export class ImageField extends ListableFormField<ImageField> {
                       className="rcm-image-field-preview"
                       src={`${imgUrl}`}
                       onError={(event) => {
-                        event.currentTarget.src = '/assets/images/no-image.png';
+                        event.currentTarget.src = getEndpoint('noImageFallback');
                       }}
                       alt="enlarged image"
                     />
@@ -178,7 +179,7 @@ export class ImageField extends ListableFormField<ImageField> {
           <div className="rcm-image-field-cell">
             <img
               className="rcm-image-field-thumb rcm-image-field-thumb-placeholder"
-              src={`/assets/images/no-image.png`}
+              src={getEndpoint('noImageFallback')}
               alt="no image"
             />
           </div>

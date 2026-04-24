@@ -2,6 +2,45 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.12] - 2026-04-24
+
+### Host coupling detox
+
+이 라이브러리에서 GJCU 학사 시스템 고유의 role 문자열, API 엔드포인트 경로, 기능 자동 주입 결정이 하드코딩되어 있던 지점들을 모두 호스트 앱이 주입할 수 있는 **registry / predicate 모델** 로 전환합니다. 자세한 설계 배경과 영향 범위는 `docs/REFACTOR_HOST_COUPLING.md` 를 참고해 주십시오.
+
+해상도 우선순위는 모든 지점에서 동일합니다: **field 단위 오버라이드 > 전역 registry > 라이브러리 기본값**.
+
+#### 신규 공개 API
+
+- `configureRuntime({ endpoints, permissions })` — 기존 `configureRuntime` 에 `endpoints` / `permissions` 섹션 추가. 두 섹션 모두 부분 오버라이드가 가능합니다.
+- `getEndpoint(name)`, `getPermission(name)` — 내부 구성요소가 registry 값을 조회하는 helper.
+- `PhoneNumberField.withSmsPermission((session) => boolean)` — 필드 단위 SMS 발송 권한 오버라이드.
+- `CustomOptionField.withFetchUrl(url)`, `CustomOptionField.withBulkFetchUrl(url)` — 필드 단위 엔드포인트 오버라이드.
+- `RevisionField.withApiUrl(url)` — 필드 단위 엔드포인트 오버라이드.
+- `registerPhoneNumberSmsHistoryInject({ enabled, permission, tabLabel, tabId, tabOrderOffset })` — SMS 이력 탭 자동 주입 opt-in. 미등록 또는 `enabled: false` 인 경우 라이브러리는 탭을 주입하지 않습니다 (이전 버전은 기본적으로 주입).
+
+#### 제거된 라이브러리 내부 하드코딩
+
+- Role 문자열 `ROLE_SUPER_ADMIN`, `ROLE_ADMIN`, `ROLE_STAFF` 제거. 아래 4 지점은 predicate 주입으로 교체됨:
+  - `EntityForm` 의 SMS 이력 탭 자동 주입 조건
+  - `ViewListGrid` 의 "새 창 열기" 버튼 표시 조건
+  - `PhoneNumberFieldView` / `PhoneNumberListView` 의 SMS 발송 버튼 표시 조건
+- URL 리터럴 제거 (모두 `ListGridEndpoints` 에 기본값 유지):
+  - `/excel-upload`, `/excel-download-history/add`
+  - `/option/by-alias`, `/option/by-aliases`
+  - `/asset/upload-file`, `/static-resource/`
+  - `/api/v1/sms-sender/list`, `/notification/send`
+  - `/revision`
+  - `/assets/images/no-image.png`
+- GJCU 도메인을 언급하던 주석 정리 (`academic/system/option`, `menu.academic.admission.notice`, `academic-system`).
+
+#### 호환성 및 마이그레이션
+
+- **URL 기본값**: 라이브러리 기본값이 기존 하드코딩 값과 동일합니다. URL 을 바꾸지 않는 호스트는 추가 설정 없이 동일하게 동작합니다.
+- **권한 기본값**: `canSendSms`, `canOpenInNewWindow` 의 라이브러리 기본값은 `() => true` (항상 표시) 로, 이전 버전처럼 관리자만 보이게 하시려면 `configureRuntime({ permissions: { canSendSms: ..., canOpenInNewWindow: ... } })` 를 부트스트랩에서 호출해 주십시오.
+- **SMS 이력 탭 자동 주입**: 이전에 자동 동작하던 기능입니다. 0.3.0 부터는 `registerPhoneNumberSmsHistoryInject({ enabled: true, permission: ... })` 를 호출해야 주입됩니다.
+- **공개 API 제거 없음**: `hasAnyRole`, `registerSmsHistoryField`, `withRequiredPermissions`, `ManyToOneView.modifiable` 등 기존 API 는 모두 유지됩니다.
+
 ## [0.2.11] - 2026-04-23
 
 ### Bug fixes

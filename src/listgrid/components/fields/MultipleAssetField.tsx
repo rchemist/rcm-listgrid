@@ -14,6 +14,7 @@ import { IconPhotoPlus, IconTrash } from '@tabler/icons-react';
 import { MultipleAssetUpload } from './view/MultipleAssetUpload';
 import { getAccessableAssetUrl } from '../../misc';
 import { RegexLowerEnglishNumber } from '../../misc';
+import { getEndpoint } from '../../config/RuntimeConfig';
 import { isTrue } from '../../utils/BooleanUtil';
 import { ViewHelpText } from '../form/ui/ViewHelpText';
 import { Tooltip } from '../../ui';
@@ -239,7 +240,7 @@ const MultipleAssetFieldView = (props: MultipleAssetFieldViewProps) => {
                                       className="rcm-asset-img"
                                       alt={`${value?.assets?.[index]?.description ?? ''}`}
                                       onError={(event) => {
-                                        event.currentTarget.src = '/assets/images/no-image.png';
+                                        event.currentTarget.src = getEndpoint('noImageFallback');
                                       }}
                                       src={`${imgUrl}`}
                                     />

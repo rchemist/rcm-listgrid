@@ -22,6 +22,8 @@ interface PhoneNumberFieldViewProps {
   enableSms?: boolean | undefined;
   session?: Session | undefined;
   renderType?: RenderType | undefined;
+  /** Permission to send SMS, resolved by PhoneNumberField at render time. */
+  canSendSmsByPermission?: boolean | undefined;
 }
 
 export const PhoneNumberFieldView = ({
@@ -35,6 +37,7 @@ export const PhoneNumberFieldView = ({
   enableSms,
   session,
   renderType,
+  canSendSmsByPermission,
 }: PhoneNumberFieldViewProps) => {
   const { openModal, closeModal } = useModalManagerStore();
   const [displayValue, setDisplayValue] = useState('');
@@ -49,12 +52,10 @@ export const PhoneNumberFieldView = ({
     }
   }, [value]);
 
-  // Check if user has admin role
-  const roles = session?.authentication?.roles ?? session?.roles ?? [];
-  const isAdmin = roles.includes('ROLE_ADMIN');
-
-  // SMS can be sent if: admin + enableSms + phoneNumber + update mode
-  const canSendSms = isAdmin && enableSms && displayValue && renderType === 'update';
+  // SMS can be sent if: permitted + enableSms + phoneNumber + update mode
+  // `canSendSmsByPermission` is evaluated and injected by PhoneNumberField
+  // (either field-level withSmsPermission override or RuntimeConfig.permissions.canSendSms).
+  const canSendSms = canSendSmsByPermission && enableSms && displayValue && renderType === 'update';
 
   // Copy is always available when there's a phone number
   const canCopy = !!displayValue;

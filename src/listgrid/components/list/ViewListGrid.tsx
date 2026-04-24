@@ -18,7 +18,8 @@ import { ListableFormField } from '../fields/abstract';
 import { ShowNotifications } from '../helper/ShowNotifications';
 import { Stack } from '../../ui';
 import { SubCollectionViewModal } from './ui/SubCollectionViewModal';
-import { hasAnyRole, useSession } from '../../auth';
+import { useSession } from '../../auth';
+import { getPermission } from '../../config/RuntimeConfig';
 import { perfLog } from './utils/performanceLogger';
 import {
   getListGridThemeByVariant,
@@ -197,13 +198,14 @@ export const ViewListGrid = (props: ViewListGridProps) => {
   const sessionFromHook = useSession();
   const session = props.session ?? entityForm.getSession() ?? sessionFromHook;
 
-  // 관리자 권한 체크 (새창 열기 버튼 표시용)
-  // 기존 session 변수를 사용하여 불필요한 API 호출 방지
+  // "새 창 열기" 버튼 표시 권한.
+  // 라이브러리 자체는 role 을 모르며, RuntimeConfig.permissions.canOpenInNewWindow 에
+  // 주입된 predicate 가 판정한다. 호스트가 설정하지 않으면 항상 true.
+  //
+  // TODO: ListGrid 단위 override (withOpenInNewWindowPermission) 를 추가할 수도 있지만,
+  // 현재는 전역 predicate 만 사용한다 — 필요 시 listGrid prop 으로 확장.
   const isAdmin = React.useMemo(() => {
-    if (session) {
-      return hasAnyRole(session, 'ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_STAFF');
-    }
-    return false;
+    return getPermission('canOpenInNewWindow')(session ?? undefined);
   }, [session]);
 
   // QuickSearch 필드명 Set 생성 (헤더 필터 비활성화용)

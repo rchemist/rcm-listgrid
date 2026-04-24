@@ -1,5 +1,5 @@
 // i18n contract: library emits translation keys (e.g. "common.save",
-// "menu.academic.admission.notice"), host maps them to strings.
+// "menu.users"), host maps them to strings.
 //
 // Usage:
 //   import { configureTranslator } from '@rchemist/listgrid';

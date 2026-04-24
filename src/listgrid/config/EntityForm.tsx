@@ -25,8 +25,10 @@ import { FieldError, SubmitFormData } from './EntityFormTypes';
 import { ExtensionPoint } from '../extensions/EntityFormExtension.types';
 import { ValidateResult } from '../validations/Validation';
 import { PhoneNumberField } from '../components/fields/PhoneNumberField';
-import { createSmsHistoryField } from '../extensions/FieldExtensions';
-import { hasAnyRole } from '../auth';
+import {
+  createSmsHistoryField,
+  getPhoneNumberSmsHistoryInjectConfig,
+} from '../extensions/FieldExtensions';
 
 export class EntityForm<T extends object = any> extends EntityFormExtensions<T> {
   constructor(name: string, url: string) {
@@ -213,18 +215,20 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
         entityForm.fields.set(field.getName(), newField);
       }
 
-      // PhoneNumberField 가 있다면 sourceType, enableSms 설정
+      // PhoneNumberField 자동 주입: 호스트 앱이 registerPhoneNumberSmsHistoryInject 로
+      // 활성화한 경우에만 SMS 발송 이력 탭을 추가한다. 권한 판정은 호스트가 주입한
+      // predicate 를 사용하며, 라이브러리 자체는 role 문자열을 알지 않는다.
       if (field instanceof PhoneNumberField) {
-        // 만약 이 PhoneNumberField 의 enableSMS 가 true 라면, view 페이지에서 SMS 발송 이력 필드를 자동으로 추가한다.
+        const injectConfig = getPhoneNumberSmsHistoryInjectConfig();
         if (
+          injectConfig.enabled &&
           isTrue(field.enableSms) &&
-          hasAnyRole(entityForm.session, 'ROLE_SUPER_ADMIN', 'ROLE_ADMIN', 'ROLE_STAFF')
+          injectConfig.permission(entityForm.session)
         ) {
-          // SMS 발송 이력 탭 정의 (STATUS_TAB_INFO.order - 10 = 999990)
           const SMS_HISTORY_TAB: TabInfo = {
-            id: 'smsHistory',
-            label: 'SMS 발송 이력',
-            order: STATUS_TAB_INFO.order - 10,
+            id: injectConfig.tabId,
+            label: injectConfig.tabLabel,
+            order: STATUS_TAB_INFO.order + injectConfig.tabOrderOffset,
             hidden: false,
           };
 
@@ -235,7 +239,7 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
           );
 
           if (smsHistoryField) {
-            smsHistoryField.withLabel('SMS 발송 이력').withModifyOnly().withHideLabel(true);
+            smsHistoryField.withLabel(injectConfig.tabLabel).withModifyOnly().withHideLabel(true);
 
             entityForm.addFields({
               tab: SMS_HISTORY_TAB,

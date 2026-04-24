@@ -1,4 +1,5 @@
 import { FieldType } from '../config/Config';
+import { getEndpoint } from '../config/RuntimeConfig';
 import { fDate, fDateTime } from '../misc';
 import { ReactNode } from 'react';
 import { isTrue } from '../utils/BooleanUtil';
@@ -202,8 +203,8 @@ export class DataTransferConfig implements IDataTransferConfig {
     }
 
     if (this.import.url === undefined) {
-      // 엑셀 업로드 기본 경로
-      this.import.url = url + '/excel-upload';
+      // 엑셀 업로드 기본 경로 (RuntimeConfig.endpoints.excelUpload 로 오버라이드 가능)
+      this.import.url = url + getEndpoint('excelUpload');
     }
   }
 

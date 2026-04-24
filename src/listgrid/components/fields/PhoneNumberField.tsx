@@ -17,6 +17,8 @@ import { RenderType } from '../../config/Config';
 import { EntityForm } from '../../config/EntityForm';
 import { PhoneNumberFieldView } from './view/PhoneNumberFieldView';
 import { PhoneNumberListView } from './view/PhoneNumberListView';
+import { getPermission } from '../../config/RuntimeConfig';
+import type { Session } from '../../auth/types';
 
 interface PhoneNumberFieldProps extends ListableFormFieldProps {
   enableSms?: boolean; // Enable SMS functionality (default: false)
@@ -24,6 +26,7 @@ interface PhoneNumberFieldProps extends ListableFormFieldProps {
 
 export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
   enableSms?: boolean;
+  private smsPermissionOverride?: (session?: Session) => boolean;
 
   constructor(name: string, order: number, validations?: Validation[], enableSms?: boolean) {
     super(name, order, 'phone');
@@ -38,6 +41,20 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
   withSms(enabled: boolean = true): this {
     this.enableSms = enabled;
     return this;
+  }
+
+  /**
+   * Override the SMS send permission predicate for this field instance.
+   * If not set, RuntimeConfig.permissions.canSendSms is used (library default: always true).
+   */
+  withSmsPermission(predicate: (session?: Session) => boolean): this {
+    this.smsPermissionOverride = predicate;
+    return this;
+  }
+
+  private resolveCanSendSms(session?: Session): boolean {
+    const fn = this.smsPermissionOverride ?? getPermission('canSendSms');
+    return fn(session);
   }
 
   /**
@@ -73,6 +90,7 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
           enableSms={this.enableSms}
           session={params.entityForm.session}
           renderType={params.entityForm.getRenderType()}
+          canSendSmsByPermission={this.resolveCanSendSms(params.entityForm.session)}
         />
       );
     })();
@@ -122,6 +140,7 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
             formattedValue={formatted}
             enableSms={this.enableSms}
             session={props.entityForm.session}
+            canSendSmsByPermission={this.resolveCanSendSms(props.entityForm.session)}
           />
         ),
         linkOnCell: true, // Prevent row click from triggering when clicking the dropdown
@@ -135,7 +154,11 @@ export class PhoneNumberField extends ListableFormField<PhoneNumberField> {
    * PhoneNumberField 인스턴스 생성
    */
   protected createInstance(name: string, order: number): PhoneNumberField {
-    return new PhoneNumberField(name, order, this.validations, this.enableSms);
+    const cloned = new PhoneNumberField(name, order, this.validations, this.enableSms);
+    if (this.smsPermissionOverride) {
+      cloned.smsPermissionOverride = this.smsPermissionOverride;
+    }
+    return cloned;
   }
 
   static create(props: PhoneNumberFieldProps): PhoneNumberField {
