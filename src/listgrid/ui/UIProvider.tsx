@@ -122,7 +122,9 @@ function makeWrapper<K extends keyof UIComponents>(name: K): any {
     const comps = useUI();
     const Component = comps[name];
     if (!Component) {
-      throw new Error(`[@rchemist/listgrid] UI component "${String(name)}" missing from UIProvider.`);
+      throw new Error(
+        `[@rchemist/listgrid] UI component "${String(name)}" missing from UIProvider.`,
+      );
     }
     return <Component {...props} />;
   };

@@ -58,11 +58,7 @@ export {
   getEndpoint,
   getPermission,
 } from './config/RuntimeConfig';
-export type {
-  RuntimeConfig,
-  ListGridEndpoints,
-  ListGridPermissions,
-} from './config/RuntimeConfig';
+export type { RuntimeConfig, ListGridEndpoints, ListGridPermissions } from './config/RuntimeConfig';
 
 // i18n extension point — host injects a translator factory at bootstrap.
 export { configureTranslator, getTranslation } from './utils/i18n';

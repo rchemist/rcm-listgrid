@@ -48,12 +48,7 @@ export const PostCodeSelector = (props: PostCodeSelectorProps) => {
   return (
     <>
       <Flex gap={10}>
-        <button
-          type="button"
-          className="rcm-button"
-          data-variant="primary"
-          onClick={handleOpen}
-        >
+        <button type="button" className="rcm-button" data-variant="primary" onClick={handleOpen}>
           주소 찾기
         </button>
         {!required && hasAddress && (
@@ -128,12 +123,8 @@ const PostCodeSelectorFormImpl = (props: PostCodeSelectorFormProps) => {
   );
   const [state, setState] = useState<string>(() => props.initialAddress?.state ?? '');
   const [city, setCity] = useState<string>(() => props.initialAddress?.city ?? '');
-  const [address1, setAddress1] = useState<string>(
-    () => props.initialAddress?.address1 ?? '',
-  );
-  const [address2, setAddress2] = useState<string>(
-    () => props.initialAddress?.address2 ?? '',
-  );
+  const [address1, setAddress1] = useState<string>(() => props.initialAddress?.address1 ?? '');
+  const [address2, setAddress2] = useState<string>(() => props.initialAddress?.address2 ?? '');
   const [longitude, setLongitude] = useState<number | undefined>(
     () => props.initialAddress?.longitude,
   );
@@ -187,13 +178,7 @@ const PostCodeSelectorFormImpl = (props: PostCodeSelectorFormProps) => {
         <div className="rcm-postcode-row-label">우편번호</div>
         <div className="rcm-postcode-row-content">
           <div className="rcm-postcode-input-row">
-            <input
-              type="text"
-              value={postalCode}
-              disabled
-              readOnly
-              className="rcm-input"
-            />
+            <input type="text" value={postalCode} disabled readOnly className="rcm-input" />
             <button
               type="button"
               className="rcm-button"
