@@ -81,7 +81,7 @@ const DEFAULT_ENDPOINTS: ListGridEndpoints = {
   customOptionByAliases: '/option/by-aliases',
   assetUpload: '/asset/upload-file',
   staticResourcePrefix: '/static-resource/',
-  smsSenderList: '/api/v1/sms-sender/list',
+  smsSenderList: '/sms-sender/list',
   smsNotificationSend: '/notification/send',
   revisionApi: '/revision',
   noImageFallback: '/assets/images/no-image.png',
