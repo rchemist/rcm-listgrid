@@ -65,6 +65,7 @@ export async function getEntityFormButtons(
     router,
     pathname,
     entityForm,
+    setEntityForm,
     setErrors,
     setNotifications,
     postSave,
@@ -223,6 +224,7 @@ export async function getEntityFormButtons(
           pathname,
           setErrors,
           setNotifications,
+          ...(setEntityForm !== undefined ? { setEntityForm } : {}),
           ...(useCreateStep && {
             step: {
               useCreateStep: true,
@@ -262,9 +264,19 @@ export async function getEntityFormButtons(
                 const form = await button.onClick(buttonProps);
 
                 if (form.errors && form.errors.length > 0) {
-                  // 에러가 있으면 에러 메시지를 표시한다.
-                  const errorMessages = form.errors.flatMap((error) => error.errors);
-                  setErrors(errorMessages);
+                  // Propagate the returned form so ViewEntityFormErrors picks
+                  // up field-level errors (entityForm.getErrorMap()), matching
+                  // the behaviour of the built-in SaveButton.
+                  setEntityForm?.(form);
+                  // entityForm.getErrorMap() 이 채워지면 ShowNotifications 의 띠는
+                  // 표시되지 않으므로(필드별로 표시), 여기에서는 매핑 가능한 필드가
+                  // 하나도 없을 때만 string 메시지를 fallback 으로 노출한다.
+                  if (form.getErrorMap().size === 0) {
+                    const errorMessages = form.errors.flatMap((error) => error.errors);
+                    setErrors(errorMessages);
+                  } else {
+                    setErrors([]);
+                  }
                   return;
                 } else {
                   if (button.isOverwrite('save')) {

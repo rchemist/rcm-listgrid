@@ -1,5 +1,5 @@
 import { EntityForm } from '../config/EntityForm';
-import { ReactNode } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 import { isEqualsIgnoreCase } from '../misc';
 import { LabelType } from '../config/Config';
 import { ModalOptions } from '../store';
@@ -18,6 +18,13 @@ export interface EntityFormButtonProps {
   pathname: string | null;
   setErrors: (errors: string[]) => void;
   setNotifications: (notifications: string[]) => void;
+  /**
+   * Setter for the host EntityForm state. When a custom button's onClick
+   * mutates the form (e.g. via `entityForm.save()` returning a new instance
+   * with field errors), call this to propagate the new instance to
+   * ViewEntityForm so that ViewEntityFormErrors can render field-level errors.
+   */
+  setEntityForm?: Dispatch<SetStateAction<EntityForm | undefined>>;
   step?: EntityFormButtonStepInfo;
 
   // 모달 관련 함수들

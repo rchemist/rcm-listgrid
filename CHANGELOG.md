@@ -2,6 +2,19 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.13] - 2026-04-27
+
+### Fixed
+
+- `EntityFormButton.withOnClick` 으로 정의한 커스텀 save-overwrite 버튼이 반환한 `EntityForm` 인스턴스가 `ViewEntityForm` 내부 상태로 전파되지 않아, `entityForm.getErrorMap()` 기반의 필드별 에러 UI 가 표시되지 않던 문제를 수정합니다.
+  - `getEntityFormButtons` 가 buttonProps 에 `setEntityForm` 을 전달합니다.
+  - 커스텀 onClick 이 `form.errors` 가 채워진 form 을 반환하면 framework 가 `setEntityForm(form)` 으로 ViewEntityForm 상태를 갱신합니다.
+  - 매핑 가능한 필드 에러가 하나라도 있으면 상단 string 띠(`setErrors`) 는 자동으로 비웁니다 — `ViewEntityFormErrors` 가 `entityErrorMap` 으로 필드별 표시를 담당하므로 이중 표시를 막기 위함입니다.
+
+### Added
+
+- `EntityFormButtonProps` 에 `setEntityForm?: Dispatch<SetStateAction<EntityForm | undefined>>` 옵션을 추가했습니다. 호스트 앱이 직접 `setEntityForm` 을 호출해야 하는 경우 (예: 사전 검증 후 entityForm 인스턴스 변경) 활용할 수 있습니다. 기존 시그니처와 호환됩니다.
+
 ## [0.2.12] - 2026-04-24
 
 ### Host coupling detox
