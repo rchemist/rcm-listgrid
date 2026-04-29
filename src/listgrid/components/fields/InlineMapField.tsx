@@ -7,9 +7,30 @@ import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 import { MinMaxLimit } from '../../form/Type';
 import { EntityForm } from '../../config/EntityForm';
 import { RenderType } from '../../config/Config';
-
 interface InlineMapFieldProps extends FormFieldProps {
   config?: InlineMapConfig | undefined;
+}
+
+/**
+ * InlineMap 의 pendingRef.value 가 비어있는지 판정.
+ * - undefined / null → blank
+ * - Map / 객체 → entries 가 0개면 blank
+ * - 배열 (KeyValue[]) → 길이 0 이면 blank
+ */
+export function isInlineMapValueBlank(value: unknown): boolean {
+  if (value === undefined || value === null) {
+    return true;
+  }
+  if (Array.isArray(value)) {
+    return value.length === 0;
+  }
+  if (value instanceof Map) {
+    return value.size === 0;
+  }
+  if (typeof value === 'object') {
+    return Object.keys(value as object).length === 0;
+  }
+  return false;
 }
 
 export class InlineMapField extends FormField<InlineMapField> {
@@ -33,6 +54,21 @@ export class InlineMapField extends FormField<InlineMapField> {
       return this.pendingRef.current.value;
     }
     return super.getSaveValue(entityForm, renderType);
+  }
+
+  /**
+   * 사용자가 InlineMap UI 에서 입력한 값은 `pendingRef.current.value` 에 누적되며,
+   * `getSaveValue`/`isDirty` 시점에서야 form value 로 반영됩니다.
+   * 따라서 검증 단계의 `isBlank` 도 pendingRef 가 modified 된 경우에는
+   * pendingRef 값을 우선해서 봐야 합니다. 그렇지 않으면 사용자가 값을 입력했음에도
+   * "필수 값입니다" 검증에 막혀 저장이 차단됩니다.
+   */
+  async isBlank(renderType: RenderType = 'create'): Promise<boolean> {
+    if (this.pendingRef.current.modified) {
+      const pendingValue = this.pendingRef.current.value;
+      return isInlineMapValueBlank(pendingValue);
+    }
+    return super.isBlank(renderType);
   }
 
   /**

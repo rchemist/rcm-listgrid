@@ -2,6 +2,15 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.14] - 2026-04-30
+
+### Fixed
+
+- `InlineMapField` 가 required 인 경우, 사용자가 UI 에 값을 입력했음에도 "필수 값입니다" 검증 에러로 저장이 차단되던 문제를 수정합니다.
+  - 원인: `InlineMap` UI 의 사용자 입력은 `pendingRef.current.value` 에 누적되고 `getSaveValue` 시점에서야 form value 로 반영되는데, 검증 단계의 `FormField.isBlank` 는 `this.value.current` (= 비어있는 객체) 만 보아 사용자 입력 여부를 인지하지 못했습니다.
+  - 수정: `InlineMapField.isBlank` 를 override 하여 `pendingRef.current.modified === true` 인 경우 pendingRef 값을 보고 빈 값 여부를 판단합니다 (기존 `isDirty` / `getSaveValue` 와 동일한 우선순위).
+  - 회귀 테스트: `src/listgrid/components/fields/__tests__/InlineMapField.test.ts`
+
 ## [0.2.13] - 2026-04-27
 
 ### Fixed
