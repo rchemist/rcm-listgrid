@@ -2,6 +2,15 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.15] - 2026-05-01
+
+### Fixed
+
+- `ExcelDownload` 로 다운로드한 샘플 파일에서 `text` / `select` / `multiselect` / `phone` 타입 필드의 셀 서식이 "텍스트(@)" 로 지정되지 않아, 사용자가 `01234` 같이 0 으로 시작하는 값을 붙여넣을 때 Excel 이 자동으로 숫자로 변환하던 문제를 수정합니다.
+  - 원인: `props.fields` 기반의 셀 타입/서식 지정 (`cell.t = 's'`, `cell.z = '@'`) 을 워크시트에 적용한 직후, `!skipHeader` 분기에서 `XLSX.utils.sheet_to_json(...)` → `XLSX.utils.aoa_to_sheet(...)` 라운드트립으로 워크시트를 재생성하면서 방금 적용한 셀 메타데이터가 모두 손실되었습니다.
+  - 수정: 필드 기반 셀 서식 지정 블록을 워크시트 재생성 **이후** 로 이동하여, 최종 워크시트에 텍스트 서식이 보존되도록 합니다.
+  - 영향: `lectureCode`, `studentNumber`, `phone` 등 `text` / `select` / `multiselect` / `phone` 타입으로 선언된 모든 필드가 텍스트 서식으로 정상 동작합니다. 호스트 앱 코드 변경은 불필요합니다.
+
 ## [0.2.14] - 2026-04-30
 
 ### Fixed

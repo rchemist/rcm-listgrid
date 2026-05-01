@@ -100,10 +100,27 @@ export const ExcelDownload = async (props: ExcelDownloadProps) => {
 
     let ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(aoaData);
 
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+
+    // 만약 skipHeader 가 false 라면 맨 처음 행을 제거한다.
+    if (!skipHeader) {
+      // 워크시트 데이터를 JSON으로 변환
+      const jsonData: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 }); // header: 1 -> 배열 형태
+
+      // jsonData.shift(); // 첫 번째 행 제거
+
+      // jsonData로 새로운 워크시트 생성
+      ws = XLSX.utils.aoa_to_sheet(jsonData);
+    }
+
+    // 첫 두 행 스타일 적용
+    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+
     // 필드 정보를 이용해 셀 타입 및 서식 지정
+    // 워크시트 재생성(sheet_to_json -> aoa_to_sheet) 이후에 적용해야
+    // cell.t / cell.z 가 보존된다. 재생성 이전에 적용하면 라운드트립 과정에서 손실됨.
     if (props.fields && props.fields.length > 0) {
       const fieldMap = new Map(props.fields.map((f) => [f.getName(), f]));
-      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
 
       for (let R = 1; R <= range.e.r; ++R) {
         // 헤더 이후 데이터 행부터
@@ -134,22 +151,6 @@ export const ExcelDownload = async (props: ExcelDownloadProps) => {
         }
       }
     }
-
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-
-    // 만약 skipHeader 가 false 라면 맨 처음 행을 제거한다.
-    if (!skipHeader) {
-      // 워크시트 데이터를 JSON으로 변환
-      const jsonData: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 }); // header: 1 -> 배열 형태
-
-      // jsonData.shift(); // 첫 번째 행 제거
-
-      // jsonData로 새로운 워크시트 생성
-      ws = XLSX.utils.aoa_to_sheet(jsonData);
-    }
-
-    // 첫 두 행 스타일 적용
-    const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
 
     if (!skipHeader) {
       for (let C = range.s.c; C <= range.e.c; C++) {
