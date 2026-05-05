@@ -455,10 +455,17 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
       return result;
     }
 
-    const url = `${this.getUrl()}/delete`;
-    const formData: Record<string, unknown> = {};
-    formData['revisionEntityName'] = this.getRevisionEntityName();
-    formData['ids'] = idList;
+    // v0.3.0+ — rcm-framework 0.1.0 endpoint 표준 (Decision #31).
+    // bulk delete = DELETE {url} + RequestBody BulkDeleteRequest{ids,revisionEntityName?}.
+    // RFC 9110 *서버 명시 지원* 영역. 0.1.0 baseline (axios 최신) 자연 지원.
+    const url = this.getUrl();
+    const formData: Record<string, unknown> = {
+      ids: idList,
+    };
+    const revisionEntityName = this.getRevisionEntityName();
+    if (revisionEntityName) {
+      formData['revisionEntityName'] = revisionEntityName;
+    }
 
     const response = await getExternalApiDataWithError({
       url: url,
@@ -653,8 +660,10 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
       const errors = errorMessages?.length ? errorMessages : ['입력 값이 올바르지 않습니다.'];
       return { actionType: renderType, entityForm: form.withErrors(submitFormData.errors), errors };
     } else {
-      const targetUrl =
-        renderType === 'create' ? `${this.getUrl()}/add` : `${this.getUrl()}/${this.id}`;
+      // v0.3.0+ — rcm-framework 0.1.0 endpoint 표준 (Decision #31).
+      //   create = POST {url}        (was POST {url}/add in 0.0.5 line)
+      //   update = PUT  {url}/{id}   (unchanged)
+      const targetUrl = renderType === 'create' ? this.getUrl() : `${this.getUrl()}/${this.id}`;
       const method = renderType === 'create' ? 'POST' : 'PUT';
 
       // 서버 extension 처리를 위한 헤더 추가

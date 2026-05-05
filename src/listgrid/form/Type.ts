@@ -86,8 +86,10 @@ export class PageResult {
        * 만약 serverSide가 true 라면 넘어 온 url 을 파라미터로 포함해 내부 프록시 api 를 호출하고 그 결과를 response 로 받는다.
        */
 
+      // v0.3.0+ — rcm-framework 0.1.0 endpoint 표준 (Decision #31).
+      // 검색은 POST {url}/search (RequestBody SearchRequest). underscore prefix 거부.
       const response: ResponseData | null = await callExternalHttpRequest({
-        url: url,
+        url: `${url}/search`,
         method: 'POST',
         formData: searchForm,
         ...(extensionOptions?.entityFormName !== undefined
@@ -127,7 +129,12 @@ export class PageResult {
         );
       }
 
-      const newSearchForm = SearchForm.deserialize(response.data.searchForm);
+      // v0.3.0+ — server echo 호환:
+      //   0.0.5 line: response.data.searchForm (deserialize)
+      //   0.1.0 line (Decision #31 SearchResponse): response.data.searchRequest (echo only)
+      // 둘 다 없으면 client 가 보낸 원본 searchForm 보존 (page/pageSize/sorts/filters 유지).
+      const echoForm = response.data.searchForm ?? response.data.searchRequest;
+      const newSearchForm = echoForm ? SearchForm.deserialize(echoForm) : searchForm;
 
       if (searchForm.hasPreservedFilters()) {
         searchForm.getPreservedFilters().forEach((filter) => {
@@ -141,7 +148,7 @@ export class PageResult {
         });
       }
 
-      // list 또는 content 필드 확인
+      // list (0.0.5) 또는 content (Spring Data Page<T> / SearchResponse 0.1.0) 흡수.
       const listData = response.data.list || response.data.content || [];
 
       const responseList: EntityWithId[] = listData.map((item: EntityWithId) => ({
@@ -149,10 +156,14 @@ export class PageResult {
         id: String(item.id), // id를 문자열로 강제 변환
       }));
 
+      // pagination 메타: totalCount/totalPage (0.0.5) 또는 totalElements/totalPages (0.1.0).
+      const totalCount = response.data.totalCount ?? response.data.totalElements ?? 0;
+      const totalPage = response.data.totalPage ?? response.data.totalPages ?? 0;
+
       return new PageResult({
         list: responseList,
-        totalCount: response.data.totalCount,
-        totalPage: response.data.totalPage,
+        totalCount,
+        totalPage,
         searchForm: newSearchForm,
       });
     } catch (error) {

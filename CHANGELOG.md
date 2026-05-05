@@ -2,6 +2,56 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.1] - 2026-05-05
+
+### BREAKING — rcm-framework 0.1.0 endpoint 표준 정합 (Decision #31)
+
+`rcm-backend-framework` v0.1.0 GA 의 새 endpoint 매트릭스에 맞춰 **list / search / create / bulk-delete URL 형태를 변경**합니다. 0.0.5 line backend 와는 더 이상 호환되지 않으므로 `0.2.x` 를 사용하는 프로젝트는 backend 도 함께 업그레이드해야 합니다.
+
+#### Endpoint 변경 매트릭스
+
+| 영역 | 0.2.x (0.0.5 backend) | 0.3.x (0.1.0 backend) |
+|---|---|---|
+| 검색 / 목록 | `POST {url}` (RequestBody SearchForm) | `POST {url}/search` (RequestBody SearchRequest) |
+| Create | `POST {url}/add` (RequestBody Form) | `POST {url}` (RequestBody CreateForm) |
+| Update | `PUT {url}/{id}` | `PUT {url}/{id}` (변경 없음) |
+| Single delete | `DELETE {url}/{id}` 또는 deleteAll([id]) → `POST {url}/delete` | `DELETE {url}/{id}` 또는 bulk |
+| Bulk delete | `POST {url}/delete` (body { ids, revisionEntityName? }) | `DELETE {url}` + body `BulkDeleteRequest{ids, revisionEntityName?}` |
+| Schema | `POST {url}/_search/schema` | `GET {url}/search/schema` |
+| Underscore prefix | `/_search` / `/_count` 일부 사용 | **영구 거부** (REST 표준 정합) |
+
+`underscore prefix` 영역은 listgrid 자체가 hardcode 하지 않으므로 별도 변경 없음. host app 의 `endpoints` 설정만 정합 (예: schema URL 을 `/search/schema` 로).
+
+#### 응답 wire format 호환 흡수
+
+framework 0.1.0 의 `SearchResponse<T>` (Spring Data `Page<T>` superset) 를 흡수하면서 0.0.5 line `ResponseListWrapper` 도 fallback 으로 유지합니다 — 한 라이브러리 코드로 양쪽 dual 흡수.
+
+| 필드 | 0.0.5 line | 0.1.0 line |
+|---|---|---|
+| 결과 list | `data.list` | `data.content` |
+| total | `data.totalCount` | `data.totalElements` |
+| total pages | `data.totalPage` | `data.totalPages` |
+| 원본 form echo | `data.searchForm` | `data.searchRequest` (SearchResponse) — 없으면 client 원본 보존 |
+
+에러 응답은 호스트 `ApiClient` 가 RFC 7807 ProblemDetail 을 listgrid 의 `entityError` shape 으로 정규화해야 합니다 (gjcu 의 `AxiosClient.ts` 참고).
+
+#### Migration
+
+```ts
+// 0.2.x — backend 가 0.0.5 line 인 경우 그대로 유지
+"@rchemist/listgrid": "^0.2.15"
+
+// 0.3.x — backend 가 rcm-framework 0.1.0 GA 인 경우
+"@rchemist/listgrid": "^0.3.1"
+```
+
+라이브러리 사용 코드 (EntityForm 정의 / ListGrid 인스턴스화 / ViewListGridWrapper 등) 는 변경이 필요하지 않습니다.
+
+#### 변경 파일
+
+- `src/listgrid/form/Type.ts` — `PageResult.fetchListData` 가 `${url}/search` 로 POST. `data.list || data.content` / `data.totalCount || data.totalElements` / `data.totalPage || data.totalPages` / `data.searchForm || data.searchRequest` dual 흡수.
+- `src/listgrid/config/EntityForm.tsx` — Create 가 `${url}` (suffix 제거). Bulk delete 가 `DELETE ${url}` + body `{ids, revisionEntityName?}`.
+
 ## [0.2.15] - 2026-05-01
 
 ### Fixed
