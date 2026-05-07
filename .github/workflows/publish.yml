@@ -24,4 +24,11 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Publish (prepublishOnly runs type-check + test + build)
-        run: npm publish --provenance --access public
+        run: |
+          TAG_NAME="${GITHUB_REF_NAME#v}"
+          case "$TAG_NAME" in
+            0.2.*) NPM_TAG="legacy-0.2" ;;
+            *)     NPM_TAG="latest"     ;;
+          esac
+          echo "Publishing $TAG_NAME with dist-tag $NPM_TAG"
+          npm publish --provenance --access public --tag "$NPM_TAG"
