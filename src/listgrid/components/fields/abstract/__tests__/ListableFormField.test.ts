@@ -171,13 +171,36 @@ describe('ListableFormField - getListFieldAlignType', () => {
     expect(f.getListFieldAlignType()).toBe('right');
   });
 
-  it('returns "center" for select / boolean / date / image', () => {
-    for (const t of ['select', 'boolean', 'date', 'image'] as FieldType[]) {
-      expect(make('f', 1, t).getListFieldAlignType()).toBe('center');
-    }
+  it('returns "left" only for text type by default', () => {
+    expect(make('f', 1, 'text').getListFieldAlignType()).toBe('left');
   });
 
-  it('returns "left" for text type by default', () => {
-    expect(make('f', 1, 'text').getListFieldAlignType()).toBe('left');
+  it('returns "center" for non-text types by default', () => {
+    const centerTypes: FieldType[] = [
+      'number',
+      'manyToOne',
+      'email',
+      'phone',
+      'password',
+      'textarea',
+      'html',
+      'markdown',
+      'tag',
+      'custom',
+      'checkbox',
+      'select',
+      'multiselect',
+      'date',
+      'datetime',
+      'year',
+      'month',
+      'time',
+      'boolean',
+      'file',
+      'image',
+    ];
+    for (const t of centerTypes) {
+      expect(make('f', 1, t).getListFieldAlignType()).toBe('center');
+    }
   });
 });
