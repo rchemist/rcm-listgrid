@@ -350,22 +350,11 @@ export abstract class ListableFormField<
       return config.align;
     }
 
-    if (
-      this.type === 'select' ||
-      this.type === 'multiselect' ||
-      this.type === 'date' ||
-      this.type === 'datetime' ||
-      this.type === 'boolean' ||
-      this.type === 'year' ||
-      this.type === 'month' ||
-      this.type === 'time' ||
-      this.type === 'file' ||
-      this.type === 'image'
-    ) {
-      return 'center';
+    if (this.type === 'text') {
+      return 'left';
     }
 
-    return 'left';
+    return 'center';
   }
 
   /**
