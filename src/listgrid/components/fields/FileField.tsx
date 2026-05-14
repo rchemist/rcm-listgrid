@@ -11,13 +11,31 @@ import { FileFieldValue } from '../../ui';
 import { LazyFileUploadInput as FileUploadInput } from '../../ui';
 import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 import { isEmpty } from '../../utils';
-import { getAccessableAssetUrl } from '../../misc';
+import { getAccessableAssetUrl, isExternalUrl } from '../../misc';
 import { IconDeviceFloppy } from '@tabler/icons-react';
 import { TextInput } from '../../ui';
 import { isBlank as isBlankString } from '../../utils/StringUtil';
 
 interface FileFieldProps extends ListableFormFieldProps {
   config?: IAssetConfig | undefined;
+}
+
+/**
+ * 다양한 형태의 필드 값(`FileFieldValue` 인스턴스 / POJO / 문자열)에서
+ * 외부 절대 URL(`http(s)://`) 을 추출한다. 외부 URL 이 아니면 `undefined`.
+ */
+function pickExternalUrl(value: any): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'string') {
+    return isExternalUrl(value) ? value.trim() : undefined;
+  }
+  if (typeof value === 'object') {
+    const files: any[] = Array.isArray(value.existFiles) ? value.existFiles : [];
+    for (const f of files) {
+      if (f && typeof f.url === 'string' && isExternalUrl(f.url)) return f.url.trim();
+    }
+  }
+  return undefined;
 }
 
 export class FileField extends ListableFormField<FileField> {
@@ -78,6 +96,22 @@ export class FileField extends ListableFormField<FileField> {
    */
   protected renderInstance(params: FieldRenderParameters): Promise<React.ReactNode | null> {
     return (async () => {
+      // 외부 URL 우회: 값이 `http(s)://` 절대 URL 이면 자체 asset 서버를 거치지 않고
+      // 그대로 다운로드 링크로 표시. (교체 시에는 기존 삭제 후 신규 등록 흐름을 사용.)
+      const externalUrl = pickExternalUrl(
+        await this.getCurrentValue(params.entityForm.getRenderType()),
+      );
+      if (externalUrl) {
+        return (
+          <div className="rcm-file-field-external">
+            <a href={externalUrl} target="_blank" rel="noreferrer" className="rcm-file-field-link">
+              <IconDeviceFloppy className="rcm-file-field-icon" />
+              <span className="rcm-file-field-name">{externalUrl}</span>
+            </a>
+          </div>
+        );
+      }
+
       return (
         <FileUploadInput
           config={this.config}
@@ -119,6 +153,30 @@ export class FileField extends ListableFormField<FileField> {
       const value = await props.item;
 
       if (value[this.name]) {
+        // 값이 단순 외부 URL 문자열로 들어온 케이스 — 자체 asset 서버를 거치지 않고
+        // 그대로 다운로드 링크로 렌더링.
+        const externalUrl = pickExternalUrl(value[this.name]);
+        if (externalUrl) {
+          return {
+            result: (
+              <div className="rcm-file-field-cell">
+                <div className="rcm-file-field-inner">
+                  <a
+                    href={externalUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rcm-file-field-link"
+                  >
+                    <IconDeviceFloppy className="rcm-file-field-icon" />
+                    <span className="rcm-file-field-name">{externalUrl}</span>
+                  </a>
+                </div>
+              </div>
+            ),
+            linkOnCell: false,
+          };
+        }
+
         const file = value[this.name] as FileFieldValue;
 
         if (!isEmpty(file.existFiles) && !isBlankString(file.existFiles[0]?.url)) {

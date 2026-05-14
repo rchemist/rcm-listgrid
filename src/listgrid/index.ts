@@ -136,6 +136,7 @@ export {
   ASSET_SERVER_URL,
   configureAssetServerUrl,
   getAccessableAssetUrl,
+  isExternalUrl,
   removeAssetServerPrefix,
   getDefinedDates,
 } from './misc';

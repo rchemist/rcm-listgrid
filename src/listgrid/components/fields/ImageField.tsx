@@ -11,12 +11,30 @@ import { FileFieldValue } from '../../ui';
 import { LazyFileUploadInput as FileUploadInput } from '../../ui';
 import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 import { isEmpty } from '../../utils';
-import { getAccessableAssetUrl } from '../../misc';
+import { getAccessableAssetUrl, isExternalUrl } from '../../misc';
 import { TextInput } from '../../ui';
 import { getEndpoint } from '../../config/RuntimeConfig';
 
 interface ImageFieldProps extends ListableFormFieldProps {
   config?: IAssetConfig | undefined;
+}
+
+/**
+ * 다양한 형태의 필드 값(`FileFieldValue` 인스턴스 / POJO / 문자열)에서
+ * 외부 절대 URL(`http(s)://`) 을 추출한다. 외부 URL 이 아니면 `undefined`.
+ */
+function pickExternalUrl(value: any): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === 'string') {
+    return isExternalUrl(value) ? value.trim() : undefined;
+  }
+  if (typeof value === 'object') {
+    const files: any[] = Array.isArray(value.existFiles) ? value.existFiles : [];
+    for (const f of files) {
+      if (f && typeof f.url === 'string' && isExternalUrl(f.url)) return f.url.trim();
+    }
+  }
+  return undefined;
 }
 
 export class ImageField extends ListableFormField<ImageField> {
@@ -100,6 +118,27 @@ export class ImageField extends ListableFormField<ImageField> {
         }
       }
 
+      // 외부 URL 우회: 값이 `http(s)://` 절대 URL 이면 자체 asset 서버를 거치지 않고
+      // 그대로 이미지로 표시한다. (첨부 정책상 교체는 "기존 삭제 후 신규 등록" 흐름이므로
+      // 별도 교체 컨트롤 없이 표시만으로 충분.)
+      const externalUrl = pickExternalUrl(
+        await this.getCurrentValue(params.entityForm.getRenderType()),
+      );
+      if (externalUrl) {
+        return (
+          <div className="rcm-image-field-external">
+            <img
+              className="rcm-image-field-external-img"
+              src={externalUrl}
+              alt="external image"
+              onError={(event) => {
+                event.currentTarget.src = getEndpoint('noImageFallback');
+              }}
+            />
+          </div>
+        );
+      }
+
       return (
         <FileUploadInput
           config={config}
@@ -141,6 +180,38 @@ export class ImageField extends ListableFormField<ImageField> {
       const value = await props.item;
 
       if (value[this.name]) {
+        // 값이 단순 외부 URL 문자열로 들어온 케이스 — 자체 asset 서버를 거치지 않고
+        // 그대로 썸네일/확대 미리보기 렌더링.
+        const externalUrl = pickExternalUrl(value[this.name]);
+        if (externalUrl) {
+          return {
+            result: (
+              <div className="rcm-image-field-cell">
+                <div className="rcm-image-field-hover-group">
+                  <img
+                    className="rcm-image-field-thumb"
+                    src={externalUrl}
+                    onError={(event) => {
+                      event.currentTarget.src = getEndpoint('noImageFallback');
+                    }}
+                    alt="primary image"
+                  />
+                  <div className="rcm-image-field-preview-wrap">
+                    <img
+                      className="rcm-image-field-preview"
+                      src={externalUrl}
+                      onError={(event) => {
+                        event.currentTarget.src = getEndpoint('noImageFallback');
+                      }}
+                      alt="enlarged image"
+                    />
+                  </div>
+                </div>
+              </div>
+            ),
+          };
+        }
+
         const file = value[this.name] as FileFieldValue;
         if (!isEmpty(file.existFiles)) {
           const imgUrl = getAccessableAssetUrl(file.existFiles[0]!.url);

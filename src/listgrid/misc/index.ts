@@ -445,10 +445,34 @@ function effectiveAssetPrefix(): string {
 
 export function getAccessableAssetUrl(imgUrl: string | null | undefined): string {
   if (!imgUrl) return '';
+  // 외부 절대 URL(`http(s)://`) 이고 자체 asset 서버 host 가 아니라면 그대로 통과.
+  // `removeAssetServerPrefix` 가 절대 URL 의 스킴 콜론을 URL-encode 해버려
+  // `https%3A//...` 와 같이 망가뜨리던 이전 동작을 바로잡는다.
+  if (isExternalUrl(imgUrl)) {
+    const trimmed = imgUrl.trim();
+    const server = effectiveAssetServerUrl();
+    if (server && trimmed.startsWith(server)) {
+      // 우리 asset 서버 host 라면 prefix 를 제거한 뒤 표준 경로 처리로 폴백한다.
+      let u = removeAssetServerPrefix(trimmed);
+      if (u.startsWith('/')) u = u.substring(1);
+      return effectiveAssetServerUrl() + effectiveAssetPrefix() + u;
+    }
+    return trimmed;
+  }
   let u = removeAssetServerPrefix(imgUrl);
   if (u.startsWith('http://') || u.startsWith('https://')) return u;
   if (u.startsWith('/')) u = u.substring(1);
   return effectiveAssetServerUrl() + effectiveAssetPrefix() + u;
+}
+
+/**
+ * 입력 URL 이 외부(`http://` / `https://`)로 시작하는 절대 URL인지 검사한다.
+ * 자체 asset 서버 prefix 를 적용해서는 안 되는 값을 분기 처리할 때 사용한다.
+ */
+export function isExternalUrl(url: string | null | undefined): boolean {
+  if (!url) return false;
+  const trimmed = url.trim();
+  return trimmed.startsWith('http://') || trimmed.startsWith('https://');
 }
 
 export function removeAssetServerPrefix(url: string | null | undefined): string {

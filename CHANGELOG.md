@@ -2,6 +2,26 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.17] - 2026-05-14
+
+### Fixed
+
+- `ImageField` / `FileField` 가 외부 절대 URL(`http(s)://`) 값을 자체 asset 서버 prefix 로
+  감싸 `https://.../static-resource/https%3A//...` 와 같이 깨뜨리던 문제를 수정.
+  값이 외부 URL 이면 폼 입력 모드와 리스트 셀 모두 host `FileUploadInput` 을 거치지 않고
+  그대로 `<img>` / 다운로드 링크로 표시. 확장자가 없는 동적 파일 엔드포인트
+  (예: `.../FileView.do?gbn=...`) 도 동일하게 처리.
+- `getAccessableAssetUrl` 이 외부 URL 의 스킴 콜론(`:`) 을 URL-encode 해버려
+  `https%3A//...` 형태로 망가뜨리던 quirk 를 근본 수정. 외부 URL 은 그대로 통과되며,
+  자체 asset 서버 host 인 경우에만 prefix 정규화를 수행.
+
+### Added
+
+- `isExternalUrl(url)` helper export — 다른 컨슈머에서도 `http(s)://` 절대 URL 분기를
+  동일한 의미로 사용할 수 있게 공개.
+
+(v0.3.3 backport)
+
 ## [0.2.15] - 2026-05-01
 
 ### Fixed
