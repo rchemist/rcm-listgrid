@@ -37,6 +37,7 @@ import {
   configureAssetServerUrl,
   configureAssetPrefix,
   getAccessableAssetUrl,
+  isExternalUrl,
   removeAssetServerPrefix,
   validatedAssetFileName,
   getDefinedDates,
@@ -391,14 +392,34 @@ describe('asset URL helpers', () => {
     expect(getAccessableAssetUrl(undefined)).toBe('');
   });
 
-  it('URL-encodes absolute http(s) inputs because removeAssetServerPrefix runs first', () => {
-    // The impl feeds the input through removeAssetServerPrefix, which
-    // encodeURIComponent-s each path segment. The early-return on http(s)
-    // therefore never fires. We lock in the current behavior so future
-    // refactors notice the quirk.
-    const result = getAccessableAssetUrl('https://cdn.example.com/a.png');
-    expect(result).toContain('https%3A');
-    expect(result).toContain('a.png');
+  it('passes external absolute URLs through untouched', () => {
+    // External URLs (not on our own asset server) must be returned verbatim
+    // so consumers can render them directly. The previous implementation
+    // accidentally URL-encoded the scheme colon and prefixed our asset
+    // server, producing `https%3A//...` style broken URLs.
+    expect(getAccessableAssetUrl('https://cdn.example.com/a.png')).toBe(
+      'https://cdn.example.com/a.png',
+    );
+    expect(getAccessableAssetUrl('http://example.com/foo/bar.pdf')).toBe(
+      'http://example.com/foo/bar.pdf',
+    );
+  });
+
+  it('passes external dynamic-endpoint URLs (no extension, with query string) through untouched', () => {
+    // 정식 이미지 확장자가 없는 동적 파일 서빙 엔드포인트도 외부 URL 로 인정되어야 한다.
+    // 브라우저가 응답 Content-Type 으로 이미지/파일을 식별한다.
+    const url = 'https://cyber.gjcu.ac.kr/ajaxa/FileCpnt/FileView.do?gbn=X08&F_USER_ID=2020020135';
+    expect(getAccessableAssetUrl(url)).toBe(url);
+  });
+
+  it('still applies asset prefix when the absolute URL targets our own asset server', () => {
+    configureAssetServerUrl('https://assets.example.com');
+    configureAssetPrefix('/files/');
+    // Caller already passed the full asset-server URL; the helper should
+    // canonicalize via the configured prefix (and not double-prefix).
+    expect(getAccessableAssetUrl('https://assets.example.com/files/photo.jpg')).toBe(
+      'https://assets.example.com/files/photo.jpg',
+    );
   });
 
   it('prepends server URL + prefix to relative paths', () => {
@@ -424,6 +445,18 @@ describe('asset URL helpers', () => {
   it('validatedAssetFileName replaces each space and each hangul char with a single underscore', () => {
     // "내 파일 name.png" = 3 hangul chars + 2 spaces = 5 replacements.
     expect(validatedAssetFileName('내 파일 name.png')).toBe('_____name.png');
+  });
+
+  it('isExternalUrl detects http(s) absolute URLs (and only those)', () => {
+    expect(isExternalUrl('https://example.com/a.png')).toBe(true);
+    expect(isExternalUrl('http://example.com')).toBe(true);
+    expect(isExternalUrl('  https://example.com  ')).toBe(true);
+    expect(isExternalUrl('/files/photo.jpg')).toBe(false);
+    expect(isExternalUrl('photo.jpg')).toBe(false);
+    expect(isExternalUrl('ftp://example.com')).toBe(false);
+    expect(isExternalUrl(null)).toBe(false);
+    expect(isExternalUrl(undefined)).toBe(false);
+    expect(isExternalUrl('')).toBe(false);
   });
 });
 
