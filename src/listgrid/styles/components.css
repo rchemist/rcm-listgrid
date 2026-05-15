@@ -1429,7 +1429,10 @@
 .rcm-table td {
   padding: var(--rcm-space-sm) var(--rcm-space-md);
   border-bottom: var(--rcm-border-width) solid var(--rcm-color-border);
-  text-align: left;
+  /* text-align 은 ViewColumn / HeaderField 가 .text-left / .text-center / .text-right
+     utility 로 셀 단위로 지정한다. 여기에 default `text-align: left` 를 두면 utility
+     보다 specificity 가 높아 (0,1,1) vs (0,1,0) getListFieldAlignType() 의 center
+     정렬이 무력화된다. 브라우저 기본 th/td 가 이미 left 라 default 가 필요 없다. */
 }
 
 .rcm-table th {

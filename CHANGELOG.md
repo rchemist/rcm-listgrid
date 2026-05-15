@@ -2,6 +2,22 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.4] - 2026-05-15
+
+### Fixed
+
+- `ListGrid` / SubCollection 셀의 가운데/오른쪽 정렬이 시각적으로 적용되지 않던
+  회귀를 수정. `ViewColumn` / `HeaderField` 는 `getListFieldAlignType()` 결과를
+  토대로 `<td>` / `<th>` 에 `.text-center` / `.text-right` utility 를 정상적으로
+  부여하고 있었으나, `components.css` 의 base reset 규칙
+  `.rcm-table th, .rcm-table td { text-align: left }` (specificity 0,1,1) 이
+  utility (specificity 0,1,0) 보다 강해 항상 left 로 렌더링되었음.
+  - 수정: `.rcm-table` 셀의 default `text-align: left` 를 제거. 브라우저 기본
+    th/td 가 이미 left 라 명시 정렬 클래스 없는 셀의 동작은 변화 없음.
+  - 영향: `v0.3.2` 의 "center-align non-text cells by default" 변경이 의도대로
+    동작. SelectField / BooleanField / Date\*Field / NumberField 등 텍스트가 아닌
+    필드의 셀 내용이 컬럼 너비 안에서 가운데 정렬됩니다.
+
 ## [0.3.3] - 2026-05-14
 
 ### Fixed
