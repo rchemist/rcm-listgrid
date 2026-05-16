@@ -2,6 +2,18 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.19] - 2026-05-17
+
+### Fixed
+
+- `CustomOptionField` 의 alias 캐시 키를 `trim + lowercase` 로 정규화. 백엔드
+  (`OptionService.normalizeAlias`) 와 동일한 규칙으로 동작하여, 동일 alias 를 다른
+  대소문자 / 공백 표기로 호출해도 같은 캐시 슬롯에 hit 합니다. 사용자 입력 표기는
+  보존되어 URL 에는 `trim` 된 원본 case 가 그대로 실리고, 백엔드가 ignore-case 로
+  매칭합니다 (`OptionRepository.findByAliasIgnoreCase`).
+
+(v0.3.5 backport)
+
 ## [0.2.18] - 2026-05-15
 
 ### Fixed
