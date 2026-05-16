@@ -22,6 +22,10 @@ import { getEndpoint } from '../../config/RuntimeConfig';
 // alias별 options 캐시 (동일 페이지 내에서 공유)
 const customOptionCache = new Map<string, SelectOption[]>();
 
+// alias 캐시 키 정규화: 앞뒤 공백 제거 + lowercase.
+// 백엔드의 OptionService.normalizeAlias 와 동일한 규칙.
+const aliasCacheKey = (alias: string): string => alias?.trim().toLowerCase();
+
 interface CustomOptionFieldProps extends OptionalFieldProps {
   alias: string;
   multiple?: boolean | undefined;
@@ -206,13 +210,15 @@ export class CustomOptionField extends OptionalField<CustomOptionField> {
 }
 
 export async function getCustomOptionValues(alias: string): Promise<SelectOption[]> {
+  const trimmedAlias = alias?.trim();
+  const cacheKey = aliasCacheKey(alias);
   // 캐시에 있으면 캐시에서 반환
-  if (customOptionCache.has(alias)) {
-    return customOptionCache.get(alias)!;
+  if (customOptionCache.has(cacheKey)) {
+    return customOptionCache.get(cacheKey)!;
   }
 
   const response = await getExternalApiDataWithError({
-    url: `${getEndpoint('customOptionByAlias')}/${alias}`,
+    url: `${getEndpoint('customOptionByAlias')}/${trimmedAlias}`,
     method: 'GET',
   });
   // 데이터가 정상적으로 들어왔다면 옵션 데이터를 생성해 반환한다. 오류가 발생했다면(alias 가 없거나 하는 경우) 빈 배열을 반환한다.
@@ -220,7 +226,7 @@ export async function getCustomOptionValues(alias: string): Promise<SelectOption
     const options = [
       ...response.data.values.map((item: any) => ({ value: item.value, label: item.label })),
     ];
-    customOptionCache.set(alias, options);
+    customOptionCache.set(cacheKey, options);
     return options;
   }
   return [];
@@ -231,15 +237,15 @@ export async function getCustomOptionValues(alias: string): Promise<SelectOption
  * ViewListGrid에서 목록 렌더링 전에 호출하여 N+1 문제 방지
  */
 export async function prefetchCustomOptions(aliases: string[]): Promise<void> {
-  // 이미 캐시에 있는 alias 제외
-  const uncachedAliases = aliases.filter((alias) => !customOptionCache.has(alias));
+  // 이미 캐시에 있는 alias 제외 (캐시 키는 trim + lowercase 정규화)
+  const uncachedAliases = aliases.filter((alias) => !customOptionCache.has(aliasCacheKey(alias)));
 
   if (uncachedAliases.length === 0) {
     return;
   }
 
   const params = new URLSearchParams();
-  uncachedAliases.forEach((alias) => params.append('aliases', alias));
+  uncachedAliases.forEach((alias) => params.append('aliases', alias?.trim()));
 
   const response = await getExternalApiDataWithError({
     url: `${getEndpoint('customOptionByAliases')}?${params.toString()}`,
@@ -253,7 +259,7 @@ export async function prefetchCustomOptions(aliases: string[]): Promise<void> {
           value: item.value,
           label: item.label,
         }));
-        customOptionCache.set(optionData.alias, options);
+        customOptionCache.set(aliasCacheKey(optionData.alias), options);
       }
     }
   }
