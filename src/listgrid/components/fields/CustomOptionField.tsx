@@ -22,9 +22,9 @@ import { getEndpoint } from '../../config/RuntimeConfig';
 // alias별 options 캐시 (동일 페이지 내에서 공유)
 const customOptionCache = new Map<string, SelectOption[]>();
 
-// alias 캐시 키 정규화: 앞뒤 공백 제거 + lowercase.
-// 백엔드의 OptionService.normalizeAlias 와 동일한 규칙.
-const aliasCacheKey = (alias: string): string => alias?.trim().toLowerCase();
+// alias 캐시 키 정규화: 앞뒤 공백 제거 + uppercase.
+// 백엔드의 OptionService.normalizeAlias 와 동일한 규칙 (프로젝트 컨벤션: EnumType / 옵션 키 모두 대문자).
+const aliasCacheKey = (alias: string): string => alias?.trim().toUpperCase();
 
 interface CustomOptionFieldProps extends OptionalFieldProps {
   alias: string;
