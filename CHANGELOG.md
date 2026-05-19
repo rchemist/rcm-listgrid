@@ -2,6 +2,19 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.6] - 2026-05-19
+
+### Fixed
+
+- `CustomOptionField` 의 alias 캐시 키를 `trim + uppercase` 로 정규화. v0.3.5
+  에서 `lowercase` 로 두었으나 백엔드 (`OptionService.normalizeAlias`) 가 프로젝트
+  컨벤션 (EnumType / 옵션 값 키 모두 대문자) 과 맞추기 위해 `uppercase` 로 재정의
+  되었으므로 (gjcu-academic-backend #1416), 프론트 캐시 키도 동일 규칙으로 통일.
+  URL 에는 여전히 `trim` 된 원본 case 가 실리고 백엔드는 `findByAliasIgnoreCase`
+  로 매칭합니다.
+
+(v0.2.20 backport from `release/0.2` — cherry-pick `3f23059`)
+
 ## [0.3.5] - 2026-05-17
 
 ### Fixed
