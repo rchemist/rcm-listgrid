@@ -2,6 +2,32 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.21] - 2026-05-20
+
+### Fixed
+
+- `ImageField` 의 폼 미리보기가 외부 절대 URL(`http(s)://`) 값에 대해 unsized
+  `<img>` 로 렌더되어 자연 크기 (수백~수천 px) 그대로 노출되던 문제를 수정.
+  외부 URL 분기에서 사용하던 `.rcm-image-field-external-img` 클래스에 CSS 룰이
+  전혀 없어, asset 서버가 절대 URL 을 반환하는 환경에서 학생/사용자 프로필 등
+  이미지 값이 화면을 가득 채우는 회귀가 발생했음.
+
+### Added
+
+- `ImageField` 의 폼 뷰 전용 썸네일 미리보기 + 클릭 시 모달 확대 보기.
+  - 외부 절대 URL / 자체 asset URL 모두 동일한 미리보기 컴포넌트
+    (`ImageFieldFormPreview`) 를 거치며, 기본 한 변 8rem (128px) 정사각형
+    썸네일로 렌더됩니다.
+  - 썸네일 클릭 시 인앱 모달 (`.rcm-image-field-zoom-backdrop` /
+    `.rcm-image-field-zoom-image`) 이 열려 원본을 90vw / 90vh 안에서
+    contain 으로 보여주며, 배경 클릭 또는 `ESC` 로 닫힙니다.
+  - `ImageField#withPreviewSize(size)` 빌더 추가. `size` 는 `number` (px) 또는
+    `string` (`'6rem'`, `'120px'` 등 CSS 길이값) 으로 한 변 크기를 지정합니다.
+    호스트가 도메인별로 더 작은/큰 미리보기를 원할 때 선언부에서 직접 제어
+    가능합니다.
+
+(v0.3.7 backport)
+
 ## [0.2.20] - 2026-05-19
 
 ### Fixed

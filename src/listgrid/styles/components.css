@@ -949,6 +949,75 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * ImageField form view (폼 미리보기 + 클릭 시 확대 모달)
+ * ------------------------------------------------------------------ */
+.rcm-image-field-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-sm);
+  align-items: flex-start;
+}
+
+.rcm-image-field-form-preview-trigger {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: zoom-in;
+  line-height: 0;
+}
+
+.rcm-image-field-form-preview {
+  width: 8rem;
+  height: 8rem;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: var(--rcm-radius-md);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  background: var(--rcm-color-surface-muted);
+  display: block;
+}
+
+.rcm-image-field-form-actions {
+  width: 100%;
+}
+
+.rcm-image-field-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+  cursor: zoom-out;
+}
+
+.rcm-image-field-zoom-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: var(--rcm-radius-md);
+  box-shadow: var(--rcm-shadow-lg);
+  cursor: default;
+}
+
+/* Backwards-compatible classes — kept for any host markup that still
+ * renders the legacy external-image wrapper directly. New code goes
+ * through ImageFieldFormPreview (.rcm-image-field-form-*). */
+.rcm-image-field-external {
+  display: inline-block;
+}
+
+.rcm-image-field-external-img {
+  width: 8rem;
+  height: 8rem;
+  max-width: 100%;
+  object-fit: cover;
+  border-radius: var(--rcm-radius-md);
+}
+
+/* ------------------------------------------------------------------ *
      * ViewApiSpecification (API 응답 뷰어)
      * ------------------------------------------------------------------ */
 .rcm-api-spec {
