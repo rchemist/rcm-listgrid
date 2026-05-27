@@ -662,6 +662,9 @@ export function createFieldMap(...fields: DataField[]): Map<string, DataField> {
 
   fields.forEach((field) => {
     fieldMap.set(field.getName(), field);
+    if (field.getLabel() && field.getLabel() !== field.getName()) {
+      fieldMap.set(field.getLabel(), field);
+    }
   });
 
   return fieldMap;
