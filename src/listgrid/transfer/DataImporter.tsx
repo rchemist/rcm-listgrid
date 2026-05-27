@@ -84,6 +84,7 @@ export const DataImporter = (props: ImporterProps) => {
           fields 정보와 비교해 불필요한 필드는 제거한다.
            */
           const cells: number[] = [];
+          const matchedFields: DataField[] = [];
           const header: any = {};
 
           const fieldMap: Map<string, DataField> = createFieldMap(...fields);
@@ -105,8 +106,10 @@ export const DataImporter = (props: ImporterProps) => {
               }
 
               if (fieldMap.has(cell)) {
+                const matched = fieldMap.get(cell)!;
                 cells.push(excelColIndex);
-                header[cell] = fieldMap.get(cell)?.getLabel();
+                matchedFields.push(matched);
+                header[matched.getName()] = matched.getLabel();
               }
             });
           }
@@ -121,7 +124,7 @@ export const DataImporter = (props: ImporterProps) => {
               if (index > 0) {
                 const newRow: DataRow = [];
                 cells.forEach(async (excelColIndex: number, arrayIndex: number) => {
-                  const field = fields[arrayIndex];
+                  const field = matchedFields[arrayIndex];
 
                   if (field) {
                     const fieldName: string = field.getName();
@@ -169,6 +172,7 @@ export const DataImporter = (props: ImporterProps) => {
             fields 정보와 비교해 불필요한 필드는 제거한다.
              */
             const cells: number[] = [];
+            const matchedFields: DataField[] = [];
             const header: any = {};
 
             const fieldMap: Map<string, DataField> = createFieldMap(...fields);
@@ -190,8 +194,10 @@ export const DataImporter = (props: ImporterProps) => {
                 }
 
                 if (fieldMap.has(cell)) {
+                  const matched = fieldMap.get(cell)!;
                   cells.push(excelColIndex);
-                  header[cell] = fieldMap.get(cell)?.getLabel();
+                  matchedFields.push(matched);
+                  header[matched.getName()] = matched.getLabel();
                 }
               });
             }
@@ -206,7 +212,7 @@ export const DataImporter = (props: ImporterProps) => {
                 if (index > 0) {
                   const newRow: DataRow = [];
                   cells.forEach(async (excelColIndex: number, arrayIndex: number) => {
-                    const field = fields[arrayIndex];
+                    const field = matchedFields[arrayIndex];
 
                     if (field) {
                       const fieldName: string = field.getName();
