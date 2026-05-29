@@ -31,3 +31,26 @@
 - toJSON 추가로 host wire 경로 + sessionStorage 경로 둘 다 배열 형태로 통일됨(과거 mapReplacer 는 sorts 를 객체로 방출했으나 deserialize 가 흡수).
 
 ---
+
+## #6 ApiClient envelope 명시 + 방어적 wrap ✅ 2026-05-29
+
+**GitHub Issue**: #6
+
+**Changed files**:
+- `src/listgrid/api/ApiClient.ts` — `ApiClient` 3개 메서드(callExternalHttpRequest/getExternalApiData/getExternalApiDataWithError)에 envelope 계약 JSDoc 추가. host 가 `ResponseData<T>.data` 로 payload 를 감싸야 함을 명시 + 올바른 어댑터 예제(`new ResponseData({ data, status })`).
+- `README.md` — Quick start `configureApiClient` 예제를 raw `r.json()` → `new ResponseData({ data, status })` wrap 으로 교정 + import 에 `ResponseData` 추가 + ⚠️ envelope 주석.
+- `src/listgrid/form/Type.ts` — `fetchListData` 성공 경로에 `const payload = response.data ?? response` 방어적 fallback 도입, 이후 `payload.{searchForm,searchRequest,list,content,totalCount,totalElements,totalPage,totalPages}` 로 deref.
+- `src/listgrid/form/Type.test.ts` — +1 테스트(payload top-level fallback).
+
+**What was done**:
+- 핵심 gap: README quick-start 가 `fetch().then(r => r.json())` raw 반환을 예시 → 정확히 이슈가 경고한 silent 빈화면 유발 패턴. JSDoc/README/방어코드 3중 보강.
+- 방어적 fallback 은 ResponseData 인스턴스인데 payload 를 top-level 에 둔 실수만 보정(정상 wrap 시 동일 동작). 완전 raw json(.isError 미보유)은 isError() 단계 throw → catch → 빈결과 + JSDoc 가이드로 유도(계약 자체는 ResponseData 의존 유지).
+
+**Verification**:
+- `npx vitest run` 전체 → 45 files / 914 passed · 1 todo (+1). `npm run type-check` 통과. eslint 변경파일 0 error(기존 catch unused 경고 1건만).
+
+**Invariant / Decision**:
+- ResponseData 는 메서드(`isError()`)를 가진 class → host 는 반드시 ResponseData 인스턴스 반환 필요(계약 불변). auto-wrap 을 boundary 전체로 확대하지 않은 이유 = isError/status 등 메서드 의존. JSDoc 로 계약 명문화.
+- `payload = response.data ?? response` 에서 `response.data` class default 가 `null` 이라 nullish fallback 성립.
+
+---

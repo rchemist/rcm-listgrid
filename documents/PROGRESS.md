@@ -4,7 +4,7 @@
 **Status**: in_progress
 **Push**: manual
 **Next session policy**: Continue current session — 모두 동일 repo(rcm-listgrid) frontend, 독립 task
-**Last updated**: 2026-05-29 (#1 SearchForm 직렬화 정합 구현 완료 · 전체 912 tests green · #2·#5·#6 대기)
+**Last updated**: 2026-05-29 (#1·#6 구현 완료 · 전체 914 tests green · #5 진행예정 · #2 설계방향(A 추천) 승인대기)
 
 ## Goal
 edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·#4)은 close 완료**. 남은 **4건(#1·#2·#5·#6)** 을 코드 대조로 판단 확정하고, 승인 시 순차 해소한다. 완료 시점에 4건 모두 fix 또는 명시적 close 상태가 되는 것이 목표.
@@ -28,7 +28,11 @@ edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·
 | Phase | Status | Summary | Detail |
 |-------|--------|---------|--------|
 | 판단(verify) | ✅ | 6건 전수 코드 대조 · #3·#4 close · #1 backend 계약 확정 | 본 문서 §Tasks 판단란 |
-| 해소(resolve) | [~] 진행 | #1 ✅ / #2·#5·#6 대기 | 본 문서 §Tasks |
+| 해소(resolve) | [~] 진행 | #1 ✅ · #6 ✅ / #5 진행예정 · #2 승인대기 | 본 문서 §Tasks |
+
+**Progress notes**:
+- Reorder: #6 → #5 보다 먼저 — #6(JSDoc+README+방어wrap)이 더 안전/단순, #5(ViewListGrid Suspense)는 렌더 변경 동반.
+- #2 설계방향: (A) headless named export + `/headless` subpath 추천(explicit>implicit, tree-shakeable, Radix/HeadlessUI 생태계 정합). 47 컴포넌트 작성은 큰 작업 → 별도 승인 시 착수.
 
 ## Tasks
 
@@ -49,11 +53,7 @@ edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·
   - **Changed files**: `src/listgrid/components/list/ViewListGrid.tsx` 또는 `README.md`/`docs/`
   - **Verification**: Next 15 `next build` 정적 prerender 회귀 없음(consumer 시나리오)
 
-- [ ] **#6 host ApiClient envelope 명시 — README + 방어적 wrap** — 🟡 부분해결
-  - **판단(완료)**: `docs/getting-started.md`에 ResponseData 엔벨로프·gotcha 문서화됨. 단 README quick-start 누락, `ApiClient`는 정식 JSDoc 아닌 inline 주석, 방어적 auto-wrap 없음 → raw json 시 silent 빈화면.
-  - **방향(구현 시 결정)**: (A) ApiClient JSDoc 강화, (B) README quick-start wrap 예제, (C) `Type.ts` fetchListData 방어적 wrap(response.data 부재 시 응답 자체를 data 취급).
-  - **Changed files**: `src/listgrid/api/ApiClient.ts`, `README.md`, (선택) `src/listgrid/form/Type.ts`
-  - **Verification**: raw json 응답 시 빈화면 대신 정상/명시 동작 + type-check
+- [x] **#6 host ApiClient envelope 명시 + 방어적 wrap** ✅ 2026-05-29 · ApiClient JSDoc(envelope 계약) + README quick-start ResponseData wrap 교정 + Type.ts `payload=data??response` 방어 fallback · 914 tests green · [detail](progress-archive/phase-resolve-tasks.md#6-apiclient-envelope-명시--방어적-wrap--2026-05-29)
 
 ## Open Questions
 - **구현 착수 승인**: 사용자가 1차로 #1·#2 "판단만"·#5·#6 "보류"를 지정함. 본 PROGRESS는 추적용으로 4건 모두 [ ] 등록. **어느 이슈부터 실제 구현할지**는 사용자 결정 사항(코드/문서로 추론 불가한 우선순위·범위) → 승인 시 #1부터 진행.

@@ -129,11 +129,19 @@ export class PageResult {
         );
       }
 
+      // 방어적 envelope 처리 — host adapter 가 payload 를 ResponseData.data 로 감싸지 않고
+      // top-level 에 둔 경우에도 동작한다 (data 부재 시 response 자체를 payload 로 취급).
+      // 정상 wrap(데이터가 .data 에 존재) 시 분기 없이 동일 동작 — zero regression.
+      // host 가 raw json(.isError 미보유)을 반환하는 경우는 위 isError() 단계에서 throw → catch 로
+      // 처리되며, ApiClient JSDoc 의 envelope 계약(ResponseData wrap 필수)을 따르도록 안내한다.
+      // intentional: payload shape is the backend search response (arbitrary fields)
+      const payload = (response.data ?? (response as unknown)) as Record<string, any>;
+
       // v0.3.0+ — server echo 호환:
-      //   0.0.5 line: response.data.searchForm (deserialize)
-      //   0.1.0 line (Decision #31 SearchResponse): response.data.searchRequest (echo only)
+      //   0.0.5 line: payload.searchForm (deserialize)
+      //   0.1.0 line (Decision #31 SearchResponse): payload.searchRequest (echo only)
       // 둘 다 없으면 client 가 보낸 원본 searchForm 보존 (page/pageSize/sorts/filters 유지).
-      const echoForm = response.data.searchForm ?? response.data.searchRequest;
+      const echoForm = payload.searchForm ?? payload.searchRequest;
       const newSearchForm = echoForm ? SearchForm.deserialize(echoForm) : searchForm;
 
       if (searchForm.hasPreservedFilters()) {
@@ -149,7 +157,7 @@ export class PageResult {
       }
 
       // list (0.0.5) 또는 content (Spring Data Page<T> / SearchResponse 0.1.0) 흡수.
-      const listData = response.data.list || response.data.content || [];
+      const listData = payload.list || payload.content || [];
 
       const responseList: EntityWithId[] = listData.map((item: EntityWithId) => ({
         ...item,
@@ -157,8 +165,8 @@ export class PageResult {
       }));
 
       // pagination 메타: totalCount/totalPage (0.0.5) 또는 totalElements/totalPages (0.1.0).
-      const totalCount = response.data.totalCount ?? response.data.totalElements ?? 0;
-      const totalPage = response.data.totalPage ?? response.data.totalPages ?? 0;
+      const totalCount = payload.totalCount ?? payload.totalElements ?? 0;
+      const totalPage = payload.totalPage ?? payload.totalPages ?? 0;
 
       return new PageResult({
         list: responseList,
