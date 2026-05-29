@@ -4,10 +4,11 @@
 **Status**: in_progress
 **Push**: manual
 **Next session policy**: Continue current session — 모두 동일 repo(rcm-listgrid) frontend, 독립 task
-**Last updated**: 2026-05-29 (#1·#5·#6 구현 완료 · 전체 914 tests green · #2 설계방향(A 추천) 승인대기)
+**Last updated**: 2026-05-29 (#1·#2·#5·#6 main 구현 완료 · 919 tests green · 다음=release/0.2 백포트(4건 양쪽 반영 요구))
 
 ## Goal
-edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·#4)은 close 완료**. 남은 **4건(#1·#2·#5·#6)** 을 코드 대조로 판단 확정하고, 승인 시 순차 해소한다. 완료 시점에 4건 모두 fix 또는 명시적 close 상태가 되는 것이 목표.
+edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·#4)은 close 완료**. 남은 **4건(#1·#2·#5·#6)** 을 코드 대조로 판단 확정하고 순차 해소한다.
+**제약(2026-05-29 사용자 지시): 모든 변경은 v0.3.x(`main`) + v0.2.x(`release/0.2`) 양쪽에 반영해야 한다.**
 
 ## Context
 - Repo: `/Users/kunner/IdeaProjects/rcm-listgrid` (현재 v0.3.8, npm 공개 publish 운영)
@@ -28,7 +29,8 @@ edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·
 | Phase | Status | Summary | Detail |
 |-------|--------|---------|--------|
 | 판단(verify) | ✅ | 6건 전수 코드 대조 · #3·#4 close · #1 backend 계약 확정 | 본 문서 §Tasks 판단란 |
-| 해소(resolve) | [~] 진행 | #1·#5·#6 ✅ / #2 승인대기 | 본 문서 §Tasks |
+| 해소(resolve, main/v0.3.x) | ✅ | #1·#2·#5·#6 전부 구현 · 919 tests green | 본 문서 §Tasks |
+| 백포트(release/0.2, v0.2.x) | [~] 진행 | 4건 양쪽 반영 — 동일파일 main서 가져오기, Type.ts/package.json 수동 | 본 문서 §Backport |
 
 **Progress notes**:
 - Reorder: #6 → #5 보다 먼저 — #6(JSDoc+README+방어wrap)이 더 안전/단순, #5(ViewListGrid Suspense)는 렌더 변경 동반.
@@ -40,12 +42,16 @@ edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·
 
 - [x] **#1 SearchForm.sorts wire 직렬화** ✅ 2026-05-29 · toJSON(sorts→객체배열·filters→AND/OR객체·subFilters재귀) + deserialize backend SortInfo 객체배열 인식 + 다중정렬 순서보존 · 912 tests green · [detail](progress-archive/phase-resolve-tasks.md#1-searchformsorts-wire-직렬화-정합--2026-05-29)
 
-- [ ] **#2 default/headless UI primitive 셋 노출 — consumer 47 stub 부담 제거** — 🟡 MEDIUM 기능
-  - **판단(완료)**: `UIProvider` 는 여전히 47개 필수 prop 요구, 누락 시 throw(`UIProvider.tsx`). `headless`/`MinimalUIComponents` export·`/headless` subpath 없음. `docs/PRIMITIVES.md`는 CSS 프리미티브라 별개. 미해결.
-  - **방향(택1, 구현 시 결정)**: (A) `headlessUIComponents` named export + `@rchemist/listgrid/headless` subpath, (C) `UIProvider` 미지정 component default fallback.
-  - **Reuse review**: (구현 착수 시 필수) `rcm-listgrid-sample`/내부 minimal provider 패턴 재사용 검토.
-  - **Changed files**: `src/listgrid/ui/`, `src/index.ts`, `package.json` exports
-  - **Verification**: headless 셋만으로 UIProvider 렌더 + type-check
+- [x] **#2 default/headless UI primitive 셋 노출** ✅ 2026-05-29 · (A) `headlessUIComponents` + `@rchemist/listgrid/headless` subpath · sample MinimalUIProvider 흡수(49 컴포넌트) · 919 tests green · build OK · [detail](progress-archive/phase-resolve-tasks.md#2-defaultheadless-ui-primitive-셋-노출--2026-05-29)
+
+## Backport (release/0.2 = v0.2.x)
+
+전제: main↔release/0.2 의 대상 파일은 `Type.ts`·`package.json` 빼고 **전부 IDENTICAL** → 동일파일은 `git checkout main -- <file>`, divergent 만 수동.
+
+- [ ] **B1 동일파일 포팅(#1·#5·#2)** — SearchForm.ts(+test), ViewListGrid.tsx, ui/headless.tsx(+test) 를 main 에서 가져오기. ApiClient.ts·types.ts·README.md(#6 일부)도 동일파일.
+  - **Verification**: release/0.2 에서 `npm run type-check` + `npx vitest run`
+- [ ] **B2 divergent 수동 적응** — #6 `Type.ts`(v0.2.x 구 endpoint 스타일에 `payload=data??response` 방어 적용) + `package.json`(`./headless` subpath 추가, version 0.2.x 유지).
+  - **Verification**: type-check + vitest + `npm run build`(headless subpath 산출)
 
 - [x] **#5 Next.js prerender Suspense — bare ViewListGrid 내부 감쌈** ✅ 2026-05-29 · ViewListGrid inner/outer 분리 + outer 가 `<Suspense fallback={Skeleton}>` 으로 hook 상위 경계 제공 · consumer page Suspense 0 · 914 tests green · [detail](progress-archive/phase-resolve-tasks.md#5-nextjs-prerender-suspense--bare-viewlistgrid-내부-감쌈--2026-05-29)
 

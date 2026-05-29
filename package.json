@@ -44,6 +44,10 @@
             "types": "./dist/listgrid/misc/index.d.ts",
             "default": "./dist/listgrid/misc/index.js"
         },
+        "./headless": {
+            "types": "./dist/listgrid/ui/headless.d.ts",
+            "default": "./dist/listgrid/ui/headless.js"
+        },
         "./styles.css": "./dist/styles.css",
         "./styles/tokens.css": "./dist/styles/tokens.css",
         "./styles/primitives.css": "./dist/styles/primitives.css",

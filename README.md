@@ -115,6 +115,18 @@ function Root({ children }) {
 }
 ```
 
+`<UIProvider components={...}>` expects the full primitive surface. Instead of hand-writing
+~47 stubs, start from the zero-styling baseline and override only what you need:
+
+```tsx
+import { headlessUIComponents } from '@rchemist/listgrid/headless';
+
+<UIProvider components={{ ...headlessUIComponents, ...myOverrides }}>{children}</UIProvider>
+```
+
+The headless set is unstyled on purpose — pair it with `@rchemist/listgrid/styles.css` for the
+`rcm-*` look, or swap individual primitives for your own design system.
+
 ### 2. Define an entity
 
 ```tsx

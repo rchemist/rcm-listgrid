@@ -79,3 +79,28 @@
 - fallback = `ViewListGridSkeleton`(모든 props optional).
 
 ---
+
+## #2 default/headless UI primitive 셋 노출 ✅ 2026-05-29
+
+**GitHub Issue**: #2 · **방향**: (A) headless named export + subpath (사용자 승인)
+
+**Reuse review**: Reuse `../rcm-listgrid-sample/src/adapters/MinimalUIProvider.tsx`(352줄, consumer 검증된 49 컴포넌트 셋) → 라이브러리 `headlessUIComponents` 로 정식 흡수.
+
+**Changed files**:
+- `src/listgrid/ui/headless.tsx` (신규) — `headlessUIComponents: UIComponents` zero-styling baseline 49개(box/passthrough/stripLibraryProps + Table 복합 children + Modal/SelectBox 등). `UIComponents` from `./UIProvider`.
+- `src/listgrid/ui/headless.test.tsx` (신규) — +5 테스트(49키 완전성·TextInput onChange·prop strip(readonly/placeHolder/internal)·Table 복합·Modal open/close).
+- `package.json` — `./headless` subpath export 추가(`dist/listgrid/ui/headless.{js,d.ts}`).
+- `README.md` — Quick start §1 에 headless baseline 사용법(`{...headlessUIComponents, ...overrides}`) 추가.
+
+**What was done**:
+- UIProvider 가 49 컴포넌트(47필수+2옵션) 전부 prop 요구 → consumer 마다 47 stub 부담. headless 셋을 subpath 로 노출해 한 줄(spread)로 해소.
+- 설계: main index 미포함·`/headless` subpath 전용(core 번들 무영향, explicit>implicit, Radix/HeadlessUI 생태계 정합). zero-styling(이슈 명세) → styles.css 페어링 또는 override.
+
+**Verification**:
+- `npx vitest run src/listgrid/ui/headless.test.tsx` 5 passed. 전체 `npx vitest run` 46 files / 919 passed(+5). `npm run type-check` 통과. `npm run build` OK → `dist/listgrid/ui/headless.{js,d.ts}` 산출 확인.
+
+**Invariant / Decision**:
+- 옵션 컴포넌트(BreadcrumbItem/PasswordStrength)도 baseline 제공 → `Object.keys` 49.
+- alias(CheckBoxChip=CheckBox, MarkdownEditor=Textarea, MultiSelectBox=SelectBox 등)는 sample 그대로 — baseline 목적상 충분.
+
+---
