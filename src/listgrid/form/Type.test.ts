@@ -152,6 +152,27 @@ describe('PageResult.fetchListData', () => {
     expect(result.list[0]!.id).toBe('7');
   });
 
+  it('defensively reads top-level payload when host did not nest it under .data', async () => {
+    // host adapter mistake: returns a ResponseData-like with list/totalCount at the top
+    // level and an empty .data — listgrid should still render instead of silently emptying.
+    stubApi(async () => ({
+      isError: () => false,
+      error: null,
+      entityError: null,
+      status: 200,
+      data: null,
+      list: [{ id: 9, name: 'Carol' }],
+      totalCount: 1,
+      totalPage: 1,
+      searchForm: null,
+    }));
+
+    const result = await PageResult.fetchListData('/api/items', SearchForm.create());
+    expect(result.list).toHaveLength(1);
+    expect(result.list[0]!.id).toBe('9');
+    expect(result.totalCount).toBe(1);
+  });
+
   it('recovers to an empty result with a generic error message on thrown errors', async () => {
     stubApi(() => {
       throw new Error('unexpected');

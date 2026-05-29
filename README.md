@@ -60,6 +60,7 @@ import '@rchemist/listgrid/styles.css';
 import {
  AuthProvider,
  UIProvider,
+ ResponseData,
  configureApiClient,
  configureMessages,
  configureRuntime,
@@ -72,13 +73,24 @@ configureRuntime({
  cryptKey: 'your-client-side-crypto-salt',
 });
 
+// ⚠️ Envelope contract: every adapter method MUST return a `ResponseData` whose `.data`
+// holds the backend payload. listgrid reads `response.data.list` / `.content` /
+// `.searchForm` and calls `response.isError()`. Returning bare `r.json()` (raw JSON)
+// makes `response.data` absent → the grid silently shows "데이터가 없습니다".
 configureApiClient({
- callExternalHttpRequest: (options) => fetch(options.url, options).then(r => r.json()),
- getExternalApiData: (url) => fetch(url).then(r => r.json()),
- getExternalApiDataWithError: (url) => fetch(url).then(async r => {
- if (!r.ok) throw await r.json();
- return r.json();
- }),
+ callExternalHttpRequest: async (options) => {
+ const r = await fetch(options.url, options);
+ return new ResponseData({ data: await r.json(), status: r.status });
+ },
+ getExternalApiData: async (url) => {
+ const r = await fetch(url);
+ return new ResponseData({ data: await r.json(), status: r.status });
+ },
+ getExternalApiDataWithError: async (url) => {
+ const r = await fetch(url);
+ if (!r.ok) return new ResponseData({ error: 'request failed', status: r.status });
+ return new ResponseData({ data: await r.json(), status: r.status });
+ },
 });
 
 configureMessages({
@@ -102,6 +114,18 @@ function Root({ children }) {
  );
 }
 ```
+
+`<UIProvider components={...}>` expects the full primitive surface. Instead of hand-writing
+~47 stubs, start from the zero-styling baseline and override only what you need:
+
+```tsx
+import { headlessUIComponents } from '@rchemist/listgrid/headless';
+
+<UIProvider components={{ ...headlessUIComponents, ...myOverrides }}>{children}</UIProvider>
+```
+
+The headless set is unstyled on purpose — pair it with `@rchemist/listgrid/styles.css` for the
+`rcm-*` look, or swap individual primitives for your own design system.
 
 ### 2. Define an entity
 

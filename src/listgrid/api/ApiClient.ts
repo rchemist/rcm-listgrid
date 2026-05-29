@@ -27,12 +27,40 @@ export interface ApiRequestOptions {
 }
 
 export interface ApiClient {
+  /**
+   * Perform a backend HTTP call and return the result as a {@link ResponseData} envelope.
+   *
+   * **IMPORTANT — envelope contract.** The host adapter MUST wrap the raw HTTP body into a
+   * `ResponseData<T>` whose `.data` holds the backend payload. Listgrid dereferences
+   * `response.data.list` / `response.data.content` / `response.data.searchForm` and calls
+   * `response.isError()` — returning a bare `fetch(...).then(r => r.json())` (raw JSON) breaks
+   * this: `response.data` is absent → the grid renders "데이터가 없습니다" with no error.
+   *
+   * Minimal correct adapter:
+   * ```ts
+   * callExternalHttpRequest: async (options) => {
+   *   const res = await fetch(options.url, options);
+   *   const body = await res.json();          // backend { list, totalCount, ... }
+   *   return new ResponseData({ data: body, status: res.status });
+   * }
+   * ```
+   * @see ResponseData
+   * @see createResponseData
+   */
   // T defaults to `any` — legacy callers dereference response.data.field directly
   callExternalHttpRequest<T = any>(options: ApiRequestOptions): Promise<ResponseData<T>>;
-  // `getExternalApiData(urlOrOptions)` accepts either a bare URL string or a full
-  // options object, matching the original the legacy UI kit API. Implementations should
-  // normalize internally.
+  /**
+   * Like {@link callExternalHttpRequest} but accepts either a bare URL string or a full
+   * options object (matching the legacy UI-kit API). Implementations should normalize
+   * internally. The same {@link ResponseData} envelope contract applies — `.data` must hold
+   * the backend payload.
+   */
   getExternalApiData<T = any>(urlOrOptions: string | ApiRequestOptions): Promise<ResponseData<T>>;
+  /**
+   * Error-aware variant of {@link getExternalApiData}. Same {@link ResponseData} envelope
+   * contract — wrap the payload into `.data` (and surface failures via `error` / `entityError`
+   * or a `status >= 400`).
+   */
   getExternalApiDataWithError<T = any>(
     urlOrOptions: string | ApiRequestOptions,
   ): Promise<ResponseData<T>>;

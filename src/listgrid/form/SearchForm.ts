@@ -248,28 +248,40 @@ export class SearchForm {
     searchForm.sorts = new Map<string, Direction>();
     searchForm.filters = new Map<'AND' | 'OR', FilterItem[]>();
 
-    // Handle sorts - supports both object and array formats from backend
-    // Object format: { "studentName": "DESC" }
-    // Array format: [["studentName", "DESC"]] (Java Map serialization)
+    // sorts 복원 — backend(rcm-backend-framework SearchRequest) 의 정식 형태는
+    //   List<SortInfo> → `[{ type?, field, direction, joinType?, nullsFirst? }]` 객체 배열.
+    // 하위호환: `[["field","DIR"]]` 튜플(구 Java Map 직렬화) / `{ field: "DIR" }` 객체도 흡수.
+    // withSort 는 prepend(newest-first) 이므로, list 순서(앞=primary)를 보존하려면 역순으로 적용한다.
     if (data.sorts) {
+      const parsed: Array<[string, Direction]> = [];
       if (Array.isArray(data.sorts)) {
-        // Array format: each element is [key, value] pair
         data.sorts.forEach((entry: unknown) => {
           if (Array.isArray(entry) && entry.length === 2) {
+            // 구 튜플 형태 [field, direction]
             const [key, value] = entry;
             if (typeof key === 'string' && (value === 'ASC' || value === 'DESC')) {
-              searchForm.withSort(key, value as Direction);
+              parsed.push([key, value]);
+            }
+          } else if (entry && typeof entry === 'object') {
+            // backend SortInfo 객체 { type?, field, direction, joinType?, nullsFirst? }
+            const { field, direction } = entry as { field?: unknown; direction?: unknown };
+            if (typeof field === 'string' && (direction === 'ASC' || direction === 'DESC')) {
+              parsed.push([field, direction]);
             }
           }
         });
       } else if (typeof data.sorts === 'object') {
-        // Object format: { fieldName: direction }
+        // 구 객체 형태 { fieldName: direction }
         Object.entries(data.sorts as Record<string, unknown>).forEach(([key, value]) => {
-          // Filter out numeric keys (array indices from malformed data)
+          // numeric key(잘못된 배열 인덱스) 제외
           if (!/^\d+$/.test(key) && (value === 'ASC' || value === 'DESC')) {
-            searchForm.withSort(key, value as Direction);
+            parsed.push([key, value as Direction]);
           }
         });
+      }
+      for (let i = parsed.length - 1; i >= 0; i--) {
+        const [field, direction] = parsed[i]!;
+        searchForm.withSort(field, direction);
       }
     }
 
@@ -874,6 +886,56 @@ export class SearchForm {
 
   getCacheKey() {
     return this.cacheKey;
+  }
+
+  /**
+   * FilterItem → wire(JSON) 형태. subFilters Map 을 재귀적으로 plain object 로 변환한다.
+   * (JSON.stringify 가 Map 을 `{}` 로 떨어뜨리는 문제 방지)
+   */
+  private static filterItemToWire(item: FilterItem): Record<string, unknown> {
+    const wire: Record<string, unknown> = {
+      name: item.name,
+      value: item.value,
+      values: item.values,
+      queryConditionType: item.queryConditionType,
+      not: item.not,
+    };
+    if (item.subFilters) {
+      const sub: Record<string, Record<string, unknown>[]> = {};
+      item.subFilters.forEach((items, condition) => {
+        sub[condition] = items.map((i) => SearchForm.filterItemToWire(i));
+      });
+      wire.subFilters = sub;
+    }
+    return wire;
+  }
+
+  /**
+   * JSON.stringify 직렬화 진입점. host adapter 가 `JSON.stringify(searchForm)` 로 wire body 를
+   * 만들 때 자동 호출된다. backend(rcm-backend-framework `SearchRequest`) 계약 정합:
+   *  - `sorts`: `Map<field, direction>` → `[{ field, direction }]` 객체 배열
+   *    (`SortInfo`, type 생략 = NORMAL / joinType = INNER / nullsFirst = null default)
+   *  - `filters`: `Map<'AND'|'OR', FilterItem[]>` → `{ AND: [...], OR: [...] }` (subFilters 재귀 변환)
+   * Map 이 `{}` 로 직렬화되어 backend 가 `Cannot deserialize ArrayList from Object` 400 을 내던 문제 해소.
+   */
+  toJSON(): Record<string, unknown> {
+    const filters: Record<string, Record<string, unknown>[]> = {};
+    this.filters.forEach((items, condition) => {
+      filters[condition] = items.map((item) => SearchForm.filterItemToWire(item));
+    });
+
+    return {
+      cacheKey: this.cacheKey,
+      page: this.page,
+      pageSize: this.pageSize,
+      sorts: Array.from(this.sorts, ([field, direction]) => ({ field, direction })),
+      filters,
+      ignoreCache: this.ignoreCache,
+      viewDetail: this.viewDetail,
+      shouldReturnEmpty: this.shouldReturnEmpty,
+      preservedFilters: this.preservedFilters,
+      quickSearchFields: this.quickSearchFields,
+    };
   }
 }
 

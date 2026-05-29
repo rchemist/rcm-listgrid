@@ -127,7 +127,15 @@ export class PageResult {
         );
       }
 
-      const newSearchForm = SearchForm.deserialize(response.data.searchForm);
+      // 방어적 envelope 처리 — host adapter 가 payload 를 ResponseData.data 로 감싸지 않고
+      // top-level 에 둔 경우에도 동작한다 (data 부재 시 response 자체를 payload 로 취급).
+      // 정상 wrap(데이터가 .data 에 존재) 시 분기 없이 동일 동작 — zero regression.
+      // host 가 raw json(.isError 미보유)을 반환하는 경우는 위 isError() 단계에서 throw → catch 로
+      // 처리되며, ApiClient JSDoc 의 envelope 계약(ResponseData wrap 필수)을 따르도록 안내한다.
+      // intentional: payload shape is the backend search response (arbitrary fields)
+      const payload = (response.data ?? (response as unknown)) as Record<string, any>;
+
+      const newSearchForm = SearchForm.deserialize(payload.searchForm);
 
       if (searchForm.hasPreservedFilters()) {
         searchForm.getPreservedFilters().forEach((filter) => {
@@ -142,7 +150,7 @@ export class PageResult {
       }
 
       // list 또는 content 필드 확인
-      const listData = response.data.list || response.data.content || [];
+      const listData = payload.list || payload.content || [];
 
       const responseList: EntityWithId[] = listData.map((item: EntityWithId) => ({
         ...item,
@@ -151,8 +159,8 @@ export class PageResult {
 
       return new PageResult({
         list: responseList,
-        totalCount: response.data.totalCount,
-        totalPage: response.data.totalPage,
+        totalCount: payload.totalCount,
+        totalPage: payload.totalPage,
         searchForm: newSearchForm,
       });
     } catch (error) {

@@ -420,6 +420,29 @@ describe('SearchForm.deserialize', () => {
     expect(form.getSortDirection('age')).toBe('ASC');
   });
 
+  it('restores sorts from backend SortInfo object-array format', () => {
+    // rcm-backend-framework SearchRequest.sorts = List<SortInfo> 정식 wire 형태
+    const form = SearchForm.deserialize({
+      sorts: [
+        { type: 'NORMAL', field: 'name', direction: 'DESC', joinType: 'INNER', nullsFirst: null },
+        { field: 'age', direction: 'ASC' },
+      ],
+    });
+    expect(form.getSortDirection('name')).toBe('DESC');
+    expect(form.getSortDirection('age')).toBe('ASC');
+  });
+
+  it('preserves multi-sort order (first element = primary) on restore', () => {
+    const form = SearchForm.deserialize({
+      sorts: [
+        { field: 'name', direction: 'DESC' },
+        { field: 'age', direction: 'ASC' },
+      ],
+    });
+    // withSort 가 prepend 임에도 list 순서(name primary)가 유지되어야 한다
+    expect(Array.from(form.getSorts().keys())).toEqual(['name', 'age']);
+  });
+
   it('ignores invalid sort directions', () => {
     const form = SearchForm.deserialize({ sorts: { name: 'BOGUS' } });
     expect(form.getSortDirection('name')).toBeNull();
@@ -452,6 +475,58 @@ describe('SearchForm.deserialize', () => {
     const form = SearchForm.deserialize('{not json}');
     expect(form).toBeInstanceOf(SearchForm);
     expect(form.hasFilters()).toBe(false);
+  });
+});
+
+describe('SearchForm wire serialization (toJSON)', () => {
+  it('serializes sorts Map as an array of { field, direction } objects (backend SortInfo)', () => {
+    const form = SearchForm.create().withSort('name', 'DESC');
+    const wire = JSON.parse(JSON.stringify(form)) as { sorts: unknown };
+    expect(wire.sorts).toEqual([{ field: 'name', direction: 'DESC' }]);
+  });
+
+  it('serializes an empty sorts Map as [] (not {})', () => {
+    const wire = JSON.parse(JSON.stringify(SearchForm.create())) as { sorts: unknown };
+    expect(Array.isArray(wire.sorts)).toBe(true);
+    expect(wire.sorts).toEqual([]);
+  });
+
+  it('serializes filters Map as an { AND/OR: FilterItem[] } object (not {})', () => {
+    const form = SearchForm.create().handleAndFilter('x', '1', 'EQUAL');
+    const wire = JSON.parse(JSON.stringify(form)) as {
+      filters: { AND?: { name: string }[] };
+    };
+    expect(Array.isArray(wire.filters.AND)).toBe(true);
+    expect(wire.filters.AND![0]!.name).toBe('x');
+  });
+
+  it('recursively serializes nested subFilters Maps', () => {
+    const form = SearchForm.create().handleQuickSearch('foo', ['name', 'email']);
+    const wire = JSON.parse(JSON.stringify(form)) as {
+      filters: { AND: { subFilters?: { OR?: unknown[] } }[] };
+    };
+    const sub = wire.filters.AND[0]!.subFilters;
+    expect(sub).toBeDefined();
+    expect(Array.isArray(sub!.OR)).toBe(true);
+    expect(sub!.OR).toHaveLength(2);
+  });
+
+  it('round-trips through stringify → deserialize preserving sorts order and filters', () => {
+    const original = SearchForm.create({ page: 1, pageSize: 50 })
+      .withSort('name', 'DESC')
+      .withSort('age', 'ASC')
+      .handleAndFilter('status', 'ACTIVE', 'EQUAL');
+    // Map order after the two withSort calls: age(newest) → name
+    const expectedOrder = Array.from(original.getSorts().keys());
+
+    const restored = SearchForm.deserialize(JSON.stringify(original));
+
+    expect(Array.from(restored.getSorts().keys())).toEqual(expectedOrder);
+    expect(restored.getSortDirection('name')).toBe('DESC');
+    expect(restored.getSortDirection('age')).toBe('ASC');
+    expect(restored.getSearchValue('status')).toBe('ACTIVE');
+    expect(restored.getPage()).toBe(1);
+    expect(restored.getPageSize()).toBe(50);
   });
 });
 
