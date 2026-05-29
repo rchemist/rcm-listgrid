@@ -12,7 +12,7 @@ import {
 import { ReactNode, useState } from 'react';
 import { getTranslation } from '../utils/i18n';
 import { isTrue } from '../utils/BooleanUtil';
-import { isBlank, subStringBetween } from '../utils/StringUtil';
+import { defaultString, isBlank, subStringBetween } from '../utils/StringUtil';
 import { isEmpty } from '../utils';
 import * as XLSX from 'xlsx-js-style';
 import { getAccessableAssetUrl, getExternalApiDataWithError } from '../misc';
@@ -27,10 +27,56 @@ interface ImporterProps {
   onClose: (result: boolean) => void; // 그냥 창을 닫았을 때
 }
 
+/**
+ * 엑셀 파싱 결과(result, header 포함)에서 헤더 + 본문 행을 DataRowSet 으로 빌드한다.
+ *
+ * - 각 행의 셀 값은 field.getValueOnImport (async) 로 변환되므로 행 단위로 await 한다.
+ * - 매핑된 모든 셀이 blank 인 행은 제외한다. 사용자가 엑셀에서 행을 삭제해도 시트
+ *   dimension(!ref)이 원래 행 수를 유지해 sheet_to_json 이 빈 행을 반환하는데, 이를
+ *   그대로 미리보기/전송하면 빈 행이 노출된다 (gjcu #1478).
+ */
+async function buildSheetData(
+  result: any[],
+  cells: number[],
+  matchedFields: DataField[],
+  header: any,
+): Promise<DataRowSet> {
+  const sheetData: DataRowSet = [];
+  sheetData.push(header);
+
+  const bodyRows = result.slice(1);
+  const builtRows: DataRow[] = await Promise.all(
+    bodyRows.map(async (row: any) => {
+      const newRow: DataRow = [];
+      for (let arrayIndex = 0; arrayIndex < cells.length; arrayIndex++) {
+        const excelColIndex = cells[arrayIndex];
+        const field = matchedFields[arrayIndex];
+        if (field && excelColIndex !== undefined) {
+          newRow.push({
+            name: field.getName(),
+            value: await field.getValueOnImport(row[excelColIndex]),
+          });
+        }
+      }
+      return newRow;
+    }),
+  );
+
+  for (const newRow of builtRows) {
+    const allBlank = newRow.every((column) => isBlank(defaultString(column.value)));
+    if (!allBlank) {
+      sheetData.push(newRow);
+    }
+  }
+
+  return sheetData;
+}
+
 export const DataImporter = (props: ImporterProps) => {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<DataRowSet>([]);
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
   const [importError, setImportError] = useState<string>();
   const [importErrorView, setImportErrorView] = useState<ReactNode>(<></>);
@@ -118,25 +164,7 @@ export const DataImporter = (props: ImporterProps) => {
             setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
             return;
           } else {
-            const sheetData: DataRowSet = [];
-            sheetData.push(header);
-            result.map(async (row: any, index: number) => {
-              if (index > 0) {
-                const newRow: DataRow = [];
-                cells.forEach(async (excelColIndex: number, arrayIndex: number) => {
-                  const field = matchedFields[arrayIndex];
-
-                  if (field) {
-                    const fieldName: string = field.getName();
-                    newRow.push({
-                      name: fieldName,
-                      value: await field.getValueOnImport(row[excelColIndex]),
-                    });
-                  }
-                });
-                sheetData.push(newRow);
-              }
-            });
+            const sheetData: DataRowSet = await buildSheetData(result, cells, matchedFields, header);
 
             if (sheetData.length > 1) {
               // append header and body
@@ -161,7 +189,7 @@ export const DataImporter = (props: ImporterProps) => {
         .then((response) => {
           return response.arrayBuffer();
         })
-        .then((buffer) => {
+        .then(async (buffer) => {
           try {
             const wb = XLSX.read(buffer, { type: 'array' });
             const wsname = wb.SheetNames[0] || '';
@@ -206,25 +234,7 @@ export const DataImporter = (props: ImporterProps) => {
               setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
               return;
             } else {
-              const sheetData: DataRowSet = [];
-              sheetData.push(header);
-              result.map(async (row: any, index: number) => {
-                if (index > 0) {
-                  const newRow: DataRow = [];
-                  cells.forEach(async (excelColIndex: number, arrayIndex: number) => {
-                    const field = matchedFields[arrayIndex];
-
-                    if (field) {
-                      const fieldName: string = field.getName();
-                      newRow.push({
-                        name: fieldName,
-                        value: await field.getValueOnImport(row[excelColIndex]),
-                      });
-                    }
-                  });
-                  sheetData.push(newRow);
-                }
-              });
+              const sheetData: DataRowSet = await buildSheetData(result, cells, matchedFields, header);
 
               if (sheetData.length > 1) {
                 // append header and body
@@ -249,6 +259,9 @@ export const DataImporter = (props: ImporterProps) => {
   }
 
   async function onSubmit() {
+    // 업로드 진행 중 표시 (버튼 disable/스피너) — gjcu #1479
+    if (submitting) return;
+    setSubmitting(true);
     try {
       // data 의 첫번째 row 는 헤더필드 이므로 제거해야 한다.
       const fileData: DataRow[] = isEmpty(data) ? [] : data.slice(1);
@@ -342,6 +355,8 @@ export const DataImporter = (props: ImporterProps) => {
       setSuccess(false);
       const message = error instanceof Error ? error.message : '업로드 중 오류가 발생했습니다.';
       setErrorMessage(message);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -410,6 +425,8 @@ export const DataImporter = (props: ImporterProps) => {
             closeOnClickOutside={false}
             closeOnEscape={false}
             onClose={() => {
+              // 업로드 진행 중에는 결과 모달 닫기 방지 — gjcu #1479
+              if (submitting) return;
               cancelImport();
             }}
           >
@@ -426,6 +443,7 @@ export const DataImporter = (props: ImporterProps) => {
               resultView={resultView}
               onImportSuccess={onImportSuccess}
               onSubmit={onSubmit}
+              submitting={submitting}
             />
           </Modal>
         )}

@@ -2,6 +2,24 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.10] - 2026-05-29
+
+### Fixed
+
+- `DataImporter` 가 엑셀 업로드 시 사용자가 삭제한 빈 행을 미리보기/전송에 그대로
+  노출하던 문제를 수정 (gjcu-academic-backend #1478). 엑셀에서 행을 삭제해도 시트
+  dimension(`!ref`)이 원래 행 수를 유지해 `sheet_to_json` 이 빈 행을 반환하는데,
+  `onFileUpload` 이 이를 빈 행 검사 없이 모두 `sheetData` 에 push 했음. 이제 매핑된
+  모든 셀이 blank 인 행은 제외한다. 행 파싱을 `buildSheetData` 헬퍼로 통합하면서
+  기존 `cells.forEach(async)` 의 비동기 push 어긋남(값 resolve 전 push)도 함께 정상화.
+
+### Added
+
+- `DataImporter` 업로드 진행 상태 표시 (gjcu-academic-backend #1479). 미리보기
+  "업로드" 버튼이 처리 중 `disabled` + 스피너 + "업로드 중..." 라벨로 전환되고,
+  처리 중에는 결과 모달이 닫히지 않는다. 대량 업로드 시 무반응처럼 보이거나 버튼이
+  중복 클릭되던 문제를 방지.
+
 ## [0.3.7] - 2026-05-20
 
 ### Fixed
