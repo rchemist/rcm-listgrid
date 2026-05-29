@@ -150,6 +150,17 @@ export interface ImportTransferConfig extends TransferConfig {
       ) => { success: boolean; result: DataTransferResult; error?: string; errorView?: ReactNode })
     | undefined;
 
+  // 비동기(processId) 응답 처리 - 서버가 즉시 응답하고 백그라운드에서 처리하는 경우,
+  // 응답 데이터를 받아 진행률 추적 등 커스텀 노드를 결과 모달에 렌더한다.
+  // 노드를 반환하면 기본 결과 처리 대신 그 노드를 렌더하며, undefined 면 기존 동기 흐름을 따른다.
+  // ctx.onComplete: 처리 완료로 모달을 닫고 목록을 갱신한다(onClose(true)). ctx.onClose: 그냥 닫는다(onClose(false)).
+  renderAsyncResult?:
+    | ((
+        response: unknown,
+        ctx: { onComplete: () => void; onClose: () => void },
+      ) => ReactNode | undefined)
+    | undefined;
+
   mode?:
     | {
         create?: boolean;
