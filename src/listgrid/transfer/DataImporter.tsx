@@ -81,6 +81,7 @@ export const DataImporter = (props: ImporterProps) => {
   const [importError, setImportError] = useState<string>();
   const [importErrorView, setImportErrorView] = useState<ReactNode>(<></>);
   const [importResult, setImportResult] = useState<DataTransferResult>();
+  const [asyncResultView, setAsyncResultView] = useState<ReactNode | undefined>(undefined);
 
   const { t } = getTranslation();
 
@@ -95,6 +96,7 @@ export const DataImporter = (props: ImporterProps) => {
     setErrorMessage(undefined);
     setImportError(undefined);
     setImportResult(undefined);
+    setAsyncResultView(undefined);
   }
 
   const fields = props.config?.fields ?? [];
@@ -104,6 +106,7 @@ export const DataImporter = (props: ImporterProps) => {
     props.config?.overrideFormData;
   const url = props.config!.url!;
   const overrideParseResult = props.config?.overrideParseResult;
+  const renderAsyncResult = props.config?.renderAsyncResult;
   const description = props.config?.description ?? '';
   const sampleData = props.config?.sampleData ?? [];
 
@@ -329,6 +332,19 @@ export const DataImporter = (props: ImporterProps) => {
           formData: importData,
         });
 
+        // 비동기(processId) 응답이면 커스텀 진행률 노드를 결과 모달에 렌더한다.
+        if (renderAsyncResult) {
+          const asyncNode = renderAsyncResult(response.data, {
+            onComplete: onImportSuccess,
+            onClose: cancelImport,
+          });
+          if (asyncNode !== undefined) {
+            setAsyncResultView(asyncNode);
+            setSuccess(true);
+            return;
+          }
+        }
+
         if (overrideParseResult) {
           const overrideParseResultResult = overrideParseResult(formData, response.data);
           setImportResult(overrideParseResultResult.result);
@@ -362,7 +378,9 @@ export const DataImporter = (props: ImporterProps) => {
 
   let resultModalTitle: string = '';
 
-  if (resultView) {
+  if (asyncResultView !== undefined) {
+    resultModalTitle = t('form.list.dataTransfer.tab.import.title');
+  } else if (resultView) {
     resultModalTitle = t('form.list.dataTransfer.tab.import.messages.success');
   } else {
     if (errorView) {
@@ -430,21 +448,25 @@ export const DataImporter = (props: ImporterProps) => {
               cancelImport();
             }}
           >
-            <DataImportProcessor
-              fields={fields}
-              data={data}
-              preview={preview}
-              errorMessage={errorMessage}
-              importError={importError}
-              importErrorView={importErrorView}
-              viewError={errorView}
-              importResult={importResult}
-              cancelImport={cancelImport}
-              resultView={resultView}
-              onImportSuccess={onImportSuccess}
-              onSubmit={onSubmit}
-              submitting={submitting}
-            />
+            {asyncResultView !== undefined ? (
+              asyncResultView
+            ) : (
+              <DataImportProcessor
+                fields={fields}
+                data={data}
+                preview={preview}
+                errorMessage={errorMessage}
+                importError={importError}
+                importErrorView={importErrorView}
+                viewError={errorView}
+                importResult={importResult}
+                cancelImport={cancelImport}
+                resultView={resultView}
+                onImportSuccess={onImportSuccess}
+                onSubmit={onSubmit}
+                submitting={submitting}
+              />
+            )}
           </Modal>
         )}
       </Modal>
@@ -454,6 +476,7 @@ export const DataImporter = (props: ImporterProps) => {
   function cancelImport() {
     setOpen(false);
     setData([]);
+    setAsyncResultView(undefined);
   }
 
   function onImportSuccess() {
