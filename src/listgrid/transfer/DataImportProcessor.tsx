@@ -28,6 +28,7 @@ interface DataImportPreviewViewerProps {
   errorMessage?: string | undefined;
   viewError: boolean;
   importErrorView?: ReactNode | undefined;
+  submitting?: boolean | undefined;
 }
 
 export const DataImportProcessor = ({
@@ -42,6 +43,7 @@ export const DataImportProcessor = ({
   importError,
   errorMessage,
   preview,
+  submitting,
   ...props
 }: DataImportPreviewViewerProps) => {
   const [fields, setFields] = useState<DataField[]>([]);
@@ -124,16 +126,25 @@ export const DataImportProcessor = ({
                     type="button"
                     className="rcm-button"
                     data-variant="primary"
+                    disabled={submitting}
                     onClick={() => {
                       onSubmit();
                     }}
                   >
-                    업로드
+                    {submitting ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span className="rcm-spinner" aria-hidden="true" />
+                        업로드 중...
+                      </span>
+                    ) : (
+                      '업로드'
+                    )}
                   </button>
                   <button
                     type="button"
                     className="rcm-button"
                     data-variant="outline"
+                    disabled={submitting}
                     onClick={() => {
                       cancelImport();
                     }}
