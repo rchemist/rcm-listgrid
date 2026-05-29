@@ -2,7 +2,7 @@
 
 'use client';
 import { Pagination } from '../../ui';
-import React, { useCallback, useEffect, useId, useMemo, useRef } from 'react';
+import React, { Suspense, useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { EntireChecker } from './ui/EntireChecker';
 import { LoadingOverlay } from '../../ui';
 import { HeaderField } from './ui/HeaderField';
@@ -72,7 +72,7 @@ const PaginationContainer: React.FC<PaginationContainerProps> = ({
   );
 };
 
-export const ViewListGrid = (props: ViewListGridProps) => {
+const ViewListGridInner = (props: ViewListGridProps) => {
   const gridId = useId();
   const {
     manyToOne,
@@ -725,3 +725,21 @@ export const ViewListGrid = (props: ViewListGridProps) => {
     </EntityFormScopeProvider>
   );
 };
+
+/**
+ * Public entry point for the list grid.
+ *
+ * Wraps the grid in a Suspense boundary because the URL-state hooks
+ * (nuqs `useQueryStates` → React `useSearchParams`) force a Suspense boundary
+ * during Next.js static prerender (`next build`). Without this, consumers who
+ * import `<ViewListGrid>` directly hit a build error and have to wrap every
+ * page in their own `<Suspense>`. The boundary must sit *above* the component
+ * that calls the hook, hence the inner/outer split.
+ */
+export const ViewListGrid = (props: ViewListGridProps) => (
+  <Suspense fallback={<ViewListGridSkeleton />}>
+    <ViewListGridInner {...props} />
+  </Suspense>
+);
+
+ViewListGrid.displayName = 'ViewListGrid';

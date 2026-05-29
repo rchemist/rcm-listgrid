@@ -54,3 +54,28 @@
 - `payload = response.data ?? response` 에서 `response.data` class default 가 `null` 이라 nullish fallback 성립.
 
 ---
+
+## #5 Next.js prerender Suspense — bare ViewListGrid 내부 감쌈 ✅ 2026-05-29
+
+**GitHub Issue**: #5
+
+**Changed files**:
+- `src/listgrid/components/list/ViewListGrid.tsx`
+  - react import 에 `Suspense` 추가.
+  - 기존 `export const ViewListGrid` → `const ViewListGridInner` 로 rename (hook 호출 본체).
+  - 신규 `export const ViewListGrid` = `<Suspense fallback={<ViewListGridSkeleton/>}><ViewListGridInner {...props}/></Suspense>` outer wrapper + displayName.
+
+**What was done**:
+- `useQueryStates`(nuqs)→`useSearchParams` 가 Next 15 정적 prerender 시 Suspense 경계 강제. 기존엔 `ViewListGridWrapper`(Suspense+dynamic ssr:false)만 안전하고 bare `ViewListGrid` 직접 import 시 build error.
+- Suspense 경계는 hook 호출 컴포넌트의 **상위**여야 하므로 inner/outer 분리 — consumer 가 page 마다 Suspense 로 감쌀 필요 0.
+- 두 export(ViewListGrid / ViewListGridWrapper) 모두 public. Wrapper 는 내부에서 dynamic 으로 ViewListGrid(=outer) 로드 → 이중 Suspense 무해.
+
+**Verification**:
+- `npm run type-check` 통과. `npx vitest run` 전체 45 files / 913 passed · 1 todo, 회귀 0. eslint 0 error(기존 exhaustive-deps 경고 3건).
+- prerender 빌드 동작 자체는 jsdom 단위테스트 대상 아님 → 기존 `InlineSubCollectionView.test.tsx`(ViewListGrid 렌더) 가 새 wrapper 경로 통과로 회귀 커버.
+
+**Invariant / Decision**:
+- 내부 sub-collection 들(SubCollectionField/InlineSubCollectionView/Xref*View/ManyToOne*View)이 ViewListGrid 직접 import — 이제 각자 Suspense 경계 갖지만 이미 mounted client tree 라 fallback 즉시 resolve, 무해.
+- fallback = `ViewListGridSkeleton`(모든 props optional).
+
+---

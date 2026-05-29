@@ -4,7 +4,7 @@
 **Status**: in_progress
 **Push**: manual
 **Next session policy**: Continue current session — 모두 동일 repo(rcm-listgrid) frontend, 독립 task
-**Last updated**: 2026-05-29 (#1·#6 구현 완료 · 전체 914 tests green · #5 진행예정 · #2 설계방향(A 추천) 승인대기)
+**Last updated**: 2026-05-29 (#1·#5·#6 구현 완료 · 전체 914 tests green · #2 설계방향(A 추천) 승인대기)
 
 ## Goal
 edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·#4)은 close 완료**. 남은 **4건(#1·#2·#5·#6)** 을 코드 대조로 판단 확정하고, 승인 시 순차 해소한다. 완료 시점에 4건 모두 fix 또는 명시적 close 상태가 되는 것이 목표.
@@ -28,7 +28,7 @@ edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·
 | Phase | Status | Summary | Detail |
 |-------|--------|---------|--------|
 | 판단(verify) | ✅ | 6건 전수 코드 대조 · #3·#4 close · #1 backend 계약 확정 | 본 문서 §Tasks 판단란 |
-| 해소(resolve) | [~] 진행 | #1 ✅ · #6 ✅ / #5 진행예정 · #2 승인대기 | 본 문서 §Tasks |
+| 해소(resolve) | [~] 진행 | #1·#5·#6 ✅ / #2 승인대기 | 본 문서 §Tasks |
 
 **Progress notes**:
 - Reorder: #6 → #5 보다 먼저 — #6(JSDoc+README+방어wrap)이 더 안전/단순, #5(ViewListGrid Suspense)는 렌더 변경 동반.
@@ -47,11 +47,7 @@ edustack XI-G 표준감사(2026-05-10) 발 6개 이슈 중 **노후화 2건(#3·
   - **Changed files**: `src/listgrid/ui/`, `src/index.ts`, `package.json` exports
   - **Verification**: headless 셋만으로 UIProvider 렌더 + type-check
 
-- [ ] **#5 Next.js 15 정적 prerender Suspense — bare ViewListGrid 보호 또는 문서화** — 🟡 부분해결
-  - **판단(완료)**: `ViewListGridWrapper`(L180-189)는 내부 `<Suspense>` 보유. 단 bare `ViewListGrid` 직접 import 시 미보호. README 가이드 부재.
-  - **방향(구현 시 결정)**: (A) `ViewListGrid` 자체 내부 Suspense, 또는 (B) README/docs 정적 prerender 패턴 명시.
-  - **Changed files**: `src/listgrid/components/list/ViewListGrid.tsx` 또는 `README.md`/`docs/`
-  - **Verification**: Next 15 `next build` 정적 prerender 회귀 없음(consumer 시나리오)
+- [x] **#5 Next.js prerender Suspense — bare ViewListGrid 내부 감쌈** ✅ 2026-05-29 · ViewListGrid inner/outer 분리 + outer 가 `<Suspense fallback={Skeleton}>` 으로 hook 상위 경계 제공 · consumer page Suspense 0 · 914 tests green · [detail](progress-archive/phase-resolve-tasks.md#5-nextjs-prerender-suspense--bare-viewlistgrid-내부-감쌈--2026-05-29)
 
 - [x] **#6 host ApiClient envelope 명시 + 방어적 wrap** ✅ 2026-05-29 · ApiClient JSDoc(envelope 계약) + README quick-start ResponseData wrap 교정 + Type.ts `payload=data??response` 방어 fallback · 914 tests green · [detail](progress-archive/phase-resolve-tasks.md#6-apiclient-envelope-명시--방어적-wrap--2026-05-29)
 
