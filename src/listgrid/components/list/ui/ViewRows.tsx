@@ -359,6 +359,8 @@ export const ViewRows = (props: ViewRowsProps) => {
           <td className={`${openNewWindowCellClass} whitespace-nowrap`}>
             <Tooltip label={openInNewWindow?.tooltip || '새창에서 열기'}>
               <button
+                type="button"
+                aria-label={openInNewWindow?.tooltip || '새창에서 열기'}
                 className={
                   'btn btn-outline-secondary btn-sm p-1 min-w-[32px] min-h-[32px] flex items-center justify-center'
                 }
@@ -374,6 +376,8 @@ export const ViewRows = (props: ViewRowsProps) => {
           <td className={`${themeClasses.cell?.selectCell ?? ''} whitespace-nowrap`}>
             <Tooltip label={isInlineExpanded ? '접기' : '펼치기'}>
               <button
+                type="button"
+                aria-label={isInlineExpanded ? '접기' : '펼치기'}
                 className={`btn btn-sm p-1 min-w-[32px] min-h-[32px] flex items-center justify-center ${
                   isInlineExpanded ? 'btn-secondary' : 'btn-outline-info'
                 }`}
@@ -396,6 +400,8 @@ export const ViewRows = (props: ViewRowsProps) => {
           <td className={`${themeClasses.cell?.selectCell ?? ''} whitespace-nowrap`}>
             <Tooltip label={'상세 보기'}>
               <button
+                type="button"
+                aria-label="상세 보기"
                 className={
                   'btn btn-outline-info btn-sm p-1 min-w-[32px] min-h-[32px] flex items-center justify-center'
                 }

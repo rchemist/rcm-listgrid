@@ -37,6 +37,8 @@ export const QuickSearchInput: React.FC<QuickSearchInputProps> = ({
       />
       <div className="rcm-quick-search-addon rcm-quick-search-addon-search">
         <button
+          type="button"
+          aria-label="검색"
           className="rcm-quick-search-btn"
           onClick={() => {
             if (!isBlank(search)) onQuickSearch(search);
@@ -48,6 +50,8 @@ export const QuickSearchInput: React.FC<QuickSearchInputProps> = ({
       {!isBlank(search) && (
         <div className="rcm-quick-search-addon rcm-quick-search-addon-clear">
           <button
+            type="button"
+            aria-label="검색어 지우기"
             className="rcm-quick-search-btn"
             onClick={() => {
               setSearch('');

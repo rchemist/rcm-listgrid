@@ -49,8 +49,17 @@ export const SortField = ({ name, searchForm, onChangeSearchForm }: SortFieldPro
     }
   };
 
+  const ariaLabel =
+    direction === 'DESC'
+      ? '정렬 변경 (현재 내림차순)'
+      : direction === 'ASC'
+        ? '정렬 변경 (현재 오름차순)'
+        : '정렬 변경';
+
   return (
     <button
+      type="button"
+      aria-label={ariaLabel}
       onClick={() => {
         changeSort();
       }}

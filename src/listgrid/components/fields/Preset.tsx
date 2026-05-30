@@ -1,3 +1,5 @@
+'use client';
+
 import { FormField } from './abstract';
 import { StringField } from './StringField';
 import { TextareaField } from './TextareaField';

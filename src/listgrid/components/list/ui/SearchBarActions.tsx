@@ -93,6 +93,7 @@ export const SearchBarActions: React.FC<SearchBarActionsProps> = (props) => {
             <SelectBox
               required={true}
               name={`pageSizeSelector`}
+              aria-label="페이지당 행 수"
               options={pageSizeOptions}
               value={isValidOption ? currentPageSize : DEFAULT_PAGE_SIZE_VALUE}
               onChange={handlePageSizeChange}
