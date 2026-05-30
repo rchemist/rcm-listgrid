@@ -20,7 +20,11 @@ export const HeaderTitle: React.FC<{ title: string; hideTitle?: boolean }> = ({
       )}
     >
       <Tooltip label={titleText} zIndex={1000} usePortal={true} position="top-start">
+        {/* ARIA role 로 semantic heading 부여 — 시각/스타일/DOM 변경 0 +
+            a11y compliance + Playwright getByRole('heading') 호환 */}
         <div
+          role="heading"
+          aria-level={1}
           className={cn(
             'flex items-center mt-2 min-h-[60px] truncate py-3 pt-2 text-[1.8rem] font-bold dark:text-white-light md:mt-0 overflow-ellipsis',
             themeClasses.header?.titleWrapper,
