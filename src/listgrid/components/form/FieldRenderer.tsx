@@ -119,8 +119,12 @@ export const FieldRenderer = (props: FieldRendererProps) => {
         if (changed || manyToOneField instanceof AbstractManyToOneField) {
           setEntityForm?.(cloned);
         } else {
-          entityForm.merge(cloned);
-          setEntityForm?.(entityForm);
+          // Sprint 31c W.6 — React 19 setState 는 same reference 시 skip 함.
+          // 기존 `entityForm.merge(cloned); setEntityForm(entityForm)` 는 같은
+          // ref 를 setState 로 보내 re-render 가 생기지 않아 controlled input
+          // 의 value 가 EntityForm 갱신 후에도 update 안 됨. cloned (새 ref)
+          // 를 passing 하여 reconciliation 강제 + 값 동기화 보장.
+          setEntityForm?.(cloned);
         }
 
         requestAnimationFrame(() => {
@@ -281,11 +285,11 @@ export const FieldRenderer = (props: FieldRendererProps) => {
               const manyToOneField = cloned.getField(name);
               setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
 
+              // Sprint 31c W.6 — React 19 setState same-ref skip 회피 (L119 동일 이유)
               if (changed || manyToOneField instanceof AbstractManyToOneField) {
                 setEntityForm?.(cloned);
               } else {
-                entityForm.merge(cloned);
-                setEntityForm?.(entityForm);
+                setEntityForm?.(cloned);
               }
 
               // entityForm 갱신으로 스크롤에 변화가 생겼다면 해당 위치로 스크롤을 자동 이동하는 구문
