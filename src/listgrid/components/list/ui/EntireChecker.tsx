@@ -32,29 +32,27 @@ export const EntireChecker = ({
     selectableIds.length > 0 && selectableIds.every((id: string) => checkedItems.includes(id));
 
   function checkAllItems() {
+    // 0.3.14 — onSelectionChange 의 stale closure fix. setCheckedItems(...)
+    // 직후 callback 에 *이전* checkedItems 를 전달하던 버그 → host 가 빈 배열
+    // 받음 → master checkbox + selectionOptions.onSelectionChange 패턴 동작 X
+    // (project-manager Sprint 31h F.4 root cause). newCheckedItems 를 명시
+    // 계산해서 setCheckedItems / onSelectionChange 양쪽에 동일 전달.
+    let newCheckedItems: string[];
     if (!selectionOptions?.selectableFilter) {
-      // 기존 로직
-      if (checkedItems.length === 0) {
-        setCheckedItems?.([...listIds]);
-      } else {
-        setCheckedItems?.([]);
-      }
+      // 기존 로직 — 아무것도 안 체크면 전체, 아니면 클리어
+      newCheckedItems = checkedItems.length === 0 ? [...listIds] : [];
+    } else if (checkAll) {
+      // 선택 가능한 항목들을 제거
+      newCheckedItems = checkedItems.filter((id: string) => !selectableIds.includes(id));
     } else {
-      // selectableFilter가 있을 때
-      if (checkAll) {
-        // 선택 가능한 항목들을 제거
-        const newCheckedItems = checkedItems.filter((id: string) => !selectableIds.includes(id));
-        setCheckedItems?.(newCheckedItems);
-      } else {
-        // 선택 가능한 항목들을 추가
-        const newCheckedItems = [...new Set([...checkedItems, ...selectableIds])];
-        setCheckedItems?.(newCheckedItems);
-      }
+      // 선택 가능한 항목들을 추가
+      newCheckedItems = [...new Set([...checkedItems, ...selectableIds])];
     }
+    setCheckedItems?.(newCheckedItems);
 
     // 선택 변경 콜백
     if (selectionOptions?.onSelectionChange) {
-      selectionOptions.onSelectionChange(checkedItems, rows || []);
+      selectionOptions.onSelectionChange(newCheckedItems, rows || []);
     }
   }
 
