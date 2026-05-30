@@ -424,6 +424,9 @@ export const FieldRenderer = (props: FieldRendererProps) => {
       </div>
       {/* 필드 값 뷰 렌더링 */}
       {/* Render field value view */}
+      {/* aria-label injection — label 이 string 이고 input view 가 valid element 일 때
+          aria-label={label} 을 cloneElement 로 주입. 시각 변경 0 +
+          Playwright getByLabel + 스크린리더 a11y compliance. */}
       <div className={cn('rcm-field-value', classNames.field?.valueContainer)}>
         {CustomFieldRenderer ? (
           <CustomFieldRenderer
@@ -444,6 +447,11 @@ export const FieldRenderer = (props: FieldRendererProps) => {
               ? { resetEntityForm: props.resetEntityForm }
               : {})}
           />
+        ) : React.isValidElement(view) && typeof label === 'string' && !hideLabel ? (
+          React.cloneElement(view as React.ReactElement<Record<string, unknown>>, {
+            'aria-label':
+              (view.props as Record<string, unknown> | undefined)?.['aria-label'] ?? label,
+          })
         ) : (
           view
         )}
