@@ -211,6 +211,10 @@ Two activation paths — no code needed:
 
 See [`docs/PRIMITIVES.md`](./docs/PRIMITIVES.md) for the catalog of primitive classes + their `data-*` variants. Every visual element (button, badge, icon, input, notice, tab, skeleton, etc.) uses `class="rcm-{name}" data-variant="..." data-size="..." data-color="..."` so you can restyle via standard CSS without fighting specificity.
 
+## Extending listgrid for host requirements
+
+When listgrid's defaults don't fit a host requirement (custom field rendering, server-required save body fields, 409 conflict UX, dirty detection quirks, autosave storage scope), reach for the **extension points** before forking the page or building a sibling. See [`docs/EXTENSIONS.md`](./docs/EXTENSIONS.md) for the catalog (`FormField` subclass · `saveValue` / `displayFunc` / `isDirty` · `withClientPreUpdate` / `withClientPostUpdate` · `EntityFormButton` · autosave key scoping) plus two real case studies (a host MarkdownField wrapping `@uiw/react-md-editor`, and LWW optimistic-concurrency save augmentation).
+
 ---
 
 ## Architecture
