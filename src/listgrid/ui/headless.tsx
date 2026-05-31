@@ -257,11 +257,7 @@ const ColorInput: any = ({ onChange, value, ...rest }: any) => (
 );
 
 const FileUploadInput: any = ({ onChange, ...rest }: any) => (
-  <input
-    type="file"
-    onChange={(e) => onChange?.(e.target.files, e)}
-    {...stripLibraryProps(rest)}
-  />
+  <input type="file" onChange={(e) => onChange?.(e.target.files, e)} {...stripLibraryProps(rest)} />
 );
 
 const FlatPickrDateField: any = ({ onChange, value, ...rest }: any) => (

@@ -167,7 +167,12 @@ export const DataImporter = (props: ImporterProps) => {
             setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
             return;
           } else {
-            const sheetData: DataRowSet = await buildSheetData(result, cells, matchedFields, header);
+            const sheetData: DataRowSet = await buildSheetData(
+              result,
+              cells,
+              matchedFields,
+              header,
+            );
 
             if (sheetData.length > 1) {
               // append header and body
@@ -237,7 +242,12 @@ export const DataImporter = (props: ImporterProps) => {
               setErrorMessage('업로드 대상 필드가 일치하지 않습니다.');
               return;
             } else {
-              const sheetData: DataRowSet = await buildSheetData(result, cells, matchedFields, header);
+              const sheetData: DataRowSet = await buildSheetData(
+                result,
+                cells,
+                matchedFields,
+                header,
+              );
 
               if (sheetData.length > 1) {
                 // append header and body
