@@ -651,11 +651,24 @@
 }
 
 .rcm-input:disabled,
-.rcm-input[readonly],
 .rcm-input[data-state='disabled'] {
   background: var(--rcm-color-surface-disabled);
   color: var(--rcm-color-text-disabled);
   cursor: not-allowed;
+}
+
+/*
+ * Readonly inputs convey *information* (server data the user can read/copy)
+ * — they must remain readable. Disabled gray text on disabled gray background
+ * fails WCAG 2 AA contrast (2.3:1 vs required 4.5:1). Use the regular body
+ * text color but keep the disabled-tinted background to signal non-editable.
+ * cursor stays `default` (not `not-allowed`) because the user CAN focus,
+ * select, and copy the value.
+ */
+.rcm-input[readonly] {
+  background: var(--rcm-color-surface-disabled);
+  color: var(--rcm-color-text);
+  cursor: default;
 }
 
 .rcm-input[data-size='sm'] {

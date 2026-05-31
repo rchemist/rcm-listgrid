@@ -274,6 +274,9 @@ export const ViewEntityForm = (props: ViewEntityFormProps) => {
                 onChange={(index) => {
                   clearAllToasts();
                   setSelectedTabIndex(index);
+                  // a11y nested-interactive 회피: ViewTab 내부의 `<button onClick={setTabIndex}>` 를
+                  // 시각용 `<span>` 으로 전환했으므로, 외부 string-id state 동기화를 여기서 수행.
+                  if (tabs[index]) setTabIndex(tabs[index].id);
                 }}
               >
                 {/* 인라인 모드: 탭 + 버튼을 같은 줄에 배치 */}

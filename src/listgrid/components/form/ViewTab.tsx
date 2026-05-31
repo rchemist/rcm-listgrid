@@ -93,21 +93,20 @@ export const ViewTab = ({
     }
     const dataState = !hasContent ? 'disabled' : selected ? 'selected' : undefined;
 
+    // headlessui `Tab as={Fragment}` 는 부모 `<Tab>` 자체가 interactive (role="tab" + tabindex)
+    // 가 되며 click + keyboard handling 을 흡수한다. 내부 시각 element 는 *비-interactive*
+    // 여야 한다 (axe `nested-interactive` 회피: `<button>` 안에 `<button>` 같은 중첩 금지).
+    // 따라서 이전의 inner `<button onClick={setTabIndex} disabled>` → 시각 전용 `<span>`.
+    // disabled 시각화는 `data-state="disabled"` + `aria-disabled` 로 처리 (CSS 규칙 동일).
     return (
-      <div style={{ display: hasContent ? 'block' : 'none' }}>
-        <button
-          className={buttonClass}
-          data-state={dataState}
-          onClick={() => {
-            if (hasContent) {
-              setTabIndex?.(id);
-            }
-          }}
-          disabled={!hasContent}
-        >
-          {label}
-        </button>
-      </div>
+      <span
+        className={buttonClass}
+        data-state={dataState}
+        style={{ display: hasContent ? 'block' : 'none' }}
+        aria-disabled={!hasContent || undefined}
+      >
+        {label}
+      </span>
     );
   }
 
