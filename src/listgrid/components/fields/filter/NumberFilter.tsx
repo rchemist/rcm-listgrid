@@ -56,19 +56,22 @@ export const NumberFilter = (props: NumberFilterProps) => {
   }
 
   return (
-    <div className={'flex w-full space-x-2'}>
-      <div className={'w-[140px]'}>
-        <SelectBox
-          value={type}
-          required={true}
-          name={'type'}
-          options={[...NumberFilterTypes]}
-          onChange={(value: QueryConditionType) => {
-            changeType(value);
-          }}
-        ></SelectBox>
+    <div className={'flex w-full space-x-2 items-center'}>
+      <div className={'flex items-center space-x-1 shrink-0'}>
+        <span className={'text-xs text-gray-500 whitespace-nowrap'}>조건</span>
+        <div className={'w-[90px]'}>
+          <SelectBox
+            value={type}
+            required={true}
+            name={'type'}
+            options={[...NumberFilterTypes]}
+            onChange={(value: QueryConditionType) => {
+              changeType(value);
+            }}
+          ></SelectBox>
+        </div>
       </div>
-      <div className={'w-full flex space-x-2 items-center'}>
+      <div className={'flex-1 flex space-x-2 items-center'}>
         <TextInput
           name={'start'}
           type={'number'}
