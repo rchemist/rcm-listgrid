@@ -1,6 +1,5 @@
 import { SearchForm } from '../form/SearchForm';
 import {
-  createFieldMap,
   DataExportCount,
   DataField,
   DataRow,
@@ -134,7 +133,9 @@ export class DataExportService {
     let page = 0;
     let currentProgress: number = 0;
     let data: DataRowSet = [];
-    const fieldMap: Map<string, DataField> = createFieldMap(...this.fields);
+    const fieldMap: Map<string, DataField> = new Map(
+      this.fields.map((field) => [field.getName(), field]),
+    );
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const exportData = async (): Promise<number> => {
