@@ -229,3 +229,33 @@ describe('MultipleOptionalField - limits', () => {
     expect(f.limit).toEqual({ min: undefined, max: 3 });
   });
 });
+
+// Regression: validate() must `await getCurrentValue()`. Previously the value was a
+// Promise, so validateWithLimit's `Array.isArray(value)` was false and any field with
+// `limit.min` defined (e.g. TagField {min:0}) always failed → detail/create save was
+// permanently blocked for limited fields.
+describe('MultipleOptionalField - validate awaits getCurrentValue (limit regression)', () => {
+  const mockForm = (renderType: 'create' | 'update' = 'create') =>
+    ({ getRenderType: () => renderType }) as never;
+  const makeM = (name = 'tags', order = 1) => new TestMultipleOptionalField(name, order);
+  const hasErr = (r: { hasError(): boolean } | { hasError(): boolean }[]) =>
+    Array.isArray(r) ? r.some((x) => x.hasError()) : r.hasError();
+
+  it('non-empty array under limit passes (was: falsely failed as Promise)', async () => {
+    const f = makeM().withLimit({ min: 0, max: 30 });
+    f.withDefaultValue(['a', 'b']);
+    expect(hasErr(await f.validate(mockForm('create')))).toBe(false);
+  });
+
+  it('empty array with min:0 passes', async () => {
+    const f = makeM().withLimit({ min: 0, max: 30 });
+    f.withDefaultValue([]);
+    expect(hasErr(await f.validate(mockForm('create')))).toBe(false);
+  });
+
+  it('over-max array still fails (limit check operates on the resolved array)', async () => {
+    const f = makeM().withLimit({ min: 0, max: 2 });
+    f.withDefaultValue(['a', 'b', 'c']);
+    expect(hasErr(await f.validate(mockForm('create')))).toBe(true);
+  });
+});

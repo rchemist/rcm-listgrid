@@ -288,7 +288,11 @@ export abstract class MultipleOptionalField<
       previousResult: await super.validate(entityForm, session),
       entityForm: entityForm,
       required: await this.isRequired(infoParams),
-      value: this.getCurrentValue(entityForm.getRenderType()),
+      // getCurrentValue 는 async — await 누락 시 value 가 Promise 가 되어
+      // validateWithLimit 에서 Array.isArray(value)===false → limit.min 이 정의된 필드
+      // (예: TagField limit{min:0,...})가 *항상* "최소 N개" 실패를 반환해 저장이 영구
+      // 차단된다. limit 이 없는 CustomOptionField 는 영향 없음(그래서 잠복).
+      value: await this.getCurrentValue(entityForm.getRenderType()),
     };
     if (this.limit !== undefined) validateProps.limit = this.limit;
     return await this.validateWithLimit(validateProps);

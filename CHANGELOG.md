@@ -2,6 +2,19 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.19] - 2026-06-03
+
+### Fixed
+
+- `OptionalField.validate` 가 `getCurrentValue()`(async) 를 `await` 하지 않아, 값이
+  Promise 로 `validateWithLimit` 에 전달되던 문제를 수정. `Array.isArray(value)` 가
+  항상 false 가 되어, `limit.min` 이 정의된 복수 옵션 필드(`TagField` 의 기본
+  `{ min: 0, ... }` 포함)는 실제 값과 무관하게 **항상 "최소 N개 이상" 검증 실패**를
+  반환했고, 그 결과 해당 필드를 포함한 EntityForm 의 detail/create **저장이 영구
+  차단**되었다 (검증 에러가 빈 채로 반환되어 저장 버튼이 조용히 무동작). `limit` 이
+  없는 `CustomOptionField` 는 영향이 없어 잠복해 있었다. 이제 resolved 값(배열)으로
+  limit 을 검사한다. 회귀 테스트 3건 추가 (`OptionalField.test.ts`).
+
 ## [0.3.10] - 2026-05-29
 
 ### Fixed
