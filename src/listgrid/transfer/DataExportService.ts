@@ -1,11 +1,5 @@
 import { SearchForm } from '../form/SearchForm';
-import {
-  DataExportCount,
-  DataField,
-  DataRow,
-  DataRowSet,
-  SampleDataItem,
-} from '../transfer/Type';
+import { DataExportCount, DataField, DataRow, DataRowSet, SampleDataItem } from '../transfer/Type';
 import { PageResult } from '../form/Type';
 import { getPlainText } from '../ui';
 import { isEmpty } from '../utils';
