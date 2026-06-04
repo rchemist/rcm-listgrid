@@ -100,6 +100,9 @@ export const DataExportProcessor = ({
     <>
       <h1 className={'text-xl mb-2'}>
         {(function () {
+          if (!exportable) {
+            return t('form.list.dataTransfer.tab.export.error.limit.retry');
+          }
           if (exportProgress < 100) {
             return t('form.list.dataTransfer.tab.export.processing');
           } else if (exportProgress >= 100) {

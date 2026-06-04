@@ -169,7 +169,11 @@ export interface ImportTransferConfig extends TransferConfig {
     | undefined;
 }
 
-export interface ExportTransferConfig extends TransferConfig {}
+export interface ExportTransferConfig extends TransferConfig {
+  // 다운로드 건수 제한 (최대 페이지 수 × 페이지당 건수 = 최대 다운로드 건수)
+  maxCount?: number | undefined;
+  countPerPage?: number | undefined;
+}
 
 export interface TransferConfig {
   fields?: DataField[] | undefined;
