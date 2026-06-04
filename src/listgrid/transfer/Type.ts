@@ -186,6 +186,10 @@ export interface TransferConfig {
 
   // 엑셀 업로드/다운로드 시 폼 데이터 조작 - 전체 데이터에 대해 조작한다.
   overrideFormData?: ((formData: DataRowSet) => Promise<DataRowSet>) | undefined;
+
+  // 다운로드 건수 제한 (최대 페이지 수 × 페이지당 건수 = 최대 다운로드 건수)
+  maxCount?: number | undefined;
+  countPerPage?: number | undefined;
 }
 
 export class DataTransferConfig implements IDataTransferConfig {
