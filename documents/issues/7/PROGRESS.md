@@ -49,11 +49,7 @@
 
 목표: 리스트 헤더 내장 전송 모달이 `DataExporter`/`DataImporter`를 static import하는 것을 끊고, host가 `@rchemist/listgrid/excel`에서 주입하도록 전환. 완료 시 barrel 그래프에서 xlsx/file-saver 사라짐.
 
-- [ ] **#3.1 전송 레지스트리 신규** — `configureDataTransfer`/`getDataTransfer`
-  - **Changed files**: 신규 `src/listgrid/transfer/registry.ts`(또는 transfer/index 내)
-  - **What**: 주입 컴포넌트 타입(`{ Exporter, Importer }`) + 모듈 스코프 레지스트리. 미등록 시 `getDataTransfer()===null`.
-  - **Reuse review** (gating): 기존 DI 패턴(`configureMessages`/`configureApiClient`/`UIProvider`) 모방 — 새 도메인(전송)이라 기존 레지스트리 재사용 불가, 동일 패턴 신규.
-  - **Verification**: `npm run type-check` green
+- [x] **#3.1 전송 레지스트리 신규** ✅ 2026-06-16 · `src/listgrid/transfer/registry.ts` · configureDataTransfer/getDataTransfer + DataTransferComponents(ComponentType<any>, UIComponents 패턴) · type-check green
 - [ ] **#3.2 DataTransferModal 주입화 + barrel 정리** — static import 제거
   - **Changed files**: `src/listgrid/components/list/ui/DataTransferModal.tsx`, `src/listgrid/index.ts`
   - **What**: DataExporter/DataImporter static import → `getDataTransfer()` 사용, 미등록 시 graceful(모달 미렌더/안내). barrel에서 xlsx/file-saver 경유 transfer export 제거(DataExporter/DataImporter/DataExportProcessor/DynamicDataImporter/DataImportProcessor/DataImportResultView/DataImportDescription/DataImportSample, `export * DataExportService`, `export * Provider/ExcelProvider`). 주입 API(`configureDataTransfer`/타입)와 peer-free `transfer/Type`은 barrel 유지.
