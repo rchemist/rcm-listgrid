@@ -52,6 +52,22 @@
       "types": "./dist/listgrid/ui/headless.d.ts",
       "default": "./dist/listgrid/ui/headless.js"
     },
+    "./qr": {
+      "types": "./dist/qr.d.ts",
+      "default": "./dist/qr.js"
+    },
+    "./address": {
+      "types": "./dist/address.d.ts",
+      "default": "./dist/address.js"
+    },
+    "./api-spec": {
+      "types": "./dist/api-spec.d.ts",
+      "default": "./dist/api-spec.js"
+    },
+    "./xref-price": {
+      "types": "./dist/xref-price.d.ts",
+      "default": "./dist/xref-price.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./styles/tokens.css": "./dist/styles/tokens.css",
     "./styles/primitives.css": "./dist/styles/primitives.css",

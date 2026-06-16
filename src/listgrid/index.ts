@@ -236,7 +236,7 @@ export type {
 export { ManyToOneField, getManyToOneEntityValue } from './components/fields/ManyToOneField';
 export { MappedJoinField } from './components/fields/MappedJoinField';
 export { XrefMappingField } from './components/fields/XrefMappingField';
-export { XrefPriceMappingField } from './components/fields/XrefPriceMappingField';
+// XrefPriceMappingField moved to opt-in subpath `@rchemist/listgrid/xref-price` (sweetalert2 peer).
 export { XrefPreferMappingField } from './components/fields/XrefPreferMappingField';
 export { XrefAvailableDateMappingField } from './components/fields/XrefAvailableDateMappingField';
 export { CheckboxField } from './components/fields/CheckboxField';
@@ -244,24 +244,24 @@ export { TagField } from './components/fields/TagField';
 export { BirthdayField } from './components/fields/BirthdayField';
 // UserField removed from this library
 export { LinkField } from './components/fields/LinkField';
-export { QrField } from './components/fields/QrField';
+// QrField moved to opt-in subpath `@rchemist/listgrid/qr` (qrcode.react peer).
 export { MessageViewField } from './components/fields/MessageViewField';
 export { ProfileField } from './components/fields/ProfileField';
 export { InlineMapField } from './components/fields/InlineMapField';
 export { CustomOptionField } from './components/fields/CustomOptionField';
 export { RuleField } from './components/fields/RuleField';
 export { SelectFieldRenderer } from './components/fields/SelectFieldRenderer';
-export { applyFullAddressFields as ApplyFullAddressFields } from './components/fields/ApplyFullAddressFields';
+// applyFullAddressFields / ApplyFullAddressFields moved to opt-in subpath
+// `@rchemist/listgrid/address` — it instantiates AddressMapField, which pulls
+// the kakao/daum address peers.
 
 // Content Asset Field
 export { ContentAssetField } from './components/fields/contentasset/ContentAssetField';
 export { ContentAssetItem } from './components/fields/contentasset/ContentAssetItem';
 
-// Address Fields
-export { AddressFieldView } from './components/fields/address/AddressFieldView';
-export { AddressMapField } from './components/fields/address/AddressMapField';
-export { PostCodeSelector } from './components/fields/address/PostCodeSelector';
-export { KakaoMap } from './components/fields/address/KakaoMap';
+// Address Fields moved to opt-in subpath `@rchemist/listgrid/address`
+// (react-kakao-maps-sdk + react-daum-postcode peers):
+// AddressFieldView, AddressMapField, PostCodeSelector, KakaoMap, ApplyFullAddressFields.
 
 // Rule Fields
 export { RuleFieldView } from './components/fields/rule/RuleFieldView';
@@ -277,7 +277,7 @@ export { ManyToOneListView } from './components/fields/view/ManyToOneListView';
 export { TreeSelectView } from './components/fields/view/TreeSelectView';
 export { LinkFieldView } from './components/fields/view/LinkFieldView';
 export { XrefMappingView } from './components/fields/view/XrefMappingView';
-export { XrefPriceMappingView as XrefPiceMappingView } from './components/fields/view/XrefPiceMappingView';
+// XrefPiceMappingView moved to opt-in subpath `@rchemist/listgrid/xref-price` (sweetalert2 peer).
 export { XrefPreferMappingView } from './components/fields/view/XrefPreferMappingView';
 export { XrefPriorityMappingView } from './components/fields/view/XrefPriorityMappingView';
 export { XrefAvailableDateMappingView } from './components/fields/view/XrefAvailableDateMappingView';
@@ -308,9 +308,8 @@ export { ShowNotifications } from './components/helper/ShowNotifications';
 // Revision Components
 export { RevisionField } from './components/revision/RevisionField';
 
-// API Components
-export { ApiSpecificationButton } from './components/api/ApiSpecificationButton';
-export { ViewApiSpecification } from './components/api/ViewApiSpecification';
+// API Components moved to opt-in subpath `@rchemist/listgrid/api-spec`
+// (sweetalert2 peer): ApiSpecificationButton, ViewApiSpecification.
 
 // Transfer Components
 export { DataExporter } from './transfer/DataExporter';
@@ -390,7 +389,7 @@ export type { AbstractDateFieldProps } from './components/fields/abstract/Abstra
 // same name as config/Config's CheckButtonValidationFieldProps (distinct shape).
 // The Config.ts one is the public one. The abstract version is used only for
 // class inheritance and is not re-exported to avoid ambiguity.
-export * from './components/fields/ApplyFullAddressFields';
+// ApplyFullAddressFields wildcard re-export moved to `@rchemist/listgrid/address`.
 export * from './components/fields/CustomOptionField';
 export * from './components/fields/view/CardManyToOneView';
 export * from './components/form/context/EntityFormThemeContext';

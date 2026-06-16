@@ -7,7 +7,7 @@
 **Push**: manual
 **다음 세션 정책**: Continue current session — 단일 라이브러리, phase 간 결합 강함
 <!-- polling: idle -->
-**Last updated**: 2026-06-16 08:25 (#1 peer 3분류 재선언 완료 — type-check+build green)
+**Last updated**: 2026-06-16 08:40 (#2 leaf subpath 추출 완료 — barrel서 qr/kakao/daum/sweetalert 도달 0, gate PASS)
 
 ## Goal
 `@rchemist/listgrid` main barrel이 optional peer를 static import해 consumer `next build`가 강제 실패하는 문제 해결. peer를 **코어=필수 / leaf=subpath opt-in / 코어내장=주입** 3분류로 명시 선언. 완료 시: 필수 peer만 설치한 consumer가 main barrel import로 `next build` 성공.
@@ -29,8 +29,8 @@
 | Phase | Status | Summary | Detail |
 |-------|--------|---------|--------|
 | 1: peer 재분류 & qrcode 고정 (package.json 계약) | ✅ | #1 완료 (build green) | 본 문서 §Phase 1 |
-| 2: leaf optional subpath 추출 | [~] In progress | QrField/address/api-spec/xref-price를 barrel에서 분리 | §Phase 2 |
-| 3: Excel 전송 주입 격리 | [ ] | configureDataTransfer 도입, DataTransferModal 리팩터 | §Phase 3 |
+| 2: leaf optional subpath 추출 | ✅ | qr/address/api-spec/xref-price 분리, gate PASS | [archive](progress-archive/phase-2-tasks.md) |
+| 3: Excel 전송 주입 격리 | [~] In progress | configureDataTransfer 도입, DataTransferModal 리팩터 | §Phase 3 |
 | 4: 빌드/문서/최종 검증 | [ ] | README·CHANGELOG·0.4.0 + acceptance grep 게이트 | §Phase 4 |
 
 ## Phase 1 — peer 재분류 & qrcode 고정 (package.json 계약) ✅
@@ -39,16 +39,31 @@
 
 **Handoff(P2)**: barrel은 아직 leaf/전송 export를 전부 보유 → build green 상태. P2는 leaf를 barrel에서 빼고 subpath로 옮긴다. exports map에 추가할 dist 경로는 tsc가 src/*.ts를 dist/*.js로 평면 출력함(현 dist/index.js 구조 참고).
 
-## Phase 2 — leaf optional subpath 추출 (진행 중)
+## Phase 2 — leaf optional subpath 추출 ✅
 
-목표: host가 인스턴스화하는 leaf 컴포넌트(QR/주소/api-spec/xref-price)를 main barrel에서 제거하고 subpath opt-in으로 격리. 완료 시 barrel 그래프에서 qrcode.react/kakao/daum/sweetalert 사라짐.
+- [x] **#2 leaf subpath 추출** ✅ 2026-06-16 · 4 신규 엔트리(qr/address/api-spec/xref-price) + barrel 8라인 제거 + exports 4개 · gate: barrel서 qr/kakao/daum/sweetalert 도달 0 · [detail](progress-archive/phase-2-tasks.md#2-leaf-subpath-추출--2026-06-16)
 
-- [ ] **#2 leaf subpath 추출** — barrel 제거 + 신규 엔트리 + exports
-  - **Changed files**: `src/listgrid/index.ts`, 신규 `src/qr.ts`·`src/address.ts`·`src/api-spec.ts`·`src/xref-price.ts`, `package.json`(exports)
-  - **What**: (a) barrel에서 제거: QrField / AddressFieldView·AddressMapField·KakaoMap·PostCodeSelector / ViewApiSpecification·ApiSpecificationButton + `components/api/Type` re-export 위치 검토 / XrefPriceMappingField·`XrefPriceMappingView as XrefPiceMappingView`. (b) 신규 엔트리 4개. (c) exports에 `./qr`·`./address`·`./api-spec`·`./xref-price` 추가. 다른 Xref 필드(Mapping/Prefer/AvailableDate)는 barrel 유지.
-  - **Reuse review**: New 엔트리는 단순 re-export barrel — 기존 `/form/SearchForm`·`/api`·`/misc` subpath 엔트리 패턴 그대로 모방(별도 추상화 불필요).
-  - **Verification**: `npm run build` green; `grep -REn "qrcode.react|react-kakao-maps-sdk|react-daum-postcode" dist/index.js dist/listgrid/index.js` = 0건; `ls dist/qr.js dist/address.js dist/api-spec.js dist/xref-price.js`; sweetalert2는 P3에서 ViewApiSpecification/xref가 빠지면 barrel서 0건 되는지 확인(전송 ViewApiSpec는 barrel서 제거됨)
-  - [Plan detail](./fix-plan.md#step-2--leaf-optional-을-main-barrel-에서-제거--subpath-신설)
+**Handoff(P3)**: barrel서 xlsx/file-saver만 남음(3 edge: `transfer/Provider/ExcelProvider`×2, `transfer/DataImporter`×1). 도달 경로 = ViewListGrid→ListGridHeader(`src/listgrid/components/list/ListGridHeader.tsx:9,49`)→`list/ui/DataTransferModal.tsx`(DataExporter/DataImporter static import). 기존 DI 참고: `src/listgrid/message.ts`·`api/index.ts`·`ui` (configure*/get* 쌍). `utils/lazy.ts`+`DynamicDataImporter`는 빌드 resolve 못 피함 → 주입으로 해결. 검증: `node documents/issues/7/.gate-trace.cjs` 가 xlsx/file-saver도 0 되어야 PASS(스크립트의 leaf 필터 확장 필요).
+
+## Phase 3 — Excel 전송 주입 격리 (진행 중)
+
+목표: 리스트 헤더 내장 전송 모달이 `DataExporter`/`DataImporter`를 static import하는 것을 끊고, host가 `@rchemist/listgrid/excel`에서 주입하도록 전환. 완료 시 barrel 그래프에서 xlsx/file-saver 사라짐.
+
+- [ ] **#3.1 전송 레지스트리 신규** — `configureDataTransfer`/`getDataTransfer`
+  - **Changed files**: 신규 `src/listgrid/transfer/registry.ts`(또는 transfer/index 내)
+  - **What**: 주입 컴포넌트 타입(`{ Exporter, Importer }`) + 모듈 스코프 레지스트리. 미등록 시 `getDataTransfer()===null`.
+  - **Reuse review** (gating): 기존 DI 패턴(`configureMessages`/`configureApiClient`/`UIProvider`) 모방 — 새 도메인(전송)이라 기존 레지스트리 재사용 불가, 동일 패턴 신규.
+  - **Verification**: `npm run type-check` green
+- [ ] **#3.2 DataTransferModal 주입화 + barrel 정리** — static import 제거
+  - **Changed files**: `src/listgrid/components/list/ui/DataTransferModal.tsx`, `src/listgrid/index.ts`
+  - **What**: DataExporter/DataImporter static import → `getDataTransfer()` 사용, 미등록 시 graceful(모달 미렌더/안내). barrel에서 xlsx/file-saver 경유 transfer export 제거(DataExporter/DataImporter/DataExportProcessor/DynamicDataImporter/DataImportProcessor/DataImportResultView/DataImportDescription/DataImportSample, `export * DataExportService`, `export * Provider/ExcelProvider`). 주입 API(`configureDataTransfer`/타입)와 peer-free `transfer/Type`은 barrel 유지.
+  - **Verification**: `npm run build` green; gate-trace에 xlsx/file-saver 추가 → barrel 도달 0
+- [ ] **#3.3 /excel 엔트리 + export** — `registerExcelDataTransfer`
+  - **Changed files**: 신규 `src/excel.ts`, `package.json`(exports `./excel`)
+  - **What**: DataExporter/DataImporter/DataExportService/ExcelProvider re-export + `registerExcelDataTransfer()` = `configureDataTransfer({Exporter:DataExporter,Importer:DataImporter})`.
+  - **Reuse review**: 단순 re-export+register 헬퍼 — P2 엔트리 패턴 모방.
+  - **Verification**: `npm run build` green; `ls dist/excel.js`; gate-trace 최종 PASS(모든 leaf+heavy peer 도달 0)
+  - [Plan detail](./fix-plan.md#step-3--전송excel-을-주입injection-으로-격리)
 
 ## Phase 3 — Excel 전송 주입 격리
 (진입 시 확장) Step 3: transfer 레지스트리(`configureDataTransfer`/`getDataTransfer`) 도입(기존 DI 패턴 모델), DataTransferModal에서 DataExporter/DataImporter static import 제거→레지스트리 사용(미등록 시 graceful), barrel에서 xlsx/file-saver 경유 transfer export 제거(주입 API는 export), src/excel.ts(+`registerExcelDataTransfer`) + `/excel` export. [Plan detail](./fix-plan.md#step-3--전송excel-을-주입injection-으로-격리)
