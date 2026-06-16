@@ -289,3 +289,34 @@ export { XrefPriceMappingView as XrefPiceMappingView } from './listgrid/componen
 3. `dist/index.js`/`dist/listgrid/index.js` 그래프에 leaf/전송 optional peer 문자열 부재 (Acceptance #5 grep 0건).
 4. `npm run build` + `npm test` 통과, 코어 기능(drag/select/icon/전송 등록 후 export) 회귀 없음.
 5. 위 Acceptance Scenario 가 실제 환경에서 green (필수).
+
+---
+
+## 구현 결과
+
+### 구현 완료일
+2026-06-16
+
+### 진행 방식
+PROGRESS 기반 (4 phase / 8 task / 8 commits, 브랜치 `fix/issue-7-optional-peer-barrel`) — [PROGRESS.md](./PROGRESS.md)
+
+### 수정된 파일
+| 파일 | 수정 내용 |
+|------|----------|
+| `package.json` | peer 3분류(@iconify/react·react-select·react-sortablejs→optional:false, sortablejs 필수 추가), qrcode.react→^3.0.0, sideEffects 추가, exports에 `./qr`·`./address`·`./api-spec`·`./xref-price`·`./excel` 추가, version 0.4.0 |
+| `src/listgrid/index.ts` | leaf 컴포넌트(QR/주소/api-spec/xref-price) + 전송 carrier export 제거, `configureDataTransfer`/`getDataTransfer` export 추가 |
+| `src/qr.ts`·`src/address.ts`·`src/api-spec.ts`·`src/xref-price.ts`·`src/excel.ts` | 신규 subpath opt-in 엔트리 (+`/excel`에 `registerExcelDataTransfer()`) |
+| `src/listgrid/transfer/registry.ts` | 신규 전송 주입 seam(`configureDataTransfer`/`getDataTransfer`/`DataTransferComponents`) |
+| `src/listgrid/components/list/ui/DataTransferModal.tsx` | DataExporter/DataImporter static import → `getDataTransfer()` 주입(미등록 시 graceful no-render) |
+| `CHANGELOG.md` | [0.4.0] BREAKING + import 매핑표 + Migration |
+| `README.md` | peer 섹션을 필수 vs opt-in subpath 표 + 전송 등록 예시로 갱신 |
+
+### 검증 결과
+- [x] 성공 기준 3 — main barrel 그래프(263 모듈, 동적 import 포함)에서 leaf/전송 optional peer 도달 **0** (`documents/issues/7/.gate-trace.cjs`)
+- [x] 성공 기준 2 — `/qr`·`/address`·`/api-spec`·`/xref-price`·`/excel` 엔트리 산출(`dist/*.js`+`.d.ts`), 모든 exports 타깃 존재, barrel 영향 없음
+- [x] 성공 기준 4 — `npm test` 923 passed, 코어 회귀 없음
+- [x] type-check / lint(0 errors) / format:check / build / test:coverage(임계 충족) 전부 green + ci.yml build-output 파일 확인
+- [ ] 성공 기준 1·5 — **실제 consumer(edustack 5) `next build` green**: npm publish(v0.4.0) 후 consumer 업그레이드 시 확인 필요 (라이브러리 측은 module-graph 게이트로 동등 검증 완료)
+
+---
+**구현 완료**: 2026-06-16 (배포 전 — main 병합 + `v0.4.0` 태그 push 대기)
