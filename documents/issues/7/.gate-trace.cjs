@@ -1,6 +1,8 @@
-// Transitive reachability gate: from dist/index.js, can we reach an import of a
-// heavy/leaf peer? After Phase 2, qr/kakao/daum/sweetalert must be unreachable.
-// xlsx-js-style/file-saver are still reachable until Phase 3 (expected).
+// Transitive reachability gate: starting from dist/index.js (the published main
+// barrel), can the module graph reach an import of ANY optional/heavy peer?
+// Follows both static `... from '...'` edges AND dynamic `import('...')` edges
+// (a consumer bundler must resolve dynamic imports at build time too).
+// After Phase 3 ALL of these peers must be UNREACHABLE from the main barrel.
 const fs = require('fs');
 const path = require('path');
 const root = path.join(__dirname, '..', '..', '..', 'dist');
@@ -23,32 +25,32 @@ function resolve(from, spec) {
   }
   return null;
 }
-function walk(f) {
+function edges(src) {
+  const specs = [];
+  let m;
+  const reStatic = /(?:import|export)[^;\n]*?from\s*['"]([^'"]+)['"]/g;
+  while ((m = reStatic.exec(src))) specs.push(m[1]);
+  const reBare = /(?:^|\n)\s*import\s*['"]([^'"]+)['"]/g;
+  while ((m = reBare.exec(src))) specs.push(m[1]);
+  const reDyn = /import\(\s*['"]([^'"]+)['"]\s*\)/g;
+  while ((m = reDyn.exec(src))) specs.push(m[1]);
+  return specs;
+}
+function walk(f, via) {
   if (seen.has(f) || !fs.existsSync(f)) return;
   seen.add(f);
   const src = fs.readFileSync(f, 'utf8');
-  const re = /(?:import|export)[^;\n]*?from\s*['"]([^'"]+)['"]/g;
-  let m;
-  while ((m = re.exec(src))) {
-    const spec = m[1];
-    if (peers.includes(spec)) hits.push(path.relative(root, f) + ' -> ' + spec);
+  for (const spec of edges(src)) {
+    if (peers.includes(spec)) hits.push(path.relative(root, f) + ' -> ' + spec + via);
     const r = resolve(f, spec);
-    if (r) walk(r);
-  }
-  const re2 = /(?:^|\n)\s*import\s*['"]([^'"]+)['"]/g;
-  while ((m = re2.exec(src))) {
-    if (peers.includes(m[1])) hits.push(path.relative(root, f) + ' -> ' + m[1]);
+    if (r) walk(r, '');
   }
 }
-walk(path.join(root, 'index.js'));
+walk(path.join(root, 'index.js'), '');
 console.log('modules scanned from main barrel:', seen.size);
-const leaf = hits.filter((h) => !/xlsx-js-style|file-saver/.test(h));
-const xlsx = hits.filter((h) => /xlsx-js-style|file-saver/.test(h));
-if (leaf.length) {
-  console.log('FAIL — leaf peer reachable from barrel:');
-  leaf.forEach((h) => console.log('  ' + h));
+if (hits.length) {
+  console.log('FAIL — peer reachable from main barrel:');
+  [...new Set(hits)].forEach((h) => console.log('  ' + h));
   process.exit(1);
 }
-console.log('PASS — qr/kakao/daum/sweetalert unreachable from main barrel.');
-console.log('xlsx/file-saver reachable (expected until Phase 3):', xlsx.length, 'edge(s)');
-xlsx.slice(0, 8).forEach((h) => console.log('  ' + h));
+console.log('PASS — no optional/heavy peer (qr/kakao/daum/sweetalert/xlsx/file-saver) reachable from main barrel.');

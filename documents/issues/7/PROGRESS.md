@@ -50,10 +50,7 @@
 목표: 리스트 헤더 내장 전송 모달이 `DataExporter`/`DataImporter`를 static import하는 것을 끊고, host가 `@rchemist/listgrid/excel`에서 주입하도록 전환. 완료 시 barrel 그래프에서 xlsx/file-saver 사라짐.
 
 - [x] **#3.1 전송 레지스트리 신규** ✅ 2026-06-16 · `src/listgrid/transfer/registry.ts` · configureDataTransfer/getDataTransfer + DataTransferComponents(ComponentType<any>, UIComponents 패턴) · type-check green
-- [ ] **#3.2 DataTransferModal 주입화 + barrel 정리** — static import 제거
-  - **Changed files**: `src/listgrid/components/list/ui/DataTransferModal.tsx`, `src/listgrid/index.ts`
-  - **What**: DataExporter/DataImporter static import → `getDataTransfer()` 사용, 미등록 시 graceful(모달 미렌더/안내). barrel에서 xlsx/file-saver 경유 transfer export 제거(DataExporter/DataImporter/DataExportProcessor/DynamicDataImporter/DataImportProcessor/DataImportResultView/DataImportDescription/DataImportSample, `export * DataExportService`, `export * Provider/ExcelProvider`). 주입 API(`configureDataTransfer`/타입)와 peer-free `transfer/Type`은 barrel 유지.
-  - **Verification**: `npm run build` green; gate-trace에 xlsx/file-saver 추가 → barrel 도달 0
+- [x] **#3.2 DataTransferModal 주입화 + barrel 정리** ✅ 2026-06-16 · DataTransferModal→`getDataTransfer()`(미등록 시 null 렌더) · barrel서 carrier 제거(DataExporter/Importer/Processor/Sample/Dynamic/ExcelProvider) + 레지스트리 export · peer-free(ResultView/Description/Processor/DataExportService/ExcelPasswordField/Type) 잔류 · gate PASS(263모듈, xlsx/file-saver 도달 0)
 - [ ] **#3.3 /excel 엔트리 + export** — `registerExcelDataTransfer`
   - **Changed files**: 신규 `src/excel.ts`, `package.json`(exports `./excel`)
   - **What**: DataExporter/DataImporter/DataExportService/ExcelProvider re-export + `registerExcelDataTransfer()` = `configureDataTransfer({Exporter:DataExporter,Importer:DataImporter})`.
@@ -72,6 +69,7 @@
 
 ## Progress notes
 - 2026-06-16: 4 phase로 분해 — package.json 계약(P1) → leaf subpath(P2) → 전송 주입(P3) → 문서/검증(P4). 각 phase 독립 빌드 검증 가능하도록 배치.
+- 2026-06-16 (사용자 결정): 마무리 = **이 브랜치를 main에 직접 병합**(PR 생략) 후 `package.json` 0.4.0 → **`v0.4.0` 태그 push**로 배포. 배포는 `.github/workflows/publish.yml`(태그 `v*` → npm publish, dist-tag latest, Trusted Publishing OIDC). 태그/푸시는 Phase 4 완료+확인 후.
 
 ## Completion Summary
 (종결 시 작성)

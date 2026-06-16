@@ -311,22 +311,24 @@ export { RevisionField } from './components/revision/RevisionField';
 // API Components moved to opt-in subpath `@rchemist/listgrid/api-spec`
 // (sweetalert2 peer): ApiSpecificationButton, ViewApiSpecification.
 
-// Transfer Components
-export { DataExporter } from './transfer/DataExporter';
-export { DataExportProcessor } from './transfer/DataExportProcessor';
-export { default as DynamicDataImporter } from './transfer/DynamicDataImporter';
+// Transfer Components (peer-free only).
+// The xlsx/file-saver-backed components moved to opt-in `@rchemist/listgrid/excel`:
+// DataExporter, DataImporter, DataExportProcessor, DataImportSample, DynamicDataImporter,
+// and the Excel provider (./transfer/Provider/ExcelProvider).
 export { DataImportResultView } from './transfer/DataImportResultView';
 export { DataImportDescription } from './transfer/DataImportDescription';
-export { DataImportSample } from './transfer/DataImportSample';
-export { DataImporter } from './transfer/DataImporter';
 export { DataImportProcessor } from './transfer/DataImportProcessor';
 
-// Transfer Services and Types
+// Data transfer injection seam — host registers the concrete Exporter/Importer
+// via `@rchemist/listgrid/excel` (registerExcelDataTransfer); the core list
+// header renders whatever is registered, so xlsx/file-saver stay out of this
+// barrel's graph.
+export { configureDataTransfer, getDataTransfer } from './transfer/registry';
+export type { DataTransferComponents } from './transfer/registry';
+
+// Transfer Services and Types (peer-free)
 export * from './transfer/DataExportService';
 export * from './transfer/Type';
-
-// Transfer Providers
-export * from './transfer/Provider/ExcelProvider';
 
 // Validations
 export * from './validations/Validation';
@@ -399,7 +401,7 @@ export * from './config/CardSubCollectionField';
 export * from './config/TableSubCollectionField';
 export * from './config/EntityFormButton';
 export * from './config/InlineSubCollectionField';
-export * from './transfer/DynamicDataImporter';
+// DynamicDataImporter moved to opt-in `@rchemist/listgrid/excel` (dynamic-imports xlsx via DataImporter).
 export * from './transfer/ExcelPasswordField';
 
 // Styling helpers — `cn` (tailwind-merge + clsx) and the per-slot
