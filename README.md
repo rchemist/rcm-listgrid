@@ -34,21 +34,45 @@ import '@rchemist/listgrid/styles.css';
 
 ### Peer dependencies
 
-**Required**: `react >= 18`, `react-dom >= 18`, `@tabler/icons-react`, `@headlessui/react`
+The main entry (`@rchemist/listgrid`) only pulls the **required** peers below — install
+these and the package builds. Heavier, feature-specific peers are isolated behind
+**opt-in subpaths**: a consumer that imports only the main entry never has to install
+them, so `next build` no longer fails on uninstalled optional peers.
 
-**Optional** (install only if you use the relevant feature):
+**Required** (used by the core list/form renderer — the main barrel imports these):
 
-| Feature | Peer |
-|---|---|
-| Next.js app-router adapter (`@rchemist/listgrid/next`) | `next`, `nuqs` |
-| Alternative icon set | `@iconify/react` |
-| Rich select fields | `react-select` |
-| Drag-sort rows | `react-sortablejs`, `sortablejs` |
-| QR code rendering | `qrcode.react` |
-| Kakao Map fields | `react-kakao-maps-sdk` |
-| Korean postcode lookup | `react-daum-postcode` |
-| Excel export (styled) | `xlsx-js-style`, `file-saver` |
-| Confirmation dialogs | `sweetalert2`, `sweetalert2-react-content` |
+`react >= 18`, `react-dom >= 18`, `@headlessui/react`, `@tabler/icons-react`,
+`@iconify/react`, `react-select`, `react-sortablejs`, `sortablejs`, `date-fns`
+
+**Opt-in subpaths** (install the peer only if you import that subpath):
+
+| Import from | Provides | Required peer |
+|---|---|---|
+| `@rchemist/listgrid/next` | Next.js app-router adapter | `next`, `nuqs` |
+| `@rchemist/listgrid/qr` | `QrField` | `qrcode.react@^3` |
+| `@rchemist/listgrid/address` | `AddressFieldView`, `AddressMapField`, `KakaoMap`, `PostCodeSelector`, `ApplyFullAddressFields` | `react-kakao-maps-sdk`, `react-daum-postcode` |
+| `@rchemist/listgrid/api-spec` | `ViewApiSpecification`, `ApiSpecificationButton` | `sweetalert2`, `sweetalert2-react-content` |
+| `@rchemist/listgrid/xref-price` | `XrefPriceMappingField` | `sweetalert2`, `sweetalert2-react-content` |
+| `@rchemist/listgrid/excel` | Excel export/import + `registerExcelDataTransfer()` | `xlsx-js-style`, `file-saver` |
+
+```ts
+// opt into the QR field — requires qrcode.react@^3
+import { QrField } from '@rchemist/listgrid/qr';
+```
+
+> **qrcode.react**: only v3 is supported. `QrField` uses the default export, which v4 removed.
+
+#### Enabling list export / import
+
+The list header's export/import actions are **injected**, so the core bundle never forces
+`xlsx-js-style` / `file-saver` on consumers that don't use them. Register the Excel
+implementation once at app bootstrap (otherwise the export/import modals simply don't render):
+
+```ts
+import { registerExcelDataTransfer } from '@rchemist/listgrid/excel';
+registerExcelDataTransfer(); // requires xlsx-js-style + file-saver
+// or wire your own: configureDataTransfer({ Exporter, Importer })
+```
 
 ---
 

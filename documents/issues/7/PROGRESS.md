@@ -57,14 +57,8 @@
 
 목표: 사용자 대면 문서 + 버전 + acceptance 마무리. (실제 consumer next build는 별도 repo 필요 → 라이브러리 측 gate로 대체 검증 + 문서화.)
 
-- [ ] **#4.1 버전 0.4.0 + CHANGELOG** — breaking change 명시
-  - **Changed files**: `package.json`(version 0.3.20→0.4.0), `CHANGELOG.md`
-  - **What**: peer 재분류 / leaf+전송 subpath 이전 / qrcode v3 고정을 breaking으로 기록. import 매핑표(무엇이 어느 subpath로).
-  - **Verification**: `node -e "require('./package.json').version" === 0.4.0`
-- [ ] **#4.2 README peer 매트릭스 + subpath 사용법** — 필수 vs opt-in
-  - **Changed files**: `README.md`
-  - **What**: 필수 peer(react/dom, @headlessui, @tabler, @iconify, react-select, react-sortablejs+sortablejs, date-fns) vs 기능별 opt-in peer 표 + subpath import 예시 + `registerExcelDataTransfer()` 예시.
-  - **Verification**: 리뷰(수동)
+- [x] **#4.1 버전 0.4.0 + CHANGELOG** ✅ 2026-06-16 · package.json 0.3.20→0.4.0, CHANGELOG [0.4.0]에 BREAKING(peer 재분류/subpath 이전/qrcode v3) + import 매핑표 + Migration
+- [x] **#4.2 README peer 매트릭스 + subpath 사용법** ✅ 2026-06-16 · 필수 vs opt-in subpath 표 + qr import 예시 + registerExcelDataTransfer 예시로 교체
 - [ ] **#4.3 최종 acceptance + fix-plan 구현결과 주입** — 전체 검증
   - **Changed files**: `documents/issues/7/fix-plan.md`(## 구현 결과)
   - **What**: `npm run type-check && npm run lint && npm run format:check && npm test && npm run build` 전부 green + gate PASS 재확인. fix-plan에 구현 결과 섹션 주입.

@@ -2,6 +2,62 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.4.0] - 2026-06-16
+
+optional peer 들을 main barrel 이 **static import** 해, consumer(Next.js)가 해당 peer 를
+설치하지 않으면 `next build` 가 `Module not found` 로 강제 실패하던 문제(#7)를 해결.
+peer 를 **코어=필수 / leaf=subpath opt-in / 코어내장=주입** 으로 명시 재분류했습니다.
+이제 **필수 peer 만 설치한 consumer 도 main barrel import 로 빌드가 통과**합니다.
+
+### Changed (BREAKING)
+
+- **peer 재분류**: 코어 그래프가 항상 사용하는 peer 를 `optional: false`(필수)로 전환 —
+  `@iconify/react`, `react-select`, `react-sortablejs`. 추가로 `react-sortablejs` 의
+  peer 인 `sortablejs`(`^1.15.0`)를 필수 peer 로 명시. 이들을 설치하지 않으면 빌드 실패가
+  정상 동작입니다(계약을 정직하게 만든 것). `date-fns` 는 기존대로 필수.
+- **`qrcode.react` peer range 를 `^3.0.0` 으로 고정** (기존 `^3 || ^4`). `QrField` 는
+  default export(`import QRCode from 'qrcode.react'`)를 쓰는데 v4 는 default 를 제거해
+  실질적으로 v3 만 호환했습니다. v4 를 쓰던 consumer 는 v3 로 다운그레이드가 필요합니다.
+- **leaf optional 컴포넌트를 main barrel 에서 제거 → subpath opt-in 으로 이전**. 아래
+  컴포넌트를 `@rchemist/listgrid` 에서 직접 import 하던 host 는 import 경로를 바꿔야 합니다:
+
+  | 이전 (main barrel) | 변경 후 (subpath) | 필요한 optional peer |
+  |---|---|---|
+  | `QrField` | `@rchemist/listgrid/qr` | `qrcode.react@^3` |
+  | `AddressFieldView`, `AddressMapField`, `KakaoMap`, `PostCodeSelector`, `ApplyFullAddressFields` | `@rchemist/listgrid/address` | `react-kakao-maps-sdk`, `react-daum-postcode` |
+  | `ViewApiSpecification`, `ApiSpecificationButton` | `@rchemist/listgrid/api-spec` | `sweetalert2`, `sweetalert2-react-content` |
+  | `XrefPriceMappingField`, `XrefPiceMappingView` | `@rchemist/listgrid/xref-price` | `sweetalert2`, `sweetalert2-react-content` |
+  | `DataExporter`, `DataImporter`, `DataExportProcessor`, `DataImportSample`, `DynamicDataImporter`, `ExcelDownload`(Provider) | `@rchemist/listgrid/excel` | `xlsx-js-style`, `file-saver` |
+
+  (다른 Xref 필드 `XrefMappingField`/`XrefPreferMappingField`/`XrefAvailableDateMappingField`,
+  그리고 peer-free 인 `DataImportResultView`/`DataImportDescription`/`DataImportProcessor`/
+  `DataExportService`/`ExcelPasswordField`/transfer `Type` 은 그대로 main barrel 에 남습니다.)
+
+- **데이터 전송(export/import) 은 주입 방식으로 전환**. 리스트 헤더 내장 전송 모달은 더 이상
+  `xlsx`/`file-saver` 를 강제로 끌어오지 않습니다. host 가 부트스트랩에서 한 번 등록해야
+  export/import UI 가 동작합니다(미등록 시 해당 모달은 렌더되지 않음):
+
+  ```ts
+  import { registerExcelDataTransfer } from '@rchemist/listgrid/excel';
+  registerExcelDataTransfer(); // xlsx-js-style + file-saver 설치 전제
+  // 또는 직접: configureDataTransfer({ Exporter, Importer })
+  ```
+
+### Added
+
+- subpath exports: `./qr`, `./address`, `./api-spec`, `./xref-price`, `./excel`.
+- `configureDataTransfer` / `getDataTransfer` (전송 주입 seam, main barrel export) + `DataTransferComponents` 타입.
+- `@rchemist/listgrid/excel` 의 `registerExcelDataTransfer()` 헬퍼.
+- `package.json` 에 `sideEffects: ["**/*.css", "*.css"]` 추가 (tree-shaking 방어선).
+
+### Migration
+
+- 필수 peer 설치 확인: `react`, `react-dom`, `@headlessui/react`, `@tabler/icons-react`,
+  `@iconify/react`, `react-select`, `react-sortablejs`, `sortablejs`, `date-fns`(, `next`/`nuqs` 사용 시).
+- 위 표의 컴포넌트를 쓰던 곳은 해당 subpath 로 import 변경 + 그 기능의 optional peer 설치.
+- 전송 기능을 쓰면 부트스트랩에 `registerExcelDataTransfer()` 추가.
+- `qrcode.react` 는 v3 로 맞춤.
+
 ## [0.3.19] - 2026-06-03
 
 ### Fixed
