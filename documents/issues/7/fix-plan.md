@@ -100,7 +100,7 @@ Module not found: Can't resolve 'sortablejs'
 | 전송 주입점 | `src/listgrid/transfer/` 에 `configureDataTransfer`/레지스트리, `ListGridHeader`→레지스트리 렌더 | 미등록 시 export/import UI 숨김, 등록 시 동작 | **YES — 코어 리스트 hot-path** |
 | `@rchemist/listgrid/excel` 엔트리 | `DataExporter`/`DataImporter` + `registerDataTransfer()` re-export | host 등록 후 export/import 동작 | no |
 | ManyToOneField / ViewListGrid / FieldRenderer | 코드 변경 없음(필수 peer 유지) | 회귀: 리스트 drag·M:1 select·아이콘 렌더 | **YES — 코어** |
-| 문서/마이그레이션 | README·CHANGELOG·MIGRATION 작성, 버전 0.4.0 | 리뷰 | no |
+| 문서/마이그레이션 | README·CHANGELOG·MIGRATION 작성, 버전 0.3.21 | 리뷰 | no |
 | consumer(edustack 5) | 필수 peer 설치 + 사용하는 subpath peer 설치 + 전송 등록 | **실제 `next build` green** | **YES — 정의상 DoD** |
 
 ---
@@ -241,7 +241,7 @@ export { XrefPriceMappingView as XrefPiceMappingView } from './listgrid/componen
 
 - `tsconfig.build.json`: `src/**` 전체 컴파일이면 신규 엔트리 자동 포함. include 범위 확인.
 - `README.md`: peer 설치 매트릭스(필수 vs 기능별 opt-in), subpath import 예시, 전송 등록 예시.
-- `CHANGELOG.md` + `documents/issues/7/`: breaking change(QR/주소/api-spec/xref-price/전송 import 경로 변경) 명시, **minor bump 0.4.0**.
+- `CHANGELOG.md` + `documents/issues/7/`: breaking change(QR/주소/api-spec/xref-price/전송 import 경로 변경) 명시, **0.3.x patch 0.3.21** (프로젝트 컨벤션상 0.3.x 라인 유지).
 
 ---
 
@@ -263,7 +263,7 @@ export { XrefPriceMappingView as XrefPiceMappingView } from './listgrid/componen
 
 - **Test data needed**: 별도 DB 불필요(빌드/번들 차원 문제). consumer 재현용 최소 Next.js 앱 1개 + 위 peer 설치 매트릭스.
 - **Temporal**: 날짜 의존 없음.
-- **Needs restart/redeploy to take effect**: 라이브러리 재빌드(`npm run build`) → `npm publish`(0.4.0) → consumer `npm i @rchemist/listgrid@0.4.0` + peer 재설치 후 재빌드. 캐시(`.next`, node_modules) 정리 권장.
+- **Needs restart/redeploy to take effect**: 라이브러리 재빌드(`npm run build`) → `npm publish`(0.3.21) → consumer `npm i @rchemist/listgrid@0.3.21` + peer 재설치 후 재빌드. 캐시(`.next`, node_modules) 정리 권장.
 - **Target env / DB**: consumer = edustack 5 SPA(Next.js 15/React 19). DB 무관.
 
 ## Validation and Test Plan
@@ -276,7 +276,7 @@ export { XrefPriceMappingView as XrefPiceMappingView } from './listgrid/componen
 
 ## Risk Factors and Mitigation
 
-- **Risk**: breaking change — 기존 consumer 가 main barrel 에서 QR/주소/api-spec/xref-price/전송 컴포넌트를 import 중. **Mitigation**: 명시적 MIGRATION 문서 + minor bump(0.4.0) + 명확한 import 매핑표. 가능하면 deprecation 안내.
+- **Risk**: breaking change — 기존 consumer 가 main barrel 에서 QR/주소/api-spec/xref-price/전송 컴포넌트를 import 중. **Mitigation**: 명시적 MIGRATION 문서 + 0.3.21(0.3.x 유지) + 명확한 import 매핑표. 가능하면 deprecation 안내.
 - **Risk**: 전송 주입 전환으로 리스트 헤더의 export/import 버튼 동작 회귀. **Mitigation**: 미등록 시 graceful(숨김/안내), 등록 시 기존과 동일 props. DataTransferModal 회귀 테스트.
 - **Risk**: `sideEffects` 오설정으로 CSS 누락. **Mitigation**: `**/*.css` 명시 + 빌드 후 `dist/styles.css` 및 import 확인.
 - **Risk**: `sortablejs` peer 신규 추가로 기존 정상 consumer 가 미설치 경고. **Mitigation**: README 필수 peer 목록에 포함, react-sortablejs 사용자는 사실상 이미 보유.
@@ -303,12 +303,12 @@ PROGRESS 기반 (4 phase / 8 task / 8 commits, 브랜치 `fix/issue-7-optional-p
 ### 수정된 파일
 | 파일 | 수정 내용 |
 |------|----------|
-| `package.json` | peer 3분류(@iconify/react·react-select·react-sortablejs→optional:false, sortablejs 필수 추가), qrcode.react→^3.0.0, sideEffects 추가, exports에 `./qr`·`./address`·`./api-spec`·`./xref-price`·`./excel` 추가, version 0.4.0 |
+| `package.json` | peer 3분류(@iconify/react·react-select·react-sortablejs→optional:false, sortablejs 필수 추가), qrcode.react→^3.0.0, sideEffects 추가, exports에 `./qr`·`./address`·`./api-spec`·`./xref-price`·`./excel` 추가, version 0.3.21 |
 | `src/listgrid/index.ts` | leaf 컴포넌트(QR/주소/api-spec/xref-price) + 전송 carrier export 제거, `configureDataTransfer`/`getDataTransfer` export 추가 |
 | `src/qr.ts`·`src/address.ts`·`src/api-spec.ts`·`src/xref-price.ts`·`src/excel.ts` | 신규 subpath opt-in 엔트리 (+`/excel`에 `registerExcelDataTransfer()`) |
 | `src/listgrid/transfer/registry.ts` | 신규 전송 주입 seam(`configureDataTransfer`/`getDataTransfer`/`DataTransferComponents`) |
 | `src/listgrid/components/list/ui/DataTransferModal.tsx` | DataExporter/DataImporter static import → `getDataTransfer()` 주입(미등록 시 graceful no-render) |
-| `CHANGELOG.md` | [0.4.0] BREAKING + import 매핑표 + Migration |
+| `CHANGELOG.md` | [0.3.21] BREAKING + import 매핑표 + Migration |
 | `README.md` | peer 섹션을 필수 vs opt-in subpath 표 + 전송 등록 예시로 갱신 |
 
 ### 검증 결과
@@ -316,7 +316,7 @@ PROGRESS 기반 (4 phase / 8 task / 8 commits, 브랜치 `fix/issue-7-optional-p
 - [x] 성공 기준 2 — `/qr`·`/address`·`/api-spec`·`/xref-price`·`/excel` 엔트리 산출(`dist/*.js`+`.d.ts`), 모든 exports 타깃 존재, barrel 영향 없음
 - [x] 성공 기준 4 — `npm test` 923 passed, 코어 회귀 없음
 - [x] type-check / lint(0 errors) / format:check / build / test:coverage(임계 충족) 전부 green + ci.yml build-output 파일 확인
-- [ ] 성공 기준 1·5 — **실제 consumer(edustack 5) `next build` green**: npm publish(v0.4.0) 후 consumer 업그레이드 시 확인 필요 (라이브러리 측은 module-graph 게이트로 동등 검증 완료)
+- [ ] 성공 기준 1·5 — **실제 consumer(edustack 5) `next build` green**: npm publish(v0.3.21) 후 consumer 업그레이드 시 확인 필요 (라이브러리 측은 module-graph 게이트로 동등 검증 완료)
 
 ---
-**구현 완료**: 2026-06-16 (배포 전 — main 병합 + `v0.4.0` 태그 push 대기)
+**구현 완료**: 2026-06-16 (배포 전 — main 병합 + `v0.3.21` 태그 push 대기)

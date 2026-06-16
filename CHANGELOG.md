@@ -2,7 +2,7 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
-## [0.4.0] - 2026-06-16
+## [0.3.21] - 2026-06-16
 
 optional peer 들을 main barrel 이 **static import** 해, consumer(Next.js)가 해당 peer 를
 설치하지 않으면 `next build` 가 `Module not found` 로 강제 실패하던 문제(#7)를 해결.

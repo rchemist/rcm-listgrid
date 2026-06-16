@@ -7,7 +7,7 @@
 **Push**: manual
 **다음 세션 정책**: Continue current session — 단일 라이브러리, phase 간 결합 강함
 <!-- polling: idle -->
-**Last updated**: 2026-06-16 09:05 (전체 완료 — Phase 1~4, 8 commits, 전체 품질 게이트 green, fix-plan 구현결과 주입. 배포(main 병합+v0.4.0 태그) 대기)
+**Last updated**: 2026-06-16 09:05 (전체 완료 — Phase 1~4, 8 commits, 전체 품질 게이트 green, fix-plan 구현결과 주입. 배포(main 병합+v0.3.21 태그) 대기)
 
 ## Goal
 `@rchemist/listgrid` main barrel이 optional peer를 static import해 consumer `next build`가 강제 실패하는 문제 해결. peer를 **코어=필수 / leaf=subpath opt-in / 코어내장=주입** 3분류로 명시 선언. 완료 시: 필수 peer만 설치한 consumer가 main barrel import로 `next build` 성공.
@@ -31,7 +31,7 @@
 | 1: peer 재분류 & qrcode 고정 (package.json 계약) | ✅ | #1 완료 (build green) | 본 문서 §Phase 1 |
 | 2: leaf optional subpath 추출 | ✅ | qr/address/api-spec/xref-price 분리, gate PASS | [archive](progress-archive/phase-2-tasks.md) |
 | 3: Excel 전송 주입 격리 | ✅ | configureDataTransfer 도입, gate PASS(모든 peer 도달 0) | [archive](progress-archive/phase-3-tasks.md) |
-| 4: 빌드/문서/최종 검증 | ✅ | 0.4.0+CHANGELOG+README, 전체 게이트 green | §Phase 4 |
+| 4: 빌드/문서/최종 검증 | ✅ | 0.3.21+CHANGELOG+README, 전체 게이트 green | §Phase 4 |
 
 ## Phase 1 — peer 재분류 & qrcode 고정 (package.json 계약) ✅
 
@@ -51,13 +51,13 @@
 - [x] **#3.2 DataTransferModal 주입화 + barrel 정리** ✅ `025c423` · 모달 주입화 + carrier 제거 · gate PASS(263모듈, 모든 peer 0) · [detail](progress-archive/phase-3-tasks.md#32-datatransfermodal-주입화--barrel-정리--2026-06-16)
 - [x] **#3.3 /excel 엔트리 + export** ✅ 2026-06-16 · `src/excel.ts` + exports `./excel` + `registerExcelDataTransfer()` · dist/excel.js 생성, gate PASS, 923 tests green · [detail](progress-archive/phase-3-tasks.md#33-excel-엔트리--export--2026-06-16)
 
-**Handoff(P4)**: 코드 변경 끝. barrel에서 모든 optional/heavy peer 도달 0(`node documents/issues/7/.gate-trace.cjs`), 923 tests·lint 0err·format clean. P4는 문서/버전/최종 acceptance만. 신규 공개 subpath: `/qr`,`/address`,`/api-spec`,`/xref-price`,`/excel`. breaking: 해당 컴포넌트들을 main barrel서 import하던 host는 subpath로, 전송은 `registerExcelDataTransfer()` 등록 필요. 마무리=main 직접 병합+v0.4.0 태그(사용자 결정).
+**Handoff(P4)**: 코드 변경 끝. barrel에서 모든 optional/heavy peer 도달 0(`node documents/issues/7/.gate-trace.cjs`), 923 tests·lint 0err·format clean. P4는 문서/버전/최종 acceptance만. 신규 공개 subpath: `/qr`,`/address`,`/api-spec`,`/xref-price`,`/excel`. breaking: 해당 컴포넌트들을 main barrel서 import하던 host는 subpath로, 전송은 `registerExcelDataTransfer()` 등록 필요. 마무리=main 직접 병합+v0.3.21 태그(사용자 결정).
 
 ## Phase 4 — 빌드/문서/최종 검증 (진행 중)
 
 목표: 사용자 대면 문서 + 버전 + acceptance 마무리. (실제 consumer next build는 별도 repo 필요 → 라이브러리 측 gate로 대체 검증 + 문서화.)
 
-- [x] **#4.1 버전 0.4.0 + CHANGELOG** ✅ 2026-06-16 · package.json 0.3.20→0.4.0, CHANGELOG [0.4.0]에 BREAKING(peer 재분류/subpath 이전/qrcode v3) + import 매핑표 + Migration
+- [x] **#4.1 버전 0.3.21 + CHANGELOG** ✅ 2026-06-16 · package.json 0.3.20→0.3.21, CHANGELOG [0.3.21]에 BREAKING(peer 재분류/subpath 이전/qrcode v3) + import 매핑표 + Migration
 - [x] **#4.2 README peer 매트릭스 + subpath 사용법** ✅ 2026-06-16 · 필수 vs opt-in subpath 표 + qr import 예시 + registerExcelDataTransfer 예시로 교체
 - [x] **#4.3 최종 acceptance + fix-plan 구현결과 주입** ✅ 2026-06-16 · type-check/lint(0err)/format/build/test:coverage(18.19%/15.43%/18.7%/17.99% ≥ 임계) + gate(263모듈 peer 0) + exports 타깃·ci build-output 전부 확인 · fix-plan에 ## 구현 결과 주입
 
@@ -65,14 +65,14 @@
 (진입 시 확장) Step 3: transfer 레지스트리(`configureDataTransfer`/`getDataTransfer`) 도입(기존 DI 패턴 모델), DataTransferModal에서 DataExporter/DataImporter static import 제거→레지스트리 사용(미등록 시 graceful), barrel에서 xlsx/file-saver 경유 transfer export 제거(주입 API는 export), src/excel.ts(+`registerExcelDataTransfer`) + `/excel` export. [Plan detail](./fix-plan.md#step-3--전송excel-을-주입injection-으로-격리)
 
 ## Phase 4 — 빌드/문서/최종 검증
-(진입 시 확장) Step 5: README peer 매트릭스+subpath 예시+전송 등록 예시, CHANGELOG + version 0.4.0, 최종 `npm run build && npm test` + acceptance grep 게이트(#5). [Plan detail](./fix-plan.md#step-5--빌드문서)
+(진입 시 확장) Step 5: README peer 매트릭스+subpath 예시+전송 등록 예시, CHANGELOG + version 0.3.21, 최종 `npm run build && npm test` + acceptance grep 게이트(#5). [Plan detail](./fix-plan.md#step-5--빌드문서)
 
 ## Open Questions
 (없음 — 전략/qrcode 결정 완료)
 
 ## Progress notes
 - 2026-06-16: 4 phase로 분해 — package.json 계약(P1) → leaf subpath(P2) → 전송 주입(P3) → 문서/검증(P4). 각 phase 독립 빌드 검증 가능하도록 배치.
-- 2026-06-16 (사용자 결정): 마무리 = **이 브랜치를 main에 직접 병합**(PR 생략) 후 `package.json` 0.4.0 → **`v0.4.0` 태그 push**로 배포. 배포는 `.github/workflows/publish.yml`(태그 `v*` → npm publish, dist-tag latest, Trusted Publishing OIDC). 태그/푸시는 Phase 4 완료+확인 후.
+- 2026-06-16 (사용자 결정): 마무리 = **이 브랜치를 main에 직접 병합**(PR 생략) 후 `package.json` 0.3.21 → **`v0.3.21` 태그 push**로 배포. 배포는 `.github/workflows/publish.yml`(태그 `v*` → npm publish, dist-tag latest, Trusted Publishing OIDC). 태그/푸시는 Phase 4 완료+확인 후.
 
 ## Completion Summary
-이슈 #7 해결 완료. main barrel이 optional peer를 static import해 consumer `next build`가 강제 실패하던 근본 원인을, peer **3분류(코어=필수 / leaf=subpath opt-in / 코어내장=주입)** 로 재설계해 제거. 8 commits / 4 phase / 8 task. 핵심 결과: main barrel 모듈 그래프(263개, 동적 import 포함)에서 qrcode.react·react-kakao-maps-sdk·react-daum-postcode·sweetalert2(+content)·xlsx-js-style·file-saver **도달 0건**(`.gate-trace.cjs`). 신규 subpath `/qr`·`/address`·`/api-spec`·`/xref-price`·`/excel` + 전송 주입 seam(`configureDataTransfer`/`registerExcelDataTransfer`). qrcode.react v3 고정. 전체 품질 게이트(type-check/lint/format/test:coverage 923 passed/build) green. version 0.4.0(BREAKING). 남은 것: main 직접 병합 + `v0.4.0` 태그 push로 npm 배포(사용자 결정, 확인 후 진행) → consumer(edustack 5)에서 실제 `next build` green 확인.
+이슈 #7 해결 완료. main barrel이 optional peer를 static import해 consumer `next build`가 강제 실패하던 근본 원인을, peer **3분류(코어=필수 / leaf=subpath opt-in / 코어내장=주입)** 로 재설계해 제거. 8 commits / 4 phase / 8 task. 핵심 결과: main barrel 모듈 그래프(263개, 동적 import 포함)에서 qrcode.react·react-kakao-maps-sdk·react-daum-postcode·sweetalert2(+content)·xlsx-js-style·file-saver **도달 0건**(`.gate-trace.cjs`). 신규 subpath `/qr`·`/address`·`/api-spec`·`/xref-price`·`/excel` + 전송 주입 seam(`configureDataTransfer`/`registerExcelDataTransfer`). qrcode.react v3 고정. 전체 품질 게이트(type-check/lint/format/test:coverage 923 passed/build) green. version 0.3.21(BREAKING). 남은 것: main 직접 병합 + `v0.3.21` 태그 push로 npm 배포(사용자 결정, 확인 후 진행) → consumer(edustack 5)에서 실제 `next build` green 확인.
