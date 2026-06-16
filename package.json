@@ -19,6 +19,10 @@
   "license": "Apache-2.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": [
+    "**/*.css",
+    "*.css"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -103,13 +107,14 @@
     "file-saver": "^2.0.5",
     "next": ">=14",
     "nuqs": ">=2.0.0",
-    "qrcode.react": "^3.0.0 || ^4.0.0",
+    "qrcode.react": "^3.0.0",
     "react": ">=18",
     "react-daum-postcode": "^3.0.0",
     "react-dom": ">=18",
     "react-kakao-maps-sdk": "^1.0.0",
     "react-select": "^5.0.0",
     "react-sortablejs": "^6.0.0 || ^7.0.0",
+    "sortablejs": "^1.15.0",
     "sweetalert2": "^11.0.0",
     "sweetalert2-react-content": "^5.0.0",
     "xlsx-js-style": "^1.2.0"
@@ -128,13 +133,13 @@
       "optional": true
     },
     "@iconify/react": {
-      "optional": true
+      "optional": false
     },
     "react-select": {
-      "optional": true
+      "optional": false
     },
     "react-sortablejs": {
-      "optional": true
+      "optional": false
     },
     "qrcode.react": {
       "optional": true
