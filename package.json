@@ -68,6 +68,10 @@
       "types": "./dist/xref-price.d.ts",
       "default": "./dist/xref-price.js"
     },
+    "./excel": {
+      "types": "./dist/excel.d.ts",
+      "default": "./dist/excel.js"
+    },
     "./styles.css": "./dist/styles.css",
     "./styles/tokens.css": "./dist/styles/tokens.css",
     "./styles/primitives.css": "./dist/styles/primitives.css",

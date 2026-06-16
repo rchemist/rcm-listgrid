@@ -33,7 +33,9 @@ export const DataTransferModals: React.FC<{
     <>
       {openDownload && (
         <Exporter
-          {...(dataTransferConfig?.export !== undefined ? { config: dataTransferConfig.export } : {})}
+          {...(dataTransferConfig?.export !== undefined
+            ? { config: dataTransferConfig.export }
+            : {})}
           searchForm={searchForm}
           fileName={dataTransferConfig?.getExportFileName() ?? 'export'}
           onClose={() => setOpenDownload(false)}
@@ -41,7 +43,9 @@ export const DataTransferModals: React.FC<{
       )}
       {openUpload && (
         <Importer
-          {...(dataTransferConfig?.import !== undefined ? { config: dataTransferConfig.import } : {})}
+          {...(dataTransferConfig?.import !== undefined
+            ? { config: dataTransferConfig.import }
+            : {})}
           sampleFileName={`${title}_Sample`}
           onClose={(result: boolean) => {
             setOpenUpload(false);

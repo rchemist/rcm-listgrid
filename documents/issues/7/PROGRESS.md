@@ -7,7 +7,7 @@
 **Push**: manual
 **다음 세션 정책**: Continue current session — 단일 라이브러리, phase 간 결합 강함
 <!-- polling: idle -->
-**Last updated**: 2026-06-16 08:40 (#2 leaf subpath 추출 완료 — barrel서 qr/kakao/daum/sweetalert 도달 0, gate PASS)
+**Last updated**: 2026-06-16 08:55 (Phase 3 완료 — 전송 주입화, barrel서 모든 optional/heavy peer 도달 0, 923 tests green)
 
 ## Goal
 `@rchemist/listgrid` main barrel이 optional peer를 static import해 consumer `next build`가 강제 실패하는 문제 해결. peer를 **코어=필수 / leaf=subpath opt-in / 코어내장=주입** 3분류로 명시 선언. 완료 시: 필수 peer만 설치한 consumer가 main barrel import로 `next build` 성공.
@@ -30,8 +30,8 @@
 |-------|--------|---------|--------|
 | 1: peer 재분류 & qrcode 고정 (package.json 계약) | ✅ | #1 완료 (build green) | 본 문서 §Phase 1 |
 | 2: leaf optional subpath 추출 | ✅ | qr/address/api-spec/xref-price 분리, gate PASS | [archive](progress-archive/phase-2-tasks.md) |
-| 3: Excel 전송 주입 격리 | [~] In progress | configureDataTransfer 도입, DataTransferModal 리팩터 | §Phase 3 |
-| 4: 빌드/문서/최종 검증 | [ ] | README·CHANGELOG·0.4.0 + acceptance grep 게이트 | §Phase 4 |
+| 3: Excel 전송 주입 격리 | ✅ | configureDataTransfer 도입, gate PASS(모든 peer 도달 0) | [archive](progress-archive/phase-3-tasks.md) |
+| 4: 빌드/문서/최종 검증 | [~] In progress | README·CHANGELOG·0.4.0 + acceptance | §Phase 4 |
 
 ## Phase 1 — peer 재분류 & qrcode 고정 (package.json 계약) ✅
 
@@ -45,18 +45,31 @@
 
 **Handoff(P3)**: barrel서 xlsx/file-saver만 남음(3 edge: `transfer/Provider/ExcelProvider`×2, `transfer/DataImporter`×1). 도달 경로 = ViewListGrid→ListGridHeader(`src/listgrid/components/list/ListGridHeader.tsx:9,49`)→`list/ui/DataTransferModal.tsx`(DataExporter/DataImporter static import). 기존 DI 참고: `src/listgrid/message.ts`·`api/index.ts`·`ui` (configure*/get* 쌍). `utils/lazy.ts`+`DynamicDataImporter`는 빌드 resolve 못 피함 → 주입으로 해결. 검증: `node documents/issues/7/.gate-trace.cjs` 가 xlsx/file-saver도 0 되어야 PASS(스크립트의 leaf 필터 확장 필요).
 
-## Phase 3 — Excel 전송 주입 격리 (진행 중)
+## Phase 3 — Excel 전송 주입 격리 ✅
 
-목표: 리스트 헤더 내장 전송 모달이 `DataExporter`/`DataImporter`를 static import하는 것을 끊고, host가 `@rchemist/listgrid/excel`에서 주입하도록 전환. 완료 시 barrel 그래프에서 xlsx/file-saver 사라짐.
+- [x] **#3.1 전송 레지스트리 신규** ✅ `a6239bc` · configureDataTransfer/getDataTransfer · [detail](progress-archive/phase-3-tasks.md#31-전송-레지스트리-신규--2026-06-16)
+- [x] **#3.2 DataTransferModal 주입화 + barrel 정리** ✅ `025c423` · 모달 주입화 + carrier 제거 · gate PASS(263모듈, 모든 peer 0) · [detail](progress-archive/phase-3-tasks.md#32-datatransfermodal-주입화--barrel-정리--2026-06-16)
+- [x] **#3.3 /excel 엔트리 + export** ✅ 2026-06-16 · `src/excel.ts` + exports `./excel` + `registerExcelDataTransfer()` · dist/excel.js 생성, gate PASS, 923 tests green · [detail](progress-archive/phase-3-tasks.md#33-excel-엔트리--export--2026-06-16)
 
-- [x] **#3.1 전송 레지스트리 신규** ✅ 2026-06-16 · `src/listgrid/transfer/registry.ts` · configureDataTransfer/getDataTransfer + DataTransferComponents(ComponentType<any>, UIComponents 패턴) · type-check green
-- [x] **#3.2 DataTransferModal 주입화 + barrel 정리** ✅ 2026-06-16 · DataTransferModal→`getDataTransfer()`(미등록 시 null 렌더) · barrel서 carrier 제거(DataExporter/Importer/Processor/Sample/Dynamic/ExcelProvider) + 레지스트리 export · peer-free(ResultView/Description/Processor/DataExportService/ExcelPasswordField/Type) 잔류 · gate PASS(263모듈, xlsx/file-saver 도달 0)
-- [ ] **#3.3 /excel 엔트리 + export** — `registerExcelDataTransfer`
-  - **Changed files**: 신규 `src/excel.ts`, `package.json`(exports `./excel`)
-  - **What**: DataExporter/DataImporter/DataExportService/ExcelProvider re-export + `registerExcelDataTransfer()` = `configureDataTransfer({Exporter:DataExporter,Importer:DataImporter})`.
-  - **Reuse review**: 단순 re-export+register 헬퍼 — P2 엔트리 패턴 모방.
-  - **Verification**: `npm run build` green; `ls dist/excel.js`; gate-trace 최종 PASS(모든 leaf+heavy peer 도달 0)
-  - [Plan detail](./fix-plan.md#step-3--전송excel-을-주입injection-으로-격리)
+**Handoff(P4)**: 코드 변경 끝. barrel에서 모든 optional/heavy peer 도달 0(`node documents/issues/7/.gate-trace.cjs`), 923 tests·lint 0err·format clean. P4는 문서/버전/최종 acceptance만. 신규 공개 subpath: `/qr`,`/address`,`/api-spec`,`/xref-price`,`/excel`. breaking: 해당 컴포넌트들을 main barrel서 import하던 host는 subpath로, 전송은 `registerExcelDataTransfer()` 등록 필요. 마무리=main 직접 병합+v0.4.0 태그(사용자 결정).
+
+## Phase 4 — 빌드/문서/최종 검증 (진행 중)
+
+목표: 사용자 대면 문서 + 버전 + acceptance 마무리. (실제 consumer next build는 별도 repo 필요 → 라이브러리 측 gate로 대체 검증 + 문서화.)
+
+- [ ] **#4.1 버전 0.4.0 + CHANGELOG** — breaking change 명시
+  - **Changed files**: `package.json`(version 0.3.20→0.4.0), `CHANGELOG.md`
+  - **What**: peer 재분류 / leaf+전송 subpath 이전 / qrcode v3 고정을 breaking으로 기록. import 매핑표(무엇이 어느 subpath로).
+  - **Verification**: `node -e "require('./package.json').version" === 0.4.0`
+- [ ] **#4.2 README peer 매트릭스 + subpath 사용법** — 필수 vs opt-in
+  - **Changed files**: `README.md`
+  - **What**: 필수 peer(react/dom, @headlessui, @tabler, @iconify, react-select, react-sortablejs+sortablejs, date-fns) vs 기능별 opt-in peer 표 + subpath import 예시 + `registerExcelDataTransfer()` 예시.
+  - **Verification**: 리뷰(수동)
+- [ ] **#4.3 최종 acceptance + fix-plan 구현결과 주입** — 전체 검증
+  - **Changed files**: `documents/issues/7/fix-plan.md`(## 구현 결과)
+  - **What**: `npm run type-check && npm run lint && npm run format:check && npm test && npm run build` 전부 green + gate PASS 재확인. fix-plan에 구현 결과 섹션 주입.
+  - **Verification**: 위 명령 전부 green; gate exit 0
+  - [Plan detail](./fix-plan.md#step-5--빌드문서)
 
 ## Phase 3 — Excel 전송 주입 격리
 (진입 시 확장) Step 3: transfer 레지스트리(`configureDataTransfer`/`getDataTransfer`) 도입(기존 DI 패턴 모델), DataTransferModal에서 DataExporter/DataImporter static import 제거→레지스트리 사용(미등록 시 graceful), barrel에서 xlsx/file-saver 경유 transfer export 제거(주입 API는 export), src/excel.ts(+`registerExcelDataTransfer`) + `/excel` export. [Plan detail](./fix-plan.md#step-3--전송excel-을-주입injection-으로-격리)
