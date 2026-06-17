@@ -128,7 +128,9 @@ export class NumberField extends ListableFormField<NumberField> {
    * NumberField 핵심 리스트 아이템 렌더링 로직
    */
   protected renderListItemInstance(props: ViewListProps): Promise<ViewListResult> {
-    if (props.item[this.name] !== undefined) {
+    // null 도 undefined 와 동일하게 "값 없음" 으로 처리 (renderViewInstance 와 일관).
+    // `!= null` 은 null 과 undefined 를 모두 포괄하므로 nullable number 셀에서 빈 셀로 렌더된다.
+    if (props.item[this.name] != null) {
       const numberValue = props.item[this.name];
       return Promise.resolve({ result: formatPrice(numberValue) });
     }

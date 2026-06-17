@@ -174,9 +174,12 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
 
           // fetch data and set values
           if (!response.isError()) {
-            fetchedEntity = response.data.data;
+            // 단건 GET 도 save/list/delete 와 동일하게 ResponseData.data = backend payload (1-depth).
+            // rcm-framework 0.1.0 AbstractCrudController 는 GET /{id} 를 봉투 없는 bare entity 로 반환하고,
+            // 표준 어댑터가 { data: entity } 로 한 번 감싼다 (ApiClient envelope 계약, Issue #9).
+            fetchedEntity = response.data;
             entityForm = await entityForm.setFetchedValues(fetchedEntity);
-            entityForm.id = response.data.data.id;
+            entityForm.id = response.data?.id;
           } else {
             try {
               if (response.entityError) {
@@ -529,6 +532,16 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
   }
 
   public async setFetchedValues(entity: Partial<T> | any): Promise<EntityForm<T>> {
+    // 봉투/페이로드 이상으로 entity 가 nullish 로 들어와도 크래시(undefined.manageEntityForm) 대신
+    // 현 상태를 유지하고 graceful 하게 빠져나간다 (Issue #9 방어선).
+    if (entity == null) {
+      console.error(
+        '[EntityForm] setFetchedValues received nullish entity — skipping value population',
+      );
+      this.dataPreloaded = true;
+      return this as unknown as EntityForm<T>;
+    }
+
     // 원본 엔티티 객체를 저장 (등록된 필드 외 속성 접근용)
     this.fetchedEntity = entity;
 

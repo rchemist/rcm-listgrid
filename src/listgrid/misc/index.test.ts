@@ -173,6 +173,17 @@ describe('formatPrice', () => {
   it('appends "원" suffix when localeCode = "원"', () => {
     expect(formatPrice(1000, '원')).toBe('1,000 원');
   });
+
+  // Issue #8 — nullable NumberField 셀이 null 값에 toLocaleString 을 호출해 크래시하던 회귀 방지.
+  it('returns empty string for null / undefined without throwing', () => {
+    expect(formatPrice(null as unknown as number)).toBe('');
+    expect(formatPrice(undefined as unknown as number)).toBe('');
+    expect(formatPrice(null as unknown as number, '원')).toBe('');
+  });
+
+  it('still formats 0 (falsy but valid number)', () => {
+    expect(formatPrice(0)).toBe('0');
+  });
 });
 
 describe('isNulls / isEquals / isEqualsIgnoreCase / isEqualCollection', () => {

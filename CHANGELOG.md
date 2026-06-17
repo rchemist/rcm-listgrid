@@ -2,6 +2,29 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.22] - 2026-06-17
+
+nullable 값에서 발생하던 두 건의 런타임 크래시(#8, #9)를 수정. 둘 다 회피 불가한
+렌더/초기화 throw 였고, 패치 레벨 수정입니다(0.3.x 유지).
+
+### Fixed
+
+- **(#8) `NumberField` nullable 셀 크래시**: list 셀 렌더러(`renderListItemInstance`)가
+  `!== undefined` 가드로 `null` 을 통과시켜 `formatPrice(null)` → `null.toLocaleString()` 가
+  throw 하던 문제. `formatPrice` 에 nullish 가드(`value == null → ''`)를 추가하고(공유 util/public
+  API 보강, `0` 은 유효값으로 보존), 호출부 가드를 `!= null` 로 정정해 상세/뷰 렌더러와 일관화.
+  nullable number 컬럼에 `null` 행이 있어도 list 가 빈 셀로 렌더됩니다.
+- **(#9) `EntityForm.initialize()` 단건 fetch 언랩 깊이 정정**: 기존 엔티티 수정/상세 폼이
+  초기 fetch 직후 `undefined.manageEntityForm` 로 크래시하던 문제. 단건 GET 응답을
+  `response.data.data`(2-depth) 로 읽던 것을 save/list/delete 및 `ApiClient` 봉투 계약과 동일하게
+  `response.data`(1-depth) 로 통일. `setFetchedValues` 에 nullish 방어선 추가.
+  rcm-framework 0.1.0 `AbstractCrudController`(봉투 없는 bare-entity GET) 정합을 완성합니다.
+
+  > ⚠️ **컨슈머 주의**: 이 버그를 우회하려고 어댑터의 `callExternalHttpRequest` 에서 GET 응답을
+  > double-wrap(`{ data: { data: json } }`) 하던 임시 코드가 있다면 0.3.22 업그레이드 시 **반드시
+  > 제거**해야 합니다. 제거하지 않으면 `response.data === { data: entity }` 가 되어 폼이 빈 값으로
+  > 뜹니다. 표준 어댑터(`{ data: json }`, 1-depth)만 유지하면 됩니다.
+
 ## [0.3.21] - 2026-06-16
 
 optional peer 들을 main barrel 이 **static import** 해, consumer(Next.js)가 해당 peer 를
