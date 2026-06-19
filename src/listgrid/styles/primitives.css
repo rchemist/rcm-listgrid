@@ -720,8 +720,17 @@
   border-color: var(--rcm-color-error);
 }
 
+/* readonly textarea = 사용자가 읽는 값 → 본문 색 유지(WCAG 2 AA). disabled 와
+ * 분리한다: `.rcm-input[readonly]` 와 동일 원칙(disabled gray text on disabled
+ * gray background = 2.3:1 contrast 실패 회피). cursor 는 focus/select/copy 가능
+ * 하므로 default. */
+.rcm-textarea[readonly] {
+  background: var(--rcm-color-surface-disabled);
+  color: var(--rcm-color-text);
+  cursor: default;
+}
+
 .rcm-textarea:disabled,
-.rcm-textarea[readonly],
 .rcm-textarea[data-state='disabled'] {
   background: var(--rcm-color-surface-disabled);
   color: var(--rcm-color-text-disabled);
