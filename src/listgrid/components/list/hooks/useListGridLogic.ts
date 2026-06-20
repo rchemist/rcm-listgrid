@@ -613,8 +613,8 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
   // host 가 자체 FilterBar/URL 로 필터를 소유하고 `options.filters` 로 주입하는 경우,
   // 필터가 바뀔 때 컴포넌트를 remount 하지 않고도 엔진이 filters 를 재적용+refetch 한다.
   // 기존 필터/정렬을 비운 뒤(clearFilterAndSort) reset 경로로 재조회 → remount 와 동형
-  // (fresh searchForm + page 0)이되 컴포넌트 상태/마운트는 보존. filtersKey 미지정이면
-  // no-op(기존 소비자 불변). 최신 searchForm 은 ref 로 읽어 stale 클로저를 피한다.
+  // (fresh searchForm + page 0 + 선택 해제)이되 컴포넌트 상태/마운트는 보존. filtersKey
+  // 미지정이면 no-op(기존 소비자 불변). 최신 searchForm 은 ref 로 읽어 stale 클로저를 피한다.
   const latestSearchFormRef = useRef(searchForm);
   latestSearchFormRef.current = searchForm;
   const reactiveFiltersMountedRef = useRef(false);
@@ -628,6 +628,10 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
     }
     const current = latestSearchFormRef.current;
     if (!current) return;
+    // remount 와 동형: 새 필터 컨텍스트의 fresh 뷰이므로 기존 행 선택도 비운다.
+    // (remount 가 아니면 checkedItems 가 남아 새 결과셋과 desync — 체크박스는 켜졌는데
+    //  host 선택 상태는 비는 불일치.)
+    setCheckedItems([]);
     const base = current.clone();
     base.clearFilterAndSort();
     void onChangeSearchForm(entityForm, base, true);
