@@ -609,6 +609,31 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // (#10) host-owned 필터 상태 반응형 재적용 — opt-in via `options.filtersKey`.
+  // host 가 자체 FilterBar/URL 로 필터를 소유하고 `options.filters` 로 주입하는 경우,
+  // 필터가 바뀔 때 컴포넌트를 remount 하지 않고도 엔진이 filters 를 재적용+refetch 한다.
+  // 기존 필터/정렬을 비운 뒤(clearFilterAndSort) reset 경로로 재조회 → remount 와 동형
+  // (fresh searchForm + page 0)이되 컴포넌트 상태/마운트는 보존. filtersKey 미지정이면
+  // no-op(기존 소비자 불변). 최신 searchForm 은 ref 로 읽어 stale 클로저를 피한다.
+  const latestSearchFormRef = useRef(searchForm);
+  latestSearchFormRef.current = searchForm;
+  const reactiveFiltersMountedRef = useRef(false);
+  const filtersKey = props.options?.filtersKey;
+  useEffect(() => {
+    if (filtersKey === undefined) return; // opt-in 전용
+    // 첫 실행은 mount 직후 — initialize() 가 이미 조회했으므로 스킵, 이후 변경부터 반응.
+    if (!reactiveFiltersMountedRef.current) {
+      reactiveFiltersMountedRef.current = true;
+      return;
+    }
+    const current = latestSearchFormRef.current;
+    if (!current) return;
+    const base = current.clone();
+    base.clearFilterAndSort();
+    void onChangeSearchForm(entityForm, base, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtersKey]);
+
   // Listen for URL state changes (browser back/forward navigation AND initial hydration)
   useEffect(() => {
     // Skip if URL sync is disabled or searchForm not ready

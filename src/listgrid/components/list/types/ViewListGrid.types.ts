@@ -87,6 +87,21 @@ export interface ViewListGridOptionProps {
   filters?: (
     entityForm: EntityForm,
   ) => Promise<{ condition?: 'AND' | 'OR'; items: FilterItem[] }[]>;
+  /**
+   * (#10) host-owned 필터 상태의 반응형 재적용 신호 (opt-in).
+   *
+   * host 가 자체 필터 UI / URL 상태를 source-of-truth 로 갖고 `filters` 콜백으로
+   * 주입하는 경우, 그 상태가 바뀔 때마다 컴포넌트를 `key` 로 remount 하지 않고도
+   * 엔진이 `filters` 를 **재적용 + refetch** 하도록 하는 변경 신호다.
+   *
+   * host 는 필터 상태에서 파생한 값(예: `JSON.stringify(filterState)` 또는 해시)을
+   * 넘기면 된다. 값이 바뀌면 엔진이 기존 필터/정렬을 비우고(`clearFilterAndSort`)
+   * `filters` 결과를 다시 적용한 뒤 첫 페이지부터 재조회한다(`onChangeSearchForm` reset).
+   *
+   * 미지정(`undefined`) 시 완전 no-op — 기존 소비자 동작 불변. mount 직후 첫 값은
+   * `initialize()` 가 이미 조회하므로 무시되고, 이후 변경부터 반응한다.
+   */
+  filtersKey?: string | number;
   fields?: ListableFormField<any>[];
   onFetched?: PostFetchListData;
   headerButtons?: ((props: ListGridHeaderButtonProps) => Promise<ReactNode>)[];
