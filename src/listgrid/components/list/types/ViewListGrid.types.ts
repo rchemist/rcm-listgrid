@@ -59,6 +59,10 @@ export interface SelectionOptions {
 export interface ViewListGridOptionProps {
   hideTitle?: boolean;
   onDragPriority?: { support: boolean; onModify?: (changed: Map<string, number>) => Promise<void> }; // priority 를 지원하는 컬렉션. 즉 우선순위를 변경할 수 있는지 여부. 이 값이 true 라면 listGrid 의 맨 왼쪽에 onDrag 핸들러를 붙여 준다.
+  // 리스트 *내부* 행 순서 재배치(reorder) 콜백. `onDragPriority.support`(또는 managePriority)가
+  // 켜지면 각 행 오른쪽에 위/아래 이동 핸들이 붙고, 재배치 시 변경된 *전체 행 id 순서*가 idList 로
+  // 전달된다. 단일 리스트 안의 정렬 순서 변경 용도이며, **다중 컬럼 칸반의 컬럼-간 카드 이동(예:
+  // status 전이)을 위한 cross-column DnD 가 아니다** — 칸반은 호스트가 직접 구현해야 한다.
   onDrag?: (idList: string[]) => void;
   useAccordion?: { render: (item: any, router: any) => Promise<ReactNode | null | undefined> };
   readonly?: boolean;

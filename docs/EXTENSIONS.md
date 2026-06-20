@@ -21,6 +21,7 @@ When `@rchemist/listgrid` doesn't fit a host requirement out of the box, **don't
 | **Hide a button conditionally** (state-machine target already current) | `EntityFormButton.withHidden(async props => boolean)` | same |
 | **Override autosave storage scope** (sessionStorage default → localStorage cross-session) | `useEntityFormAutoSave({ autoSaveKey })` accepts a host key; for full storage override wrap the hook or write a thin host adapter | `components/form/hooks/useEntityFormAutoSave.ts:29-42` |
 | **Run pre/post lifecycle for list fetch** (inject default filters, decorate page results) | `withClientPreFetchList` / `withClientPostFetchList` | `EntityFormExtensions.tsx:46-58` |
+| **Reorder rows *within one list*** (drag-handle priority sort) | `options.onDrag(idList)` + `onDragPriority.support` — up/down handles emit the full reordered id list. **Not** a kanban cross-column DnD (moving a card between status columns to transition it) — listgrid has no multi-column kanban primitive; the host owns that board (dnd-kit / HTML5) and only shares listgrid's *data* via the headless `useListGridLogic`. | `components/list/ui/ViewRows.tsx` |
 
 All extensions are **chainable** on `EntityForm` and support `priority`, `enabled`, `continueOnError` via the second `options` arg.
 
@@ -262,6 +263,7 @@ These genuinely belong to the host, not listgrid:
 - **Cross-session draft persistence** (the host's `useFormDraft` localStorage banner) when its semantics differ from listgrid's per-tab `useEntityFormAutoSave` (sessionStorage). Run them side by side: listgrid handles refresh-recovery, host handles cross-session — they don't conflict.
 - **Page-level toast/notification UX with undo actions** (delete + transition undo). Use host `useToast()` and capture it into your `EntityFormButton.withOnClick` closure. Listgrid's `showToast` is intentionally minimal.
 - **External entity panels** (linked issues, AI analysis, comments, agent sessions). These are pure host React, rendered as siblings around `ViewEntityFormWrapper`.
+- **Multi-column kanban boards** (drag a card between status columns to transition it). `options.onDrag` is a *within-list* row-reorder hook, **not** cross-column DnD — there is no listgrid kanban primitive. Build the board with the host's own dnd-kit/HTML5 DnD, and feed it listgrid's *data* by consuming the headless `useListGridLogic` (shared search/filter/fetch/selection state) instead of a parallel fetch. This keeps one data source of truth while the board rendering stays host-owned.
 
 The line: if it modifies the EntityForm's lifecycle, use an extension. If it lives *next to* the form, render it as a sibling and pass the entity via the host's data hooks.
 
