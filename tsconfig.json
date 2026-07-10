@@ -28,8 +28,20 @@
     "exclude": [
         "node_modules",
         "dist",
+        "packages",
+        "apps",
         "**/__tests__/**",
         "**/*.test.ts",
         "**/*.test.tsx"
+    ],
+    "references": [
+        { "path": "./packages/schema-core" },
+        { "path": "./packages/state" },
+        { "path": "./packages/react" },
+        { "path": "./packages/ui-default" },
+        { "path": "./packages/backend-rcm" },
+        { "path": "./packages/backend-rest" },
+        { "path": "./packages/presets-rcm" },
+        { "path": "./packages/next" }
     ]
 }

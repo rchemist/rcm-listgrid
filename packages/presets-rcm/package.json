@@ -1,0 +1,13 @@
+{
+  "name": "@listgrid/presets-rcm",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "original host domain presets (color maps, MarketingField, etc.)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false
+}

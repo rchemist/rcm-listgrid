@@ -1,0 +1,7 @@
+{
+  "name": "@listgrid/sample",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Embedded sample site — living integration demo + alpha demo vehicle (sample-site-spec.md). Full Next.js scaffold lands in P1-5.",
+  "scripts": {}
+}

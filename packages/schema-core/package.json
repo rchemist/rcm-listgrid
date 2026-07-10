@@ -1,0 +1,13 @@
+{
+  "name": "@listgrid/schema-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "EntityForm declarations, field metadata, validation, SearchForm, PermissionPolicy \u2014 React-free (lint-enforced)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false
+}
