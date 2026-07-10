@@ -33,6 +33,7 @@
 - 전면 백지 재작성(규율 2 위반) · SubViewEntityForm 단독 분리 · xstate 도입 · 전역 싱글턴의 React Context화 · 무료 기능 유료화
 - 구 배럴(main)의 표면 재단(0.4에서만 — 이중 작업 금지) · docs/api 커밋 재개 · 헌장 밖 신기능의 v0.4 편입
 - react-hook-form/TanStack Form로 폼 상태 대체(ADR-0002 기각 사유 참조)
+- **0.2.x(`release/0.2`) 선제 수정 금지 (사용자 확정 2026-07-10)** — 프로덕션 가동 중. 별도 에러 리포트가 들어오지 않는 한 백포트·수정하지 않는다. 0.3.x부터는 자유 수정·배포 가능.
 
 ## Progress State
 
@@ -137,7 +138,7 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 - [ ] **P0-4 최소범위 초과** — hook이 per-list defaultPageSize에 접근 불가라 `QuickSearchBar`/`ViewListGrid`에 prop 스레딩 추가(1→3파일). 브리핑의 useListGridLogic 우선순위 정렬 지시상 불가피.
 - [ ] **P0-8 동결 방식** — no-explicit-any 135파일 동결을 인라인 주석 대신 `eslint.config.mjs` override 블록으로(동일 효과·1파일 diff·whittle-down 용이).
 - [ ] **P1-2 ESM 메인배럴 caveat** — 순수 Node ESM `import('@rchemist/listgrid')`(메인)은 `react-sortablejs`(CJS-only peer, ESM/exports 없음)의 named export 미검출로 실패. 번들러(Next/webpack) 소비자는 정상. 대응: (a) 수용+MIGRATION 명시 / (b) v0.4에서 react-sortablejs를 ESM 대체(예: @dnd-kit)로 교체 검토(P5 렌더러 이식 시). 결정 필요.
-- [ ] **브랜치 전략 확인** — 모델 판단으로 `p0-hotfixes`→`v0.4` 병합해 P1 착수(이식원본 확보, reversible). main 무변경. 사용자가 다른 흐름(p0-hotfixes→main→v0.4) 원하면 v0.4 리셋 후 재정렬 가능.
+- [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후(지금 아님).
 - [ ] **P2 렌더 파일수 게이트** — 게이트 문구는 "렌더 테스트 파일 9→25+"이나 실제는 밀도높은 5파일 68테스트(대표 표면 커버)로 구현. 파일수 목표를 문자적으로 채울지(필드 40종 개별 파일 등) vs 행동밀도로 충족 인정할지 — 커버리지 래칫 재측정과 함께 P3 진입 시 판단.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
@@ -146,10 +147,11 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 
 ## Open Questions
 
-- [ ] **릴리스/publish 승인 (외부 — 대기)** — ① 0.3.26 `npm publish`(latest) 승인? ② `p0-hotfixes`→main 반영 방식(PR vs 직접)? ③ 0.4.0-alpha.0 `npm publish --tag next`(빈 골격 파이프 검증) 승인? — v0.4 이식원본 propagation은 완료(main·npm publish만 외부 게이트). §Needs Review 소비자 Breaking 확인이 0.3.26 publish 선결.
-- [ ] npm publish 승인 방식: alpha.N마다 개별 승인 vs "alpha는 포괄 승인" — 사용자 결정 필요 (P1-4 전까지)
+- [x] **릴리스 기전 확정(2026-07-10)** — `v*` 태그 push→`publish.yml` 자동배포(dist-tag `-alpha`→next/`0.2.x`→legacy-0.2/else latest). 게이트 선행.
+- [ ] **0.3.26 실배포 트리거 (외부 — 사용자 실행/승인)** — 준비 완료(`p0-hotfixes`, 게이트 green). 배포 절차: `p0-hotfixes`→main 병합 → `git tag v0.3.26` → push → latest 자동배포. **선결 확인: 0.3.26은 hardening Breaking 3종 포함(patch에 breaking) — GJCU/edustack이 cryptKey/sanitizer 설정했는지 확인 후 배포**(§Needs Review). 로컬 미푸시 상태 유지 중.
+- [ ] **0.4.0-alpha.N 배포** — `v0.4.0-alpha.N` 태그 push → next 자동배포(파이프 검증). P1 완료로 준비됨(빈 골격이어도 실행 가능). 사용자 실행/승인 시점 결정.
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독 (P5 전까지)
-- [ ] 0.2.x 라인(release/0.2)에 P0 버그 중 백포트할 항목이 있는지 — P0-1(검증)·P0-2(엑셀)는 후보 (P0-10 전까지)
+- [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
 
 ## 완료 기록 (태스크 완료 시 여기에 한 줄 증거 누적, 페이즈 완료 시 progress-archive로 이동)
 
