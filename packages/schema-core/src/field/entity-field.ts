@@ -100,6 +100,13 @@ export interface EntityField<TValue = unknown> extends EntityItem {
    * schema-core opaque data — never interpreted here; consumed by renderers.
    */
   attributes?: Map<string, unknown>;
+  /**
+   * Render-suppression marker (Phase EB — see `FormField.renderedBy` doc, `form-field.ts`).
+   * When set, names the composite field whose renderer already renders this field's editor;
+   * standalone form iteration (`@listgrid/react` `ViewEntityForm`) skips it. Deliberately NOT
+   * consulted by `validate()` — suppression is a render-layer concern only.
+   */
+  renderedBy?: string;
 
   // --- pure predicate ---
   isRequired(ctx: FieldEvalContext): Promise<boolean>;

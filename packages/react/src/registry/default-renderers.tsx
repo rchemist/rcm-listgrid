@@ -25,6 +25,7 @@ import { FileFieldRenderer } from './file-renderer';
 import { ImageFieldRenderer } from './image-renderer';
 import { MultipleAssetFieldRenderer } from './multiple-asset-renderer';
 import { InlineMapFieldRenderer } from './inline-map-renderer';
+import { AddressFieldRenderer } from './address-renderer';
 
 // Default field-type renderers (task item 3). Every one of these follows the
 // same shape: read this field's resolved value via useFieldValue, resolve the
@@ -258,4 +259,6 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('multipleAsset', MultipleAssetFieldRenderer);
   // EA-D InlineMap (single delegate; store-direct-write redesign, no pendingRef)
   registerFieldRenderer('inlineMap', InlineMapFieldRenderer);
+  // EB2 Address (Daum 우편번호 composite; renders + owns its 5 renderedBy-suppressed siblings)
+  registerFieldRenderer('address', AddressFieldRenderer);
 }

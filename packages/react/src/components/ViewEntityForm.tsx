@@ -39,8 +39,18 @@ const DEFAULT_GROUP_ID = 'default';
 // falls back to an id-only entry, ordered after the declared ones — mirrors
 // the `tab.label ?? tab.id` fallback already used below for unlabeled tabs.
 
+// EB2 — fields carrying a `renderedBy` marker (form-field.ts doc: "this field's editor is
+// rendered by the named composite field's renderer, e.g. AddressField's AddressRenderer") are
+// excluded from EVERY standalone-iteration surface: tab/group derivation, the rendered field
+// list, AND the focus-first-error scan below. This is a RENDER-layer suppression only —
+// `renderedBy` is never consulted by FormField.validate()/validateAll (@listgrid/state), so a
+// suppressed field's required/validations still run exactly as if it were rendered standalone;
+// only its own standalone <FieldRenderer> is skipped (the owning composite's renderer is
+// expected to render/own that a11y surface instead — see AddressFieldRenderer).
 function liveFields(fieldDefs: Record<string, EntityField>): EntityField[] {
-  return Object.values(fieldDefs).sort((a, b) => a.getOrder() - b.getOrder());
+  return Object.values(fieldDefs)
+    .filter((f) => f.renderedBy === undefined)
+    .sort((a, b) => a.getOrder() - b.getOrder());
 }
 
 function deriveTabs(entityForm: EntityForm, fields: EntityField[]): TabDef[] {

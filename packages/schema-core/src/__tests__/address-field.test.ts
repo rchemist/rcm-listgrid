@@ -7,7 +7,12 @@ import { describe, expect, it } from 'vitest';
 // reverse).
 import { createFormStore } from '@listgrid/state';
 import { EntityForm } from '../entity-form';
-import { AddressField, applyFullAddressFields, type Address } from '../field/address-field';
+import {
+  AddressField,
+  addressSiblingNames,
+  applyFullAddressFields,
+  type Address,
+} from '../field/address-field';
 import { StringField } from '../field/basic-fields';
 import type { FieldEvalContext } from '../field/eval-context';
 
@@ -204,5 +209,89 @@ describe('applyFullAddressFields — hydrate seeds flat siblings from data (@lis
     expect(store.getState().getValue('user.address1')).toBe('테헤란로 1');
     expect(store.getState().getValue('user.state')).toBe('서울');
     expect(store.getState().getValue('user.postalCode')).toBe('06133');
+  });
+});
+
+describe('FormField.renderedBy — EB2 render-suppression marker (NOT hidden)', () => {
+  it('withRenderedBy sets the member, chainable', () => {
+    const f = new StringField('address1', 100);
+    expect(f.renderedBy).toBeUndefined();
+    const chained = f.withRenderedBy('address');
+    expect(chained).toBe(f);
+    expect(f.renderedBy).toBe('address');
+  });
+
+  it('clone() carries renderedBy (shallow Object.assign copy)', () => {
+    const f = new StringField('address1', 100).withRenderedBy('address');
+    const cloned = f.clone();
+    expect(cloned.renderedBy).toBe('address');
+    expect(cloned).not.toBe(f);
+  });
+
+  it('renderedBy does NOT short-circuit validate() — required still fires (the whole point vs hidden)', async () => {
+    const f = new StringField('address1', 100).withRequired(true).withRenderedBy('address');
+    const errors = await f.validate(ctx(undefined));
+    expect(errors.length).toBe(1);
+    expect(await f.isHidden(ctx(undefined))).toBe(false);
+  });
+});
+
+describe('addressSiblingNames — shared prefix-derivation helper', () => {
+  it('derives the 5 flat sibling names from an unprefixed composite name', () => {
+    expect(addressSiblingNames('address')).toEqual({
+      state: 'state',
+      city: 'city',
+      address1: 'address1',
+      address2: 'address2',
+      postalCode: 'postalCode',
+    });
+  });
+
+  it('derives dotted sibling names from a prefixed composite name', () => {
+    expect(addressSiblingNames('user.address')).toEqual({
+      state: 'user.state',
+      city: 'user.city',
+      address1: 'user.address1',
+      address2: 'user.address2',
+      postalCode: 'user.postalCode',
+    });
+  });
+
+  it('matches the names applyFullAddressFields actually declares (no drift)', () => {
+    const form = new EntityForm('StudentEntityForm', '/student');
+    applyFullAddressFields(form, { prefix: 'user' });
+    const names = addressSiblingNames('user.address');
+    for (const n of Object.values(names)) {
+      expect(form.getField(n)).toBeDefined();
+    }
+  });
+});
+
+describe('applyFullAddressFields — renderedBy fan-out to every sibling it creates', () => {
+  it('every flat sibling (incl. longitude/latitude) is marked renderedBy the composite name', () => {
+    const form = new EntityForm('StudentEntityForm', '/student');
+    applyFullAddressFields(form, { showLongitudeLatitude: true });
+
+    const siblingNames = [
+      'state',
+      'city',
+      'address1',
+      'address2',
+      'postalCode',
+      'longitude',
+      'latitude',
+    ];
+    for (const n of siblingNames) {
+      expect(form.getField(n)!.renderedBy).toBe('address');
+    }
+    // the composite itself carries no renderedBy — it IS the renderer, not rendered-by one.
+    expect(form.getField('address')!.renderedBy).toBeUndefined();
+  });
+
+  it('prefixed form: siblings are renderedBy the prefixed composite name', () => {
+    const form = new EntityForm('CollegeEntityForm', '/college');
+    applyFullAddressFields(form, { prefix: 'user' });
+    expect(form.getField('user.address1')!.renderedBy).toBe('user.address');
+    expect(form.getField('user.postalCode')!.renderedBy).toBe('user.address');
   });
 });

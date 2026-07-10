@@ -54,6 +54,17 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   requiredPermissions?: string[];
   exceptOnSave?: boolean;
   dependsOn?: string[];
+  /**
+   * Render-suppression marker (Phase EB — conductor-settled, NOT `hidden`; see
+   * `AddressField`/`applyFullAddressFields`, `address-field.ts`, for the full argument). When
+   * set, names the composite field (by `name`) whose OWN renderer (e.g. the `@listgrid/react`
+   * `AddressFieldRenderer`) already renders this field's editor — so standalone form
+   * iteration (`ViewEntityForm`) skips it. Deliberately orthogonal to `hidden`:
+   * `FormField.validate()` does NOT consult `renderedBy` — a `renderedBy` field's
+   * required/validations still run exactly as if it were rendered standalone. Only the
+   * RENDER layer (outside schema-core, charter C4) is suppression's business.
+   */
+  renderedBy?: string;
   attributes?: Map<string, unknown>;
   value?: FieldValue<TValue>;
   form?: { tabId: string; fieldGroupId: string };
@@ -178,6 +189,12 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   /** Declare the sibling fields this field's conditionals read (cross-field cascade). */
   withDependsOn(...names: string[]): this {
     this.dependsOn = names;
+    return this;
+  }
+  /** Mark this field as rendered by the named composite field's renderer — see the
+   *  `renderedBy` member doc above for the full suppression-vs-hidden argument. */
+  withRenderedBy(name: string): this {
+    this.renderedBy = name;
     return this;
   }
   withRequiredPermissions(...permissions: string[]): this {

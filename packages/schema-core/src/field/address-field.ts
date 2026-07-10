@@ -75,6 +75,44 @@ const ADDRESS_SIBLING_LABELS = {
   latitude: '위도',
 } as const;
 
+/** The literal suffix `applyFullAddressFields` always appends to `prefix` for the composite
+ *  field's OWN name (`${prefix}address`) — {@link addressSiblingNames} strips this back off to
+ *  recover `prefix` from a composite field's name alone. */
+const ADDRESS_COMPOSITE_SUFFIX = 'address';
+
+/** The 5 flat sibling field names an EB2 renderer needs to read/write for a composite
+ *  `AddressField` (longitude/latitude are declaration-only extras Daum never returns — see
+ *  {@link applyFullAddressFields} header — so they're excluded from this renderer-facing set). */
+export interface AddressSiblingNames {
+  state: string;
+  city: string;
+  address1: string;
+  address2: string;
+  postalCode: string;
+}
+
+/**
+ * Derive the flat sibling field names for a composite `AddressField`'s `name` (e.g.
+ * `'address'` → `{state:'state', city:'city', address1:'address1', address2:'address2',
+ * postalCode:'postalCode'}`; `'user.address'` → `{state:'user.state', ...}`). The SAME
+ * prefix rule {@link applyFullAddressFields} uses to declare the siblings in the first place —
+ * shared here (both this function and `applyFullAddressFields` consult it) so the
+ * `@listgrid/react` `AddressRenderer` (EB2) never re-derives — and risks drifting from — the
+ * naming convention.
+ */
+export function addressSiblingNames(compositeName: string): AddressSiblingNames {
+  const prefix = compositeName.endsWith(ADDRESS_COMPOSITE_SUFFIX)
+    ? compositeName.slice(0, -ADDRESS_COMPOSITE_SUFFIX.length)
+    : `${compositeName}.`;
+  return {
+    state: `${prefix}state`,
+    city: `${prefix}city`,
+    address1: `${prefix}address1`,
+    address2: `${prefix}address2`,
+    postalCode: `${prefix}postalCode`,
+  };
+}
+
 export interface AddressFieldsProps {
   /** dot-prefix applied to the composite + every flat sibling name (0.3.x parity —
    *  `appendLastDot`; e.g. prefix `'user'` → composite `'user.address'`, siblings
@@ -139,17 +177,28 @@ export function applyFullAddressFields(
   const required = props?.required ?? false;
   const showLongitudeLatitude = props?.showLongitudeLatitude ?? false;
 
+  // Shared with the EB2 AddressRenderer (@listgrid/react) — the same derivation, not a
+  // second copy of the prefix rule (see addressSiblingNames doc above).
+  const siblingNames = addressSiblingNames(addressName);
+
   const stringSibling = (
     key: 'state' | 'city' | 'address1' | 'address2' | 'postalCode',
     order: number,
     isRequired: boolean,
   ): StringField => {
-    const field = new StringField(`${prefix}${key}`, order).withLabel(ADDRESS_SIBLING_LABELS[key]);
+    // EB2 render-suppression marker (form-field.ts `renderedBy` doc) — this sibling's editor
+    // is rendered by the composite AddressField's renderer; ViewEntityForm skips it in
+    // standalone iteration, but validation (required/validations) is UNAFFECTED.
+    const field = new StringField(siblingNames[key], order)
+      .withLabel(ADDRESS_SIBLING_LABELS[key])
+      .withRenderedBy(addressName);
     if (isRequired) field.withRequired(true);
     return field;
   };
   const numberSibling = (key: 'longitude' | 'latitude', order: number): NumberField =>
-    new NumberField(`${prefix}${key}`, order).withLabel(ADDRESS_SIBLING_LABELS[key]);
+    new NumberField(`${prefix}${key}`, order)
+      .withLabel(ADDRESS_SIBLING_LABELS[key])
+      .withRenderedBy(addressName);
 
   const items: EntityField[] = [
     new AddressField(addressName, baseOrder, props?.showMap).withLabel(props?.label ?? '주소'),
