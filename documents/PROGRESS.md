@@ -7,7 +7,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 (EF1 완료 — 반응형 META override `c7d387f`(store meta-slice+setMeta, validate override 준수, D4 구독). 명령형 라이프사이클 초석 확보. 전체 1138 unit+5 E2E green. Next=EF2(onChanges cascade). E계획: [e-track-field-parity.md](./plans/e-track-field-parity.md))
+**Last updated**: 2026-07-11 02:47 (EF1 완료 — 반응형 META override `c7d387f`. 명령형 라이프사이클 초석 확보. 전체 1138 unit+5 E2E green, push 완료. **Next=EF2(onChanges cascade)** — §세션 인계 Handoff + [E계획 EF2 노트](./plans/e-track-field-parity.md) 읽고 재개)
 
 ## Goal
 
@@ -49,6 +49,15 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
+## 세션 인계 (Handoff — 다음 작업: EF2 onChanges cascade)
+
+- **현 상태**: 하드닝 H 완료. E-트랙 기반 Phase EF 중 **EF1(반응형 META override) 완료**(`c7d387f`). 전체 **1138 unit + 5 E2E green**, 전부 push됨(v0.4). 남은 미커밋 작업 없음.
+- **다음 = EF2 (onChanges cascade)**. **아키텍처 이미 결정** — [계획 §EF2 구현 노트](./plans/e-track-field-parity.md) 참조(재도출 금지): FormMutator 인터페이스로 schema-core 순수성 유지 + loop-guard + 대표 빌더 3종(changeHidden/changeRequired/changeSelectOptions, 전부 setMeta로).
+- **Do-NOT**: ① onChanges가 store/EntityForm을 직접 받게 하지 말 것(schema-core→state 역의존, ADR-0003 위반) → FormMutator 경유. ② 필드 렌더만 이식하고 동작 검증 생략 금지(사용자 강조 — onInit/onChanges 실제 작동해야). ③ EF1~4 착지 전 대량 필드 이식(EA) 금지(EF-gate). ④ 형식 P3~P7 재개 금지(보류).
+- **불변/함정**: EF1 override는 `??`(explicit false 승). setMeta는 단일필드 구독(D4) — cascade 구현 시 D4 유지. setValue cascade 무한루프(A→B→A) loop-guard 필수.
+- **첫 파일**: 구엔진 `src/listgrid/config/OnChangeEntityForm.ts`(76-361 카탈로그)·`EntityForm.tsx:122`(executeOnChanges) → 신 `packages/state/src/form-store.ts`(setValue 확장)·`packages/schema-core/src/field/entity-field.ts`(EntityForm onChanges 리스트+withOnChanges).
+- **작업 규율**: 태스크마다 설계는 세션이(conductor), 구현은 sonnet 위임, 검증은 세션이 rigorous(type-check×2+vitest+공유경로 변경 시 full E2E). 완료=logic 커밋→PROGRESS 커밋→**push(사용자: 전부 push)**. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`. Node26(폴리필 OK).
+
 ---
 
 ## Tasks — 하드닝/확장 트랙 (active · 무인모드)
@@ -62,8 +71,8 @@
 - [x] **H·게이트** 품질게이트 신 패키지+apps 확장(eslint globs·lint/format globs·`typecheck:packages`) · `0493333`/`a7c1e03`
 - [x] **H·CI** CI에 packages tsc + Playwright e2e job 배선 · `0493333`
 - [x] **H·SubColl테스트** SubCollection 단위테스트(state) · `0493333`
-- [x] **H1** id→entity 캐시 ✅ 2026-07-11 · `e48a21f` · AdapterProvider seam에 adapter-scoped 참조해소 캐시(`useReferenceResolver`, dedup+실패시 evict) · react 7/7·College+dean M2O E2E 2/2·gate green(1120→1123)
-- [x] **H2** a11y ✅ 2026-07-11 · `8144df4` · aria-required/invalid/describedby(입력↔에러 연결) + focus-first-error(submit 실패) + Modal 포커스(open→dialog·close→복귀) · react 9/9·E2E 5/5·gate green(1124→1129)
+- [x] **H1** id→entity 캐시 ✅ `e48a21f` · M2O 참조해소 adapter-scoped 캐시(useReferenceResolver, dedup+실패시 evict) · react 7/7·M2O E2E 2/2·gate(1120→1123)
+- [x] **H2** a11y ✅ `8144df4` · aria-required/invalid/describedby + focus-first-error + Modal 포커스(open→dialog·close→복귀) · react 9/9·E2E 5/5·gate(1124→1129)
 
 ### E — 확장 (사용자 확정 2026-07-11: 전 필드 이식 + 동작 실증 + Daum 주소) · [계획](./plans/e-track-field-parity.md)
 
@@ -73,7 +82,7 @@
 
 #### Phase EF — 명령형 라이프사이클 기반 (대량 이식 전 필수) **[O]**
 
-- [x] **EF1 [O] META 반응화** ✅ 2026-07-11 · `c7d387f` · store meta-slice(required/hidden/readonly/options/validations)+setMeta/getMeta, override가 `??`로 declared 우선(explicit false 승). useFieldMeta 단일필드 구독(D4), FieldRenderer eff*, SelectRenderer options, validate(ctx,override) 준수 · 28 unit(7 state+3 react)·E2E 5/5·gate green(1128→1138)
+- [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선, explicit false 승)·useFieldMeta(D4 구독)·FieldRenderer eff*·SelectRenderer options·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
 - [ ] **EF2 [O] onChanges cascade** — setValue 후 ordered onChanges(store,field) 훅 dispatch(형제 setValue·meta mutate·loop-guard) + 구 OnChangeEntityForm.ts:76-361 빌더 카탈로그 이식(EF1 위). 대상 state+schema-core.
 - [ ] **EF3 [O] initializeFormStore 파이프** — fetch→onFetchData→onInitialize(순차 clone 변형)→build→hydrate→init추가 필드 재바인딩. EntityForm 훅 리스트+빌더 + react useEntityFormInitializer. 구 EntityForm.tsx:162-306. 대상 state+schema-core+react.
 - [ ] **EF4 [O] 동적 필드 add/remove + structure-version** — store.addField/removeField(슬라이스)+late-add 재바인딩(구 268-302), ViewEntityForm version 시 groups 재도출(구 shouldReload 대체). EF3 의존.
