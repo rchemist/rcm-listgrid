@@ -49,7 +49,11 @@ export type FieldType =
   | 'birthday'
   | 'telephoneNumber'
   | 'color'
-  | 'customOption';
+  | 'customOption'
+  // EA-C0 addition (upload fan-out pre-stage — 'file'/'image'/'contentAsset'
+  // already existed; MultipleAssetField is the only genuinely new field type
+  // in the upload batch, ea-c-scout-briefing.md PART D "MultipleAsset").
+  | 'multipleAsset';
 
 /** The create/update discriminant threaded through every conditional resolution. */
 export type RenderType = 'create' | 'update';

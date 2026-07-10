@@ -116,6 +116,32 @@ export interface TagsInputProps {
   describedBy?: string;
 }
 
+/**
+ * File/Image upload slot (EA-C0 pre-stage — first consumers: File/Image/
+ * MultipleAsset fields, EA-C fan-out). `value`/`onChange` carry the plain
+ * URL string (conductor decision ① — no FileFieldValue envelope). Upload
+ * HTTP is host-owned: without `onUpload` the ui-default fallback renders a
+ * URL text input only (edustack-parity, no file picker); with `onUpload`
+ * it also renders a file picker that calls `onUpload(file)` and feeds the
+ * resolved `{ url }` into `onChange`.
+ */
+export interface FileInputProps {
+  id?: string;
+  value?: string;
+  onChange?: (url: string | undefined) => void;
+  /** When provided, the file picker calls this on selection and feeds the
+   *  resolved URL into `onChange`. Omitted = no file picker rendered. */
+  onUpload?: (file: File) => Promise<{ url: string }>;
+  /** `accept` attribute forwarded to the file picker input. */
+  accept?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
+  ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
+}
+
 export interface UserViewProps {
   /** host-owned shape (ProfileField/UserView is a placeholder posture — the
    *  real host overrides this component with its own user-lookup view). */
@@ -187,6 +213,7 @@ export interface UIComponents {
   CheckBox: ComponentType<CheckBoxProps>;
   SelectBox: ComponentType<SelectBoxProps>;
   TagsInput: ComponentType<TagsInputProps>;
+  FileInput: ComponentType<FileInputProps>;
   UserView: ComponentType<UserViewProps>;
   Button: ComponentType<ButtonProps>;
   Modal: ComponentType<ModalProps>;

@@ -2,10 +2,12 @@
 // component library dependency. Every input primitive normalizes onChange
 // to the plain VALUE the field store expects (never the raw DOM event).
 import { useEffect, useRef, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import type {
   ButtonProps,
   CheckBoxProps,
   DateInputProps,
+  FileInputProps,
   LoadingOverlayProps,
   ModalProps,
   NumberInputProps,
@@ -306,6 +308,80 @@ export function TagsInput({
 }
 
 /**
+ * File/Image upload fallback (EA-C0 pre-stage — first consumers: File/Image/
+ * MultipleAsset fields, EA-C fan-out; ea-c-scout-briefing.md decision ②).
+ * The value is always the plain URL string (no FileFieldValue envelope):
+ * edited directly via the text input (edustack-parity — today's real
+ * behavior has no upload wiring at all). When a host supplies `onUpload`,
+ * a file picker is ALSO rendered; selecting a file calls `onUpload`, and on
+ * success feeds the resolved URL into `onChange`. On rejection the current
+ * value is left untouched and the failure surfaces via `role="alert"`
+ * (async-safe — no partial/optimistic value change). Without `onUpload` no
+ * file picker renders at all (nothing to wire it to). A clear-value button
+ * is included so a populated URL can be removed without hand-editing text.
+ */
+export function FileInput({
+  id,
+  value,
+  onChange,
+  onUpload,
+  accept,
+  readOnly,
+  disabled,
+  ariaLabel,
+  required,
+  invalid,
+  describedBy,
+}: FileInputProps) {
+  const [uploadError, setUploadError] = useState<string | undefined>(undefined);
+
+  async function handleFileSelect(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    // Reset so re-selecting the same file re-fires onChange next time.
+    e.target.value = '';
+    if (!file) return;
+    setUploadError(undefined);
+    try {
+      const result = await onUpload!(file);
+      onChange?.(result.url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : '파일 업로드에 실패했습니다.');
+    }
+  }
+
+  return (
+    <div id={id}>
+      <input
+        type="text"
+        value={value ?? ''}
+        readOnly={readOnly}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-required={required || undefined}
+        aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
+        onChange={(e) => onChange?.(e.target.value === '' ? undefined : e.target.value)}
+      />
+      {!readOnly && !disabled && value !== undefined && value !== '' && (
+        <button type="button" aria-label="Clear" onClick={() => onChange?.(undefined)}>
+          ×
+        </button>
+      )}
+      {onUpload && (
+        <input
+          type="file"
+          accept={accept}
+          disabled={readOnly || disabled}
+          aria-label={ariaLabel ? `${ariaLabel} — upload` : undefined}
+          onChange={(e) => void handleFileSelect(e)}
+        />
+      )}
+      {uploadError !== undefined && <div role="alert">{uploadError}</div>}
+    </div>
+  );
+}
+
+/**
  * Placeholder fallback for the Profile field's `UserView` slot (EA-A0
  * pre-stage, conductor decision ②: "최소 placeholder — 호스트 오버라이드
  * 전제"). Renders the value as plain text; a real host replaces this
@@ -421,6 +497,7 @@ export const defaultUIComponents: UIComponents = {
   CheckBox,
   SelectBox,
   TagsInput,
+  FileInput,
   UserView,
   Button,
   Modal,

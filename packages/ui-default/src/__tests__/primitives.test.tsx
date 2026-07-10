@@ -6,8 +6,8 @@
 // idiom used throughout @listgrid/react's __tests__.
 
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { TagsInput, TextInput, UserView } from '../primitives';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { FileInput, TagsInput, TextInput, UserView } from '../primitives';
 
 describe('TextInput type prop (backward compatible — default stays "text")', () => {
   it('defaults to type="text" when omitted', () => {
@@ -92,5 +92,84 @@ describe('UserView fallback (placeholder posture — host overrides via UICompon
   it('renders empty (no crash) for nullish values', () => {
     const { container } = render(<UserView value={undefined} />);
     expect(container.textContent).toBe('');
+  });
+});
+
+describe('FileInput (EA-C0 pre-stage — plain-URL value, host-owned upload seam)', () => {
+  it('URL text edit path calls onChange with the typed value', () => {
+    const onChange = vi.fn();
+    render(<FileInput ariaLabel="file" value="" onChange={onChange} />);
+    const input = screen.getByLabelText('file');
+    fireEvent.change(input, { target: { value: 'https://example.com/a.png' } });
+    expect(onChange).toHaveBeenCalledWith('https://example.com/a.png');
+  });
+
+  it('clearing the text input calls onChange with undefined', () => {
+    const onChange = vi.fn();
+    render(<FileInput ariaLabel="file" value="https://example.com/a.png" onChange={onChange} />);
+    const input = screen.getByLabelText('file');
+    fireEvent.change(input, { target: { value: '' } });
+    expect(onChange).toHaveBeenCalledWith(undefined);
+  });
+
+  it('the clear button calls onChange with undefined', () => {
+    const onChange = vi.fn();
+    render(<FileInput ariaLabel="file" value="https://example.com/a.png" onChange={onChange} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(onChange).toHaveBeenCalledWith(undefined);
+  });
+
+  it('no file picker renders when onUpload is absent', () => {
+    render(<FileInput ariaLabel="file" value="" onChange={vi.fn()} />);
+    expect(screen.queryByLabelText('file — upload')).not.toBeInTheDocument();
+  });
+
+  it('selecting a file calls onUpload then onChange with the resolved url', async () => {
+    const onChange = vi.fn();
+    const onUpload = vi.fn().mockResolvedValue({ url: 'https://cdn.example.com/uploaded.png' });
+    render(<FileInput ariaLabel="file" value="" onChange={onChange} onUpload={onUpload} />);
+    const picker = screen.getByLabelText('file — upload') as HTMLInputElement;
+    const file = new File(['content'], 'photo.png', { type: 'image/png' });
+    fireEvent.change(picker, { target: { files: [file] } });
+    expect(onUpload).toHaveBeenCalledWith(file);
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith('https://cdn.example.com/uploaded.png'),
+    );
+  });
+
+  it('onUpload rejection leaves the value unchanged and surfaces role="alert"', async () => {
+    const onChange = vi.fn();
+    const onUpload = vi.fn().mockRejectedValue(new Error('too large'));
+    render(
+      <FileInput
+        ariaLabel="file"
+        value="https://example.com/a.png"
+        onChange={onChange}
+        onUpload={onUpload}
+      />,
+    );
+    const picker = screen.getByLabelText('file — upload') as HTMLInputElement;
+    const file = new File(['content'], 'photo.png', { type: 'image/png' });
+    fireEvent.change(picker, { target: { files: [file] } });
+    expect(await screen.findByRole('alert')).toHaveTextContent('too large');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByLabelText('file')).toHaveValue('https://example.com/a.png');
+  });
+
+  it('a11y attrs: aria-required/aria-invalid/aria-describedby pass through', () => {
+    render(
+      <FileInput
+        ariaLabel="file"
+        value=""
+        onChange={vi.fn()}
+        required
+        invalid
+        describedBy="file-help"
+      />,
+    );
+    const input = screen.getByLabelText('file');
+    expect(input).toHaveAttribute('aria-required', 'true');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAttribute('aria-describedby', 'file-help');
   });
 });

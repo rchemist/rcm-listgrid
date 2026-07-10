@@ -93,6 +93,14 @@ export {
 export { getCurrentValue, isBlank, isDirty, normalizeEmptyValue, resetValue } from './field/value';
 export { isEquals, isEqualCollection } from './util/compare';
 
+// --- URL classification (EA-C0 pre-stage; consumers: File/Image field
+// external-URL bypass, ea-c-scout-briefing.md decision ⑥) ---
+export { isExternalUrl } from './util/url';
+
+// --- shared File/Image upload constraint config (EA-C0 pre-stage; consumers:
+// FileField/ImageField, EA-C fan-out) ---
+export type { AssetConfig } from './field/asset-config';
+
 // --- phone formatting (EA-B0 PART D item 5; TelephoneNumberField consumer) ---
 export { formatPhoneNumber, removePhoneNumberHyphens } from './util/phone-util';
 
