@@ -78,7 +78,7 @@
 #### Phase EF — 명령형 라이프사이클 기반 (대량 이식 전 필수) **[O]**
 
 - [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선)·useFieldMeta(D4)·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
-- [x] **EF2 [O] onChanges cascade** ✅ 2026-07-11 · `1bc3f06` · FormMutator+batch loop-guard+빌더3종(setMeta) · +22 unit(1160 green)·E2E 5/5·full gate ✓·deviations 4→§Needs Review · [detail](./progress-archive/phase-e-track-tasks.md)
+- [x] **EF2 [O] onChanges cascade** ✅ `1bc3f06` · FormMutator+loop-guard+빌더3종 · +22 unit(1160 green)·E2E 5/5·deviations 4→§Needs Review · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF3 [O] initializeFormStore 파이프** — fetch→onFetchData→onInitialize(순차 clone 변형)→build→hydrate→init추가 필드 재바인딩. EntityForm 훅 리스트+빌더 + react useEntityFormInitializer. 구 EntityForm.tsx:162-306. 대상 state+schema-core+react.
 - [ ] **EF4 [O] 동적 필드 add/remove + structure-version** — store.addField/removeField(슬라이스)+late-add 재바인딩(구 268-302), ViewEntityForm version 시 groups 재도출(구 shouldReload 대체). EF3 의존.
 - [ ] **EF5 validate-on-change (opt-in)** — setValue 후 debounce validateField+touched 게이팅. 낮은 위험, cascade 뒤.
