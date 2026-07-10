@@ -1,4 +1,5 @@
 import type { EntityField } from './field/entity-field';
+import type { OnChangesHandler } from './field/form-mutator';
 import type { RenderType } from './field/types';
 
 // EntityForm — the single declaration from which BOTH the list and the form
@@ -42,6 +43,14 @@ export class EntityForm {
   private readonly groups = new Map<string, FieldGroupDef>();
   private groupSeq = 0;
   private tabSeq = 0;
+  /**
+   * Imperative lifecycle hooks (EF2): dispatched by the form store after
+   * setValue (see @listgrid/state createFormStore). Successor to the 0.3.x
+   * `EntityForm.onChanges` array (src/listgrid/config/EntityForm.tsx:94,
+   * 122-127) — now typed against the state-agnostic FormMutator instead of
+   * carrying the store/EntityForm instance directly (ADR-0003 purity).
+   */
+  private onChanges: OnChangesHandler[] = [];
 
   constructor(name: string, fetchUrl: string) {
     this.name = name;
@@ -60,6 +69,11 @@ export class EntityForm {
   /** Mark this instance as an existing-record (update) form. */
   withId(id: string): this {
     this.id = id;
+    return this;
+  }
+  /** Append an onChanges handler (EF2); registration order is dispatch order. */
+  withOnChanges(handler: OnChangesHandler): this {
+    this.onChanges.push(handler);
     return this;
   }
 
@@ -109,6 +123,10 @@ export class EntityForm {
   getRenderType(): RenderType {
     return this.id !== undefined ? 'update' : 'create';
   }
+  /** registered onChanges handlers, in dispatch order (EF2). */
+  getOnChanges(): OnChangesHandler[] {
+    return this.onChanges;
+  }
 
   /** All fields, ordered by their declared `order`. */
   getFields(): EntityField[] {
@@ -148,6 +166,8 @@ export class EntityForm {
     for (const [k, v] of this.tabs) copy.tabs.set(k, { ...v });
     for (const [k, v] of this.groups) copy.groups.set(k, { ...v });
     for (const f of this.fields) copy.fields.push(f.clone(includeValue));
+    // propagate onChanges (0.3.x parity — src/listgrid/config/EntityForm.tsx:94).
+    copy.onChanges = [...this.onChanges];
     return copy;
   }
 }

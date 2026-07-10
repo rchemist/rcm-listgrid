@@ -7,6 +7,7 @@ import {
   type FieldEvalContext,
   type FieldMetaOverride,
   type FieldValueSlice,
+  type FormMutator,
   type RenderType,
   type Session,
 } from '@listgrid/schema-core';
@@ -34,6 +35,11 @@ export interface FormStoreState {
   formErrors: string[];
 
   // --- actions ---
+  /**
+   * Writes field `name`'s value slice, then dispatches the EntityForm's
+   * registered onChanges handlers (EF2) — see createFormStore's dispatch/
+   * loop-guard doc comment below for the batching contract.
+   */
   setValue(name: string, value: unknown): void;
   getValue(name: string): unknown;
   /** fill fetched values from a server entity (create → update). */
@@ -95,121 +101,200 @@ export function createFormStore(
     return ctx;
   }
 
-  return createStore<FormStoreState>((set, get) => ({
-    fields: initialFields,
-    meta: {},
-    renderType,
-    tabIndex: entityForm.getTabs()[0]?.id ?? 'default',
-    initialized: true,
-    saving: false,
-    formErrors: [],
+  return createStore<FormStoreState>((set, get) => {
+    // --- EF2 onChanges cascade: dispatch + loop-guard -----------------------
+    // A top-level setValue(name, value) call starts a "batch" — a Set of
+    // field names already dispatched during this synchronous call stack. A
+    // nested mutator.setValue (called from inside a handler) ALWAYS writes
+    // the value, but only dispatches onChanges for that field if it is not
+    // already in the batch set (added when dispatched). This lets a
+    // legitimate cascade chain A -> B -> C run to completion while stopping
+    // an A -> B -> A re-entry loop after B's dispatch (A is already
+    // in-batch, so the re-entrant A write does not re-dispatch A's
+    // handlers). The batch is cleared when the top-level call's dispatch
+    // stack unwinds (finally), so a LATER, unrelated top-level setValue
+    // starts a fresh batch.
+    //
+    // Scope caveat: this guard covers the SYNCHRONOUS batch only. onChanges
+    // handlers are dispatched fire-and-forget (0.3.x parity —
+    // EntityForm.tsx:122-127) — an async handler's mutator.setValue, made
+    // after its await resolves, runs after the originating batch has
+    // already cleared, so it starts a brand-new top-level batch. This
+    // matches the 0.3.x fire-and-forget exposure: an async handler's writes
+    // are not covered by the loop-guard that protected the synchronous
+    // chain it was dispatched from.
+    let dispatchBatch: Set<string> | null = null;
 
-    getValue(name) {
-      return getCurrentValue(get().fields[name], get().renderType);
-    },
+    function dispatchOnChanges(changedField: string): void {
+      for (const handler of entityForm.getOnChanges()) {
+        const result = handler(mutator, changedField);
+        if (result && typeof (result as Promise<void>).then === 'function') {
+          // fire-and-forget (see doc comment above) — swallow rejections so
+          // an async handler failure cannot surface as an unhandled
+          // rejection.
+          (result as Promise<void>).catch(() => {});
+        }
+      }
+    }
 
-    setValue(name, value) {
+    function writeValue(name: string, value: unknown): void {
       set((s) => {
         const prev = s.fields[name] ?? {};
         const next: FieldValueSlice = { ...prev, current: value };
         next.dirty = computeDirty(next);
         return { fields: { ...s.fields, [name]: next } };
       });
-    },
+    }
 
-    hydrate(data) {
-      set((s) => {
+    function performSetValue(name: string, value: unknown): void {
+      const isTopLevel = dispatchBatch === null;
+      if (isTopLevel) dispatchBatch = new Set<string>();
+      const batch = dispatchBatch as Set<string>;
+      try {
+        writeValue(name, value);
+        if (!batch.has(name)) {
+          batch.add(name);
+          dispatchOnChanges(name);
+        }
+      } finally {
+        if (isTopLevel) dispatchBatch = null;
+      }
+    }
+
+    // Store-backed FormMutator adapter (EF2) injected into every onChanges
+    // handler. Keeps schema-core's OnChangesHandler state-agnostic
+    // (ADR-0003) while giving handlers read/write access to this store.
+    const mutator: FormMutator = {
+      getValue(name) {
+        return get().getValue(name);
+      },
+      getValues() {
+        const s = get();
+        const values: Record<string, unknown> = {};
+        for (const [n, slice] of Object.entries(s.fields)) {
+          values[n] = getCurrentValue(slice, s.renderType);
+        }
+        return values;
+      },
+      setValue(name, value) {
+        performSetValue(name, value);
+      },
+      setMeta(name, partial) {
+        get().setMeta(name, partial);
+      },
+    };
+
+    return {
+      fields: initialFields,
+      meta: {},
+      renderType,
+      tabIndex: entityForm.getTabs()[0]?.id ?? 'default',
+      initialized: true,
+      saving: false,
+      formErrors: [],
+
+      getValue(name) {
+        return getCurrentValue(get().fields[name], get().renderType);
+      },
+
+      setValue(name, value) {
+        performSetValue(name, value);
+      },
+
+      hydrate(data) {
+        set((s) => {
+          const fields = { ...s.fields };
+          for (const field of entityForm.getFields()) {
+            const name = field.getName();
+            const prev = fields[name] ?? {};
+            // the loaded record is the new baseline: fetched = record value, and
+            // current follows it (no edits yet) so the create-time default is
+            // dropped (0.3.x update-mode: defaults don't apply). dirty = false.
+            const next: FieldValueSlice = {
+              ...prev,
+              fetched: data[name],
+              current: data[name],
+              dirty: false,
+            };
+            fields[name] = next;
+          }
+          return { fields, renderType: 'update' as RenderType, initialized: true };
+        });
+      },
+
+      setMeta(name, partial) {
+        set((s) => ({ meta: { ...s.meta, [name]: { ...(s.meta[name] ?? {}), ...partial } } }));
+      },
+
+      getMeta(name) {
+        return get().meta[name];
+      },
+
+      async validateField(name) {
+        const field = entityForm.getField(name);
+        if (!field) return true;
+        const errs = await field.validate(buildCtx(get(), name), get().meta[name]);
+        set((s) => ({
+          fields: {
+            ...s.fields,
+            [name]: { ...s.fields[name], errors: errs.map((e) => ({ message: e.message })) },
+          },
+        }));
+        return errs.length === 0;
+      },
+
+      async validateAll() {
+        const s = get();
+        let valid = true;
         const fields = { ...s.fields };
         for (const field of entityForm.getFields()) {
           const name = field.getName();
-          const prev = fields[name] ?? {};
-          // the loaded record is the new baseline: fetched = record value, and
-          // current follows it (no edits yet) so the create-time default is
-          // dropped (0.3.x update-mode: defaults don't apply). dirty = false.
-          const next: FieldValueSlice = {
-            ...prev,
-            fetched: data[name],
-            current: data[name],
-            dirty: false,
-          };
-          fields[name] = next;
+          const errs = await field.validate(buildCtx(s, name), s.meta[name]);
+          fields[name] = { ...fields[name], errors: errs.map((e) => ({ message: e.message })) };
+          if (errs.length > 0) valid = false;
         }
-        return { fields, renderType: 'update' as RenderType, initialized: true };
-      });
-    },
+        set({ fields });
+        return valid;
+      },
 
-    setMeta(name, partial) {
-      set((s) => ({ meta: { ...s.meta, [name]: { ...(s.meta[name] ?? {}), ...partial } } }));
-    },
+      reset() {
+        set((s) => {
+          const fields: Record<string, FieldValueSlice> = {};
+          for (const [name, slice] of Object.entries(s.fields)) {
+            fields[name] = resetValue(slice, s.renderType);
+          }
+          return { fields };
+        });
+      },
 
-    getMeta(name) {
-      return get().meta[name];
-    },
+      isDirty() {
+        return Object.values(get().fields).some((slice) => computeDirty(slice));
+      },
 
-    async validateField(name) {
-      const field = entityForm.getField(name);
-      if (!field) return true;
-      const errs = await field.validate(buildCtx(get(), name), get().meta[name]);
-      set((s) => ({
-        fields: {
-          ...s.fields,
-          [name]: { ...s.fields[name], errors: errs.map((e) => ({ message: e.message })) },
-        },
-      }));
-      return errs.length === 0;
-    },
+      setSaving(saving) {
+        set({ saving });
+      },
 
-    async validateAll() {
-      const s = get();
-      let valid = true;
-      const fields = { ...s.fields };
-      for (const field of entityForm.getFields()) {
-        const name = field.getName();
-        const errs = await field.validate(buildCtx(s, name), s.meta[name]);
-        fields[name] = { ...fields[name], errors: errs.map((e) => ({ message: e.message })) };
-        if (errs.length > 0) valid = false;
-      }
-      set({ fields });
-      return valid;
-    },
+      setTabIndex(tabIndex) {
+        set({ tabIndex });
+      },
 
-    reset() {
-      set((s) => {
-        const fields: Record<string, FieldValueSlice> = {};
-        for (const [name, slice] of Object.entries(s.fields)) {
-          fields[name] = resetValue(slice, s.renderType);
+      toSaveData() {
+        const s = get();
+        const out: Record<string, unknown> = {};
+        for (const field of entityForm.getFields()) {
+          if (field.exceptOnSave) continue;
+          const name = field.getName();
+          const value = getCurrentValue(s.fields[name], s.renderType);
+          if (field.type === 'manyToOne' && value && typeof value === 'object') {
+            const idField = (field as { getIdField?: () => string }).getIdField?.() ?? 'id';
+            out[`${name}Id`] = (value as Record<string, unknown>)[idField];
+          } else {
+            out[name] = value;
+          }
         }
-        return { fields };
-      });
-    },
-
-    isDirty() {
-      return Object.values(get().fields).some((slice) => computeDirty(slice));
-    },
-
-    setSaving(saving) {
-      set({ saving });
-    },
-
-    setTabIndex(tabIndex) {
-      set({ tabIndex });
-    },
-
-    toSaveData() {
-      const s = get();
-      const out: Record<string, unknown> = {};
-      for (const field of entityForm.getFields()) {
-        if (field.exceptOnSave) continue;
-        const name = field.getName();
-        const value = getCurrentValue(s.fields[name], s.renderType);
-        if (field.type === 'manyToOne' && value && typeof value === 'object') {
-          const idField = (field as { getIdField?: () => string }).getIdField?.() ?? 'id';
-          out[`${name}Id`] = (value as Record<string, unknown>)[idField];
-        } else {
-          out[name] = value;
-        }
-      }
-      return out;
-    },
-  }));
+        return out;
+      },
+    };
+  });
 }

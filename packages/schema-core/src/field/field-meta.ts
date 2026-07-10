@@ -11,6 +11,14 @@ export interface FieldMetaOverride {
   required?: boolean;
   hidden?: boolean;
   readonly?: boolean;
-  options?: SelectOption[];
+  /**
+   * `| undefined` (beyond plain optionality) is intentional: EF2's
+   * changeSelectOptions builder explicitly writes `{ options: undefined }`
+   * to REVERT a prior options override back to the field's declared list
+   * (the merge is `metaOptions ?? declaredOptions` — see FieldRenderer's
+   * SelectRenderer) — under `exactOptionalPropertyTypes`, that explicit-undefined
+   * write needs the wider type, not just an absent key.
+   */
+  options?: SelectOption[] | undefined;
   validations?: Validation[];
 }

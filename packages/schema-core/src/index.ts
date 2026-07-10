@@ -52,6 +52,9 @@ export {
 export type { EntityItem, EntityField } from './field/entity-field';
 export type { FieldMetaOverride } from './field/field-meta';
 
+// --- imperative lifecycle: onChanges cascade (EF2) ---
+export type { FormMutator, OnChangesHandler } from './field/form-mutator';
+
 // --- permission policy (unified) ---
 export {
   PermissionPolicy,
@@ -112,6 +115,16 @@ export type { SubCollectionConfig } from './field/sub-collection-field';
 // --- EntityForm declaration (charter C1) ---
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
+
+// --- onChanges builder catalog (EF2; port of 0.3.x
+// src/listgrid/config/OnChangeEntityForm.ts:76-361 — changeHidden/
+// changeRequired/changeSelectOptions only; derivedValidations is out of
+// scope, later task) ---
+export { changeHidden } from './onchanges/change-hidden';
+export type { ConditionalMetaClause } from './onchanges/change-hidden';
+export { changeRequired } from './onchanges/change-required';
+export { changeSelectOptions } from './onchanges/change-select-options';
+export type { ConditionalSelectOptionsClause } from './onchanges/change-select-options';
 
 // --- SearchForm (list query model, charter C9) ---
 export { SearchForm } from './search/search-form';
