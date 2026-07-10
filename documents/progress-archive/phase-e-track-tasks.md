@@ -240,5 +240,22 @@ proposed_helper: 없음.
 - deviation 2(건전): withDefaultValue에 Record 허용(구엔진 누락 보정, 추가적)·Map 협소화(승인된 fallback).
 - **Dead 3종 연기 확정**(scout 증거): Rule(rule/ 1264줄 — 채택 0, 가장 깨끗한 dead 증거)·XrefPrice(535줄, 자체 opt-in 격리)·XrefAvailableDate(505줄, 순수 미채택). **Xref 생존 2종(Mapping 29·Prefer 2 사이트)은 EA-D2로** — ViewListGrid 확장(selection/subCollection/onFetched/fields) 선행 병목, EC3 실폼 요구 주도 설계 예정. [브리핑](../analysis/2026-07-11/ea-d-scout-briefing.md).
 
+---
+
+## EA phase 리뷰 게이트 (2026-07-11) — confirmed 5 / refuted 5
+
+**실행**: 3차원(correctness-상호작용·intent-conformance·dedup backstop) find(sonnet)+opus verify — 13 agents/687k tokens/8min · diff `ab12255..HEAD`(108파일 +11.4k줄) · 무인 FIND-ONLY → EA-R1로 라우팅
+
+| # | sev(verify 후) | 발견 | 라우팅 |
+|---|---|---|---|
+| 1 | **blocking**·high | **InlineMap fixed-keys `{key:''}` required 우회** — 입력 후 지우면 빈 문자열 잔존→non-empty object→isBlank 통과. 재설계가 없앤다던 #1289 모드의 잔존 변종(빈 재현 확인). free 모드 회귀핀만 있고 fixed 모드 미커버 | EA-R1① |
+| 2 | non-blocking·med(→하향: latent, 확인된 소비자 없음) | Image multi(maxCount>1) 편집 시 value[0]만 렌더·쓰기가 `[next]`로 tail 소실 — file-renderer multi 모드와 비대칭(기록 부재=간과) | EA-R1② |
+| 3 | non-blocking·high | Tag 렌더러만 EF1 meta-options 관례 미준수(형제 4종은 전부 준수) — changeSelectOptions가 Tag에 조용히 no-op | EA-R1③ |
+| 4 | non-blocking·high | Password `static create` 잔존(배치 관례: message-view 선례로 드롭) | EA-R1④ |
+| 5 | non-blocking·high | file-field가 buildAssetConfig를 verbatim 사설 재구현(세션이 공유 승격 시 통합 보류했던 것 — 게이트가 회수) | EA-R1⑤ |
+
+**refuted 5**(dedup 관찰 — 통합 비용>이득 판정, 기록만): Time/Datetime sentinel 리졸버 구조 유사(포맷 차이 실질)·MultiSelect/CustomOption/Checkbox 체크박스그룹 3중 구현(idiom 수준)·a11y 배선 미세 차이·마스킹 blur-commit 3중 관례(공유 훅화 시기상조)·InlineMap config rebuild 4회(파일 내 국소).
+**intent-conformance 이탈 0** — 순수성·descope·plain-value·cascade 범위 전부 준수 확인.
+
 
 

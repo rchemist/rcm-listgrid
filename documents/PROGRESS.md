@@ -83,6 +83,7 @@
 - [x] **EA-B 모더릿 5종+B0/B1** ✅ `4727c22`(pre-stage)+`7cf849f`(wave) · Html 드롭(중복 판정)·cascade seam·배열 isDirty 시스테믹 해소 · +136 테스트(1566 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [x] **EA-C 업로드 3종+C0** ✅ `544014c`+`b7341dd` · plain string 값+FileInput 슬롯(호스트 업로드)·ContentAsset 연기 · +104 테스트(1670 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [x] **EA-D InlineMap+dead 정리** ✅ `1f305f1` · store-direct-write 재설계(#1289류 원천 소멸)·dead 3종 연기·Xref→EA-D2 · +50 테스트(1720 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
+- [~] **EA-R1 (phase 리뷰게이트 수정 5건)** — ① InlineMap fixed-keys `''`값 required 우회(**blocking**, 재현됨 — buildResult에서 빈값 entry 필터+회귀) ② Image multi 데이터 소실(file-renderer multi 모드 미러) ③ Tag meta-options 관례 ④ Password static create 제거 ⑤ file-field buildAssetConfig 공유 import
 - [ ] **EA-D2 Xref 인프라+이식** (reorder: EC2 뒤·EC3 앞) — ViewListGrid 확장 4종(selection/subCollection/onFetched/fields — [O] 설계, EC3 실폼 요구 주도) → XrefMapping(29 사이트)+XrefPrefer(+'xrefPreferMapping' 타입). 드래그 재정렬 별도 판단.
 
 #### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
