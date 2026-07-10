@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · **하드닝 H 완료** · **Next up**: E-트랙 우선순위 결정 대기(§Open Questions — E2 폼 지정 vs 클린필드 배치 vs infra필드). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 착수(전 필드 이식+동작실증+Daum, 사용자 확정) · **Next up**: EF1(META 반응화 — 명령형 라이프사이클 초석). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 (하드닝 H 완료 — H1 M2O 참조해소 캐시 `e48a21f` + H2 필드 a11y `8144df4`. 전체 1129 unit + 5 E2E green. 남음 확장 E1(필드타입)/E2(GJCU 폼). 대기(외부): 0.3.26·alpha.0 publish 승인)
+**Last updated**: 2026-07-11 (E-트랙 방향 확정+계획 수립 — 사용자: 전 필드 이식+동작실증+Daum 주소. Understand 워크플로우로 30필드/라이프사이클 갭/GJCU/Daum 매핑 → [E계획](./plans/e-track-field-parity.md). **핵심: 명령형 라이프사이클(onInit/onChanges/META반응성) 전무 → EF 기반 먼저.** Next=EF1. 전체 1129 unit+5 E2E green)
 
 ## Goal
 
@@ -45,7 +45,7 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 | — | 이 문서 §Tasks |
+| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H 완료·E 착수) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
@@ -65,13 +65,42 @@
 - [x] **H1** id→entity 캐시 ✅ 2026-07-11 · `e48a21f` · AdapterProvider seam에 adapter-scoped 참조해소 캐시(`useReferenceResolver`, dedup+실패시 evict) · react 7/7·College+dean M2O E2E 2/2·gate green(1120→1123)
 - [x] **H2** a11y ✅ 2026-07-11 · `8144df4` · aria-required/invalid/describedby(입력↔에러 연결) + focus-first-error(submit 실패) + Modal 포커스(open→dialog·close→복귀) · react 9/9·E2E 5/5·gate green(1124→1129)
 
-### E — 확장
+### E — 확장 (사용자 확정 2026-07-11: 전 필드 이식 + 동작 실증 + Daum 주소) · [계획](./plans/e-track-field-parity.md)
 
 - [x] **E·Email/Phone** Email/Phone 필드클래스(내장 검증, C4 "클래스1+렌더러1" 패턴 실증, Subject E2E) · `20f5156`
-- [ ] **E1** 나머지 필드타입 이식(규율2, 1필드=1커밋+테스트) — 구엔진 ~40종 미이식. **(A) 클린 포트**(client-side, infra 무관): Password·Link·Time/Month/Year·MultiSelect·Tag·Color·Html·CustomOption. **(B) 결정 필요**: File/Image/Profile(업로드 seam)·주소/InlineMap(주소검색 API)·Qr(QR dep)·Xref×4/MappedJoin/Rule(도메인 매핑). 착수 전 우선순위 결정 → §Open Questions.
-- [ ] **E2** GJCU 폼 1~2종 추가 재구현 — 신 엔진 breadth 실증(E2E 동반). 대상 폼이 정해지면 그 폼이 쓰는 필드로 E1 자동 확정.
 
-**Next up**: E1(필드타입 — File/Tag/주소 등) → E2(GJCU 폼). 순서 무관·독립. E1은 다항목이라 착수 시 필드별 체크박스로 전개. 하드닝 H 트랙 완료.
+**핵심**: 신 엔진은 선언적 라이프사이클(dependsOn cascade)만 있고 **명령형(onInitialize/onChanges/META 반응성)이 전무** → 필드 렌더만 이식하면 동작이 조용히 no-op. **Phase EF(기반) 먼저 → EA(필드 대량) → EB(주소) → EC(폼+E2E).** 근거·상세 [계획](./plans/e-track-field-parity.md) + [원자료](./analysis/2026-07-11/e-track-understand-workflow.md).
+
+#### Phase EF — 명령형 라이프사이클 기반 (대량 이식 전 필수) **[O]**
+
+- [ ] **EF1 [O] META 반응화** (모든 것을 막음) — mutable per-field override(required/hidden/readonly/options/validations)를 store meta-slice로, 렌더러 구독. 현: 렌더러가 frozen field에서 meta 읽음(FieldRenderer.tsx:44-74·default-renderers.tsx:150). 대상 state+react. 검증: setMeta→리렌더 단위테스트.
+- [ ] **EF2 [O] onChanges cascade** — setValue 후 ordered onChanges(store,field) 훅 dispatch(형제 setValue·meta mutate·loop-guard) + 구 OnChangeEntityForm.ts:76-361 빌더 카탈로그 이식(EF1 위). 대상 state+schema-core.
+- [ ] **EF3 [O] initializeFormStore 파이프** — fetch→onFetchData→onInitialize(순차 clone 변형)→build→hydrate→init추가 필드 재바인딩. EntityForm 훅 리스트+빌더 + react useEntityFormInitializer. 구 EntityForm.tsx:162-306. 대상 state+schema-core+react.
+- [ ] **EF4 [O] 동적 필드 add/remove + structure-version** — store.addField/removeField(슬라이스)+late-add 재바인딩(구 268-302), ViewEntityForm version 시 groups 재도출(구 shouldReload 대체). EF3 의존.
+- [ ] **EF5 validate-on-change (opt-in)** — setValue 후 debounce validateField+touched 게이팅. 낮은 위험, cascade 뒤.
+- [ ] **EF-gate** — EF1~4 착지 확인 + onInitialize/onChanges 특성화 오라클(구·신 대조) 후 EA 착수.
+
+#### Phase EA — 필드 전수 이식 (EF1~4 후, wave별 전개) **[S, 복잡건 O]**
+
+전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
+- [ ] **EA-A 트리비얼/고빈도** — Checkbox·MultiSelect·Password·Month·Year·Time·Link·Tag·ColorPreset·MessageView·Profile·MappedJoin
+- [ ] **EA-B 모더릿/고빈도** — Datetime·CustomOption·Html·Birthday·TelephoneNumber·Color(⚠dynamic Tailwind 금지)
+- [ ] **EA-C 업로드** — File·Image·MultipleAsset·ContentAsset (**업로드 backend seam 결정** §Open Q)
+- [ ] **EA-D xref/도메인** — XrefMapping·XrefPrefer·XrefPrice·XrefAvailableDate·Rule·InlineMap(⚠pendingRef)
+
+#### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
+
+- [ ] **EB1** schema-core AddressField(exceptOnSave 가상 composite) + applyFullAddressFields(flat 형제 required) — form-store 무변경
+- [ ] **EB2** react AddressRenderer — 형제 useFieldValue + useUI 2단 모달 + `<DaumPostcode>` 직접 import + onComplete→형제 setValue fan-out. peerDep react-daum-postcode. (Kakao 지도 연기)
+
+#### Phase EC — EntityForm 사용예 + E2E (동작 실증)
+
+- [ ] **EC1** StudentAddress 재현(주소 baseline, onInit/onChanges 0) + E2E
+- [ ] **EC2** Collabo 재현(dynamic options·조건부 required/hidden·M2O 자동채움·file·submit transform) + E2E — EF2/EF3 실증
+- [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
+- [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
+
+**Next up**: **EF1** (META 반응화 — 명령형 라이프사이클의 초석, 이후 전부 차단 해제). 하드닝 H 완료.
 
 ---
 
@@ -101,7 +130,8 @@
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독.
 - [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
 - [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 실 worklist는 §Tasks(하드닝/확장 트랙)로 승격됨. **하드닝 H 트랙 완료**(게이트·CI·SubColl·H1 캐시·H2 a11y). 남음 = 확장 E 트랙(E1/E2).
-- [ ] **E-트랙 우선순위 (도메인/우선순위 결정 — 사용자 선택 필요)** — 하드닝 완료, 확장 E1은 구엔진 ~40 필드타입 중 무엇을 이식할지 결정 필요(규율1: 대상 폼 없는 speculative breadth 금지). 선택지: **① E2 먼저**(우선할 실제 GJCU 폼 1~2종 지정 → 그 폼이 쓰는 필드로 E1 자동 확정, 헌장 보존검증3 정합) · **② 클린 필드 배치 포트**(A군: Password/Link/Time/MultiSelect/Tag/Color 등 순차) · **③ infra 필드 진입**(File 업로드 seam / 주소검색 API / Xref 도메인 — 각각 선결 결정 동반). 미선택 시 여기서 대기.
+- [x] **E-트랙 우선순위 → 전부 (사용자 확정 2026-07-11)** — 구엔진 전 필드 이식 + 동작(onInitialize/onChanges/state) 실증 + Daum 주소(무료). GJCU 것 활용/창작 자유. 계획: [e-track-field-parity.md](./plans/e-track-field-parity.md). foundation-first(EF→EA→EB→EC).
+- [ ] **업로드 backend seam (EA-C 착수 시 결정)** — File/Image/MultipleAsset/ContentAsset 이식은 업로드 저장/서빙 방식 필요. GJCU는 asset 서버 사용. sample 목업에 업로드 endpoint를 둘지 vs BackendAdapter에 upload 시그니처 추가 vs 외부 asset URL만 지원. EA-C 도달 시 GJCU 관례 확인 후 결정.
 
 ## 완료 기록 (페이즈 완료 시 progress-archive로 이동)
 
