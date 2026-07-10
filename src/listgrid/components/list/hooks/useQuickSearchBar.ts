@@ -100,8 +100,14 @@ export function getQuickSearchLabel(
 }
 
 export const useQuickSearchBar = (props: QuickSearchBarProps) => {
-  const { quickSearchValue, searchForm, onChangeSearchForm, listFields, quickSearchProperty } =
-    props;
+  const {
+    quickSearchValue,
+    searchForm,
+    onChangeSearchForm,
+    listFields,
+    quickSearchProperty,
+    defaultPageSize,
+  } = props;
   const { t } = getTranslation();
   const [search, setSearch] = useState<string>(quickSearchValue ?? '');
 
@@ -110,9 +116,9 @@ export const useQuickSearchBar = (props: QuickSearchBarProps) => {
   }, [quickSearchValue]);
 
   useEffect(() => {
-    const globalPageSize = getGlobalPageSize();
-    if (searchForm.getPageSize() !== globalPageSize) {
-      onChangeSearchForm(searchForm.clone().withPage(0).withPageSize(globalPageSize));
+    const pageSize = defaultPageSize ?? getGlobalPageSize();
+    if (searchForm.getPageSize() !== pageSize) {
+      onChangeSearchForm(searchForm.clone().withPage(0).withPageSize(pageSize));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
