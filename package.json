@@ -162,17 +162,39 @@
   },
   "typesVersions": {
     "*": {
-      "next": ["./dist/adapters/next/index.d.ts"],
-      "form/SearchForm": ["./dist/listgrid/form/SearchForm.d.ts"],
-      "form/Type": ["./dist/listgrid/form/Type.d.ts"],
-      "api": ["./dist/listgrid/api/index.d.ts"],
-      "misc": ["./dist/listgrid/misc/index.d.ts"],
-      "headless": ["./dist/listgrid/ui/headless.d.ts"],
-      "qr": ["./dist/qr.d.ts"],
-      "address": ["./dist/address.d.ts"],
-      "api-spec": ["./dist/api-spec.d.ts"],
-      "xref-price": ["./dist/xref-price.d.ts"],
-      "excel": ["./dist/excel.d.ts"]
+      "next": [
+        "./dist/adapters/next/index.d.ts"
+      ],
+      "form/SearchForm": [
+        "./dist/listgrid/form/SearchForm.d.ts"
+      ],
+      "form/Type": [
+        "./dist/listgrid/form/Type.d.ts"
+      ],
+      "api": [
+        "./dist/listgrid/api/index.d.ts"
+      ],
+      "misc": [
+        "./dist/listgrid/misc/index.d.ts"
+      ],
+      "headless": [
+        "./dist/listgrid/ui/headless.d.ts"
+      ],
+      "qr": [
+        "./dist/qr.d.ts"
+      ],
+      "address": [
+        "./dist/address.d.ts"
+      ],
+      "api-spec": [
+        "./dist/api-spec.d.ts"
+      ],
+      "xref-price": [
+        "./dist/xref-price.d.ts"
+      ],
+      "excel": [
+        "./dist/excel.d.ts"
+      ]
     }
   },
   "files": [
@@ -288,6 +310,7 @@
     "@eslint/js": "^10.0.1",
     "@headlessui/react": "^2.2.9",
     "@iconify/react": "^4.1.1",
+    "@playwright/test": "^1.61.1",
     "@tabler/icons-react": "^2.30.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
