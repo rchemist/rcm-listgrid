@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active (설계 완료 · 작업 미착수)
+**Status**: active (P0 코드 완료 — P0-10 publish + 브랜치 전환만 사용자 승인 대기)
 **Engine**: claude (codex eligible 태스크는 개별 표기 — P3-4 표면 감사표 등 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (PROGRESS 설계 — P0-1부터 착수 가능)
+**Last updated**: 2026-07-10 (P0-1~P0-9 완료 + 0.3.26 릴리스 준비 — `p0-hotfixes` 브랜치, 전체 게이트 green(962 tests), 14 커밋; publish/전환만 승인 대기)
 
 ## Goal
 
@@ -38,7 +38,7 @@
 
 | 페이즈 | 브랜치 | 상태 | 릴리스 | 요약 |
 |---|---|---|---|---|
-| P0 실버그 핫픽스 | main | ⬜ 미착수 | 0.3.26 | 확정 버그 9건 + 안전 기본값 + 환경 고정 |
+| P0 실버그 핫픽스 | `p0-hotfixes` | 🟡 코드완료 | 0.3.26 | 버그 9건+보안 3종+환경 완료 · publish/전환만 승인 대기 |
 | P1 워크스페이스+패키징 | v0.4 | ⬜ | alpha.0 | 스캐폴드 · tsup dual · CI · apps/sample 골조 |
 | P2 특성화 오라클 | main→공용 | ⬜ | (내부) | 행동 고정 테스트 4묶음 |
 | P3 계약 골격+감사표 | v0.4 | ⬜ | alpha.N | spec-first 게이트 · 파일럿 이식 |
@@ -55,20 +55,20 @@
 
 ### P0 — 실버그 핫픽스 (main, 0.3.26) — 모두 독립 태스크, 순서 무관
 
-여기서 고친 로직이 이후 이식 대상이 된다(버그째 이식 방지). 각 태스크 = 수정 + 회귀 테스트 + 기존 스위트 green.
+고친 로직이 이후 이식 대상. 실행: `p0-hotfixes` 브랜치(main off) 위 8-에이전트 워크플로우 fan-out → 중앙 적용·검증·태스크별 커밋. 전체 게이트 green(type-check·962 tests·lint·format·build). 상세는 커밋/CHANGELOG.
 
-- [ ] **P0-1 [S] min/max 검증 무력화 수정** — `src/listgrid/validations/Validation.tsx:109-124` `getValueAsNumber/getValueAsBoolean`: `??`보다 `===`가 먼저 평가되는 우선순위 버그. 같은 파일 `getValueAsString(:92-101)`이 올바른 참조 구현 — 동일 형태로 괄호 수정: `value?.current ?? (entityForm.getRenderType() === 'update' ? value?.fetched : value?.default)`. 테스트: update 모드에서 current가 있으면 current 검증 / `current=0` 보존 / `MinMaxNumberValidation` 실동작.
-- [ ] **P0-2 [S] DatetimeField 타입 오등록** — `src/listgrid/components/fields/DatetimeField.tsx:24` `super(name, order, 'date', …)` → `'datetime'`. 주의: 지금껏 죽은 코드였던 `transfer/Type.ts:565-576,607-610`의 datetime 분기가 처음 활성화됨 — Excel **range export + import** 왕복에서 시간 보존 테스트 필수. 필터는 `HeaderFieldFilter.tsx:172`가 'date'||'datetime' 양쪽 처리라 무회귀 예상(확인만).
-- [ ] **P0-3 [S] FieldRenderer onChange 2벌 통합 + 에러 삼킴 제거** — `src/listgrid/components/form/FieldRenderer.tsx:77-142`(handleFieldChange) vs `:240-310`(viewParams.onChange)이 축자 중복이며 두 IIFE 모두 `.catch()` 없음(validate/getManyToOneLink throw 시 unhandled rejection, 필드가 값·에러를 조용히 잃음). 공통 `applyFieldChange()` 헬퍼로 추출하고 IIFE 전체를 try/catch — catch에서 사용자 피드백(setErrors) 보장. 테스트: validator throw 시나리오.
-- [ ] **P0-4 [S] pageSize 우선순위 역전 수정** — `src/listgrid/components/list/hooks/useQuickSearchBar.ts:112-117`이 전역 localStorage 값으로 리스트별 `options.defaultPageSize`를 마운트 시 덮어씀(`useListGridLogic.ts:461`과 대조). 명시 지정 > 전역 저장값 > 라이브러리 기본 순으로 정정. 테스트: defaultPageSize=50 리스트가 전역=20이어도 50 유지.
-- [ ] **P0-5 [S] useLoadingStore 구독 배선** — `src/listgrid/loading/index.ts:12-29`: 훅 이름인데 구독 메커니즘 없음(상태 변경해도 리렌더 안 됨). zustand store로 교체(이미 의존성). `configureLoading`의 호스트 교체 계약은 유지. 테스트: 상태 변경 시 구독 컴포넌트 리렌더.
-- [ ] **P0-6 [H] clone 권한 aliasing** — `src/listgrid/config/EntityForm.tsx:51` `= this.manageEntityForm` → `= { ...this.manageEntityForm }`. 테스트: clone 후 원본의 withUpdatable 변경이 클론에 미전파.
-- [ ] **P0-7 [S] 보안 기본값 3종** (ADR-0006 §Decision 1·2·3) — ① `configureHtmlSanitizer((html)=>string)` 신설, 싱크 3곳(`HtmlField.tsx:34`, `ShowNotifications.tsx:90`, `ViewHelpIcon.tsx:28`)이 경유하도록 — 미설정 시 raw HTML 거부(이스케이프 텍스트 + dev warn). ② `MenuPermissionChecker.ts` 미설정 첫 호출 시 console.warn 1회 + 헤더 주석 'WRITE'→'ALL' 오기 정정. ③ `simpleCrypt.ts:9-11` 폴백 키 제거 — cryptKey 미설정 시 encrypt/decrypt throw. 테스트: `<img onerror=…>` 페이로드가 텍스트로 렌더 / warn 1회.
-- [ ] **P0-8 [S] 환경 고정 + 릴리스 게이트** (ADR-0007 P0) — `engines.node >=20` + `.nvmrc`(22 LTS) + ci.yml Node 20/22 매트릭스. jsdom localStorage 27건: 먼저 `src/test-setup.ts`에 localStorage 셋업/폴리필 또는 jsdom 옵션으로 해소 시도, 실패 시 .nvmrc 고정으로 봉쇄하고 사유 기록. `scripts/check-release-docs.mjs`(CHANGELOG 최상단 버전==package.json) 작성 + publish.yml 게이트 연결. eslint `no-explicit-any: error` + 기존 위반 파일은 파일 단위 disable로 동결(신규 유입만 차단). 수용: 고정 Node에서 `npm test` 전량 green.
-- [ ] **P0-9 [H] 잔재 정리** — `misc/index.ts:423-425` `http://127.0.0.1:8320` 폴백 제거(빈 문자열 + 미설정 warn) · `AdvancedSearchForm`(V1, 내부 사용처 0)에 `@deprecated` TSDoc + CHANGELOG 제거 예고.
-- [ ] **P0-10 [S] 0.3.26 마감 + v0.4 전환** — CHANGELOG 0.3.26 작성(게이트 스크립트 통과 확인) · version bump · 사용자 승인 후 publish · **전환 절차**: 이 PROGRESS를 v0.4 브랜치에 반영(`git checkout v0.4 && git merge main` — P0 시점엔 문서/픽스만이라 병합 가능; 이후 발산 시작) + main의 PROGRESS 상단에 "P1+는 v0.4 브랜치의 PROGRESS가 진실" 스텁 문구 추가. 이후 모든 PROGRESS 갱신은 **v0.4에 커밋**.
+- [x] **P0-1** ✅ `0f01861` · min/max 우선순위 괄호 수정(getValueAsString과 동형), current=0/false 보존 + MinMaxNumber 재동작, 회귀 6건 green
+- [x] **P0-2** ✅ `80329dd` · DatetimeField type 'date'→'datetime', Excel export/import 왕복 시간보존 테스트 green, 필터 무회귀 확인
+- [x] **P0-3** ✅ `ab82315` · `applyFieldChange()` 추출 + 두 진입점 try/catch→setErrors, unhandled rejection/에러삼킴 제거 (deviation: §Needs Review)
+- [x] **P0-4** ✅ `6d2320c` · defaultPageSize 명시값>전역>기본, 회귀 green (deviation: prop 스레딩 §Needs Review)
+- [x] **P0-5** ✅ `d6cdbfa` · useLoadingStore zustand화(반응성), configureLoading 호스트교체 계약 유지, 모든 caller 컴포넌트 내 훅
+- [x] **P0-6** ✅ `848ed1d` · clone `{...manageEntityForm}` 얕은복사, aliasing 회귀 green
+- [x] **P0-7** ✅ `04d120b` · configureHtmlSanitizer+싱크3 텍스트폴백/warn · simpleCrypt cryptKey 미설정 throw · menu warn+주석정정 (**Breaking** → §Needs Review)
+- [x] **P0-8** ✅ `214c85d`·`a786ff3`·`5cb4b9b` · localStorage 폴리필(Node26 27건) · engines/.nvmrc/CI 20·22+v0.4 · release-docs 게이트 · no-explicit-any error(135파일 동결)
+- [x] **P0-9** ✅ `fe58523` · ASSET_SERVER_URL 폴백제거(빈문자열+warn) · AdvancedSearchForm(v1) @deprecated
+- [~] **P0-10** 🟡 `898296a` · CHANGELOG 0.3.26 + version bump + 마이그레이션 리빙문서 완료 · **남음(승인): ① npm publish ② p0-hotfixes→main ③ main→v0.4 전환**
 
-**P0 게이트**: 신규 테스트 포함 전량 green · 0.3.26 publish · 소비자(edustack/GJCU) 무변경 동작.
+**P0 게이트**: 전량 green ✅(962) · publish ⏸(승인 대기) · 소비자 무변경은 **crypt/HTML/asset 3종 Breaking 확인 필요**(§Needs Review).
 
 ### P1 — v0.4 개시: 워크스페이스 + 패키징 + 샘플 골조 [ADR-0008 §구조, ADR-0001, sample-spec §P1]
 
@@ -123,16 +123,25 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 
 ### P7 — 0.4.0 GA (개요)
 
-MIGRATION "0.3→0.4" + codemod · docs/api 재생성 · **헌장 대조표**(C1~C9 × 구현 위치 × sample 페이지 — 빈 행 시 GA 불가) · 실엔티티 재현 검증(헌장 §보존 검증 3 — GJCU/edustack급 엔티티 1종) · getting-started 전면 개정(코드 블록=sample 실코드) · 브랜치 플립(main→release/0.3, v0.4 승격) · 0.3.x 지원 정책 고지.
+[마이그레이션 리빙 문서](./plans/migration-0.3-to-0.4.md)를 `docs/MIGRATION.md`(사용자 대면)로 승격 + codemod · docs/api 재생성 · **헌장 대조표**(C1~C9 × 구현 위치 × sample 페이지 — 빈 행 시 GA 불가) · 실엔티티 재현 검증(헌장 §보존 검증 3 — GJCU/edustack급 엔티티 1종) · getting-started 전면 개정(코드 블록=sample 실코드) · 브랜치 플립(main→release/0.3, v0.4 승격) · 0.3.x 지원 정책 고지.
 
 ---
 
+## Needs Review (P0 fan-out deviations — 사용자 확인 후 `[x]`)
+
+- [ ] **P0-7 Breaking 소비자 영향** (最우선, publish 전 확인) — simpleCrypt cryptKey 미설정 throw / HTML 싱크 텍스트폴백 / asset-url 폴백제거. GJCU·edustack이 `configureRuntime({cryptKey})` + (HTML 필요시)`configureHtmlSanitizer` 설정하는지 확인해야 무회귀. [detail](./plans/migration-0.3-to-0.4.md#1-0325--0326-하드닝-릴리스--지금-조치-필요)
+- [ ] **P0-7 API 범위** — ADR-0006 §3의 encrypt/decrypt 공개 API 제거는 v1.0 단계로 판단, 이번엔 폴백키 제거+throw만 구현(encrypt/decrypt 여전히 export). 의도 확인.
+- [ ] **P0-3 신규 사용자 문구** — 에러 표면화 시 `'필드 값을 처리하는 중 오류가 발생했습니다.'` 신설(리포 관례 '~하는 중 오류가 발생했습니다.' 따름). i18n 키화는 P5 동시처리 목록으로 이월.
+- [ ] **P0-4 최소범위 초과** — hook이 per-list defaultPageSize에 접근 불가라 `QuickSearchBar`/`ViewListGrid`에 prop 스레딩 추가(1→3파일). 브리핑의 useListGridLogic 우선순위 정렬 지시상 불가피.
+- [ ] **P0-8 동결 방식** — no-explicit-any 135파일 동결을 인라인 주석 대신 `eslint.config.mjs` override 블록으로(동일 효과·1파일 diff·whittle-down 용이).
+
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
-(비어 있음)
+- 마이그레이션 how-to는 [리빙 문서](./plans/migration-0.3-to-0.4.md)로 P0-10에서 착수 — 각 페이즈가 호환성 변경을 발생 커밋에서 누적, P7에서 `docs/MIGRATION.md`+codemod로 승격(P7 개요에 반영).
 
 ## Open Questions
 
+- [ ] **P0-10 릴리스/전환 승인 (지금 대기)** — ① 0.3.26 `npm publish`(외부 공개) 승인? ② 작업 브랜치 `p0-hotfixes`를 main에 반영하는 방식(PR vs 직접 병합)? ③ 그 후 main→v0.4 전환 실행 시점? (§Needs Review의 소비자 Breaking 확인이 publish 선결)
 - [ ] npm publish 승인 방식: alpha.N마다 개별 승인 vs "alpha는 포괄 승인" — 사용자 결정 필요 (P1-4 전까지)
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독 (P5 전까지)
 - [ ] 0.2.x 라인(release/0.2)에 P0 버그 중 백포트할 항목이 있는지 — P0-1(검증)·P0-2(엑셀)는 후보 (P0-10 전까지)
