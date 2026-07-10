@@ -57,7 +57,7 @@
 
 | 마일스톤 | 범위 | 게이트 | 상태 |
 |---|---|---|---|
-| **V0.1** schema-core 코어 | EntityForm + 필드클래스(String/Bool/Number/Textarea/Markdown/Select/M2O) + value ops(dirty/blank) + validate | 단위테스트 ✅ 32 green | ✅ `3d3f396` |
+| **V0.1** schema-core 코어 | EntityForm + 필드클래스(String/Bool/Number/Textarea/Markdown/Select/M2O) + value ops(dirty/blank) + validate | 단위테스트 ✅ 32 green | ✅ `8ca3932` |
 | **V0.2** state 스토어 | createFormStore/createListStore(값슬라이스·셀렉터·액션) + SearchForm | 스토어 단위테스트 | ⬜ ← next |
 | **V0.3** ui-default + react 폼 | 프리미티브 + FieldRenderer 레지스트리 + ViewEntityForm + 프로바이더 | jsdom 렌더 테스트 | ⬜ |
 | **V0.4** backend+list+M2O+E2E | backend-rcm 어댑터 + sample CRUD + ViewListGrid + M2O 팝업 | **College E2E green** | ⬜ |
