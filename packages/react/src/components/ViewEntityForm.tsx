@@ -117,18 +117,32 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
   // Focus-first-error (a11y gap C): after a failed validateAll(), errors are
   // already committed to the store (form-store.ts validateAll sets
   // fields[name].errors for every field). Find the first invalid field in
-  // declaration order (liveFields() is sorted by field.order — the same
-  // traversal validateAll() itself uses, over the same live registry) and
-  // move focus to its input, which carries id={fieldName} (FieldRenderer ->
-  // primitive wiring).
+  // declaration order and move focus to its input.
+  //
+  // EB-R1 finding 1: this MUST scan the UNFILTERED field list (all of
+  // state.fieldDefs, sorted by order — the same ordering source
+  // validateAll() itself uses), not liveFields() (which drops `renderedBy`
+  // fields from standalone iteration, EB2 above). A suppressed sibling (e.g.
+  // an AddressField's postalCode/address1) still validates on its own store
+  // slice and still renders an input carrying id={fieldName} — just via the
+  // owning composite's renderer (AddressFieldRenderer) instead of a
+  // standalone <FieldRenderer>. Scanning liveFields() here would blind this
+  // function to an address-only-invalid form: save stays blocked (validateAll
+  // is unaffected by renderedBy) but focus would silently never move. Fields
+  // with no element in the DOM (id lookup misses) are simply skipped, so this
+  // is safe for any hidden/not-yet-mounted field too.
   function focusFirstInvalidField(): void {
     if (typeof document === 'undefined') return;
     const state = store.getState();
-    const firstInvalid = liveFields(state.fieldDefs).find(
-      (f) => (state.fields[f.getName()]?.errors?.length ?? 0) > 0,
-    );
-    if (firstInvalid) {
-      document.getElementById(firstInvalid.getName())?.focus();
+    const invalidFields = Object.values(state.fieldDefs)
+      .filter((f) => (state.fields[f.getName()]?.errors?.length ?? 0) > 0)
+      .sort((a, b) => a.getOrder() - b.getOrder());
+    for (const field of invalidFields) {
+      const el = document.getElementById(field.getName());
+      if (el) {
+        el.focus();
+        return;
+      }
     }
   }
 

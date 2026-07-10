@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { addressSiblingNames } from '@listgrid/schema-core';
 import DaumPostcode from 'react-daum-postcode';
 import { useUI } from '../providers/ui';
-import { useFieldValue, useFormField, useFormStore } from '../providers/form-store';
+import { useFieldMeta, useFieldValue, useFormField, useFormStore } from '../providers/form-store';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
 
 // AddressRenderer (EB2 — plan §EB, documents/plans/e-track-field-parity.md). Transplant of the
@@ -13,6 +13,15 @@ import type { FieldRendererComponentProps } from './field-renderer-registry';
 // EA-D `InlineMap` precedent, makes those unnecessary here) and using `react-daum-postcode`
 // DIRECTLY (ADR-sanctioned exception — root `package.json` already carries it as a peer for
 // exactly this precedent) rather than the 0.3.x hand-rolled `loadPostcode` script loader.
+//
+// `react-daum-postcode` is a REQUIRED peer of `@listgrid/react` (package.json), not optional:
+// this module `import`s it statically at the top level, and this module is itself statically
+// wired into the renderer graph by `registerDefaultRenderers` (registry/default-renderers.tsx) —
+// so any consumer that registers the default renderers pulls this import unconditionally,
+// whether or not their forms use an AddressField. There is no lazy-loading here; marking the
+// peer optional while the import graph is static would just move the missing-dependency failure
+// from install-time (clear peer-dep warning) to first-render-time (a confusing bare
+// module-not-found).
 //
 // This is the ONLY renderer this composite field owns: the 5 flat siblings
 // (state/city/address1/address2/postalCode) `applyFullAddressFields` declares are all marked
@@ -60,8 +69,20 @@ export function AddressFieldRenderer({ name, readOnly }: FieldRendererComponentP
   // direct read off the live field registry is exact; no async predicate resolution needed
   // (contrast FieldRenderer's isRequired()/isHidden() dance, which exists for the general
   // conditional case these siblings never use).
-  const postalCodeRequired = store.getState().fieldDefs[names.postalCode]?.required === true;
-  const address1Required = store.getState().fieldDefs[names.address1]?.required === true;
+  //
+  // EB-R1 finding 3: that declared read alone bypasses the EF1 imperative-override contract —
+  // setMeta(name, { required }) (state.meta[name], useFieldMeta) is meant to win over the
+  // declared value for EVERY field, including these renderedBy siblings, exactly as
+  // FieldRenderer's `metaOverride.required ?? required` does. Apply the same `?? declared`
+  // pattern here so a setMeta-driven required change is reflected in this renderer's own
+  // required indicator/attribute too.
+  const postalCodeMeta = useFieldMeta(names.postalCode);
+  const address1Meta = useFieldMeta(names.address1);
+  const postalCodeDeclaredRequired =
+    store.getState().fieldDefs[names.postalCode]?.required === true;
+  const address1DeclaredRequired = store.getState().fieldDefs[names.address1]?.required === true;
+  const postalCodeRequired = postalCodeMeta.required ?? postalCodeDeclaredRequired;
+  const address1Required = address1Meta.required ?? address1DeclaredRequired;
 
   const [open, setOpen] = useState(false);
   // Set right before setOpen(false) inside handleComplete only — NOT on every close (e.g. the

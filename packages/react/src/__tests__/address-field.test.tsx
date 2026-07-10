@@ -145,6 +145,33 @@ describe('AddressFieldRenderer — Daum picker onComplete fan-out (mocked react-
   });
 });
 
+describe('AddressFieldRenderer — EB-R1 review-gate fixes', () => {
+  it('focus-first-invalid moves focus into a suppressed sibling (postalCode/address1) on an address-only-invalid save', async () => {
+    const { store } = renderForm(addressForm({ required: true }));
+    await screen.findByText('주소 찾기');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(store.getState().fields['postalCode']?.errors?.length ?? 0).toBeGreaterThan(0);
+      expect(store.getState().fields['address1']?.errors?.length ?? 0).toBeGreaterThan(0);
+    });
+    await waitFor(() => expect(['postalCode', 'address1']).toContain(document.activeElement?.id));
+  });
+
+  it('setMeta(postalCode, { required: false }) clears the required indicator/attribute', async () => {
+    const { store } = renderForm(addressForm({ required: true }));
+    await screen.findByText('주소 찾기');
+
+    const postalCodeInput = document.getElementById('postalCode') as HTMLInputElement;
+    await waitFor(() => expect(postalCodeInput).toHaveAttribute('aria-required', 'true'));
+
+    store.getState().setMeta('postalCode', { required: false });
+
+    await waitFor(() => expect(postalCodeInput).not.toHaveAttribute('aria-required'));
+  });
+});
+
 describe('AddressFieldRenderer — hydrate seeds the composite display from flat data', () => {
   it('hydrated flat sibling values render in postalCode/address1/address2 displays', async () => {
     const entityForm = addressForm();
