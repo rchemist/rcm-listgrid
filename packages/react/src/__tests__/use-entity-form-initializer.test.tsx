@@ -35,6 +35,33 @@ function fakeAdapter(): BackendAdapter {
   };
 }
 
+// EF-R1 regression — a form whose clone() throws synchronously simulates an
+// initializeFormStore pipe rejection (a throw ahead of the pipe's own
+// try/catch guards). Before the fix, useEntityFormInitializer's promise
+// chain had no .catch, so a rejection left the hook stuck at loading:true
+// forever.
+function brokenForm(): EntityForm {
+  const form = widgetForm();
+  form.clone = () => {
+    throw new Error('clone boom');
+  };
+  return form;
+}
+
+function ThrowingHarness() {
+  const entityFormDecl = useMemo(() => brokenForm(), []);
+  const adapter = useMemo(() => fakeAdapter(), []);
+  const { loading, error } = useEntityFormInitializer({
+    entityForm: entityFormDecl,
+    adapter,
+    id: '1',
+  });
+
+  if (loading) return <p>loading…</p>;
+  if (error) return <p>error: {error.message}</p>;
+  return <p>no error surfaced</p>;
+}
+
 function Harness() {
   // stable identity across re-renders — mirrors the real call-site idiom
   // (apps/sample edit pages memoize entityForm/adapter the same way) and is
@@ -71,5 +98,14 @@ describe('useEntityFormInitializer (EF3 react integration)', () => {
 
     const extraInput = await screen.findByLabelText(/^Extra/);
     expect((extraInput as HTMLInputElement).value).toBe('fetched-extra-value');
+  });
+
+  it('a rejecting pipe resolves the hook with loading:false + error surfaced instead of hanging', async () => {
+    render(<ThrowingHarness />);
+
+    expect(screen.getByText('loading…')).toBeInTheDocument();
+
+    const errorText = await screen.findByText(/^error:/);
+    expect(errorText).toHaveTextContent('error: clone boom');
   });
 });

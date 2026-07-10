@@ -64,15 +64,33 @@ export function useEntityFormInitializer(
       ...(id !== undefined ? { id } : {}),
       ...(session !== undefined ? { session } : {}),
       ...(initialData !== undefined ? { initialData } : {}),
-    }).then((result) => {
-      if (cancelled) return;
-      setState({
-        store: result.store,
-        entityForm: result.entityForm,
-        loading: false,
-        ...(result.error !== undefined ? { error: result.error } : {}),
+    })
+      .then((result) => {
+        if (cancelled) return;
+        setState({
+          store: result.store,
+          entityForm: result.entityForm,
+          loading: false,
+          ...(result.error !== undefined ? { error: result.error } : {}),
+        });
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        // the pipe itself rejected (should be rare — initializeFormStore
+        // isolates its own handler throws — but never let the hook hang on
+        // loading:true). Align the error shape with the fetch-error path.
+        setState({
+          loading: false,
+          error:
+            e !== null &&
+            typeof e === 'object' &&
+            'code' in e &&
+            'message' in e &&
+            typeof (e as { message: unknown }).message === 'string'
+              ? (e as BackendError)
+              : { code: 'UNKNOWN', message: e instanceof Error ? e.message : String(e) },
+        });
       });
-    });
 
     return () => {
       cancelled = true;

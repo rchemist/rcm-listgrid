@@ -175,4 +175,65 @@ describe('initializeFormStore (EF3)', () => {
     expect(store.getState().getValue('name')).toBe('fetched-name');
     expect(onChangesCalls).toEqual([]);
   });
+
+  // EF-R1 regression — clone(true) parity: declared default/current values
+  // must survive the pipe's clone step and reach the store (previously
+  // dropped by clone()'s default includeValue=false, which cascaded to
+  // FormField.clone deleting the whole value object).
+  it('create mode: a declared withDefaultValue reaches the store', async () => {
+    const form = new EntityForm('WidgetEntityForm', '/widget').addFields({
+      items: [new StringField('name', 1).withLabel('Name').withDefaultValue('default-name')],
+    });
+
+    const { store } = await initializeFormStore({ entityForm: form });
+    expect(store.getState().getValue('name')).toBe('default-name');
+  });
+
+  it('create mode: a declared withValue reaches the store', async () => {
+    const form = new EntityForm('WidgetEntityForm', '/widget').addFields({
+      items: [new StringField('name', 1).withLabel('Name').withValue('declared-current')],
+    });
+
+    const { store } = await initializeFormStore({ entityForm: form });
+    expect(store.getState().getValue('name')).toBe('declared-current');
+  });
+
+  it('edit mode: declared defaults are preserved on the clone, but hydrate still overwrites with fetched data (no regression of hydrate precedence)', async () => {
+    const form = new EntityForm('WidgetEntityForm', '/widget').addFields({
+      items: [new StringField('name', 1).withLabel('Name').withDefaultValue('default-name')],
+    });
+    const adapter = fakeAdapter(async () => ({ id: '1', name: 'fetched-name' }));
+
+    const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+    // hydrate wins over the declared default in edit mode.
+    expect(store.getState().getValue('name')).toBe('fetched-name');
+  });
+
+  it('an onFetchData handler that throws is caught (logged) and does not abort the pipe — remaining onFetchData handlers and onInitialize still run', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const calls: string[] = [];
+    const form = WidgetForm()
+      .withOnFetchData(() => {
+        calls.push('first');
+        throw new Error('boom');
+      })
+      .withOnFetchData((ef) => {
+        calls.push('second');
+        return ef;
+      })
+      .withOnInitialize((ef) => {
+        calls.push('onInitialize');
+        return ef;
+      });
+    const adapter = fakeAdapter(async () => ({ id: '1', name: 'fetched' }));
+
+    const result = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+    expect(calls).toEqual(['first', 'second', 'onInitialize']);
+    expect(consoleError).toHaveBeenCalled();
+    expect(result.error).toBeUndefined();
+    // store is still usable.
+    expect(() => result.store.getState().setValue('name', 'x')).not.toThrow();
+    expect(result.store.getState().getValue('name')).toBe('x');
+    consoleError.mockRestore();
+  });
 });

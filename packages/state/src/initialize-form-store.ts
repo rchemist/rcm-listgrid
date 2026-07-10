@@ -59,8 +59,12 @@ export async function initializeFormStore(
 ): Promise<InitializeFormStoreResult> {
   const { adapter, id, session, initialData, validateOnChange } = options;
 
-  // a. never mutate the declared form.
-  let ef = options.entityForm.clone();
+  // a. never mutate the declared form. clone(true) carries declared
+  // default/current values into the pipe (0.3.x parity — the old
+  // initialize() did `this.clone(true)`, src/listgrid/config/EntityForm.tsx:163);
+  // clone()'s default includeValue=false would drop withDefaultValue/withValue
+  // before createFormStore ever seeds a slice from them.
+  let ef = options.entityForm.clone(true);
   if (id != null) ef = ef.withId(id);
 
   const storeOpts: CreateFormStoreOptions = {};
@@ -79,9 +83,16 @@ export async function initializeFormStore(
   }
 
   // d. onFetchData — sequential, only when there is fetched/provided data.
+  // a throwing handler is logged and skipped, remaining handlers still run
+  // (0.3.x per-handler isolation parity — EntityForm.tsx:591-600), same as
+  // the onInitialize loop below.
   if (data) {
     for (const handler of ef.getOnFetchData()) {
-      ef = await handler(ef, data);
+      try {
+        ef = await handler(ef, data);
+      } catch (e) {
+        console.error('[@listgrid/state] onFetchData handler threw — skipping it', e);
+      }
     }
   }
 
