@@ -30,6 +30,7 @@ jobs:
         run: |
           TAG_NAME="${GITHUB_REF_NAME#v}"
           case "$TAG_NAME" in
+            *-*)   NPM_TAG="next"       ;;  # prerelease (0.4.0-alpha.N/beta/rc) -> dist-tag next
             0.2.*) NPM_TAG="legacy-0.2" ;;
             *)     NPM_TAG="latest"     ;;
           esac
