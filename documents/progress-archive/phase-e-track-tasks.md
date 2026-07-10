@@ -265,7 +265,7 @@ proposed_helper: 없음.
 
 **EB1** `f31fb23`(+14): AddressField(exceptOnSave — toSaveData skip 검증 TRUE·form-store 무변경)+applyFullAddressFields. 증거 이탈: 형제 hidden 미적용(hidden=validate 전체 스킵, 양 엔진 공통 — 테스트 입증)·composite required 미부여(형제 direct-write 설계)·schema-core devDep @listgrid/state(테스트 전용).
 **EB2** `6091182`(+14): renderedBy 억제(FormField+EntityField, liveFields 단일 필터 — validate 비영향 테스트 고정)·addressSiblingNames 공유 파생·AddressRenderer(Daum 직접 import·onComplete 4형제 fan-out·address2 포커스)·optional peer(→게이트에서 모순 확인).
-**리뷰 게이트**(4 agents, 결합 파인더+opus): confirmed 3(전부 non-blocking — ① focus-first-error가 억제 형제 미도달(save 차단·alert 정상, 포커스 편의 상실로 하향) ② optional peer인데 정적 import 그래프 강제(계약 모순) ③ required 표시 EF1 override 미반영) → **EB-R1** 수정: focus 스캔 unfiltered화·peer required 전환(subpath opt-in은 Backlog)·EF1 패턴 적용.
+**리뷰 게이트**(4 agents, 결합 파인더+opus): confirmed 3(전부 non-blocking — ① focus-first-error가 억제 형제 미도달(save 차단·alert 정상, 포커스 편의 상실로 하향) ② optional peer인데 정적 import 그래프 강제(계약 모순) ③ required 표시 EF1 override 미반영) → **EB-R1 ✅ `caf7cbe`**(+2 테스트, 1757): focus 스캔 unfiltered화(DOM 존재 가드)·peer required 전환(subpath opt-in은 Backlog)·EF1 패턴 적용. deviation 0.
 
 ## Phase EA 종결 (2026-07-11) — 매트릭스
 

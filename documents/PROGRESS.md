@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·**EA ✅**(리뷰게이트 통과) · **Next up**: EB1(AddressField) → EB2(Daum 렌더러). EA-D2(Xref)는 EC2 뒤. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·EA·**EB ✅** · **Next up**: EC1(StudentAddress 재현+E2E — 주소 실브라우저 실증). EA-D2(Xref)는 EC2 뒤. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 08:20 (**EA 페이즈 게이트 통과** — EA-R1 `2a79166`로 confirmed 5 전해소(blocking: InlineMap fixed-keys required 우회). 1727 unit+5 E2E green. EA 섹션 collapse. **Next=EB1**(AddressField) — §세션 인계 Handoff+[계획 §EB](./plans/e-track-field-parity.md) 읽고 재개)
+**Last updated**: 2026-07-11 09:10 (**EB 완료** — EB1/EB2+게이트 3건 해소 `caf7cbe`. 1757 unit+5 E2E green. **Next=EC1**(StudentAddress 재현+Playwright E2E — 주소 전체 흐름 실브라우저 실증, sample 앱 작업). [archive §EB](./progress-archive/phase-e-track-tasks.md) 읽고 재개)
 
 ## Goal
 
@@ -79,11 +79,7 @@
 
 - [ ] **EA-D2 Xref 인프라+이식** (reorder: EC2 뒤·EC3 앞) — ViewListGrid 확장 4종(selection/subCollection/onFetched/fields — [O] 설계, EC3 실폼 요구 주도) → XrefMapping(29 사이트)+XrefPrefer(+'xrefPreferMapping' 타입). 드래그 재정렬 별도 판단.
 
-#### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
-
-- [x] **EB1** ✅ `f31fb23` · AddressField(exceptOnSave — toSaveData skip 검증 TRUE)+applyFullAddressFields·형제 hidden 미적용(hidden=required 사망, 증거) · +14(1741)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [~] **EB2** react AddressRenderer — 형제 useFieldValue + useUI 2단 모달 + `<DaumPostcode>` 직접 import + onComplete→형제 setValue fan-out. peerDep react-daum-postcode. **+렌더 억제 메커니즘**: 형제에 `renderedBy`(composite명) 마커(schema-core 소폭)+ViewEntityForm 순회 스킵 — hidden과 달리 validate 비스킵. (Kakao 지도 연기)
-  - **Reuse review**: Extend: FormField(renderedBy 마커)·ViewEntityForm 순회·Modal/TextInput 프리미티브·store setValue fan-out(InlineMap 동형) — New: AddressRenderer+react-daum-postcode peerDep
+#### Phase EB ✅ 완료 (2026-07-11 — AddressField+Daum 렌더러+renderedBy 억제 · 게이트 confirmed 3 전해소 `caf7cbe` · 1757 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EB2** react AddressRenderer — 형제 useFieldValue + useUI 2단 모달 + `<DaumPostcode>` 직접 import + onComplete→형제 setValue fan-out. peerDep react-daum-postcode. (Kakao 지도 연기)
 
 #### Phase EC — EntityForm 사용예 + E2E (동작 실증)
