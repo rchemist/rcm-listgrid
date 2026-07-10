@@ -38,8 +38,8 @@
 
 ### P1 — v0.4 브랜치 개시: 워크스페이스 스캐폴드 + 패키징 [ADR-0008 구조, ADR-0001]
 
-`v0.4` 분기 → npm workspaces(packages/schema-core·state·react·ui-default·backend-rcm·backend-rest·presets-rcm·next) → tsup dual 빌드 + exports 조건 분리 + 로드 스모크/publint/attw CI(main·v0.4 이중 트리거) → **빈 골격이라도 `0.4.0-alpha.0` 첫 배포**(배포 파이프라인을 첫날부터 검증). 구성 리뷰 [O], 실행 [S].
-**게이트**: ADR-0001 수용 기준(로드 4경로) + alpha.0이 dist-tag next로 설치·로드됨.
+`v0.4` 분기 → npm workspaces(packages/schema-core·state·react·ui-default·backend-rcm·backend-rest·presets-rcm·next + **apps/sample**) → tsup dual 빌드 + exports 조건 분리 + 로드 스모크/publint/attw CI(main·v0.4 이중 트리거) → **빈 골격이라도 `0.4.0-alpha.0` 첫 배포**(배포 파이프라인을 첫날부터 검증) → apps/sample 스캐폴드(목업 rcm 백엔드 + 홈, [명세](../prd/sample-site-spec.md) §P1). 구성 리뷰 [O], 실행 [S].
+**게이트**: ADR-0001 수용 기준(로드 4경로) + alpha.0이 dist-tag next로 설치·로드됨 + `npm run dev -w apps/sample` 단독 기동.
 
 ### P2 — 특성화 테스트 그물 (이식 오라클) [ADR-0007 §2]
 
@@ -58,7 +58,7 @@ EntityForm 선언 모델(5단 상속→컴포지션), 검증 12종, SearchForm �
 
 ### P5 — 렌더러 이식 (react 패키지)
 
-파일럿 StringField로 레시피 확정 [O] → 39종 반복 이식 [H/S] → ViewEntityForm/ViewListGrid를 store 셀렉터 구독으로 재구성(드릴링 없음) → CSS 이식(+레이어 충돌 4건 정리, raw/map-styles §2.3). **이식 중 동시 처리(고정 목록만)**: i18n 키화 · 중복 통합(SubCollection 3변형/Xref 4형제/misc-utils) · `any` 제거 · 도메인 리터럴→presets-rcm 격리 · a11y 3종(ADR-0006 §6). `examples/minimal`이 이식과 함께 자란다 — 매 alpha가 데모 가능해야 한다.
+파일럿 StringField로 레시피 확정 [O] → 39종 반복 이식 [H/S] → ViewEntityForm/ViewListGrid를 store 셀렉터 구독으로 재구성(드릴링 없음) → CSS 이식(+레이어 충돌 4건 정리, raw/map-styles §2.3). **이식 중 동시 처리(고정 목록만)**: i18n 키화 · 중복 통합(SubCollection 3변형/Xref 4형제/misc-utils) · `any` 제거 · 도메인 리터럴→presets-rcm 격리 · a11y 3종(ADR-0006 §6). `apps/sample`이 이식과 함께 자란다(엔티티 3종 + /theming — 명세 §P5) — 매 alpha가 데모 가능해야 한다.
 **게이트**: ADR-0002 수용 기준(키 입력 리렌더 = 1필드, onChange 경로 clone 0회, 중첩 재fetch 0회) + 특성화 그물 전량 green + `t()` 한글 키 0건.
 
 ### P6 — 어댑터·표면 완성

@@ -64,7 +64,7 @@
 - BackendAdapter 계약 + `./backend/rcm` 기본 어댑터 + generic REST 레퍼런스 어댑터 (ADR-0005)
 - `@rchemist/listgrid/ui-default` — 필수 peer를 코어에서 걷어낸 공식 스타일드 프리미티브 서브패스 (ADR-0004 §peer)
 - i18n: 코어 사용자 표면(검색 연산자 24종·세션만료 모달·리스트/폼 공통 문구) 키 체계 이관
-- `examples/minimal` — quick-start의 end-to-end 검증 앱 (기존 ROADMAP 항목 유지)
+- `apps/sample` — 내장 샘플 사이트([명세](./sample-site-spec.md)): quick-start 검증 + alpha 데모 + 헌장 시연 + **확장성 증명 6종**(CSS 토큰/classNames/프리미티브 교체/커스텀 필드/자체 wrapper/어댑터 교체)
 - 중복 정리: SubCollection 3변형·Xref 4형제·misc/utils 이중 API·FieldRenderer onChange 2벌 (~400-500줄)
 
 ### 하지 않음 (Non-goals — 기존 + 신규)
