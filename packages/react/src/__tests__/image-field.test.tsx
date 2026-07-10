@@ -228,4 +228,50 @@ describe('ImageFieldRenderer (transplant of 0.3.x ImageField.tsx:141-189)', () =
       ]),
     );
   });
+
+  describe('EA-R1 #2: multi-image gallery no longer drops the tail on edit', () => {
+    it('hydrates a pre-loaded string[] gallery and renders one FileInput per URL', async () => {
+      renderForm(
+        new ImageField('gallery', 100)
+          .withLabel('Gallery')
+          .withMaxCount(3)
+          .withDefaultValue(['a', 'b', 'c']),
+      );
+      await screen.findByText('Gallery');
+      const galleryWrapper = document.querySelector('[data-field-name="gallery"]') as HTMLElement;
+      expect(within(galleryWrapper).getAllByRole('textbox')).toHaveLength(3);
+      expect(galleryWrapper.querySelectorAll('img')).toHaveLength(3);
+    });
+
+    it('editing slot 0 preserves the other pre-loaded URLs (b, c)', async () => {
+      const { store } = renderForm(
+        new ImageField('gallery', 100)
+          .withLabel('Gallery')
+          .withMaxCount(3)
+          .withDefaultValue(['a', 'b', 'c']),
+      );
+      await screen.findByText('Gallery');
+      const galleryWrapper = document.querySelector('[data-field-name="gallery"]') as HTMLElement;
+      const inputs = within(galleryWrapper).getAllByRole('textbox') as HTMLInputElement[];
+
+      fireEvent.change(inputs[0]!, { target: { value: 'a2' } });
+
+      await waitFor(() => expect(store.getState().getValue('gallery')).toEqual(['a2', 'b', 'c']));
+    });
+
+    it('removing slot 1 leaves [a, c]', async () => {
+      const { store } = renderForm(
+        new ImageField('gallery', 100)
+          .withLabel('Gallery')
+          .withMaxCount(3)
+          .withDefaultValue(['a', 'b', 'c']),
+      );
+      await screen.findByText('Gallery');
+      const galleryWrapper = document.querySelector('[data-field-name="gallery"]') as HTMLElement;
+
+      fireEvent.click(within(galleryWrapper).getByRole('button', { name: 'Remove image 2' }));
+
+      await waitFor(() => expect(store.getState().getValue('gallery')).toEqual(['a', 'c']));
+    });
+  });
 });

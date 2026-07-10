@@ -45,17 +45,13 @@ interface ImageFieldLike {
 }
 
 /**
- * The value store may hold a plain `string` (single image, the common
- * maxCount<=1 case) or a `string[]` (multi-image, maxCount>1 — conductor
- * decision ①). The FileInput slot's contract (EA-C0 pre-stage,
- * `packages/ui-default/src/types.ts` `FileInputProps`) is single-string only,
- * so both the display value AND the thumbnail source read the FIRST url out
- * of either shape — parity with 0.3.x's own `pickImageUrl` picking
- * `existFiles[0]` (ImageField.tsx:56-64).
+ * Thumbnail style derived from the field's `previewSize` (px/CSS length) —
+ * shared by every rendered `<img>`, single or multi mode.
  */
-function firstUrl(value: string | string[] | undefined): string | undefined {
-  if (Array.isArray(value)) return value[0];
-  return value;
+function thumbnailStyle(previewSize: number | string | undefined) {
+  return previewSize !== undefined
+    ? ({ width: previewSize, height: previewSize, objectFit: 'cover' as const } as const)
+    : undefined;
 }
 
 export function ImageFieldRenderer({
@@ -71,45 +67,98 @@ export function ImageFieldRenderer({
   const value = useFieldValue<string | string[]>(name);
   const imageField = field as unknown as ImageFieldLike;
   const resolvedConfig = imageField.resolveConfig();
-  const multiple = (resolvedConfig.maxCount ?? 1) > 1;
-  const url = firstUrl(value);
+  const maxCount = resolvedConfig.maxCount ?? 1;
+  const multiple = maxCount > 1;
   const accept = resolvedConfig.fileTypes?.join(',');
+  const style = thumbnailStyle(imageField.previewSize);
 
-  function handleChange(next: string | undefined) {
-    if (multiple) {
-      store.getState().setValue(name, next === undefined ? [] : [next]);
-    } else {
+  if (!multiple) {
+    const url = typeof value === 'string' ? value : undefined;
+
+    function handleChange(next: string | undefined) {
       store.getState().setValue(name, next);
     }
+
+    return (
+      <div>
+        <FileInput
+          id={name}
+          {...(url !== undefined ? { value: url } : {})}
+          onChange={handleChange}
+          {...(accept !== undefined ? { accept } : {})}
+          {...(readOnly !== undefined ? { readOnly } : {})}
+          {...(required ? { required: true } : {})}
+          {...(invalid ? { invalid: true } : {})}
+          {...(describedBy !== undefined ? { describedBy } : {})}
+        />
+        {url ? <img src={url} alt="" style={style} /> : null}
+      </div>
+    );
+  }
+
+  // Multi mode (maxCount>1) — EA-R1 #2 fix: mirror file-renderer.tsx's
+  // multi-mode structure (one FileInput per hydrated URL + one adder slot
+  // while under maxCount) instead of the old single-slot `[next]`
+  // replace-the-whole-array posture, which showed only `value[0]` and
+  // dropped every other pre-loaded URL on the very first edit.
+  const values: string[] = Array.isArray(value) ? value : [];
+
+  function replaceAt(index: number, next: string | undefined) {
+    const nextValues =
+      next === undefined
+        ? values.filter((_, i) => i !== index)
+        : values.map((v, i) => (i === index ? next : v));
+    store.getState().setValue(name, nextValues);
+  }
+
+  function removeAt(index: number) {
+    store.getState().setValue(
+      name,
+      values.filter((_, i) => i !== index),
+    );
+  }
+
+  function add(next: string | undefined) {
+    if (next === undefined) return;
+    store.getState().setValue(name, [...values, next]);
   }
 
   return (
-    <div>
-      <FileInput
-        id={name}
-        {...(url !== undefined ? { value: url } : {})}
-        onChange={handleChange}
-        {...(accept !== undefined ? { accept } : {})}
-        {...(readOnly !== undefined ? { readOnly } : {})}
-        {...(required ? { required: true } : {})}
-        {...(invalid ? { invalid: true } : {})}
-        {...(describedBy !== undefined ? { describedBy } : {})}
-      />
-      {url ? (
-        <img
-          src={url}
-          alt=""
-          style={
-            imageField.previewSize !== undefined
-              ? {
-                  width: imageField.previewSize,
-                  height: imageField.previewSize,
-                  objectFit: 'cover',
-                }
-              : undefined
-          }
+    <div
+      data-field="image-multi"
+      role="group"
+      {...(required ? { 'aria-required': true } : {})}
+      {...(invalid ? { 'aria-invalid': true } : {})}
+      {...(describedBy !== undefined ? { 'aria-describedby': describedBy } : {})}
+    >
+      {values.map((url, index) => (
+        <div key={index}>
+          <FileInput
+            id={`${name}-${index}`}
+            value={url}
+            onChange={(next) => replaceAt(index, next)}
+            {...(accept !== undefined ? { accept } : {})}
+            {...(readOnly !== undefined ? { readOnly } : {})}
+          />
+          <img src={url} alt="" style={style} />
+          {!readOnly && (
+            <button
+              type="button"
+              aria-label={`Remove image ${index + 1}`}
+              onClick={() => removeAt(index)}
+            >
+              ×
+            </button>
+          )}
+        </div>
+      ))}
+      {!readOnly && values.length < maxCount && (
+        <FileInput
+          id={`${name}-add`}
+          onChange={add}
+          {...(accept !== undefined ? { accept } : {})}
         />
-      ) : null}
+      )}
     </div>
   );
 }

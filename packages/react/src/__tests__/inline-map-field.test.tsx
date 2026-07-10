@@ -171,6 +171,79 @@ describe('InlineMapFieldRenderer — required works via generic isBlank (0.3.x i
   });
 });
 
+describe('InlineMapFieldRenderer — EA-R1 #1: fixed-keys type-then-clear does not bypass required (0.3.x #1289 mode)', () => {
+  it('fixed-keys, single key typed then cleared back to blank → Save still blocked', async () => {
+    const onSave = vi.fn();
+    const field = new InlineMapField('extra', 100)
+      .withLabel('추가정보')
+      .withKeys([{ key: 'phone', label: 'Phone' }])
+      .withRequired(true);
+    const { store } = renderForm(field, onSave);
+    await screen.findByText('추가정보');
+    const group = within(fieldWrapper());
+
+    fireEvent.change(group.getByLabelText('Value 1'), { target: { value: '010-1234' } });
+    await waitFor(() => expect(store.getState().getValue('extra')).toEqual({ phone: '010-1234' }));
+
+    fireEvent.change(group.getByLabelText('Value 1'), { target: { value: '' } });
+    await waitFor(() => expect(store.getState().getValue('extra')).toBeUndefined());
+
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    expect(await screen.findByText(/필수 값입니다/)).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('fixed-keys, two keys, only one filled → NOT blank (required passes, both entries retained)', async () => {
+    const onSave = vi.fn();
+    const field = new InlineMapField('extra', 100)
+      .withLabel('추가정보')
+      .withKeys([
+        { key: 'phone', label: 'Phone' },
+        { key: 'fax', label: 'Fax' },
+      ])
+      .withRequired(true);
+    const { store } = renderForm(field, onSave);
+    await screen.findByText('추가정보');
+    const group = within(fieldWrapper());
+
+    fireEvent.change(group.getByLabelText('Value 1'), { target: { value: '010' } });
+    await waitFor(() => expect(store.getState().getValue('extra')).toEqual({ phone: '010' }));
+
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    await waitFor(() => expect(onSave).toHaveBeenCalledWith({ extra: { phone: '010' } }));
+  });
+
+  it('useKeyValue() legit row (real key + non-empty value) round-trips unaffected — not filtered away', async () => {
+    const field = new InlineMapField('extra', 100).withLabel('추가정보').useKeyValue();
+    const { store } = renderForm(field);
+    await screen.findByText('추가정보');
+    const group = within(fieldWrapper());
+    fireEvent.click(group.getByRole('button', { name: 'Add' }));
+    fireEvent.change(group.getByLabelText('Key 1'), { target: { value: 'phone' } });
+    fireEvent.change(group.getByLabelText('Value 1'), { target: { value: '010' } });
+    await waitFor(() =>
+      expect(store.getState().getValue('extra')).toEqual([{ key: 'phone', value: '010' }]),
+    );
+  });
+
+  it('useKeyValue() all-blank-value rows collapse to [] (KeyValue mode variant of the #1289 fix)', async () => {
+    const onSave = vi.fn();
+    const field = new InlineMapField('extra', 100)
+      .withLabel('추가정보')
+      .useKeyValue()
+      .withRequired(true);
+    renderForm(field, onSave);
+    await screen.findByText('추가정보');
+    const group = within(fieldWrapper());
+    fireEvent.click(group.getByRole('button', { name: 'Add' }));
+    fireEvent.change(group.getByLabelText('Key 1'), { target: { value: 'phone' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    expect(await screen.findByText(/필수 값입니다/)).toBeInTheDocument();
+    expect(onSave).not.toHaveBeenCalled();
+  });
+});
+
 describe('InlineMapFieldRenderer — resultType conversions', () => {
   it("default ('Object') writes a plain Record", async () => {
     const field = new InlineMapField('extra', 100).withLabel('추가정보');

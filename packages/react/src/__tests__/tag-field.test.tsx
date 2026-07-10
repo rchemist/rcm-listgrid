@@ -147,4 +147,23 @@ describe('TagFieldRenderer (transplant of 0.3.x TagField.tsx:45-89)', () => {
     expect(await screen.findByText(/필수 값입니다/)).toBeInTheDocument();
     expect(onSave).not.toHaveBeenCalled();
   });
+
+  it('EA-R1 #3: setMeta({options}) reshapes the suggestion datalist (EF1 meta-options override, same convention as MultiSelectRenderer)', async () => {
+    const field = new TagField('tags', 100).withLabel('Tags').withOptions([
+      { value: 'react', label: 'React' },
+      { value: 'vue', label: 'Vue' },
+    ]);
+    const { store } = renderForm(field);
+    await screen.findByText('Tags');
+    const wrapper = () => document.querySelector('[data-field-name="tags"]') as HTMLElement;
+    const optionValues = () =>
+      Array.from(wrapper().querySelectorAll('datalist option')).map(
+        (o) => (o as HTMLOptionElement).value,
+      );
+    expect(optionValues()).toEqual(['react', 'vue']);
+
+    store.getState().setMeta('tags', { options: [{ value: 'go', label: 'Go' }] });
+
+    await waitFor(() => expect(optionValues()).toEqual(['go']));
+  });
 });

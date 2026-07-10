@@ -1,6 +1,6 @@
 import type { TagField } from '@listgrid/schema-core';
 import { useUI } from '../providers/ui';
-import { useFieldValue, useFormStore } from '../providers/form-store';
+import { useFieldMeta, useFieldValue, useFormStore } from '../providers/form-store';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
 
 // Tag renderer (EA-A fan-out) — transplant of 0.3.x
@@ -36,14 +36,20 @@ export function TagFieldRenderer({
   const store = useFormStore();
   const value = useFieldValue<string[]>(name);
   const tagField = field as TagField;
-  const data = tagField.options?.map((option) => String(option.value));
+  // EF1: an imperative options override (setMeta(name, { options })) wins
+  // over the field's declared options, same merge MultiSelectRenderer uses
+  // (multi-select-renderer.tsx) — `changeSelectOptions` (EF2 onChanges
+  // catalog) is not select-specific at the FieldMetaOverride level.
+  const metaOptions = useFieldMeta(name).options;
+  const options = metaOptions ?? tagField.options ?? [];
+  const data = options.map((option) => String(option.value));
 
   return (
     <TagsInput
       id={name}
       value={value ?? []}
       onChange={(v) => store.getState().setValue(name, v)}
-      {...(data !== undefined ? { data } : {})}
+      data={data}
       {...(tagField.tagValidation ? { onValidateTag: tagField.tagValidation } : {})}
       {...(tagField.limit?.min !== undefined ? { minTags: tagField.limit.min } : {})}
       {...(tagField.limit?.max !== undefined ? { maxTags: tagField.limit.max } : {})}

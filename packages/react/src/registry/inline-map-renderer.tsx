@@ -95,11 +95,30 @@ function buildResult(
   resultType: ResolvedResultType,
 ): Record<string, string> | KeyValue[] | undefined {
   const entries = Object.entries(record);
+  // EA-R1 #1 (0.3.x #1289 regression: fixed-keys type-then-clear left `{
+  // key: '' }` sitting in the store — a non-empty object, so the generic
+  // `isBlank` silently read it as NOT blank). A row set is only truly
+  // "empty" when EVERY entry's value is '' — collapse to the same
+  // empty-container sentinel the zero-entries case already uses below
+  // (`undefined` for Object/Map, `[]` for KeyValue) in that case. A record
+  // with AT LEAST ONE non-blank value keeps ALL its entries verbatim
+  // (including any still-blank ones) — this is deliberate, not a partial
+  // filter: free mode's local `rows` state (ui-default primitives.tsx
+  // `InlineMap`) round-trips this exact record back through `recordsEqual`
+  // to decide whether an in-progress row (e.g. a key just typed, value not
+  // yet) needs to be resynced from `value`; stripping individual blank-value
+  // entries out of a still-has-real-content record would desync that
+  // buffer and drop the in-progress row from view. Only the "wholly blank"
+  // collapse is safe unconditionally, since a wholly blank record has no
+  // in-progress content to lose either way.
+  const hasNonBlankValue = entries.some(([, value]) => value !== '');
   if (resultType === 'KeyValue') {
-    return entries.length === 0 ? [] : entries.map(([key, value]) => ({ key, value }));
+    return entries.length === 0 || !hasNonBlankValue
+      ? []
+      : entries.map(([key, value]) => ({ key, value }));
   }
   // 'Object' (default) and 'Map' (narrowed): plain Record, undefined when empty.
-  return entries.length === 0 ? undefined : record;
+  return entries.length === 0 || !hasNonBlankValue ? undefined : record;
 }
 
 export function InlineMapFieldRenderer({

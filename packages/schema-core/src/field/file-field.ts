@@ -1,4 +1,5 @@
 import type { AssetConfig } from './asset-config';
+import { buildAssetConfig } from './asset-config';
 import { FormField } from './form-field';
 
 // FileField (EA-C fan-out — File). Transplant of 0.3.x
@@ -7,8 +8,9 @@ import { FormField } from './form-field';
 // `withConfig/withMaxSize/withMaxCount/withExtensions/withFileTypes` :49-92,
 // each rebuilding the whole `IAssetConfig` literal from the current config +
 // the one changed member). The 0.3.x original set every member explicitly
-// (including `undefined` ones) on the rebuilt literal; the `buildConfig`
-// helper below achieves the SAME observable config each call produces
+// (including `undefined` ones) on the rebuilt literal; the shared
+// `buildAssetConfig` helper (imported below) achieves the SAME observable
+// config each call produces
 // (a member is present only when it has a value) while satisfying this
 // repo's `exactOptionalPropertyTypes: true` (assigning an explicit
 // `undefined` into `AssetConfig`'s non-`|undefined` optional members is a
@@ -28,23 +30,12 @@ import { FormField } from './form-field';
 // `withRequired` — PART C). That is also why this class carries no
 // `isBlank`/`isDirty` override, unlike the 0.3.x original (:216-280): the
 // generic logic is the correct behavior now, not a gap to fill.
-/** Rebuilds a full `AssetConfig` literal from four possibly-unset members,
- *  omitting any member that is `undefined` (exactOptionalPropertyTypes-safe
- *  equivalent of the 0.3.x builders' "set every member, some to undefined"
- *  literal — see file header comment). */
-function buildConfig(
-  maxSize: number | undefined,
-  maxCount: number | undefined,
-  extensions: string[] | undefined,
-  fileTypes: string[] | undefined,
-): AssetConfig {
-  const config: AssetConfig = {};
-  if (maxSize !== undefined) config.maxSize = maxSize;
-  if (maxCount !== undefined) config.maxCount = maxCount;
-  if (extensions !== undefined) config.extensions = extensions;
-  if (fileTypes !== undefined) config.fileTypes = fileTypes;
-  return config;
-}
+//
+// EA-R1 #5: the withX builders below rebuild the whole `AssetConfig` literal
+// from four possibly-unset members via the shared `buildAssetConfig`
+// (`./asset-config.ts`) — identical semantics to a private `buildConfig`
+// this file used to duplicate locally; ImageField (`image-field.ts`) already
+// used the shared helper, so this closes the last duplicate.
 
 export class FileField extends FormField<string | string[]> {
   config?: AssetConfig | undefined;
@@ -62,7 +53,7 @@ export class FileField extends FormField<string | string[]> {
 
   /** Transplant of `FileField.withMaxSize:54-62`. */
   withMaxSize(maxSize?: number): this {
-    this.config = buildConfig(
+    this.config = buildAssetConfig(
       maxSize,
       this.config?.maxCount,
       this.config?.extensions,
@@ -73,7 +64,7 @@ export class FileField extends FormField<string | string[]> {
 
   /** Transplant of `FileField.withMaxCount:64-72` — the single/multi value-shape switch (decision ①). */
   withMaxCount(maxCount?: number): this {
-    this.config = buildConfig(
+    this.config = buildAssetConfig(
       this.config?.maxSize,
       maxCount,
       this.config?.extensions,
@@ -84,7 +75,7 @@ export class FileField extends FormField<string | string[]> {
 
   /** Transplant of `FileField.withExtensions:74-82`. */
   withExtensions(...extension: string[]): this {
-    this.config = buildConfig(
+    this.config = buildAssetConfig(
       this.config?.maxSize,
       this.config?.maxCount,
       extension,
@@ -95,7 +86,7 @@ export class FileField extends FormField<string | string[]> {
 
   /** Transplant of `FileField.withFileTypes:84-92`. */
   withFileTypes(...fileTypes: string[]): this {
-    this.config = buildConfig(
+    this.config = buildAssetConfig(
       this.config?.maxSize,
       this.config?.maxCount,
       this.config?.extensions,

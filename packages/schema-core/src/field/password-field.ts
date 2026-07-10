@@ -27,6 +27,10 @@ export interface PasswordStrength {
   regex?: PasswordStrengthRule[];
 }
 
+/** @deprecated Kept for its type shape only — the `PasswordField.create()`
+ *  factory that consumed this (0.3.x PasswordField.tsx factory-pattern
+ *  relic) was dropped (EA-R1 #4, same precedent as MessageViewField: `new
+ *  PasswordField(...)` + chaining supersedes it). */
 export interface PasswordFieldProps {
   name: string;
   order: number;
@@ -99,9 +103,5 @@ export class PasswordField extends FormField<string> {
       this.validations = newValidations;
     }
     return this;
-  }
-
-  static create(props: PasswordFieldProps): PasswordField {
-    return new PasswordField(props.name, props.order, props.validations, props.strength);
   }
 }

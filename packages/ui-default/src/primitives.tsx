@@ -420,6 +420,26 @@ function recordsEqual(a: Record<string, string> | undefined, b: Record<string, s
   return keysA.every((k) => source[k] === b[k]);
 }
 
+/** Strip blank-value entries (EA-R1 #1 companion to
+ *  `inline-map-renderer.tsx`'s `buildResult`, which now collapses a record
+ *  that is blank-by-VALUE in every entry down to `undefined`/`[]` at the
+ *  store-write boundary, closing the 0.3.x #1289 `{ key: '' }`-reads-as-
+ *  not-blank hole). Used ONLY for the resync-decision comparison below, not
+ *  for row rendering: comparing the raw incoming `value` against the raw
+ *  local-derived record would otherwise treat that store-side collapse as
+ *  an "external change" and wipe an in-progress free-mode row the instant
+ *  its key is typed but its value isn't yet (the local `rows` buffer is
+ *  the one thing that's still allowed to hold a real key + blank value —
+ *  comparing on meaningful content only keeps the resync decision blind to
+ *  that in-progress state while still catching genuine external changes. */
+function meaningfulRecord(record: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(record)) {
+    if (value !== '') result[key] = value;
+  }
+  return result;
+}
+
 /**
  * Key-value row editor (EA-D — InlineMap, first/only consumer:
  * InlineMapField; host reference UX: gjcu `packages/ui/form/InlineMap.tsx`).
@@ -467,7 +487,13 @@ export function InlineMap({
 
   useEffect(() => {
     if (fixedKeys) return;
-    if (recordsEqual(value, inlineMapDeriveRecord(rowsRef.current))) return;
+    if (
+      recordsEqual(
+        meaningfulRecord(value ?? {}),
+        meaningfulRecord(inlineMapDeriveRecord(rowsRef.current)),
+      )
+    )
+      return;
     setRows(rowsFromRecord(value));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- rowsRef sidesteps the need for `rows` here
   }, [value, fixedKeys]);

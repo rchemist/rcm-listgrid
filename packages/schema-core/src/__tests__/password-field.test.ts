@@ -8,9 +8,13 @@ import { PasswordField } from '../field/password-field';
 
 // EA-A fan-out — PasswordField unit tests. Transplant oracle for
 // src/listgrid/components/fields/PasswordField.tsx:15-100 (0.3.x). Covers:
-// builders (create/withStrength), validate() (default PasswordValidation +
+// builders (withStrength), validate() (default PasswordValidation +
 // strength-driven RegexValidation swap, id-tag filtering), and clone
 // preservation of `strength`.
+//
+// EA-R1 #4: the `PasswordField.create(props)` static factory (0.3.x
+// factory-pattern relic) was dropped — `new PasswordField(...)` + chaining
+// is the only construction path now (message-view-field.ts precedent).
 
 const ctx = (renderType: FieldEvalContext['renderType'] = 'create'): FieldEvalContext => ({
   renderType,
@@ -31,13 +35,6 @@ describe('PasswordField construction', () => {
     expect(field.validations).not.toBe(custom);
     expect(field.validations).toEqual(custom);
     expect(field.validations?.[0].id).toBe('CustomPwd');
-  });
-
-  it('PasswordField.create builds from props (name/order/validations/strength)', () => {
-    const field = PasswordField.create({ name: 'pw', order: 5 });
-    expect(field.getName()).toBe('pw');
-    expect(field.getOrder()).toBe(5);
-    expect(field.validations?.[0]).toBeInstanceOf(PasswordValidation);
   });
 
   it('constructor strength.regex[] filters out the default and appends RegexValidation entries', () => {
