@@ -2,6 +2,7 @@
   "name": "@rchemist/listgrid",
   "version": "0.3.26",
   "private": false,
+  "type": "module",
   "description": "Framework-free React CRUD UI engine — primitive-based design system, data-attr theming, and a full list/form renderer for RCM-framework-style entity backends.",
   "keywords": [
     "react",
@@ -24,60 +25,133 @@
     "packages/*",
     "apps/*"
   ],
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
   "sideEffects": [
     "**/*.css",
     "*.css"
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./next": {
-      "types": "./dist/adapters/next/index.d.ts",
-      "default": "./dist/adapters/next/index.js"
+      "import": {
+        "types": "./dist/adapters/next/index.d.ts",
+        "default": "./dist/adapters/next/index.js"
+      },
+      "require": {
+        "types": "./dist/adapters/next/index.d.cts",
+        "default": "./dist/adapters/next/index.cjs"
+      }
     },
     "./form/SearchForm": {
-      "types": "./dist/listgrid/form/SearchForm.d.ts",
-      "default": "./dist/listgrid/form/SearchForm.js"
+      "import": {
+        "types": "./dist/listgrid/form/SearchForm.d.ts",
+        "default": "./dist/listgrid/form/SearchForm.js"
+      },
+      "require": {
+        "types": "./dist/listgrid/form/SearchForm.d.cts",
+        "default": "./dist/listgrid/form/SearchForm.cjs"
+      }
     },
     "./form/Type": {
-      "types": "./dist/listgrid/form/Type.d.ts",
-      "default": "./dist/listgrid/form/Type.js"
+      "import": {
+        "types": "./dist/listgrid/form/Type.d.ts",
+        "default": "./dist/listgrid/form/Type.js"
+      },
+      "require": {
+        "types": "./dist/listgrid/form/Type.d.cts",
+        "default": "./dist/listgrid/form/Type.cjs"
+      }
     },
     "./api": {
-      "types": "./dist/listgrid/api/index.d.ts",
-      "default": "./dist/listgrid/api/index.js"
+      "import": {
+        "types": "./dist/listgrid/api/index.d.ts",
+        "default": "./dist/listgrid/api/index.js"
+      },
+      "require": {
+        "types": "./dist/listgrid/api/index.d.cts",
+        "default": "./dist/listgrid/api/index.cjs"
+      }
     },
     "./misc": {
-      "types": "./dist/listgrid/misc/index.d.ts",
-      "default": "./dist/listgrid/misc/index.js"
+      "import": {
+        "types": "./dist/listgrid/misc/index.d.ts",
+        "default": "./dist/listgrid/misc/index.js"
+      },
+      "require": {
+        "types": "./dist/listgrid/misc/index.d.cts",
+        "default": "./dist/listgrid/misc/index.cjs"
+      }
     },
     "./headless": {
-      "types": "./dist/listgrid/ui/headless.d.ts",
-      "default": "./dist/listgrid/ui/headless.js"
+      "import": {
+        "types": "./dist/listgrid/ui/headless.d.ts",
+        "default": "./dist/listgrid/ui/headless.js"
+      },
+      "require": {
+        "types": "./dist/listgrid/ui/headless.d.cts",
+        "default": "./dist/listgrid/ui/headless.cjs"
+      }
     },
     "./qr": {
-      "types": "./dist/qr.d.ts",
-      "default": "./dist/qr.js"
+      "import": {
+        "types": "./dist/qr.d.ts",
+        "default": "./dist/qr.js"
+      },
+      "require": {
+        "types": "./dist/qr.d.cts",
+        "default": "./dist/qr.cjs"
+      }
     },
     "./address": {
-      "types": "./dist/address.d.ts",
-      "default": "./dist/address.js"
+      "import": {
+        "types": "./dist/address.d.ts",
+        "default": "./dist/address.js"
+      },
+      "require": {
+        "types": "./dist/address.d.cts",
+        "default": "./dist/address.cjs"
+      }
     },
     "./api-spec": {
-      "types": "./dist/api-spec.d.ts",
-      "default": "./dist/api-spec.js"
+      "import": {
+        "types": "./dist/api-spec.d.ts",
+        "default": "./dist/api-spec.js"
+      },
+      "require": {
+        "types": "./dist/api-spec.d.cts",
+        "default": "./dist/api-spec.cjs"
+      }
     },
     "./xref-price": {
-      "types": "./dist/xref-price.d.ts",
-      "default": "./dist/xref-price.js"
+      "import": {
+        "types": "./dist/xref-price.d.ts",
+        "default": "./dist/xref-price.js"
+      },
+      "require": {
+        "types": "./dist/xref-price.d.cts",
+        "default": "./dist/xref-price.cjs"
+      }
     },
     "./excel": {
-      "types": "./dist/excel.d.ts",
-      "default": "./dist/excel.js"
+      "import": {
+        "types": "./dist/excel.d.ts",
+        "default": "./dist/excel.js"
+      },
+      "require": {
+        "types": "./dist/excel.d.cts",
+        "default": "./dist/excel.cjs"
+      }
     },
     "./styles.css": "./dist/styles.css",
     "./styles/tokens.css": "./dist/styles/tokens.css",
@@ -85,6 +159,21 @@
     "./styles/layouts.css": "./dist/styles/layouts.css",
     "./styles/components.css": "./dist/styles/components.css",
     "./styles/base.css": "./dist/styles/base.css"
+  },
+  "typesVersions": {
+    "*": {
+      "next": ["./dist/adapters/next/index.d.ts"],
+      "form/SearchForm": ["./dist/listgrid/form/SearchForm.d.ts"],
+      "form/Type": ["./dist/listgrid/form/Type.d.ts"],
+      "api": ["./dist/listgrid/api/index.d.ts"],
+      "misc": ["./dist/listgrid/misc/index.d.ts"],
+      "headless": ["./dist/listgrid/ui/headless.d.ts"],
+      "qr": ["./dist/qr.d.ts"],
+      "address": ["./dist/address.d.ts"],
+      "api-spec": ["./dist/api-spec.d.ts"],
+      "xref-price": ["./dist/xref-price.d.ts"],
+      "excel": ["./dist/excel.d.ts"]
+    }
   },
   "files": [
     "dist",
@@ -105,9 +194,11 @@
   "homepage": "https://github.com/rchemist/rcm-listgrid#readme",
   "scripts": {
     "type-check": "tsc --noEmit",
-    "build": "tsc -p tsconfig.build.json && npm run build:styles",
+    "build": "tsup && npm run build:styles",
     "build:styles": "mkdir -p dist/styles && cp src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/layouts.css src/listgrid/styles/components.css src/listgrid/styles/base.css dist/styles/ && cat src/listgrid/styles/tokens.css src/listgrid/styles/primitives.css src/listgrid/styles/layouts.css src/listgrid/styles/components.css src/listgrid/styles/base.css > dist/styles.css",
     "clean": "rm -rf dist",
+    "check:exports": "attw --pack . --exclude-entrypoints styles.css styles/tokens.css styles/primitives.css styles/layouts.css styles/components.css styles/base.css",
+    "check:publint": "publint",
     "prepublishOnly": "npm run clean && npm run type-check && npm test && npm run build",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
@@ -191,6 +282,7 @@
     }
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
     "@eslint/js": "^10.0.1",
     "@headlessui/react": "^2.2.9",
     "@iconify/react": "^4.1.1",
@@ -218,6 +310,7 @@
     "next": "^15.0.0",
     "nuqs": "^2.0.0",
     "prettier": "^3.8.3",
+    "publint": "^0.3.21",
     "qrcode.react": "^3.1.0",
     "react": "^19.2.1",
     "react-daum-postcode": "^3.1.3",
@@ -228,6 +321,7 @@
     "sortablejs": "^1.15.7",
     "sweetalert2": "^11.6.13",
     "sweetalert2-react-content": "^5.0.7",
+    "tsup": "^8.5.1",
     "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
     "typescript": "^5.5.0",
