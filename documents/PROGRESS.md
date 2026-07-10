@@ -66,13 +66,7 @@
 형식 P3~P7(표면 감사표·GA 대조표)은 GA 승격 시 재개하고, 그전까지는 **하드닝 + 점진 확장**으로 진행. 현재 전체 **1120 unit + 5 E2E green**.
 게이트: 태스크마다 관련 단위/렌더/E2E 그물 green + (렌더 변경) sample 실화면 확인.
 
-### H — 하드닝
-
-- [x] **H·게이트** 품질게이트 신 패키지+apps 확장(eslint globs·lint/format globs·`typecheck:packages`) · `0493333`/`a7c1e03`
-- [x] **H·CI** CI에 packages tsc + Playwright e2e job 배선 · `0493333`
-- [x] **H·SubColl테스트** SubCollection 단위테스트(state) · `0493333`
-- [x] **H1** id→entity 캐시 ✅ `e48a21f` · M2O 참조해소 adapter-scoped 캐시(useReferenceResolver, dedup+실패시 evict) · react 7/7·M2O E2E 2/2·gate(1120→1123)
-- [x] **H2** a11y ✅ `8144df4` · aria-required/invalid/describedby + focus-first-error + Modal 포커스(open→dialog·close→복귀) · react 9/9·E2E 5/5·gate(1124→1129)
+### H — 하드닝 ✅ 완료 (전 5태스크 — 게이트·CI·SubColl·H1 캐시·H2 a11y) · [archive](./progress-archive/phase-hardening-H.md)
 
 ### E — 확장 (사용자 확정 2026-07-11: 전 필드 이식 + 동작 실증 + Daum 주소) · [계획](./plans/e-track-field-parity.md)
 
