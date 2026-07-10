@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·EA·EB ✅ · EC1 ✅(주소 실증) · **Next up**: EC2(Collabo 재현 — EF2/EF3 실증, EC 최대 폼). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·EA·EB·EC1·**EC2 ✅**(EF2/EF3 실브라우저 실증 완료) · **Next up**: EF6(submit-transform 훅, 소형) → EA-D2(Xref 인프라 [O]) → EC3. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 09:50 (**EC1 완료** — Student 폼+Daum 스텁 E2E `142fbf9`, 주소 스택 실브라우저 결함 0. 1757 unit+**7 E2E** green. **Next=EC2**(Collabo 재현 — dynamic options·조건부·M2O 자동채움·file·submit transform, EF2/EF3 첫 실브라우저 실증. gjcu CollaboEntityForm 참조 scout 후 위임) )
+**Last updated**: 2026-07-11 11:00 (**EC2 완료** — Collabo `060418d`, **EF2/EF3 실브라우저 5/5·결함 0**. 1757 unit+**12 E2E** green. NR +1(changeSelectOptions 레이스)·EC-F1(기존 flake) 신설. **Next=EF6**(submit-transform 훅 — [브리핑 §5](./analysis/2026-07-11/ec2-collabo-briefing.md) 참조) → EA-D2 → EC3)
 
 ## Goal
 
@@ -85,8 +85,8 @@
 #### Phase EC — EntityForm 사용예 + E2E (동작 실증)
 
 - [x] **EC1** ✅ `142fbf9` · Student 폼+Daum 스텁 E2E 2건(create: required+focus+fan-out+왕복 / edit: hydrate+부분수정) · **라이브러리 결함 0**(주소 스택 첫 실브라우저 무결) · E2E 5→7 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [~] **EC2** Collabo 재현 + E2E 5건 — EF2/EF3 첫 실브라우저 실증. [재현 브리핑](./analysis/2026-07-11/ec2-collabo-briefing.md) 완결(스카우트). 갭 4건 확증→라우팅: ①submit-transform=EF6 ②hydrate clobber=EF7 ③주소 subset·④프리셋=Backlog
-  - **Reuse review**: Extend: college/student 페이지·fixture·E2E 패턴, EF2 빌더+hand-written 핸들러 혼용(구 스타일 충실) — New: collabo/org/staff 엔티티·spec(소비자측 신규 정당)
+- [x] **EC2** ✅ `060418d` · Collabo 재현 — **EF2/EF3 첫 실브라우저 실증 5/5 pass·라이브러리 결함 0**(옵션스왑·상호배제·M2O자동채움·onInit 첫페인트·required 게이트) · E2E 7→12 · [브리핑](./analysis/2026-07-11/ec2-collabo-briefing.md)
+- [ ] **EC-F1** student-address E2E flake(Daum 스텁 dialog 타이밍 — EC2 부재에도 재현된 기존 결함) 대기 로직 보강
 - [ ] **EF6** submit-transform 훅(EntityForm.withSubmitTransform→toSaveData) — 구 withOverrideSubmitData 후속(EC2 갭①, GJCU 실사용). EC2는 page-level workaround
 - [ ] **EF7 [O]** onInitialize 값-보정 vs hydrate clobber 설계(EC2 갭② — 구엔진 가능·신 파이프 불가. onFetchData data-변형 반환 vs hydrate의 init-set 존중)
 - [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
@@ -125,6 +125,7 @@
 - [ ] **EA-C ContentAsset 연기** — "전 필드 이식" 스코프에서 제외: 양 소비자 실사용 0·구엔진에서도 업로드 미완성 스텁(동작 실증 불가)·child EntityForm+FileField 대체 실존 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 - [ ] **EA-D Dead 3종 연기** — Rule(1264줄, 채택 0·bespoke 계약 미확인)·XrefPrice(자체 opt-in 격리)·XrefAvailableDate(순수 미채택): 양 소비자 실사용 0 전수 확인 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-d-scout-briefing.md)
 - [ ] **EA-D Map compare 갭(시스테믹)** — schema-core isEquals/normalizeEmptyValue가 Map 인스턴스 전맹(Object.keys 기반 — blank/equal 오판·JSON `{}` 소실). InlineMap은 Record 협소화로 회피; 장래 Map 값 필드 도입 시 선결 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EF2 changeSelectOptions 배열-clause 레이스** — 동일 필드를 겨냥한 2 clause에서 unmatched의 revert가 matched의 apply 뒤 실행될 수 있음(iteration order 의존 — EC2 구현이 이 사유로 빌더 대신 hand-written 채택) · risk: med(빌더 소비자) · [detail](./analysis/2026-07-11/ec2-collabo-briefing.md)
 - [ ] **EA-C 값 shape 다운그레이드** — FileFieldValue envelope 대신 plain string/string[](purity·소비자·백엔드 3중 정합). 구 envelope wire 계약을 쓰는 호스트는 어댑터 변환 필요 · risk: med(마이그레이션 문서화 필요) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 
 ## Progress notes
