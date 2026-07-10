@@ -2,7 +2,7 @@
 //
 // Original host app used this to gate listgrid pages behind menu-level
 // permissions. Generic library cannot assume host menu infrastructure;
-// default implementation returns a permissive 'WRITE' level. Host apps
+// default implementation returns a permissive 'ALL' level. Host apps
 // register a real checker via `registerMenuPermissionChecker()`.
 
 export const DEFAULT_MENU_ALIAS = 'default';
@@ -27,13 +27,22 @@ export type MenuPermissionChecker = (
 const DEFAULT_CHECKER: MenuPermissionChecker = () => 'ALL';
 
 let _checker: MenuPermissionChecker = DEFAULT_CHECKER;
+let _registered = false;
+let _warned = false;
 
 export function registerMenuPermissionChecker(checker: MenuPermissionChecker): void {
   _checker = checker;
+  _registered = true;
 }
 
 export function checkAdminMenuPermission(
   args: MenuPermissionCheckArgs,
 ): PermissionType | Promise<PermissionType> {
+  if (!_registered && !_warned) {
+    _warned = true;
+    console.warn(
+      "[@rchemist/listgrid] No MenuPermissionChecker registered — defaulting to permissive 'ALL'. Call registerMenuPermissionChecker() at bootstrap to enforce real menu permissions.",
+    );
+  }
   return _checker(args);
 }

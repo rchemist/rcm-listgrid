@@ -21,7 +21,7 @@ interface DatetimeFieldProps extends AbstractDateFieldProps {}
 
 export class DatetimeField extends AbstractDateField<DatetimeField> {
   constructor(name: string, order: number, limit?: MinMaxStringLimit, range?: boolean) {
-    super(name, order, 'date', limit, range);
+    super(name, order, 'datetime', limit, range);
   }
 
   async getCurrentValue(renderType?: RenderType): Promise<string | undefined | string[]> {

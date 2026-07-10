@@ -6,8 +6,16 @@ import { getRuntimeConfig } from '../config/RuntimeConfig';
 
 // Lazy-resolved: call getRuntimeConfig() at use time so host-side
 // configureRuntime({ cryptKey: ... }) can run after module import.
+// No fallback key: a shared hard-coded default would let any consumer of the
+// library decrypt any host's data. Hosts must configure their own cryptKey.
 function secretKey(): string {
-  return getRuntimeConfig().cryptKey || 'rcm-token-secret';
+  const cryptKey = getRuntimeConfig().cryptKey;
+  if (!cryptKey) {
+    throw new Error(
+      '[@rchemist/listgrid] simpleCrypt requires a cryptKey. Call configureRuntime({ cryptKey: ... }) at bootstrap before using encrypt/decrypt.',
+    );
+  }
+  return cryptKey;
 }
 
 export function encrypt(input: string, compress?: boolean): string {

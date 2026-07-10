@@ -4,22 +4,18 @@
 // `setOpenBaseLoading`. Host apps that want a global spinner overlay call
 // `configureLoading({ setOpenBaseLoading })`; otherwise calls no-op.
 
+import { create } from 'zustand';
+
 export interface LoadingStore {
   openBaseLoading: boolean;
   setOpenBaseLoading: (open: boolean) => void;
 }
 
-let _store: LoadingStore = {
+export const useLoadingStore = create<LoadingStore>((set) => ({
   openBaseLoading: false,
-  setOpenBaseLoading: (open) => {
-    _store.openBaseLoading = open;
-  },
-};
+  setOpenBaseLoading: (open) => set({ openBaseLoading: open }),
+}));
 
 export function configureLoading(store: LoadingStore): void {
-  _store = store;
-}
-
-export function useLoadingStore(): LoadingStore {
-  return _store;
+  useLoadingStore.setState(store);
 }

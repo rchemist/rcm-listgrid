@@ -2,6 +2,70 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.26] - 2026-07-10
+
+0.4 재기초에 앞서 **확정 버그 9건 + 안전 기본값**을 고친 하드닝 릴리스. 여기서
+고쳐진 로직이 0.4 이식의 원본이 된다(버그째 이식 방지). 보안 기본값 3종은 동작이
+바뀌므로 아래 **Breaking** 을 반드시 확인할 것. 0.4 로의 마이그레이션 how-to 는
+`documents/plans/migration-0.3-to-0.4.md`(리빙 문서)에 누적된다.
+
+### Breaking
+
+- **`simpleCrypt` cryptKey 필수화**: 공유 하드코딩 폴백 키(`'rcm-token-secret'`)를
+  제거했다. `configureRuntime({ cryptKey })` 로 키를 주입하지 않은 채 `encrypt` /
+  `decrypt` 를 호출하면 이제 명확한 에러를 던진다(모든 소비자가 같은 기본 키로 서로의
+  데이터를 복호화할 수 있던 문제 차단). 호스트는 부트스트랩에서 cryptKey 를 설정해야 한다.
+- **HTML 싱크 안전 기본값**: `HtmlField` · `ShowNotifications` · `ViewHelpIcon` 이
+  이전에는 host 제공 문자열을 `dangerouslySetInnerHTML` 로 그대로 렌더했다. 이제
+  `configureHtmlSanitizer((html) => sanitized)` 를 설정하기 전에는 **이스케이프된
+  텍스트로 렌더**하고 1회 경고한다. 기존처럼 HTML 로 렌더하려면 부트스트랩에서 새니타이저
+  (예: `configureHtmlSanitizer(DOMPurify.sanitize)`)를 주입한다.
+- **`ASSET_SERVER_URL` 폴백 제거**: 미설정 시 `http://127.0.0.1:8320` 으로 폴백하던
+  동작을 제거하고 빈 문자열 + 1회 경고로 바꿨다. `NEXT_PUBLIC_ASSET_SERVER` 또는
+  `configureAssetServerUrl()` 로 자산 서버를 설정하지 않던 host 는 자산 경로가 바뀔 수 있다.
+
+### Fixed
+
+- **(P0-1) min/max 검증 무력화**: `getValueAsNumber` / `getValueAsBoolean` 이 연산자
+  우선순위 버그로 `(current ?? renderType==='update') ? fetched : default` 로 평가돼
+  `current` 를 직접 쓰지 못하고 falsy(0/false) current 가 조용히 fetched/default 로
+  대체됐다. `getValueAsString` 과 동일하게 삼항을 괄호로 묶어 정정 —
+  `current ?? (renderType==='update' ? fetched : default)`. `MinMaxNumber` 검증이
+  다시 동작한다.
+- **(P0-2) DatetimeField 타입 오등록**: 필드 타입을 `'date'` 대신 `'datetime'` 으로
+  등록해 Excel export/import 왕복에서 **시간 성분이 보존**된다(기존엔 datetime 분기가
+  죽은 코드였음). 필터 UI 크기는 두 타입을 모두 처리하므로 무회귀.
+- **(P0-3) FieldRenderer onChange 에러 삼킴**: 축자 중복된 두 onChange IIFE 에 `.catch`
+  가 없어 `validate()` / `getManyToOneLink()` 가 throw 하면 unhandled rejection 으로
+  값·에러가 조용히 유실됐다. 공통 `applyFieldChange()` 로 추출하고 두 진입점을 try/catch
+  로 감싸 실패를 `setErrors()` 로 사용자에게 표시한다.
+- **(P0-4) pageSize 우선순위 역전**: 리스트별 `options.defaultPageSize` 가 마운트 시
+  전역 저장값으로 덮어써지던 문제. 명시 지정 > 전역 저장값 > 라이브러리 기본 순으로 정정.
+- **(P0-5) useLoadingStore 비반응성**: 훅 이름이지만 구독이 없어 로딩 상태가 바뀌어도
+  리렌더되지 않았다. zustand store 로 교체(반응성 확보). `configureLoading` 호스트 교체
+  계약은 유지.
+- **(P0-6) clone 권한 aliasing**: `EntityForm.clone()` 이 `manageEntityForm` 을 참조로
+  공유해 클론 변경이 원본에 누수됐다. 얕은 복사로 격리.
+
+### Added
+
+- **`configureHtmlSanitizer(sanitizer)`** — raw-HTML 싱크에 host 새니타이저를 주입하는
+  확장점(미설정 시 이스케이프 텍스트 + 1회 경고).
+
+### Changed
+
+- **`MenuPermissionChecker`**: 미등록 상태 첫 호출 시 1회 경고(여전히 관대한 `'ALL'`
+  기본값). 헤더 주석의 `'WRITE'` → `'ALL'` 오기 정정.
+- **환경 고정 / 릴리스 게이트 (P0-8)**: `engines.node >= 20`, `.nvmrc`(22 LTS),
+  CI Node 20/22 매트릭스 + `v0.4` 트리거, `scripts/check-release-docs.mjs`(CHANGELOG
+  최상단 == package.json 버전) publish 게이트, `@typescript-eslint/no-explicit-any`
+  를 error 로 승격(기존 135파일은 동결, 신규 유입만 차단). jsdom `localStorage` 셋업
+  폴리필로 Node 20+ 의 inert `localStorage` 전역 문제 해소.
+
+### Deprecated
+
+- **`AdvancedSearchForm`** (v1) — `AdvancedSearchFormV2` 로 대체 예정. 내부 사용처 0.
+
 ## [0.3.25] - 2026-06-20
 
 ### Fixed

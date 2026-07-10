@@ -48,6 +48,9 @@ interface ViewAdvancedSearchProps {
   subCollection?: boolean;
 }
 
+/**
+ * @deprecated Superseded by {@link AdvancedSearchFormV2}. Slated for removal in a future version.
+ */
 export const AdvancedSearchForm = ({
   fields,
   entityForm,

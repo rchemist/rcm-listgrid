@@ -26,6 +26,7 @@ export interface QuickSearchBarProps extends ViewFieldManageable {
   entityUrl: string;
   subCollectionName?: string;
   hideAdvancedSearch?: boolean;
+  defaultPageSize?: number;
 }
 
 // == Main Component ==

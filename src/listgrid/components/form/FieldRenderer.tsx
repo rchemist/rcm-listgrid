@@ -71,77 +71,95 @@ export const FieldRenderer = (props: FieldRendererProps) => {
   // 커스텀 필드 렌더러 확인
   const CustomFieldRenderer = getFieldRenderer(field.getName());
 
+  // onChange 처리 공통 로직 — 커스텀 렌더러용(handleFieldChange)과 기본 뷰용(viewParams.onChange)이
+  // 이 헬퍼를 공유한다. 실패 시 예외를 던져서 각 호출부의 catch 가 setErrors 로 사용자 피드백을
+  // 보장하도록 한다. (기존에는 두 곳 모두 .catch 가 없어 validate()/getManyToOneLink() 가 던지면
+  // unhandled rejection 이 되어 에러가 조용히 사라졌음 — P0-3)
+  const applyFieldChange = useCallback(
+    async (value: any, propagation: boolean | undefined, updateCurrentValue: boolean) => {
+      const fieldName = field.getName();
+      const currentScroll = window.scrollY;
+
+      setErrors([]);
+      if (updateCurrentValue) {
+        setCurrentValue(value);
+      }
+
+      const isPropagation = isTrue(propagation, true);
+
+      let cloned: EntityForm = entityForm.clone(true);
+      cloned.setValue(fieldName, value);
+      cloned.clearAlertMessages(false);
+
+      const updatedField = cloned.fields.get(fieldName);
+      setDirty(updatedField?.isDirty() ?? false);
+
+      const validationErrors: FieldError[] = await cloned.validate({
+        fieldNames: [fieldName],
+        ...(props.session !== undefined ? { session: props.session } : {}),
+      });
+      cloned.mergeError(fieldName, validationErrors);
+
+      let changed = false;
+
+      if (isPropagation) {
+        if (cloned.onChanges && cloned.onChanges.length > 0) {
+          for (const onChange of cloned.onChanges!) {
+            try {
+              cloned = await onChange(cloned, fieldName);
+              if (isTrue(cloned.shouldReload)) {
+                changed = true;
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          }
+        }
+      }
+
+      const manyToOneField = cloned.getField(fieldName);
+      setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
+
+      if (changed || manyToOneField instanceof AbstractManyToOneField) {
+        setEntityForm?.(cloned);
+      } else {
+        // Sprint 31c W.6 — React 19 setState 는 same reference 시 skip 함.
+        // 기존 `entityForm.merge(cloned); setEntityForm(entityForm)` 는 같은
+        // ref 를 setState 로 보내 re-render 가 생기지 않아 controlled input
+        // 의 value 가 EntityForm 갱신 후에도 update 안 됨. cloned (새 ref)
+        // 를 passing 하여 reconciliation 강제 + 값 동기화 보장.
+        setEntityForm?.(cloned);
+      }
+
+      requestAnimationFrame(() => {
+        if (Math.abs(window.scrollY - currentScroll) > 0) {
+          setOpenBaseLoading(true);
+          window.scrollTo({
+            top: currentScroll,
+            behavior: 'instant',
+          });
+          setTimeout(() => {
+            setOpenBaseLoading(false);
+          }, 50);
+        }
+      });
+    },
+    [entityForm, setEntityForm, field, props.session, setOpenBaseLoading],
+  );
+
   // 커스텀 렌더러용 onChange 핸들러
   const handleFieldChange = useCallback(
     (value: any, propagation?: boolean) => {
       (async () => {
-        const fieldName = field.getName();
-        const currentScroll = window.scrollY;
-
-        setErrors([]);
-        setCurrentValue(value);
-
-        const isPropagation = isTrue(propagation, true);
-
-        let cloned: EntityForm = entityForm.clone(true);
-        cloned.setValue(fieldName, value);
-        cloned.clearAlertMessages(false);
-
-        const updatedField = cloned.fields.get(fieldName);
-        setDirty(updatedField?.isDirty() ?? false);
-
-        const validationErrors: FieldError[] = await cloned.validate({
-          fieldNames: [fieldName],
-          ...(props.session !== undefined ? { session: props.session } : {}),
-        });
-        cloned.mergeError(fieldName, validationErrors);
-
-        let changed = false;
-
-        if (isPropagation) {
-          if (cloned.onChanges && cloned.onChanges.length > 0) {
-            for (const onChange of cloned.onChanges!) {
-              try {
-                cloned = await onChange(cloned, fieldName);
-                if (isTrue(cloned.shouldReload)) {
-                  changed = true;
-                }
-              } catch (e) {
-                console.error(e);
-              }
-            }
-          }
+        try {
+          await applyFieldChange(value, propagation, true);
+        } catch (e) {
+          console.error(e);
+          setErrors(['필드 값을 처리하는 중 오류가 발생했습니다.']);
         }
-
-        const manyToOneField = cloned.getField(fieldName);
-        setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
-
-        if (changed || manyToOneField instanceof AbstractManyToOneField) {
-          setEntityForm?.(cloned);
-        } else {
-          // Sprint 31c W.6 — React 19 setState 는 same reference 시 skip 함.
-          // 기존 `entityForm.merge(cloned); setEntityForm(entityForm)` 는 같은
-          // ref 를 setState 로 보내 re-render 가 생기지 않아 controlled input
-          // 의 value 가 EntityForm 갱신 후에도 update 안 됨. cloned (새 ref)
-          // 를 passing 하여 reconciliation 강제 + 값 동기화 보장.
-          setEntityForm?.(cloned);
-        }
-
-        requestAnimationFrame(() => {
-          if (Math.abs(window.scrollY - currentScroll) > 0) {
-            setOpenBaseLoading(true);
-            window.scrollTo({
-              top: currentScroll,
-              behavior: 'instant',
-            });
-            setTimeout(() => {
-              setOpenBaseLoading(false);
-            }, 50);
-          }
-        });
       })();
     },
-    [entityForm, setEntityForm, field, props.session, setOpenBaseLoading],
+    [applyFieldChange],
   );
 
   // 커스텀 렌더러용 onError 핸들러
@@ -238,75 +256,12 @@ export const FieldRenderer = (props: FieldRendererProps) => {
             : {}),
           onChange: (value, propagation) => {
             (async () => {
-              // 값 변경 시 에러 초기화, 값 반영, 검증, onChanges 콜백, manyToOneLink 갱신 등 처리
-              // On value change: clear errors, update value, validate, run onChanges, update manyToOneLink, etc.
-              const name = field.getName();
-              const currentScroll = window.scrollY; // 현재 스크롤 위치 저장
-
-              setErrors([]);
-
-              const isPropagation = isTrue(propagation, true);
-
-              let cloned: EntityForm = entityForm.clone(true);
-              cloned.setValue(name, value);
-
-              // persistent가 false인 alert 메시지들을 제거
-              cloned.clearAlertMessages(false);
-
-              // dirty 상태 즉시 계산 및 업데이트
-              const updatedField = cloned.fields.get(name);
-              setDirty(updatedField?.isDirty() ?? false);
-
-              // 현재 value 에 대해서만 다시 error 검사하기
-              // Validate only the current value
-              const errors: FieldError[] = await cloned.validate({
-                fieldNames: [name],
-                ...(props.session !== undefined ? { session: props.session } : {}),
-              });
-              cloned.mergeError(name, errors);
-
-              let changed = false;
-
-              if (isPropagation) {
-                if (cloned.onChanges && cloned.onChanges.length > 0) {
-                  for (const onChange of cloned.onChanges!) {
-                    try {
-                      cloned = await onChange(cloned, name);
-                      if (isTrue(cloned.shouldReload)) {
-                        changed = true;
-                      }
-                    } catch (e) {
-                      console.error(e);
-                    }
-                  }
-                }
+              try {
+                await applyFieldChange(value, propagation, false);
+              } catch (e) {
+                console.error(e);
+                setErrors(['필드 값을 처리하는 중 오류가 발생했습니다.']);
               }
-
-              const manyToOneField = cloned.getField(name);
-              setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
-
-              // Sprint 31c W.6 — React 19 setState same-ref skip 회피 (L119 동일 이유)
-              if (changed || manyToOneField instanceof AbstractManyToOneField) {
-                setEntityForm?.(cloned);
-              } else {
-                setEntityForm?.(cloned);
-              }
-
-              // entityForm 갱신으로 스크롤에 변화가 생겼다면 해당 위치로 스크롤을 자동 이동하는 구문
-              // If entityForm update changes scroll, auto-scroll to previous position
-              requestAnimationFrame(() => {
-                if (Math.abs(window.scrollY - currentScroll) > 0) {
-                  setOpenBaseLoading(true);
-                  window.scrollTo({
-                    top: currentScroll,
-                    behavior: 'instant',
-                  });
-
-                  setTimeout(() => {
-                    setOpenBaseLoading(false);
-                  }, 50);
-                }
-              });
             })();
           },
           onError: (message: string) => {

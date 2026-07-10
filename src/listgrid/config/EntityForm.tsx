@@ -48,7 +48,7 @@ export class EntityForm<T extends object = any> extends EntityFormExtensions<T> 
     entityForm.neverDelete = this.neverDelete;
     entityForm.revisionEntityName = this.revisionEntityName;
     entityForm.createStep = this.getCreateStep();
-    entityForm.manageEntityForm = this.manageEntityForm;
+    entityForm.manageEntityForm = { ...this.manageEntityForm };
     entityForm.session = this.session;
 
     // Extensions 복사

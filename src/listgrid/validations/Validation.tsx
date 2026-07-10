@@ -108,7 +108,7 @@ export abstract class ValidationItem implements Validation {
    */
   getValueAsNumber(entityForm: EntityForm, value: FieldValue): number {
     return Number(
-      (value?.current ?? entityForm.getRenderType() === 'update') ? value?.fetched : value?.default,
+      value?.current ?? (entityForm.getRenderType() === 'update' ? value?.fetched : value?.default),
     );
   }
 
@@ -119,7 +119,7 @@ export abstract class ValidationItem implements Validation {
    */
   getValueAsBoolean(entityForm: EntityForm, value: FieldValue): boolean {
     return Boolean(
-      (value?.current ?? entityForm.getRenderType() === 'update') ? value?.fetched : value?.default,
+      value?.current ?? (entityForm.getRenderType() === 'update' ? value?.fetched : value?.default),
     );
   }
 

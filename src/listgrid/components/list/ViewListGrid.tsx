@@ -515,6 +515,9 @@ const ViewListGridInner = (props: ViewListGridProps) => {
                 subCollection={isSubCollection}
                 quickSearchValue={search}
                 listFields={listFields}
+                {...(props.options?.defaultPageSize !== undefined
+                  ? { defaultPageSize: props.options.defaultPageSize }
+                  : {})}
                 {...(quickSearchProperty !== undefined ? { quickSearchProperty } : {})}
                 enableHandleData={enableHandleData}
                 showAdvancedSearch={showAdvancedSearch}

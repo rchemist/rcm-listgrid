@@ -420,9 +420,10 @@ export function getSessionStorageObject<T>(
 // Originals are module-level constants pulled from env. Library-consumer
 // Next.js bundles substitute NEXT_PUBLIC_* at build time, so this reads the
 // same env var and matches the original shape (plain strings, not Proxies).
+let _warnedNoAssetServerUrl = false;
+
 export const ASSET_SERVER_URL: string =
-  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_ASSET_SERVER) ||
-  'http://127.0.0.1:8320';
+  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_ASSET_SERVER) || '';
 
 export const ASSET_PREFIX: string = '/static-resource/';
 
@@ -440,7 +441,16 @@ export function configureAssetPrefix(prefix: string): void {
 }
 
 function effectiveAssetServerUrl(): string {
-  return _assetServerUrlOverride ?? ASSET_SERVER_URL;
+  const result = _assetServerUrlOverride ?? ASSET_SERVER_URL;
+  if (!result && !_warnedNoAssetServerUrl) {
+    _warnedNoAssetServerUrl = true;
+    if (typeof console !== 'undefined' && console.warn) {
+      console.warn(
+        '[listgrid] ASSET_SERVER_URL is not configured. Host must configure it via environment variable NEXT_PUBLIC_ASSET_SERVER or configureAssetServerUrl().',
+      );
+    }
+  }
+  return result;
 }
 
 function effectiveAssetPrefix(): string {
