@@ -166,6 +166,11 @@ export { BirthdayField } from './field/birthday-field';
 export { TelephoneNumberField } from './field/telephone-number-field';
 export { ColorField } from './field/color-field';
 
+// --- EA-D InlineMap (single delegate; store-direct-write redesign, no
+// pendingRef — ea-d-scout-briefing.md PART B/D) ---
+export { InlineMapField } from './field/inline-map-field';
+export type { InlineMapConfig, InlineMapValue, MapKey, KeyValue } from './field/inline-map-field';
+
 // --- EntityForm declaration (charter C1) ---
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';

@@ -8,6 +8,7 @@ import type {
   CheckBoxProps,
   DateInputProps,
   FileInputProps,
+  InlineMapProps,
   LoadingOverlayProps,
   ModalProps,
   NumberInputProps,
@@ -381,6 +382,214 @@ export function FileInput({
   );
 }
 
+let inlineMapRowSeq = 0;
+
+interface InlineMapRow {
+  id: number;
+  key: string;
+  value: string;
+}
+
+/** Build the ordered row list an incoming `value` Record represents. Fresh
+ *  ids on every call by design — rows are only ever rebuilt from `value`
+ *  when `recordsEqual` below has determined the current local rows no
+ *  longer match it (an external change), so a stable id per rebuild is not
+ *  needed for React reconciliation correctness (key churn just means a
+ *  fresh row of inputs, not a semantic loss). */
+function rowsFromRecord(record: Record<string, string> | undefined): InlineMapRow[] {
+  return Object.entries(record ?? {}).map(([key, value]) => ({
+    id: inlineMapRowSeq++,
+    key,
+    value,
+  }));
+}
+
+function inlineMapDeriveRecord(rows: InlineMapRow[]): Record<string, string> {
+  const record: Record<string, string> = {};
+  for (const row of rows) {
+    if (row.key !== '') record[row.key] = row.value;
+  }
+  return record;
+}
+
+function recordsEqual(a: Record<string, string> | undefined, b: Record<string, string>): boolean {
+  const keysA = Object.keys(a ?? {});
+  const keysB = Object.keys(b);
+  if (keysA.length !== keysB.length) return false;
+  const source = a ?? {};
+  return keysA.every((k) => source[k] === b[k]);
+}
+
+/**
+ * Key-value row editor (EA-D — InlineMap, first/only consumer:
+ * InlineMapField; host reference UX: gjcu `packages/ui/form/InlineMap.tsx`).
+ * Always speaks `Record<string,string>` at the `value`/`onChange` boundary
+ * (`InlineMapProps` doc comment, `types.ts`) — the injecting renderer owns
+ * any `KeyValue[]`/`Map` conversion.
+ *
+ * FIXED-KEYS mode (`keys` non-empty) needs no local row bookkeeping — each
+ * row maps 1:1 to a stable declared key, so it renders straight off
+ * `value`/`keys` every render. FREE mode does need local `rows` state: a
+ * plain `Record` can represent neither an in-progress blank key (typing a
+ * new row's key from empty) nor two rows sharing the same (still-being-
+ * edited) key, so rows are tracked with a synthetic id and only re-derived
+ * from `value` when the CONTENT the current rows would produce
+ * (`inlineMapDeriveRecord`) diverges from the incoming `value` — i.e. on a
+ * genuine external change, never merely because the renderer handed back a
+ * new object reference (a `resultType` conversion in the renderer allocates
+ * a fresh Record every render even when nothing changed).
+ */
+export function InlineMap({
+  value,
+  onChange,
+  keys,
+  minRows,
+  maxRows,
+  keyLabel,
+  valueLabel,
+  readOnly,
+  disabled,
+  id,
+  ariaLabel,
+  required,
+  invalid,
+  describedBy,
+}: InlineMapProps) {
+  const fixedKeys = keys && keys.length > 0 ? keys : undefined;
+  const editable = !readOnly && !disabled;
+  const kLabel = keyLabel ?? 'Key';
+  const vLabel = valueLabel ?? 'Value';
+
+  const [rows, setRows] = useState<InlineMapRow[]>(() => rowsFromRecord(value));
+  const rowsRef = useRef(rows);
+  rowsRef.current = rows;
+  const [error, setError] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (fixedKeys) return;
+    if (recordsEqual(value, inlineMapDeriveRecord(rowsRef.current))) return;
+    setRows(rowsFromRecord(value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- rowsRef sidesteps the need for `rows` here
+  }, [value, fixedKeys]);
+
+  function emit(next: InlineMapRow[]) {
+    setRows(next);
+    onChange?.(inlineMapDeriveRecord(next));
+  }
+
+  function setFixedValue(k: string, v: string) {
+    onChange?.({ ...(value ?? {}), [k]: v });
+  }
+
+  function setRowKey(rowId: number, key: string) {
+    emit(rows.map((row) => (row.id === rowId ? { ...row, key } : row)));
+  }
+
+  function setRowValue(rowId: number, value_: string) {
+    emit(rows.map((row) => (row.id === rowId ? { ...row, value: value_ } : row)));
+  }
+
+  function addRow() {
+    if (maxRows !== undefined && rows.length >= maxRows) {
+      setError(`최대 ${maxRows}개 까지 입력 가능합니다.`);
+      return;
+    }
+    setError(undefined);
+    setRows([...rows, { id: inlineMapRowSeq++, key: '', value: '' }]);
+  }
+
+  function removeRow(rowId: number) {
+    if (minRows !== undefined && rows.length <= minRows) {
+      setError(`최소 ${minRows}개 이상의 항목이 필요합니다.`);
+      return;
+    }
+    setError(undefined);
+    emit(rows.filter((row) => row.id !== rowId));
+  }
+
+  const displayRows = fixedKeys
+    ? fixedKeys.map((k) => ({
+        id: k.key,
+        key: k.key,
+        label: k.label ?? k.key,
+        value: value?.[k.key] ?? '',
+      }))
+    : rows.map((row) => ({ id: String(row.id), key: row.key, label: undefined, value: row.value }));
+
+  return (
+    <div
+      id={id}
+      data-field="inline-map"
+      role="group"
+      aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>{kLabel}</th>
+            <th>{vLabel}</th>
+            {!fixedKeys && editable && <th>Action</th>}
+          </tr>
+        </thead>
+        <tbody>
+          {displayRows.map((row, index) => (
+            <tr key={row.id}>
+              <td>
+                {fixedKeys ? (
+                  <span>{row.label}</span>
+                ) : (
+                  <input
+                    type="text"
+                    value={row.key}
+                    readOnly={!editable}
+                    disabled={disabled}
+                    aria-label={`${kLabel} ${index + 1}`}
+                    onChange={(e) => setRowKey(Number(row.id), e.target.value)}
+                  />
+                )}
+              </td>
+              <td>
+                <input
+                  type="text"
+                  value={row.value}
+                  readOnly={!editable}
+                  disabled={disabled}
+                  aria-label={`${vLabel} ${index + 1}`}
+                  onChange={(e) =>
+                    fixedKeys
+                      ? setFixedValue(row.key, e.target.value)
+                      : setRowValue(Number(row.id), e.target.value)
+                  }
+                />
+              </td>
+              {!fixedKeys && editable && (
+                <td>
+                  <button
+                    type="button"
+                    aria-label={`Remove row ${index + 1}`}
+                    onClick={() => removeRow(Number(row.id))}
+                  >
+                    ×
+                  </button>
+                </td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {!fixedKeys && editable && (
+        <button type="button" onClick={addRow}>
+          Add
+        </button>
+      )}
+      {error !== undefined && <div role="alert">{error}</div>}
+    </div>
+  );
+}
+
 /**
  * Placeholder fallback for the Profile field's `UserView` slot (EA-A0
  * pre-stage, conductor decision ②: "최소 placeholder — 호스트 오버라이드
@@ -498,6 +707,7 @@ export const defaultUIComponents: UIComponents = {
   SelectBox,
   TagsInput,
   FileInput,
+  InlineMap,
   UserView,
   Button,
   Modal,

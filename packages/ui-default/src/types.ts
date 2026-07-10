@@ -142,6 +142,58 @@ export interface FileInputProps {
   describedBy?: string;
 }
 
+/** One fixed key the InlineMap slot may offer (EA-D pre-stage — first
+ *  consumer: InlineMapField). Structurally identical to schema-core's
+ *  `MapKey` (`InlineMapConfig.keys`) — duplicated here rather than imported
+ *  so ui-default stays decoupled from schema-core (same posture as
+ *  `SelectOption` above, which structurally mirrors schema-core's own
+ *  `SelectOption` without importing it). */
+export interface InlineMapKeyDef {
+  key: string;
+  label?: string;
+  required?: boolean;
+}
+
+/**
+ * Key-value row editor slot (EA-D — InlineMap, first/only consumer:
+ * InlineMapField). The slot boundary ALWAYS speaks
+ * `Record<string,string>` for `value`/`onChange` regardless of the field's
+ * declared `resultType` — converting to/from `KeyValue[]`/`Map` is the
+ * renderer's job (`@listgrid/react` `inline-map-renderer.tsx`), keeping this
+ * slot's contract shape-agnostic ("keep the slot dumb").
+ *
+ * Two modes, selected purely by whether `keys` is non-empty:
+ *   - FIXED-KEYS (`keys` non-empty): one row per declared key, in that
+ *     order; the key column is a static label, only the value is editable;
+ *     no add/remove affordance (the row set is exactly `keys`).
+ *   - FREE (`keys` unset/empty): rows come from `value`'s own entries; both
+ *     key and value are editable, and rows can be added/removed, subject to
+ *     `minRows`/`maxRows`.
+ */
+export interface InlineMapProps {
+  value?: Record<string, string>;
+  onChange?: (value: Record<string, string>) => void;
+  /** Fixed key list — presence (non-empty) switches the editor into
+   *  fixed-keys mode (see above). */
+  keys?: InlineMapKeyDef[];
+  /** Free-mode row-count floor — attempting to remove a row at/below this
+   *  count is rejected (surfaced via `role="alert"`, no onChange call). */
+  minRows?: number;
+  /** Free-mode row-count ceiling — attempting to add a row at/above this
+   *  count is rejected the same way. */
+  maxRows?: number;
+  /** Column header text (default 'Key'/'Value'). */
+  keyLabel?: string;
+  valueLabel?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
+  id?: string;
+  ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
+}
+
 export interface UserViewProps {
   /** host-owned shape (ProfileField/UserView is a placeholder posture — the
    *  real host overrides this component with its own user-lookup view). */
@@ -214,6 +266,7 @@ export interface UIComponents {
   SelectBox: ComponentType<SelectBoxProps>;
   TagsInput: ComponentType<TagsInputProps>;
   FileInput: ComponentType<FileInputProps>;
+  InlineMap: ComponentType<InlineMapProps>;
   UserView: ComponentType<UserViewProps>;
   Button: ComponentType<ButtonProps>;
   Modal: ComponentType<ModalProps>;

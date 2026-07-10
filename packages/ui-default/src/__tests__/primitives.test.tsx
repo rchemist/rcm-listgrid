@@ -6,8 +6,8 @@
 // idiom used throughout @listgrid/react's __tests__.
 
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { FileInput, TagsInput, TextInput, UserView } from '../primitives';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { FileInput, InlineMap, TagsInput, TextInput, UserView } from '../primitives';
 
 describe('TextInput type prop (backward compatible — default stays "text")', () => {
   it('defaults to type="text" when omitted', () => {
@@ -171,5 +171,145 @@ describe('FileInput (EA-C0 pre-stage — plain-URL value, host-owned upload seam
     expect(input).toHaveAttribute('aria-required', 'true');
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAttribute('aria-describedby', 'file-help');
+  });
+});
+
+describe('InlineMap (EA-D — key-value row editor, Record<string,string> slot boundary)', () => {
+  function getGroup(container: HTMLElement) {
+    return within(container).getByRole('group');
+  }
+
+  describe('fixed-keys mode (config.keys non-empty — value-only editing, no add/remove)', () => {
+    const keys = [
+      { key: 'phone', label: 'Phone' },
+      { key: 'fax', label: 'Fax' },
+    ];
+
+    it('renders one row per declared key, in order, with static (non-input) key labels', () => {
+      const { container } = render(
+        <InlineMap ariaLabel="extra" value={{ phone: '010' }} keys={keys} onChange={vi.fn()} />,
+      );
+      const group = getGroup(container);
+      expect(within(group).getByText('Phone')).toBeInTheDocument();
+      expect(within(group).getByText('Fax')).toBeInTheDocument();
+      expect(within(group).queryByLabelText('Key 1')).not.toBeInTheDocument();
+      expect(within(group).getByLabelText('Value 1')).toHaveValue('010');
+      expect(within(group).getByLabelText('Value 2')).toHaveValue('');
+    });
+
+    it('editing a key value onChanges the merged Record, preserving the other keys', () => {
+      const onChange = vi.fn();
+      const { container } = render(
+        <InlineMap
+          ariaLabel="extra"
+          value={{ phone: '010', fax: '02' }}
+          keys={keys}
+          onChange={onChange}
+        />,
+      );
+      const group = getGroup(container);
+      fireEvent.change(within(group).getByLabelText('Value 1'), { target: { value: '011' } });
+      expect(onChange).toHaveBeenCalledWith({ phone: '011', fax: '02' });
+    });
+
+    it('no add/remove affordance in fixed-keys mode', () => {
+      const { container } = render(
+        <InlineMap ariaLabel="extra" value={{}} keys={keys} onChange={vi.fn()} />,
+      );
+      const group = getGroup(container);
+      expect(within(group).queryByRole('button', { name: /add/i })).not.toBeInTheDocument();
+      expect(within(group).queryByRole('button', { name: /remove/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('free mode (no keys — add/remove rows, editable key+value)', () => {
+    it('renders zero rows and an Add button when value is empty', () => {
+      const { container } = render(<InlineMap ariaLabel="extra" value={{}} onChange={vi.fn()} />);
+      const group = getGroup(container);
+      expect(within(group).queryAllByRole('row')).toHaveLength(1); // header row only
+      expect(within(group).getByRole('button', { name: 'Add' })).toBeInTheDocument();
+    });
+
+    it('Add creates a new blank row (no onChange — content unchanged until typed)', () => {
+      const onChange = vi.fn();
+      const { container } = render(<InlineMap ariaLabel="extra" value={{}} onChange={onChange} />);
+      fireEvent.click(within(getGroup(container)).getByRole('button', { name: 'Add' }));
+      expect(within(getGroup(container)).getByLabelText('Key 1')).toHaveValue('');
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('typing a key then a value calls onChange with the accumulated Record', () => {
+      const onChange = vi.fn();
+      const { container } = render(<InlineMap ariaLabel="extra" value={{}} onChange={onChange} />);
+      const group = () => getGroup(container);
+      fireEvent.click(within(group()).getByRole('button', { name: 'Add' }));
+      fireEvent.change(within(group()).getByLabelText('Key 1'), { target: { value: 'phone' } });
+      expect(onChange).toHaveBeenLastCalledWith({ phone: '' });
+
+      // local row state already reflects the typed key (the slot is
+      // uncontrolled-until-resynced — see `recordsEqual` doc comment,
+      // primitives.tsx) — no need to feed the value prop back for the next edit.
+      fireEvent.change(within(group()).getByLabelText('Value 1'), { target: { value: '010' } });
+      expect(onChange).toHaveBeenLastCalledWith({ phone: '010' });
+    });
+
+    it('remove button drops exactly that row from the Record', () => {
+      const onChange = vi.fn();
+      const { container } = render(
+        <InlineMap ariaLabel="extra" value={{ a: '1', b: '2' }} onChange={onChange} />,
+      );
+      const group = getGroup(container);
+      fireEvent.click(within(group).getByRole('button', { name: 'Remove row 1' }));
+      expect(onChange).toHaveBeenCalledWith({ b: '2' });
+    });
+
+    it('respects maxRows — Add beyond the ceiling surfaces role="alert", no row added', () => {
+      const onChange = vi.fn();
+      const { container } = render(
+        <InlineMap ariaLabel="extra" value={{ a: '1' }} maxRows={1} onChange={onChange} />,
+      );
+      const group = getGroup(container);
+      fireEvent.click(within(group).getByRole('button', { name: 'Add' }));
+      expect(within(group).getByRole('alert')).toHaveTextContent('최대 1개');
+      expect(within(group).queryAllByRole('row')).toHaveLength(2); // header + the one existing row
+    });
+
+    it('respects minRows — Remove at/below the floor surfaces role="alert", no onChange', () => {
+      const onChange = vi.fn();
+      const { container } = render(
+        <InlineMap ariaLabel="extra" value={{ a: '1' }} minRows={1} onChange={onChange} />,
+      );
+      const group = getGroup(container);
+      fireEvent.click(within(group).getByRole('button', { name: 'Remove row 1' }));
+      expect(within(group).getByRole('alert')).toHaveTextContent('최소 1개');
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('readOnly hides Add/Remove and marks inputs read-only', () => {
+      const { container } = render(
+        <InlineMap ariaLabel="extra" value={{ a: '1' }} readOnly onChange={vi.fn()} />,
+      );
+      const group = getGroup(container);
+      expect(within(group).queryByRole('button', { name: 'Add' })).not.toBeInTheDocument();
+      expect(within(group).queryByRole('button', { name: /remove/i })).not.toBeInTheDocument();
+      expect(within(group).getByLabelText('Key 1')).toHaveAttribute('readonly');
+    });
+  });
+
+  it('a11y attrs: aria-required/aria-invalid/aria-describedby pass through to the group', () => {
+    render(
+      <InlineMap
+        ariaLabel="extra"
+        value={{}}
+        onChange={vi.fn()}
+        required
+        invalid
+        describedBy="extra-help"
+      />,
+    );
+    const group = screen.getByRole('group');
+    expect(group).toHaveAttribute('aria-required', 'true');
+    expect(group).toHaveAttribute('aria-invalid', 'true');
+    expect(group).toHaveAttribute('aria-describedby', 'extra-help');
   });
 });

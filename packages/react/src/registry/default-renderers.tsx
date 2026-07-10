@@ -24,6 +24,7 @@ import { ColorFieldRenderer } from './color-renderer';
 import { FileFieldRenderer } from './file-renderer';
 import { ImageFieldRenderer } from './image-renderer';
 import { MultipleAssetFieldRenderer } from './multiple-asset-renderer';
+import { InlineMapFieldRenderer } from './inline-map-renderer';
 
 // Default field-type renderers (task item 3). Every one of these follows the
 // same shape: read this field's resolved value via useFieldValue, resolve the
@@ -255,4 +256,6 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('file', FileFieldRenderer);
   registerFieldRenderer('image', ImageFieldRenderer);
   registerFieldRenderer('multipleAsset', MultipleAssetFieldRenderer);
+  // EA-D InlineMap (single delegate; store-direct-write redesign, no pendingRef)
+  registerFieldRenderer('inlineMap', InlineMapFieldRenderer);
 }
