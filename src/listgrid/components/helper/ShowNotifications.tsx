@@ -4,6 +4,7 @@ import { IconAlertTriangle, IconSquareRoundedX } from '@tabler/icons-react';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { isTrue } from '../../utils/BooleanUtil';
 import { ColorType } from '../../common/type';
+import { sanitizeHtmlOrWarn } from '../../config/htmlSanitizer';
 
 interface ListGridNotificationsProps {
   messages?: string[] | Map<string, string>;
@@ -77,19 +78,26 @@ export const ShowNotifications = ({
             <div className="rcm-notification-body">
               <div className={`${showClose ? 'flex items-start justify-between' : ''}`}>
                 <div className={`${textColor} w-full`}>
-                  {uniqueMessages.map((item: MessageItem) => (
-                    <div
-                      key={item.id}
-                      id={item.id}
-                      className={
-                        'flex space-x-2 items-center font-semibold cursor-pointer hover:opacity-80'
-                      }
-                      onClick={() => onClick && onClick(item.id)}
-                    >
-                      <IconAlertTriangle className="h-6 w-6" />
-                      <div dangerouslySetInnerHTML={{ __html: item.message }} />
-                    </div>
-                  ))}
+                  {uniqueMessages.map((item: MessageItem) => {
+                    const sanitized = sanitizeHtmlOrWarn(item.message);
+                    return (
+                      <div
+                        key={item.id}
+                        id={item.id}
+                        className={
+                          'flex space-x-2 items-center font-semibold cursor-pointer hover:opacity-80'
+                        }
+                        onClick={() => onClick && onClick(item.id)}
+                      >
+                        <IconAlertTriangle className="h-6 w-6" />
+                        {sanitized === null ? (
+                          <div>{item.message}</div>
+                        ) : (
+                          <div dangerouslySetInnerHTML={{ __html: sanitized }} />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
                 {showClose && (
                   <div className={`${textColor}`}>

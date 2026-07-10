@@ -60,6 +60,12 @@ export {
 } from './config/RuntimeConfig';
 export type { RuntimeConfig, ListGridEndpoints, ListGridPermissions } from './config/RuntimeConfig';
 
+// HTML sanitizer injection (ADR-0006) — raw-HTML sinks (HtmlField,
+// ShowNotifications, ViewHelpIcon) render escaped text and warn until a host
+// configures a sanitizer, e.g. `configureHtmlSanitizer(DOMPurify.sanitize)`.
+export { configureHtmlSanitizer, getHtmlSanitizer } from './config/htmlSanitizer';
+export type { HtmlSanitizer } from './config/htmlSanitizer';
+
 // i18n extension point — host injects a translator factory at bootstrap.
 export { configureTranslator, getTranslation } from './utils/i18n';
 export type { Translator, TranslatorI18n, TranslatorFactory } from './utils/i18n';

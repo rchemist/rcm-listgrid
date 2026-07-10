@@ -5,6 +5,7 @@ import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 import { MarkdownEditor } from '../../ui';
 import { isEquals } from '../../misc';
 import { isBlank } from '../../utils/StringUtil';
+import { sanitizeHtmlOrWarn } from '../../config/htmlSanitizer';
 
 interface HtmlFieldProps extends FormFieldProps {}
 
@@ -30,8 +31,15 @@ export class HtmlField extends FormField<HtmlField> {
     if (value === null || value === undefined || value === '') {
       return { result: null };
     }
+    const html = String(value);
+    const sanitized = sanitizeHtmlOrWarn(html);
     return {
-      result: <div dangerouslySetInnerHTML={{ __html: String(value) }} />,
+      result:
+        sanitized === null ? (
+          <div>{html}</div>
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: sanitized }} />
+        ),
     };
   }
 

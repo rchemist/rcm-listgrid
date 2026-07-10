@@ -3,6 +3,7 @@ import { IconInfoCircle } from '@tabler/icons-react';
 import React from 'react';
 import { isBlank } from '../../../utils/StringUtil';
 import { getTranslation } from '../../../utils/i18n';
+import { sanitizeHtmlOrWarn } from '../../../config/htmlSanitizer';
 
 interface ViewHelpIconProps {
   helpText?: string;
@@ -16,6 +17,7 @@ export const ViewHelpIcon = (props: ViewHelpIconProps) => {
   const { t } = getTranslation();
 
   const value = t(helpText ?? '');
+  const sanitized = sanitizeHtmlOrWarn(value);
 
   return (
     <TooltipCard width={280} shadow="md">
@@ -25,7 +27,11 @@ export const ViewHelpIcon = (props: ViewHelpIconProps) => {
         </div>
       </TooltipCard.Target>
       <TooltipCard.Dropdown>
-        <div className="rcm-field-help" dangerouslySetInnerHTML={{ __html: value }}></div>
+        {sanitized === null ? (
+          <div className="rcm-field-help">{value}</div>
+        ) : (
+          <div className="rcm-field-help" dangerouslySetInnerHTML={{ __html: sanitized }}></div>
+        )}
       </TooltipCard.Dropdown>
     </TooltipCard>
   );
