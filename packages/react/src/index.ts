@@ -17,6 +17,13 @@ export type { RouterProviderProps, Router } from './providers/router';
 export { AdapterProvider, useAdapter } from './providers/adapter';
 export type { AdapterProviderProps } from './providers/adapter';
 
+export { CustomOptionProvider, useCustomOptions } from './providers/custom-option';
+export type {
+  CustomOptionProviderProps,
+  FetchCustomOptions,
+  CustomOptionResolver,
+} from './providers/custom-option';
+
 export { configureMessages, getMessages, resetMessages } from './messages';
 export type { MessagesRegistry, ToastKind } from './messages';
 

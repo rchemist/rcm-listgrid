@@ -41,7 +41,15 @@ export type FieldType =
   | 'colorPreset'
   | 'messageView'
   | 'profile'
-  | 'mappedJoin';
+  | 'mappedJoin'
+  // EA-B0 additions (charter C4 +4 — Birthday/TelephoneNumber/Color/
+  // CustomOption, ea-b-scout-briefing.md PART D item 2). 'telephoneNumber'
+  // is distinct from the existing 'phone' (PhoneNumberField already owns
+  // that type; TelephoneNumberField's validation/format differ).
+  | 'birthday'
+  | 'telephoneNumber'
+  | 'color'
+  | 'customOption';
 
 /** The create/update discriminant threaded through every conditional resolution. */
 export type RenderType = 'create' | 'update';

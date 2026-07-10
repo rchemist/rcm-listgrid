@@ -93,6 +93,9 @@ export {
 export { getCurrentValue, isBlank, isDirty, normalizeEmptyValue, resetValue } from './field/value';
 export { isEquals, isEqualCollection } from './util/compare';
 
+// --- phone formatting (EA-B0 PART D item 5; TelephoneNumberField consumer) ---
+export { formatPhoneNumber, removePhoneNumberHyphens } from './util/phone-util';
+
 // --- field classes (meta; render lives in @listgrid/react) ---
 export { FormField } from './field/form-field';
 export {

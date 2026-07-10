@@ -26,6 +26,13 @@ describe('TextInput type prop (backward compatible — default stays "text")', (
     render(<TextInput ariaLabel="t" type="time" value="" />);
     expect(screen.getByLabelText('t')).toHaveAttribute('type', 'time');
   });
+
+  it('renders type="datetime-local" and type="color" (EA-B0)', () => {
+    render(<TextInput ariaLabel="dt" type="datetime-local" value="" />);
+    expect(screen.getByLabelText('dt')).toHaveAttribute('type', 'datetime-local');
+    render(<TextInput ariaLabel="c" type="color" value="" />);
+    expect(screen.getByLabelText('c')).toHaveAttribute('type', 'color');
+  });
 });
 
 describe('TagsInput (0.3.x TagField.tsx:45-89 usage — minimal token input)', () => {

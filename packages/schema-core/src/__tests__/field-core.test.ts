@@ -116,6 +116,29 @@ describe('isDirty (transplant of FormField:542-590 — the C4 micro-decision)', 
     expect(isDirty({ fetched: ['a', 'b'], current: ['b', 'a'] })).toBe(false);
     expect(isDirty({ fetched: ['a'], current: ['a', 'b'] })).toBe(true);
   });
+
+  describe('EA-B1: empty-array normalization (systemic array-field dirty fix)', () => {
+    it('create mode: current=[] with no declared default -> not dirty (was a false positive pre-EA-B1)', () => {
+      expect(isDirty({ current: [] })).toBe(false);
+      expect(isDirty({ current: [], default: undefined })).toBe(false);
+    });
+    it('create mode: current=[] vs a non-empty declared default -> dirty', () => {
+      expect(isDirty({ current: [], default: ['a'] })).toBe(true);
+    });
+    it('create mode: current with >=1 item and no default -> dirty', () => {
+      expect(isDirty({ current: ['a'] })).toBe(true);
+      expect(isDirty({ current: ['a', 'b'] })).toBe(true);
+    });
+    it('create mode: current=[] equals default=[] -> not dirty', () => {
+      expect(isDirty({ current: [], default: [] })).toBe(false);
+    });
+    it('update mode is unaffected: fetched=["a"] then current back to ["a"] -> not dirty', () => {
+      expect(isDirty({ fetched: ['a'], current: ['a'] })).toBe(false);
+    });
+    it('update mode: fetched=[] then current edited to a non-empty array -> dirty', () => {
+      expect(isDirty({ fetched: [], current: ['a'] })).toBe(true);
+    });
+  });
 });
 
 describe('resetValue', () => {

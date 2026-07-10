@@ -15,8 +15,9 @@ export interface TextInputProps {
   /** HTML input type (default 'text'). 'password'/'month'/'time' let a single
    *  primitive back PasswordField/MonthField/TimeField (EA-A) without a new
    *  slot per type — additive, backward compatible (existing callers that
-   *  omit it keep getting `type="text"`). */
-  type?: 'text' | 'password' | 'month' | 'time';
+   *  omit it keep getting `type="text"`). 'datetime-local'/'color' extend
+   *  the same union (EA-B0) for DatetimeField/ColorField. */
+  type?: 'text' | 'password' | 'month' | 'time' | 'datetime-local' | 'color';
   readOnly?: boolean;
   disabled?: boolean;
   id?: string;

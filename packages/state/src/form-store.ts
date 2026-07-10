@@ -75,8 +75,17 @@ export interface FormStoreState {
    * Writes field `name`'s value slice, then dispatches the EntityForm's
    * registered onChanges handlers (EF2) — see createFormStore's dispatch/
    * loop-guard doc comment below for the batching contract.
+   *
+   * `opts.cascade === false` (EA-B0) skips ONLY the dispatchOnChanges call —
+   * an independent axis from the loop-guard's isTopLevel/dispatchBatch
+   * machinery (do not conflate). writeValue/dirty recompute, touched
+   * marking, and validate-on-change scheduling all run exactly as they do
+   * without the option (old-engine parity — FieldRenderer.tsx propagation=
+   * false only ever skipped the onChanges loop, PART A). Not exposed on
+   * FormMutator: handler-driven cascade writes are the loop-guard's concern,
+   * not this option's.
    */
-  setValue(name: string, value: unknown): void;
+  setValue(name: string, value: unknown, opts?: { cascade?: boolean }): void;
   getValue(name: string): unknown;
   /** fill fetched values from a server entity (create → update). */
   hydrate(data: Record<string, unknown>): void;
@@ -261,13 +270,18 @@ export function createFormStore(
       });
     }
 
-    function performSetValue(name: string, value: unknown): void {
+    function performSetValue(name: string, value: unknown, opts?: { cascade?: boolean }): void {
       const isTopLevel = dispatchBatch === null;
       if (isTopLevel) dispatchBatch = new Set<string>();
       const batch = dispatchBatch as Set<string>;
       try {
         writeValue(name, value);
-        if (!batch.has(name)) {
+        // EA-B0: cascade:false is an INDEPENDENT condition from the
+        // isTopLevel/batch loop-guard above — it only ever suppresses this
+        // dispatchOnChanges call (old-engine propagation=false parity, PART
+        // A). Everything else (writeValue/dirty just above, touched +
+        // validate-on-change scheduling just below) is unconditional.
+        if (opts?.cascade !== false && !batch.has(name)) {
           batch.add(name);
           dispatchOnChanges(name);
         }
@@ -324,8 +338,8 @@ export function createFormStore(
         return getCurrentValue(get().fields[name], get().renderType);
       },
 
-      setValue(name, value) {
-        performSetValue(name, value);
+      setValue(name, value, opts) {
+        performSetValue(name, value, opts);
       },
 
       hydrate(data) {

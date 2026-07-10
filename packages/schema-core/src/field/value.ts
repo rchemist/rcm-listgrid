@@ -34,14 +34,27 @@ export function isBlank(slice: FieldValue | undefined, renderType: RenderType = 
 }
 
 /**
- * Normalize '', null, undefined, and empty-object to undefined for dirty
- * comparison. Transplant of FormField.normalizeEmptyValue:596-606.
+ * Normalize '', null, undefined, empty-object, and (EA-B1) empty-array to
+ * undefined for dirty comparison. Transplant of
+ * FormField.normalizeEmptyValue:596-606, EXTENDED by EA-B1: the 0.3.x
+ * original normalized empty non-array objects but never arrays, so a
+ * create-mode array field (Checkbox/MultiSelect/Tag/CustomOption-multiple)
+ * with `current=[]` and no declared default was misjudged dirty=true by the
+ * newer engine's create-mode branch below (undefined default normalizes to
+ * undefined, `[]` did not, so `normalizedCurrent !== normalizedDefault`) —
+ * a systemic gap across every array-valued field, not present in 0.3.x
+ * (whose FormField.isDirty ran `isEmpty(current) && isEmpty(original)` up
+ * front, treating [] as empty there too). See ea-b-scout-briefing.md PART B
+ * closing note + PART D item 6.
  */
 export function normalizeEmptyValue(value: unknown): unknown {
   if (value === '' || value === null || value === undefined) {
     return undefined;
   }
-  if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) {
+  if (Array.isArray(value)) {
+    return value.length === 0 ? undefined : value;
+  }
+  if (typeof value === 'object' && Object.keys(value).length === 0) {
     return undefined;
   }
   return value;
