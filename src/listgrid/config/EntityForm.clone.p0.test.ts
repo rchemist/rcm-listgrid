@@ -14,7 +14,7 @@ describe('EntityForm.clone — P0-6 manageEntityForm reference aliasing', () => 
     // Arrange: create a form with manageEntityForm in a known state
     const original = new EntityForm('testEntity', '/api/test')
       .withId('1')
-      .withUpdatable(false)  // set update to false
+      .withUpdatable(false) // set update to false
       .addFields({ items: [new NumberField('qty', 1)] });
 
     const originalManageState = { ...original.manageEntityForm };

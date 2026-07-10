@@ -36,9 +36,8 @@ describe('checkAdminMenuPermission default warning', () => {
   });
 
   it('does not warn when a real checker has been registered before the first call', async () => {
-    const { checkAdminMenuPermission, registerMenuPermissionChecker } = await import(
-      './MenuPermissionChecker'
-    );
+    const { checkAdminMenuPermission, registerMenuPermissionChecker } =
+      await import('./MenuPermissionChecker');
     registerMenuPermissionChecker(() => 'READ');
     const result = checkAdminMenuPermission({ url: '/admin' });
     expect(result).toBe('READ');
