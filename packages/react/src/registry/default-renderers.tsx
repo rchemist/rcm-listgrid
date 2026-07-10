@@ -1,7 +1,8 @@
-import type { ManyToOneField, SelectField, TextareaField } from '@listgrid/schema-core';
+import type { SelectField, TextareaField } from '@listgrid/schema-core';
 import { useUI } from '../providers/ui';
 import { useFieldValue, useFormStore } from '../providers/form-store';
 import { registerFieldRenderer, type FieldRendererComponentProps } from './field-renderer-registry';
+import { ManyToOneRenderer } from './many-to-one-renderer';
 
 // Default field-type renderers (task item 3). Every one of these follows the
 // same shape: read this field's resolved value via useFieldValue, resolve the
@@ -106,29 +107,11 @@ function MarkdownRenderer({ name, readOnly }: FieldRendererComponentProps) {
 }
 
 /**
- * manyToOne placeholder — NOT the V1 searchable picker. Read-only: shows the
- * selected entity's label field, or a literal "select..." when unset. Exists
- * purely so a form declaring a ManyToOneField (e.g. College.dean) renders
- * without crashing; the real picker/tree editor lands with the ManyToOne
- * renderer transplant (V0.4+).
- */
-function ManyToOnePlaceholderRenderer({ field, name }: FieldRendererComponentProps) {
-  const value = useFieldValue<Record<string, unknown>>(name);
-  const m2oField = field as ManyToOneField;
-  const labelField =
-    typeof m2oField.getLabelField === 'function' ? m2oField.getLabelField() : 'name';
-  const label =
-    value !== undefined && value !== null && typeof value === 'object'
-      ? value[labelField]
-      : undefined;
-  return <span data-field-readonly="manyToOne">{label != null ? String(label) : 'select...'}</span>;
-}
-
-/**
  * Register the built-in renderers for text/textarea/number/boolean/select/
  * markdown/manyToOne. Safe to call more than once (each call just re-sets the
  * same registry entries) — but call it BEFORE any host `registerFieldRenderer`
- * overrides, since the last write to a given type wins.
+ * overrides, since the last write to a given type wins. The manyToOne renderer
+ * (a Modal + ViewListGrid picker) requires an <AdapterProvider> in the tree.
  */
 export function registerDefaultRenderers(): void {
   registerFieldRenderer('text', TextRenderer);
@@ -137,5 +120,5 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('boolean', BooleanRenderer);
   registerFieldRenderer('select', SelectRenderer);
   registerFieldRenderer('markdown', MarkdownRenderer);
-  registerFieldRenderer('manyToOne', ManyToOnePlaceholderRenderer);
+  registerFieldRenderer('manyToOne', ManyToOneRenderer);
 }

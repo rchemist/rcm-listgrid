@@ -14,6 +14,9 @@ export type { AuthProviderProps } from './providers/auth';
 export { RouterProvider, useRouter } from './providers/router';
 export type { RouterProviderProps, Router } from './providers/router';
 
+export { AdapterProvider, useAdapter } from './providers/adapter';
+export type { AdapterProviderProps } from './providers/adapter';
+
 export { configureMessages, getMessages, resetMessages } from './messages';
 export type { MessagesRegistry, ToastKind } from './messages';
 

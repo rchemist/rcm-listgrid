@@ -1,4 +1,11 @@
-import { BooleanField, EntityForm, StringField, TextareaField } from '@listgrid/schema-core';
+import {
+  BooleanField,
+  EntityForm,
+  ManyToOneField,
+  StringField,
+  TextareaField,
+} from '@listgrid/schema-core';
+import { ProfessorEntityForm } from './professor';
 
 // College — reimplemented on the new @listgrid/* engine, faithful to the GJCU
 // production CollegeEntityForm (packages/entities/Academic/University/
@@ -15,6 +22,13 @@ export function CollegeEntityForm(): EntityForm {
       items: [
         new StringField('name', 100).withRequired(true).withLabel('명칭'),
         new StringField('englishName', 110).withRequired(true).withLabel('영문명'),
+        // dean — a ManyToOne reference to Professor via a LAZY thunk (decision
+        // D1). Selecting opens a Modal ViewListGrid picker; save flattens to
+        // deanId (charter C3).
+        new ManyToOneField('dean', 115, {
+          entityForm: () => ProfessorEntityForm(),
+          labelField: 'name',
+        }).withLabel('학장'),
         new BooleanField('active', 120).withLabel('사용여부').withDefaultValue(true),
       ],
     })

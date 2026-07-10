@@ -42,3 +42,33 @@ test('College CRUD round-trips through the new engine', async ({ page }) => {
   await page.getByText('테스트대학').click();
   await expect(page.getByLabel(/영문명/)).toHaveValue('Test College (updated)');
 });
+
+// V0.4b — the ManyToOne popup (charter C3): the keystone that proves the whole
+// provider+modal+list stack, since the picker IS a ViewListGrid of the
+// referenced entity opened in a Modal.
+test('College dean ManyToOne picker selects a professor and saves', async ({ page }) => {
+  await page.goto('/college/new');
+  await page.getByLabel(/명칭/).fill('관계테스트대학');
+  await page.getByLabel(/영문명/).fill('Relation Test College');
+
+  // dean starts unselected
+  const deanValue = page.locator('[data-m2o-value="dean"]');
+  await expect(deanValue).toHaveText('(선택 안 됨)');
+
+  // open the picker — a Modal containing a ViewListGrid of professors
+  await page.getByRole('button', { name: '찾기' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText('김태윤')).toBeVisible(); // professor rows fetched
+  await expect(dialog.getByText('이하은')).toBeVisible();
+
+  // pick one → modal closes, dean shows the selected professor's name
+  await dialog.getByText('박성민').click();
+  await expect(deanValue).toHaveText('박성민');
+  await expect(dialog).toBeHidden();
+
+  // save → the college is created with the dean relation (flattened to deanId)
+  await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page).toHaveURL(/\/college$/);
+  await expect(page.getByText('관계테스트대학')).toBeVisible();
+});
