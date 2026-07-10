@@ -30,6 +30,14 @@
 - **EF5** — validate-on-change(opt-in): setValue 후 debounce `validateField(name)`(이미 존재 form-store.ts:123-134) + touched 게이팅. 낮은 위험, cascade 뒤.
 - **EF-gate**: EF1~EF4 착지 후에만 대량 필드 이식 시작. onChanges/onInitialize 의존 필드는 특성화 오라클로 구·신 대조.
 
+### EF2 구현 노트 (다음 세션 — 이미 결정된 아키텍처, 재도출 금지)
+
+**핵심 제약**: schema-core는 순수 메타(React/state 의존 금지 — ADR-0003). 그러므로 구엔진처럼 onChanges가 EntityForm/store를 직접 받게 하면 schema-core→state 역의존이 생긴다. **해법 = FormMutator 인터페이스 패턴**:
+- **schema-core**: `interface FormMutator { getValue(name): unknown; getValues(): Record<string,unknown>; setValue(name, value): void; setMeta(name, partial: FieldMetaOverride): void; }` 선언(상태-무지). EntityForm에 `onChanges?: OnChangesHandler[]` + `withOnChanges(h)` + `getOnChanges()`. `type OnChangesHandler = (m: FormMutator, changedField: string) => void | Promise<void>`.
+- **state**: `setValue`가 슬라이스 쓴 뒤 `entityForm.getOnChanges()` 순차 실행, store 기반 FormMutator 어댑터 주입(get/set/setMeta 위임). **loop-guard**: 재진입 depth/플래그로 onChanges 내부 setValue의 무한 cascade(A→B→A) 방지 — 단, 정당한 연쇄는 허용(depth 한도 또는 "이번 배치에서 이미 변경된 필드" 집합). 구엔진 executeOnChanges(EntityForm.tsx:122) semantics 먼저 확인.
+- **빌더 카탈로그**(구 OnChangeEntityForm.ts:76-361): EF2에선 대표 3종만 이식 실증 — `changeHidden(target, when)` `changeRequired(target, when)` `changeSelectOptions(target, optionsBy)` (전부 `setMeta`로 구현 → EF1 위). 나머지(derivedValidations 등)는 해당 필드/폼 이식 시 확장.
+- **검증**: onChanges가 형제 값 set + meta(required/hidden/options) 변경 → 리렌더·validate 반영 단위테스트 + Collabo류 cascade E2E(EC2).
+
 ## Phase EA — 필드 전수 이식 (EF1~4 후, wave별) **[S 실행, 복잡건 O]**
 
 빈도(GJCU 178폼): String243·M2O215·Select214·Number207·Bool111·Date58·SubColl55·Textarea48·**Datetime40**·**Xref26**·**File21**·**CustomOption17**·Tag11·Markdown11·Phone9·Password7·Month5·Email4·롱테일. **이미 이식(11)**: String/Number/Boolean/Textarea/Markdown/Select/Date/Email/Phone/M2O/SubColl.
