@@ -171,6 +171,10 @@ export { ColorField } from './field/color-field';
 export { InlineMapField } from './field/inline-map-field';
 export type { InlineMapConfig, InlineMapValue, MapKey, KeyValue } from './field/inline-map-field';
 
+// --- EB1 Address (Daum 우편번호 composite handle + flat siblings — plan §EB) ---
+export { AddressField, applyFullAddressFields } from './field/address-field';
+export type { Address, AddressFieldsProps } from './field/address-field';
+
 // --- EntityForm declaration (charter C1) ---
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
