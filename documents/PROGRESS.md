@@ -6,7 +6,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (P3-1 완료 — packages/schema-core 계약 골격 커밋 `7f5cdd4`, 전체 1047 tests green(신규 17 char). Node26 게이트 확인(폴리필 병합, 실패 해소). P3=🟡. 다음: P3-2 state 계약([O], P3-1 검토 후 권장). 대기(외부): 0.3.26·alpha.0 publish 승인)
+**Last updated**: 2026-07-10 (P3-1 완료 — packages/schema-core 계약 골격 커밋 `fb8f9cb`, 전체 1047 tests green(신규 17 char). Node26 게이트 확인(폴리필 병합, 실패 해소). P3=🟡. 다음: P3-2 state 계약([O], P3-1 검토 후 권장). 대기(외부): 0.3.26·alpha.0 publish 승인)
 
 ## Goal
 
@@ -97,7 +97,7 @@
 
 ### P3 — 계약 골격 + 표면 감사표 (spec-first 게이트)
 
-- [x] **P3-1 [O] schema-core 계약** ✅ 2026-07-10 · `7f5cdd4` · 계약 골격(EntityField 순수메타 [view()제거]·FieldValueSlice `{cur,fet,def,errors,dirty}`·FieldEvalContext[EntityForm 협소화]·ViewPreset 통합·PermissionPolicy 3중복→1 [+base권한→SubColl 게이트]·Validation base) · 17 char tests+tsc/lint/fmt green · 결정 2건→§Needs Review
+- [x] **P3-1 [O] schema-core 계약** ✅ 2026-07-10 · `fb8f9cb` · 순수메타 EntityField·FieldValueSlice·FieldEvalContext·PermissionPolicy 통합(+SubColl)·Validation base · 1047 green · 결정 2건→§Needs Review
 - [ ] **P3-2 [O] state 계약** — `packages/state`: `createFormStore()/createListStore()` API(zustand vanilla), 셀렉터 규약, 중첩 폼의 자식 store 생성+부모 캐시 전달 프로토콜(ADR-0002 §Decision 4).
 - [ ] **P3-3 [O] BackendAdapter 계약** — `packages/schema-core` 또는 별도: ADR-0005 §Decision 1 인터페이스 + `BackendErrorCode` enum. 구현은 P6(여기선 타입+기본 어댑터 시그니처만).
 - [ ] **P3-4 [S, codex eligible] 표면 감사표** — 구 배럴(src/listgrid/index.ts) 580 심볼 전수 → `documents/analysis/surface-audit.csv`(심볼·분류[유지/이동/삭제]·이동 대상 패키지·근거 한 줄). 판정 기준: ADR-0004 §Decision 1. 목표 공개 심볼 ≤220.
