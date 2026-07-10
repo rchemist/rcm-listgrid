@@ -257,5 +257,13 @@ proposed_helper: 없음.
 **refuted 5**(dedup 관찰 — 통합 비용>이득 판정, 기록만): Time/Datetime sentinel 리졸버 구조 유사(포맷 차이 실질)·MultiSelect/CustomOption/Checkbox 체크박스그룹 3중 구현(idiom 수준)·a11y 배선 미세 차이·마스킹 blur-commit 3중 관례(공유 훅화 시기상조)·InlineMap config rebuild 4회(파일 내 국소).
 **intent-conformance 이탈 0** — 순수성·descope·plain-value·cascade 범위 전부 준수 확인.
 
+### EA-R1 수정 (2026-07-11) ✅ `2a79166` — 게이트 통과
+
+5건 전해소(+7 회귀핀, 1727 unit·E2E 5/5): ① InlineMap buildResult 빈값 entry 필터(전 resultType — fixed-keys type-then-clear가 required 차단, **companion**: primitives resync 비교도 blank-strip — buildResult 단독 수정 시 free-mode 입력 중 행 소실 7테스트 red 재현 후 해소, 건전 deviation) ② Image multi를 file-renderer 미러로(tail 소실 제거) ③ Tag meta-options 관례 ④ Password static create 제거(PasswordFieldProps는 @deprecated 유지) ⑤ file-field가 공유 buildAssetConfig import.
+
+## Phase EA 종결 (2026-07-11) — 매트릭스
+
+이식 21종: 트리비얼 12(Checkbox·MultiSelect·Password·Month·Year·Time·Link·Tag·ColorPreset·MessageView·Profile·MappedJoin) + 모더릿 5(Datetime·CustomOption·Birthday·TelephoneNumber·Color) + 업로드 3(File·Image·MultipleAsset) + InlineMap. 공유 기반: OptionsField/MultiOptions·cascade:false seam·CustomOptionProvider·FileInput/TagsInput/UserView/InlineMap 슬롯·배열 isDirty 정규화·phone/url utils·buildAssetConfig. Dead/연기 5종(증거 기록): Html(중복)·ContentAsset·Rule·XrefPrice·XrefAvailableDate. 이월: Xref Mapping/Prefer → EA-D2(ViewListGrid 확장 선행, EC2 뒤). 테스트 1234→1727.
+
 
 

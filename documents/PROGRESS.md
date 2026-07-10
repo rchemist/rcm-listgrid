@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · **EA(A~D) ✅** · **Next up**: EA phase 리뷰 게이트 → EB(Daum 주소). EA-D2(Xref)는 EC2 뒤. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·**EA ✅**(리뷰게이트 통과) · **Next up**: EB1(AddressField) → EB2(Daum 렌더러). EA-D2(Xref)는 EC2 뒤. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 07:40 (**EA 페이즈 완료** — EA-D InlineMap `1f305f1`로 A~D 종결. 1720 unit+5 E2E green. 이식 완료 필드 누적 21종+기반, dead/연기 5종 기록. **Next=EA phase 리뷰 게이트**(fan-out 의무 — correctness·intent·dedup 차원) → EB. [archive](./progress-archive/phase-e-track-tasks.md) 읽고 재개)
+**Last updated**: 2026-07-11 08:20 (**EA 페이즈 게이트 통과** — EA-R1 `2a79166`로 confirmed 5 전해소(blocking: InlineMap fixed-keys required 우회). 1727 unit+5 E2E green. EA 섹션 collapse. **Next=EB1**(AddressField) — §세션 인계 Handoff+[계획 §EB](./plans/e-track-field-parity.md) 읽고 재개)
 
 ## Goal
 
@@ -49,14 +49,13 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음 작업: EA-A 트리비얼 필드 12종)
+## 세션 인계 (Handoff — 다음 작업: EB 주소(Daum 우편번호))
 
-- **현 상태**: **Phase EF ✅**(EF1~5+R1/R2+gate). 명령형 라이프사이클 완비, **1205 unit + 5 E2E green**, 전부 push. 상세 Handoff·패턴 카탈로그는 [archive §Next Phase Handoff](./progress-archive/phase-e-track-tasks.md) — 새 세션은 그것부터.
-- **다음 = EA-A**: Checkbox·MultiSelect·Password·Month·Year·Time·Link·Tag·ColorPreset·MessageView·Profile·MappedJoin (12종). 규칙: 1필드=1커밋+테스트. 함정·값형태 [계획 §필드 인벤토리](./plans/e-track-field-parity.md). 기반 클래스 체인(OptionalField/MultipleOptionalField/CheckButtonValidationField/AbstractDateField) 필요 시 선행 이식.
-- **fan-out 주의**: 필드 이식은 schema-core 배럴·react 레지스트리(default-renderers)가 **shared-by-construction** → 병렬화하려면 worktree isolation+patch-merge 또는 공유 지점 pre-stage 후 disjoint만 병렬.
-- **Do-NOT**: ① store 직접 수신 금지(FormMutator 경유, ADR-0003) ② 동적 mutation 후 entityForm.getFields()류 직접 읽기 금지(store.fieldDefs 경유) ③ 동작 검증 생략 금지 ④ 형식 P3~P7 재개 금지 ⑤ ColorField dynamic Tailwind 이식 금지 ⑥ EA-B 라이브 마스킹류 착수 전 propagation seam 결정(계획 ⚠).
-- **불변/함정**: EF1 override `??`·D4 단일필드 구독. EF2 loop-guard sync batch. EF3 build-after-hooks+clone(true). hydrate dotted-path·payload 보존. structureVersion add/remove만 bump.
-- **작업 규율**: 설계=세션(conductor), 구현=sonnet 위임, 검증=세션 rigorous(full gate+공유경로 변경 시 full E2E). 완료=logic 커밋→PROGRESS 커밋→**push(사용자: 전부 push)**. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`. Node26(폴리필 OK).
+- **현 상태**: H·EF·**EA(A~D+리뷰게이트)** ✅. 필드 21종 이식+명령형 라이프사이클 완비, **1727 unit + 5 E2E green**, 전부 push. 필드별 상세·패턴·게이트 기록은 [archive](./progress-archive/phase-e-track-tasks.md).
+- **다음 = EB1→EB2 (주소)**: 계획 §Phase EB에 설계 완결 — EB1: schema-core AddressField(`'address'` FieldType 추가 필요·exceptOnSave 가상 composite·Address 타입) + `applyFullAddressFields(entityForm, props)`(flat 형제 StringField/NumberField 생성, required는 형제에 부여 — form-store 무변경). EB2: react AddressRenderer(형제 useFieldValue 표시 + useUI 2단 모달 + `react-daum-postcode` 직접 import(구 PostCodeSelector 선례) + onComplete→형제 setValue fan-out, zonecode/roadAddress/sido/sigungu 매핑·address2는 사용자 입력) + peerDep react-daum-postcode(^3.1.3 루트 기존재). Kakao 지도 연기.
+- **Do-NOT**: ① store 직접 수신 금지(FormMutator 경유) ② 동적 mutation 후 entityForm.getFields()류 직접 읽기 금지(store.fieldDefs) ③ 동작 검증 생략 금지 ④ 형식 P3~P7 재개 금지 ⑤ toSaveData의 exceptOnSave skip 동작 확인 후 사용(계획: 이미 skip — 검증 필수).
+- **불변/함정**: EF1 override `??`·D4. EF2 loop-guard·cascade:false는 dispatch만. EF3 build-after-hooks+clone(true). 빈 non-array 쓰기는 undefined(InlineMap 규약). exactOptionalPropertyTypes(반복 결함 1위 — 조건 spread).
+- **작업 규율**: 설계=세션(conductor)·구현=sonnet 위임·검증=세션 rigorous(full gate+E2E). 완료=logic 커밋→PROGRESS 커밋→push. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`.
 
 ---
 
@@ -76,14 +75,8 @@
 
 #### Phase EF ✅ 완료 (2026-07-11 — EF1~5 + 리뷰게이트 R1·R2 + gate 통과, 명령형 라이프사이클 완비 · 1205 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md) · parity map [analysis](./analysis/2026-07-11/ef-gate-parity-map.md)
 
-#### Phase EA — 필드 전수 이식 (EF1~4 후, wave별 전개) **[S, 복잡건 O]**
+#### Phase EA ✅ 완료 (2026-07-11 — 21필드 이식+공유기반 · dead/연기 5종 · 리뷰게이트 confirmed 5 전해소 `2a79166` · 1727 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
 
-전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
-- [x] **EA-A 트리비얼 12종** ✅ `e9c1121`(A0 pre-stage)+`5566c21`(wave) · 12/12 이식+196 테스트(1430 green)·E2E 5/5·full gate ✓ · [상세 표](./progress-archive/phase-e-track-tasks.md)
-- [x] **EA-B 모더릿 5종+B0/B1** ✅ `4727c22`(pre-stage)+`7cf849f`(wave) · Html 드롭(중복 판정)·cascade seam·배열 isDirty 시스테믹 해소 · +136 테스트(1566 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [x] **EA-C 업로드 3종+C0** ✅ `544014c`+`b7341dd` · plain string 값+FileInput 슬롯(호스트 업로드)·ContentAsset 연기 · +104 테스트(1670 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [x] **EA-D InlineMap+dead 정리** ✅ `1f305f1` · store-direct-write 재설계(#1289류 원천 소멸)·dead 3종 연기·Xref→EA-D2 · +50 테스트(1720 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [~] **EA-R1 (phase 리뷰게이트 수정 5건)** — ① InlineMap fixed-keys `''`값 required 우회(**blocking**, 재현됨 — buildResult에서 빈값 entry 필터+회귀) ② Image multi 데이터 소실(file-renderer multi 모드 미러) ③ Tag meta-options 관례 ④ Password static create 제거 ⑤ file-field buildAssetConfig 공유 import
 - [ ] **EA-D2 Xref 인프라+이식** (reorder: EC2 뒤·EC3 앞) — ViewListGrid 확장 4종(selection/subCollection/onFetched/fields — [O] 설계, EC3 실폼 요구 주도) → XrefMapping(29 사이트)+XrefPrefer(+'xrefPreferMapping' 타입). 드래그 재정렬 별도 판단.
 
 #### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
