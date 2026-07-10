@@ -8,11 +8,15 @@ export default defineConfig({
       'src/**/*.test.{ts,tsx}',
       'src/**/__tests__/**/*.{test,spec}.{ts,tsx}',
       'tests/**/*.test.{ts,tsx}',
+      // P3+ re-foundation packages carry their own package-local tests
+      // (transplant-faithfulness suites live beside the code they cover).
+      'packages/**/*.test.{ts,tsx}',
+      'packages/**/__tests__/**/*.{test,spec}.{ts,tsx}',
     ],
     setupFiles: ['src/test-setup.ts'],
     exclude: [
-      'node_modules/**',
-      'dist/**',
+      '**/node_modules/**',
+      '**/dist/**',
     ],
     coverage: {
       provider: 'v8',

@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active (P0+P1+P2 완료 — 외부 publish + P3 설계결정 대기) · **Next up**: P3(계약 골격, [O] 설계 태스크 — 사용자 검토 권장)
+**Status**: active (P0+P1+P2 + P3-1 schema-core 계약 완료 — 외부 publish 대기 · **P3-1 계약 사용자 검토 권장**) · **Next up**: P3-2(state 계약, [O] — P3-1 검토 후 착수 권장)
 **Engine**: claude (codex eligible 태스크는 개별 표기 — P3-4 표면 감사표 등 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (P0+P1+P2 완료 — v0.4 브랜치 ~28 커밋, 전체 1030 tests green. P2 특성화 오라클(68테스트)+wart 체크리스트 완성. 대기(외부): 0.3.26 publish+main병합·0.4 alpha.0 publish. 다음: P3 계약([O] 설계 — 사용자 검토 권장))
+**Last updated**: 2026-07-10 (P3-1 완료 — packages/schema-core 계약 골격 커밋 `7f5cdd4`, 전체 1047 tests green(신규 17 char). Node26 게이트 확인(폴리필 병합, 실패 해소). P3=🟡. 다음: P3-2 state 계약([O], P3-1 검토 후 권장). 대기(외부): 0.3.26·alpha.0 publish 승인)
 
 ## Goal
 
@@ -42,7 +42,7 @@
 | P0 실버그 핫픽스 | `p0-hotfixes` | 🟡 코드완료 | 0.3.26 | 버그 9건+보안 3종+환경 완료 · publish/전환만 승인 대기 |
 | P1 워크스페이스+패키징 | v0.4 | 🟡 코드완료 | alpha.0 | 스캐폴드·tsup dual·CI 로드게이트·sample 기동 완료 · alpha.0 publish만 승인 대기 |
 | P2 특성화 오라클 | v0.4(=main src) | ✅ 완료 | (내부) | 하네스+4묶음 68테스트 · 엔진 wart 다수 특성화(이식 결정용) |
-| P3 계약 골격+감사표 | v0.4 | ⬜ | alpha.N | spec-first 게이트 · 파일럿 이식 |
+| P3 계약 골격+감사표 | v0.4 | 🟡 P3-1 완료 | alpha.N | schema-core 계약 골격(17 char tests) · 남음 P3-2~6 |
 | P4 코어 이식 | v0.4 | ⬜ | alpha.N | schema-core+state · **abort 판정 지점** |
 | P5 렌더러 이식 | v0.4 | ⬜ | alpha.N | 필드 40종 · store 구독 · sample 성장 |
 | P6 어댑터·표면 | v0.4 | ⬜ | 0.4.0-rc | backend-rcm/rest · ui-default · exports |
@@ -97,7 +97,7 @@
 
 ### P3 — 계약 골격 + 표면 감사표 (spec-first 게이트)
 
-- [ ] **P3-1 [O] schema-core 계약** — `packages/schema-core`: EntityField **순수 메타 인터페이스**(view() 제거 — ADR-0003 §Decision 1), FieldValue 슬라이스 스키마(`{current,fetched,default,errors,dirty}` — ADR-0002 §Decision 1), `PermissionPolicy` 단일 구현(구엔진 3중복 통합 + **SubCollection 권한 포함** — 구엔진에 없던 유일한 신규 규칙, 헌장 C2).
+- [x] **P3-1 [O] schema-core 계약** ✅ 2026-07-10 · `7f5cdd4` · 계약 골격(EntityField 순수메타 [view()제거]·FieldValueSlice `{cur,fet,def,errors,dirty}`·FieldEvalContext[EntityForm 협소화]·ViewPreset 통합·PermissionPolicy 3중복→1 [+base권한→SubColl 게이트]·Validation base) · 17 char tests+tsc/lint/fmt green · 결정 2건→§Needs Review
 - [ ] **P3-2 [O] state 계약** — `packages/state`: `createFormStore()/createListStore()` API(zustand vanilla), 셀렉터 규약, 중첩 폼의 자식 store 생성+부모 캐시 전달 프로토콜(ADR-0002 §Decision 4).
 - [ ] **P3-3 [O] BackendAdapter 계약** — `packages/schema-core` 또는 별도: ADR-0005 §Decision 1 인터페이스 + `BackendErrorCode` enum. 구현은 P6(여기선 타입+기본 어댑터 시그니처만).
 - [ ] **P3-4 [S, codex eligible] 표면 감사표** — 구 배럴(src/listgrid/index.ts) 580 심볼 전수 → `documents/analysis/surface-audit.csv`(심볼·분류[유지/이동/삭제]·이동 대상 패키지·근거 한 줄). 판정 기준: ADR-0004 §Decision 1. 목표 공개 심볼 ≤220.
@@ -142,10 +142,13 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 - [ ] **P1-2 ESM 메인배럴 caveat** — 순수 Node ESM `import('@rchemist/listgrid')`(메인)은 `react-sortablejs`(CJS-only peer, ESM/exports 없음)의 named export 미검출로 실패. 번들러(Next/webpack) 소비자는 정상. 대응: (a) 수용+MIGRATION 명시 / (b) v0.4에서 react-sortablejs를 ESM 대체(예: @dnd-kit)로 교체 검토(P5 렌더러 이식 시). 결정 필요.
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후(지금 아님).
 - [ ] **P2 렌더 파일수 게이트** — 게이트 문구는 "렌더 테스트 파일 9→25+"이나 실제는 밀도높은 5파일 68테스트(대표 표면 커버)로 구현. 파일수 목표를 문자적으로 채울지(필드 40종 개별 파일 등) vs 행동밀도로 충족 인정할지 — 커버리지 래칫 재측정과 함께 P3 진입 시 판단.
+- [ ] **P3-1 조건부 컨텍스트 협소화 (소비자 breaking)** — 조건부 함수 `withHidden((props)=>…)` 등이 EntityForm-carrying `ConditionalValue` 대신 순수 `FieldEvalContext{renderType,session,value,values}`를 받음. 근거 ADR-0003§4·헌장 C2(EntityForm은 렌더 객체). MIGRATION 1:1 대응표 필요 + P5 렌더러 배선서 실사용 검증. [detail](../packages/schema-core/src/field/eval-context.ts)
+- [ ] **P3-1 권한추출 협소화 (행동 narrowing)** — canonical `extractPermissions`=2-way(`roles ?? authentication.roles`)만; 구엔진 getViewableTabs의 `this.session` 인스턴스 폴백(EntityFormBase:356-361) 제거(ADR-0002 상태보관 제거와 정합, 스토어가 session 명시전달). 무영향 예상 — 확인. [detail](../packages/schema-core/src/permission.ts)
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
 - 마이그레이션 how-to는 [리빙 문서](./plans/migration-0.3-to-0.4.md)로 P0-10에서 착수 — 각 페이즈가 호환성 변경을 발생 커밋에서 누적, P7에서 `docs/MIGRATION.md`+codemod로 승격(P7 개요에 반영).
+- **P3-1 스카우트 발견 (P4/P5 이식 시 처리)**: PhoneNumber/TelephoneNumber `validate()` 본문 동일(파라미터화 통합 후보) · `RegexFormularValidation.ts` 파일명 오타(클래스=`RegexFormulaValidation`, 이식 시 정정) · `Validation.tsx`→`.ts`(JSX 0) · `getConditionalReactNode`(React.isValidElement)는 렌더러 계층으로 이관 · SearchForm `quickSearchFields` 중복 사이드채널 · `EQUAL_IGNORECASE`/`NOT_LIKE`는 셀렉트 미노출(의도 확인).
 
 ## Open Questions
 
