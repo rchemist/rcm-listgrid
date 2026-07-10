@@ -78,6 +78,8 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   const label = field.getLabel();
   const Renderer = getFieldRenderer(field.type);
   const errors = slice.errors ?? [];
+  const hasErrors = errors.length > 0;
+  const errorId = `${fieldName}-error`;
 
   return (
     <div data-field-name={fieldName}>
@@ -88,12 +90,19 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
         </label>
       )}
       {Renderer ? (
-        <Renderer field={field} name={fieldName} readOnly={readOnly} />
+        <Renderer
+          field={field}
+          name={fieldName}
+          readOnly={readOnly}
+          required={required}
+          invalid={hasErrors}
+          {...(hasErrors ? { describedBy: errorId } : {})}
+        />
       ) : (
         <span role="alert">Unsupported field type: {field.type}</span>
       )}
-      {errors.length > 0 && (
-        <ul role="alert">
+      {hasErrors && (
+        <ul id={errorId} role="alert">
           {errors.map((err, i) => (
             <li key={i}>{err.message}</li>
           ))}

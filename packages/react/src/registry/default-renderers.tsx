@@ -18,7 +18,13 @@ import { SubCollectionRenderer } from './sub-collection-renderer';
 // tsconfig's `exactOptionalPropertyTypes` treats an explicit `undefined` on
 // an optional prop as a type error, distinct from omitting the prop.
 
-function TextRenderer({ name, readOnly }: FieldRendererComponentProps) {
+function TextRenderer({
+  name,
+  readOnly,
+  required,
+  invalid,
+  describedBy,
+}: FieldRendererComponentProps) {
   const { TextInput } = useUI();
   const store = useFormStore();
   const value = useFieldValue<string>(name);
@@ -28,11 +34,21 @@ function TextRenderer({ name, readOnly }: FieldRendererComponentProps) {
       value={value ?? ''}
       onChange={(v) => store.getState().setValue(name, v)}
       {...(readOnly !== undefined ? { readOnly } : {})}
+      {...(required ? { required: true } : {})}
+      {...(invalid ? { invalid: true } : {})}
+      {...(describedBy !== undefined ? { describedBy } : {})}
     />
   );
 }
 
-function TextareaRenderer({ field, name, readOnly }: FieldRendererComponentProps) {
+function TextareaRenderer({
+  field,
+  name,
+  readOnly,
+  required,
+  invalid,
+  describedBy,
+}: FieldRendererComponentProps) {
   const { Textarea } = useUI();
   const store = useFormStore();
   const value = useFieldValue<string>(name);
@@ -44,11 +60,20 @@ function TextareaRenderer({ field, name, readOnly }: FieldRendererComponentProps
       rows={rows}
       onChange={(v) => store.getState().setValue(name, v)}
       {...(readOnly !== undefined ? { readOnly } : {})}
+      {...(required ? { required: true } : {})}
+      {...(invalid ? { invalid: true } : {})}
+      {...(describedBy !== undefined ? { describedBy } : {})}
     />
   );
 }
 
-function NumberRenderer({ name, readOnly }: FieldRendererComponentProps) {
+function NumberRenderer({
+  name,
+  readOnly,
+  required,
+  invalid,
+  describedBy,
+}: FieldRendererComponentProps) {
   const { NumberInput } = useUI();
   const store = useFormStore();
   const value = useFieldValue<number>(name);
@@ -58,11 +83,20 @@ function NumberRenderer({ name, readOnly }: FieldRendererComponentProps) {
       onChange={(v) => store.getState().setValue(name, v)}
       {...(value !== undefined ? { value } : {})}
       {...(readOnly !== undefined ? { readOnly } : {})}
+      {...(required ? { required: true } : {})}
+      {...(invalid ? { invalid: true } : {})}
+      {...(describedBy !== undefined ? { describedBy } : {})}
     />
   );
 }
 
-function DateRenderer({ name, readOnly }: FieldRendererComponentProps) {
+function DateRenderer({
+  name,
+  readOnly,
+  required,
+  invalid,
+  describedBy,
+}: FieldRendererComponentProps) {
   const { DateInput } = useUI();
   const store = useFormStore();
   const value = useFieldValue<string>(name);
@@ -72,11 +106,20 @@ function DateRenderer({ name, readOnly }: FieldRendererComponentProps) {
       value={value ?? ''}
       onChange={(v) => store.getState().setValue(name, v)}
       {...(readOnly !== undefined ? { readOnly } : {})}
+      {...(required ? { required: true } : {})}
+      {...(invalid ? { invalid: true } : {})}
+      {...(describedBy !== undefined ? { describedBy } : {})}
     />
   );
 }
 
-function BooleanRenderer({ name, readOnly }: FieldRendererComponentProps) {
+function BooleanRenderer({
+  name,
+  readOnly,
+  required,
+  invalid,
+  describedBy,
+}: FieldRendererComponentProps) {
   const { CheckBox } = useUI();
   const store = useFormStore();
   const value = useFieldValue<boolean>(name);
@@ -86,11 +129,21 @@ function BooleanRenderer({ name, readOnly }: FieldRendererComponentProps) {
       checked={value ?? false}
       onChange={(v) => store.getState().setValue(name, v)}
       {...(readOnly !== undefined ? { disabled: readOnly } : {})}
+      {...(required ? { required: true } : {})}
+      {...(invalid ? { invalid: true } : {})}
+      {...(describedBy !== undefined ? { describedBy } : {})}
     />
   );
 }
 
-function SelectRenderer({ field, name, readOnly }: FieldRendererComponentProps) {
+function SelectRenderer({
+  field,
+  name,
+  readOnly,
+  required,
+  invalid,
+  describedBy,
+}: FieldRendererComponentProps) {
   const { SelectBox } = useUI();
   const store = useFormStore();
   const value = useFieldValue<string | number | boolean>(name);
@@ -102,12 +155,21 @@ function SelectRenderer({ field, name, readOnly }: FieldRendererComponentProps) 
       onChange={(v) => store.getState().setValue(name, v)}
       {...(value !== undefined ? { value } : {})}
       {...(readOnly !== undefined ? { disabled: readOnly } : {})}
+      {...(required ? { required: true } : {})}
+      {...(invalid ? { invalid: true } : {})}
+      {...(describedBy !== undefined ? { describedBy } : {})}
     />
   );
 }
 
 /** markdown → Textarea fallback (task item 3: a real rich-text editor is V1). */
-function MarkdownRenderer({ name, readOnly }: FieldRendererComponentProps) {
+function MarkdownRenderer({
+  name,
+  readOnly,
+  required,
+  invalid,
+  describedBy,
+}: FieldRendererComponentProps) {
   const { Textarea } = useUI();
   const store = useFormStore();
   const value = useFieldValue<string>(name);
@@ -117,6 +179,9 @@ function MarkdownRenderer({ name, readOnly }: FieldRendererComponentProps) {
       value={value ?? ''}
       onChange={(v) => store.getState().setValue(name, v)}
       {...(readOnly !== undefined ? { readOnly } : {})}
+      {...(required ? { required: true } : {})}
+      {...(invalid ? { invalid: true } : {})}
+      {...(describedBy !== undefined ? { describedBy } : {})}
     />
   );
 }

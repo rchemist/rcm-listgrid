@@ -43,11 +43,31 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
   const groups = entityForm.getFieldGroups(activeTabId);
   const title = entityForm.getTitle();
 
+  // Focus-first-error (a11y gap C): after a failed validateAll(), errors are
+  // already committed to the store (form-store.ts validateAll sets
+  // fields[name].errors for every field). Find the first invalid field in
+  // declaration order (entityForm.getFields() is sorted by field.order — the
+  // same traversal validateAll() itself uses) and move focus to its input,
+  // which carries id={fieldName} (FieldRenderer -> primitive wiring).
+  function focusFirstInvalidField(): void {
+    if (typeof document === 'undefined') return;
+    const state = store.getState();
+    const firstInvalid = entityForm
+      .getFields()
+      .find((f) => (state.fields[f.getName()]?.errors?.length ?? 0) > 0);
+    if (firstInvalid) {
+      document.getElementById(firstInvalid.getName())?.focus();
+    }
+  }
+
   async function handleSave(): Promise<void> {
     store.getState().setSaving(true);
     try {
       const valid = await store.getState().validateAll();
-      if (!valid) return;
+      if (!valid) {
+        focusFirstInvalidField();
+        return;
+      }
       await onSave?.(store.getState().toSaveData());
     } finally {
       store.getState().setSaving(false);

@@ -1,6 +1,7 @@
 // Default UI primitives — plain semantic HTML, no CSS framework, no
 // component library dependency. Every input primitive normalizes onChange
 // to the plain VALUE the field store expects (never the raw DOM event).
+import { useEffect, useRef } from 'react';
 import type {
   ButtonProps,
   CheckBoxProps,
@@ -28,6 +29,9 @@ export function TextInput({
   disabled,
   id,
   ariaLabel,
+  required,
+  invalid,
+  describedBy,
 }: TextInputProps) {
   return (
     <input
@@ -38,6 +42,9 @@ export function TextInput({
       readOnly={readOnly}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
       onChange={(e) => onChange?.(e.target.value)}
     />
   );
@@ -51,6 +58,9 @@ export function Textarea({
   disabled,
   id,
   ariaLabel,
+  required,
+  invalid,
+  describedBy,
 }: TextareaProps) {
   return (
     <textarea
@@ -60,6 +70,9 @@ export function Textarea({
       readOnly={readOnly}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
       onChange={(e) => onChange?.(e.target.value)}
     />
   );
@@ -72,6 +85,9 @@ export function NumberInput({
   disabled,
   id,
   ariaLabel,
+  required,
+  invalid,
+  describedBy,
 }: NumberInputProps) {
   return (
     <input
@@ -81,6 +97,9 @@ export function NumberInput({
       readOnly={readOnly}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
       onChange={(e) => {
         const raw = e.target.value;
         onChange?.(raw === '' ? NaN : Number(raw));
@@ -89,7 +108,17 @@ export function NumberInput({
   );
 }
 
-export function DateInput({ value, onChange, readOnly, disabled, id, ariaLabel }: DateInputProps) {
+export function DateInput({
+  value,
+  onChange,
+  readOnly,
+  disabled,
+  id,
+  ariaLabel,
+  required,
+  invalid,
+  describedBy,
+}: DateInputProps) {
   return (
     <input
       type="date"
@@ -98,12 +127,24 @@ export function DateInput({ value, onChange, readOnly, disabled, id, ariaLabel }
       readOnly={readOnly}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
       onChange={(e) => onChange?.(e.target.value)}
     />
   );
 }
 
-export function CheckBox({ checked, onChange, disabled, id, ariaLabel }: CheckBoxProps) {
+export function CheckBox({
+  checked,
+  onChange,
+  disabled,
+  id,
+  ariaLabel,
+  required,
+  invalid,
+  describedBy,
+}: CheckBoxProps) {
   return (
     <input
       type="checkbox"
@@ -111,12 +152,25 @@ export function CheckBox({ checked, onChange, disabled, id, ariaLabel }: CheckBo
       checked={checked ?? false}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
       onChange={(e) => onChange?.(e.target.checked)}
     />
   );
 }
 
-export function SelectBox({ value, onChange, options, disabled, id, ariaLabel }: SelectBoxProps) {
+export function SelectBox({
+  value,
+  onChange,
+  options,
+  disabled,
+  id,
+  ariaLabel,
+  required,
+  invalid,
+  describedBy,
+}: SelectBoxProps) {
   const opts = options ?? [];
   return (
     <select
@@ -124,6 +178,9 @@ export function SelectBox({ value, onChange, options, disabled, id, ariaLabel }:
       value={value === undefined ? '' : String(value)}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
       onChange={(e) => {
         const raw = e.target.value;
         const matched = opts.find((o) => String(o.value) === raw);
@@ -148,9 +205,24 @@ export function Button({ onClick, children, type, disabled, variant }: ButtonPro
 }
 
 export function Modal({ open, onClose, title, children }: ModalProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus management (a11y gap D): move focus into the dialog on open, and
+  // restore it to whatever had focus beforehand on close/unmount. Hooks must
+  // run unconditionally, so the `!open` early return stays BELOW this effect.
+  useEffect(() => {
+    if (!open) return;
+    const saved =
+      typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
+    dialogRef.current?.focus();
+    return () => {
+      saved?.focus?.();
+    };
+  }, [open]);
+
   if (!open) return null;
   return (
-    <div role="dialog" aria-modal="true" aria-label={title}>
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}>
       {title !== undefined && (
         <div>
           <strong>{title}</strong>

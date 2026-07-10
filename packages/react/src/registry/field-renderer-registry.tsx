@@ -18,6 +18,9 @@ export interface FieldRendererComponentProps {
   field: EntityField;
   name: string;
   readOnly?: boolean;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 export type FieldRendererComponent = ComponentType<FieldRendererComponentProps>;

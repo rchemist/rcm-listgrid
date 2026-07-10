@@ -16,6 +16,9 @@ export interface TextInputProps {
   disabled?: boolean;
   id?: string;
   ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 export interface TextareaProps {
@@ -26,6 +29,9 @@ export interface TextareaProps {
   disabled?: boolean;
   id?: string;
   ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 export interface NumberInputProps {
@@ -35,6 +41,9 @@ export interface NumberInputProps {
   disabled?: boolean;
   id?: string;
   ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 export interface DateInputProps {
@@ -44,6 +53,9 @@ export interface DateInputProps {
   disabled?: boolean;
   id?: string;
   ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 export interface CheckBoxProps {
@@ -52,6 +64,9 @@ export interface CheckBoxProps {
   disabled?: boolean;
   id?: string;
   ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 export interface SelectBoxProps {
@@ -61,6 +76,9 @@ export interface SelectBoxProps {
   disabled?: boolean;
   id?: string;
   ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
 }
 
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
