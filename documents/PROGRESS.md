@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 착수(전 필드 이식+동작실증+Daum, 사용자 확정) · **Next up**: EF1(META 반응화 — 명령형 라이프사이클 초석). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 진행(EF1 META 반응화 완료) · **Next up**: EF2(onChanges cascade). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 (E-트랙 방향 확정+계획 수립 — 사용자: 전 필드 이식+동작실증+Daum 주소. Understand 워크플로우로 30필드/라이프사이클 갭/GJCU/Daum 매핑 → [E계획](./plans/e-track-field-parity.md). **핵심: 명령형 라이프사이클(onInit/onChanges/META반응성) 전무 → EF 기반 먼저.** Next=EF1. 전체 1129 unit+5 E2E green)
+**Last updated**: 2026-07-11 (EF1 완료 — 반응형 META override `c7d387f`(store meta-slice+setMeta, validate override 준수, D4 구독). 명령형 라이프사이클 초석 확보. 전체 1138 unit+5 E2E green. Next=EF2(onChanges cascade). E계획: [e-track-field-parity.md](./plans/e-track-field-parity.md))
 
 ## Goal
 
@@ -73,7 +73,7 @@
 
 #### Phase EF — 명령형 라이프사이클 기반 (대량 이식 전 필수) **[O]**
 
-- [ ] **EF1 [O] META 반응화** (모든 것을 막음) — mutable per-field override(required/hidden/readonly/options/validations)를 store meta-slice로, 렌더러 구독. 현: 렌더러가 frozen field에서 meta 읽음(FieldRenderer.tsx:44-74·default-renderers.tsx:150). 대상 state+react. 검증: setMeta→리렌더 단위테스트.
+- [x] **EF1 [O] META 반응화** ✅ 2026-07-11 · `c7d387f` · store meta-slice(required/hidden/readonly/options/validations)+setMeta/getMeta, override가 `??`로 declared 우선(explicit false 승). useFieldMeta 단일필드 구독(D4), FieldRenderer eff*, SelectRenderer options, validate(ctx,override) 준수 · 28 unit(7 state+3 react)·E2E 5/5·gate green(1128→1138)
 - [ ] **EF2 [O] onChanges cascade** — setValue 후 ordered onChanges(store,field) 훅 dispatch(형제 setValue·meta mutate·loop-guard) + 구 OnChangeEntityForm.ts:76-361 빌더 카탈로그 이식(EF1 위). 대상 state+schema-core.
 - [ ] **EF3 [O] initializeFormStore 파이프** — fetch→onFetchData→onInitialize(순차 clone 변형)→build→hydrate→init추가 필드 재바인딩. EntityForm 훅 리스트+빌더 + react useEntityFormInitializer. 구 EntityForm.tsx:162-306. 대상 state+schema-core+react.
 - [ ] **EF4 [O] 동적 필드 add/remove + structure-version** — store.addField/removeField(슬라이스)+late-add 재바인딩(구 268-302), ViewEntityForm version 시 groups 재도출(구 shouldReload 대체). EF3 의존.
@@ -100,7 +100,7 @@
 - [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
 
-**Next up**: **EF1** (META 반응화 — 명령형 라이프사이클의 초석, 이후 전부 차단 해제). 하드닝 H 완료.
+**Next up**: **EF2** (onChanges cascade — setValue 후 훅 체인 dispatch + OnChangeEntityForm 빌더 카탈로그 이식, EF1 meta-slice 위). EF1 완료로 META 반응성 확보.
 
 ---
 
