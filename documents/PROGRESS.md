@@ -1,7 +1,8 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active (P0+P1+P2 + P3-1 schema-core 계약 완료 — 외부 publish 대기 · **P3-1 계약 사용자 검토 권장**) · **Next up**: P3-2(state 계약, [O] — P3-1 검토 후 착수 권장)
+**Status**: active · **구동 트랙 = E2E-Parity Vertical Slice**(무인모드, 2026-07-10~ — 실제 GJCU 폼을 신 엔진에서 Playwright E2E로 동작 증명) · **Next up**: V0.1(schema-core 코어 — EntityForm+필드클래스). P0/P1 publish는 외부 승인 대기(별건).
+**운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 E2E green까지 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — P3-4 표면 감사표 등 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
@@ -49,6 +50,21 @@
 | P7 GA | v0.4→승격 | ⬜ | **0.4.0** | 헌장 대조 · MIGRATION · 브랜치 플립 |
 
 **타임박스**: P0~P3 3개월 / P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토(사용자 결정 사안).
+
+## E2E-Parity Vertical Slice (구동 트랙 — 무인모드) · [계획](./plans/e2e-parity-vertical-slice.md)
+
+실제 GJCU EntityForm(College→Major→Professor)을 신 `@listgrid/*`로 재구현 → 간단 SSR CRUD 백엔드 → **Playwright E2E green**. P3-2(state)·P5(렌더러)·P6(어댑터)를 **수직 슬라이스로 앞당겨 실행**(reorder — ADR/헌장은 설계 권위 유지). E2E 통과 = 헌장 보존검증3 + ADR-0008 abort 판정 조기 증명. 리프로직 이식(규율2)/아키텍처 신축(ADR).
+
+| 마일스톤 | 범위 | 게이트 | 상태 |
+|---|---|---|---|
+| **V0.1** schema-core 코어 | EntityForm/SearchForm + 필드클래스(String/Boolean/M2O)+최소 preset | 단위테스트 | ⬜ |
+| **V0.2** state 스토어 | createFormStore/createListStore(값슬라이스·셀렉터·액션) | 스토어 단위테스트 | ⬜ |
+| **V0.3** ui-default + react 폼 | 프리미티브 + FieldRenderer 레지스트리 + ViewEntityForm + 프로바이더 | jsdom 렌더 테스트 | ⬜ |
+| **V0.4** backend+list+M2O+E2E | backend-rcm 어댑터 + sample CRUD + ViewListGrid + M2O 팝업 | **College E2E green** | ⬜ |
+| **V1** Major | Number/Select/Date/validations + 조건부 가시성(cross-field) | Major E2E | ⬜ |
+| **V2** Professor | SubCollection(inline/table) + 자식 store 격리(ADR-0002§4) | Professor E2E | ⬜ |
+
+**확정 설계 결정**: **D1** 관계 thunk 지연참조(College↔Professor↔Major 순환생성 방지) · **D2** RCM 0.1.0 wire(POST `/{url}/search` 리스트+M2O공용·bulk `DELETE {url}`·Spring-Page envelope·ADR-0005 에러코드) · **D3** 5-seam 프로바이더(UI/Modal/Router/Auth/Message, 미주입 throw) · **D4** 값슬라이스 셀렉터 구독(clone(true) 소멸) · **D5** 이식 오라클(P2/신규 단위테스트 green). 근거·상세는 [계획 문서](./plans/e2e-parity-vertical-slice.md).
 
 ---
 
