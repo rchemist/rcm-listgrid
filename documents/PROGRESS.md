@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · EA-A/B/C ✅ · **Next up**: EA-D(xref/도메인 6종 — InlineMap pendingRef 최난, scout 선행). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · **EA(A~D) ✅** · **Next up**: EA phase 리뷰 게이트 → EB(Daum 주소). EA-D2(Xref)는 EC2 뒤. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 06:55 (**EA-C 완료** — File/Image/MultipleAsset `b7341dd`, ContentAsset 연기(NR). 1670 unit+5 E2E green. **Next=EA-D**(xref/도메인) — scout 선행, XrefMapping/Rule/InlineMap은 최난군. [archive](./progress-archive/phase-e-track-tasks.md)+[계획 §EA-D](./plans/e-track-field-parity.md) 읽고 재개)
+**Last updated**: 2026-07-11 07:40 (**EA 페이즈 완료** — EA-D InlineMap `1f305f1`로 A~D 종결. 1720 unit+5 E2E green. 이식 완료 필드 누적 21종+기반, dead/연기 5종 기록. **Next=EA phase 리뷰 게이트**(fan-out 의무 — correctness·intent·dedup 차원) → EB. [archive](./progress-archive/phase-e-track-tasks.md) 읽고 재개)
 
 ## Goal
 
@@ -82,8 +82,7 @@
 - [x] **EA-A 트리비얼 12종** ✅ `e9c1121`(A0 pre-stage)+`5566c21`(wave) · 12/12 이식+196 테스트(1430 green)·E2E 5/5·full gate ✓ · [상세 표](./progress-archive/phase-e-track-tasks.md)
 - [x] **EA-B 모더릿 5종+B0/B1** ✅ `4727c22`(pre-stage)+`7cf849f`(wave) · Html 드롭(중복 판정)·cascade seam·배열 isDirty 시스테믹 해소 · +136 테스트(1566 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [x] **EA-C 업로드 3종+C0** ✅ `544014c`+`b7341dd` · plain string 값+FileInput 슬롯(호스트 업로드)·ContentAsset 연기 · +104 테스트(1670 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [~] **EA-D 도메인** — **InlineMap만 이식**(pendingRef→store-direct-write 재설계). Dead 3종 연기(Rule 1264줄·XrefPrice·XrefAvailableDate — 실사용 0, [증거](./analysis/2026-07-11/ea-d-scout-briefing.md)). Xref 2종은 EA-D2로 이월.
-  - **Reuse review**: Extend: FieldType 'inlineMap'(기존재)·store setValue 직결(Tag 동형) — New: InlineMapConfig/MapKey 타입·UIComponents.InlineMap 슬롯·필드/렌더러(이식)
+- [x] **EA-D InlineMap+dead 정리** ✅ `1f305f1` · store-direct-write 재설계(#1289류 원천 소멸)·dead 3종 연기·Xref→EA-D2 · +50 테스트(1720 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-D2 Xref 인프라+이식** (reorder: EC2 뒤·EC3 앞) — ViewListGrid 확장 4종(selection/subCollection/onFetched/fields — [O] 설계, EC3 실폼 요구 주도) → XrefMapping(29 사이트)+XrefPrefer(+'xrefPreferMapping' 타입). 드래그 재정렬 별도 판단.
 
 #### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
@@ -130,6 +129,7 @@
 - [ ] **EA-B CustomOption layout** — 공유 FormField에 layout 멤버가 없어 필드 own-property로 선언(그룹/레이아웃 시스템 도입 시 재정렬 후보) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-C ContentAsset 연기** — "전 필드 이식" 스코프에서 제외: 양 소비자 실사용 0·구엔진에서도 업로드 미완성 스텁(동작 실증 불가)·child EntityForm+FileField 대체 실존 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 - [ ] **EA-D Dead 3종 연기** — Rule(1264줄, 채택 0·bespoke 계약 미확인)·XrefPrice(자체 opt-in 격리)·XrefAvailableDate(순수 미채택): 양 소비자 실사용 0 전수 확인 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-d-scout-briefing.md)
+- [ ] **EA-D Map compare 갭(시스테믹)** — schema-core isEquals/normalizeEmptyValue가 Map 인스턴스 전맹(Object.keys 기반 — blank/equal 오판·JSON `{}` 소실). InlineMap은 Record 협소화로 회피; 장래 Map 값 필드 도입 시 선결 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-C 값 shape 다운그레이드** — FileFieldValue envelope 대신 plain string/string[](purity·소비자·백엔드 3중 정합). 구 envelope wire 계약을 쓰는 호스트는 어댑터 변환 필요 · risk: med(마이그레이션 문서화 필요) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 
 ## Progress notes

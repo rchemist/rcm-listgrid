@@ -228,5 +228,17 @@ proposed_helper: 없음.
 **세션 수정**: `buildAssetConfig`를 asset-config.ts 공유로 승격(file-field 사설 헬퍼와 image-field 리터럴 중복 통합) + image-renderer value 조건 spread + multiple-asset primary 키 omission 2건.
 **ContentAsset 연기 근거 요약**: 양 소비자 실사용 0(전수 grep)·업로드 영구 스텁(README 자인)·useModalManagerStore 부재·child EntityForm+FileField 실전 대체 — [브리핑](../analysis/2026-07-11/ea-c-scout-briefing.md).
 
+---
+
+## EA-D — InlineMap (단독 delegate) ✅ · Dead 3종 연기 · Xref→EA-D2 reorder
+
+**완료**: 2026-07-11 · **실행**: 3-리포 실사용 센서스 scout → 단독 delegate(sonnet, wf_9caa6ef1-37c, 200k tokens/13.6min — 병렬 없음이라 등록까지 에이전트 수행) `1f305f1`
+**검증**: full gate ✓ — **1720 unit**(1670→1720, +50)·E2E 5/5.
+
+- **재설계 핵심**: pendingRef 인스턴스 사이드채널 미이식(ADR-0002상 이식 불가 + clone 참조공유 위험) → 렌더러 store-direct-write. 구 #1289류(required 조용히 파손) 원천 소멸 — add→전부 remove→빈 상태에서 required 차단까지 회귀 고정. **빈 non-array 쓰기는 `{}`가 아닌 `undefined`**(제네릭 isBlank가 emptiness를 보는 유일한 방법 — 비배열 shape의 #1289 등가 함정 구조적 회피).
+- **Map resultType→Record 협소화**(지시된 조사 결과): schema-core isEquals/normalizeEmptyValue가 Object.keys() 기반이라 Map 인스턴스는 내용 무관 blank/equal 오판 + JSON 직렬화 `{}`(내용 소실) — **기존 범용 갭**(이번 스코프 밖), §Needs Review 등재. useResultMap 선언은 유효하되 store 값은 Record.
+- deviation 2(건전): withDefaultValue에 Record 허용(구엔진 누락 보정, 추가적)·Map 협소화(승인된 fallback).
+- **Dead 3종 연기 확정**(scout 증거): Rule(rule/ 1264줄 — 채택 0, 가장 깨끗한 dead 증거)·XrefPrice(535줄, 자체 opt-in 격리)·XrefAvailableDate(505줄, 순수 미채택). **Xref 생존 2종(Mapping 29·Prefer 2 사이트)은 EA-D2로** — ViewListGrid 확장(selection/subCollection/onFetched/fields) 선행 병목, EC3 실폼 요구 주도 설계 예정. [브리핑](../analysis/2026-07-11/ea-d-scout-briefing.md).
+
 
 
