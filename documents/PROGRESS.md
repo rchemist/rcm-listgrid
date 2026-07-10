@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드, 수직 슬라이스 GO 실증 완료 후) · **Next up**: H1 id→entity 캐시(M2O renderer 매 렌더 getOne 방지). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드, 수직 슬라이스 GO 실증 완료 후) · **Next up**: H2 a11y(필드 라벨·role·focus). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 (heal-on-entry slim — P0~P2·V0~V2·형식 P3~P7 상세를 progress-archive/로 이관, 하드닝/확장 트랙을 활성 §Tasks로 승격. 전체 1120 unit + 5 E2E green 유지)
+**Last updated**: 2026-07-11 (H1 완료 — M2O 참조해소 캐시 `e48a21f`. 전체 1123 unit + 5 E2E green. 남음 하드닝 H2(a11y), 확장 E1(필드타입)/E2(GJCU 폼). 대기(외부): 0.3.26·alpha.0 publish 승인)
 
 ## Goal
 
@@ -62,7 +62,7 @@
 - [x] **H·게이트** 품질게이트 신 패키지+apps 확장(eslint globs·lint/format globs·`typecheck:packages`) · `0493333`/`a7c1e03`
 - [x] **H·CI** CI에 packages tsc + Playwright e2e job 배선 · `0493333`
 - [x] **H·SubColl테스트** SubCollection 단위테스트(state) · `0493333`
-- [ ] **H1** id→entity 캐시 — M2O renderer가 매 렌더마다 getOne 호출하는 것 방지(해소 캐시/메모). 검증: 렌더 카운트 or fetch 호출수 단위테스트 + M2O E2E 무회귀.
+- [x] **H1** id→entity 캐시 ✅ 2026-07-11 · `e48a21f` · AdapterProvider seam에 adapter-scoped 참조해소 캐시(`useReferenceResolver`, dedup+실패시 evict) · react 7/7·College+dean M2O E2E 2/2·gate green(1120→1123)
 - [ ] **H2** a11y — 필드 라벨 연결(htmlFor/id)·role·focus 관리. 검증: jsdom a11y 단위테스트 + 대표 폼 스크린 확인.
 
 ### E — 확장
@@ -71,7 +71,7 @@
 - [ ] **E1** 나머지 필드타입 — File/Tag/주소/QR/Xref 등. 구엔진 필드에서 이식(규율2). 1필드=1커밋+테스트.
 - [ ] **E2** GJCU 폼 1~2종 추가 재구현 — 신 엔진 breadth 실증(E2E 동반).
 
-**Next up**: H1(id→entity 캐시) → H2(a11y) → E1(필드타입) → E2(GJCU 폼). 순서 무관·독립. E1은 다항목이라 착수 시 필드별 체크박스로 전개.
+**Next up**: H2(a11y) → E1(필드타입) → E2(GJCU 폼). 순서 무관·독립. E1은 다항목이라 착수 시 필드별 체크박스로 전개.
 
 ---
 
