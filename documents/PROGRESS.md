@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active (P0 코드 완료 — P0-10 publish + 브랜치 전환만 사용자 승인 대기)
+**Status**: active (P0+P1 코드 완료 — 외부 publish만 승인 대기 · P2 착수)
 **Engine**: claude (codex eligible 태스크는 개별 표기 — P3-4 표면 감사표 등 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (P0-1~P0-9 완료 + 0.3.26 릴리스 준비 — `p0-hotfixes` 브랜치, 전체 게이트 green(962 tests), 14 커밋; publish/전환만 승인 대기)
+**Last updated**: 2026-07-10 (P0+P1 코드 완료 — v0.4 브랜치 22 커밋, 962 tests green, sample 기동·load smoke 검증. 대기(외부 승인): 0.3.26 publish+main병합 · 0.4 alpha.0 publish. 다음: P2 특성화 오라클)
 
 ## Goal
 
@@ -39,7 +39,7 @@
 | 페이즈 | 브랜치 | 상태 | 릴리스 | 요약 |
 |---|---|---|---|---|
 | P0 실버그 핫픽스 | `p0-hotfixes` | 🟡 코드완료 | 0.3.26 | 버그 9건+보안 3종+환경 완료 · publish/전환만 승인 대기 |
-| P1 워크스페이스+패키징 | v0.4 | ⬜ | alpha.0 | 스캐폴드 · tsup dual · CI · apps/sample 골조 |
+| P1 워크스페이스+패키징 | v0.4 | 🟡 코드완료 | alpha.0 | 스캐폴드·tsup dual·CI 로드게이트·sample 기동 완료 · alpha.0 publish만 승인 대기 |
 | P2 특성화 오라클 | main→공용 | ⬜ | (내부) | 행동 고정 테스트 4묶음 |
 | P3 계약 골격+감사표 | v0.4 | ⬜ | alpha.N | spec-first 게이트 · 파일럿 이식 |
 | P4 코어 이식 | v0.4 | ⬜ | alpha.N | schema-core+state · **abort 판정 지점** |
@@ -72,13 +72,15 @@
 
 ### P1 — v0.4 개시: 워크스페이스 + 패키징 + 샘플 골조 [ADR-0008 §구조, ADR-0001, sample-spec §P1]
 
-- [ ] **P1-1 [S] 워크스페이스 골조** — 루트 package.json `workspaces: ["packages/*","apps/*"]`. `packages/{schema-core,state,react,ui-default,backend-rcm,backend-rest,presets-rcm,next}` + `apps/sample` 생성(각각 package.json private + tsconfig project reference + 빈 index.ts). 기존 `src/`는 **이식 원본으로 유지**(삭제 금지 — P4~P5에서 파일 단위로 비워짐). 내부 패키지명은 `@listgrid/<name>` 작업명(배포는 루트 단일 패키지 — ADR-0008 §배포 형태).
-- [ ] **P1-2 [S] tsup dual 빌드** — ADR-0001 구현 계획 1~3항: 루트에서 진입점별 ESM+CJS+d.ts+sourcemap, exports 맵 3-조건(`types/import/require`), `build:styles` 유지, engines 반영.
-- [ ] **P1-3 [S] CI 이중화 + 로드 게이트** — ci.yml: main·v0.4 트리거, Node 20/22 매트릭스, 로드 스모크(`node -e require` + `--input-type=module` import, 대표 서브패스 포함), publint + @arethetypeswrong/cli. 수용: ADR-0001 수용 기준의 4경로 로드.
-- [ ] **P1-4 [S] alpha 배포 파이프** — publish.yml에 v0.4 분기: `npm version 0.4.0-alpha.N --no-git-tag-version` + `npm publish --tag next`(--provenance 유지). **첫 배포(alpha.0)는 빈 골격이어도 실행**(파이프 검증이 목적). 사용자 승인 후 publish.
-- [ ] **P1-5 [S] apps/sample 스캐폴드** — [명세](./prd/sample-site-spec.md) §P1 범위: Next.js App Router + workspace 참조 + **목업 rcm 백엔드**(route handlers가 rcm 0.1.0 envelope로 메모리 fixture 서빙: `POST /api/{entity}/search`, bare GET `/{id}`, POST/PUT/DELETE) + 홈(로드된 패키지 버전 표시). 수용: `npm run dev -w apps/sample` 단독 기동.
+실행: `p0-hotfixes`→`v0.4` 병합(`0a6dace`, P0 이식원본 확보) 후 v0.4에서 진행. P1-2·P1-5는 sonnet 에이전트 위임(빌드/부팅 검증 동반), 나머지 인라인.
 
-**P1 게이트**: 로드 4경로 green · alpha.0 이 `npm i @rchemist/listgrid@next`로 설치·로드됨 · sample 기동.
+- [x] **P1-1** ✅ `3fc5147` · 루트 workspaces + `@listgrid/*` 8패키지 스텁(composite tsconfig)+apps/sample 스텁 · tsc -b 8패키지 green, src/ 무변경(이식원본 유지)
+- [x] **P1-2** ✅ `62d4277` · tsup dual(.js ESM/.cjs CJS/.d.ts/.d.cts/map) 12진입점 · exports 3-조건+typesVersions · publint/attw green · 954KB(<2.5x) (caveat §Needs Review)
+- [x] **P1-3** ✅ `b77534e` · CI publint+attw+`scripts/smoke-load.sh`(npm pack→temp install→require/import) · verify-build 이중산출 검증 추가
+- [~] **P1-4** 🟡 `c519f7d` · publish.yml prerelease→dist-tag `next` 라우팅 · **alpha.0 실배포는 승인 대기**(외부)
+- [x] **P1-5** ✅ `333316c` · Next15 App Router + 목업 rcm 백엔드(Spring-Data-Page envelope, employee CRUD 왕복) + 홈(workspace 로드 증명) · dev 기동<1s·API 200·build green 검증
+
+**P1 게이트**: 로드 스모크 green ✅(publint/attw+pack smoke) · alpha.0 설치·로드 ⏸(승인 대기) · sample 기동 ✅(직접 확인).
 
 ### P2 — 특성화 테스트 그물 = 이식 오라클 [ADR-0007 §2]
 
@@ -134,6 +136,8 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 - [ ] **P0-3 신규 사용자 문구** — 에러 표면화 시 `'필드 값을 처리하는 중 오류가 발생했습니다.'` 신설(리포 관례 '~하는 중 오류가 발생했습니다.' 따름). i18n 키화는 P5 동시처리 목록으로 이월.
 - [ ] **P0-4 최소범위 초과** — hook이 per-list defaultPageSize에 접근 불가라 `QuickSearchBar`/`ViewListGrid`에 prop 스레딩 추가(1→3파일). 브리핑의 useListGridLogic 우선순위 정렬 지시상 불가피.
 - [ ] **P0-8 동결 방식** — no-explicit-any 135파일 동결을 인라인 주석 대신 `eslint.config.mjs` override 블록으로(동일 효과·1파일 diff·whittle-down 용이).
+- [ ] **P1-2 ESM 메인배럴 caveat** — 순수 Node ESM `import('@rchemist/listgrid')`(메인)은 `react-sortablejs`(CJS-only peer, ESM/exports 없음)의 named export 미검출로 실패. 번들러(Next/webpack) 소비자는 정상. 대응: (a) 수용+MIGRATION 명시 / (b) v0.4에서 react-sortablejs를 ESM 대체(예: @dnd-kit)로 교체 검토(P5 렌더러 이식 시). 결정 필요.
+- [ ] **브랜치 전략 확인** — 모델 판단으로 `p0-hotfixes`→`v0.4` 병합해 P1 착수(이식원본 확보, reversible). main 무변경. 사용자가 다른 흐름(p0-hotfixes→main→v0.4) 원하면 v0.4 리셋 후 재정렬 가능.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
@@ -141,7 +145,7 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 
 ## Open Questions
 
-- [ ] **P0-10 릴리스/전환 승인 (지금 대기)** — ① 0.3.26 `npm publish`(외부 공개) 승인? ② 작업 브랜치 `p0-hotfixes`를 main에 반영하는 방식(PR vs 직접 병합)? ③ 그 후 main→v0.4 전환 실행 시점? (§Needs Review의 소비자 Breaking 확인이 publish 선결)
+- [ ] **릴리스/publish 승인 (외부 — 대기)** — ① 0.3.26 `npm publish`(latest) 승인? ② `p0-hotfixes`→main 반영 방식(PR vs 직접)? ③ 0.4.0-alpha.0 `npm publish --tag next`(빈 골격 파이프 검증) 승인? — v0.4 이식원본 propagation은 완료(main·npm publish만 외부 게이트). §Needs Review 소비자 Breaking 확인이 0.3.26 publish 선결.
 - [ ] npm publish 승인 방식: alpha.N마다 개별 승인 vs "alpha는 포괄 승인" — 사용자 결정 필요 (P1-4 전까지)
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독 (P5 전까지)
 - [ ] 0.2.x 라인(release/0.2)에 P0 버그 중 백포트할 항목이 있는지 — P0-1(검증)·P0-2(엑셀)는 후보 (P0-10 전까지)
