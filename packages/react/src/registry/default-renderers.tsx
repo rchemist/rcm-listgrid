@@ -21,6 +21,9 @@ import { CustomOptionFieldRenderer } from './custom-option-renderer';
 import { BirthdayFieldRenderer } from './birthday-renderer';
 import { TelephoneNumberFieldRenderer } from './telephone-number-renderer';
 import { ColorFieldRenderer } from './color-renderer';
+import { FileFieldRenderer } from './file-renderer';
+import { ImageFieldRenderer } from './image-renderer';
+import { MultipleAssetFieldRenderer } from './multiple-asset-renderer';
 
 // Default field-type renderers (task item 3). Every one of these follows the
 // same shape: read this field's resolved value via useFieldValue, resolve the
@@ -248,4 +251,8 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('birthday', BirthdayFieldRenderer);
   registerFieldRenderer('telephoneNumber', TelephoneNumberFieldRenderer);
   registerFieldRenderer('color', ColorFieldRenderer);
+  // EA-C upload fields (fan-out port; ContentAsset deferred — dead in 0.3.x)
+  registerFieldRenderer('file', FileFieldRenderer);
+  registerFieldRenderer('image', ImageFieldRenderer);
+  registerFieldRenderer('multipleAsset', MultipleAssetFieldRenderer);
 }

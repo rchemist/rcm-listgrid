@@ -17,3 +17,21 @@ export interface AssetConfig {
   /** Allowed MIME types, e.g. `['image/*']`. */
   fileTypes?: string[];
 }
+
+/** Rebuilds a full `AssetConfig` from four possibly-unset members, omitting
+ *  `undefined` ones — the exactOptionalPropertyTypes-safe equivalent of the
+ *  0.3.x builders' "set every member, some to undefined" literal rebuild.
+ *  Shared by FileField/ImageField's withX builders. */
+export function buildAssetConfig(
+  maxSize: number | undefined,
+  maxCount: number | undefined,
+  extensions: string[] | undefined,
+  fileTypes: string[] | undefined,
+): AssetConfig {
+  const config: AssetConfig = {};
+  if (maxSize !== undefined) config.maxSize = maxSize;
+  if (maxCount !== undefined) config.maxCount = maxCount;
+  if (extensions !== undefined) config.extensions = extensions;
+  if (fileTypes !== undefined) config.fileTypes = fileTypes;
+  return config;
+}

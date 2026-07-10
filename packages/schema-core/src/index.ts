@@ -150,6 +150,13 @@ export { MessageViewField } from './field/message-view-field';
 export { ProfileField } from './field/profile-field';
 export { MappedJoinField } from './field/mapped-join-field';
 
+// --- EA-C upload field classes (plain string/string[] values; upload HTTP is
+// host-owned via the UIComponents.FileInput slot — ea-c-scout-briefing.md) ---
+export { FileField } from './field/file-field';
+export { ImageField } from './field/image-field';
+export { MultipleAssetField } from './field/multiple-asset-field';
+export type { AssetItem } from './field/multiple-asset-field';
+
 // --- EA-B moderate field classes ---
 export { DatetimeField } from './field/datetime-field';
 export type { DatetimeFieldValue } from './field/datetime-field';
