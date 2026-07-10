@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 진행(EF1 META 반응화 완료) · **Next up**: EF2(onChanges cascade). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 진행(EF1·EF2 완료) · **Next up**: EF3(initializeFormStore 파이프). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 02:47 (EF1 완료 — 반응형 META override `c7d387f`. 명령형 라이프사이클 초석 확보. 전체 1138 unit+5 E2E green, push 완료. **Next=EF2(onChanges cascade)** — §세션 인계 Handoff + [E계획 EF2 노트](./plans/e-track-field-parity.md) 읽고 재개)
+**Last updated**: 2026-07-11 03:25 (EF2 완료 — onChanges cascade `1bc3f06`: FormMutator+loop-guard+빌더3종. 1160 unit+5 E2E green, deviations 4건 §Needs Review. **Next=EF3** — §세션 인계 Handoff + [E계획 §EF3](./plans/e-track-field-parity.md) 읽고 재개)
 
 ## Goal
 
@@ -49,14 +49,15 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음 작업: EF2 onChanges cascade)
+## 세션 인계 (Handoff — 다음 작업: EF3 initializeFormStore 파이프)
 
-- **현 상태**: 하드닝 H 완료. E-트랙 기반 Phase EF 중 **EF1(반응형 META override) 완료**(`c7d387f`). 전체 **1138 unit + 5 E2E green**, 전부 push됨(v0.4). 남은 미커밋 작업 없음.
-- **다음 = EF2 (onChanges cascade)**. **아키텍처 이미 결정** — [계획 §EF2 구현 노트](./plans/e-track-field-parity.md) 참조(재도출 금지): FormMutator 인터페이스로 schema-core 순수성 유지 + loop-guard + 대표 빌더 3종(changeHidden/changeRequired/changeSelectOptions, 전부 setMeta로).
-- **Do-NOT**: ① onChanges가 store/EntityForm을 직접 받게 하지 말 것(schema-core→state 역의존, ADR-0003 위반) → FormMutator 경유. ② 필드 렌더만 이식하고 동작 검증 생략 금지(사용자 강조 — onInit/onChanges 실제 작동해야). ③ EF1~4 착지 전 대량 필드 이식(EA) 금지(EF-gate). ④ 형식 P3~P7 재개 금지(보류).
-- **불변/함정**: EF1 override는 `??`(explicit false 승). setMeta는 단일필드 구독(D4) — cascade 구현 시 D4 유지. setValue cascade 무한루프(A→B→A) loop-guard 필수.
-- **첫 파일**: 구엔진 `src/listgrid/config/OnChangeEntityForm.ts`(76-361 카탈로그)·`EntityForm.tsx:122`(executeOnChanges) → 신 `packages/state/src/form-store.ts`(setValue 확장)·`packages/schema-core/src/field/entity-field.ts`(EntityForm onChanges 리스트+withOnChanges).
-- **작업 규율**: 태스크마다 설계는 세션이(conductor), 구현은 sonnet 위임, 검증은 세션이 rigorous(type-check×2+vitest+공유경로 변경 시 full E2E). 완료=logic 커밋→PROGRESS 커밋→**push(사용자: 전부 push)**. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`. Node26(폴리필 OK).
+- **현 상태**: EF1(META 반응화 `c7d387f`)·EF2(onChanges cascade `1bc3f06`) 완료. 전체 **1160 unit + 5 E2E green**, full gate ✓. §Needs Review에 EF2 deviation 4건 open(비차단).
+- **다음 = EF3 (initializeFormStore 파이프)**. 계획 §EF3: fetch→onFetchData→onInitialize(순차, EntityForm clone 변형)→build store→hydrate→init추가 필드 fetched 재바인딩. EntityForm에 onInitialize/onFetchData 훅 리스트+빌더, react `useEntityFormInitializer`. **세부 아키텍처는 conductor가 착수 시 결정**(EF2와 달리 사전 노트 없음 — onInitialize는 EntityForm clone 변형이라 FormMutator와 다른 형태 가능, ADR-0003 순수성 검토 필요).
+- **Do-NOT**: ① 훅이 store를 직접 받게 하지 말 것(schema-core→state 역의존, ADR-0003) — EF2는 FormMutator로 해소, EF3도 동일 원칙. ② 필드 렌더만 이식하고 동작 검증 생략 금지(사용자 강조 — onInit/onChanges 실제 작동해야). ③ EF1~4 착지 전 대량 필드 이식(EA) 금지(EF-gate). ④ 형식 P3~P7 재개 금지(보류).
+- **불변/함정**: EF1 override `??`(explicit false 승)·D4 단일필드 구독 유지. EF2 loop-guard는 sync batch 한정(async 재진입=새 batch, form-store 주석). FieldMetaOverride.options `| undefined`(revert=선언 폴백).
+- **패턴 참조**: FormMutator(`schema-core/src/field/form-mutator.ts`)·빌더 카탈로그(`schema-core/src/onchanges/`)·batch loop-guard(`state/src/form-store.ts` performSetValue). H-트랙 패턴 [archive](./progress-archive/phase-hardening-H.md).
+- **첫 파일**: 구 `src/listgrid/config/EntityForm.tsx:162-306`(초기화 루프 256-266·동적필드 재바인딩 268-302)·`Config.ts:459-463` → 신 `packages/schema-core/src/entity-form.ts`·`packages/state/src/form-store.ts`·`packages/react/src/`(initializer 훅 신설).
+- **작업 규율**: 태스크마다 설계는 세션이(conductor), 구현은 sonnet 위임, 검증은 세션이 rigorous(full gate+공유경로 변경 시 full E2E). 완료=logic 커밋→PROGRESS 커밋→**push(사용자: 전부 push)**. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`. Node26(폴리필 OK).
 
 ---
 
@@ -77,7 +78,7 @@
 #### Phase EF — 명령형 라이프사이클 기반 (대량 이식 전 필수) **[O]**
 
 - [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선)·useFieldMeta(D4)·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
-- [ ] **EF2 [O] onChanges cascade** — setValue 후 ordered onChanges(store,field) 훅 dispatch(형제 setValue·meta mutate·loop-guard) + 구 OnChangeEntityForm.ts:76-361 빌더 카탈로그 이식(EF1 위). 대상 state+schema-core.
+- [x] **EF2 [O] onChanges cascade** ✅ 2026-07-11 · `1bc3f06` · FormMutator+batch loop-guard+빌더3종(setMeta) · +22 unit(1160 green)·E2E 5/5·full gate ✓·deviations 4→§Needs Review · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF3 [O] initializeFormStore 파이프** — fetch→onFetchData→onInitialize(순차 clone 변형)→build→hydrate→init추가 필드 재바인딩. EntityForm 훅 리스트+빌더 + react useEntityFormInitializer. 구 EntityForm.tsx:162-306. 대상 state+schema-core+react.
 - [ ] **EF4 [O] 동적 필드 add/remove + structure-version** — store.addField/removeField(슬라이스)+late-add 재바인딩(구 268-302), ViewEntityForm version 시 groups 재도출(구 shouldReload 대체). EF3 의존.
 - [ ] **EF5 validate-on-change (opt-in)** — setValue 후 debounce validateField+touched 게이팅. 낮은 위험, cascade 뒤.
@@ -119,6 +120,10 @@
 - [ ] **P2 렌더 파일수 게이트** — 게이트 문구는 "렌더 테스트 파일 9→25+"이나 실제는 밀도높은 5파일 68테스트. 파일수 목표 문자적 충족 vs 행동밀도 인정 — 커버리지 래칫 재측정과 함께 판단.
 - [ ] **P3-1 조건부 컨텍스트 협소화 (소비자 breaking)** — 조건부 함수 `withHidden((props)=>…)` 등이 EntityForm-carrying `ConditionalValue` 대신 순수 `FieldEvalContext{renderType,session,value,values}`를 받음. 근거 ADR-0003§4·헌장 C2. MIGRATION 1:1 대응표 필요 + P5 렌더러 배선서 실사용 검증. [detail](../packages/schema-core/src/field/eval-context.ts)
 - [ ] **P3-1 권한추출 협소화 (행동 narrowing)** — canonical `extractPermissions`=2-way(`roles ?? authentication.roles`)만; 구엔진 getViewableTabs의 `this.session` 인스턴스 폴백(EntityFormBase:356-361) 제거(ADR-0002 정합). 무영향 예상 — 확인. [detail](../packages/schema-core/src/permission.ts)
+- [ ] **EF2 meta options 확장** — FieldMetaOverride.options `SelectOption[]`→`| undefined`(revert가 선언옵션 폴백하려면 필요, exactOptionalPropertyTypes) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EF2 빌더 자체필터** — 구엔진 매변경 무조건 재계산 → 신 빌더3종은 changedField≠source면 skip(루프는 전핸들러 호출 유지·settled state 동일) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EF2 미이식 2건** — ConditionalSelectOption defaultValue(구소스 dead code 확인)·withShouldReload(신 대응개념 없음, EF4 영역) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EF2 onChanges 내부표현** — `onChanges?:` 옵셔널 대신 private 빈배열(공개 getOnChanges 계약은 스펙대로) · risk: negligible · [detail](./progress-archive/phase-e-track-tasks.md)
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
