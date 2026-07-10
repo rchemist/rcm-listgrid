@@ -229,6 +229,8 @@
     "format:check": "prettier --check 'src/**/*.{ts,tsx,css,json}'",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "typecheck:packages": "tsc -b",
     "test:char": "vitest run tests/characterization",
     "test:coverage": "vitest run --coverage",
     "docs": "typedoc",
