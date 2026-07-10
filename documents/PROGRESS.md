@@ -80,7 +80,9 @@
 
 전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
 - [x] **EA-A 트리비얼 12종** ✅ `e9c1121`(A0 pre-stage)+`5566c21`(wave) · 12/12 이식+196 테스트(1430 green)·E2E 5/5·full gate ✓ · [상세 표](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-B 모더릿/고빈도** — Datetime·CustomOption·Html·Birthday·TelephoneNumber·Color(⚠dynamic Tailwind 금지)
+- [~] **EA-B 모더릿** (5종 — **Html 드롭**: 구엔진부터 MarkdownField와 중복, Extend 판정) · 진행: ⬜Datetime ⬜CustomOption ⬜Birthday ⬜TelephoneNumber ⬜Color
+  - **scout ✅ + 결정 확정**([브리핑](./analysis/2026-07-11/ea-b-scout-briefing.md) 배너): `{cascade:false}`=dispatchOnChanges만 스킵(validate는 구엔진도 항상 실행)·소비자 Birthday/Telephone/Color·CustomOptionProvider(host fetch+dedup 개선)·죽은 withFetchUrl 드롭·**EA-B1 시스테믹**(배열 isDirty 갭 — EA-A 필드도 영향) pre-stage 포함
+  - **Reuse review**: Extend: form-store setValue(옵션)·OptionsField·TextInput union·H1 캐시 패턴·기존 TelephoneNumberValidation — New: CustomOptionProvider·phone-util·필드 5클래스/렌더러(이식)
 - [ ] **EA-C 업로드** — File·Image·MultipleAsset·ContentAsset (**업로드 backend seam 결정** §Open Q)
 - [ ] **EA-D xref/도메인** — XrefMapping·XrefPrefer·XrefPrice·XrefAvailableDate·Rule·InlineMap(⚠pendingRef)
 
