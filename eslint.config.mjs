@@ -6,12 +6,28 @@ import globals from 'globals';
 
 export default [
     {
-        ignores: ['dist/**', 'node_modules/**', 'coverage/**', '*.config.ts', '*.config.js'],
+        ignores: [
+            'dist/**',
+            '**/dist/**',
+            'node_modules/**',
+            'coverage/**',
+            '*.config.ts',
+            '*.config.js',
+            '**/.next/**',
+            'apps/*/next-env.d.ts',
+        ],
     },
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {
-        files: ['src/**/*.{ts,tsx}'],
+        // src/ = 0.3.x engine; packages/*/src + apps/*/{app,lib} = v0.4
+        // re-foundation. Same rule set applies to all so new code is gated.
+        files: [
+            'src/**/*.{ts,tsx}',
+            'packages/*/src/**/*.{ts,tsx}',
+            'apps/*/app/**/*.{ts,tsx}',
+            'apps/*/lib/**/*.{ts,tsx}',
+        ],
         languageOptions: {
             parser: tseslint.parser,
             parserOptions: {

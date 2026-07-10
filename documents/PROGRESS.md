@@ -176,7 +176,7 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 - [ ] **0.4.0-alpha.N 배포** — `v0.4.0-alpha.N` 태그 push → next 자동배포(파이프 검증). P1 완료로 준비됨(빈 골격이어도 실행 가능). 사용자 실행/승인 시점 결정.
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독 (P5 전까지)
 - [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
-- [ ] **수직 슬라이스 완료 후 다음 방향 (비크리티컬 — 사용자 확정)** — V0~V2로 재기초 합성이 실동작 실증됨. 다음 우선순위 선택: **(a)** 필드/폼 확장(FileField·XrefMapping·주소·QR 등 나머지 필드 카탈로그 + 더 많은 GJCU 폼) · **(b)** 형식적 P3~P7 마무리(P3-4 표면 감사표·madge 순환 게이트·ADR-0004 심볼≤220·헌장 대조표·MIGRATION 승격·GA) · **(c)** 하드닝(E2E를 CI 게이트로·SubCollection 단위테스트·id→entity 캐시·접근성) · **(d)** 외부 publish 승인 진행. 기본값 없이 대기 — 사용자가 우선순위 지정 시 착수.
+- [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 진행 중. **H(하드닝)**: [x] 품질 게이트를 신 패키지+apps로 확장(eslint files/ignores·lint/format globs·`typecheck:packages`) · [x] CI에 packages tsc + Playwright e2e job 배선 · [x] SubCollection 단위테스트(state) · [ ] id→entity 캐시(M2O renderer 매 렌더 getOne 방지) · [ ] a11y(라벨·role·focus). **E(확장)**: [ ] 남은 필드타입(Email/Phone/File/Tag/주소/QR/Xref 클래스+렌더러) · [ ] GJCU 폼 1~2종 추가 재구현.
 
 ## 완료 기록 (태스크 완료 시 여기에 한 줄 증거 누적, 페이즈 완료 시 progress-archive로 이동)
 

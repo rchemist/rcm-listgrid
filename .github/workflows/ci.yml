@@ -28,6 +28,9 @@ jobs:
       - name: Type check
         run: npm run type-check
 
+      - name: Type check (v0.4 packages — composite tsc -b)
+        run: npm run typecheck:packages
+
       - name: Lint
         run: npm run lint
 
@@ -61,3 +64,26 @@ jobs:
 
       - name: Load smoke (npm pack → install → require/import published exports)
         run: bash scripts/smoke-load.sh
+
+  e2e:
+    # v0.4 vertical-slice acceptance — drives apps/sample (new @listgrid/*
+    # engine + mock RCM backend) in a real browser (documents/plans/
+    # e2e-parity-vertical-slice.md). Runs once (not per node matrix).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci --legacy-peer-deps
+
+      - name: Install Playwright browser (chromium)
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E (Playwright — College / Subject / Professor)
+        run: npm run test:e2e
