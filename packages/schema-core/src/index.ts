@@ -142,6 +142,15 @@ export { MessageViewField } from './field/message-view-field';
 export { ProfileField } from './field/profile-field';
 export { MappedJoinField } from './field/mapped-join-field';
 
+// --- EA-B moderate field classes ---
+export { DatetimeField } from './field/datetime-field';
+export type { DatetimeFieldValue } from './field/datetime-field';
+export { CustomOptionField } from './field/custom-option-field';
+export type { CustomOptionComboProps, CustomOptionLayout } from './field/custom-option-field';
+export { BirthdayField } from './field/birthday-field';
+export { TelephoneNumberField } from './field/telephone-number-field';
+export { ColorField } from './field/color-field';
+
 // --- EntityForm declaration (charter C1) ---
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';

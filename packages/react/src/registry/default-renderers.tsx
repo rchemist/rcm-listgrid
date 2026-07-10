@@ -16,6 +16,11 @@ import { ColorPresetFieldRenderer } from './color-preset-renderer';
 import { MessageViewFieldRenderer } from './message-view-renderer';
 import { ProfileFieldRenderer } from './profile-renderer';
 import { MappedJoinFieldRenderer } from './mapped-join-renderer';
+import { DatetimeFieldRenderer } from './datetime-renderer';
+import { CustomOptionFieldRenderer } from './custom-option-renderer';
+import { BirthdayFieldRenderer } from './birthday-renderer';
+import { TelephoneNumberFieldRenderer } from './telephone-number-renderer';
+import { ColorFieldRenderer } from './color-renderer';
 
 // Default field-type renderers (task item 3). Every one of these follows the
 // same shape: read this field's resolved value via useFieldValue, resolve the
@@ -219,7 +224,7 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('textarea', TextareaRenderer);
   registerFieldRenderer('number', NumberRenderer);
   registerFieldRenderer('date', DateRenderer);
-  registerFieldRenderer('datetime', DateRenderer);
+  registerFieldRenderer('datetime', DatetimeFieldRenderer);
   registerFieldRenderer('boolean', BooleanRenderer);
   registerFieldRenderer('select', SelectRenderer);
   registerFieldRenderer('markdown', MarkdownRenderer);
@@ -238,4 +243,9 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('messageView', MessageViewFieldRenderer);
   registerFieldRenderer('profile', ProfileFieldRenderer);
   registerFieldRenderer('mappedJoin', MappedJoinFieldRenderer);
+  // EA-B moderate fields (fan-out port of the 0.3.x catalog)
+  registerFieldRenderer('customOption', CustomOptionFieldRenderer);
+  registerFieldRenderer('birthday', BirthdayFieldRenderer);
+  registerFieldRenderer('telephoneNumber', TelephoneNumberFieldRenderer);
+  registerFieldRenderer('color', ColorFieldRenderer);
 }
