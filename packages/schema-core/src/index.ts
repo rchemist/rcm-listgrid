@@ -106,11 +106,15 @@ export {
   DateField,
   SelectField,
 } from './field/basic-fields';
-export type { MinMaxLimit, SelectOption } from './field/basic-fields';
+export type { MinMaxLimit, MinMaxStringLimit, SelectOption } from './field/basic-fields';
 export { ManyToOneField } from './field/many-to-one-field';
 export type { ManyToOneConfig } from './field/many-to-one-field';
 export { SubCollectionField } from './field/sub-collection-field';
 export type { SubCollectionConfig } from './field/sub-collection-field';
+
+// --- options-carrying field bases (EA-A0 pre-stage; consumers: Checkbox/
+// MultiSelect/Tag, EA-A fan-out) ---
+export { OptionsField, MultiOptionsField } from './field/options-field';
 
 // --- EntityForm declaration (charter C1) ---
 export { EntityForm } from './entity-form';

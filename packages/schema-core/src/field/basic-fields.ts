@@ -48,6 +48,14 @@ export interface MinMaxLimit {
   max?: number;
 }
 
+/** String-valued min/max bound (0.3.x `form/Type.ts:37`) — used by fields whose
+ *  limit is compared lexicographically rather than numerically (Month 'YYYY-MM',
+ *  Time 'HH:mm'; lexicographic order equals chronological order for both). */
+export interface MinMaxStringLimit {
+  min?: string;
+  max?: string;
+}
+
 /** Numeric (0.3.x NumberField, type 'number'). */
 export class NumberField extends FormField<number> {
   currency?: string;

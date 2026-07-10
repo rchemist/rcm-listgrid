@@ -12,6 +12,11 @@ export interface TextInputProps {
   value?: string;
   onChange?: (value: string) => void;
   placeholder?: string;
+  /** HTML input type (default 'text'). 'password'/'month'/'time' let a single
+   *  primitive back PasswordField/MonthField/TimeField (EA-A) without a new
+   *  slot per type — additive, backward compatible (existing callers that
+   *  omit it keep getting `type="text"`). */
+  type?: 'text' | 'password' | 'month' | 'time';
   readOnly?: boolean;
   disabled?: boolean;
   id?: string;
@@ -81,6 +86,44 @@ export interface SelectBoxProps {
   describedBy?: string;
 }
 
+/** Outcome of a per-tag validation check (0.3.x `form/TagsInput/types.ts`
+ *  `TagValidationResult` — TagField's `withTagValidation` callback shape). */
+export interface TagValidationResult {
+  valid: boolean;
+  message?: string;
+}
+
+export interface TagsInputProps {
+  /** current tags. */
+  value?: string[];
+  onChange?: (value: string[]) => void;
+  /** suggestion pool for the token input (0.3.x TagField `data`). */
+  data?: string[];
+  /** per-tag async validation gate run before a tag is added (0.3.x TagField
+   *  `onValidateTag`/`withTagValidation`) — reject with `{valid:false}` to
+   *  keep the tag out and surface `message`. */
+  onValidateTag?: (value: string) => TagValidationResult | Promise<TagValidationResult>;
+  minTags?: number;
+  maxTags?: number;
+  placeholder?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
+  id?: string;
+  ariaLabel?: string;
+  required?: boolean;
+  invalid?: boolean;
+  describedBy?: string;
+}
+
+export interface UserViewProps {
+  /** host-owned shape (ProfileField/UserView is a placeholder posture — the
+   *  real host overrides this component with its own user-lookup view). */
+  value?: unknown;
+  id?: string;
+  ariaLabel?: string;
+  describedBy?: string;
+}
+
 export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'ghost';
 
 export interface ButtonProps {
@@ -142,6 +185,8 @@ export interface UIComponents {
   DateInput: ComponentType<DateInputProps>;
   CheckBox: ComponentType<CheckBoxProps>;
   SelectBox: ComponentType<SelectBoxProps>;
+  TagsInput: ComponentType<TagsInputProps>;
+  UserView: ComponentType<UserViewProps>;
   Button: ComponentType<ButtonProps>;
   Modal: ComponentType<ModalProps>;
   Table: TableComponent;

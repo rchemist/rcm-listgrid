@@ -1,7 +1,7 @@
 // Default UI primitives — plain semantic HTML, no CSS framework, no
 // component library dependency. Every input primitive normalizes onChange
 // to the plain VALUE the field store expects (never the raw DOM event).
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type {
   ButtonProps,
   CheckBoxProps,
@@ -16,15 +16,18 @@ import type {
   TableComponent,
   TableProps,
   TableRowProps,
+  TagsInputProps,
   TextareaProps,
   TextInputProps,
   UIComponents,
+  UserViewProps,
 } from './types';
 
 export function TextInput({
   value,
   onChange,
   placeholder,
+  type,
   readOnly,
   disabled,
   id,
@@ -35,7 +38,7 @@ export function TextInput({
 }: TextInputProps) {
   return (
     <input
-      type="text"
+      type={type ?? 'text'}
       id={id}
       value={value ?? ''}
       placeholder={placeholder}
@@ -196,6 +199,126 @@ export function SelectBox({
   );
 }
 
+/**
+ * Minimal token input (EA-A0 pre-stage — first consumer: TagField).
+ * Enter adds the current text as a tag (after `onValidateTag`, if
+ * supplied); each tag carries its own remove button. `data` (if given)
+ * feeds a native `<datalist>` for suggestions — no custom dropdown/filter
+ * UI (that's the 0.3.x `TagsInput` component's job; this is the ui-default
+ * fallback a host is expected to override with its own design-system
+ * widget, same posture as every other primitive here).
+ */
+export function TagsInput({
+  value,
+  onChange,
+  data,
+  onValidateTag,
+  maxTags,
+  placeholder,
+  readOnly,
+  disabled,
+  id,
+  ariaLabel,
+  required,
+  invalid,
+  describedBy,
+}: TagsInputProps) {
+  const [inputValue, setInputValue] = useState('');
+  const [error, setError] = useState<string | undefined>(undefined);
+  const tags = value ?? [];
+  const listId = data && data.length > 0 && id ? `${id}-suggestions` : undefined;
+
+  async function addTag(raw: string) {
+    const tag = raw.trim();
+    if (!tag || readOnly || disabled) return;
+    if (tags.includes(tag)) {
+      setInputValue('');
+      return;
+    }
+    if (maxTags !== undefined && tags.length >= maxTags) {
+      setError(`최대 ${maxTags}개까지 추가할 수 있습니다.`);
+      return;
+    }
+    if (onValidateTag) {
+      const result = await onValidateTag(tag);
+      if (!result.valid) {
+        setError(result.message ?? '유효하지 않은 태그입니다.');
+        return;
+      }
+    }
+    setError(undefined);
+    onChange?.([...tags, tag]);
+    setInputValue('');
+  }
+
+  function removeTag(index: number) {
+    if (readOnly || disabled) return;
+    const next = tags.slice();
+    next.splice(index, 1);
+    onChange?.(next);
+  }
+
+  return (
+    <div id={id}>
+      <ul aria-label={ariaLabel ? `${ariaLabel} — selected` : undefined}>
+        {tags.map((tag, index) => (
+          <li key={`${tag}-${index}`}>
+            <span>{tag}</span>
+            {!readOnly && !disabled && (
+              <button type="button" aria-label={`Remove ${tag}`} onClick={() => removeTag(index)}>
+                ×
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+      <input
+        type="text"
+        value={inputValue}
+        placeholder={placeholder}
+        readOnly={readOnly}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        aria-required={required || undefined}
+        aria-invalid={invalid || (error !== undefined ? true : undefined) || undefined}
+        aria-describedby={describedBy}
+        list={listId}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            void addTag(inputValue);
+          }
+        }}
+      />
+      {listId && (
+        <datalist id={listId}>
+          {(data ?? []).map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </datalist>
+      )}
+      {error !== undefined && <div role="alert">{error}</div>}
+    </div>
+  );
+}
+
+/**
+ * Placeholder fallback for the Profile field's `UserView` slot (EA-A0
+ * pre-stage, conductor decision ②: "최소 placeholder — 호스트 오버라이드
+ * 전제"). Renders the value as plain text; a real host replaces this
+ * component with a user-lookup/avatar view via `UIComponents.UserView`.
+ */
+export function UserView({ value, id, ariaLabel, describedBy }: UserViewProps) {
+  return (
+    <span id={id} aria-label={ariaLabel} aria-describedby={describedBy}>
+      {value === undefined || value === null ? '' : String(value)}
+    </span>
+  );
+}
+
 export function Button({ onClick, children, type, disabled, variant }: ButtonProps) {
   return (
     <button type={type ?? 'button'} onClick={onClick} disabled={disabled} data-variant={variant}>
@@ -297,6 +420,8 @@ export const defaultUIComponents: UIComponents = {
   DateInput,
   CheckBox,
   SelectBox,
+  TagsInput,
+  UserView,
   Button,
   Modal,
   Table,

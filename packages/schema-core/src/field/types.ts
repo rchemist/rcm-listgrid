@@ -36,7 +36,12 @@ export type FieldType =
   | 'xrefAvailableMapping'
   | 'revision'
   | 'contentAsset'
-  | 'subCollection';
+  | 'subCollection'
+  | 'link'
+  | 'colorPreset'
+  | 'messageView'
+  | 'profile'
+  | 'mappedJoin';
 
 /** The create/update discriminant threaded through every conditional resolution. */
 export type RenderType = 'create' | 'update';

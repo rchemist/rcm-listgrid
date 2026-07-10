@@ -54,3 +54,7 @@ export type { ViewEntityFormProps } from './components/ViewEntityForm';
 
 export { ViewListGrid } from './components/ViewListGrid';
 export type { ViewListGridProps } from './components/ViewListGrid';
+
+// --- conditional resolvers that need value-level React (ADR-0003 §Decision 5;
+// schema-core ships only the React-free getConditionalBoolean/String) ---
+export { getConditionalReactNode } from './util/conditional-react-node';
