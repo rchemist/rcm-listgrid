@@ -29,3 +29,30 @@
 4. **onChanges 내부 표현** — `onChanges?: OnChangesHandler[]` 대신 `private onChanges: OnChangesHandler[] = []`(비옵셔널 빈배열). getOnChanges() 공개 계약은 스펙대로. risk: Negligible.
 
 proposed_helper: 없음.
+
+---
+
+## EF3 — initializeFormStore 파이프 (build-after-hooks)
+
+**완료**: 2026-07-11 · **실행**: delegate(sonnet, wf_0bdcf17e-90b, 127k tokens/87 tool calls/9.2min) · **status**: `done_with_deviations` (2건 — 본문 §Needs Review)
+
+**Reuse review**: Extend: EntityForm(EF2 withOnChanges 패턴)·createFormStore/hydrate 호출 재사용 — New: state initializeFormStore 파이프 + react useEntityFormInitializer.
+
+### 구현 (에이전트 notes 요약)
+
+- **schema-core** `entity-form.ts`: `OnFetchDataHandler`/`OnInitializeHandler` 타입(순수 EntityForm-in/out) + private 배열 + `withOnFetchData`/`withOnInitialize`(append) + getter + `clone()` 전파 — EF2 onChanges 패턴 그대로.
+- **state** 신규 `initialize-form-store.ts`: `initializeFormStore({entityForm, adapter?, id?, session?, initialData?}) → {store, entityForm, error?}` — clone→`withId(id)`→(initialData ?? adapter.getOne)→onFetchData*(data 있을 때만, 순차)→onInitialize*(순차, per-handler catch+continue)→**createFormStore(훅 적용 후 build)**→hydrate(data). fetch 실패 시 훅·hydrate 생략+normalized BackendError 반환(구 198-203 parity). 
+- **state** `form-store.ts`: hydrate가 flat `data[name]`만 지원하던 갭 → 내부 비공개 `resolveFetchedValue(data, name)` dotted-path walker 추가(구 setFetchedValues parity). flat 이름 동작 byte-identical.
+- **react** 신규 `hooks/use-entity-form-initializer.ts`: `useEntityFormInitializer` → {store, entityForm, loading, error?} — cancellation-safe useEffect, dep은 entityForm/adapter/id identity만(session/initialData는 latest closure — providers/adapter.tsx idiom). 기존 동기 createFormStore 콜사이트 무변경.
+
+### 검증 (에이전트 자가보고 — 세션 authoritative 게이트 별도)
+
+- typecheck:packages clean · 터치 파일 eslint 0/0 · 전체 vitest **81 파일/1176 passed**(1160→1176, +16)
+- state 9/9: 파이프 순서·핸들러가 새 EntityForm 반환 시 교체·onInitialize throw catch+continue·**동적 추가 필드가 슬라이스+fetched 값 수신(flat AND dotted)**·initialData 우회·fetch 에러 시 훅 skip+store 사용가능·create 모드 onInitialize만·hydrate가 EF2 onChanges 미발화
+- react 1/1: 실제 ViewEntityForm 렌더 — fake adapter+동적 필드 추가 onInitialize → loading 해소 후 원본+동적 필드 fetched 값 DOM 표시
+
+### Deviations (2건 — §Needs Review 라우팅됨)
+
+1. **withId(id) 전파** — 브리핑 a단계에 미명시였으나 clone 직후 `ef.withId(id)` 추가. 없으면 fetch-error 경로가 create 모드와 구분 불가(getId undefined→update URL 불능). sample edit page의 기존 idiom(`clone().withId(id)`)과 일치. risk: Low(추가적, 기존 테스트 무영향).
+2. **hydrate dotted-path 수정(공유 코드)** — 브리핑 "dotted 지원 확인 — 될 것" 실제론 미지원 → hydrate 내부에 비공개 resolveFetchedValue 추가. EF3 수용기준(동적 필드 dotted 바인딩)에 필수. 공유 hydrate 변경이나 flat 동작 동일·전 스위트 green. risk: Low-medium. **EC2(Collabo nested 필드)가 실사용 검증 예정.**
+
