@@ -80,7 +80,7 @@
 - [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선)·useFieldMeta(D4)·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
 - [x] **EF2 [O] onChanges cascade** ✅ `1bc3f06` · FormMutator+loop-guard+빌더3종 · +22 unit(1160 green)·E2E 5/5·deviations 4→§Needs Review · [detail](./progress-archive/phase-e-track-tasks.md)
 - [x] **EF3 [O] initializeFormStore 파이프** ✅ `98f956f` · build-after-hooks+initializer 훅+hydrate dotted · +16 unit(1176)·E2E 5/5·deviations 2 · [detail](./progress-archive/phase-e-track-tasks.md)
-- [x] **EF4 [O] 동적 필드 add/remove + structure-version** ✅ `9018747` · fieldDefs live registry+version 재도출(무 remount 증명) · +14 unit(1190)·E2E 5/5·deviation 1 · [detail](./progress-archive/phase-e-track-tasks.md)
+- [x] **EF4 [O] 동적 필드 add/remove + structure-version** ✅ `9018747` · fieldDefs registry+정밀 재도출(무 remount) · +14 unit(1190)·E2E 5/5·dev 1 · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF5 validate-on-change (opt-in)** — setValue 후 debounce validateField+touched 게이팅. 낮은 위험, cascade 뒤.
 - [ ] **EF-gate** — EF1~4 착지 확인 + onInitialize/onChanges 특성화 오라클(구·신 대조) 후 EA 착수.
 
