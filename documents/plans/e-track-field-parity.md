@@ -45,7 +45,7 @@
 전개 규칙: wave 착수 시 필드별 `[ ]` 체크박스 생성(1필드=1커밋+테스트+구 특성화 or 신규 렌더 테스트). 필드별 이식 상세·함정은 아래 §필드 인벤토리. 기반 클래스 체인(FormField→ListableFormField→OptionalField→MultipleOptionalField / CheckButtonValidationField / AbstractDateField)도 필요 시 이식.
 
 - **EA-A 트리비얼/고빈도**: Checkbox, MultiSelect, Password, Month, Year, Time, Link, Tag, ColorPreset, MessageView, Profile, MappedJoin
-- **EA-B 모더릿/고빈도**: **Datetime**(sentinel 'today' 라이브 기본값·range·3-branch list), **CustomOption**(alias async 옵션+module 캐시+prefetch bulk·4-branch), Html(sanitize fail-closed), Birthday(라이브 마스킹), TelephoneNumber(≠Phone), Color(⚠ dynamic Tailwind class 금지→inline-style)
+- **EA-B 모더릿/고빈도**: **Datetime**(sentinel 'today' 라이브 기본값·range·3-branch list), **CustomOption**(alias async 옵션+module 캐시+prefetch bulk·4-branch), Html(sanitize fail-closed), Birthday(라이브 마스킹), TelephoneNumber(≠Phone), Color(⚠ dynamic Tailwind class 금지→inline-style) · ⚠ **라이브 마스킹류(Birthday/Telephone) 착수 전**: 구 renderer `propagation=false`(중간입력 cascade 억제) 대응 seam 결정 필요 — 신 store.setValue는 무조건 dispatch(EF-gate 리뷰 노트, renderer-layer seam으로 ADR-0003 무저촉 추가 가능 or commit-시점 1회 setValue)
 - **EA-C 업로드**: **File**(FileFieldValue·외부URL 바이패스·isDirty 오버라이드), Image(FileFieldValue 공유·썸네일), MultipleAsset(named slots+modal), ContentAsset(서브패키지 통째) — **업로드 backend seam 결정 필요**(§Open Q)
 - **EA-D xref/도메인(복잡)**: **XrefMapping**(supportPriority 2-view·static/async filters·excludeId·add), XrefPrefer, XrefPrice(initPrice async), XrefAvailableDate, Rule(rule/ 서브트리 통째), InlineMap(⚠ pendingRef side-channel·clone 공유참조)
 

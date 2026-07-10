@@ -99,5 +99,20 @@ proposed_helper: 없음.
 - typecheck clean · state 61/61(신규 8) · react 통합 1/1(react 코드 무변경 — EF1/D4 기존 에러 슬라이스 구독으로 충분함을 확인) · packages 168 · **전체 1199 passed**(1190→1199, +9) · prettier 4파일 clean
 - 행동: off 무발화·trailing 단일 발화(최신값)·valid 시 에러 클리어·cascade 형제 미발화·untouched 미검증·custom debounceMs·passthrough E2E
 
+---
+
+## EF-gate — phase 리뷰 게이트 1차 결과 (2026-07-11)
+
+**실행**: 3차원 find(sonnet: correctness·intent-conformance·특성화 parity) + 발견별 adversarial verify(opus) — 8 agents/516k tokens/8.2min · diff `e3aa840..HEAD`(29파일 +2394/-125) · 무인모드 FIND-ONLY
+**집계**: confirmed 3(blocking 2·non-blocking 1 → EF-R1/EF-R2) / refuted 2 / **intent-conformance 이탈 0**(5개 위임 태스크 전부 브리핑 충실 이행 — 미신고 departure 없음) / parity map → [analysis](../analysis/2026-07-11/ef-gate-parity-map.md)
+
+| # | sev | 발견 (file:line) | 검증 | 라우팅 |
+|---|-----|------|------|--------|
+| 1 | **blocking** | initializeFormStore `clone()`=includeValue false → `withDefaultValue`/`withValue` 선언값 전량 소실(create 모드는 hydrate 없어 미보정). 기존 테스트 사각: store.test는 createFormStore 직접 호출이라 통과 (initialize-form-store.ts:63) | opus high — 빈 vitest 재현 | **EF-R1①** |
+| 2 | **blocking** | onFetchData 훅 무격리 — throw 시 파이프 전체 reject·error 미기록·onInitialize 미실행 + initializer 훅 .catch 부재로 **무한 loading**. 구 0.3.x는 per-handler catch(591-600)+outer try 이중 보호 → 회귀 (initialize-form-store.ts:82) | opus high — 빈 vitest 재현 | **EF-R1②** |
+| 3 | non-blocking | removeField/중복 addField가 validationTimers·touchedFields 미정리 → 이름 재사용 신규 필드에 stale debounce 타이머가 오검증(untouched 필드에 에러 표시) (form-store.ts:220) | opus high — 재현 성공 | **EF-R2** |
+
+**refuted**: ① onChanges sync-throw 미격리 — 구 fire-and-forget(EntityForm.tsx:122-127)의 의도적 이식, onInitialize와 달리 격리 요구 없음(설계 확인) ② `propagation=false`(구 renderer 중간입력 cascade 억제) 대응 seam 부재 — 현 이식 필드 무영향, **EA-B 설계 인풋으로 계획서에 ⚠ 등재**(Birthday/Telephone 라이브 마스킹류).
+
 
 

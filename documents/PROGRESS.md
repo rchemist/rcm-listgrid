@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 진행(EF1~EF5 완료) · **Next up**: EF-gate(특성화 오라클+phase 리뷰 게이트). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙: EF1~EF5 완료, **phase EF = 🟡 Partial**(리뷰 게이트 blocking 2건) · **Next up**: EF-R1 → EF-R2 → EF-gate 재검증. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 04:07 (EF5 완료 — validate-on-change `5f1d151`: opt-in+touched+debounce, dev 0. 1199 unit+5 E2E green. **Next=EF-gate** — Phase EF 마지막: 특성화 오라클 대조+phase 리뷰 게이트(intent-conformance)+아카이브)
+**Last updated**: 2026-07-11 04:25 (EF-gate 리뷰 1차 — confirmed 3(blocking 2: EF3 default 소실·onFetchData 무격리/훅 hang, non-blocking 1: stale 타이머)·intent 이탈 0·refuted 2. **Next=EF-R1**(blocking 수정) → R2 → gate 재검증. phase EF 🟡 Partial)
 
 ## Goal
 
@@ -82,7 +82,9 @@
 - [x] **EF3 [O] initializeFormStore 파이프** ✅ `98f956f` · build-after-hooks+initializer 훅+hydrate dotted · +16 unit(1176)·E2E 5/5·deviations 2 · [detail](./progress-archive/phase-e-track-tasks.md)
 - [x] **EF4 [O] 동적 필드 add/remove + structure-version** ✅ `9018747` · fieldDefs registry+정밀 재도출(무 remount) · +14 unit(1190)·E2E 5/5·dev 1 · [detail](./progress-archive/phase-e-track-tasks.md)
 - [x] **EF5 validate-on-change (opt-in)** ✅ `5f1d151` · 기본off+touched+trailing debounce·cascade 미발화 · +9 unit(1199)·E2E 5/5·dev 0 · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF-gate** — EF1~4 착지 확인 + onInitialize/onChanges 특성화 오라클(구·신 대조) 후 EA 착수.
+- [ ] **EF-R1 (리뷰게이트 blocking)** — EF3 파이프: ① clone()→clone(true)로 선언 default/value 보존(구 EntityForm.tsx:163 parity) ② onFetchData per-handler 격리(구 591-600)+initializer 훅 .catch(무한 loading 방지). 회귀 테스트.
+- [ ] **EF-R2 (리뷰게이트 non-blocking)** — removeField·중복 addField가 validationTimers/touchedFields 정리(이름 재사용 필드 stale 타이머 오검증 방지, 재현 확인됨). 재현 테스트.
+- [ ] **EF-gate** — 리뷰 게이트 1차 완료(blocking 2·non-blocking 1 → EF-R1/R2, [결과](./progress-archive/phase-e-track-tasks.md)). **선결 EF-R1·R2** 착지 후 재검증+phase 아카이브.
 
 #### Phase EA — 필드 전수 이식 (EF1~4 후, wave별 전개) **[S, 복잡건 O]**
 
