@@ -59,9 +59,31 @@ export {
   mergeRequiredPermissions,
 } from './permission';
 
-// --- validation contract (base only; concretes ported in P4) ---
+// --- validation contract ---
 export type { Validation } from './validation';
 export { ValidateResult, ValidationItem } from './validation';
+
+// --- validations catalog (concrete validations; transplanted from
+// src/listgrid/validations/*.ts 0.3.x under the P2 characterization oracle) ---
+export { RegexValidation } from './validations/regex-validation';
+export { EmailValidation } from './validations/email-validation';
+export { RegexFormulaValidation } from './validations/regex-formula-validation';
+export { MinMaxNumberValidation } from './validations/min-max-number-validation';
+export { StringValidation } from './validations/string-validation';
+export { PhoneNumberValidation } from './validations/phone-number-validation';
+export { TelephoneNumberValidation } from './validations/telephone-number-validation';
+export { PasswordValidation } from './validations/password-validation';
+export { IpAddressValidation, RegexAllowedIpAddr } from './validations/ip-address-validation';
+export { CustomValidation } from './validations/custom-validation';
+
+// --- regex constants the validations catalog is built on (React-free,
+// verbatim from src/listgrid/misc/index.ts 0.3.x) ---
+export {
+  RegexEmailAddress,
+  RegexPhoneNumber,
+  RegexTelephoneNumber,
+  RegexPasswordNormal,
+} from './util/regex';
 
 // --- runtime value-slice operations (pure fns over the store slice, ADR-0002) ---
 export { getCurrentValue, isBlank, isDirty, normalizeEmptyValue, resetValue } from './field/value';
@@ -75,6 +97,7 @@ export {
   NumberField,
   TextareaField,
   MarkdownField,
+  DateField,
   SelectField,
 } from './field/basic-fields';
 export type { MinMaxLimit, SelectOption } from './field/basic-fields';

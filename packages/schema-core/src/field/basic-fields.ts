@@ -65,6 +65,15 @@ export class MarkdownField extends FormField<string> {
   }
 }
 
+/** Date (0.3.x DateField, type 'date'). Value is a yyyy-mm-dd string. The rich
+ *  'today'-sentinel / range logic (DateField.tsx) is deferred; this is the
+ *  plain-date meta the DateRenderer needs. */
+export class DateField extends FormField<string> {
+  constructor(name: string, order: number) {
+    super(name, order, 'date');
+  }
+}
+
 /** Select / dropdown (0.3.x SelectField, type 'select'). Options are meta. */
 export interface SelectOption {
   value: string | number | boolean;

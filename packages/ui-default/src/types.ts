@@ -37,6 +37,15 @@ export interface NumberInputProps {
   ariaLabel?: string;
 }
 
+export interface DateInputProps {
+  value?: string;
+  onChange?: (value: string) => void;
+  readOnly?: boolean;
+  disabled?: boolean;
+  id?: string;
+  ariaLabel?: string;
+}
+
 export interface CheckBoxProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
@@ -112,6 +121,7 @@ export interface UIComponents {
   TextInput: ComponentType<TextInputProps>;
   Textarea: ComponentType<TextareaProps>;
   NumberInput: ComponentType<NumberInputProps>;
+  DateInput: ComponentType<DateInputProps>;
   CheckBox: ComponentType<CheckBoxProps>;
   SelectBox: ComponentType<SelectBoxProps>;
   Button: ComponentType<ButtonProps>;

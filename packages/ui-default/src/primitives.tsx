@@ -4,6 +4,7 @@
 import type {
   ButtonProps,
   CheckBoxProps,
+  DateInputProps,
   LoadingOverlayProps,
   ModalProps,
   NumberInputProps,
@@ -84,6 +85,20 @@ export function NumberInput({
         const raw = e.target.value;
         onChange?.(raw === '' ? NaN : Number(raw));
       }}
+    />
+  );
+}
+
+export function DateInput({ value, onChange, readOnly, disabled, id, ariaLabel }: DateInputProps) {
+  return (
+    <input
+      type="date"
+      id={id}
+      value={value ?? ''}
+      readOnly={readOnly}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      onChange={(e) => onChange?.(e.target.value)}
     />
   );
 }
@@ -207,6 +222,7 @@ export const defaultUIComponents: UIComponents = {
   TextInput,
   Textarea,
   NumberInput,
+  DateInput,
   CheckBox,
   SelectBox,
   Button,

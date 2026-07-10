@@ -88,6 +88,13 @@ export interface EntityField<TValue = unknown> extends EntityItem {
   /** exclude this field's value from the save payload. */
   exceptOnSave?: boolean;
   /**
+   * Sibling fields this field's conditionals (hidden/readonly/required) read.
+   * The renderer re-resolves those predicates when any listed field's value
+   * changes — the ADR-0002 §Consequences answer to cross-field conditionals,
+   * staying D4-safe (subscribe only to declared deps, not the whole form).
+   */
+  dependsOn?: string[];
+  /**
    * opaque render-facing passthrough (0.3.x EntityField.attributes). Kept as
    * schema-core opaque data — never interpreted here; consumed by renderers.
    */

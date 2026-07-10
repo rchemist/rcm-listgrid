@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { EntityField, FieldEvalContext } from '@listgrid/schema-core';
+import { useStore } from 'zustand';
+import { getCurrentValue, type EntityField, type FieldEvalContext } from '@listgrid/schema-core';
 import { useSession } from '../providers/auth';
 import { useFormField, useFormStore, snapshotFieldValues } from '../providers/form-store';
 import { getFieldRenderer } from '../registry/field-renderer-registry';
@@ -24,6 +25,17 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   const store = useFormStore();
   const session = useSession();
   const slice = useFormField(fieldName);
+
+  // Cross-field cascade (ADR-0002 §Consequences): subscribe to the values of
+  // the sibling fields this field's conditionals declare via `dependsOn`, as a
+  // single stable signal — so predicates re-resolve when a dependency changes,
+  // without subscribing to the whole store (D4 stays intact).
+  const dependsOn = field.dependsOn ?? [];
+  const depSignal = useStore(store, (s) =>
+    dependsOn
+      .map((n) => JSON.stringify(getCurrentValue(s.fields[n], s.renderType) ?? null))
+      .join('|'),
+  );
 
   const [hidden, setHidden] = useState(false);
   const [required, setRequired] = useState(false);
@@ -56,13 +68,10 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
     return () => {
       cancelled = true;
     };
-    // `slice` deliberately re-triggers resolution on every edit of THIS field
-    // (cross-field conditionals over sibling values are a known V0.4 gap —
-    // they re-resolve only when the field they're declared on changes, not on
-    // every sibling keystroke; re-subscribing to the whole store here would
-    // reintroduce the D4 whole-form-re-render regression this layer exists to
-    // prevent).
-  }, [store, session, field, fieldName, slice]);
+    // Re-resolve on: own slice edits (`slice`) AND declared cross-field
+    // dependency changes (`depSignal`). Subscribing to `depSignal` (not the
+    // whole store) keeps D4 — only fields that DECLARE a dependency pay for it.
+  }, [store, session, field, fieldName, slice, depSignal]);
 
   if (hidden) return null;
 

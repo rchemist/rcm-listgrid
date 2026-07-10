@@ -61,6 +61,20 @@ function NumberRenderer({ name, readOnly }: FieldRendererComponentProps) {
   );
 }
 
+function DateRenderer({ name, readOnly }: FieldRendererComponentProps) {
+  const { DateInput } = useUI();
+  const store = useFormStore();
+  const value = useFieldValue<string>(name);
+  return (
+    <DateInput
+      id={name}
+      value={value ?? ''}
+      onChange={(v) => store.getState().setValue(name, v)}
+      {...(readOnly !== undefined ? { readOnly } : {})}
+    />
+  );
+}
+
 function BooleanRenderer({ name, readOnly }: FieldRendererComponentProps) {
   const { CheckBox } = useUI();
   const store = useFormStore();
@@ -107,8 +121,11 @@ function MarkdownRenderer({ name, readOnly }: FieldRendererComponentProps) {
 }
 
 /**
- * Register the built-in renderers for text/textarea/number/boolean/select/
- * markdown/manyToOne. Safe to call more than once (each call just re-sets the
+ * Register the built-in renderers for text/textarea/number/date/datetime/
+ * boolean/select/markdown/manyToOne. 'datetime' reuses DateRenderer (native
+ * <input type="date">) for now — no schema-core DateTimeField/DateTimeInput
+ * exists yet, so this is a deliberately trivial placeholder, not a real
+ * datetime-local editor. Safe to call more than once (each call just re-sets the
  * same registry entries) — but call it BEFORE any host `registerFieldRenderer`
  * overrides, since the last write to a given type wins. The manyToOne renderer
  * (a Modal + ViewListGrid picker) requires an <AdapterProvider> in the tree.
@@ -117,6 +134,8 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('text', TextRenderer);
   registerFieldRenderer('textarea', TextareaRenderer);
   registerFieldRenderer('number', NumberRenderer);
+  registerFieldRenderer('date', DateRenderer);
+  registerFieldRenderer('datetime', DateRenderer);
   registerFieldRenderer('boolean', BooleanRenderer);
   registerFieldRenderer('select', SelectRenderer);
   registerFieldRenderer('markdown', MarkdownRenderer);

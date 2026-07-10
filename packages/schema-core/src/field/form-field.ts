@@ -52,6 +52,7 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   validations?: Validation[];
   requiredPermissions?: string[];
   exceptOnSave?: boolean;
+  dependsOn?: string[];
   attributes?: Map<string, unknown>;
   value?: FieldValue<TValue>;
   form?: { tabId: string; fieldGroupId: string };
@@ -163,6 +164,11 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   }
   withValidations(...validations: (Validation | undefined)[]): this {
     this.validations = validations.filter((v): v is Validation => v !== undefined);
+    return this;
+  }
+  /** Declare the sibling fields this field's conditionals read (cross-field cascade). */
+  withDependsOn(...names: string[]): this {
+    this.dependsOn = names;
     return this;
   }
   withRequiredPermissions(...permissions: string[]): this {

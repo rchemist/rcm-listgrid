@@ -28,6 +28,19 @@ function collegeForm(): EntityForm {
   });
 }
 
+// No DateField class exists in schema-core yet (only the 'date' FieldType
+// vocabulary entry) — the renderer dispatches purely on `field.type`
+// (FieldRenderer.tsx:70), so a StringField's `.type` is overridden to 'date'
+// as the minimal meta vehicle for this render test, without touching
+// schema-core.
+function collegeFormWithFoundedDate(): EntityForm {
+  const foundedDate = new StringField('foundedDate', 200).withLabel('Founded Date');
+  foundedDate.type = 'date';
+  return new EntityForm('CollegeEntityForm', '/college').addFields({
+    items: [new StringField('name', 100).withRequired(true).withLabel('Name'), foundedDate],
+  });
+}
+
 describe('ViewEntityForm (JSDOM render)', () => {
   it('renders inputs with labels, writes keystrokes to the store, validates required fields, and saves', async () => {
     const entityForm = collegeForm();
@@ -74,5 +87,27 @@ describe('ViewEntityForm (JSDOM render)', () => {
         active: true,
       }),
     );
+  });
+
+  it('renders a date field as a native date input and writes typed dates to the store', async () => {
+    const entityForm = collegeFormWithFoundedDate();
+    const store = createFormStore(entityForm);
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AuthProvider session={undefined}>
+          <FormStoreProvider store={store}>
+            <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+          </FormStoreProvider>
+        </AuthProvider>
+      </UIProvider>,
+    );
+
+    const dateInput = await screen.findByLabelText(/^Founded Date/);
+    expect(dateInput).toBeInTheDocument();
+    expect(dateInput).toHaveAttribute('type', 'date');
+
+    fireEvent.change(dateInput, { target: { value: '2026-07-10' } });
+    expect(store.getState().getValue('foundedDate')).toBe('2026-07-10');
   });
 });

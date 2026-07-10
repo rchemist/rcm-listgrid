@@ -91,8 +91,50 @@ const universitySeed: University[] = [
   { id: '4', name: '한양대학교' },
 ];
 
+export interface Subject {
+  id: string;
+  name: string;
+  code: string;
+  credits: number;
+  contactEmail: string;
+  category: string;
+  onlineUrl: string;
+  startDate: string;
+  active: boolean;
+  [key: string]: unknown;
+}
+
+const subjectSeed: Subject[] = [
+  {
+    id: '1',
+    name: '자료구조',
+    code: 'CS201',
+    credits: 3,
+    contactEmail: 'ds@example.ac.kr',
+    category: 'MAJOR',
+    onlineUrl: '',
+    startDate: '2026-03-02',
+    active: true,
+  },
+  {
+    id: '2',
+    name: '대학영어',
+    code: 'GE101',
+    credits: 2,
+    contactEmail: 'english@example.ac.kr',
+    category: 'GENERAL',
+    onlineUrl: '',
+    startDate: '2026-03-02',
+    active: true,
+  },
+];
+
 export function collegeStore() {
   return getOrCreateStore<College>('college', collegeSeed);
+}
+
+export function subjectStore() {
+  return getOrCreateStore<Subject>('subject', subjectSeed);
 }
 
 export function professorStore() {

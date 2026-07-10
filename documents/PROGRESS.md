@@ -7,7 +7,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (**✅ V0 walking skeleton 완료** 🎉 — College(+dean ManyToOne 팝업)가 신 엔진 6패키지로 실브라우저 Playwright E2E green(2 tests: CRUD 왕복 + M2O 피커). ADR-0008 abort판정 GO 방향 실증. 전체 1088 unit + 2 E2E. V0.1~V0.4b 커밋됨. 다음: V1 Major(Number/Select/Date+validations+cross-field). 대기(외부): 0.3.26·alpha.0 publish 승인)
+**Last updated**: 2026-07-11 (**✅ V0+V1 완료** — College(CRUD+M2O 팝업) + Subject(검증 카탈로그+조건부 cross-field) 실브라우저 E2E green(**4 tests**). validations 10종 이식·Date/Select/Number 렌더러·dependsOn cascade(D4 갭 해소). 전체 1117 unit + 4 E2E. 다음: V2 Professor SubCollection. 대기(외부): 0.3.26·alpha.0 publish 승인)
 
 ## Goal
 
@@ -64,8 +64,8 @@
 | **V0.3** ui-default + react 폼 | ui-default 프리미티브 11종 + 5-seam 프로바이더(throw) + FieldRenderer 레지스트리(D4 슬라이스 구독) + ViewEntityForm(validate→onSave) | jsdom 렌더 테스트 ✅ (타이핑→store·required 에러·onSave) | ✅ |
 | **V0.4a** backend+list+form+E2E | backend-rcm 어댑터(12t) + @listgrid/next + sample College/Prof/Univ CRUD + ViewListGrid + College 재구현 + 페이지(list/new/edit) + Playwright | **College CRUD E2E green ✅** (list fetch→생성→required검증→POST→목록반영→edit(getOne+hydrate)→PUT→영속) | ✅ |
 | **V0.4b** ManyToOne 팝업 | AdapterProvider seam + ManyToOne 렌더러(Modal + ViewListGrid 피커, id→entity 해소) + College dean(→Professor thunk) + E2E | **College+dean E2E green ✅** (피커 열기→교수 fetch→선택→표시→저장 deanId flatten) | ✅ |
-| **V1** Major | Number/Select/Date + validations 카탈로그 + 조건부 가시성(cross-field cascade — V0.3 갭 해소) | Major E2E | ⬜ ← next |
-| **V2** Professor | SubCollection(inline/table) + 자식 store 격리(ADR-0002§4) | Professor E2E | ⬜ |
+| **V1** Subject | validations 카탈로그(10종 이식) + Number/Select/Date 필드·렌더러 + **cross-field cascade(dependsOn/D4 — V0.3 갭 해소)** + Subject 재구현(과목: regex/minmax/email + 온라인 조건부) | **Subject E2E green ✅** (검증 3종 발화→통과 + onlineUrl 조건부 표시/필수) | ✅ |
+| **V2** Professor | SubCollection(inline/table) + 자식 store 격리(ADR-0002§4) | Professor E2E | ⬜ ← next |
 
 **확정 설계 결정**: **D1** 관계 thunk 지연참조(College↔Professor↔Major 순환생성 방지) · **D2** RCM 0.1.0 wire(POST `/{url}/search` 리스트+M2O공용·bulk `DELETE {url}`·Spring-Page envelope·ADR-0005 에러코드) · **D3** 5-seam 프로바이더(UI/Modal/Router/Auth/Message, 미주입 throw) · **D4** 값슬라이스 셀렉터 구독(clone(true) 소멸) · **D5** 이식 오라클(P2/신규 단위테스트 green). 근거·상세는 [계획 문서](./plans/e2e-parity-vertical-slice.md).
 
