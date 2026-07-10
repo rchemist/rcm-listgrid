@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·EA·**EB ✅** · **Next up**: EC1(StudentAddress 재현+E2E — 주소 실브라우저 실증). EA-D2(Xref)는 EC2 뒤. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·EA·EB ✅ · EC1 ✅(주소 실증) · **Next up**: EC2(Collabo 재현 — EF2/EF3 실증, EC 최대 폼). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 09:10 (**EB 완료** — EB1/EB2+게이트 3건 해소 `caf7cbe`. 1757 unit+5 E2E green. **Next=EC1**(StudentAddress 재현+Playwright E2E — 주소 전체 흐름 실브라우저 실증, sample 앱 작업). [archive §EB](./progress-archive/phase-e-track-tasks.md) 읽고 재개)
+**Last updated**: 2026-07-11 09:50 (**EC1 완료** — Student 폼+Daum 스텁 E2E `142fbf9`, 주소 스택 실브라우저 결함 0. 1757 unit+**7 E2E** green. **Next=EC2**(Collabo 재현 — dynamic options·조건부·M2O 자동채움·file·submit transform, EF2/EF3 첫 실브라우저 실증. gjcu CollaboEntityForm 참조 scout 후 위임) )
 
 ## Goal
 
@@ -84,7 +84,7 @@
 
 #### Phase EC — EntityForm 사용예 + E2E (동작 실증)
 
-- [ ] **EC1** StudentAddress 재현(주소 baseline, onInit/onChanges 0) + E2E
+- [x] **EC1** ✅ `142fbf9` · Student 폼+Daum 스텁 E2E 2건(create: required+focus+fan-out+왕복 / edit: hydrate+부분수정) · **라이브러리 결함 0**(주소 스택 첫 실브라우저 무결) · E2E 5→7 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EC2** Collabo 재현(dynamic options·조건부 required/hidden·M2O 자동채움·file·submit transform) + E2E — EF2/EF3 실증
 - [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
