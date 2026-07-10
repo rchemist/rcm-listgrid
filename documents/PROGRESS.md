@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 진행(EF1~EF3 완료) · **Next up**: EF4(동적 필드 add/remove + structure-version). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙 진행(EF1~EF4 완료) · **Next up**: EF5(validate-on-change) → EF-gate. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 03:40 (EF3 완료 — initializeFormStore `98f956f`: build-after-hooks 파이프+useEntityFormInitializer. 1176 unit+5 E2E green, deviations 2건 §Needs Review 추가. **Next=EF4** — §세션 인계 Handoff + [E계획 §EF4](./plans/e-track-field-parity.md) 읽고 재개)
+**Last updated**: 2026-07-11 03:57 (EF4 완료 — 동적 필드 `9018747`: fieldDefs live registry+structureVersion, shouldReload 정밀 대체. 1190 unit+5 E2E green, deviation 1건 §Needs Review. **Next=EF5** — §세션 인계 Handoff 읽고 재개)
 
 ## Goal
 
@@ -49,14 +49,14 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음 작업: EF4 동적 필드 add/remove + structure-version)
+## 세션 인계 (Handoff — 다음 작업: EF5 validate-on-change → EF-gate)
 
-- **현 상태**: EF1(`c7d387f`)·EF2(`1bc3f06`)·EF3(`98f956f`) 완료. 전체 **1176 unit + 5 E2E green**, full gate ✓. §Needs Review에 EF2 4건+EF3 2건 open(비차단).
-- **다음 = EF4 (동적 필드 add/remove + structure-version)**. 계획 §EF4: store.addField/removeField(슬라이스 생성/삭제) + late-added 필드 fetched 재바인딩(구 EntityForm.tsx:268-302 — **init-시점 추가는 EF3 build-after-hooks가 이미 해소**, EF4는 post-init 추가분) + ViewEntityForm이 structure-version 변경 시 tabs/groups 재도출(구 shouldReload 대체). **세부 아키텍처는 conductor가 착수 시 결정**(FormMutator에 addField/removeField 노출 여부 — EF2 인터페이스 확장 vs store 전용 API — 포함).
-- **Do-NOT**: ① 훅/빌더가 store를 직접 받게 하지 말 것(ADR-0003) — FormMutator 경유 원칙. ② 동작 검증 생략 금지(사용자 강조). ③ EF1~4 착지 전 대량 필드 이식(EA) 금지(EF-gate). ④ 형식 P3~P7 재개 금지(보류).
-- **불변/함정**: EF1 override `??`(explicit false 승)·D4 단일필드 구독 유지. EF2 loop-guard sync batch 한정. EF3 파이프는 build-after-hooks(파이프 재조립 금지 — initializeFormStore 호출 재사용). hydrate는 dotted-path 지원(resolveFetchedValue).
-- **패턴 참조**: FormMutator(`schema-core/src/field/form-mutator.ts`)·빌더(`schema-core/src/onchanges/`)·batch loop-guard(`state/src/form-store.ts` performSetValue)·init 파이프(`state/src/initialize-form-store.ts`)·initializer 훅(`react/src/hooks/use-entity-form-initializer.ts`). H-트랙 [archive](./progress-archive/phase-hardening-H.md).
-- **첫 파일**: 구 `src/listgrid/config/EntityForm.tsx:268-302`(재바인딩)·`EntityFormBase.tsx:75-76`·`useEntityFormLogic.ts:263-273`(shouldReload) → 신 `packages/state/src/form-store.ts`·`packages/react/src/components/`(ViewEntityForm groups 재도출).
+- **현 상태**: EF1(`c7d387f`)·EF2(`1bc3f06`)·EF3(`98f956f`)·EF4(`9018747`) 완료. 전체 **1190 unit + 5 E2E green**, full gate ✓. §Needs Review에 EF2 4건+EF3 2건+EF4 1건 open(비차단).
+- **다음 = EF5 (validate-on-change, opt-in)**: setValue 후 debounce validateField(기존 form-store validateField 재사용) + touched 게이팅. 낮은 위험 — 이후 **EF-gate**(EF1~4 착지 + onInitialize/onChanges 특성화 오라클 구·신 대조, **phase-boundary 리뷰 게이트 겸함** — delegate 페이즈라 intent-conformance 차원 필수).
+- **Do-NOT**: ① 훅/빌더가 store를 직접 받게 하지 말 것(ADR-0003) — FormMutator 경유. ② **동적 mutation 이후 entityForm.getFields()/getTabs()/getFieldGroups() 직접 읽기 금지 — store.fieldDefs가 live 구조의 단일 진실**(EF4, EA/EC 신규 소비자 주의). ③ 동작 검증 생략 금지. ④ EF-gate 전 대량 필드 이식(EA) 금지. ⑤ 형식 P3~P7 재개 금지.
+- **불변/함정**: EF1 override `??`(explicit false 승)·D4 단일필드 구독. EF2 loop-guard sync batch 한정. EF3 build-after-hooks(파이프 재조립 금지). hydrate dotted-path(resolveFetchedValue)·payload는 store에 보존(late-add 재바인딩용). structureVersion은 add/remove만 bump.
+- **패턴 참조**: FormMutator(`schema-core/src/field/form-mutator.ts`)·빌더(`schema-core/src/onchanges/`)·loop-guard+fieldDefs(`state/src/form-store.ts`)·init 파이프(`state/src/initialize-form-store.ts`)·initializer 훅(`react/src/hooks/`)·구조 재도출(`react/src/components/ViewEntityForm.tsx`). H-트랙 [archive](./progress-archive/phase-hardening-H.md).
+- **첫 파일**: 구 `src/listgrid/components/form/FieldRenderer.tsx:97-101`(onChange→validate) → 신 `packages/state/src/form-store.ts`(validateField 재사용)·debounce/touched 게이팅 설계.
 - **작업 규율**: 태스크마다 설계는 세션이(conductor), 구현은 sonnet 위임, 검증은 세션이 rigorous(full gate+공유경로 변경 시 full E2E). 완료=logic 커밋→PROGRESS 커밋→**push(사용자: 전부 push)**. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`. Node26(폴리필 OK).
 
 ---
@@ -80,7 +80,7 @@
 - [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선)·useFieldMeta(D4)·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
 - [x] **EF2 [O] onChanges cascade** ✅ `1bc3f06` · FormMutator+loop-guard+빌더3종 · +22 unit(1160 green)·E2E 5/5·deviations 4→§Needs Review · [detail](./progress-archive/phase-e-track-tasks.md)
 - [x] **EF3 [O] initializeFormStore 파이프** ✅ `98f956f` · build-after-hooks+initializer 훅+hydrate dotted · +16 unit(1176)·E2E 5/5·deviations 2 · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF4 [O] 동적 필드 add/remove + structure-version** — store.addField/removeField(슬라이스)+late-add 재바인딩(구 268-302), ViewEntityForm version 시 groups 재도출(구 shouldReload 대체). EF3 의존.
+- [x] **EF4 [O] 동적 필드 add/remove + structure-version** ✅ `9018747` · fieldDefs live registry+version 재도출(무 remount 증명) · +14 unit(1190)·E2E 5/5·deviation 1 · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF5 validate-on-change (opt-in)** — setValue 후 debounce validateField+touched 게이팅. 낮은 위험, cascade 뒤.
 - [ ] **EF-gate** — EF1~4 착지 확인 + onInitialize/onChanges 특성화 오라클(구·신 대조) 후 EA 착수.
 
@@ -126,6 +126,7 @@
 - [ ] **EF2 onChanges 내부표현** — `onChanges?:` 옵셔널 대신 private 빈배열(공개 getOnChanges 계약은 스펙대로) · risk: negligible · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF3 withId 전파** — 브리핑 미명시였으나 clone 직후 `withId(id)` 추가(fetch-error 경로도 update 모드 유지, sample idiom 일치) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF3 hydrate dotted 수정(공유코드)** — "지원 확인" 결과 미지원이라 hydrate 내부 resolveFetchedValue 신설(flat 동작 동일·1176 green). EC2 실사용 검증 예정 · risk: low-med · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EF4 fieldDefs=단일 진실** — 동적 mutation 후 entityForm.getFields()류 직접 읽기는 stale(현 콜사이트 0 확인·Handoff Do-NOT 등재). EA/EC 신규 소비자는 store 경유 필수 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 

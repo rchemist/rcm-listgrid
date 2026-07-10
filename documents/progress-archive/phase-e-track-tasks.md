@@ -56,3 +56,29 @@ proposed_helper: 없음.
 1. **withId(id) 전파** — 브리핑 a단계에 미명시였으나 clone 직후 `ef.withId(id)` 추가. 없으면 fetch-error 경로가 create 모드와 구분 불가(getId undefined→update URL 불능). sample edit page의 기존 idiom(`clone().withId(id)`)과 일치. risk: Low(추가적, 기존 테스트 무영향).
 2. **hydrate dotted-path 수정(공유 코드)** — 브리핑 "dotted 지원 확인 — 될 것" 실제론 미지원 → hydrate 내부에 비공개 resolveFetchedValue 추가. EF3 수용기준(동적 필드 dotted 바인딩)에 필수. 공유 hydrate 변경이나 flat 동작 동일·전 스위트 green. risk: Low-medium. **EC2(Collabo nested 필드)가 실사용 검증 예정.**
 
+---
+
+## EF4 — 동적 필드 add/remove + structure-version (shouldReload 정밀 대체)
+
+**완료**: 2026-07-11 · **실행**: delegate(sonnet, wf_1e3a85c3-746, 159k tokens/81 tool calls/10.7min) · **status**: `done_with_deviations` (2건 — 실질 1건만 §Needs Review, 1건은 브리핑에 명시 지시된 기계적 변경)
+
+**Reuse review**: Extend: form-store(fieldDefs+structureVersion)·FormMutator(addField/removeField — 이번 태스크 인터페이스 확장 인가)·ViewEntityForm(version 구독) — New: 없음.
+
+### 구현 (에이전트 notes 요약)
+
+- **schema-core** `form-mutator.ts`: FormMutator에 `addField(field: FormField)`/`removeField(name)` 확장(계약 doc-comment). on-changes.test.ts의 fakeMutator에 no-op stub 추가(인터페이스 정합 — 브리핑 명시 지시).
+- **state** `form-store.ts`: `fieldDefs: Record<string,EntityField>` **live field registry**(생성 시 entityForm.getFields() 복사, 이후 hydrate/validateField/validateAll/toSaveData의 유일한 읽기 원천 — entityForm 인스턴스는 불변 유지) + `structureVersion`(add/remove만 bump). `addField`: form 미지정 시 default tab/group 배치(구 addFields default parity)·`seedSlice()` 공유 시딩·보존된 hydrate payload(`fetchedData`)에서 resolveFetchedValue로 재바인딩(dotted 지원)·중복명=필드정의+슬라이스 전체 교체(구 fields.set parity). `removeField`: fieldDefs/values/meta 삭제·부재 시 진성 no-op(bump 없음). 둘 다 performSetValue 밖 plain set — EF2 loop-guard 무간섭·추가 필드 retro-dispatch 없음. store-backed FormMutator 어댑터에 위임 배선.
+- **react** `ViewEntityForm.tsx`: 파일스코프 liveFields/deriveTabs/deriveGroups/deriveGroupFields — store.fieldDefs에서 구조 재도출(선언 TabDef/FieldGroupDef는 label/order만 참조, 미선언 id는 unlabeled 후순위 폴백). `structureVersion` 구독=순수 리렌더 트리거, 값 편집은 이 구독 미발화(D4 보존). focusFirstInvalidField·그룹 렌더 루프도 live registry로 통일.
+
+### 검증 (에이전트 자가보고)
+
+- tsc -b(3패키지+repo-wide) clean · `npx vitest run packages` 19 파일/160 passed(신규 14: state 13+react 1, 기존 EF1~3 무회귀)
+- state 13: default 시드·flat/dotted 재바인딩·payload 부재 시 default 유지·중복명 교체·값편집 version 불변·remove 슬라이스+meta 삭제·부재 no-op·onChanges발 add/remove(loop-guard·no-retro-dispatch)·validateAll 동적 required 포함/제거 배제
+- react 1(통합): Select 변경→onChanges가 m.addField/m.removeField — 신규 필드 DOM 출현(default값)/revert 시 소멸/**형제 필드 DOM node identity+미커밋 타이핑 값이 version bump에서 생존(무 remount 증명)**
+
+### Deviations
+
+1. *(§Needs Review 미등재 — 브리핑에 명시 지시된 변경이라 departure 아님)* fakeMutator no-op stub(schema-core on-changes.test.ts) — 인터페이스 확장에 따른 기계적 정합. risk: None.
+2. **store가 live 구조의 단일 진실이 됨(fieldDefs)** — EntityForm 불변(스코프 제외) + 동적 필드 가시성/validate 참여 + remove 실효라는 3제약의 유일 해. 결과: **동적 mutation 이후 entityForm.getFields()/getTabs()/getFieldGroups() 직접 읽기는 stale** — 현 코드베이스에 그런 콜사이트 없음(에이전트 grep 확인, ViewEntityForm/form-store만 해당·모두 전환됨). EA/EC에서 신규 소비자가 생기면 반드시 store 경유. risk: Low(latent). → §Needs Review + Handoff Do-NOT 등재.
+
+
