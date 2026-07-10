@@ -35,7 +35,8 @@ export type FieldType =
   | 'xrefPriorityMapping'
   | 'xrefAvailableMapping'
   | 'revision'
-  | 'contentAsset';
+  | 'contentAsset'
+  | 'subCollection';
 
 /** The create/update discriminant threaded through every conditional resolution. */
 export type RenderType = 'create' | 'update';

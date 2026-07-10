@@ -48,7 +48,8 @@ function hasShowInList(field: unknown): field is { showInList: boolean } {
 function deriveColumnNames(entityForm: EntityForm, explicit?: string[]): string[] {
   if (explicit && explicit.length > 0) return explicit;
 
-  const fields = entityForm.getFields();
+  // sub-collections are never list columns (they're child grids, not scalars).
+  const fields = entityForm.getFields().filter((f) => f.type !== 'subCollection');
   const marked = fields.filter((f) => hasShowInList(f) && f.showInList);
   if (marked.length > 0) return marked.map((f) => f.getName());
 

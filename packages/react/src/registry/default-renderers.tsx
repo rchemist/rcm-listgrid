@@ -3,6 +3,7 @@ import { useUI } from '../providers/ui';
 import { useFieldValue, useFormStore } from '../providers/form-store';
 import { registerFieldRenderer, type FieldRendererComponentProps } from './field-renderer-registry';
 import { ManyToOneRenderer } from './many-to-one-renderer';
+import { SubCollectionRenderer } from './sub-collection-renderer';
 
 // Default field-type renderers (task item 3). Every one of these follows the
 // same shape: read this field's resolved value via useFieldValue, resolve the
@@ -140,4 +141,5 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('select', SelectRenderer);
   registerFieldRenderer('markdown', MarkdownRenderer);
   registerFieldRenderer('manyToOne', ManyToOneRenderer);
+  registerFieldRenderer('subCollection', SubCollectionRenderer);
 }
