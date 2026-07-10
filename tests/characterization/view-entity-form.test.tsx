@@ -1,30 +1,40 @@
 // Characterization tests — ViewEntityForm structural characterization (P2-5).
 //
-// SCOPE (per task): step/wizard progression, subcollection display + modal
-// re-entry, and button placement rules, using ViewEntityForm +
-// createProjectForm/createEmployeeForm.
+// SCOPE (per task): full-render field/button/tab characterization, step/
+// wizard progression, subcollection display + modal re-entry, and button
+// placement rules, using ViewEntityForm + createProjectForm/createEmployeeForm.
 //
 // ---------------------------------------------------------------------------
-// HARNESS GAP (grounded empirically, see "harness limitation" describe below):
-// ViewEntityForm's logic hook (useEntityFormLogic) calls useRouter()
-// unconditionally on every render (src/listgrid/components/form/hooks/
-// useEntityFormLogic.ts:52 `const router = useRouter();`). useRouter() throws
-// synchronously when no <RouterProvider> ancestor exists (src/listgrid/
-// router/RouterProvider.tsx `mustRouter`). RouterProvider IS part of the
-// library's public barrel (src/listgrid/index.ts) but is deliberately NOT
-// re-exported by tests/characterization/harness.ts's curated surface, and the
-// hard rule for this suite forbids importing from '../../src' directly to add
-// it ourselves. Consequently **ViewEntityForm cannot be mounted through this
-// harness at all** — every scenario below that would otherwise assert on
-// live ViewEntityForm DOM (step-button clicks, header/bottom/tab-row button
-// placement) is instead driven through the real EntityForm public API that
-// ViewEntityForm's hook/child components consume internally
-// (getCreateStep/validate/getViewableTabs/isCreatable/getRenderType, and
-// TableSubCollectionField.render() called directly for the subcollection —
-// TableSubCollectionView itself has no router dependency, so that one path
-// *is* fully live-DOM-verified). This is recorded as a deviation, not papered
-// over with hand-reimplemented logic — every assertion below calls the real
-// engine method the component itself calls.
+// HARNESS UPDATE: renderWithProviders() now wraps `ui` in RouterProvider +
+// AuthProvider + UIProvider (previously UIProvider only — see harness.ts).
+// ViewEntityForm's logic hook (useEntityFormLogic) calls useRouter()/
+// useSession() unconditionally (src/listgrid/components/form/hooks/
+// useEntityFormLogic.ts), which used to throw synchronously with no
+// <RouterProvider> ancestor. That gap is closed: ViewEntityForm (and the
+// default ManyToOneView, which calls useSession()) now mount cleanly through
+// renderWithProviders — see the "ViewEntityForm — full render via harness"
+// describe block below, which renders the real component tree and asserts
+// on actual DOM (fields, buttons, tabs), not a re-implementation of the
+// render logic.
+//
+// The STEP/WIZARD and SUBCOLLECTION describe blocks further down still drive
+// their scenarios through the real EntityForm API (getCreateStep/validate/
+// getViewableTabs, TableSubCollectionField.render() called directly) rather
+// than a full ViewEntityForm mount — kept that way on purpose even after the
+// harness fix, since those blocks isolate one concern at a time (step-gating
+// math, table column derivation) without needing a live full-form render.
+//
+// One full-mount gap remains, noted again at its describe block below:
+// rendering an active createStep wizard through ViewEntityForm crashes under
+// headlessUIComponents — CreateStepView renders <Stepper.Step>, and the
+// headless baseline's Stepper (src/listgrid/ui/headless.tsx) has no `.Step`
+// compound component, so UIProvider's compound-component proxy
+// (src/listgrid/ui/UIProvider.tsx `makeWrapper`) throws `Compound
+// "Stepper.Step" missing on host component.` at render time. That is a real
+// gap in the headless UI baseline, not a ViewEntityForm defect, so this
+// suite does not attempt a live-DOM wizard render — the STEP/WIZARD block
+// keeps characterizing wizard gating through the real EntityForm createStep
+// API instead.
 // ---------------------------------------------------------------------------
 
 import React from 'react';
@@ -40,6 +50,7 @@ import {
   BooleanField,
   RequiredValidation,
   TableSubCollectionField,
+  bareEntity,
   type MockRcmFetchHandle,
 } from './harness';
 import { createProjectForm, createEmployeeForm } from './fixtures';
@@ -52,22 +63,149 @@ afterEach(() => {
 });
 
 // ============================================================================
-// Harness limitation — ViewEntityForm cannot mount without a RouterProvider
-// the harness does not export. Pinned here as a real, currently-true fact so
-// a future harness update (or the P4 transplant) has a concrete regression
-// signal if this requirement ever changes.
+// ViewEntityForm — full render via harness. renderWithProviders() now
+// supplies RouterProvider + AuthProvider (see harness.ts), so the real
+// component tree mounts: useEntityFormLogic's useRouter()/useSession() calls
+// resolve instead of throwing, and every assertion below is against actual
+// rendered DOM — not a re-implementation of the render logic.
 // ============================================================================
 
-describe('harness limitation — ViewEntityForm requires an app-level RouterProvider', () => {
-  it('throws synchronously on mount because useEntityFormLogic calls useRouter() unconditionally', () => {
-    const form = createProjectForm();
-    let message = '';
-    try {
-      renderWithProviders(<ViewEntityForm entityForm={form} />);
-    } catch (error) {
-      message = (error as Error).message;
-    }
-    expect(message).toContain('useRouter must be called within a <RouterProvider>');
+describe('ViewEntityForm — full render via harness', () => {
+  it('CREATE mode (createEmployeeForm, no id): shows a loading skeleton synchronously, then mounts the real fields', async () => {
+    const employee = createEmployeeForm();
+    const { container } = renderWithProviders(<ViewEntityForm entityForm={employee} />);
+
+    // Immediately after render(), useEntityFormLogic's mount effect has
+    // fired but its `await entityForm.initialize(...)` has not resolved yet
+    // — even in CREATE mode, EntityForm.initialize() awaits a 100ms
+    // delay() when isAbleFetch() is false (see EntityForm.tsx). So the real
+    // "이름" field is not on screen yet; only ViewEntityFormSkeleton is.
+    expect(screen.queryByLabelText('이름')).not.toBeInTheDocument();
+
+    // findBy* polls (RTL default up to 1000ms) until the async initialize
+    // settles and the real fields mount.
+    expect(await screen.findByLabelText('이름')).toBeInTheDocument();
+    expect(screen.getByLabelText('이메일')).toBeInTheDocument();
+
+    // SURPRISE: getByLabelText('전화번호') does NOT find the phone input.
+    // FieldRenderer only clones an `aria-label` onto the field's view element
+    // when that element IS the form control (React.isValidElement(view) —
+    // see FieldRenderer.tsx). PhoneNumberField's view wraps its <input> in
+    // extra "rcm-input-group-*" container divs, so the aria-label lands on
+    // that wrapper div, not on the <input> — leaving the input with no
+    // accessible name. Falls back to a plain DOM query instead.
+    expect(screen.queryByLabelText('전화번호')).not.toBeInTheDocument();
+    expect(container.querySelector('input#phone')).not.toBeNull();
+  });
+
+  it('CREATE mode buttons: Save + List render, Delete does not — getRenderType() === "create" is the real predicate DeleteButton is gated on', async () => {
+    const employee = createEmployeeForm();
+    renderWithProviders(<ViewEntityForm entityForm={employee} />);
+
+    expect(await screen.findByRole('button', { name: '저장' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '목록' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '삭제' })).not.toBeInTheDocument();
+  });
+
+  it('UPDATE mode (createEmployeeForm().withId(...)): fetches the entity via GET {url}/{id} and renders the fetched value', async () => {
+    const employee = createEmployeeForm().withId('emp-1');
+    const mock = mockRcmFetch([
+      {
+        method: 'GET',
+        url: '/api/employee/emp-1',
+        handler: () => bareEntity({ id: 'emp-1', name: '홍길동' }),
+      },
+    ]);
+    activeMock = mock;
+
+    renderWithProviders(<ViewEntityForm entityForm={employee} />);
+
+    expect(await screen.findByDisplayValue('홍길동')).toBeInTheDocument();
+    expect(mock.requests).toHaveLength(1);
+    expect(mock.requests[0]?.url).toBe('/api/employee/emp-1');
+    expect(mock.requests[0]?.method).toBe('GET');
+  });
+
+  it('UPDATE mode buttons: Save + List + Delete all render — isDeletable() defaults true and getRenderType() === "update" gates Delete on', async () => {
+    const employee = createEmployeeForm().withId('emp-1');
+    const mock = mockRcmFetch([
+      {
+        method: 'GET',
+        url: '/api/employee/emp-1',
+        handler: () => bareEntity({ id: 'emp-1', name: '홍길동' }),
+      },
+    ]);
+    activeMock = mock;
+
+    renderWithProviders(<ViewEntityForm entityForm={employee} />);
+
+    expect(await screen.findByRole('button', { name: '저장' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '목록' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '삭제' })).toBeInTheDocument();
+  });
+
+  it('SURPRISE: CREATE-mode createProjectForm() has exactly 1 viewable tab (tasks is update-only) — ViewEntityForm renders no tab BUTTON chrome at all, only the field-group heading remains', async () => {
+    const project = createProjectForm();
+    const { container } = renderWithProviders(<ViewEntityForm entityForm={project} />);
+
+    expect(await screen.findByLabelText('프로젝트명')).toBeInTheDocument();
+
+    // ViewEntityForm only renders <Tab.List> (the clickable tab buttons)
+    // when `tabs.length > 1` (see ViewEntityForm.tsx) — with a single
+    // viewable tab there is no ".rcm-tab" button anywhere. "기본 정보" itself
+    // still appears once, though — it is also the default field-group
+    // heading (DEFAULT_FIELD_GROUP_INFO.label), which ViewFieldGroup renders
+    // regardless of tab count. So "no tab chrome" means no tab BUTTONS, not
+    // "no occurrence of the tab's label text".
+    expect(container.querySelectorAll('.rcm-tab')).toHaveLength(0);
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(0);
+    expect(screen.getAllByText('기본 정보')).toHaveLength(1);
+    expect(screen.queryByText('작업')).not.toBeInTheDocument();
+  });
+
+  it('UPDATE-mode createProjectForm() reveals a second "작업" tab, and BOTH tab panels mount at once (ViewTabPanel uses unmount={false}) — the tasks subcollection fetches even though "기본 정보" is the selected tab', async () => {
+    const project = createProjectForm().withId('proj-1');
+    const mock = mockRcmFetch([
+      {
+        method: 'GET',
+        url: '/api/project/proj-1',
+        handler: () => bareEntity({ id: 'proj-1', name: '프로젝트 A' }),
+      },
+      {
+        method: 'POST',
+        url: '/api/project-task/search',
+        handler: () => searchPageEnvelope([]),
+      },
+    ]);
+    activeMock = mock;
+
+    const { container } = renderWithProviders(<ViewEntityForm entityForm={project} />);
+
+    // The "작업" tab panel is not the selected one (index 0, "기본 정보", is),
+    // yet its TableSubCollectionField still issued its search request and
+    // rendered the empty-state message — proof both panels are live-mounted
+    // simultaneously, not lazily mounted on tab activation.
+    expect(await screen.findByText('표시할 항목이 없습니다')).toBeInTheDocument();
+
+    // SURPRISE: "기본 정보" is not a reliable way to find "the default tab" —
+    // it is ALSO the default field-group heading (DEFAULT_FIELD_GROUP_INFO
+    // .label), and both tabs' field groups fall back to that same default
+    // (createProjectForm() never passes an explicit `fieldGroup` to
+    // addFields — see EntityFormActions.tsx addFields). Once everything
+    // settles, "기본 정보" appears 3 times (1 tab label + 2 field-group <h5>
+    // headings, one per tab panel) — querying by that text alone is
+    // ambiguous. The ViewTab-specific ".rcm-tab" class is what actually
+    // identifies the 2 real tab buttons, in tab order.
+    expect(screen.getAllByText('기본 정보')).toHaveLength(3);
+    expect(screen.getAllByText('작업')).toHaveLength(1);
+    const tabLabels = Array.from(container.querySelectorAll<HTMLElement>('.rcm-tab')).map(
+      (el) => el.textContent,
+    );
+    expect(tabLabels).toEqual(['기본 정보', '작업']);
+
+    const urls = mock.requests.map((r) => r.url);
+    expect(urls).toContain('/api/project/proj-1');
+    expect(urls).toContain('/api/project-task/search');
   });
 });
 

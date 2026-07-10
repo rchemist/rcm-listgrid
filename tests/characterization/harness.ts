@@ -64,6 +64,11 @@ export {
   UIProvider,
   EntityFormThemeProvider,
 
+  // Router + auth providers — full components (ViewEntityForm via useRouter,
+  // default ManyToOneView via useSession) require these at render time.
+  RouterProvider,
+  AuthProvider,
+
   // API client injection seam (module-scope registry — see api/ApiClient.ts)
   configureApiClient,
   createResponseData,
@@ -89,6 +94,11 @@ export type {
   // SubCollection relation shape (used by the Project fixture)
   CardSubCollectionRelation,
 
+  // Router + auth contracts (for renderWithProviders test defaults)
+  RouterServices,
+  RouterApi,
+  Session,
+
   // Theming
   EntityFormThemeProviderProps,
 } from '../../src';
@@ -112,6 +122,8 @@ export { headlessUIComponents } from '../../src/listgrid/ui/headless';
 import {
   UIProvider,
   EntityFormThemeProvider,
+  RouterProvider,
+  AuthProvider,
   configureApiClient,
   createResponseData,
 } from '../../src';
@@ -121,6 +133,9 @@ import type {
   ApiMethod,
   ApiRequestOptions,
   EntityFormThemeProviderProps,
+  RouterServices,
+  RouterApi,
+  Session,
 } from '../../src';
 import { headlessUIComponents } from '../../src/listgrid/ui/headless';
 
@@ -130,9 +145,40 @@ import { headlessUIComponents } from '../../src/listgrid/ui/headless';
 // src/listgrid/components/form/FieldRenderer.p0.test.tsx.
 // ============================================================================
 
+// A no-op RouterServices for tests: navigation methods are spies you can assert
+// on, and the location hooks return stable empty values. Full listgrid
+// components (ViewEntityForm's useEntityFormLogic calls useRouter()
+// unconditionally) mount cleanly with this. Override via options.routerServices.
+export function createTestRouterServices(overrides?: Partial<RouterApi>): RouterServices {
+  const api: RouterApi = {
+    push: () => {},
+    replace: () => {},
+    refresh: () => {},
+    back: () => {},
+    forward: () => {},
+    prefetch: () => {},
+    ...overrides,
+  };
+  return {
+    useRouter: () => api,
+    usePathname: () => '/',
+    useParams: () => ({}),
+    useSearchParams: () => new URLSearchParams(),
+    Link: ({ href, children }) => React.createElement('a', { href }, children),
+  };
+}
+
 export interface RenderWithProvidersOptions {
   /** UIComponents to inject via <UIProvider>. Defaults to headlessUIComponents. */
   uiComponents?: UIComponents;
+  /**
+   * Session for <AuthProvider>. Defaults to `undefined` (a valid "no session"
+   * state — AuthProvider is still present so useSession() returns undefined
+   * instead of throwing "must be called within an <AuthProvider>").
+   */
+  session?: Session;
+  /** RouterServices for <RouterProvider>. Defaults to createTestRouterServices(). */
+  routerServices?: RouterServices;
   /**
    * When present, additionally wraps `ui` in <EntityFormThemeProvider {...}>
    * (custom field renderers, theme class overrides, button labels, etc.).
@@ -146,22 +192,35 @@ export function renderWithProviders(
   options?: RenderWithProvidersOptions,
 ): RenderResult {
   const uiComponents = options?.uiComponents ?? headlessUIComponents;
+  const routerServices = options?.routerServices ?? createTestRouterServices();
 
   // NOTE: children is passed inside the props object (not as createElement's
-  // variadic 3rd+ args) — UIProviderProps/EntityFormThemeProviderProps both
-  // declare `children` as required, and this repo's exactOptionalPropertyTypes
-  // makes the variadic-children createElement overload fail to typecheck
-  // against that. Passing `children` explicitly keeps this file JSX-free
-  // (harness.ts, not .tsx) while satisfying both prop contracts exactly.
-  const tree = options?.themeProviderProps
-    ? React.createElement(UIProvider, {
-        components: uiComponents,
-        children: React.createElement(EntityFormThemeProvider, {
-          ...options.themeProviderProps,
-          children: ui,
-        }),
+  // variadic 3rd+ args) — the provider prop types declare `children` as
+  // required and this repo's exactOptionalPropertyTypes makes the variadic-
+  // children createElement overload fail to typecheck against that. Passing
+  // `children` explicitly keeps this file JSX-free (harness.ts, not .tsx).
+  //
+  // Provider nesting (outer → inner): RouterProvider → AuthProvider →
+  // UIProvider → [EntityFormThemeProvider] → ui. All four are ancestors of the
+  // rendered UI so useRouter/useSession/useUI all resolve. Fields that don't
+  // touch router/auth are unaffected (the extra providers are inert for them).
+  const inner = options?.themeProviderProps
+    ? React.createElement(EntityFormThemeProvider, {
+        ...options.themeProviderProps,
+        children: ui,
       })
-    : React.createElement(UIProvider, { components: uiComponents, children: ui });
+    : ui;
+
+  const tree = React.createElement(RouterProvider, {
+    value: routerServices,
+    children: React.createElement(AuthProvider, {
+      session: options?.session,
+      children: React.createElement(UIProvider, {
+        components: uiComponents,
+        children: inner,
+      }),
+    }),
+  });
 
   return render(tree);
 }
