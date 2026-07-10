@@ -79,7 +79,10 @@
 #### Phase EA — 필드 전수 이식 (EF1~4 후, wave별 전개) **[S, 복잡건 O]**
 
 전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
-- [ ] **EA-A 트리비얼/고빈도** — Checkbox·MultiSelect·Password·Month·Year·Time·Link·Tag·ColorPreset·MessageView·Profile·MappedJoin
+- [~] **EA-A 트리비얼/고빈도** (12종 wave — 1필드=1커밋+테스트) · 진행: ⬜Checkbox ⬜MultiSelect ⬜Password ⬜Month ⬜Year ⬜Time ⬜Link ⬜Tag ⬜ColorPreset ⬜MessageView ⬜Profile ⬜MappedJoin
+  - **실행 형태**: scout ✅([브리핑](./analysis/2026-07-11/ea-a-scout-briefing.md) — fan-out 에이전트 필독) → **EA-A0 pre-stage**(공유 5종: Options base·MinMaxStringLimit·FieldType+5·getConditionalReactNode·ui-default 확장) → fan-out 12(disjoint 파일만·등록은 세션이 manifest 적용)
+  - **Reuse review**: Extend: 기존 필드 패턴(basic-fields·SelectField)·레지스트리·conditional.ts ReactNode 타입 — New: options-field base(구 OptionalField 이식)+필드별 클래스/렌더러 파일+TagsInput/UserView 프리미티브(기존 부재 확인)
+  - **확정 결정**: Profile=placeholder(호스트 오버라이드)·ColorPreset=inline-style 팔레트·MultiSelect status-change 3종 descope·Time 'now'=렌더러 해석·MappedJoin=isHidden override+toSaveData 테스트·리스트 셀 렌더 전역 연기(dispatch 부재)·Link CheckButtonValidation descope
 - [ ] **EA-B 모더릿/고빈도** — Datetime·CustomOption·Html·Birthday·TelephoneNumber·Color(⚠dynamic Tailwind 금지)
 - [ ] **EA-C 업로드** — File·Image·MultipleAsset·ContentAsset (**업로드 backend seam 결정** §Open Q)
 - [ ] **EA-D xref/도메인** — XrefMapping·XrefPrefer·XrefPrice·XrefAvailableDate·Rule·InlineMap(⚠pendingRef)
