@@ -114,5 +114,16 @@ proposed_helper: 없음.
 
 **refuted**: ① onChanges sync-throw 미격리 — 구 fire-and-forget(EntityForm.tsx:122-127)의 의도적 이식, onInitialize와 달리 격리 요구 없음(설계 확인) ② `propagation=false`(구 renderer 중간입력 cascade 억제) 대응 seam 부재 — 현 이식 필드 무영향, **EA-B 설계 인풋으로 계획서에 ⚠ 등재**(Birthday/Telephone 라이브 마스킹류).
 
+---
+
+## EF-R1 — 리뷰게이트 blocking 수정 (EF3 파이프)
+
+**완료**: 2026-07-11 · **실행**: delegate(sonnet, wf_3357fff8-cdd, 62k tokens/27 tool calls/2.9min) · **status**: `done` (deviation 1 — 테스트 국소)
+
+- ① `clone()`→`clone(true)`(구 EntityForm.tsx:163 exact parity — 공유 clone semantics 불변). create-mode withDefaultValue/withValue가 store 도달, edit-mode hydrate 우선순위 무회귀 테스트로 고정.
+- ② onFetchData 루프에 onInitialize와 동일한 per-handler try/catch+continue(구 591-600 parity) + initializer 훅 `.catch`(cancelled 가드 유지, loading:false+정규화 error — fetch-error 경로와 동일 BackendError 형태 인라인).
+- 회귀 테스트 4건(+state 3·react 1). 격리 후엔 어댑터 throw만으로 파이프가 reject하지 않아, 훅 `.catch` 분기 검증은 테스트 내 clone() 몽키패치로 재현(deviation — 프로덕션 무영향).
+- 에이전트 자가보고: typecheck clean·packages 174/174·prettier clean.
+
 
 

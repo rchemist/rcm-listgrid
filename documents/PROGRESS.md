@@ -7,7 +7,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 04:25 (EF-gate 리뷰 1차 — confirmed 3(blocking 2: EF3 default 소실·onFetchData 무격리/훅 hang, non-blocking 1: stale 타이머)·intent 이탈 0·refuted 2. **Next=EF-R1**(blocking 수정) → R2 → gate 재검증. phase EF 🟡 Partial)
+**Last updated**: 2026-07-11 04:30 (EF-R1 완료 — blocking 2건 해소 `5230a56`. 1204 unit+5 E2E green. parity map은 [analysis](./analysis/2026-07-11/ef-gate-parity-map.md) 커밋. **Next=EF-R2**(stale 타이머 정리) → EF-gate 재검증)
 
 ## Goal
 
@@ -82,7 +82,7 @@
 - [x] **EF3 [O] initializeFormStore 파이프** ✅ `98f956f` · build-after-hooks+initializer 훅+hydrate dotted · +16 unit(1176)·E2E 5/5·deviations 2 · [detail](./progress-archive/phase-e-track-tasks.md)
 - [x] **EF4 [O] 동적 필드 add/remove + structure-version** ✅ `9018747` · fieldDefs registry+정밀 재도출(무 remount) · +14 unit(1190)·E2E 5/5·dev 1 · [detail](./progress-archive/phase-e-track-tasks.md)
 - [x] **EF5 validate-on-change (opt-in)** ✅ `5f1d151` · 기본off+touched+trailing debounce·cascade 미발화 · +9 unit(1199)·E2E 5/5·dev 0 · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF-R1 (리뷰게이트 blocking)** — EF3 파이프: ① clone()→clone(true)로 선언 default/value 보존(구 EntityForm.tsx:163 parity) ② onFetchData per-handler 격리(구 591-600)+initializer 훅 .catch(무한 loading 방지). 회귀 테스트.
+- [x] **EF-R1 (리뷰게이트 blocking)** ✅ `5230a56` · clone(true) parity+onFetchData 격리+훅 .catch · +4 회귀(1204)·E2E 5/5·dev 0(테스트 국소 1) · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF-R2 (리뷰게이트 non-blocking)** — removeField·중복 addField가 validationTimers/touchedFields 정리(이름 재사용 필드 stale 타이머 오검증 방지, 재현 확인됨). 재현 테스트.
 - [ ] **EF-gate** — 리뷰 게이트 1차 완료(blocking 2·non-blocking 1 → EF-R1/R2, [결과](./progress-archive/phase-e-track-tasks.md)). **선결 EF-R1·R2** 착지 후 재검증+phase 아카이브.
 
