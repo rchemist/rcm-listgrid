@@ -3,6 +3,7 @@ import {
   getCurrentValue,
   isDirty as computeDirty,
   resetValue,
+  type EntityField,
   type EntityForm,
   type FieldEvalContext,
   type FieldMetaOverride,
@@ -45,6 +46,24 @@ export interface FormStoreState {
    * (onChanges/onInitialize, EF2/EF3) mutates to reshape a live form.
    */
   meta: Record<string, FieldMetaOverride>;
+  /**
+   * The LIVE field registry (EF4) — seeded from entityForm.getFields() at
+   * store creation, then mutated by addField/removeField. This, NOT
+   * entityForm.getFields()/getField(), is the source hydrate/validateField/
+   * validateAll/toSaveData read from, so a dynamically added/removed field
+   * participates correctly. entityForm itself is never mutated (schema-core
+   * stays untouched by EF4 — see reuse review); ViewEntityForm re-derives its
+   * tabs/groups from this registry on a structureVersion bump.
+   */
+  fieldDefs: Record<string, EntityField>;
+  /**
+   * Bumped by addField/removeField only (EF4) — NEVER by a value edit.
+   * ViewEntityForm subscribes to this to re-derive tabs/groups/field list
+   * without a full remount (replaces the 0.3.x shouldReload full-clone/
+   * cacheKey-remount path — EntityFormBase.tsx:75-76/636-638,
+   * useEntityFormLogic.ts:263-273).
+   */
+  structureVersion: number;
   renderType: RenderType;
   tabIndex: string;
   initialized: boolean;
@@ -69,6 +88,17 @@ export interface FormStoreState {
   setMeta(name: string, partial: FieldMetaOverride): void;
   /** read field `name`'s current meta override, if any has been set. */
   getMeta(name: string): FieldMetaOverride | undefined;
+  /**
+   * Register a new field mid-lifecycle (EF4) — see FormMutator.addField doc
+   * (@listgrid/schema-core) for the full seed/rebind/duplicate-replace/
+   * version-bump contract this implements.
+   */
+  addField(field: EntityField): void;
+  /**
+   * Remove field `name`'s value/meta slices (EF4) — nonexistent name is a
+   * silent no-op (no version bump). See FormMutator.removeField doc.
+   */
+  removeField(name: string): void;
   /** validate one field; writes errors to its slice; returns valid. */
   validateField(name: string): Promise<boolean>;
   /** validate every field; returns whether the whole form is valid. */
@@ -94,16 +124,28 @@ export function createFormStore(
   const renderType = opts.renderType ?? entityForm.getRenderType();
   const session = opts.session;
 
-  // seed slices from the field declaration values (default / declared current)
-  const initialFields: Record<string, FieldValueSlice> = {};
-  for (const field of entityForm.getFields()) {
+  // seed a slice from a field's declaration values (default / declared
+  // current) — shared by the initial-fields build below AND addField (EF4),
+  // which reruns the same seeding for a field registered mid-lifecycle.
+  function seedSlice(field: EntityField): FieldValueSlice {
     const seed = field.value;
     const slice: FieldValueSlice = {};
     if (seed?.default !== undefined) slice.default = seed.default;
     if (seed && Object.prototype.hasOwnProperty.call(seed, 'current')) {
       slice.current = seed.current;
     }
-    initialFields[field.getName()] = slice;
+    return slice;
+  }
+
+  const initialFieldDefs: Record<string, EntityField> = {};
+  const initialFields: Record<string, FieldValueSlice> = {};
+  for (const field of entityForm.getFields()) {
+    initialFieldDefs[field.getName()] = field;
+    initialFields[field.getName()] = seedSlice(field);
+  }
+
+  function sortedFieldDefs(state: FormStoreState): EntityField[] {
+    return Object.values(state.fieldDefs).sort((a, b) => a.getOrder() - b.getOrder());
   }
 
   function buildCtx(state: FormStoreState, name: string): FieldEvalContext {
@@ -141,6 +183,14 @@ export function createFormStore(
     // are not covered by the loop-guard that protected the synchronous
     // chain it was dispatched from.
     let dispatchBatch: Set<string> | null = null;
+
+    // EF4 — the last hydrated data payload, retained so a field registered
+    // AFTER hydrate() (a post-init addField, e.g. from an onChanges handler)
+    // can still rebind its fetched value (0.3.x EntityForm.tsx:268-302 late-
+    // added-field parity; init-time additions never hit this path — EF3's
+    // build-after-hooks pipe already seeds them via the hydrate() call that
+    // follows onInitialize).
+    let fetchedData: Record<string, unknown> | undefined;
 
     function dispatchOnChanges(changedField: string): void {
       for (const handler of entityForm.getOnChanges()) {
@@ -199,11 +249,19 @@ export function createFormStore(
       setMeta(name, partial) {
         get().setMeta(name, partial);
       },
+      addField(field) {
+        get().addField(field);
+      },
+      removeField(name) {
+        get().removeField(name);
+      },
     };
 
     return {
       fields: initialFields,
       meta: {},
+      fieldDefs: initialFieldDefs,
+      structureVersion: 0,
       renderType,
       tabIndex: entityForm.getTabs()[0]?.id ?? 'default',
       initialized: true,
@@ -219,9 +277,10 @@ export function createFormStore(
       },
 
       hydrate(data) {
+        fetchedData = data;
         set((s) => {
           const fields = { ...s.fields };
-          for (const field of entityForm.getFields()) {
+          for (const field of sortedFieldDefs(s)) {
             const name = field.getName();
             const prev = fields[name] ?? {};
             const value = resolveFetchedValue(data, name);
@@ -248,8 +307,56 @@ export function createFormStore(
         return get().meta[name];
       },
 
+      addField(field) {
+        set((s) => {
+          const name = field.getName();
+          // route dynamically-added fields the same way EntityForm.addFields
+          // places declaration-time ones — 'default' tab/group unless the
+          // caller already set one via withForm().
+          if (!field.form) field.form = { tabId: 'default', fieldGroupId: 'default' };
+
+          let slice = seedSlice(field);
+          if (fetchedData !== undefined) {
+            const value = resolveFetchedValue(fetchedData, name);
+            // late-added-field rebind (0.3.x EntityForm.tsx:268-302 parity) —
+            // only when the hydrated record actually has a value for this name.
+            if (value !== undefined) {
+              slice = { ...slice, fetched: value, current: value, dirty: false };
+            }
+          }
+
+          // duplicate name: replace the field definition AND reset its
+          // value/meta slices from the new definition wholesale (0.3.x
+          // `fields.set` parity — the field instance IS the value's home).
+          const meta = { ...s.meta };
+          delete meta[name];
+
+          return {
+            fieldDefs: { ...s.fieldDefs, [name]: field },
+            fields: { ...s.fields, [name]: slice },
+            meta,
+            structureVersion: s.structureVersion + 1,
+          };
+        });
+      },
+
+      removeField(name) {
+        set((s) => {
+          if (!(name in s.fieldDefs)) return {}; // nonexistent name: silent no-op, no version bump
+
+          const fieldDefs = { ...s.fieldDefs };
+          delete fieldDefs[name];
+          const fields = { ...s.fields };
+          delete fields[name];
+          const meta = { ...s.meta };
+          delete meta[name];
+
+          return { fieldDefs, fields, meta, structureVersion: s.structureVersion + 1 };
+        });
+      },
+
       async validateField(name) {
-        const field = entityForm.getField(name);
+        const field = get().fieldDefs[name];
         if (!field) return true;
         const errs = await field.validate(buildCtx(get(), name), get().meta[name]);
         set((s) => ({
@@ -265,7 +372,7 @@ export function createFormStore(
         const s = get();
         let valid = true;
         const fields = { ...s.fields };
-        for (const field of entityForm.getFields()) {
+        for (const field of sortedFieldDefs(s)) {
           const name = field.getName();
           const errs = await field.validate(buildCtx(s, name), s.meta[name]);
           fields[name] = { ...fields[name], errors: errs.map((e) => ({ message: e.message })) };
@@ -300,7 +407,7 @@ export function createFormStore(
       toSaveData() {
         const s = get();
         const out: Record<string, unknown> = {};
-        for (const field of entityForm.getFields()) {
+        for (const field of Object.values(s.fieldDefs)) {
           if (field.exceptOnSave) continue;
           const name = field.getName();
           const value = getCurrentValue(s.fields[name], s.renderType);

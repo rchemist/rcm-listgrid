@@ -1,4 +1,5 @@
 import type { FieldMetaOverride } from './field-meta';
+import type { FormField } from './form-field';
 
 // FormMutator (EF2) — the state-agnostic mutation surface an onChanges
 // handler receives. Declared here (schema-core), not @listgrid/state,
@@ -26,6 +27,25 @@ export interface FormMutator {
   setValue(name: string, value: unknown): void;
   /** shallow-merge `partial` into field `name`'s EF1 meta override. */
   setMeta(name: string, partial: FieldMetaOverride): void;
+  /**
+   * Register a new field mid-lifecycle (EF4 — post-init dynamic add; init-time
+   * additions already go through initializeFormStore's onInitialize/
+   * build-after-hooks pipe, EF3). Creates the field's value slice, seeded from
+   * its declared default/current, then — if hydrate() already ran and
+   * retained a fetched-data payload — rebinds it from that payload (dotted-path
+   * aware, 0.3.x EntityForm.tsx:268-302 parity). A duplicate name REPLACES the
+   * existing field definition and resets its slices (0.3.x `fields.set`
+   * parity — the field instance IS the value's home in the old engine).
+   * Bumps the store's structureVersion; does NOT itself dispatch onChanges for
+   * the new field (only a subsequent setValue on it does).
+   */
+  addField(field: FormField): void;
+  /**
+   * Remove field `name` — deletes its value/meta slices and clears its
+   * validation errors. A nonexistent name is a silent no-op (no version
+   * bump). Otherwise bumps the store's structureVersion.
+   */
+  removeField(name: string): void;
 }
 
 /**
