@@ -115,6 +115,29 @@ export interface FormStoreState {
 export interface CreateFormStoreOptions {
   session?: Session;
   renderType?: RenderType;
+  /**
+   * EF5 — opt-in validate-on-change. Default OFF (absent/false): zero change
+   * from pre-EF5 behavior. `true` uses the default 300ms trailing debounce;
+   * an object customizes `debounceMs`. Only a TOP-LEVEL (user-initiated)
+   * setValue of the field just changed schedules validation of THAT field —
+   * nested cascade writes from onChanges handlers never mark touched or
+   * schedule (old renderer-onChange asymmetry — FieldRenderer.tsx:97-101
+   * parity: cascade-driven writes never validated in the 0.3.x engine
+   * either).
+   */
+  validateOnChange?: boolean | { debounceMs?: number };
+}
+
+interface ValidateOnChangeConfig {
+  debounceMs: number;
+}
+
+function resolveValidateOnChange(
+  opt: CreateFormStoreOptions['validateOnChange'],
+): ValidateOnChangeConfig | null {
+  if (!opt) return null;
+  const debounceMs = typeof opt === 'object' ? (opt.debounceMs ?? 300) : 300;
+  return { debounceMs };
 }
 
 export function createFormStore(
@@ -123,6 +146,7 @@ export function createFormStore(
 ): StoreApi<FormStoreState> {
   const renderType = opts.renderType ?? entityForm.getRenderType();
   const session = opts.session;
+  const validateOnChangeConfig = resolveValidateOnChange(opts.validateOnChange);
 
   // seed a slice from a field's declaration values (default / declared
   // current) — shared by the initial-fields build below AND addField (EF4),
@@ -184,6 +208,30 @@ export function createFormStore(
     // chain it was dispatched from.
     let dispatchBatch: Set<string> | null = null;
 
+    // --- EF5 validate-on-change: touched gating + trailing debounce ---------
+    // touchedFields marks a field on its first TOP-LEVEL setValue (see
+    // performSetValue's isTopLevel check, reusing the EF2 dispatch-depth
+    // mechanism above) — a nested cascade write never touches this set.
+    // validationTimers holds one trailing setTimeout per field; a later
+    // top-level setValue of the same field resets it (only the last edit
+    // within the debounce window validates). No new public dispose API is
+    // added (out of scope per EF5 briefing) — clearing on reschedule plus
+    // letting the final trailing timer run is the accepted leak posture.
+    const touchedFields = new Set<string>();
+    const validationTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+    function scheduleValidateOnChange(name: string): void {
+      if (!validateOnChangeConfig) return;
+      touchedFields.add(name);
+      const existing = validationTimers.get(name);
+      if (existing !== undefined) clearTimeout(existing);
+      const timer = setTimeout(() => {
+        validationTimers.delete(name);
+        if (touchedFields.has(name)) void get().validateField(name);
+      }, validateOnChangeConfig.debounceMs);
+      validationTimers.set(name, timer);
+    }
+
     // EF4 — the last hydrated data payload, retained so a field registered
     // AFTER hydrate() (a post-init addField, e.g. from an onChanges handler)
     // can still rebind its fetched value (0.3.x EntityForm.tsx:268-302 late-
@@ -223,6 +271,10 @@ export function createFormStore(
           batch.add(name);
           dispatchOnChanges(name);
         }
+        // EF5: only the top-level (user-initiated) write of a field schedules
+        // its own validation — nested cascade writes (onChanges handlers
+        // setting a sibling) never do (see scheduleValidateOnChange doc).
+        if (isTopLevel) scheduleValidateOnChange(name);
       } finally {
         if (isTopLevel) dispatchBatch = null;
       }

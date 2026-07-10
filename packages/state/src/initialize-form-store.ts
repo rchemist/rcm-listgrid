@@ -1,6 +1,6 @@
 import type { StoreApi } from 'zustand/vanilla';
 import type { BackendAdapter, BackendError, EntityForm, Session } from '@listgrid/schema-core';
-import { createFormStore, type FormStoreState } from './form-store';
+import { createFormStore, type CreateFormStoreOptions, type FormStoreState } from './form-store';
 
 // initializeFormStore (EF3) — the async pipe that reassembles the 0.3.x
 // EntityForm.initialize() (src/listgrid/config/EntityForm.tsx:162-306) on top
@@ -27,6 +27,8 @@ export interface InitializeFormStoreOptions {
   session?: Session;
   /** bypasses the adapter fetch — e.g. data already loaded by the host (0.3.x dataPreloaded). */
   initialData?: Record<string, unknown>;
+  /** EF5 — passthrough to createFormStore's opt-in validate-on-change (default OFF). */
+  validateOnChange?: CreateFormStoreOptions['validateOnChange'];
 }
 
 export interface InitializeFormStoreResult {
@@ -55,13 +57,15 @@ function toBackendError(e: unknown): BackendError {
 export async function initializeFormStore(
   options: InitializeFormStoreOptions,
 ): Promise<InitializeFormStoreResult> {
-  const { adapter, id, session, initialData } = options;
+  const { adapter, id, session, initialData, validateOnChange } = options;
 
   // a. never mutate the declared form.
   let ef = options.entityForm.clone();
   if (id != null) ef = ef.withId(id);
 
-  const storeOpts = session !== undefined ? { session } : {};
+  const storeOpts: CreateFormStoreOptions = {};
+  if (session !== undefined) storeOpts.session = session;
+  if (validateOnChange !== undefined) storeOpts.validateOnChange = validateOnChange;
 
   // b. resolve the fetched data (initialData bypasses the adapter entirely).
   let data: Record<string, unknown> | undefined = initialData;
