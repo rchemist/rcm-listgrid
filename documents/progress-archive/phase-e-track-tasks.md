@@ -190,5 +190,25 @@ proposed_helper: 없음.
 공통 dev(전원 해소됨): 배럴 미등록 상태라 테스트가 상대경로 import — 등록 후에도 유효, 세션 등록 단계에서 전 테스트 green 확인. 타입 수정 3건(세션): color-preset hexOf 폴백·time-renderer ariaLabel 조건 spread·password strength `| undefined`.
 **명시 연기(재확인)**: 리스트 셀 per-type 렌더 전역·Link normalizeUrl/stopPropagation·MultiSelect status-change 3종·PasswordStrengthView. **실화면 실증은 EC 폼 재현에서**(현 sample 폼은 신규 필드 미사용).
 
+---
+
+## EA-B — 모더릿 필드 5종 (fan-out) ✅ (Html은 드롭 — MarkdownField 중복 판정)
+
+**완료**: 2026-07-11 · **실행**: scout(sonnet — propagation/CustomOption/Html 사실 정정 다수) → EA-B0 pre-stage(sonnet 1) `4727c22` → **fan-out 5 sonnet 병렬**(wf_2592fb88-4b3, 553k tokens/9.6min) → 세션 등록 → wave 커밋 `7cf849f`
+**검증**: full gate ✓ — **1566 unit**(1467→1566, +99)·E2E 5/5·lint/format/build ✓ (타입 수정 0건 — pre-stage 선행 효과). 순수성: 20개 전부 신규 파일·공유 무접촉.
+
+### EA-B0 pre-stage (`4727c22`, +37 테스트)
+`setValue({cascade:false})`(dispatch만 스킵 — 구 propagation=false 정밀 parity)·FieldType+4·TextInput union+2·CustomOptionProvider(H1 dedup 개선 — 구엔진은 값 캐시만)·phone-util(기존 util/phone.ts 재수출 — search-first)·**EA-B1: normalizeEmptyValue 빈 배열 정규화**(EA-A 배열 필드 isDirty 오판 시스테믹 해소, 회귀 고정). dev 3(전부 건전: 재수출/구 JSDoc 버그 정정(코드 byte-identical)/H1 동형 hook).
+
+| 필드 | status | 골자 | dev |
+|---|---|---|---|
+| Datetime | done | 'today' 렌더러 해석·limit=UI 힌트만(구 parity — lexicographic validate 추가 안 함)·**구 T/space separator 불일치 보존**(native input이 정규화, 기능 중립 확인)·placeholder 등록 교체 | 0 |
+| CustomOption | done+dev | OptionsField·provider 경유 fetch(cancellation-safe)·2-branch·죽은 코드 드롭·layout own-property(공유 base에 layout 없음)·combo 메타만(렌더 미소비 — 예견됨)·static create 드롭(관례) | 3 |
+| Birthday | done | 라이브 마스킹+cascade:false/blur 커밋(**spy 핸들러로 억제/발화 증명**)·검증은 렌더러 로컬(구 parity)·lastWrittenDigits ref(외부변경 resync 유지)·helpText 충실 이식 | 3(benign) |
+| TelephoneNumber | done | 'telephoneNumber' 신 타입(phone과 별개)·store=digits-only 불변+렌더 포맷·기존 Validation 재사용·displayValue를 파생값으로(구 useState+useEffect 대비 단순화) | 1 |
+| Color | done | cascade:false 중간+blur 커밋 = 구 onChangeEnd(cascade 1회) parity — 브라우저 발화 빈도 무관 보장·Tailwind 무접촉 | 0 |
+
+**후속 노트**: Color 실브라우저 발화 빈도는 EC 단계에서 확인(억제 로직으로 이미 안전). CustomOption bulk prefetch 연기(소비처=list 전용). Html rich-text sentinel isDirty는 백로그(V1 defer 유지).
+
 
 

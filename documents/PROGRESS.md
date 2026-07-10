@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · **EA-A ✅**(12필드) · **Next up**: EA-B(모더릿 6종 — 착수 전 propagation seam 결정). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · EA-A ✅ · **EA-B ✅**(5종+시스테믹) · **Next up**: EA-C(업로드 4종 — backend seam Open Q 결정 선행). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 05:20 (**EA-A 완료** — 12필드 fan-out `5566c21`, +196 테스트(1430 green)+E2E 5/5. Needs Review +5. **Next=EA-B** — propagation seam 결정(conductor) 후 6종 이식. [archive 표](./progress-archive/phase-e-track-tasks.md)+[계획 §EA-B ⚠](./plans/e-track-field-parity.md) 읽고 재개)
+**Last updated**: 2026-07-11 06:00 (**EA-B 완료** — 5필드+cascade seam+배열 isDirty 시스테믹 `7cf849f`. 1566 unit+5 E2E green, NR +2. **Next=EA-C**(업로드 4종) — 착수 전 §Open Q "업로드 backend seam" conductor 결정 필요. [archive](./progress-archive/phase-e-track-tasks.md) 읽고 재개)
 
 ## Goal
 
@@ -80,9 +80,7 @@
 
 전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
 - [x] **EA-A 트리비얼 12종** ✅ `e9c1121`(A0 pre-stage)+`5566c21`(wave) · 12/12 이식+196 테스트(1430 green)·E2E 5/5·full gate ✓ · [상세 표](./progress-archive/phase-e-track-tasks.md)
-- [~] **EA-B 모더릿** (5종 — **Html 드롭**: 구엔진부터 MarkdownField와 중복, Extend 판정) · 진행: ⬜Datetime ⬜CustomOption ⬜Birthday ⬜TelephoneNumber ⬜Color
-  - **scout ✅ + 결정 확정**([브리핑](./analysis/2026-07-11/ea-b-scout-briefing.md) 배너): `{cascade:false}`=dispatchOnChanges만 스킵(validate는 구엔진도 항상 실행)·소비자 Birthday/Telephone/Color·CustomOptionProvider(host fetch+dedup 개선)·죽은 withFetchUrl 드롭·**EA-B1 시스테믹**(배열 isDirty 갭 — EA-A 필드도 영향) pre-stage 포함
-  - **Reuse review**: Extend: form-store setValue(옵션)·OptionsField·TextInput union·H1 캐시 패턴·기존 TelephoneNumberValidation — New: CustomOptionProvider·phone-util·필드 5클래스/렌더러(이식)
+- [x] **EA-B 모더릿 5종+B0/B1** ✅ `4727c22`(pre-stage)+`7cf849f`(wave) · Html 드롭(중복 판정)·cascade seam·배열 isDirty 시스테믹 해소 · +136 테스트(1566 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-C 업로드** — File·Image·MultipleAsset·ContentAsset (**업로드 backend seam 결정** §Open Q)
 - [ ] **EA-D xref/도메인** — XrefMapping·XrefPrefer·XrefPrice·XrefAvailableDate·Rule·InlineMap(⚠pendingRef)
 
@@ -126,6 +124,8 @@
 - [ ] **EA-A Time 브리핑 정정** — range 'now' sentinel=+12시간(+12분 아님, 구 원본 재확인 후 충실 이식) · risk: none(기록) · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-A Month min/max 미전달** — 렌더러가 native input min/max 속성 미전달(TextInputProps에 없음) — validate가 실게이트, UX만 차이 · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-A Checkbox combo 추가** — withComboType(row/column 힌트)을 base 아닌 Checkbox 전용으로 이식(브리핑 미명시 판단) · risk: negligible · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-B Telephone round-trip** — 마운트 시 fetched 하이픈 정규화 안 함(사용자 미편집 값은 원본 유지 — 구 getSaveValue 방어 strip과 다를 수 있음) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-B CustomOption layout** — 공유 FormField에 layout 멤버가 없어 필드 own-property로 선언(그룹/레이아웃 시스템 도입 시 재정렬 후보) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 
 ## Progress notes
 
