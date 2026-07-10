@@ -82,7 +82,7 @@
 
 #### Phase EF — 명령형 라이프사이클 기반 (대량 이식 전 필수) **[O]**
 
-- [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선, explicit false 승)·useFieldMeta(D4 구독)·FieldRenderer eff*·SelectRenderer options·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
+- [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선)·useFieldMeta(D4)·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
 - [ ] **EF2 [O] onChanges cascade** — setValue 후 ordered onChanges(store,field) 훅 dispatch(형제 setValue·meta mutate·loop-guard) + 구 OnChangeEntityForm.ts:76-361 빌더 카탈로그 이식(EF1 위). 대상 state+schema-core.
 - [ ] **EF3 [O] initializeFormStore 파이프** — fetch→onFetchData→onInitialize(순차 clone 변형)→build→hydrate→init추가 필드 재바인딩. EntityForm 훅 리스트+빌더 + react useEntityFormInitializer. 구 EntityForm.tsx:162-306. 대상 state+schema-core+react.
 - [ ] **EF4 [O] 동적 필드 add/remove + structure-version** — store.addField/removeField(슬라이스)+late-add 재바인딩(구 268-302), ViewEntityForm version 시 groups 재도출(구 shouldReload 대체). EF3 의존.
