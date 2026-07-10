@@ -85,6 +85,19 @@ export type { ManyToOneConfig } from './field/many-to-one-field';
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
 
+// --- SearchForm (list query model, charter C9) ---
+export { SearchForm } from './search/search-form';
+export type {
+  Direction,
+  SortSpec,
+  QueryConditionType,
+  FilterItem,
+  SearchFormJSON,
+} from './search/search-form';
+
+// --- backend adapter contract (ADR-0005; impls in @listgrid/backend-*) ---
+export type { PageResult, BackendErrorCode, BackendError, BackendAdapter } from './backend/adapter';
+
 // P1-5 workspace-wiring marker — apps/sample imports this to prove the
 // @listgrid/* workspace path resolves. Now shipping real contract modules.
 export const SCHEMA_CORE_VERSION = '0.0.0';

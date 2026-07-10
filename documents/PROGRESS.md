@@ -7,7 +7,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (E2E-parity 트랙 착수 · V0.1 완료 — schema-core 코어: EntityForm+필드클래스+value ops+validate, 전체 1062 tests green(신규 32). 정찰 8스카우트 완료(백엔드/폼/렌더러/필드 이식원본 매핑). Playwright+Chromium 설치. 다음: V0.2 state 스토어. 대기(외부): 0.3.26·alpha.0 publish 승인)
+**Last updated**: 2026-07-10 (V0.1+V0.2 완료 — schema-core 코어(EntityForm/필드/value/validate) + @listgrid/state 스토어(createFormStore·createListStore·SearchForm·BackendAdapter 계약), 전체 1073 tests green(신규 43). 다음: V0.3 ui-default+react 렌더러. 대기(외부): 0.3.26·alpha.0 publish 승인)
 
 ## Goal
 
@@ -58,8 +58,8 @@
 | 마일스톤 | 범위 | 게이트 | 상태 |
 |---|---|---|---|
 | **V0.1** schema-core 코어 | EntityForm + 필드클래스(String/Bool/Number/Textarea/Markdown/Select/M2O) + value ops(dirty/blank) + validate | 단위테스트 ✅ 32 green | ✅ `8ca3932` |
-| **V0.2** state 스토어 | createFormStore/createListStore(값슬라이스·셀렉터·액션) + SearchForm | 스토어 단위테스트 | ⬜ ← next |
-| **V0.3** ui-default + react 폼 | 프리미티브 + FieldRenderer 레지스트리 + ViewEntityForm + 프로바이더 | jsdom 렌더 테스트 | ⬜ |
+| **V0.2** state 스토어 | createFormStore(값슬라이스·validate·hydrate·toSaveData[M2O flatten])/createListStore + SearchForm + BackendAdapter 계약 | 스토어 단위테스트 ✅ 11 green | ✅ |
+| **V0.3** ui-default + react 폼 | 프리미티브 + FieldRenderer 레지스트리 + ViewEntityForm + 프로바이더 | jsdom 렌더 테스트 | ⬜ ← next |
 | **V0.4** backend+list+M2O+E2E | backend-rcm 어댑터 + sample CRUD + ViewListGrid + M2O 팝업 | **College E2E green** | ⬜ |
 | **V1** Major | Number/Select/Date/validations + 조건부 가시성(cross-field) | Major E2E | ⬜ |
 | **V2** Professor | SubCollection(inline/table) + 자식 store 격리(ADR-0002§4) | Professor E2E | ⬜ |

@@ -9,5 +9,9 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "@listgrid/schema-core": "*",
+    "zustand": "^4.5.7"
+  }
 }

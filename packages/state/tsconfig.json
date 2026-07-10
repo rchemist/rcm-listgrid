@@ -7,6 +7,7 @@
     "outDir": "dist",
     "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
+  "references": [{ "path": "../schema-core" }],
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx"
