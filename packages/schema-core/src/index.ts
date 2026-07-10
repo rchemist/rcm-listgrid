@@ -116,6 +116,10 @@ export type { SubCollectionConfig } from './field/sub-collection-field';
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
 
+// --- imperative lifecycle: fetch/init hooks (EF3; dispatched by
+// initializeFormStore, @listgrid/state) ---
+export type { OnFetchDataHandler, OnInitializeHandler } from './entity-form';
+
 // --- onChanges builder catalog (EF2; port of 0.3.x
 // src/listgrid/config/OnChangeEntityForm.ts:76-361 — changeHidden/
 // changeRequired/changeSelectOptions only; derivedValidations is out of

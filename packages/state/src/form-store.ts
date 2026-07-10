@@ -12,6 +12,23 @@ import {
   type Session,
 } from '@listgrid/schema-core';
 
+// resolveFetchedValue — reads field `name`'s value out of a fetched/provided
+// data record. A dotted name (e.g. 'user.state') addresses a nested object in
+// the record (0.3.x parity — src/listgrid/config/EntityForm.tsx
+// setFetchedValues:553-575 walked the same `key.split('.')` path for
+// pre-existing fields; EF3's initializeFormStore relies on hydrate covering
+// both flat and dotted names since it builds/hydrates AFTER onInitialize may
+// have added a dotted-named field).
+function resolveFetchedValue(data: Record<string, unknown>, name: string): unknown {
+  if (!name.includes('.')) return data[name];
+  let cur: unknown = data;
+  for (const part of name.split('.')) {
+    if (cur === undefined || cur === null) return undefined;
+    cur = (cur as Record<string, unknown>)[part];
+  }
+  return cur;
+}
+
 // createFormStore — the per-instance, value-slice form store (ADR-0002). The
 // store holds ONLY the value slices + form-level UI state; the field META lives
 // on the EntityForm/field instances. Renderers subscribe to a single field's
@@ -207,13 +224,14 @@ export function createFormStore(
           for (const field of entityForm.getFields()) {
             const name = field.getName();
             const prev = fields[name] ?? {};
+            const value = resolveFetchedValue(data, name);
             // the loaded record is the new baseline: fetched = record value, and
             // current follows it (no edits yet) so the create-time default is
             // dropped (0.3.x update-mode: defaults don't apply). dirty = false.
             const next: FieldValueSlice = {
               ...prev,
-              fetched: data[name],
-              current: data[name],
+              fetched: value,
+              current: value,
               dirty: false,
             };
             fields[name] = next;

@@ -29,6 +29,13 @@ export {
 } from './providers/form-store';
 export type { FormStoreProviderProps } from './providers/form-store';
 
+// --- initializeFormStore pipe entry point (EF3) ---
+export { useEntityFormInitializer } from './hooks/use-entity-form-initializer';
+export type {
+  UseEntityFormInitializerOptions,
+  UseEntityFormInitializerResult,
+} from './hooks/use-entity-form-initializer';
+
 // --- FieldRenderer registry (ADR-0003 §2) ---
 export {
   registerFieldRenderer,

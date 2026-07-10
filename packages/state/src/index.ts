@@ -6,3 +6,11 @@ export type { FormStoreState, CreateFormStoreOptions } from './form-store';
 
 export { createListStore } from './list-store';
 export type { ListStoreState, CreateListStoreOptions } from './list-store';
+
+// --- initializeFormStore pipe (EF3: fetch -> onFetchData -> onInitialize ->
+// build -> hydrate) ---
+export { initializeFormStore } from './initialize-form-store';
+export type {
+  InitializeFormStoreOptions,
+  InitializeFormStoreResult,
+} from './initialize-form-store';

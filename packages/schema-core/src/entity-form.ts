@@ -1,6 +1,36 @@
+import type { Session } from './auth';
 import type { EntityField } from './field/entity-field';
 import type { OnChangesHandler } from './field/form-mutator';
 import type { RenderType } from './field/types';
+
+/**
+ * Imperative lifecycle hook (EF3): runs once per registered handler, in
+ * registration order, after data is fetched but BEFORE onInitialize
+ * (initializeFormStore, @listgrid/state). Receives the already-normalized
+ * fetched DATA payload — NOT a raw response like the 0.3.x
+ * ModifyFetchedEntityFormFunc(entityForm, response?) (src/listgrid/config/
+ * Config.ts:459) — the new BackendAdapter (ADR-0005 decision D2) already
+ * unwraps the envelope, so the handler gets the entity data directly.
+ * Pure (EntityForm in, EntityForm out) — no store/mutator, unlike
+ * OnChangesHandler, so schema-core stays free of a state dependency.
+ */
+export type OnFetchDataHandler = (
+  entityForm: EntityForm,
+  data: Record<string, unknown>,
+) => EntityForm | Promise<EntityForm>;
+
+/**
+ * Imperative lifecycle hook (EF3): runs once per registered handler, in
+ * registration order, after onFetchData and before the form store is built.
+ * 0.3.x parity — src/listgrid/config/Config.ts OnInitializeFunc, dispatched
+ * at EntityForm.tsx:259-264 (per-handler try/catch: a throwing handler is
+ * logged and skipped, remaining handlers still run — initializeFormStore,
+ * @listgrid/state, reproduces that contract).
+ */
+export type OnInitializeHandler = (
+  entityForm: EntityForm,
+  session?: Session,
+) => EntityForm | Promise<EntityForm>;
 
 // EntityForm — the single declaration from which BOTH the list and the form
 // screens derive (charter C1). React-free: it is the declaration + query model;
@@ -51,6 +81,15 @@ export class EntityForm {
    * carrying the store/EntityForm instance directly (ADR-0003 purity).
    */
   private onChanges: OnChangesHandler[] = [];
+  /**
+   * Fetch/init lifecycle hooks (EF3): dispatched by initializeFormStore
+   * (@listgrid/state), in this order — onFetchData first (once, if data was
+   * fetched/provided), then onInitialize (always, create or update).
+   * Successor to the 0.3.x EntityForm.onInitialize array (Config.ts
+   * OnInitializeFunc) / modifyFetchedEntityForm (ModifyFetchedEntityFormFunc).
+   */
+  private onFetchData: OnFetchDataHandler[] = [];
+  private onInitialize: OnInitializeHandler[] = [];
 
   constructor(name: string, fetchUrl: string) {
     this.name = name;
@@ -74,6 +113,16 @@ export class EntityForm {
   /** Append an onChanges handler (EF2); registration order is dispatch order. */
   withOnChanges(handler: OnChangesHandler): this {
     this.onChanges.push(handler);
+    return this;
+  }
+  /** Append an onFetchData handler (EF3); registration order is dispatch order. */
+  withOnFetchData(handler: OnFetchDataHandler): this {
+    this.onFetchData.push(handler);
+    return this;
+  }
+  /** Append an onInitialize handler (EF3); registration order is dispatch order. */
+  withOnInitialize(handler: OnInitializeHandler): this {
+    this.onInitialize.push(handler);
     return this;
   }
 
@@ -127,6 +176,14 @@ export class EntityForm {
   getOnChanges(): OnChangesHandler[] {
     return this.onChanges;
   }
+  /** registered onFetchData handlers, in dispatch order (EF3). */
+  getOnFetchData(): OnFetchDataHandler[] {
+    return this.onFetchData;
+  }
+  /** registered onInitialize handlers, in dispatch order (EF3). */
+  getOnInitialize(): OnInitializeHandler[] {
+    return this.onInitialize;
+  }
 
   /** All fields, ordered by their declared `order`. */
   getFields(): EntityField[] {
@@ -168,6 +225,9 @@ export class EntityForm {
     for (const f of this.fields) copy.fields.push(f.clone(includeValue));
     // propagate onChanges (0.3.x parity — src/listgrid/config/EntityForm.tsx:94).
     copy.onChanges = [...this.onChanges];
+    // propagate onFetchData/onInitialize (EF3, same clone-propagation contract).
+    copy.onFetchData = [...this.onFetchData];
+    copy.onInitialize = [...this.onInitialize];
     return copy;
   }
 }

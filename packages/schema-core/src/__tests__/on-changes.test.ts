@@ -62,6 +62,54 @@ describe('EntityForm.withOnChanges / getOnChanges (EF2)', () => {
   });
 });
 
+describe('EntityForm.withOnInitialize / getOnInitialize (EF3)', () => {
+  it('appends handlers; getOnInitialize returns them in registration order', () => {
+    const h1 = (ef: EntityForm) => ef;
+    const h2 = (ef: EntityForm) => ef;
+    const form = OneFieldForm().withOnInitialize(h1).withOnInitialize(h2);
+    expect(form.getOnInitialize()).toEqual([h1, h2]);
+  });
+
+  it('a fresh EntityForm has no onInitialize handlers', () => {
+    expect(OneFieldForm().getOnInitialize()).toEqual([]);
+  });
+
+  it('clone() propagates onInitialize independently of the original', () => {
+    const h1 = (ef: EntityForm) => ef;
+    const original = OneFieldForm().withOnInitialize(h1);
+    const cloned = original.clone();
+    expect(cloned.getOnInitialize()).toEqual([h1]);
+
+    cloned.withOnInitialize((ef) => ef);
+    expect(original.getOnInitialize()).toHaveLength(1);
+    expect(cloned.getOnInitialize()).toHaveLength(2);
+  });
+});
+
+describe('EntityForm.withOnFetchData / getOnFetchData (EF3)', () => {
+  it('appends handlers; getOnFetchData returns them in registration order', () => {
+    const h1 = (ef: EntityForm) => ef;
+    const h2 = (ef: EntityForm) => ef;
+    const form = OneFieldForm().withOnFetchData(h1).withOnFetchData(h2);
+    expect(form.getOnFetchData()).toEqual([h1, h2]);
+  });
+
+  it('a fresh EntityForm has no onFetchData handlers', () => {
+    expect(OneFieldForm().getOnFetchData()).toEqual([]);
+  });
+
+  it('clone() propagates onFetchData independently of the original', () => {
+    const h1 = (ef: EntityForm) => ef;
+    const original = OneFieldForm().withOnFetchData(h1);
+    const cloned = original.clone();
+    expect(cloned.getOnFetchData()).toEqual([h1]);
+
+    cloned.withOnFetchData((ef) => ef);
+    expect(original.getOnFetchData()).toHaveLength(1);
+    expect(cloned.getOnFetchData()).toHaveLength(2);
+  });
+});
+
 describe('changeHidden builder', () => {
   it('single clause: matched target gets the declared boolean, unmatched gets its negation', () => {
     const handler = changeHidden('kind', { value: 'a', result: { x: true, y: false } });
