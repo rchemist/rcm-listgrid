@@ -2,6 +2,40 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.3.25] - 2026-06-20
+
+### Fixed
+
+- **(#10) `options.filtersKey` 재적용 시 행 선택 desync**: 0.3.24 의 `filtersKey` 재적용은
+  필터/정렬/페이지만 리셋하고 `checkedItems`(행 선택)는 그대로 남겨, 새 결과셋에 이전
+  선택행이 그대로 있으면 체크박스는 켜졌는데 host 선택 상태는 비어 있는 desync 가
+  발생했다. remount 였다면 선택도 함께 초기화됐을 것이므로 `setCheckedItems([])` 를
+  추가해 remount 와 동일한 동작을 보장한다(동형 완성).
+
+## [0.3.24] - 2026-06-20
+
+`options.filtersKey` 를 추가해, host 가 자체 FilterBar/URL 로 필터 상태를 소유하고
+`options.filters` 로 주입하는 구성에서 **컴포넌트 remount 없이** 필터 재적용이 가능해졌다.
+
+### Added
+
+- **(#10) `options.filtersKey?: string | number`** — `ViewListGridWrapper` 의 새 공개 옵션.
+  host 가 필터 상태 파생값(JSON/hash)을 넘기면, 값이 바뀔 때 엔진이 기존 필터/정렬을
+  비우고(`clearFilterAndSort`) `options.filters` 를 재적용한 뒤 첫 페이지부터 재조회한다
+  (기존 `onChangeSearchForm` reset 경로 재사용). 지금까지는 반영을 위해
+  `<ViewListGridWrapper key={…}>` 로 컴포넌트를 remount 해야 했다(상태 teardown + cold
+  re-init + react-query 캐시구독 브리지 유발) — 이제 컴포넌트 마운트/상태가 보존된다.
+  `filtersKey` 미지정 시 완전 no-op 이라 기존 소비자 동작은 변하지 않는다.
+
+## [0.3.23] - 2026-06-19
+
+### Fixed
+
+- `.rcm-textarea[readonly]` 가 `--rcm-color-text-disabled`(gray-400)을 disabled 배경
+  위에 써 2.3:1 대비로 WCAG 2 AA(4.5:1) 기준을 실패하던 문제를 수정. `.rcm-input[readonly]`
+  가 이미 적용한 동일 원칙(본문 색 유지 + disabled 배경)으로 readonly 를 disabled 와
+  분리했다. readonly 값은 사용자가 읽는 데이터이므로 가독성이 필수다.
+
 ## [0.3.22] - 2026-06-17
 
 nullable 값에서 발생하던 두 건의 런타임 크래시(#8, #9)를 수정. 둘 다 회피 불가한

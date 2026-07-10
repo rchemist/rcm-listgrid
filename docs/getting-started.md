@@ -20,7 +20,7 @@ If you are targeting an older browser matrix, stop here — the styling layer wi
 ## 2. Install
 
 ```bash
-npm install @rchemist/listgrid react react-dom @headlessui/react @tabler/icons-react
+npm install @rchemist/listgrid react react-dom @headlessui/react @tabler/icons-react @iconify/react react-select react-sortablejs sortablejs date-fns
 ```
 
 Then import the stylesheet **once** at your app root:
@@ -35,17 +35,20 @@ import '@rchemist/listgrid/styles.css';
 
 | You use… | Install |
 |---|---|
-| The library at all | `react`, `react-dom`, `@tabler/icons-react`, `@headlessui/react` (all required) |
+| The library at all (core required peers) | `react`, `react-dom`, `@headlessui/react`, `@tabler/icons-react`, `@iconify/react`, `react-select`, `react-sortablejs`, `sortablejs`, `date-fns` |
 | Next.js app-router adapter (`@rchemist/listgrid/next`) | `next`, `nuqs` |
-| Rich select fields (`SelectField` / `MultiSelectField`) | `react-select` |
-| Drag-sort rows in a list | `react-sortablejs`, `sortablejs` |
-| `QrField` | `qrcode.react` |
-| `AddressMapField` (Korean map) | `react-kakao-maps-sdk` |
-| Korean postcode lookup (`PostCodeSelector`) | `react-daum-postcode` |
-| Styled Excel export (`DataExporter`) | `xlsx-js-style`, `file-saver` |
-| `ApiSpecificationButton` / `XrefPriceMappingView` confirm dialogs | `sweetalert2`, `sweetalert2-react-content` |
+| `QrField` (`@rchemist/listgrid/qr`) | `qrcode.react` |
+| `AddressMapField` (Korean map, `@rchemist/listgrid/address`) | `react-kakao-maps-sdk` |
+| Korean postcode lookup (`PostCodeSelector`, `@rchemist/listgrid/address`) | `react-daum-postcode` |
+| `ViewApiSpecification` (`@rchemist/listgrid/api-spec`) | `sweetalert2`, `sweetalert2-react-content` |
+| `XrefPriceMappingField` (`@rchemist/listgrid/xref-price`) | `sweetalert2`, `sweetalert2-react-content` |
+| Excel export/import (`@rchemist/listgrid/excel`) | `xlsx-js-style`, `file-saver` |
 
-Only install the rows you actually render. The rest of the peer list is marked `optional` in `peerDependenciesMeta` so package managers won't warn.
+The nine "core required peers" row is not optional — the main barrel imports `react-select` /
+`react-sortablejs` / `sortablejs` / `date-fns` statically, so the build fails without them
+(as of `v0.3.21`, see [`docs/MIGRATION.md`](./MIGRATION.md)). Only the subpath rows below that
+are genuinely opt-in — install their peer only if you import that subpath. The opt-in peers are
+marked `optional` in `peerDependenciesMeta` so package managers won't warn.
 
 **Common gotcha**: if you are using `npm`, pair the install with `--legacy-peer-deps` (`npm install --legacy-peer-deps`). The library declares a wide React peer range (`>= 18`) and npm 7+ is stricter than yarn/pnpm about overlapping ranges when a transitive dep pins a narrower version.
 
@@ -58,7 +61,7 @@ The library is **framework-free by design**. It does not know how you do HTTP, r
 | Contract | Form | Purpose |
 |---|---|---|
 | `AuthProvider` | React component | Session + role checks |
-| `UIProvider` | React component | ~50 visual primitives (Table, Modal, Tooltip, …) |
+| `UIProvider` | React component | 49 visual primitives — 47 required + 2 optional (Table, Modal, Tooltip, …) |
 | `RouterProvider` | React component | Framework router hooks (Next, React Router, …) |
 | `UrlStateProvider` | React component | Query-string state sync (nuqs-compatible) |
 | `configureApiClient` | Module-level function | HTTP transport + auth headers + CSRF |
@@ -149,7 +152,7 @@ Each is a plain object of hooks (`useRouter`, `usePathname`, `useParams`, `useSe
 
 ## 4. `UIProvider` — the biggest single hurdle
 
-`UIProvider` takes a `components` prop of type `UIComponents` (see [`src/listgrid/ui/UIProvider.tsx`](../src/listgrid/ui/UIProvider.tsx)) — a map of **~50 visual primitives** the library composes internally. Every prop is typed `ComponentType<any>` on purpose so you can plug any UI kit with any prop shape. The library does not ship a default set.
+`UIProvider` takes a `components` prop of type `UIComponents` (see [`src/listgrid/ui/UIProvider.tsx`](../src/listgrid/ui/UIProvider.tsx)) — a map of **49 visual primitives** (47 required + 2 optional: `BreadcrumbItem`, `PasswordStrength`) the library composes internally. Every prop is typed `ComponentType<any>` on purpose so you can plug any UI kit with any prop shape. The library does not ship a default set.
 
 ### The full primitive list (categorised)
 
@@ -177,7 +180,7 @@ A handful are optional (`BreadcrumbItem`, `PasswordStrength`); the rest are requ
 
 **(b) Wrap an existing UI kit.** MUI, Chakra, shadcn/ui, Ant Design, Mantine — any kit works. You write one adapter module that maps each primitive to a kit component, translating props. Cost: ~300–500 lines, follows whatever design language your app already has.
 
-> **No official adapter ships yet.** See [`docs/ROADMAP.md`](./ROADMAP.md) — a reference adapter is follow-up work. Until then, every adopter writes their own map. This is the biggest single integration cost.
+> **A zero-styling baseline ships as `@rchemist/listgrid/headless`** (`headlessUIComponents`) — spread it and override only what you need. A *styled* reference adapter (HeadlessUI + Tailwind) is still follow-up work (see [`documents/`](../documents/README.md)); until then, styling primitives yourself is the biggest single integration cost.
 
 ### Shape of a primitive
 
@@ -392,11 +395,40 @@ Out of the box you get: pagination, column selection, quick search, advanced sea
 
 ---
 
+## 9. Registry reference (configure*/register*)
+
+Beyond the four provider components (§ 3) and `configureApiClient` / `configureMessages` /
+`configureRuntime`, the library exposes a set of narrower module-global `configure*` /
+`register*` functions. Same rationale as § 3 — module-scope registries, not React Context,
+because some are read from class methods outside the component tree. Call each once at
+bootstrap, before the relevant feature renders; every one of them is safe to leave uncalled
+(the library falls back to a documented default instead of crashing, except where noted).
+
+| Function | Configures | Default when NOT called |
+|---|---|---|
+| `configureApiClient(client)` | HTTP transport (`callExternalHttpRequest` / `getExternalApiData` / `getExternalApiDataWithError`) | Throws `"... no ApiClient has been configured"` on the first library API call |
+| `configureMessages(services)` | Toast / alert / confirm / success dialogs | No-op stubs that `console.warn`; `showConfirm` resolves `false` |
+| `configureRuntime(config)` | Dev-mode flag, crypto salt, `endpoints` map, `permissions` predicates | Library defaults: permissive permissions (`() => true`), library-internal endpoint paths (e.g. `/asset/upload-file`), `isDevelopment: false` |
+| `configureTranslator(factory)` | i18n key → string lookup (`getTranslation().t(key)`) | Identity translator — `t(key)` returns the key itself (or `fallback`) so UI still renders |
+| `configureLoading(store)` | Global loading overlay store (`openBaseLoading` + setter) | Internal in-memory store — flips a module-local boolean but isn't wired to any host UI |
+| `configureOverlayZIndex(base)` | Base z-index for `Modal` / `Popover` overlays | `1000` |
+| `configureAssetServerUrl(url)` | Asset server origin used to strip/normalize asset URLs | `process.env.NEXT_PUBLIC_ASSET_SERVER`, or `http://127.0.0.1:8320` if unset |
+| `configureAssetPrefix(prefix)` | Static-resource path prefix for asset URLs | `/static-resource/` |
+| `configureDataTransfer({ Exporter, Importer })` | Injects the list header's export/import modal components | `null` — the list's export/import UI does not render |
+| `registerExcelDataTransfer()` (`@rchemist/listgrid/excel`) | Convenience wrapper — calls `configureDataTransfer` with the xlsx-backed `DataExporter` / `DataImporter` | Same as `configureDataTransfer` unset — export/import UI does not render |
+| `registerExcelCrypto(impl)` (`@rchemist/listgrid/excel`) | Node-only `officecrypto-tool`-shaped implementation for password-protected Excel export | Throws on the first password-protected export attempt (`"... requires officecrypto-tool"`) |
+| `registerSignOut(fn)` | Host sign-out handler invoked by the library's internal `signOut()` | No-op that `console.warn`s — does not actually sign the user out |
+| `registerMenuPermissionChecker(checker)` | Menu-level permission gate for `ViewListGridWrapper` / `ViewEntityFormWrapper` | Fully permissive — always returns `'ALL'` |
+| `registerSmsHistoryField(ctor)` | Host's `SmsHistoryField` implementation class, used inside the SMS history tab | `console.warn`s and returns `null` — the SMS history feature is silently skipped |
+| `registerPhoneNumberSmsHistoryInject(config)` | Opt-in auto-injection of an "SMS 발송 이력" tab next to `PhoneNumberField` fields with `enableSms` | Disabled (`enabled: false`) — the library never auto-injects the tab unless a host explicitly registers with `enabled: true` |
+
+---
+
 ## Where to next
 
 - [`README.md`](../README.md) — one-page overview, theming, architecture diagram.
-- [`CHANGELOG.md`](../CHANGELOG.md) — what changed in v0.2.0.
-- [`docs/MIGRATION.md`](./MIGRATION.md) — upgrading from v0.1.0-alpha.x.
+- [`CHANGELOG.md`](../CHANGELOG.md) — release notes per version.
+- [`docs/MIGRATION.md`](./MIGRATION.md) — upgrading across breaking changes (v0.2.x → v0.3.x and earlier).
 - [`docs/PRIMITIVES.md`](./PRIMITIVES.md) — the full list of `rcm-*` CSS classes and their `data-*` variants.
-- [`docs/ROADMAP.md`](./ROADMAP.md) — planned work.
+- [`documents/`](../documents/README.md) — product planning (PRD, ADRs, roadmap).
 - [`src/listgrid/index.ts`](../src/listgrid/index.ts) — the canonical list of every public export.

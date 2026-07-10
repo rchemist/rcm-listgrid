@@ -5,7 +5,7 @@
 - **Title**: NumberField 셀 포매터 formatPrice() 가 null 값에 toLocaleString 호출 → 런타임 크래시 (null-guard 부재)
 - **Created**: 2026-06-16T16:22:00Z
 - **Labels**: (없음)
-- **Status**: OPEN
+- **Status**: CLOSED (구현 완료 — v0.3.22 릴리스 반영)
 - **Assignee**: @me
 
 ## Issue Content (요약)

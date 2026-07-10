@@ -5,6 +5,7 @@ node_modules/
 dist/
 .turbo/
 *.tsbuildinfo
+docs/api/
 
 # editor / OS
 .DS_Store

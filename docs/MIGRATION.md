@@ -1,6 +1,146 @@
 # Migration guide
 
-This document walks you from any `0.1.0-alpha.x` release of `@rchemist/listgrid` to **`v0.2.0`**. It expands the entries in [`CHANGELOG.md`](../CHANGELOG.md) into before/after code samples and diagnostic messages so you can grep for TypeScript errors and find the relevant fix directly.
+This document has two parts. [**§ v0.2.x → v0.3.x**](#v02x--v03x) covers the breaking changes
+between the `0.2.x` and current `0.3.x` line. [**§ v0.2.0 — summary**](#v020--summary) below it
+walks you from any `0.1.0-alpha.x` release to `v0.2.0`. Both expand the entries in
+[`CHANGELOG.md`](../CHANGELOG.md) into before/after code samples and diagnostic messages so you
+can grep for TypeScript errors and find the relevant fix directly.
+
+---
+
+## v0.2.x → v0.3.x
+
+Covers `0.3.1`, `0.3.21`, and `0.3.22` — the three releases in the `0.3.x` line with
+consumer-visible breaking changes or required cleanup. If you are upgrading straight from
+`0.1.0-alpha.x`, read [§ v0.2.0 — summary](#v020--summary) first, then apply this section.
+
+### 0.3.1 — rcm-backend-framework 0.1.0 endpoint alignment (BREAKING)
+
+**What changed.** The `0.3.x` line targets `rcm-backend-framework` **v0.1.0 GA**'s endpoint
+matrix instead of the older `0.0.5` line. Upgrading the package without upgrading the backend (or
+vice versa) breaks list/search/create/bulk-delete calls.
+
+| Area | 0.2.x (0.0.5 backend) | 0.3.x (0.1.0 backend) |
+|---|---|---|
+| Search / list | `POST {url}` (`SearchForm` body) | `POST {url}/search` (`SearchRequest` body) |
+| Create | `POST {url}/add` (`Form` body) | `POST {url}` (`CreateForm` body) |
+| Bulk delete | `POST {url}/delete` (body `{ ids, revisionEntityName? }`) | `DELETE {url}` + body `BulkDeleteRequest{ids, revisionEntityName?}` |
+| Schema | `POST {url}/_search/schema` | `GET {url}/search/schema` |
+
+**Response payload aliases** — the `0.3.x` line accepts both the 0.0.5-line and 0.1.0-line list
+response shapes (dual absorption; no host code change required for this part):
+
+| Field | 0.0.5 line | 0.1.0 line |
+|---|---|---|
+| Result list | `data.list` | `data.content` |
+| Total count | `data.totalCount` | `data.totalElements` |
+| Echoed search form | `data.searchForm` | `data.searchRequest` |
+
+**Fix.** Upgrade your backend to `rcm-backend-framework 0.1.0` GA alongside the package bump, or
+stay on `@rchemist/listgrid@^0.2.x` if you can't upgrade the backend yet:
+
+```ts
+// 0.2.x — backend is still the 0.0.5 line
+"@rchemist/listgrid": "^0.2.15"
+
+// 0.3.x — backend is rcm-backend-framework 0.1.0 GA
+"@rchemist/listgrid": "^0.3.1"
+```
+
+No `EntityForm` / `ListGrid` / `ViewListGridWrapper` usage code changes are required — the
+alignment is internal to `src/listgrid/form/Type.ts` and `src/listgrid/config/EntityForm.tsx`.
+Source: `CHANGELOG.md` `[0.3.1]`.
+
+### 0.3.21 — peer reclassification + subpath moves (BREAKING)
+
+**What changed.** Peers the main barrel always needs were reclassified from optional to
+**required** (a build that omits them now fails honestly, instead of succeeding and breaking at
+runtime), and leaf components that only some hosts use were moved out of the main barrel into
+**opt-in subpaths**.
+
+**Newly required peers** — install these if you don't already have them:
+
+```bash
+npm install @iconify/react react-select react-sortablejs sortablejs date-fns
+```
+
+**Components relocated from the main barrel to a subpath:**
+
+| Before (main barrel) | After (subpath) | Peer required |
+|---|---|---|
+| `QrField` | `@rchemist/listgrid/qr` | `qrcode.react@^3` (v4 no longer supported — the default export it relies on was removed) |
+| `AddressFieldView`, `AddressMapField`, `KakaoMap`, `PostCodeSelector`, `ApplyFullAddressFields` | `@rchemist/listgrid/address` | `react-kakao-maps-sdk`, `react-daum-postcode` |
+| `ViewApiSpecification`, `ApiSpecificationButton` | `@rchemist/listgrid/api-spec` | `sweetalert2`, `sweetalert2-react-content` |
+| `XrefPriceMappingField` | `@rchemist/listgrid/xref-price` | `sweetalert2`, `sweetalert2-react-content` |
+| Excel export/import (`DataExporter`, `DataImporter`, …) | `@rchemist/listgrid/excel` + `registerExcelDataTransfer()` | `xlsx-js-style`, `file-saver` |
+
+**Before:**
+
+```ts
+import { QrField, AddressMapField, ViewApiSpecification } from '@rchemist/listgrid';
+```
+
+**After:**
+
+```ts
+import { QrField } from '@rchemist/listgrid/qr';
+import { AddressMapField } from '@rchemist/listgrid/address';
+import { ViewApiSpecification } from '@rchemist/listgrid/api-spec';
+```
+
+**Excel export/import is now injected, not bundled.** Register it once at bootstrap:
+
+```ts
+import { registerExcelDataTransfer } from '@rchemist/listgrid/excel';
+registerExcelDataTransfer(); // requires xlsx-js-style + file-saver installed
+```
+
+Without this call the list header's export/import modal simply doesn't render — no crash, no
+console error, just a missing button. Skip it if you don't use Excel export/import.
+
+**Fix checklist.**
+
+- [ ] Install the five newly-required peers above.
+- [ ] Grep your codebase for the relocated component names imported from the main barrel; switch
+      each to its matching subpath.
+- [ ] If you use list export/import, call `registerExcelDataTransfer()` at bootstrap.
+- [ ] Pin `qrcode.react` to `^3` if you were on `^4`.
+
+Source: `CHANGELOG.md` `[0.3.21]`, [`documents/issues/7/fix-plan.md`](../documents/issues/7/fix-plan.md).
+
+### 0.3.22 — single-entity GET envelope depth (breaks GET double-wrap workarounds)
+
+**What changed.** `EntityForm.initialize()`'s single-entity `GET` now unwraps the response at
+**1-depth** (`response.data` = the entity), matching the depth `save` / `list` / `delete` already
+used. It previously read `response.data.data` (2-depth) — a legacy asymmetry that happened to
+work against the old `0.0.5`-line backend (which double-wrapped GET responses) but crashes
+against `rcm-backend-framework 0.1.0`'s bare-entity `GET` (`TypeError: Cannot read properties of
+undefined (reading 'manageEntityForm')`).
+
+**Fix.** If your `ApiClient` adapter's `getExternalApiData` / `getExternalApiDataWithError`
+double-wraps the GET response to compensate for the old 2-depth read, **remove that workaround**:
+
+```ts
+// ❌ before — compensating for the old 2-depth read
+getExternalApiData: async (url) => {
+  const res = await fetch(url);
+  const entity = await res.json();
+  return new ResponseData({ data: { data: entity } }); // double-wrap workaround
+},
+
+// ✅ after — standard 1-depth envelope (same shape save/list/delete already use)
+getExternalApiData: async (url) => {
+  const res = await fetch(url);
+  const entity = await res.json();
+  return new ResponseData({ data: entity });
+},
+```
+
+If you keep the double-wrap after upgrading, `response.data` becomes `{ data: entity }` and the
+edit/detail form renders with empty values instead of the fetched entity. Standard adapters
+(single-depth `{ data: json }`, as documented in the `ApiClient` contract) need no change.
+
+Source: [`documents/issues/9/fix-plan.md`](../documents/issues/9/fix-plan.md) ("컨슈머 적용 안내" section).
 
 ---
 

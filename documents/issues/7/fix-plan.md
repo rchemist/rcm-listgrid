@@ -6,7 +6,7 @@
 - **Title**: barrel(index.js)이 optional:true peer를 static import → consumer 빌드 강제 실패
 - **Created**: 2026-06-16T06:57:39Z
 - **Labels**: (none)
-- **Status**: OPEN
+- **Status**: CLOSED (구현 완료 — v0.3.21 릴리스 반영)
 - **Assignee**: @greatkunner (self-assigned)
 - **확정 전략**: 하이브리드 + qrcode.react v3 peer 고정 (사용자 확정, 2026-06-16)
 

@@ -5,7 +5,7 @@
 - **Title**: EntityForm.initialize() 단건 fetch 가 response.data.data(2-depth) 로 언랩 → 기존 엔티티 수정/상세 폼 manageEntityForm 크래시 (save/list 는 1-depth)
 - **Created**: 2026-06-17T07:43:44Z
 - **Labels**: (없음)
-- **Status**: OPEN
+- **Status**: CLOSED (구현 완료 — v0.3.22 릴리스 반영)
 - **Assignee**: @me
 
 ## Issue Content (요약)

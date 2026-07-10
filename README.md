@@ -300,13 +300,13 @@ Requires a browser with container queries and `color-mix` — **2023+**:
 - Firefox 113+
 - Safari 16.2+
 
-Auto-generated TypeDoc API reference: [`docs/api/`](./docs/api/README.md) (regenerate with `npm run docs`).
+API reference: generate locally with `npm run docs` (TypeDoc output to `docs/api/`, not committed).
 
 ---
 
 ## Roadmap & Vision
 
-### Next milestones (post-v0.2.0)
+### Next milestones
 
 - **`UIProvider` reference adapter** — first-party adapter wiring the primitive contracts (Button, Modal, Table, Tooltip, Select, …) to a mainstream headless kit (HeadlessUI + Tailwind). Unblocks `examples/minimal`.
 - **`examples/minimal`** — a copy-paste-runnable Next.js + `@rchemist/listgrid` demo. Validates the quick-start in this README end-to-end.
@@ -333,13 +333,13 @@ Auto-generated TypeDoc API reference: [`docs/api/`](./docs/api/README.md) (regen
 - **Vue / Svelte / Angular ports** — React-only by design.
 - **Visual form builder / drag-drop schema editor** — the engine consumes declarative entity metadata; schema authoring is a host concern.
 
-See [`docs/ROADMAP.md`](./docs/ROADMAP.md) for planned work.
+Detailed product/architecture planning lives in [`documents/`](./documents/README.md) (PRD, ADRs, roadmap).
 
 ---
 
 ## Status
 
-**`v0.2.0` — first public minor.** The surface is stable enough for external adoption. Opt-in generics (`EntityForm<T>`, `FormField<TSelf, TValue, TForm>`, `FieldRenderParameters<T, TValue>`, `parse<T>`) give per-entity key narrowing where you use them.
+**`v0.3.x` — current release line (latest: see CHANGELOG.md).** The surface is stable enough for external adoption. Opt-in generics (`EntityForm<T>`, `FormField<TSelf, TValue, TForm>`, `FieldRenderParameters<T, TValue>`, `parse<T>`) give per-entity key narrowing where you use them.
 
 **New to the library?** Start with [`docs/getting-started.md`](./docs/getting-started.md) — it walks through each provider contract and the most common adoption traps.
 
@@ -352,15 +352,14 @@ See [`docs/ROADMAP.md`](./docs/ROADMAP.md) for planned work.
 | Document | Purpose |
 |---|---|
 | [`docs/getting-started.md`](./docs/getting-started.md) | Step-by-step onboarding — each provider contract, common adoption traps |
-| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | v0.2.0 breaking changes with before/after code |
+| [`docs/MIGRATION.md`](./docs/MIGRATION.md) | Breaking-change guides (v0.2.x → v0.3.x and earlier) with before/after code |
 | [`docs/PRIMITIVES.md`](./docs/PRIMITIVES.md) | Design-system primitive catalog (`rcm-*` classes + `data-*` variants) |
-| [`docs/ROADMAP.md`](./docs/ROADMAP.md) | Planned work |
 | [`CHANGELOG.md`](./CHANGELOG.md) | Release notes per version |
-| [`docs/api/`](./docs/api/README.md) | Auto-generated TypeDoc API reference |
+| [`docs/api/`](./docs/api/) | Auto-generated TypeDoc API reference — generated locally via `npm run docs` (not committed) |
 
 ### API reference
 
-`npm run docs` regenerates [`docs/api/`](./docs/api/) via TypeDoc. Run after any public API change; commit the regenerated output alongside.
+`npm run docs` generates the TypeDoc reference into `docs/api/` (git-ignored). Generate after public API changes when you need to browse the surface.
 
 ---
 
@@ -373,7 +372,7 @@ Confirm your change fits the current [Roadmap](#roadmap--vision) — or open an 
 ```bash
 npm install --legacy-peer-deps
 npm run type-check # tsc --noEmit; all 5 strict options on
-npm test # vitest; 884+ tests
+npm test # vitest; 930 tests
 npm run lint # ESLint flat config; zero errors
 npm run format:check # Prettier; zero diff
 npm run build # tsc + CSS copy → dist/
