@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { ManyToOneField } from '@listgrid/schema-core';
 import { createListStore } from '@listgrid/state';
 import { useUI } from '../providers/ui';
-import { useAdapter } from '../providers/adapter';
+import { useAdapter, useReferenceResolver } from '../providers/adapter';
 import { useFieldValue, useFormStore } from '../providers/form-store';
 import { ViewListGrid } from '../components/ViewListGrid';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
@@ -26,6 +26,7 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
   const { Button, Modal } = useUI();
   const store = useFormStore();
   const adapter = useAdapter();
+  const resolveReference = useReferenceResolver();
   const value = useFieldValue<unknown>(name);
   const m2o = field as ManyToOneField;
   const labelField = typeof m2o.getLabelField === 'function' ? m2o.getLabelField() : 'name';
@@ -45,8 +46,7 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
   useEffect(() => {
     let cancelled = false;
     if (value != null && typeof value !== 'object') {
-      adapter
-        .getOne(target.getUrl(), String(value))
+      resolveReference(target.getUrl(), String(value))
         .then((entity) => {
           if (!cancelled) setResolvedLabel(labelOf(entity, labelField));
         })
@@ -59,7 +59,7 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
     return () => {
       cancelled = true;
     };
-  }, [value, adapter, target, labelField]);
+  }, [value, resolveReference, target, labelField]);
 
   const display = resolvedLabel ?? labelOf(value, labelField);
 
