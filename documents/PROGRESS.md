@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H ✅ · **Phase EF ✅**(리뷰게이트 통과) · **Next up**: EA-A(트리비얼 필드 12종 wave 전개). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · **EA-A ✅**(12필드) · **Next up**: EA-B(모더릿 6종 — 착수 전 propagation seam 결정). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 04:45 (**Phase EF 완료** — EF-R2 `1a64dbb`로 리뷰 발견 3건 전해소, gate 통과. 1205 unit+5 E2E green. EF 섹션 collapse. **Next=EA-A** — [archive Handoff](./progress-archive/phase-e-track-tasks.md) + [계획 §EA](./plans/e-track-field-parity.md) 읽고 재개)
+**Last updated**: 2026-07-11 05:20 (**EA-A 완료** — 12필드 fan-out `5566c21`, +196 테스트(1430 green)+E2E 5/5. Needs Review +5. **Next=EA-B** — propagation seam 결정(conductor) 후 6종 이식. [archive 표](./progress-archive/phase-e-track-tasks.md)+[계획 §EA-B ⚠](./plans/e-track-field-parity.md) 읽고 재개)
 
 ## Goal
 
@@ -79,10 +79,7 @@
 #### Phase EA — 필드 전수 이식 (EF1~4 후, wave별 전개) **[S, 복잡건 O]**
 
 전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
-- [~] **EA-A 트리비얼/고빈도** (12종 wave — 1필드=1커밋+테스트) · 진행: ⬜Checkbox ⬜MultiSelect ⬜Password ⬜Month ⬜Year ⬜Time ⬜Link ⬜Tag ⬜ColorPreset ⬜MessageView ⬜Profile ⬜MappedJoin
-  - **실행 형태**: scout ✅([브리핑](./analysis/2026-07-11/ea-a-scout-briefing.md) — fan-out 에이전트 필독) → **EA-A0 pre-stage**(공유 5종: Options base·MinMaxStringLimit·FieldType+5·getConditionalReactNode·ui-default 확장) → fan-out 12(disjoint 파일만·등록은 세션이 manifest 적용)
-  - **Reuse review**: Extend: 기존 필드 패턴(basic-fields·SelectField)·레지스트리·conditional.ts ReactNode 타입 — New: options-field base(구 OptionalField 이식)+필드별 클래스/렌더러 파일+TagsInput/UserView 프리미티브(기존 부재 확인)
-  - **확정 결정**: Profile=placeholder(호스트 오버라이드)·ColorPreset=inline-style 팔레트·MultiSelect status-change 3종 descope·Time 'now'=렌더러 해석·MappedJoin=isHidden override+toSaveData 테스트·리스트 셀 렌더 전역 연기(dispatch 부재)·Link CheckButtonValidation descope
+- [x] **EA-A 트리비얼 12종** ✅ `e9c1121`(A0 pre-stage)+`5566c21`(wave) · 12/12 이식+196 테스트(1430 green)·E2E 5/5·full gate ✓ · [상세 표](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-B 모더릿/고빈도** — Datetime·CustomOption·Html·Birthday·TelephoneNumber·Color(⚠dynamic Tailwind 금지)
 - [ ] **EA-C 업로드** — File·Image·MultipleAsset·ContentAsset (**업로드 backend seam 결정** §Open Q)
 - [ ] **EA-D xref/도메인** — XrefMapping·XrefPrefer·XrefPrice·XrefAvailableDate·Rule·InlineMap(⚠pendingRef)
@@ -122,11 +119,17 @@
 - [ ] **EF3 withId 전파** — 브리핑 미명시였으나 clone 직후 `withId(id)` 추가(fetch-error 경로도 update 모드 유지, sample idiom 일치) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF3 hydrate dotted 수정(공유코드)** — "지원 확인" 결과 미지원이라 hydrate 내부 resolveFetchedValue 신설(flat 동작 동일·1176 green). EC2 실사용 검증 예정 · risk: low-med · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF4 fieldDefs=단일 진실** — 동적 mutation 후 entityForm.getFields()류 직접 읽기는 stale(현 콜사이트 0 확인·Handoff Do-NOT 등재). EA/EC 신규 소비자는 store 경유 필수 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-A MultiOptions validate 특성** — min/max-count 체크가 hidden/readonly 상태 재확인 없이 수행(base 설계) — hidden+limited 필드의 빈 값이 count 검증에 걸릴 수 있음 · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-A Password 참조 push** — withStrength가 구 shallow-copy 대신 validation 참조 유지(구 방식은 프로토타입 메서드 소실 latent bug — 의도적 개선) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-A Time 브리핑 정정** — range 'now' sentinel=+12시간(+12분 아님, 구 원본 재확인 후 충실 이식) · risk: none(기록) · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-A Month min/max 미전달** — 렌더러가 native input min/max 속성 미전달(TextInputProps에 없음) — validate가 실게이트, UX만 차이 · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-A Checkbox combo 추가** — withComboType(row/column 힌트)을 base 아닌 Checkbox 전용으로 이식(브리핑 미명시 판단) · risk: negligible · [detail](./progress-archive/phase-e-track-tasks.md)
 
 ## Progress notes
 
 - 2026-07-11 EF-R2 anomaly: 위임 에이전트가 red-green 증명에 `git stash` 사용(no-git 규칙 위반) — HEAD 불변·stash 잔여 없음 확인, 피해 없음. 브리핑의 no-git 문구는 유지.
 - 2026-07-11 EF-gate: 무인 FIND-ONLY 준수 — 발견 3건 전부 태스크(EF-R1/R2) 경유로 수정, 리뷰 자체는 무변경.
+- 2026-07-11 EA-A fan-out: 12필드 병렬(disjoint 신규 파일+등록 manifest, 공유 무접촉 확인). **1필드=1커밋 대신 wave 단일 원자 커밋** — fanout 프로토콜(/progress 1회 커밋) 우선, 필드 단위는 파일·테스트로 보존. deviation 17건 중 benign(배럴 대기 import) 다수는 등록으로 해소, 실질 5건만 §Needs Review.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 

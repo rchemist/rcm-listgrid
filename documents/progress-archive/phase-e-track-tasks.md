@@ -164,5 +164,31 @@ proposed_helper: 없음.
 - **Unacknowledged Needs Review**: 16건 open (P0/P1/P2/P3 9건 + EF2 4건 + EF3 2건 + EF4 1건) — 본문 §Needs Review.
 - **세션 정책**: continue 권장(컨텍스트 연속성 — EF 패턴 참조가 EA 브리핑에 직결). 새 세션이라면 이 Handoff + 계획 §EA + parity map만 읽고 재개.
 
+---
+
+## EA-A — 트리비얼 필드 12종 (fan-out) ✅
+
+**완료**: 2026-07-11 · **실행**: EA-A0 pre-stage(sonnet 1) `e9c1121` → **fan-out 12 sonnet 병렬**(wf_e3246bcd-15a, 1.35M tokens/582 tool calls/10min) → 세션이 배럴·레지스트리 등록+타입 수정 3건 → wave 원자 커밋 `5566c21`
+**검증**: full gate ✓ — type-check·tsc -b·**1430 unit**(1234→1430, +196)·lint 0err·format·build·**E2E 5/5**. 순수성: 48개 전부 신규 파일·공유 무접촉·HEAD 불변(수동 확인)
+**커밋 방식 결정**: 계획의 1필드=1커밋 대신 **wave 단일 원자 커밋** — fanout 프로토콜(subagent 무커밋·/progress 1회 커밋) 우선, 필드별 단위는 파일·테스트가 보존(§Progress notes 기록)
+
+| 필드 | status | 골자 | dev |
+|---|---|---|---|
+| Checkbox | done+dev | MultiOptionsField·string[] 그룹·combo 힌트 추가(판단 이식) | 2 |
+| MultiSelect | done+dev | MultiOptionsField·체크박스 그룹 렌더·status-change 3종 descope(지시) | 2 |
+| Password | done+dev | PasswordValidation 자동부착+withStrength(id-swap)·validation 참조 push(구 shallow-copy는 메서드 소실 latent bug — 의도 개선)·StrengthView 미이식(descope) | 2 |
+| Month | done+dev | YYYY-MM 사전식 limit validate(충실 이식)·renderer min/max 속성 미전달(TextInputProps에 없음 — validate가 게이트) | 2 |
+| Year | done | limit→SelectBox 옵션 생성(1900..현재 eager — 충실) | 1 |
+| Time | done+dev | **브리핑 정정: range 'now'=+12시간(분 아님 — 원본 재확인)**·'now' 렌더러 해석·withMin/Max superset | 2 |
+| Link | done | 'link' 타입+TextInput·CheckButtonValidation descope | 0 |
+| Tag | done | MultiOptionsField+TagsInput 프리미티브·per-tag async 검증 passthrough | 0 |
+| ColorPreset | done+dev | inline-style 정적 팔레트(hex 자체 정의)·팝오버=Modal 재사용 | 3 |
+| MessageView | done+dev | ConditionalReactNodeValue(type-only)+react resolver — 순수성 준수 | 1 |
+| Profile | done | UserView placeholder(호스트 오버라이드 전제)·값 unknown | 0 |
+| MappedJoin | done+dev | isHidden() override true·**hidden 값 toSaveData 포함 테스트 고정**·ctor (name,order) 컨벤션 정렬 | 2 |
+
+공통 dev(전원 해소됨): 배럴 미등록 상태라 테스트가 상대경로 import — 등록 후에도 유효, 세션 등록 단계에서 전 테스트 green 확인. 타입 수정 3건(세션): color-preset hexOf 폴백·time-renderer ariaLabel 조건 spread·password strength `| undefined`.
+**명시 연기(재확인)**: 리스트 셀 per-type 렌더 전역·Link normalizeUrl/stopPropagation·MultiSelect status-change 3종·PasswordStrengthView. **실화면 실증은 EC 폼 재현에서**(현 sample 폼은 신규 필드 미사용).
+
 
 
