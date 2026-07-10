@@ -107,6 +107,8 @@
 **P3 게이트**: 골격 컴파일 + 파일럿 1종이 sample에서 렌더·입력·검증 동작 + 감사표 완성 + 대조표에 빈 칸 없음.
 **P3 종료 세션의 의무**: 아래 P4·P5 개요를 **체크박스 태스크로 전개**해 이 문서에 커밋한다(전개 규칙은 각 개요에 명시).
 
+> **P3 착수 노트 (cold-start — 여기서 실제 엔진 이식 시작)**: 지금까지(P0~P2)는 바닥다지기(버그픽스·골격·오라클), src/ 52k LOC·필드 59종은 아직 미이식(`@listgrid/*` 전부 빈 스텁). P3부터 실코드 이식. **읽을 것**: ADR-0003(schema/render 분리 — EntityField view() 제거, 렌더러 레지스트리, useSession 인자화)·ADR-0002(폼 상태 — createFormStore 값슬라이스 `{current,fetched,default,errors,dirty}`, 셀렉터 구독)·ADR-0004(표면)·ADR-0005(백엔드). **권장 순서**: P3-1→P3-2 계약 → **P3-5 StringField 파일럿(첫 실이식, 레시피 확립)** → P3-4 감사표 → P3-3 → P3-6. **검증**: P2 오라클 준비됨 — 파일럿 이식 후 `harness.ts`의 2개 엔진 pointer를 `@listgrid/*`로 flip해 특성화 테스트가 신 엔진에서 green이면 이식 완료. **[O] 태스크는 opus 세션 권장.**
+
 ### P4 — 코어 이식 (개요 — P3 종료 시 전개) **[abort 판정 지점]**
 
 EntityForm 선언 모델(5단 상속→컴포지션), 검증 12종, SearchForm 직렬화, OnChange 연쇄를 schema-core+state로 이식.
