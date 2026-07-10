@@ -81,4 +81,23 @@ proposed_helper: 없음.
 1. *(§Needs Review 미등재 — 브리핑에 명시 지시된 변경이라 departure 아님)* fakeMutator no-op stub(schema-core on-changes.test.ts) — 인터페이스 확장에 따른 기계적 정합. risk: None.
 2. **store가 live 구조의 단일 진실이 됨(fieldDefs)** — EntityForm 불변(스코프 제외) + 동적 필드 가시성/validate 참여 + remove 실효라는 3제약의 유일 해. 결과: **동적 mutation 이후 entityForm.getFields()/getTabs()/getFieldGroups() 직접 읽기는 stale** — 현 코드베이스에 그런 콜사이트 없음(에이전트 grep 확인, ViewEntityForm/form-store만 해당·모두 전환됨). EA/EC에서 신규 소비자가 생기면 반드시 store 경유. risk: Low(latent). → §Needs Review + Handoff Do-NOT 등재.
 
+---
+
+## EF5 — validate-on-change (opt-in)
+
+**완료**: 2026-07-11 · **실행**: delegate(sonnet, wf_9e419f68-3ff, 101k tokens/64 tool calls/5.9min) · **status**: `done` (deviation 0)
+
+**Reuse review**: Extend: form-store(validateField 그대로 재사용 + 옵션/touched/debounce 배관)·initializeFormStore(passthrough) — New: 없음(사설 file-local 함수 2개만, 미export).
+
+### 구현
+
+- `CreateFormStoreOptions.validateOnChange?: boolean | { debounceMs?: number }` — **기본 OFF**(부재/false = 기존 동작 무변경). initializeFormStore는 기존 storeOpts로 plain passthrough.
+- createFormStore closure 내부 사설 상태: `touchedFields: Set` + `validationTimers: Map` (FormStoreState 비노출 — 공개 API 표면 무증가). `performSetValue`가 **isTopLevel(EF2 dispatchBatch-null 체크 재사용)일 때만** scheduleValidateOnChange 호출 — cascade(중첩) 쓰기는 touched 마킹·검증 스케줄 없음(구 renderer-onChange parity). trailing debounce 300ms(재입력 시 타이머 리셋), 발화 시 기존 `validateField(name)` 호출(검증 로직 미복제·통과 시 기존 경로로 에러 클리어). dispose API 신설 없음.
+
+### 검증 (에이전트 자가보고 · 세션 게이트 별도)
+
+- typecheck clean · state 61/61(신규 8) · react 통합 1/1(react 코드 무변경 — EF1/D4 기존 에러 슬라이스 구독으로 충분함을 확인) · packages 168 · **전체 1199 passed**(1190→1199, +9) · prettier 4파일 clean
+- 행동: off 무발화·trailing 단일 발화(최신값)·valid 시 에러 클리어·cascade 형제 미발화·untouched 미검증·custom debounceMs·passthrough E2E
+
+
 
