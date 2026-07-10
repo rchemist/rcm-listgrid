@@ -1,7 +1,7 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드, 수직 슬라이스 GO 실증 완료 후) · **Next up**: E1 필드타입 확장(File/Tag/주소 등, 구엔진 이식). 하드닝 H 완료. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · **하드닝 H 완료** · **Next up**: E-트랙 우선순위 결정 대기(§Open Questions — E2 폼 지정 vs 클린필드 배치 vs infra필드). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
@@ -68,8 +68,8 @@
 ### E — 확장
 
 - [x] **E·Email/Phone** Email/Phone 필드클래스(내장 검증, C4 "클래스1+렌더러1" 패턴 실증, Subject E2E) · `20f5156`
-- [ ] **E1** 나머지 필드타입 — File/Tag/주소/QR/Xref 등. 구엔진 필드에서 이식(규율2). 1필드=1커밋+테스트.
-- [ ] **E2** GJCU 폼 1~2종 추가 재구현 — 신 엔진 breadth 실증(E2E 동반).
+- [ ] **E1** 나머지 필드타입 이식(규율2, 1필드=1커밋+테스트) — 구엔진 ~40종 미이식. **(A) 클린 포트**(client-side, infra 무관): Password·Link·Time/Month/Year·MultiSelect·Tag·Color·Html·CustomOption. **(B) 결정 필요**: File/Image/Profile(업로드 seam)·주소/InlineMap(주소검색 API)·Qr(QR dep)·Xref×4/MappedJoin/Rule(도메인 매핑). 착수 전 우선순위 결정 → §Open Questions.
+- [ ] **E2** GJCU 폼 1~2종 추가 재구현 — 신 엔진 breadth 실증(E2E 동반). 대상 폼이 정해지면 그 폼이 쓰는 필드로 E1 자동 확정.
 
 **Next up**: E1(필드타입 — File/Tag/주소 등) → E2(GJCU 폼). 순서 무관·독립. E1은 다항목이라 착수 시 필드별 체크박스로 전개. 하드닝 H 트랙 완료.
 
@@ -100,7 +100,8 @@
 - [ ] **0.4.0-alpha.N 배포** — `v0.4.0-alpha.N` 태그 push → next 자동배포. P1 완료로 준비됨. 사용자 실행/승인 시점 결정.
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독.
 - [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
-- [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 실 worklist는 §Tasks(하드닝/확장 트랙)로 승격됨. H(게이트·CI·SubColl테스트) + E(Email/Phone) 완료, 남음 H1/H2/E1/E2.
+- [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 실 worklist는 §Tasks(하드닝/확장 트랙)로 승격됨. **하드닝 H 트랙 완료**(게이트·CI·SubColl·H1 캐시·H2 a11y). 남음 = 확장 E 트랙(E1/E2).
+- [ ] **E-트랙 우선순위 (도메인/우선순위 결정 — 사용자 선택 필요)** — 하드닝 완료, 확장 E1은 구엔진 ~40 필드타입 중 무엇을 이식할지 결정 필요(규율1: 대상 폼 없는 speculative breadth 금지). 선택지: **① E2 먼저**(우선할 실제 GJCU 폼 1~2종 지정 → 그 폼이 쓰는 필드로 E1 자동 확정, 헌장 보존검증3 정합) · **② 클린 필드 배치 포트**(A군: Password/Link/Time/MultiSelect/Tag/Color 등 순차) · **③ infra 필드 진입**(File 업로드 seam / 주소검색 API / Xref 도메인 — 각각 선결 결정 동반). 미선택 시 여기서 대기.
 
 ## 완료 기록 (페이즈 완료 시 progress-archive로 이동)
 
