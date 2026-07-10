@@ -106,6 +106,38 @@ describe('form-store validate-on-change (EF5)', () => {
     expect(store.getState().fields.name.errors?.length).toBe(1);
   });
 
+  it('EF-R2: removeField + duplicate-name addField clears a pending stale timer/touched-mark for the replaced name — the new field is not spuriously validated', async () => {
+    // Reproduces the review-gate defect: user edits 'name' (touched, trailing
+    // debounce timer scheduled) — WITHIN that debounce window, an onChanges
+    // handler triggered by editing a different field ('other') removes
+    // 'name' and re-adds a brand-new field also named 'name' (documented
+    // duplicate-replace path). Without cleanup, the stale timer for the old
+    // 'name' fires validateField('name') against the new, never-touched
+    // field and writes a spurious error into its slice.
+    const form = RequiredForm().withOnChanges((m: FormMutator, changedField) => {
+      if (changedField === 'other') {
+        m.removeField('name');
+        m.addField(new StringField('name', 1).withRequired(true).withLabel('Name'));
+      }
+    });
+    const store = createFormStore(form, { validateOnChange: true });
+
+    store.getState().setValue('name', 'valid'); // touched, schedules a 300ms trailing timer for 'name'
+    await vi.advanceTimersByTimeAsync(200); // still within the debounce window
+
+    store.getState().setValue('other', 'valid'); // triggers onChanges: swap out/in 'name' mid-flight
+
+    await vi.advanceTimersByTimeAsync(300); // past both the old and new timer windows
+
+    expect(store.getState().fields.name.errors).toBeUndefined(); // new field is untouched — never validated
+
+    // normal validate-on-change still works after the swap once the user
+    // edits the new field directly.
+    store.getState().setValue('name', '');
+    await vi.advanceTimersByTimeAsync(300);
+    expect(store.getState().fields.name.errors?.length).toBe(1);
+  });
+
   it('initializeFormStore passes validateOnChange through to the built store', async () => {
     const { store } = await initializeFormStore({
       entityForm: RequiredForm(),

@@ -383,6 +383,15 @@ export function createFormStore(
           const meta = { ...s.meta };
           delete meta[name];
 
+          // duplicate-name replace (EF-R2): the new field instance starts
+          // untouched with no pending validation — drop any stale touched
+          // mark / debounce timer left over from the replaced field so a
+          // later-firing timer can't validate the wrong (new) field.
+          const existingTimer = validationTimers.get(name);
+          if (existingTimer !== undefined) clearTimeout(existingTimer);
+          validationTimers.delete(name);
+          touchedFields.delete(name);
+
           return {
             fieldDefs: { ...s.fieldDefs, [name]: field },
             fields: { ...s.fields, [name]: slice },
@@ -402,6 +411,15 @@ export function createFormStore(
           delete fields[name];
           const meta = { ...s.meta };
           delete meta[name];
+
+          // EF-R2: clear any pending debounce timer / touched mark for the
+          // removed name — otherwise a later addField() re-using the same
+          // name inherits a stale timer that fires validateField() against
+          // the brand-new (untouched) field.
+          const existingTimer = validationTimers.get(name);
+          if (existingTimer !== undefined) clearTimeout(existingTimer);
+          validationTimers.delete(name);
+          touchedFields.delete(name);
 
           return { fieldDefs, fields, meta, structureVersion: s.structureVersion + 1 };
         });
