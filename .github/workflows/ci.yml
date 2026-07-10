@@ -40,13 +40,24 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify build output
+      - name: Verify build output (dual ESM+CJS + styles)
         run: |
           test -f dist/index.js
+          test -f dist/index.cjs
           test -f dist/index.d.ts
+          test -f dist/index.d.cts
           test -f dist/styles.css
           test -f dist/styles/tokens.css
           test -f dist/styles/primitives.css
           test -f dist/styles/layouts.css
           test -f dist/styles/components.css
           test -f dist/styles/base.css
+
+      - name: publint (package.json / exports integrity)
+        run: npx publint
+
+      - name: Are the types wrong? (attw)
+        run: npm run check:exports
+
+      - name: Load smoke (npm pack → install → require/import published exports)
+        run: bash scripts/smoke-load.sh
