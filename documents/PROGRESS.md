@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active (P0+P1 코드 완료 — 외부 publish만 승인 대기 · P2 착수)
+**Status**: active (P0+P1+P2 완료 — 외부 publish + P3 설계결정 대기) · **Next up**: P3(계약 골격, [O] 설계 태스크 — 사용자 검토 권장)
 **Engine**: claude (codex eligible 태스크는 개별 표기 — P3-4 표면 감사표 등 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (P0+P1 코드 완료 — v0.4 브랜치 22 커밋, 962 tests green, sample 기동·load smoke 검증. 대기(외부 승인): 0.3.26 publish+main병합 · 0.4 alpha.0 publish. 다음: P2 특성화 오라클)
+**Last updated**: 2026-07-10 (P0+P1+P2 완료 — v0.4 브랜치 ~28 커밋, 전체 1030 tests green. P2 특성화 오라클(68테스트)+wart 체크리스트 완성. 대기(외부): 0.3.26 publish+main병합·0.4 alpha.0 publish. 다음: P3 계약([O] 설계 — 사용자 검토 권장))
 
 ## Goal
 
@@ -40,7 +40,7 @@
 |---|---|---|---|---|
 | P0 실버그 핫픽스 | `p0-hotfixes` | 🟡 코드완료 | 0.3.26 | 버그 9건+보안 3종+환경 완료 · publish/전환만 승인 대기 |
 | P1 워크스페이스+패키징 | v0.4 | 🟡 코드완료 | alpha.0 | 스캐폴드·tsup dual·CI 로드게이트·sample 기동 완료 · alpha.0 publish만 승인 대기 |
-| P2 특성화 오라클 | main→공용 | ⬜ | (내부) | 행동 고정 테스트 4묶음 |
+| P2 특성화 오라클 | v0.4(=main src) | ✅ 완료 | (내부) | 하네스+4묶음 68테스트 · 엔진 wart 다수 특성화(이식 결정용) |
 | P3 계약 골격+감사표 | v0.4 | ⬜ | alpha.N | spec-first 게이트 · 파일럿 이식 |
 | P4 코어 이식 | v0.4 | ⬜ | alpha.N | schema-core+state · **abort 판정 지점** |
 | P5 렌더러 이식 | v0.4 | ⬜ | alpha.N | 필드 40종 · store 구독 · sample 성장 |
@@ -84,15 +84,15 @@
 
 ### P2 — 특성화 테스트 그물 = 이식 오라클 [ADR-0007 §2]
 
-구엔진(main의 src/) 행동을 고정한다. **신구 양쪽에서 실행 가능해야 한다** — 테스트가 라이브러리 진입점을 하드코딩하지 말고 하네스 모듈 1곳에서 import하도록(P4부터 같은 테스트를 신 엔진으로 돌린다).
+구엔진(v0.4의 src/, P0-fixed) 행동을 고정. 하네스 1곳에서만 엔진 import(P4에서 2개 specifier flip으로 신 엔진 전환). fan-out(sonnet ×4)으로 4묶음 병렬 작성. 특성화가 드러낸 엔진 wart는 이식 판단용으로 [특성화 발견 체크리스트](./analysis/characterization-findings.md)에 정리(P4/P5 keep-vs-fix 결정 근거).
 
-- [ ] **P2-1 [S] 하네스** — `tests/characterization/harness.ts`: 진입점·fixture(엔티티 선언 3종 — sample 도메인 재사용)·fetch 목업을 단일 모듈로.
-- [ ] **P2-2 [S] FieldRenderer 특성화** — 대표 6종(String/Number/Select/Date/ManyToOne/Boolean): 렌더 → 입력 → 검증 실패/통과 → 에러 표시 → 값 반영. 스냅숏 금지, 행동 단언만.
-- [ ] **P2-3 [S] 폼 로직 특성화** — 초기화(create/update: fetch 목업 경유 값 채움) · 저장(submit payload 형태 고정 — envelope 포함) · 리셋 · 탭 전환 · dirty 판정 엣지(빈 문자열/0/빈 배열).
-- [ ] **P2-4 [S] 리스트 로직 특성화** — 검색→검색폼 직렬화(wire 형식 고정)→페이지→다중 정렬→행 선택→일괄 삭제 payload.
-- [ ] **P2-5 [S] ViewEntityForm 구조 특성화** — 스텝 위저드 진행 · 서브컬렉션 표시/모달 재진입 콜백 · 버튼 배치 규칙.
+- [x] **P2-1** ✅ `3af8c2a`+`bb211ca` · 하네스(엔진 2-pointer indirection·renderWithProviders[Router/Auth/UI]·mockRcmFetch[ApiClient seam]·envelope)+3 fixture
+- [x] **P2-2** ✅ `39dec04` · FieldRenderer 6종 9테스트(chip-degenerate/withSelectBoxView 우회 포함)
+- [x] **P2-3** ✅ `39dec04` · 폼 로직 19테스트(create/update init·save wire·reset·isDirty 엣지·탭)
+- [x] **P2-4** ✅ `39dec04` · 리스트 13테스트(SearchForm.toJSON wire·페이지·다중정렬·bulk-delete payload)
+- [x] **P2-5** ✅ `39dec04`+`bb211ca` · ViewEntityForm 25테스트(서브컬렉션·버튼·탭 + 전체 렌더)
 
-**P2 게이트**: main에서 전량 green · 렌더 테스트 파일 9→25+ · 커버리지 래칫 가동(ADR-0007 §3).
+**P2 게이트**: 전량 green ✅(68 char + 전체 1030) · 렌더 파일 5개(68테스트 — 파일수보다 행동밀도 우선, 대표 표면 커버; 문자적 25파일 미달은 §Needs Review) · 커버리지 래칫 ⏳(임계 상향은 P3 진입 시 재측정).
 
 ### P3 — 계약 골격 + 표면 감사표 (spec-first 게이트)
 
@@ -138,6 +138,7 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 - [ ] **P0-8 동결 방식** — no-explicit-any 135파일 동결을 인라인 주석 대신 `eslint.config.mjs` override 블록으로(동일 효과·1파일 diff·whittle-down 용이).
 - [ ] **P1-2 ESM 메인배럴 caveat** — 순수 Node ESM `import('@rchemist/listgrid')`(메인)은 `react-sortablejs`(CJS-only peer, ESM/exports 없음)의 named export 미검출로 실패. 번들러(Next/webpack) 소비자는 정상. 대응: (a) 수용+MIGRATION 명시 / (b) v0.4에서 react-sortablejs를 ESM 대체(예: @dnd-kit)로 교체 검토(P5 렌더러 이식 시). 결정 필요.
 - [ ] **브랜치 전략 확인** — 모델 판단으로 `p0-hotfixes`→`v0.4` 병합해 P1 착수(이식원본 확보, reversible). main 무변경. 사용자가 다른 흐름(p0-hotfixes→main→v0.4) 원하면 v0.4 리셋 후 재정렬 가능.
+- [ ] **P2 렌더 파일수 게이트** — 게이트 문구는 "렌더 테스트 파일 9→25+"이나 실제는 밀도높은 5파일 68테스트(대표 표면 커버)로 구현. 파일수 목표를 문자적으로 채울지(필드 40종 개별 파일 등) vs 행동밀도로 충족 인정할지 — 커버리지 래칫 재측정과 함께 P3 진입 시 판단.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
