@@ -15,18 +15,21 @@ test('Subject declared validations fire, then pass (regex / minmax / email)', as
   await page.getByLabel(/과목명/).fill('알고리즘');
   await page.getByLabel(/과목코드/).fill('bad-code'); // fails the regex
   await page.getByLabel(/학점/).fill('9'); // out of [1,6]
-  await page.getByLabel(/이메일/).fill('not-an-email'); // fails email
+  await page.getByLabel(/이메일/).fill('not-an-email'); // fails EmailField
+  await page.getByLabel(/연락처/).fill('abc'); // fails PhoneNumberField
   await page.getByRole('button', { name: 'Save' }).click();
 
   await expect(page.getByText(/과목코드 형식/)).toBeVisible();
   await expect(page.getByText(/학점은 1~6/)).toBeVisible();
   await expect(page.getByText(/이메일 형식/)).toBeVisible();
+  await expect(page.getByText(/전화번호 형식/)).toBeVisible();
   await expect(page).toHaveURL(/\/subject\/new$/); // blocked
 
-  // fix all three → save succeeds
+  // fix all → save succeeds (phone with hyphens is normalized before the regex)
   await page.getByLabel(/과목코드/).fill('CS301');
   await page.getByLabel(/학점/).fill('3');
   await page.getByLabel(/이메일/).fill('algo@example.ac.kr');
+  await page.getByLabel(/연락처/).fill('010-1234-5678');
   await page.getByRole('button', { name: 'Save' }).click();
   await expect(page).toHaveURL(/\/subject$/);
   await expect(page.getByText('알고리즘')).toBeVisible();

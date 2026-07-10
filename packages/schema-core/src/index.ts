@@ -93,6 +93,8 @@ export { isEquals, isEqualCollection } from './util/compare';
 export { FormField } from './field/form-field';
 export {
   StringField,
+  EmailField,
+  PhoneNumberField,
   BooleanField,
   NumberField,
   TextareaField,

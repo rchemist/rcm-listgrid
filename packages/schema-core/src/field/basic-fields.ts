@@ -1,4 +1,6 @@
 import { FormField } from './form-field';
+import { EmailValidation } from '../validations/email-validation';
+import { PhoneNumberValidation } from '../validations/phone-number-validation';
 
 // Concrete leaf-field classes — META ONLY (charter C4). The type discriminant
 // drives the FieldRenderer registry in @listgrid/react (ADR-0003 §2); all
@@ -11,6 +13,24 @@ export class StringField extends FormField<string> {
   constructor(name: string, order: number, useCopy = false) {
     super(name, order, 'text');
     this.useCopy = useCopy;
+  }
+}
+
+/** Email (0.3.x EmailField, type 'email') — auto-attaches EmailValidation
+ *  (charter C4: a new field type is one class + one renderer). */
+export class EmailField extends FormField<string> {
+  constructor(name: string, order: number) {
+    super(name, order, 'email');
+    this.validations = [new EmailValidation()];
+  }
+}
+
+/** Phone number (0.3.x PhoneNumberField, type 'phone') — auto-attaches
+ *  PhoneNumberValidation (hyphens stripped, digits-only regex). */
+export class PhoneNumberField extends FormField<string> {
+  constructor(name: string, order: number) {
+    super(name, order, 'phone');
+    this.validations = [new PhoneNumberValidation()];
   }
 }
 

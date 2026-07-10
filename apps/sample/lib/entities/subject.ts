@@ -1,10 +1,11 @@
 import {
   BooleanField,
   DateField,
-  EmailValidation,
+  EmailField,
   EntityForm,
   MinMaxNumberValidation,
   NumberField,
+  PhoneNumberField,
   RegexValidation,
   SelectField,
   StringField,
@@ -40,9 +41,8 @@ export function SubjectEntityForm(): EntityForm {
             '학점은 1~6 사이여야 합니다',
           ),
         ),
-      new StringField('contactEmail', 130)
-        .withLabel('담당자 이메일')
-        .withValidations(new EmailValidation()),
+      new EmailField('contactEmail', 130).withLabel('담당자 이메일'),
+      new PhoneNumberField('contactPhone', 135).withLabel('담당자 연락처'),
       new SelectField('category', 140, [
         { value: 'MAJOR', label: '전공' },
         { value: 'GENERAL', label: '교양' },

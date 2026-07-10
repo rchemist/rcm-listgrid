@@ -133,6 +133,9 @@ function MarkdownRenderer({ name, readOnly }: FieldRendererComponentProps) {
  */
 export function registerDefaultRenderers(): void {
   registerFieldRenderer('text', TextRenderer);
+  // email/phone reuse the text input; the field class carries the validation.
+  registerFieldRenderer('email', TextRenderer);
+  registerFieldRenderer('phone', TextRenderer);
   registerFieldRenderer('textarea', TextareaRenderer);
   registerFieldRenderer('number', NumberRenderer);
   registerFieldRenderer('date', DateRenderer);

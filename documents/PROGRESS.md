@@ -7,7 +7,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-11 (**✅ 수직 슬라이스 V0+V1+V2 완료** 🎉 — College(CRUD+M2O 팝업)·Subject(검증+cross-field)·Professor(SubCollection) 실브라우저 **E2E 5건 green**. 헌장 C1~C9 전 개념 실증. 전체 1117 unit + 5 E2E. **다음 방향 사용자 확정 필요**(§Open Questions). 대기(외부): 0.3.26·alpha.0 publish 승인)
+**Last updated**: 2026-07-11 (수직 슬라이스 V0~V2 완료 + **하드닝/확장 트랙 진행**(사용자 확정): 품질게이트 신패키지+apps 확장·CI e2e job·SubColl 단위테스트·Email/Phone 필드클래스(C4 패턴). 전체 **1120 unit + 5 E2E green**. 남은 하드닝: id→entity 캐시·a11y; 남은 확장: File/Tag/주소 등 필드·GJCU 폼 추가. 대기(외부): 0.3.26·alpha.0 publish 승인)
 
 ## Goal
 
@@ -176,7 +176,7 @@ backend-rcm(현행 URL/envelope 관례 **무변경 이사** — EntityForm.tsx:6
 - [ ] **0.4.0-alpha.N 배포** — `v0.4.0-alpha.N` 태그 push → next 자동배포(파이프 검증). P1 완료로 준비됨(빈 골격이어도 실행 가능). 사용자 실행/승인 시점 결정.
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독 (P5 전까지)
 - [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
-- [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 진행 중. **H(하드닝)**: [x] 품질 게이트를 신 패키지+apps로 확장(eslint files/ignores·lint/format globs·`typecheck:packages`) · [x] CI에 packages tsc + Playwright e2e job 배선 · [x] SubCollection 단위테스트(state) · [ ] id→entity 캐시(M2O renderer 매 렌더 getOne 방지) · [ ] a11y(라벨·role·focus). **E(확장)**: [ ] 남은 필드타입(Email/Phone/File/Tag/주소/QR/Xref 클래스+렌더러) · [ ] GJCU 폼 1~2종 추가 재구현.
+- [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 진행 중. **H(하드닝)**: [x] 품질 게이트를 신 패키지+apps로 확장(eslint files/ignores·lint/format globs·`typecheck:packages`) · [x] CI에 packages tsc + Playwright e2e job 배선 · [x] SubCollection 단위테스트(state) · [ ] id→entity 캐시(M2O renderer 매 렌더 getOne 방지) · [ ] a11y(라벨·role·focus). **E(확장)**: [~] 필드타입 — [x] Email/Phone 클래스(내장 검증, C4 "클래스1+렌더러1" 패턴 실증, Subject E2E) · [ ] File/Tag/주소/QR/Xref 등 나머지 · [ ] GJCU 폼 1~2종 추가 재구현.
 
 ## 완료 기록 (태스크 완료 시 여기에 한 줄 증거 누적, 페이즈 완료 시 progress-archive로 이동)
 
