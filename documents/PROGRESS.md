@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H 완료 · E-트랙: EF1~EF5 완료, **phase EF = 🟡 Partial**(리뷰 게이트 blocking 2건) · **Next up**: EF-R1 → EF-R2 → EF-gate 재검증. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · 하드닝 H ✅ · **Phase EF ✅**(리뷰게이트 통과) · **Next up**: EA-A(트리비얼 필드 12종 wave 전개). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 04:30 (EF-R1 완료 — blocking 2건 해소 `5230a56`. 1204 unit+5 E2E green. parity map은 [analysis](./analysis/2026-07-11/ef-gate-parity-map.md) 커밋. **Next=EF-R2**(stale 타이머 정리) → EF-gate 재검증)
+**Last updated**: 2026-07-11 04:45 (**Phase EF 완료** — EF-R2 `1a64dbb`로 리뷰 발견 3건 전해소, gate 통과. 1205 unit+5 E2E green. EF 섹션 collapse. **Next=EA-A** — [archive Handoff](./progress-archive/phase-e-track-tasks.md) + [계획 §EA](./plans/e-track-field-parity.md) 읽고 재개)
 
 ## Goal
 
@@ -45,26 +45,25 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H 완료·E 착수) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF ✅ · EA 착수) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음 작업: EF5 validate-on-change → EF-gate)
+## 세션 인계 (Handoff — 다음 작업: EA-A 트리비얼 필드 12종)
 
-- **현 상태**: EF1(`c7d387f`)·EF2(`1bc3f06`)·EF3(`98f956f`)·EF4(`9018747`) 완료. 전체 **1190 unit + 5 E2E green**, full gate ✓. §Needs Review에 EF2 4건+EF3 2건+EF4 1건 open(비차단).
-- **다음 = EF5 (validate-on-change, opt-in)**: setValue 후 debounce validateField(기존 form-store validateField 재사용) + touched 게이팅. 낮은 위험 — 이후 **EF-gate**(EF1~4 착지 + onInitialize/onChanges 특성화 오라클 구·신 대조, **phase-boundary 리뷰 게이트 겸함** — delegate 페이즈라 intent-conformance 차원 필수).
-- **Do-NOT**: ① 훅/빌더가 store를 직접 받게 하지 말 것(ADR-0003) — FormMutator 경유. ② **동적 mutation 이후 entityForm.getFields()/getTabs()/getFieldGroups() 직접 읽기 금지 — store.fieldDefs가 live 구조의 단일 진실**(EF4, EA/EC 신규 소비자 주의). ③ 동작 검증 생략 금지. ④ EF-gate 전 대량 필드 이식(EA) 금지. ⑤ 형식 P3~P7 재개 금지.
-- **불변/함정**: EF1 override `??`(explicit false 승)·D4 단일필드 구독. EF2 loop-guard sync batch 한정. EF3 build-after-hooks(파이프 재조립 금지). hydrate dotted-path(resolveFetchedValue)·payload는 store에 보존(late-add 재바인딩용). structureVersion은 add/remove만 bump.
-- **패턴 참조**: FormMutator(`schema-core/src/field/form-mutator.ts`)·빌더(`schema-core/src/onchanges/`)·loop-guard+fieldDefs(`state/src/form-store.ts`)·init 파이프(`state/src/initialize-form-store.ts`)·initializer 훅(`react/src/hooks/`)·구조 재도출(`react/src/components/ViewEntityForm.tsx`). H-트랙 [archive](./progress-archive/phase-hardening-H.md).
-- **첫 파일**: 구 `src/listgrid/components/form/FieldRenderer.tsx:97-101`(onChange→validate) → 신 `packages/state/src/form-store.ts`(validateField 재사용)·debounce/touched 게이팅 설계.
-- **작업 규율**: 태스크마다 설계는 세션이(conductor), 구현은 sonnet 위임, 검증은 세션이 rigorous(full gate+공유경로 변경 시 full E2E). 완료=logic 커밋→PROGRESS 커밋→**push(사용자: 전부 push)**. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`. Node26(폴리필 OK).
+- **현 상태**: **Phase EF ✅**(EF1~5+R1/R2+gate). 명령형 라이프사이클 완비, **1205 unit + 5 E2E green**, 전부 push. 상세 Handoff·패턴 카탈로그는 [archive §Next Phase Handoff](./progress-archive/phase-e-track-tasks.md) — 새 세션은 그것부터.
+- **다음 = EA-A**: Checkbox·MultiSelect·Password·Month·Year·Time·Link·Tag·ColorPreset·MessageView·Profile·MappedJoin (12종). 규칙: 1필드=1커밋+테스트. 함정·값형태 [계획 §필드 인벤토리](./plans/e-track-field-parity.md). 기반 클래스 체인(OptionalField/MultipleOptionalField/CheckButtonValidationField/AbstractDateField) 필요 시 선행 이식.
+- **fan-out 주의**: 필드 이식은 schema-core 배럴·react 레지스트리(default-renderers)가 **shared-by-construction** → 병렬화하려면 worktree isolation+patch-merge 또는 공유 지점 pre-stage 후 disjoint만 병렬.
+- **Do-NOT**: ① store 직접 수신 금지(FormMutator 경유, ADR-0003) ② 동적 mutation 후 entityForm.getFields()류 직접 읽기 금지(store.fieldDefs 경유) ③ 동작 검증 생략 금지 ④ 형식 P3~P7 재개 금지 ⑤ ColorField dynamic Tailwind 이식 금지 ⑥ EA-B 라이브 마스킹류 착수 전 propagation seam 결정(계획 ⚠).
+- **불변/함정**: EF1 override `??`·D4 단일필드 구독. EF2 loop-guard sync batch. EF3 build-after-hooks+clone(true). hydrate dotted-path·payload 보존. structureVersion add/remove만 bump.
+- **작업 규율**: 설계=세션(conductor), 구현=sonnet 위임, 검증=세션 rigorous(full gate+공유경로 변경 시 full E2E). 완료=logic 커밋→PROGRESS 커밋→**push(사용자: 전부 push)**. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`. Node26(폴리필 OK).
 
 ---
 
 ## Tasks — 하드닝/확장 트랙 (active · 무인모드)
 
 **확정 방향 (사용자 2026-07-11)**: 수직 슬라이스(실 GJCU 3폼 → 신 엔진 6패키지 → Playwright E2E 5건 green, 헌장 C1~C9 실증)로 ADR-0008 abort 판정을 GO로 실증.
-형식 P3~P7(표면 감사표·GA 대조표)은 GA 승격 시 재개하고, 그전까지는 **하드닝 + 점진 확장**으로 진행. 현재 전체 **1120 unit + 5 E2E green**.
+형식 P3~P7(표면 감사표·GA 대조표)은 GA 승격 시 재개하고, 그전까지는 **하드닝 + 점진 확장**으로 진행. 현재 전체 **1205 unit + 5 E2E green**.
 게이트: 태스크마다 관련 단위/렌더/E2E 그물 green + (렌더 변경) sample 실화면 확인.
 
 ### H — 하드닝 ✅ 완료 (전 5태스크 — 게이트·CI·SubColl·H1 캐시·H2 a11y) · [archive](./progress-archive/phase-hardening-H.md)
@@ -75,16 +74,7 @@
 
 **핵심**: 신 엔진은 선언적 라이프사이클(dependsOn cascade)만 있고 **명령형(onInitialize/onChanges/META 반응성)이 전무** → 필드 렌더만 이식하면 동작이 조용히 no-op. **Phase EF(기반) 먼저 → EA(필드 대량) → EB(주소) → EC(폼+E2E).** 근거·상세 [계획](./plans/e-track-field-parity.md) + [원자료](./analysis/2026-07-11/e-track-understand-workflow.md).
 
-#### Phase EF — 명령형 라이프사이클 기반 (대량 이식 전 필수) **[O]**
-
-- [x] **EF1 [O] META 반응화** ✅ `c7d387f` · store meta-slice+setMeta(override `??` declared 우선)·useFieldMeta(D4)·validate(ctx,override) 준수 · 28 unit·E2E 5/5·gate(1128→1138)
-- [x] **EF2 [O] onChanges cascade** ✅ `1bc3f06` · FormMutator+loop-guard+빌더3종 · +22 unit(1160 green)·E2E 5/5·deviations 4→§Needs Review · [detail](./progress-archive/phase-e-track-tasks.md)
-- [x] **EF3 [O] initializeFormStore 파이프** ✅ `98f956f` · build-after-hooks+initializer 훅+hydrate dotted · +16 unit(1176)·E2E 5/5·deviations 2 · [detail](./progress-archive/phase-e-track-tasks.md)
-- [x] **EF4 [O] 동적 필드 add/remove + structure-version** ✅ `9018747` · fieldDefs registry+정밀 재도출(무 remount) · +14 unit(1190)·E2E 5/5·dev 1 · [detail](./progress-archive/phase-e-track-tasks.md)
-- [x] **EF5 validate-on-change (opt-in)** ✅ `5f1d151` · 기본off+touched+trailing debounce·cascade 미발화 · +9 unit(1199)·E2E 5/5·dev 0 · [detail](./progress-archive/phase-e-track-tasks.md)
-- [x] **EF-R1 (리뷰게이트 blocking)** ✅ `5230a56` · clone(true) parity+onFetchData 격리+훅 .catch · +4 회귀(1204)·E2E 5/5·dev 0(테스트 국소 1) · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF-R2 (리뷰게이트 non-blocking)** — removeField·중복 addField가 validationTimers/touchedFields 정리(이름 재사용 필드 stale 타이머 오검증 방지, 재현 확인됨). 재현 테스트.
-- [ ] **EF-gate** — 리뷰 게이트 1차 완료(blocking 2·non-blocking 1 → EF-R1/R2, [결과](./progress-archive/phase-e-track-tasks.md)). **선결 EF-R1·R2** 착지 후 재검증+phase 아카이브.
+#### Phase EF ✅ 완료 (2026-07-11 — EF1~5 + 리뷰게이트 R1·R2 + gate 통과, 명령형 라이프사이클 완비 · 1205 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md) · parity map [analysis](./analysis/2026-07-11/ef-gate-parity-map.md)
 
 #### Phase EA — 필드 전수 이식 (EF1~4 후, wave별 전개) **[S, 복잡건 O]**
 
@@ -106,7 +96,7 @@
 - [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
 
-**Next up**: **EF2** (onChanges cascade — setValue 후 훅 체인 dispatch + OnChangeEntityForm 빌더 카탈로그 이식, EF1 meta-slice 위). EF1 완료로 META 반응성 확보.
+**Next up**: **EA-A** (트리비얼 필드 12종 wave 전개 — 착수 시 필드별 `[ ]` 생성, 1필드=1커밋+테스트).
 
 ---
 
@@ -129,6 +119,11 @@
 - [ ] **EF3 withId 전파** — 브리핑 미명시였으나 clone 직후 `withId(id)` 추가(fetch-error 경로도 update 모드 유지, sample idiom 일치) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF3 hydrate dotted 수정(공유코드)** — "지원 확인" 결과 미지원이라 hydrate 내부 resolveFetchedValue 신설(flat 동작 동일·1176 green). EC2 실사용 검증 예정 · risk: low-med · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF4 fieldDefs=단일 진실** — 동적 mutation 후 entityForm.getFields()류 직접 읽기는 stale(현 콜사이트 0 확인·Handoff Do-NOT 등재). EA/EC 신규 소비자는 store 경유 필수 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
+
+## Progress notes
+
+- 2026-07-11 EF-R2 anomaly: 위임 에이전트가 red-green 증명에 `git stash` 사용(no-git 규칙 위반) — HEAD 불변·stash 잔여 없음 확인, 피해 없음. 브리핑의 no-git 문구는 유지.
+- 2026-07-11 EF-gate: 무인 FIND-ONLY 준수 — 발견 3건 전부 태스크(EF-R1/R2) 경유로 수정, 리뷰 자체는 무변경.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 

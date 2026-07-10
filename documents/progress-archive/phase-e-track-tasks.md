@@ -125,5 +125,44 @@ proposed_helper: 없음.
 - 회귀 테스트 4건(+state 3·react 1). 격리 후엔 어댑터 throw만으로 파이프가 reject하지 않아, 훅 `.catch` 분기 검증은 테스트 내 clone() 몽키패치로 재현(deviation — 프로덕션 무영향).
 - 에이전트 자가보고: typecheck clean·packages 174/174·prettier clean.
 
+---
+
+## EF-R2 — stale 타이머/touched 정리 (리뷰 발견 #3)
+
+**완료**: 2026-07-11 · **실행**: delegate(sonnet, wf_540c0829-acf, 44k tokens/2min) · **status**: `done` (deviation 0)
+
+- removeField + addField 중복교체 분기에서 clearTimeout+validationTimers.delete+touchedFields.delete (부재 no-op 계약 보존). 회귀 테스트 1건 — **red-green 증명 수행**(수정 임시 제거 시 정확히 리뷰 증상 재현 후 복원 green).
+- ⚠ 순수성 anomaly: 에이전트가 red-green 증명에 `git stash`를 사용(no-git 규칙 위반). HEAD 불변·stash 잔여 없음 확인 — 피해 없음, 이후 브리핑에 "테스트만 검증, git 절대 금지" 강조 유지.
+
+---
+
+## EF-gate — 최종 판정 (2026-07-11) ✅ 통과
+
+- **리뷰 발견 3건 전부 해소**: #1·#2 → EF-R1 `5230a56`(+4 회귀 테스트), #3 → EF-R2 `1a64dbb`(+1 red-green 증명 테스트). refuted 2건은 설계 확인/EA-B 계획 등재.
+- **intent-conformance 이탈 0** (5개 위임 태스크 전부 브리핑 충실).
+- **특성화 오라클**: 구→신 14개 동작 parity map 확정·보존 — [analysis/2026-07-11/ef-gate-parity-map.md](../analysis/2026-07-11/ef-gate-parity-map.md). 미이식으로 확정 기록된 것: derivedValidations 빌더(필드 이식 시 확장)·withShouldReload(EF4 대체)·propagation seam(EA-B 결정).
+- 최종 게이트: **1205 unit + 5 E2E green**, full gate ✓. **EA 착수 조건 충족.**
+
+---
+
+## Patterns Introduced / Reused (Phase EF)
+
+- **FormMutator** (`schema-core/src/field/form-mutator.ts`) — 핸들러가 받는 유일한 mutation seam(getValue/getValues/setValue/setMeta/addField/removeField). 새 명령형 기능은 store 직접 노출 금지, 이 인터페이스 확장으로.
+- **onChanges 빌더 카탈로그** (`schema-core/src/onchanges/`) — changeHidden/changeRequired/changeSelectOptions 스타일(순수 함수→OnChangesHandler, setMeta만 사용). 후속 빌더(derivedValidations 등)는 이 패턴으로.
+- **batch loop-guard** (`state/src/form-store.ts` performSetValue) — top-level 판별(dispatchBatch null 체크)은 EF5 touched 게이팅도 재사용 중. 신규 "사용자 편집시에만" 기능은 이 체크 재사용.
+- **build-after-hooks 파이프** (`state/src/initialize-form-store.ts`) — 재조립 금지, 호출 재사용. clone(true) 필수(선언값 보존).
+- **fieldDefs live registry + structureVersion** — 동적 구조의 단일 진실은 store. 구조 소비자는 store 경유(entityForm getter는 mutation 후 stale).
+- **useEntityFormInitializer** (`react/src/hooks/`) — cancellation-safe + .catch(무한 loading 금지 계약).
+- **resolveFetchedValue** (form-store 내부) — dotted-path 바인딩 walker. 중복 구현 금지.
+
+## Next Phase Handoff (→ EA-A 트리비얼 필드 12종)
+
+- **현 상태**: Phase EF ✅(EF1~5+R1/R2+gate). 명령형 라이프사이클(META 반응성·onChanges cascade·init 파이프·동적 필드·validate-on-change) 완비, **1205 unit + 5 E2E green**, 전부 push. 필드 대량 이식 개시 조건 충족.
+- **EA-A 스코프**: Checkbox·MultiSelect·Password·Month·Year·Time·Link·Tag·ColorPreset·MessageView·Profile·MappedJoin (12종, 빈도순 아님 — 트리비얼 묶음). 규칙: 1필드=1커밋+테스트(구 특성화 or 신규 렌더). 함정·값형태는 [계획 §필드 인벤토리](../plans/e-track-field-parity.md).
+- **공유 터치포인트 주의(fan-out 시)**: 필드 이식은 schema-core 배럴(index.ts)·react 레지스트리(default-renderers)·기반 클래스 체인(OptionalField/MultipleOptionalField/CheckButtonValidationField/AbstractDateField 필요 시 선행 이식)이 **shared-by-construction** — fan-out하면 worktree isolation 필수 또는 공유 지점 pre-stage 후 disjoint 파일만 병렬.
+- **Do-NOT**: ① 훅/빌더가 store 직접 수신 금지(FormMutator 경유, ADR-0003) ② 동적 mutation 후 entityForm.getFields()류 직접 읽기 금지(store.fieldDefs 경유) ③ 동작 검증 생략 금지(사용자 강조) ④ 형식 P3~P7 재개 금지 ⑤ ColorField dynamic Tailwind(`!bg-[${v}]`) 이식 금지→inline-style ⑥ EA-B 라이브 마스킹류(Birthday/Telephone) 착수 전 propagation seam 결정(계획서 ⚠)
+- **Unacknowledged Needs Review**: 16건 open (P0/P1/P2/P3 9건 + EF2 4건 + EF3 2건 + EF4 1건) — 본문 §Needs Review.
+- **세션 정책**: continue 권장(컨텍스트 연속성 — EF 패턴 참조가 EA 브리핑에 직결). 새 세션이라면 이 Handoff + 계획 §EA + parity map만 읽고 재개.
+
 
 
