@@ -116,6 +116,29 @@ export type { SubCollectionConfig } from './field/sub-collection-field';
 // MultiSelect/Tag, EA-A fan-out) ---
 export { OptionsField, MultiOptionsField } from './field/options-field';
 
+// --- EA-A trivial field classes (one class + one renderer file each; renderers
+// register in @listgrid/react default-renderers) ---
+export { CheckboxField } from './field/checkbox-field';
+export type { CheckboxComboProps } from './field/checkbox-field';
+export { MultiSelectField } from './field/multi-select-field';
+export { PasswordField } from './field/password-field';
+export type {
+  PasswordFieldProps,
+  PasswordStrength,
+  PasswordStrengthRule,
+} from './field/password-field';
+export { MonthField } from './field/month-field';
+export { YearField } from './field/year-field';
+export { TimeField } from './field/time-field';
+export type { TimeFieldValue } from './field/time-field';
+export { LinkField } from './field/link-field';
+export { TagField } from './field/tag-field';
+export type { TagValidationResult } from './field/tag-field';
+export { ColorPresetField } from './field/color-preset-field';
+export { MessageViewField } from './field/message-view-field';
+export { ProfileField } from './field/profile-field';
+export { MappedJoinField } from './field/mapped-join-field';
+
 // --- EntityForm declaration (charter C1) ---
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';

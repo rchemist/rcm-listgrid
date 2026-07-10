@@ -4,6 +4,18 @@ import { useFieldMeta, useFieldValue, useFormStore } from '../providers/form-sto
 import { registerFieldRenderer, type FieldRendererComponentProps } from './field-renderer-registry';
 import { ManyToOneRenderer } from './many-to-one-renderer';
 import { SubCollectionRenderer } from './sub-collection-renderer';
+import { CheckboxFieldRenderer } from './checkbox-renderer';
+import { MultiSelectFieldRenderer } from './multi-select-renderer';
+import { PasswordFieldRenderer } from './password-renderer';
+import { MonthFieldRenderer } from './month-renderer';
+import { YearFieldRenderer } from './year-renderer';
+import { TimeFieldRenderer } from './time-renderer';
+import { LinkFieldRenderer } from './link-renderer';
+import { TagFieldRenderer } from './tag-renderer';
+import { ColorPresetFieldRenderer } from './color-preset-renderer';
+import { MessageViewFieldRenderer } from './message-view-renderer';
+import { ProfileFieldRenderer } from './profile-renderer';
+import { MappedJoinFieldRenderer } from './mapped-join-renderer';
 
 // Default field-type renderers (task item 3). Every one of these follows the
 // same shape: read this field's resolved value via useFieldValue, resolve the
@@ -213,4 +225,17 @@ export function registerDefaultRenderers(): void {
   registerFieldRenderer('markdown', MarkdownRenderer);
   registerFieldRenderer('manyToOne', ManyToOneRenderer);
   registerFieldRenderer('subCollection', SubCollectionRenderer);
+  // EA-A trivial fields (fan-out port of the 0.3.x catalog)
+  registerFieldRenderer('checkbox', CheckboxFieldRenderer);
+  registerFieldRenderer('multiselect', MultiSelectFieldRenderer);
+  registerFieldRenderer('password', PasswordFieldRenderer);
+  registerFieldRenderer('month', MonthFieldRenderer);
+  registerFieldRenderer('year', YearFieldRenderer);
+  registerFieldRenderer('time', TimeFieldRenderer);
+  registerFieldRenderer('link', LinkFieldRenderer);
+  registerFieldRenderer('tag', TagFieldRenderer);
+  registerFieldRenderer('colorPreset', ColorPresetFieldRenderer);
+  registerFieldRenderer('messageView', MessageViewFieldRenderer);
+  registerFieldRenderer('profile', ProfileFieldRenderer);
+  registerFieldRenderer('mappedJoin', MappedJoinFieldRenderer);
 }
