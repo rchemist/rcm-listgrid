@@ -129,8 +129,49 @@ const subjectSeed: Subject[] = [
   },
 ];
 
+export interface Student {
+  id: string;
+  name: string;
+  state?: string;
+  city?: string;
+  address1: string;
+  address2: string;
+  postalCode: string;
+  [key: string]: unknown;
+}
+
+// Flat address columns (state/city/address1/address2/postalCode) — the wire
+// shape `applyFullAddressFields`' siblings hydrate FROM on edit (EC1, plan
+// §EC). Both seeds carry every column so the composite AddressRenderer's
+// read-only postalCode/address1 displays + state/city summary line render
+// non-empty immediately on `/student/{id}`.
+const studentSeed: Student[] = [
+  {
+    id: '1',
+    name: '김민준',
+    state: '서울',
+    city: '강남구',
+    address1: '테헤란로 152',
+    address2: '3층',
+    postalCode: '06236',
+  },
+  {
+    id: '2',
+    name: '이서연',
+    state: '경기',
+    city: '성남시 분당구',
+    address1: '판교역로 235',
+    address2: '',
+    postalCode: '13494',
+  },
+];
+
 export function collegeStore() {
   return getOrCreateStore<College>('college', collegeSeed);
+}
+
+export function studentStore() {
+  return getOrCreateStore<Student>('student', studentSeed);
 }
 
 export function subjectStore() {
