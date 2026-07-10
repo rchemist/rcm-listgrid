@@ -41,3 +41,6 @@ export type { FieldRendererProps } from './components/FieldRenderer';
 
 export { ViewEntityForm } from './components/ViewEntityForm';
 export type { ViewEntityFormProps } from './components/ViewEntityForm';
+
+export { ViewListGrid } from './components/ViewListGrid';
+export type { ViewListGridProps } from './components/ViewListGrid';

@@ -56,7 +56,10 @@ export function EmployeeSearchDemo() {
       <thead>
         <tr>
           {['id', 'name', 'email', 'department', 'status', 'hireDate'].map((col) => (
-            <th key={col} style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '4px 8px' }}>
+            <th
+              key={col}
+              style={{ textAlign: 'left', borderBottom: '1px solid #ccc', padding: '4px 8px' }}
+            >
               {col}
             </th>
           ))}

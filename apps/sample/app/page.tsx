@@ -27,8 +27,8 @@ export default function HomePage() {
         <h2>package load</h2>
         <ul>
           <li>
-            workspace package <code>@listgrid/schema-core</code> — <code>SCHEMA_CORE_VERSION</code> ={' '}
-            <strong>{SCHEMA_CORE_VERSION}</strong>
+            workspace package <code>@listgrid/schema-core</code> — <code>SCHEMA_CORE_VERSION</code>{' '}
+            = <strong>{SCHEMA_CORE_VERSION}</strong>
           </li>
           <li>
             published library <code>{ROOT_PACKAGE_NAME}</code> — version{' '}

@@ -9,6 +9,12 @@
     "start": "next start"
   },
   "dependencies": {
+    "@listgrid/backend-rcm": "*",
+    "@listgrid/next": "*",
+    "@listgrid/react": "*",
+    "@listgrid/schema-core": "*",
+    "@listgrid/state": "*",
+    "@listgrid/ui-default": "*",
     "next": "^15.0.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"

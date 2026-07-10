@@ -7,7 +7,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: **fable 불필요.** 세션 기본 sonnet, `[O]` 태스크만 opus (`/model`로 전환). `[H]`=haiku 위임 가능한 반복. 설계 판단이 ADR/헌장으로 해소되지 않으면 **구현하지 말고** §Open Questions에 기록 후 사용자에게 질의한다.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수할 태스크가 가리키는 ADR **만** 읽고 재개한다. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함 — 필요 시 verification-log 경유).
-**Last updated**: 2026-07-10 (V0.1~V0.3 완료 — schema-core 코어 + @listgrid/state 스토어 + @listgrid/react 렌더러(프로바이더·레지스트리·ViewEntityForm)+ui-default 프리미티브, 전체 1074 tests green. V0.3는 워크플로 위임(sonnet)→main 검증·통합. 알려진 갭: cross-field 조건부 재해소는 V1. 다음: V0.4 backend+list+M2O+College E2E. 대기(외부): 0.3.26·alpha.0 publish 승인)
+**Last updated**: 2026-07-10 (**V0.4a 완료 — College CRUD가 실브라우저 Playwright E2E green** 🎉: 신 엔진(schema-core+state+react+ui-default+backend-rcm+next)이 SSR 목업 백엔드와 실동작. 헌장 보존검증3 + ADR-0008 abort판정 조기 통과. 전체 1088 unit + College E2E. V0.1~V0.4a 커밋됨. 다음: V0.4b ManyToOne 팝업. 대기(외부): 0.3.26·alpha.0 publish 승인)
 
 ## Goal
 
@@ -60,7 +60,8 @@
 | **V0.1** schema-core 코어 | EntityForm + 필드클래스(String/Bool/Number/Textarea/Markdown/Select/M2O) + value ops(dirty/blank) + validate | 단위테스트 ✅ 32 green | ✅ `8ca3932` |
 | **V0.2** state 스토어 | createFormStore(값슬라이스·validate·hydrate·toSaveData[M2O flatten])/createListStore + SearchForm + BackendAdapter 계약 | 스토어 단위테스트 ✅ 11 green | ✅ |
 | **V0.3** ui-default + react 폼 | ui-default 프리미티브 11종 + 5-seam 프로바이더(throw) + FieldRenderer 레지스트리(D4 슬라이스 구독) + ViewEntityForm(validate→onSave) | jsdom 렌더 테스트 ✅ (타이핑→store·required 에러·onSave) | ✅ |
-| **V0.4** backend+list+M2O+E2E | backend-rcm 어댑터 + @listgrid/next + sample College/Prof CRUD + ViewListGrid + M2O 팝업(피커+생성) + College 재구현 + Playwright | **College E2E green** | ⬜ ← next |
+| **V0.4a** backend+list+form+E2E | backend-rcm 어댑터(12t) + @listgrid/next + sample College/Prof/Univ CRUD + ViewListGrid + College 재구현 + 페이지(list/new/edit) + Playwright | **College CRUD E2E green ✅** (list fetch→생성→required검증→POST→목록반영→edit(getOne+hydrate)→PUT→영속) | ✅ |
+| **V0.4b** ManyToOne 팝업 | ManyToOne 렌더러(Modal + ViewListGrid 피커 + ViewEntityForm 생성) + College dean 필드 + E2E 확장 | College+dean E2E green | ⬜ ← next |
 | **V1** Major | Number/Select/Date/validations + 조건부 가시성(cross-field) | Major E2E | ⬜ |
 | **V2** Professor | SubCollection(inline/table) + 자식 store 격리(ADR-0002§4) | Professor E2E | ⬜ |
 

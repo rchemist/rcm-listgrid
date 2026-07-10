@@ -9,5 +9,17 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependencies": {
+    "next": "^15.0.0",
+    "react": "^19.2.1"
+  },
+  "dependencies": {
+    "@listgrid/react": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "next": "^15.0.0",
+    "react": "^19.2.1"
+  }
 }
