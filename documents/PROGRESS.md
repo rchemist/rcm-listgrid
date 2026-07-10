@@ -81,7 +81,9 @@
 
 #### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
 
-- [ ] **EB1** schema-core AddressField(exceptOnSave 가상 composite) + applyFullAddressFields(flat 형제 required) — form-store 무변경
+- [x] **EB1** ✅ `f31fb23` · AddressField(exceptOnSave — toSaveData skip 검증 TRUE)+applyFullAddressFields·형제 hidden 미적용(hidden=required 사망, 증거) · +14(1741)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
+- [~] **EB2** react AddressRenderer — 형제 useFieldValue + useUI 2단 모달 + `<DaumPostcode>` 직접 import + onComplete→형제 setValue fan-out. peerDep react-daum-postcode. **+렌더 억제 메커니즘**: 형제에 `renderedBy`(composite명) 마커(schema-core 소폭)+ViewEntityForm 순회 스킵 — hidden과 달리 validate 비스킵. (Kakao 지도 연기)
+  - **Reuse review**: Extend: FormField(renderedBy 마커)·ViewEntityForm 순회·Modal/TextInput 프리미티브·store setValue fan-out(InlineMap 동형) — New: AddressRenderer+react-daum-postcode peerDep
 - [ ] **EB2** react AddressRenderer — 형제 useFieldValue + useUI 2단 모달 + `<DaumPostcode>` 직접 import + onComplete→형제 setValue fan-out. peerDep react-daum-postcode. (Kakao 지도 연기)
 
 #### Phase EC — EntityForm 사용예 + E2E (동작 실증)
