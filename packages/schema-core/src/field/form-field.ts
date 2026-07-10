@@ -18,6 +18,7 @@ import {
 } from './conditional';
 import type { EntityField } from './entity-field';
 import type { FieldEvalContext } from './eval-context';
+import type { FieldMetaOverride } from './field-meta';
 import type { FieldType, FieldValue } from './types';
 import { isBlank } from './value';
 import type { ViewPreset } from './view-preset';
@@ -98,16 +99,23 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
    * Run required-blank check + declared validations. Transplant of
    * FormField.validate:779-823 — hidden/readonly/unpermitted fields skip
    * validation; required-blank short-circuits; returns failing results only.
+   *
+   * `override` (EF1) is the imperative per-field meta override held in the
+   * form store: when a key is set (non-undefined) it WINS over the
+   * declared/predicate-resolved value. `??` is deliberate here — it lets an
+   * explicit `false` override win (only `undefined` falls through to the
+   * predicate), unlike `||` which would treat `false` as "not set".
    */
-  async validate(ctx: FieldEvalContext): Promise<ValidateResult[]> {
-    if ((await this.isHidden(ctx)) || (await this.isReadonly(ctx))) {
-      return [];
-    }
+  async validate(ctx: FieldEvalContext, override?: FieldMetaOverride): Promise<ValidateResult[]> {
+    const hidden = override?.hidden ?? (await this.isHidden(ctx));
+    const readonly = override?.readonly ?? (await this.isReadonly(ctx));
+    if (hidden || readonly) return [];
     if (!this.isPermitted(extractPermissions(ctx.session))) {
       return [];
     }
 
-    if (await this.isRequired(ctx)) {
+    const required = override?.required ?? (await this.isRequired(ctx));
+    if (required) {
       if (isBlank(ctx.value, ctx.renderType)) {
         const label =
           typeof this.getLabel() === 'string' ? String(this.getLabel()) : this.getName();
@@ -115,9 +123,10 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
       }
     }
 
+    const validations = override?.validations ?? this.validations;
     const results: ValidateResult[] = [];
-    if (this.validations && this.validations.length > 0) {
-      for (const v of this.validations) {
+    if (validations && validations.length > 0) {
+      for (const v of validations) {
         const r = await v.validate(ctx, ctx.value, v.message);
         if (r.hasError()) results.push(r);
       }

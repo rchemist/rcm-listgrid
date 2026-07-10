@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import { getCurrentValue, type EntityField, type FieldEvalContext } from '@listgrid/schema-core';
 import { useSession } from '../providers/auth';
-import { useFormField, useFormStore, snapshotFieldValues } from '../providers/form-store';
+import {
+  useFieldMeta,
+  useFormField,
+  useFormStore,
+  snapshotFieldValues,
+} from '../providers/form-store';
 import { getFieldRenderer } from '../registry/field-renderer-registry';
 
 // FieldRenderer — the per-field wrapper (task item 4): label + required
@@ -25,6 +30,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   const store = useFormStore();
   const session = useSession();
   const slice = useFormField(fieldName);
+  const metaOverride = useFieldMeta(fieldName);
 
   // Cross-field cascade (ADR-0002 §Consequences): subscribe to the values of
   // the sibling fields this field's conditionals declare via `dependsOn`, as a
@@ -73,7 +79,13 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
     // whole store) keeps D4 — only fields that DECLARE a dependency pay for it.
   }, [store, session, field, fieldName, slice, depSignal]);
 
-  if (hidden) return null;
+  // EF1: the imperative meta override wins over the async-resolved
+  // predicate/declared value when a key has been set via setMeta().
+  const effHidden = metaOverride.hidden ?? hidden;
+  const effRequired = metaOverride.required ?? required;
+  const effReadOnly = metaOverride.readonly ?? readOnly;
+
+  if (effHidden) return null;
 
   const label = field.getLabel();
   const Renderer = getFieldRenderer(field.type);
@@ -86,15 +98,15 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
       {!field.hideLabel && label !== false && (
         <label htmlFor={fieldName}>
           {label}
-          {required ? <span aria-hidden="true"> *</span> : null}
+          {effRequired ? <span aria-hidden="true"> *</span> : null}
         </label>
       )}
       {Renderer ? (
         <Renderer
           field={field}
           name={fieldName}
-          readOnly={readOnly}
-          required={required}
+          readOnly={effReadOnly}
+          required={effRequired}
           invalid={hasErrors}
           {...(hasErrors ? { describedBy: errorId } : {})}
         />

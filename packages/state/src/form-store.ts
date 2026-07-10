@@ -5,6 +5,7 @@ import {
   resetValue,
   type EntityForm,
   type FieldEvalContext,
+  type FieldMetaOverride,
   type FieldValueSlice,
   type RenderType,
   type Session,
@@ -18,6 +19,14 @@ import {
 
 export interface FormStoreState {
   fields: Record<string, FieldValueSlice>;
+  /**
+   * Per-field imperative meta overrides (EF1). When a key is set on a field's
+   * entry it WINS over that field's declared/predicate-resolved meta —
+   * renderers subscribe to this via useFieldMeta and validate() consults it.
+   * This is the reactivity substrate the imperative lifecycle
+   * (onChanges/onInitialize, EF2/EF3) mutates to reshape a live form.
+   */
+  meta: Record<string, FieldMetaOverride>;
   renderType: RenderType;
   tabIndex: string;
   initialized: boolean;
@@ -29,6 +38,14 @@ export interface FormStoreState {
   getValue(name: string): unknown;
   /** fill fetched values from a server entity (create → update). */
   hydrate(data: Record<string, unknown>): void;
+  /**
+   * Imperative reactivity entry point (EF1): shallow-merge `partial` into
+   * field `name`'s meta override. Renderers subscribed via useFieldMeta
+   * re-render; validateField/validateAll consult the merged override.
+   */
+  setMeta(name: string, partial: FieldMetaOverride): void;
+  /** read field `name`'s current meta override, if any has been set. */
+  getMeta(name: string): FieldMetaOverride | undefined;
   /** validate one field; writes errors to its slice; returns valid. */
   validateField(name: string): Promise<boolean>;
   /** validate every field; returns whether the whole form is valid. */
@@ -80,6 +97,7 @@ export function createFormStore(
 
   return createStore<FormStoreState>((set, get) => ({
     fields: initialFields,
+    meta: {},
     renderType,
     tabIndex: entityForm.getTabs()[0]?.id ?? 'default',
     initialized: true,
@@ -120,10 +138,18 @@ export function createFormStore(
       });
     },
 
+    setMeta(name, partial) {
+      set((s) => ({ meta: { ...s.meta, [name]: { ...(s.meta[name] ?? {}), ...partial } } }));
+    },
+
+    getMeta(name) {
+      return get().meta[name];
+    },
+
     async validateField(name) {
       const field = entityForm.getField(name);
       if (!field) return true;
-      const errs = await field.validate(buildCtx(get(), name));
+      const errs = await field.validate(buildCtx(get(), name), get().meta[name]);
       set((s) => ({
         fields: {
           ...s.fields,
@@ -139,7 +165,7 @@ export function createFormStore(
       const fields = { ...s.fields };
       for (const field of entityForm.getFields()) {
         const name = field.getName();
-        const errs = await field.validate(buildCtx(s, name));
+        const errs = await field.validate(buildCtx(s, name), s.meta[name]);
         fields[name] = { ...fields[name], errors: errs.map((e) => ({ message: e.message })) };
         if (errs.length > 0) valid = false;
       }

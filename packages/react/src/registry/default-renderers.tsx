@@ -1,6 +1,6 @@
 import type { SelectField, TextareaField } from '@listgrid/schema-core';
 import { useUI } from '../providers/ui';
-import { useFieldValue, useFormStore } from '../providers/form-store';
+import { useFieldMeta, useFieldValue, useFormStore } from '../providers/form-store';
 import { registerFieldRenderer, type FieldRendererComponentProps } from './field-renderer-registry';
 import { ManyToOneRenderer } from './many-to-one-renderer';
 import { SubCollectionRenderer } from './sub-collection-renderer';
@@ -147,7 +147,10 @@ function SelectRenderer({
   const { SelectBox } = useUI();
   const store = useFormStore();
   const value = useFieldValue<string | number | boolean>(name);
-  const options = (field as SelectField).options ?? [];
+  // EF1: an imperative options override (setMeta(name, { options })) wins over
+  // the field's declared options; the declared list remains the fallback.
+  const metaOptions = useFieldMeta(name).options;
+  const options = metaOptions ?? (field as SelectField).options ?? [];
   return (
     <SelectBox
       id={name}

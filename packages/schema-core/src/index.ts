@@ -50,6 +50,7 @@ export {
 
 // --- field meta contract ---
 export type { EntityItem, EntityField } from './field/entity-field';
+export type { FieldMetaOverride } from './field/field-meta';
 
 // --- permission policy (unified) ---
 export {

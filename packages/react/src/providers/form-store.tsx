@@ -1,6 +1,10 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import { useStore, type StoreApi } from 'zustand';
-import { getCurrentValue, type FieldValueSlice } from '@listgrid/schema-core';
+import {
+  getCurrentValue,
+  type FieldMetaOverride,
+  type FieldValueSlice,
+} from '@listgrid/schema-core';
 import type { FormStoreState } from '@listgrid/state';
 
 // FormStoreProvider — threads the per-instance form StoreApi (ADR-0002) down
@@ -42,6 +46,18 @@ const EMPTY_SLICE: FieldValueSlice = {};
 export function useFormField(name: string): FieldValueSlice {
   const store = useFormStore();
   return useStore(store, (s) => s.fields[name] ?? EMPTY_SLICE);
+}
+
+const EMPTY_META: FieldMetaOverride = {};
+
+/**
+ * Subscribes to ONE field's imperative meta override (EF1) —
+ * `state.meta[name]`. setMeta re-renders only that field, mirroring
+ * useFormField's D4 granularity guarantee.
+ */
+export function useFieldMeta(name: string): FieldMetaOverride {
+  const store = useFormStore();
+  return useStore(store, (s) => s.meta[name] ?? EMPTY_META);
 }
 
 /**

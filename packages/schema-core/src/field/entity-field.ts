@@ -7,6 +7,7 @@ import type {
   RequiredType,
 } from './conditional';
 import type { FieldEvalContext } from './eval-context';
+import type { FieldMetaOverride } from './field-meta';
 import type { FieldType, FieldValue } from './types';
 import type { ViewPreset } from './view-preset';
 import type { Validation, ValidateResult } from '../validation';
@@ -112,8 +113,10 @@ export interface EntityField<TValue = unknown> extends EntityItem {
    * Run this field's declared validations (+ required-blank check) against the
    * eval context (ctx.value = the field's current value slice). Transplant of
    * FormField.validate:779-823 — returns the failing results (empty = valid).
+   * `override` (EF1) is the imperative per-field meta override held in the
+   * form store — when a key is set, it wins over the declared/predicate value.
    */
-  validate(ctx: FieldEvalContext): Promise<ValidateResult[]>;
+  validate(ctx: FieldEvalContext, override?: FieldMetaOverride): Promise<ValidateResult[]>;
 
   // --- chainable builders ---
   withRequired(required?: RequiredType): this;
