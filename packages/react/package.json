@@ -9,5 +9,18 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": "^19.2.1"
+  },
+  "dependencies": {
+    "@listgrid/schema-core": "*",
+    "@listgrid/state": "*",
+    "@listgrid/ui-default": "*",
+    "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "react": "^19.2.1"
+  }
 }

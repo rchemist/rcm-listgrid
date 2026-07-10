@@ -3,11 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "styled primitives (headlessui/react-select/sortablejs peer isolation)",
+  "description": "default UI primitives injected by the renderer (charter C7, ADR-0004) — minimal, unstyled, accessible reference impl a host can swap",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": "^19.2.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "react": "^19.2.1"
+  }
 }
