@@ -85,7 +85,10 @@
 #### Phase EC — EntityForm 사용예 + E2E (동작 실증)
 
 - [x] **EC1** ✅ `142fbf9` · Student 폼+Daum 스텁 E2E 2건(create: required+focus+fan-out+왕복 / edit: hydrate+부분수정) · **라이브러리 결함 0**(주소 스택 첫 실브라우저 무결) · E2E 5→7 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EC2** Collabo 재현(dynamic options·조건부 required/hidden·M2O 자동채움·file·submit transform) + E2E — EF2/EF3 실증
+- [~] **EC2** Collabo 재현 + E2E 5건 — EF2/EF3 첫 실브라우저 실증. [재현 브리핑](./analysis/2026-07-11/ec2-collabo-briefing.md) 완결(스카우트). 갭 4건 확증→라우팅: ①submit-transform=EF6 ②hydrate clobber=EF7 ③주소 subset·④프리셋=Backlog
+  - **Reuse review**: Extend: college/student 페이지·fixture·E2E 패턴, EF2 빌더+hand-written 핸들러 혼용(구 스타일 충실) — New: collabo/org/staff 엔티티·spec(소비자측 신규 정당)
+- [ ] **EF6** submit-transform 훅(EntityForm.withSubmitTransform→toSaveData) — 구 withOverrideSubmitData 후속(EC2 갭①, GJCU 실사용). EC2는 page-level workaround
+- [ ] **EF7 [O]** onInitialize 값-보정 vs hydrate clobber 설계(EC2 갭② — 구엔진 가능·신 파이프 불가. onFetchData data-변형 반환 vs hydrate의 init-set 존중)
 - [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
 
