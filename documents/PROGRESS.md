@@ -81,7 +81,9 @@
 전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
 - [x] **EA-A 트리비얼 12종** ✅ `e9c1121`(A0 pre-stage)+`5566c21`(wave) · 12/12 이식+196 테스트(1430 green)·E2E 5/5·full gate ✓ · [상세 표](./progress-archive/phase-e-track-tasks.md)
 - [x] **EA-B 모더릿 5종+B0/B1** ✅ `4727c22`(pre-stage)+`7cf849f`(wave) · Html 드롭(중복 판정)·cascade seam·배열 isDirty 시스테믹 해소 · +136 테스트(1566 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-C 업로드** — File·Image·MultipleAsset·ContentAsset (**업로드 backend seam 결정** §Open Q)
+- [~] **EA-C 업로드** (3종 — **ContentAsset 연기**: 양 소비자 실사용 0·업로드 영구 스텁·대체 패턴 실존) · 진행: ⬜File ⬜Image ⬜MultipleAsset
+  - **seam 확정(3-리포 스카우트 증거, [브리핑](./analysis/2026-07-11/ea-c-scout-briefing.md))**: 값=plain string/string[](envelope은 purity 파손)·업로드=신설 UIComponents.FileInput 슬롯(구엔진 실패턴 parity — 호스트가 UI+HTTP 소유)·BackendAdapter 비확장·MultipleAsset 값=AssetItem[](preferred→primary 플래그)
+  - **Reuse review**: Extend: TextInput/Modal 프리미티브·EA-B1 배열 정규화·기존 'file'/'image' FieldType — New: FileInput 슬롯·isExternalUrl util·AssetConfig 타입·필드 3클래스/렌더러
 - [ ] **EA-D xref/도메인** — XrefMapping·XrefPrefer·XrefPrice·XrefAvailableDate·Rule·InlineMap(⚠pendingRef)
 
 #### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
@@ -126,6 +128,8 @@
 - [ ] **EA-A Checkbox combo 추가** — withComboType(row/column 힌트)을 base 아닌 Checkbox 전용으로 이식(브리핑 미명시 판단) · risk: negligible · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-B Telephone round-trip** — 마운트 시 fetched 하이픈 정규화 안 함(사용자 미편집 값은 원본 유지 — 구 getSaveValue 방어 strip과 다를 수 있음) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-B CustomOption layout** — 공유 FormField에 layout 멤버가 없어 필드 own-property로 선언(그룹/레이아웃 시스템 도입 시 재정렬 후보) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
+- [ ] **EA-C ContentAsset 연기** — "전 필드 이식" 스코프에서 제외: 양 소비자 실사용 0·구엔진에서도 업로드 미완성 스텁(동작 실증 불가)·child EntityForm+FileField 대체 실존 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
+- [ ] **EA-C 값 shape 다운그레이드** — FileFieldValue envelope 대신 plain string/string[](purity·소비자·백엔드 3중 정합). 구 envelope wire 계약을 쓰는 호스트는 어댑터 변환 필요 · risk: med(마이그레이션 문서화 필요) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 
 ## Progress notes
 
