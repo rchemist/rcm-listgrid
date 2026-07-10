@@ -210,5 +210,23 @@ proposed_helper: 없음.
 
 **후속 노트**: Color 실브라우저 발화 빈도는 EC 단계에서 확인(억제 로직으로 이미 안전). CustomOption bulk prefetch 연기(소비처=list 전용). Html rich-text sentinel isDirty는 백로그(V1 defer 유지).
 
+---
+
+## EA-C — 업로드 필드 3종 (fan-out) ✅ (ContentAsset 연기)
+
+**완료**: 2026-07-11 · **실행**: 3-리포 스카우트(gjcu-backend/edustack/구엔진 — seam 증거) → EA-C0 pre-stage `544014c` → **fan-out 3 sonnet**(wf_ca865571-89a, 501k tokens/14.7min) → 세션 등록+타입 수정(buildAssetConfig 공유 헬퍼 신설로 dedup, strictness 3건) → wave `b7341dd`
+**검증**: full gate ✓ — **1670 unit**(1581→1670, +89)·E2E 5/5. 순수성: 12개 신규 파일·공유 무접촉(File 에이전트가 형제 파일을 '읽기만' 하여 onUpload 소싱 관례를 자율 수렴 — 편집 없음 확인).
+
+### EA-C0 (`544014c`, +15): FileInput 슬롯(URL 입력 폴백+optional onUpload)·FieldType 'multipleAsset'·isExternalUrl·AssetConfig. dev 1(FileInputProps에서 maxSize 제외 — 의도적 협소화, maxSize 검사는 렌더러/호스트 소관).
+
+| 필드 | status | 골자 | dev |
+|---|---|---|---|
+| File | done+dev | plain string/string[]·외부URL 바이패스 행(parity)·multi 모드 add/remove는 배열 shape가 요구한 신설계(기록)·onUpload는 렌더러가 소싱 안 함(호스트가 FileInput 컴포넌트 통째 오버라이드 — 3에이전트 자율 수렴 관례) | 3 |
+| Image | done+dev | 'image' 전용 타입(구 'file' 재사용 결함 미계승)·기본 whitelist config fill 이식·bare img 썸네일(확대 모달 디스코프)·noImageFallback 대체=빈 상태(RuntimeConfig 부재 기록)·plain 값으로 required 자연 치유 | 3 |
+| MultipleAsset | done | AssetItem[](래퍼 제거·preferred→primary 플래그·단일 primary 강제)·named-slot 그리드+Modal add/edit+슬롯명 정규식(한글 문구 verbatim)·전부 로컬 state | 0 |
+
+**세션 수정**: `buildAssetConfig`를 asset-config.ts 공유로 승격(file-field 사설 헬퍼와 image-field 리터럴 중복 통합) + image-renderer value 조건 spread + multiple-asset primary 키 omission 2건.
+**ContentAsset 연기 근거 요약**: 양 소비자 실사용 0(전수 grep)·업로드 영구 스텁(README 자인)·useModalManagerStore 부재·child EntityForm+FileField 실전 대체 — [브리핑](../analysis/2026-07-11/ea-c-scout-briefing.md).
+
 
 

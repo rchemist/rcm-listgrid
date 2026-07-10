@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · EA-A ✅ · **EA-B ✅**(5종+시스테믹) · **Next up**: EA-C(업로드 4종 — backend seam Open Q 결정 선행). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H ✅ · EF ✅ · EA-A/B/C ✅ · **Next up**: EA-D(xref/도메인 6종 — InlineMap pendingRef 최난, scout 선행). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 06:00 (**EA-B 완료** — 5필드+cascade seam+배열 isDirty 시스테믹 `7cf849f`. 1566 unit+5 E2E green, NR +2. **Next=EA-C**(업로드 4종) — 착수 전 §Open Q "업로드 backend seam" conductor 결정 필요. [archive](./progress-archive/phase-e-track-tasks.md) 읽고 재개)
+**Last updated**: 2026-07-11 06:55 (**EA-C 완료** — File/Image/MultipleAsset `b7341dd`, ContentAsset 연기(NR). 1670 unit+5 E2E green. **Next=EA-D**(xref/도메인) — scout 선행, XrefMapping/Rule/InlineMap은 최난군. [archive](./progress-archive/phase-e-track-tasks.md)+[계획 §EA-D](./plans/e-track-field-parity.md) 읽고 재개)
 
 ## Goal
 
@@ -81,9 +81,7 @@
 전개 규칙: wave 착수 시 필드별 `[ ]` 생성(1필드=1커밋+테스트). 함정·값형태는 [계획 §필드 인벤토리]. 빈도순: Datetime40·Xref26·File21·CustomOption17 우선.
 - [x] **EA-A 트리비얼 12종** ✅ `e9c1121`(A0 pre-stage)+`5566c21`(wave) · 12/12 이식+196 테스트(1430 green)·E2E 5/5·full gate ✓ · [상세 표](./progress-archive/phase-e-track-tasks.md)
 - [x] **EA-B 모더릿 5종+B0/B1** ✅ `4727c22`(pre-stage)+`7cf849f`(wave) · Html 드롭(중복 판정)·cascade seam·배열 isDirty 시스테믹 해소 · +136 테스트(1566 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [~] **EA-C 업로드** (3종 — **ContentAsset 연기**: 양 소비자 실사용 0·업로드 영구 스텁·대체 패턴 실존) · 진행: ⬜File ⬜Image ⬜MultipleAsset
-  - **seam 확정(3-리포 스카우트 증거, [브리핑](./analysis/2026-07-11/ea-c-scout-briefing.md))**: 값=plain string/string[](envelope은 purity 파손)·업로드=신설 UIComponents.FileInput 슬롯(구엔진 실패턴 parity — 호스트가 UI+HTTP 소유)·BackendAdapter 비확장·MultipleAsset 값=AssetItem[](preferred→primary 플래그)
-  - **Reuse review**: Extend: TextInput/Modal 프리미티브·EA-B1 배열 정규화·기존 'file'/'image' FieldType — New: FileInput 슬롯·isExternalUrl util·AssetConfig 타입·필드 3클래스/렌더러
+- [x] **EA-C 업로드 3종+C0** ✅ `544014c`+`b7341dd` · plain string 값+FileInput 슬롯(호스트 업로드)·ContentAsset 연기 · +104 테스트(1670 green)·E2E 5/5 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-D xref/도메인** — XrefMapping·XrefPrefer·XrefPrice·XrefAvailableDate·Rule·InlineMap(⚠pendingRef)
 
 #### Phase EB — 주소 (Daum 우편번호, 무료) **[S]**
