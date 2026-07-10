@@ -63,6 +63,28 @@ export {
 export type { Validation } from './validation';
 export { ValidateResult, ValidationItem } from './validation';
 
+// --- runtime value-slice operations (pure fns over the store slice, ADR-0002) ---
+export { getCurrentValue, isBlank, isDirty, normalizeEmptyValue, resetValue } from './field/value';
+export { isEquals, isEqualCollection } from './util/compare';
+
+// --- field classes (meta; render lives in @listgrid/react) ---
+export { FormField } from './field/form-field';
+export {
+  StringField,
+  BooleanField,
+  NumberField,
+  TextareaField,
+  MarkdownField,
+  SelectField,
+} from './field/basic-fields';
+export type { MinMaxLimit, SelectOption } from './field/basic-fields';
+export { ManyToOneField } from './field/many-to-one-field';
+export type { ManyToOneConfig } from './field/many-to-one-field';
+
+// --- EntityForm declaration (charter C1) ---
+export { EntityForm } from './entity-form';
+export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
+
 // P1-5 workspace-wiring marker — apps/sample imports this to prove the
 // @listgrid/* workspace path resolves. Now shipping real contract modules.
 export const SCHEMA_CORE_VERSION = '0.0.0';

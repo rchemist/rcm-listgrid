@@ -9,7 +9,7 @@ import type {
 import type { FieldEvalContext } from './eval-context';
 import type { FieldType, FieldValue } from './types';
 import type { ViewPreset } from './view-preset';
-import type { Validation } from '../validation';
+import type { Validation, ValidateResult } from '../validation';
 
 /**
  * The shared base for every declarable form item — fields, tabs, field groups,
@@ -93,16 +93,20 @@ export interface EntityField<TValue = unknown> extends EntityItem {
    */
   attributes?: Map<string, unknown>;
 
-  // --- pure predicates ---
+  // --- pure predicate ---
   isRequired(ctx: FieldEvalContext): Promise<boolean>;
-  isBlank(renderType?: FieldEvalContext['renderType']): Promise<boolean>;
-  /** structural dirty check (empty-normalization + collection equality ported in P4). */
-  isDirty(): boolean;
 
-  // NOTE: field-level validation orchestration (running the declared
-  // `validations` and merging results) is transplanted in P4 alongside the
-  // concrete Validation classes under the P2 oracle — its exact return shape is
-  // not guessed here. The Validation base contract lives in ../validation.
+  // NOTE: dirty/blank/current-value are pure functions over the runtime value
+  // slice (../field/value.ts: isDirty/isBlank/getCurrentValue) — NOT instance
+  // methods, because the value lives in the form store, not on the field
+  // (ADR-0002 §Decision 1 value/meta separation).
+
+  /**
+   * Run this field's declared validations (+ required-blank check) against the
+   * eval context (ctx.value = the field's current value slice). Transplant of
+   * FormField.validate:779-823 — returns the failing results (empty = valid).
+   */
+  validate(ctx: FieldEvalContext): Promise<ValidateResult[]>;
 
   // --- chainable builders ---
   withRequired(required?: RequiredType): this;

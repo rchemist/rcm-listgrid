@@ -1,0 +1,170 @@
+import { describe, expect, it } from 'vitest';
+import {
+  BooleanField,
+  EntityForm,
+  ManyToOneField,
+  StringField,
+  getCurrentValue,
+  isBlank,
+  isDirty,
+  resetValue,
+  type FieldEvalContext,
+  type FieldValueSlice,
+} from '../index';
+
+// V0.1 transplant oracle (decision D5) — locks the declaration model + the
+// charter-C4 dirty/blank/current micro-decisions transplanted from 0.3.x
+// FormField, so V0.2+ (store) and V0.4 (E2E) can rely on them.
+
+// A faithful mini-College (the walking-skeleton target): name/englishName
+// (String, englishName required), dean (ManyToOne→Professor via a LAZY thunk —
+// decision D1), active (Boolean, default true).
+function ProfessorForm(): EntityForm {
+  return new EntityForm('ProfessorEntityForm', '/professor').addFields({
+    items: [new StringField('name', 1).withRequired(true).withLabel('교수명')],
+  });
+}
+function CollegeForm(): EntityForm {
+  return new EntityForm('CollegeEntityForm', '/college')
+    .withNeverDelete()
+    .withTitle('menu.academic.university.college')
+    .addFields({
+      items: [
+        new StringField('name', 100).withRequired(true).withLabel('명칭'),
+        new StringField('englishName', 110).withRequired(true).withLabel('영문명'),
+        new ManyToOneField('dean', 200, { entityForm: () => ProfessorForm(), labelField: 'name' })
+          .withLabel('학장')
+          .useListField(),
+        new BooleanField('active', 900).withLabel('사용여부').withDefaultValue(true),
+      ],
+    });
+}
+
+describe('EntityForm declaration (charter C1)', () => {
+  it('captures fields ordered + form-level config', () => {
+    const f = CollegeForm();
+    expect(f.getName()).toBe('CollegeEntityForm');
+    expect(f.getUrl()).toBe('/college');
+    expect(f.getTitle()).toBe('menu.academic.university.college');
+    expect(f.isNeverDelete()).toBe(true);
+    expect(f.getFields().map((x) => x.getName())).toEqual([
+      'name',
+      'englishName',
+      'dean',
+      'active',
+    ]);
+  });
+
+  it('getRenderType: create until an id is set', () => {
+    expect(CollegeForm().getRenderType()).toBe('create');
+    expect(CollegeForm().clone().withId('7').getRenderType()).toBe('update');
+  });
+
+  it('clone is independent (declaration copy)', () => {
+    const a = CollegeForm();
+    const b = a.clone();
+    expect(b.getField('name')).not.toBe(a.getField('name'));
+    expect(b.getFields().length).toBe(a.getFields().length);
+  });
+});
+
+describe('ManyToOne lazy thunk (decision D1 — no eager recursion)', () => {
+  it('resolves the target form only when called', () => {
+    const dean = CollegeForm().getField('dean') as ManyToOneField;
+    expect(dean.type).toBe('manyToOne');
+    expect(dean.showInList).toBe(true);
+    expect(dean.getIdField()).toBe('id');
+    expect(dean.getLabelField()).toBe('name');
+    const target = dean.getEntityForm();
+    expect(target.getName()).toBe('ProfessorEntityForm');
+  });
+});
+
+describe('getCurrentValue / isBlank (transplant of FormField:531-539,726-737)', () => {
+  it('current wins when present; else default(create)/fetched(update)', () => {
+    expect(getCurrentValue({ current: 'c', default: 'd', fetched: 'f' }, 'create')).toBe('c');
+    expect(getCurrentValue({ default: 'd', fetched: 'f' }, 'create')).toBe('d');
+    expect(getCurrentValue({ default: 'd', fetched: 'f' }, 'update')).toBe('f');
+    expect(getCurrentValue(undefined)).toBeUndefined();
+    // explicit current:undefined still wins (hasOwnProperty semantics)
+    expect(getCurrentValue({ current: undefined, default: 'd' }, 'create')).toBeUndefined();
+  });
+
+  it('isBlank: empty array / undefined / null / empty string', () => {
+    expect(isBlank({ current: '' })).toBe(true);
+    expect(isBlank({ current: [] })).toBe(true);
+    expect(isBlank({ current: null })).toBe(true);
+    expect(isBlank({ current: 'x' })).toBe(false);
+    expect(isBlank({ current: 0 })).toBe(false); // 0 is NOT blank
+  });
+});
+
+describe('isDirty (transplant of FormField:542-590 — the C4 micro-decision)', () => {
+  it('untouched (no fetched, no current) → not dirty', () => {
+    expect(isDirty({ default: 'd' })).toBe(false);
+  });
+  it('create mode: current vs default, empty-normalized', () => {
+    expect(isDirty({ current: 'd', default: 'd' })).toBe(false);
+    expect(isDirty({ current: 'x', default: 'd' })).toBe(true);
+    expect(isDirty({ current: '', default: undefined })).toBe(false); // '' normalizes to undefined
+  });
+  it('update mode: fetched vs current', () => {
+    expect(isDirty({ fetched: 'f', current: 'f' })).toBe(false);
+    expect(isDirty({ fetched: 'f', current: 'g' })).toBe(true);
+  });
+  it('arrays compare order-insensitively', () => {
+    expect(isDirty({ fetched: ['a', 'b'], current: ['b', 'a'] })).toBe(false);
+    expect(isDirty({ fetched: ['a'], current: ['a', 'b'] })).toBe(true);
+  });
+});
+
+describe('resetValue', () => {
+  it('resets current to baseline + clears dirty/errors', () => {
+    const slice: FieldValueSlice = {
+      current: 'x',
+      default: 'd',
+      dirty: true,
+      errors: [{ message: 'e' }],
+    };
+    const r = resetValue(slice, 'create');
+    expect(r.current).toBe('d');
+    expect(r.dirty).toBe(false);
+    expect(r.errors).toBeUndefined();
+  });
+});
+
+describe('FormField.validate (transplant of FormField:779-823)', () => {
+  const ctx = (
+    value: FieldValueSlice,
+    renderType: 'create' | 'update' = 'create',
+  ): FieldEvalContext => ({
+    renderType,
+    value,
+  });
+
+  it('required + blank → one failure with the Korean message', async () => {
+    const eng = new StringField('englishName', 1).withRequired(true).withLabel('영문명');
+    const res = await eng.validate(ctx({ current: '' }));
+    expect(res).toHaveLength(1);
+    expect(res[0].message).toContain('필수 값입니다');
+    expect(res[0].message).toContain('영문명');
+  });
+
+  it('required + filled → valid', async () => {
+    const eng = new StringField('englishName', 1).withRequired(true);
+    expect(await eng.validate(ctx({ current: 'Engineering' }))).toEqual([]);
+  });
+
+  it('hidden/readonly fields skip validation', async () => {
+    const eng = new StringField('x', 1).withRequired(true).withHidden(true);
+    expect(await eng.validate(ctx({ current: '' }))).toEqual([]);
+    const ro = new StringField('y', 1).withRequired(true).withReadOnly(true);
+    expect(await ro.validate(ctx({ current: '' }))).toEqual([]);
+  });
+
+  it('conditional required resolves per renderType', async () => {
+    const f = new StringField('z', 1).withRequired({ onCreate: true, onUpdate: false });
+    expect(await f.validate(ctx({ current: '' }, 'create'))).toHaveLength(1);
+    expect(await f.validate(ctx({ current: '' }, 'update'))).toEqual([]);
+  });
+});
