@@ -77,8 +77,7 @@
 
 #### Phase EA ✅ 완료 (2026-07-11 — 21필드 이식+공유기반 · dead/연기 5종 · 리뷰게이트 confirmed 5 전해소 `2a79166` · 1727 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
 
-- [~] **EA-D2** Xref 인프라+이식 — **설계 확정**([브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md) 배너): 최소형 4종+M2O filter 채널·plain 뷰만(supportPriority 렌더 미구현 — Major 전수 미사용 증거)·degrees `[fn]` 교정 포트·트리/드래그 연기. 분할: **D2-0**(ViewListGrid+list-store+M2O filter pre-stage) → **D2-1**(Xref 2종 이식)
-  - **Reuse review**: Extend: ViewListGrid·list-store(initialSearch 기존재 확인)·ManyToOneConfig·ChildFormModal 동형 — New: selection/toolbar/postFetch/columns 유니온·Xref 2클래스/뷰·'xrefPreferMapping' 타입
+- [x] **EA-D2** ✅ D2-0 `4907291`(ViewListGrid 4종+M2O filter, +19)+D2-1 `518f8ac`(Xref 2종, +37 — required=CustomValidation 설계·filters 단일함수형 교정·prefer onSave dead code 규명) · 1813 unit·12 E2E · [브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md)
 - [ ] **EC3-0** TAB-자체-숨김 기반(TabDef.hidden+store 탭 슬롯+FormMutator.setTabHidden+deriveTabs 필터) — 구 withHidden({type:'TAB'}) 대응(신엔진은 필드 캐스케이드만 가능, 탭바 숨김 전무 확인)
 
 #### Phase EB ✅ 완료 (2026-07-11 — AddressField+Daum 렌더러+renderedBy 억제 · 게이트 confirmed 3 전해소 `caf7cbe` · 1757 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
@@ -128,6 +127,7 @@
 - [ ] **EA-D Dead 3종 연기** — Rule(1264줄, 채택 0·bespoke 계약 미확인)·XrefPrice(자체 opt-in 격리)·XrefAvailableDate(순수 미채택): 양 소비자 실사용 0 전수 확인 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-d-scout-briefing.md)
 - [ ] **EA-D Map compare 갭(시스테믹)** — schema-core isEquals/normalizeEmptyValue가 Map 인스턴스 전맹(Object.keys 기반 — blank/equal 오판·JSON `{}` 소실). InlineMap은 Record 협소화로 회피; 장래 Map 값 필드 도입 시 선결 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF2 changeSelectOptions 배열-clause 레이스** — 동일 필드를 겨냥한 2 clause에서 unmatched의 revert가 matched의 apply 뒤 실행될 수 있음(iteration order 의존 — EC2 구현이 이 사유로 빌더 대신 hand-written 채택) · risk: med(빌더 소비자) · [detail](./analysis/2026-07-11/ec2-collabo-briefing.md)
+- [ ] **EA-D2 Prefer 재편집 미이식** — 구 뷰의 "표시 행 클릭→preferred 재설정" 경로 add-only로 축소(삭제 후 재추가 대체). 중복 폼에러는 구조적 방지(NOT_IN)+조용한 가드로 동등 · risk: low · [detail](./analysis/2026-07-11/ea-d2-xref-major-briefing.md)
 - [ ] **EA-C 값 shape 다운그레이드** — FileFieldValue envelope 대신 plain string/string[](purity·소비자·백엔드 3중 정합). 구 envelope wire 계약을 쓰는 호스트는 어댑터 변환 필요 · risk: med(마이그레이션 문서화 필요) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 
 ## Progress notes
