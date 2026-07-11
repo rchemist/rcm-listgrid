@@ -105,4 +105,17 @@ export interface FieldError {
 export interface FieldValueSlice<TValue = unknown> extends FieldValue<TValue> {
   errors?: FieldError[];
   dirty?: boolean;
+  /**
+   * AsyncValidation tri-state (spec §5.3, CAP-05; W4-3) — store-managed only
+   * (@listgrid/state/form-store.ts `runAsyncValidation` + the 'change'-trigger
+   * debounce scheduler own every write; schema-core only declares the shape,
+   * ADR-0002 §Decision 1 value/meta split precedent). Seeded 'unchecked' at
+   * store build for any field carrying a declared `AsyncValidation` (see
+   * `../validations/async-validation.ts`); absent entirely on a field with
+   * none. 'checking' while `check(value, ctx)` is in flight; 'valid'/
+   * 'invalid' from the resolved `ValidateResult` (an invalid result's message
+   * lands on this same slice's `errors`, the existing per-field error
+   * channel — no separate message field).
+   */
+  asyncState?: 'unchecked' | 'checking' | 'valid' | 'invalid';
 }

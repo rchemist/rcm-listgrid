@@ -79,6 +79,12 @@ export { PasswordValidation } from './validations/password-validation';
 export { IpAddressValidation, RegexAllowedIpAddr } from './validations/ip-address-validation';
 export { CustomValidation } from './validations/custom-validation';
 
+// --- AsyncValidation (spec §5.3, CAP-05; W4-3 — 구 CheckButtonValidation
+// 재설계. Rides the same withValidations() channel as every validation above;
+// asyncState tri-state lives on the runtime FieldValueSlice — see that type's
+// doc, ./field/types.ts — and is store-managed (@listgrid/state/form-store.ts) ---
+export { AsyncValidation } from './validations/async-validation';
+
 // --- regex constants the validations catalog is built on (React-free,
 // verbatim from src/listgrid/misc/index.ts 0.3.x) ---
 export {

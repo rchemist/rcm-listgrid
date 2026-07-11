@@ -37,6 +37,12 @@ import type { FormStoreState } from './form-store';
 //   1. capability create|update gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
 //      => { ok: false }, silent (no adapter call, no message)
 //   2. validateAll() (unless opts.skipValidation) — fail => { ok: false }
+//      (W4-3 Needs-Review: validateAll runs the SYNC ValidationItem channel
+//      only — an AsyncValidation-carrying field's asyncState ('unchecked'/
+//      'checking'/'invalid') is NEVER consulted here. Save does NOT block on
+//      an unconfirmed/failed 중복확인. Spec §5.3/§6.2 are silent on whether
+//      async-gating save is intended — deliberately NOT wired per that
+//      task's SCOPE note; a spec decision is needed before this changes.)
 //   3. toSaveData()
 //   4. onBeforeSave handlers, sequential; setData threads the payload;
 //      cancel() stops the flow; a THROWING handler is logged + SKIPPED

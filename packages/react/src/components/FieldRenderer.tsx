@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useStore } from 'zustand';
 import {
+  AsyncValidation,
   extractPermissions,
   getCurrentValue,
   type EntityField,
@@ -111,6 +112,18 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   const hasErrors = errors.length > 0;
   const errorId = `${fieldName}-error`;
 
+  // W4-3 (spec §5.3, CAP-05) — a `trigger:'button'` AsyncValidation gets a
+  // confirm-button affordance next to the field; `trigger:'change'` (the
+  // default) never renders one — its check runs automatically, debounced,
+  // from the store's setValue path (@listgrid/state/form-store.ts). The
+  // invalid-message case reuses the SAME `errors` list rendered below — the
+  // store's runAsyncValidation action writes an invalid ValidateResult's
+  // message onto this field's `errors` slice (the existing per-field error
+  // channel), so no separate message UI is needed here.
+  const asyncValidation = (field.validations ?? []).find(
+    (v): v is AsyncValidation => v instanceof AsyncValidation && v.trigger === 'button',
+  );
+
   return (
     <div data-field-name={fieldName}>
       {!field.hideLabel && label !== false && (
@@ -130,6 +143,19 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
         />
       ) : (
         <span role="alert">Unsupported field type: {field.type}</span>
+      )}
+      {asyncValidation && (
+        <span>
+          <button
+            type="button"
+            onClick={() => void store.getState().runAsyncValidation(fieldName)}
+            disabled={slice.asyncState === 'checking'}
+          >
+            {asyncValidation.buttonLabel}
+          </button>
+          {slice.asyncState === 'checking' && <span role="status">확인 중…</span>}
+          {slice.asyncState === 'valid' && <span role="status">사용 가능</span>}
+        </span>
       )}
       {hasErrors && (
         <ul id={errorId} role="alert">

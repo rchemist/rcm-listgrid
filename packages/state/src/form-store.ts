@@ -1,5 +1,6 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import {
+  AsyncValidation,
   extractPermissions,
   getCurrentValue,
   getStaticConditionalBoolean,
@@ -62,6 +63,24 @@ function nestDottedKeys(flat: Record<string, unknown>): Record<string, unknown> 
     cur[parts[parts.length - 1] as string] = value;
   }
   return out;
+}
+
+// findAsyncValidation — W4-3 (spec §5.3, CAP-05): locates the (at most one,
+// by convention) AsyncValidation instance a field's `validations` array
+// carries, optionally narrowed to a `trigger`. AsyncValidation rides the same
+// single `withValidations()` channel every other Validation does (C5 — no
+// dedicated field class), so identity here is `instanceof`, not a lookup by
+// `id` (AsyncValidation's constructor takes no `id` param — see
+// ../validations/async-validation.ts).
+function findAsyncValidation(
+  field: EntityField | undefined,
+  trigger?: 'change' | 'button',
+): AsyncValidation | undefined {
+  if (!field) return undefined;
+  return (field.validations ?? []).find(
+    (v): v is AsyncValidation =>
+      v instanceof AsyncValidation && (trigger === undefined || v.trigger === trigger),
+  );
 }
 
 // createFormStore — the per-instance, value-slice form store (ADR-0002). The
@@ -207,6 +226,33 @@ export interface FormStoreState {
   setFieldErrors(name: string, messages: string[]): void;
   /** validate every field; returns whether the whole form is valid. */
   validateAll(): Promise<boolean>;
+  /**
+   * W4-3 (spec §5.3, CAP-05) — run field `name`'s declared AsyncValidation
+   * (the first `instanceof AsyncValidation` found in its `validations`)
+   * against its CURRENT value: writes `asyncState:'checking'` synchronously,
+   * then awaits `check(value, ctx)` and writes `asyncState:'valid'` |
+   * `'invalid'` from the resolved `ValidateResult` — an invalid result's
+   * message is written to the SAME `errors` channel `validateField`/
+   * `validateAll` write (no separate message field; a later sync
+   * validate*() call overwrites it wholesale, same as it already does across
+   * repeated sync calls). A no-op (no state change, `check` never invoked)
+   * if `name` names no declared field or the field carries no
+   * AsyncValidation.
+   *
+   * This is the explicit entry point a `trigger:'button'` field's confirm
+   * button calls directly (@listgrid/react FieldRenderer). A
+   * `trigger:'change'` field never needs it called directly — `setValue`'s
+   * internal debounce scheduler (see createFormStore's dispatch/loop-guard
+   * doc) calls it after that AsyncValidation's own `debounceMs` elapses.
+   * Cancels any pending 'change'-trigger debounce for `name` first, so an
+   * explicit call always wins over a stale pending timer.
+   *
+   * SCOPE (W4-3 — save-gating is OUT of scope, spec §5.3/§6.2 silent):
+   * `asyncState` is a display/UX signal only here — `controller.save`
+   * (@listgrid/state/form-controller.ts) does NOT consult it. See that
+   * file's header NOTES / this task's report for the flagged Needs-Review.
+   */
+  runAsyncValidation(name: string): Promise<void>;
   /** reset every slice to its baseline (create→default, update→fetched). */
   reset(): void;
   isDirty(): boolean;
@@ -328,6 +374,12 @@ export function createFormStore(
     if (seed && Object.prototype.hasOwnProperty.call(seed, 'current')) {
       slice.current = seed.current;
     }
+    // W4-3 (spec §5.3): seed the AsyncValidation tri-state to 'unchecked' for
+    // any field that declares one — absent entirely on a field with none
+    // (see FieldValueSlice.asyncState doc, @listgrid/schema-core).
+    if (findAsyncValidation(field) !== undefined) {
+      slice.asyncState = 'unchecked';
+    }
     return slice;
   }
 
@@ -413,6 +465,49 @@ export function createFormStore(
       validationTimers.set(name, timer);
     }
 
+    // --- W4-3 AsyncValidation (spec §5.3, CAP-05): 'change'-trigger debounce
+    // scheduler + the shared runner both 'change' and the button-trigger
+    // public action (runAsyncValidation, below) fall through to. Independent
+    // of the EF5 validateOnChangeConfig opt-in above — a field's own declared
+    // AsyncValidation IS the opt-in signal here (the store option gates the
+    // separate sync-validation-on-change feature, not this one). Its own
+    // timer map (not validationTimers) since the two debounce windows are
+    // configured independently (EF5's store-level debounceMs vs. this
+    // AsyncValidation instance's own debounceMs).
+    const asyncValidationTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+    async function runAsyncValidationNow(name: string, validation: AsyncValidation): Promise<void> {
+      set((s) => ({
+        fields: { ...s.fields, [name]: { ...s.fields[name], asyncState: 'checking' } },
+      }));
+      const state = get();
+      const value = getCurrentValue(state.fields[name], state.renderType);
+      const ctx = buildCtx(state, name);
+      const result = await validation.check(value, ctx);
+      set((s) => ({
+        fields: {
+          ...s.fields,
+          [name]: {
+            ...s.fields[name],
+            asyncState: result.hasError() ? 'invalid' : 'valid',
+            errors: result.hasError() ? [{ message: result.message }] : [],
+          },
+        },
+      }));
+    }
+
+    function scheduleAsyncValidation(name: string): void {
+      const validation = findAsyncValidation(get().fieldDefs[name], 'change');
+      if (!validation) return;
+      const existing = asyncValidationTimers.get(name);
+      if (existing !== undefined) clearTimeout(existing);
+      const timer = setTimeout(() => {
+        asyncValidationTimers.delete(name);
+        void runAsyncValidationNow(name, validation);
+      }, validation.debounceMs);
+      asyncValidationTimers.set(name, timer);
+    }
+
     // EF4 — the last hydrated/provided data payload, retained so a field
     // registered AFTER init (a post-init addField, e.g. from an onChanges
     // handler) can still rebind its fetched value (0.3.x EntityForm.tsx:
@@ -464,6 +559,11 @@ export function createFormStore(
         // its own validation — nested cascade writes (onChanges handlers
         // setting a sibling) never do (see scheduleValidateOnChange doc).
         if (isTopLevel) scheduleValidateOnChange(name);
+        // W4-3: same top-level-only gating for a 'change'-trigger
+        // AsyncValidation (see scheduleAsyncValidation doc) — a cascade
+        // write of a sibling field never triggers ITS AsyncValidation
+        // either, mirroring the EF5 precedent immediately above.
+        if (isTopLevel) scheduleAsyncValidation(name);
       } finally {
         if (isTopLevel) dispatchBatch = null;
       }
@@ -599,6 +699,13 @@ export function createFormStore(
           validationTimers.delete(name);
           touchedFields.delete(name);
 
+          // W4-3 (EF-R2 parity): same stale-timer hazard for a 'change'-
+          // trigger AsyncValidation — a pending debounce for the REPLACED
+          // field must not fire against the new field instance.
+          const existingAsyncTimer = asyncValidationTimers.get(name);
+          if (existingAsyncTimer !== undefined) clearTimeout(existingAsyncTimer);
+          asyncValidationTimers.delete(name);
+
           return {
             fieldDefs: { ...s.fieldDefs, [name]: field },
             fields: { ...s.fields, [name]: slice },
@@ -627,6 +734,11 @@ export function createFormStore(
           if (existingTimer !== undefined) clearTimeout(existingTimer);
           validationTimers.delete(name);
           touchedFields.delete(name);
+
+          // W4-3 (EF-R2 parity) — see addField's matching comment.
+          const existingAsyncTimer = asyncValidationTimers.get(name);
+          if (existingAsyncTimer !== undefined) clearTimeout(existingAsyncTimer);
+          asyncValidationTimers.delete(name);
 
           return { fieldDefs, fields, meta, structureVersion: s.structureVersion + 1 };
         });
@@ -669,6 +781,20 @@ export function createFormStore(
         }
         set({ fields });
         return valid;
+      },
+
+      async runAsyncValidation(name) {
+        const validation = findAsyncValidation(get().fieldDefs[name]);
+        if (!validation) return;
+        // an explicit call (button click, or a direct caller) always wins
+        // over a stale pending 'change'-trigger debounce for the same field —
+        // cancel it first so it can't clobber this immediate result later.
+        const pending = asyncValidationTimers.get(name);
+        if (pending !== undefined) {
+          clearTimeout(pending);
+          asyncValidationTimers.delete(name);
+        }
+        await runAsyncValidationNow(name, validation);
       },
 
       reset() {
