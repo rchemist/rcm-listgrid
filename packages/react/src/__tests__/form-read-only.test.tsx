@@ -136,4 +136,22 @@ describe('ViewEntityForm — formReadOnly hides built-in Save only (spec §6.1; 
     expect(screen.queryByRole('button', { name: /^Save$/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Delete$/ })).toBeInTheDocument();
   });
+
+  it("withReadOnly(true): a custom action that replaces:'save' is ALSO hidden — formReadOnly hides the Save affordance, not just the built-in (D2 #W3-5b)", async () => {
+    const form = widgetForm()
+      .withReadOnly(true)
+      .addAction({ id: 'custom-save', label: 'Submit', replaces: 'save' });
+    renderForm(form, { controller: fakeController() });
+    await screen.findByLabelText(/^Name/);
+    // the replacement occupies the Save slot, which withReadOnly hides.
+    expect(screen.queryByRole('button', { name: /^Submit$/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Save$/ })).not.toBeInTheDocument();
+  });
+
+  it("withReadOnly(true): a plain custom action (no replaces:'save') still renders — formReadOnly gates the Save affordance only (D2 #W3-5b control)", async () => {
+    const form = widgetForm().withReadOnly(true).addAction({ id: 'export', label: 'Export' });
+    renderForm(form, { controller: fakeController() });
+    await screen.findByLabelText(/^Name/);
+    expect(screen.getByRole('button', { name: /^Export$/ })).toBeInTheDocument();
+  });
 });

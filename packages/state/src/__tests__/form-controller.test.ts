@@ -74,7 +74,7 @@ describe('createFormController.save (spec §6.2)', () => {
 
     const outcome = await controller.save();
 
-    expect(outcome).toEqual({ ok: false });
+    expect(outcome).toEqual({ ok: false, reason: 'validation' });
     expect(create).not.toHaveBeenCalled();
     expect(store.getState().fields.name?.errors?.length).toBeGreaterThan(0); // validateAll already populated this
   });
@@ -94,11 +94,34 @@ describe('createFormController.save (spec §6.2)', () => {
 
     const outcome = await controller.save();
 
-    expect(outcome).toEqual({ ok: false, cancelled: 'user declined' });
+    expect(outcome).toEqual({ ok: false, reason: 'cancelled', cancelled: 'user declined' });
     expect(create).not.toHaveBeenCalled();
     expect(store.getState().messages).toContainEqual(
       expect.objectContaining({ severity: 'info', text: 'user declined' }),
     );
+  });
+
+  it('reason-less cancel is distinguishable from a validation failure (D2 #W2-5)', async () => {
+    // exactOptional forbids `cancelled: undefined`, so before the `reason`
+    // discriminant a reason-less cancel() and a validation failure both
+    // resolved a bare `{ ok: false }` — indistinguishable. `reason` fixes that.
+    const entityForm = WidgetForm().onBeforeSave((ctx) => {
+      ctx.cancel(); // no reason
+    });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false, reason: 'cancelled' });
+    expect(outcome).not.toHaveProperty('cancelled'); // no reason string given
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('server fieldErrors mapping: a declared field is keyed by NAME (not label)', async () => {
@@ -121,7 +144,7 @@ describe('createFormController.save (spec §6.2)', () => {
 
     const outcome = await controller.save();
 
-    expect(outcome).toEqual({ ok: false, error });
+    expect(outcome).toEqual({ ok: false, reason: 'error', error });
     expect(store.getState().fields.name?.errors).toEqual([{ message: 'too short' }]);
   });
 
@@ -194,7 +217,7 @@ describe('createFormController.save (spec §6.2)', () => {
 
     const outcome = await controller.save();
 
-    expect(outcome).toEqual({ ok: false, error });
+    expect(outcome).toEqual({ ok: false, reason: 'error', error });
     expect(store.getState().messages).toContainEqual(
       expect.objectContaining({ key: 'save-error', severity: 'error', text: 'network down' }),
     );
@@ -312,7 +335,7 @@ describe('createFormController.delete (spec §6.2)', () => {
 
     const outcome = await controller.delete();
 
-    expect(outcome).toEqual({ ok: false, cancelled: 'confirm declined' });
+    expect(outcome).toEqual({ ok: false, reason: 'cancelled', cancelled: 'confirm declined' });
     expect(remove).not.toHaveBeenCalled();
   });
 
@@ -331,7 +354,7 @@ describe('createFormController.delete (spec §6.2)', () => {
 
     const outcome = await controller.delete();
 
-    expect(outcome).toEqual({ ok: false, error });
+    expect(outcome).toEqual({ ok: false, reason: 'error', error });
     expect(store.getState().messages).toContainEqual(
       expect.objectContaining({ key: 'delete-error', severity: 'error', text: 'not allowed' }),
     );
@@ -474,7 +497,7 @@ describe('createFormController capability gate (spec §3.4/§6.2, CAP-06; W3-2)'
 
     const outcome = await controller.save();
 
-    expect(outcome).toEqual({ ok: false });
+    expect(outcome).toEqual({ ok: false, reason: 'capability' });
     expect(create).not.toHaveBeenCalled();
   });
 
@@ -509,7 +532,7 @@ describe('createFormController capability gate (spec §3.4/§6.2, CAP-06; W3-2)'
 
     const outcome = await controller.save();
 
-    expect(outcome).toEqual({ ok: false });
+    expect(outcome).toEqual({ ok: false, reason: 'capability' });
     expect(update).not.toHaveBeenCalled();
   });
 
@@ -525,7 +548,7 @@ describe('createFormController capability gate (spec §3.4/§6.2, CAP-06; W3-2)'
       session: { roles: ['USER'] },
     });
     const deniedOutcome = await deniedController.delete();
-    expect(deniedOutcome).toEqual({ ok: false });
+    expect(deniedOutcome).toEqual({ ok: false, reason: 'capability' });
     expect(remove).not.toHaveBeenCalled();
 
     const allowedStore = createFormStore(entityForm);

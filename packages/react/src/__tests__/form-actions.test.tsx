@@ -229,7 +229,9 @@ describe('ViewEntityForm built-in Save rewire — controller.save (spec §3.4 §
   });
 
   it('controller.save resolving ok:false (validation failure): onSave is NOT called (single validate — no double-validate)', async () => {
-    const controller = fakeController({ save: vi.fn(async () => ({ ok: false })) });
+    const controller = fakeController({
+      save: vi.fn(async () => ({ ok: false, reason: 'validation' as const })),
+    });
     const onSave = vi.fn();
     const entityForm = WidgetForm();
     renderForm(entityForm, { controller, onSave });

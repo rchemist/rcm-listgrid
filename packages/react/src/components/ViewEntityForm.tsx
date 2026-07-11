@@ -600,7 +600,15 @@ function ViewEntityFormInner({
   }
 
   // --- merge: replaces / id-collision drop, then order-sort (spec §3.4) ---
-  const custom = entityForm.getActions();
+  // #W3-5b (D2, spec §3.1, 2026-07-12) — formReadOnly hides the Save
+  // AFFORDANCE, not merely the built-in: a custom action that `replaces: 'save'`
+  // occupies that same Save slot, so a read-only form must drop it too
+  // (otherwise a custom save-slot button renders on a form declared read-only —
+  // defeating withReadOnly). `replaces: 'delete'` and plain custom actions are
+  // unaffected — formReadOnly gates the Save affordance ONLY (spec §6.1).
+  const custom = formReadOnly
+    ? entityForm.getActions().filter((a) => a.replaces !== 'save')
+    : entityForm.getActions();
   const replacedSlots = new Set<string>(
     custom.map((a) => a.replaces).filter((r): r is 'save' | 'delete' => r !== undefined),
   );

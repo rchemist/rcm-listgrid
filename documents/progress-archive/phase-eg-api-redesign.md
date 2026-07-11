@@ -130,6 +130,18 @@
 
 **검증**: +11 unit(**2114**: dirty unchecked/invalid/checking→validateAll false·valid→true·untouched-update(initializeFormStore) 면제·reset-on-edit·same-value no-reset·stale-guard·controller.save 차단/valid통과/skipValidation 우회)·+3 E2E(**27**: async-demo Save 차단 unverified/edited-stale/invalid). full gate 독립 PASS(type-check·2114·lint 0err·format·build·계수 47/49/182 무변경=신 export 0). 파일: form-store.ts·form-controller.ts·types.ts·async-validation.ts(schema)·async-validation.test.ts·async-validation.spec.ts·async-demo.ts·async-demo/new/page.tsx·스펙 §5.3/§6.2.
 
+### #D2 잔여 §Needs Review 9건 일괄 처분 (스펙 저자·발명금지 해제)
+
+전건 처분표 = [needs-review-dispositions-2026-07-12.md](./needs-review-dispositions-2026-07-12.md). 요약: **코드 2 + 문서 7 · §Open Q 이월 0**.
+
+**코드 변경**:
+- **#W2-5 + #W3-2 (동류)** — `SaveOutcome`에 **`reason: 'validation'|'cancelled'|'capability'|'error'` 판별자 추가**(인라인 union 확장·신 export 0·계수 무변경). bare `{ok:false}`로 붕괴하던 3 blocked 결과(validation/reason-less cancel/capability)를 구별 가능하게. reason-less cancel도 `reason:'cancelled'`(exactOptional `cancelled:undefined` 갭 #W2-5 봉인)·capability=`reason:'capability'`(#W3-2). 근거=재설계 정직-타이핑 가치·headless C7 분기. 파일: form-runtime.ts·form-controller.ts(9 site+헤더)·entity-form.ts(cancel JSDoc)·스펙 §6.2. 테스트: form-controller.test.ts assertion+reason-less cancel 신규·async-validation.test.ts·form-actions.test.tsx.
+- **#W3-5b** — `formReadOnly`일 때 `replaces:'save'` 커스텀 액션도 드롭(merge 전 `custom` 필터). Save 어포던스=빌트인+교체 액션 슬롯. 파일: ViewEntityForm.tsx·스펙 §3.1. 테스트: form-read-only.test.tsx +2.
+
+**문서 결정(현 구현=의도·코드 변경 없음)**: #W3-3(controller 타입 불변·controller-less 뷰는 액션 omit=정직, 스펙 §3.4)·#W4-1a(getTitle 폴백=this.name·카피 미발명, §3.1)·#W4-1b(withTitle replace, §3.1)·#W4-2a(전 step hidden=graceful 액션바만, §3.2)·#W4-6a(step id-based vs 필드 renderType 분기=의도, §3.2)·#W2-1(onInit 설계확정=기존 §4.2/§9·잔여는 W7 gjcu 마이그레이션 검증으로 전환).
+
+**검증**: +6 unit(**2117**: reason-less cancel 구별·formReadOnly가 replaces:'save' 숨김+일반 커스텀 잔류)·E2E 27 무회귀·full gate 독립 PASS(type-check·2117·lint 0err·format·build·계수 47/49/182 무변경).
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

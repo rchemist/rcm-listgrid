@@ -51,21 +51,37 @@ export interface FormRuntime {
 }
 
 /**
- * The result of {@link FormRuntime.save} (spec §6.2). Exactly one of three
- * shapes:
+ * The result of {@link FormRuntime.save} (spec §6.2). Either success, or a
+ * failure carrying an explicit `reason` discriminant (D2 #W2-5/#W3-2,
+ * 2026-07-12) that tells the four blocked outcomes apart — before this they all
+ * collapsed to a bare `{ ok: false }`, distinguishable only by side effects
+ * (field-slice errors vs the banner channel vs nothing), the api-semantics gap
+ * the reporter flagged. A caller does flow control on `ok`; a headless host
+ * (C7) can branch on `reason` without inspecting store internals.
  *   - `{ ok: true, result }` — the adapter's create/update call succeeded;
  *     `result` is the entity it returned.
- *   - `{ ok: false }` — validation failed (field-slice errors are already
- *     populated by `validateAll()`; there is nothing else to inspect here).
- *   - `{ ok: false, cancelled }` — an onBeforeSave handler called
- *     `ctx.cancel(reason?)`; `cancelled` carries that reason, if given.
- *   - `{ ok: false, error }` — the adapter call threw; `error` is the mapped
- *     `BackendError` (also already applied to field-slice errors / the
- *     banner channel by the time this resolves).
+ *   - `{ ok: false, reason: 'validation' }` — `validateAll()` failed;
+ *     field-slice errors are already populated.
+ *   - `{ ok: false, reason: 'cancelled', cancelled? }` — an onBefore{Save,
+ *     Delete} handler called `ctx.cancel(reason?)`; `cancelled` carries that
+ *     reason if given. A reason-LESS cancel is still `reason: 'cancelled'` —
+ *     no longer collapsed into a validation failure (the exactOptional
+ *     `cancelled: undefined` gap #W2-5 this closes).
+ *   - `{ ok: false, reason: 'capability' }` — the create/update/delete
+ *     capability is denied (CAP-06); a SILENT block: no adapter call, no
+ *     message (the view already hides the affordance) — #W3-2.
+ *   - `{ ok: false, reason: 'error', error }` — the adapter call threw;
+ *     `error` is the mapped `BackendError` (also applied to field-slice
+ *     errors / the banner channel by the time this resolves).
  */
 export type SaveOutcome =
   | { ok: true; result: unknown }
-  | { ok: false; cancelled?: string; error?: BackendError };
+  | {
+      ok: false;
+      reason: 'validation' | 'cancelled' | 'capability' | 'error';
+      cancelled?: string;
+      error?: BackendError;
+    };
 
 /** Same shape as {@link SaveOutcome} (spec §6.2) — delete has no success payload, so `result` is `undefined` on `ok: true`. */
 export type DeleteOutcome = SaveOutcome;

@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W4 ✅ seal. **D-pass 진행 중**: D1 async save-gating ✅(2026-07-12) → **Next up: D2**(잔여 §Needs Review 8건 일괄 결정) → W5 list-track. **2114 unit/E2E 27**·계수 47/49/182(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W4 ✅ seal · **D-pass ✅**(D1 async save-gating + D2 §Needs Review 9건 처분, 2026-07-12). **Next up: W5 list-track**(entry-brief pass 선행). **2117 unit/E2E 27**·계수 47/49/182(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W4 ✅ · D1 ✅**. 새 세션은 **D2 먼저**(사용자 지시 2026-07-12: 결정 미루지 말고 일괄) — **잔여 §Needs Review 8건**을 스펙 저자로 결정(모델 auto-decide+스펙 반영·domain만 §Open Q·**workflow 적합**) → 그 후 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track) 읽고 W5 entry brief. **상위 티어 세션**(스펙 개정 동반).
-**Last updated**: 2026-07-12 (**D1 async save-gating ✅**(#W4-3a 구현). validateAll dirty-gate(asyncState!=='valid')+reset-on-edit+in-flight stale-guard·스펙 §5.3/§6.2 개정·doc 4처 동기화. +11 unit(**2114**)·+3 E2E(**27**)·full gate 독립 PASS·계수 47/49/182 무변경. Next=**D2**(잔여 §Needs Review 8건 일괄 결정)→W5.)
+**Next session policy**: **W1~W4 ✅ · D-pass ✅**(D1+D2). 새 세션은 **W5 list-track entry-brief pass 먼저** — [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track) 읽고 waves §W5 규칙대로 태스크 표 추가·커밋 후 실행. 스펙 §5.1·§7·§2·§3.5·§3.6+8그룹 map. **상위 티어 세션 권장**(entry-brief=설계 pass·스펙 개정 동반 가능).
+**Last updated**: 2026-07-12 (**D-pass ✅**(D1+D2). D2 = 잔여 §Needs Review 9건 스펙 저자 처분: 코드2(SaveOutcome `reason` 판별자 #W2-5+#W3-2·formReadOnly Save-슬롯 #W3-5b)+문서7·§Open Q 0. +6 unit(**2117**)·E2E 27·full gate 독립 PASS·계수 47/49/182 무변경. Next=**W5 list-track**(entry-brief pass).)
 
 ## Goal
 
@@ -49,9 +49,9 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W4 ✅ seal · D1 ✅**. 다음: **D2**(잔여 미결 결정)→W5 — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
+## 세션 인계 (Handoff — **W1~W4 ✅ seal · D-pass ✅**. 다음: **W5 list-track**(entry-brief pass) — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
-- **⚠ 다음 = D2 (사용자 지시 2026-07-12·상위 티어)**: **D1 async save-gating ✅ 완료**(#W4-3a — validateAll dirty-gate+reset-on-edit+in-flight stale-guard·스펙 §5.3/§6.2 개정·2114u/E2E27·[D1 detail](./progress-archive/phase-eg-api-redesign.md#d1-async-save-gating-구현-w4-3a-확정--cap-05-완결)). **D2**: 잔여 §Needs Review 8건(#W4-1a·1b·2a·6a·#W2-1·#W2-5·#W3-2·#W3-3·#W3-5b)을 스펙 저자로 일괄 결정 — 사용자 "결정하고 진행" 승인=**발명금지 게이트 이 항목엔 해제**(모델 auto-decide+기록+스펙 반영, domain 판단만 §Open Q). 구현 요하는 건(#W2-5/#W3-2 SaveOutcome 판별자·#W3-3 controller 타입 정합) 처리. **workflow 적합**(항목별 병렬 결정안→opus 종합). 그 후 W5 entry brief.
+- **⚠ 다음 = W5 list-track entry-brief pass (상위 티어 권장)**: **D-pass ✅ 완료 2026-07-12**. D1 async save-gating(#W4-3a·[D1](./progress-archive/phase-eg-api-redesign.md#d1-async-save-gating-구현-w4-3a-확정--cap-05-완결)) + D2 잔여 §Needs Review 9건 처분([dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md) — 코드2: SaveOutcome `reason` 판별자·formReadOnly Save-슬롯 / 문서7 / §Open Q 0). **W5 착수 규율**(waves §W5): 태스크 표를 **먼저 추가·커밋**한 뒤 실행 — 스펙 §5.1(withList/withFilter)·§7·§2·§3.5·§3.6+[8그룹 map](./analysis/2026-07-11/eg-group-capability-maps.md) LIST-TRACK·CAP-18·19·20·계수 §10-A 갱신(182→~184). **신규 공개 표면 = SaveOutcome.reason**(D2·인라인 union·headless 호스트가 실패 원인 분기 가능).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -90,29 +90,21 @@
 - [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` · 6 sub+W3-6 하드닝·CAP 7종·2003u·E2E 19·4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
 - [x] **W4 폼 완결** ✅ `3b3518f`..`44edfae` · 6 sub+하드닝(4버그)·CAP-05·07·10·13·23·2103u/E2E24·계수 47/49/182 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D1 async save-gating** (#W4-3a) ✅ 2026-07-12 · dirty-gate+reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정 · 2114u/E2E27 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [ ] **D2 잔여 §Needs Review 전건 결정** (사용자 지시 2026-07-12: 일괄·발명금지 해제) **← Next up** — #W4-1a·1b·2a·6a·#W2-1·#W2-5·#W3-2·#W3-3·#W3-5b: 스펙 저자로 각 결정(모델 auto-decide+기록+스펙 반영)·구현 요하면 처리(#W2-5/#W3-2 SaveOutcome 판별자·#W3-3 controller 타입 정합 등). domain 판단만 §Open Q. workflow 적합(항목별 병렬 결정안→종합).
-- [ ] **W5 list-track** (D-pass 완료 후) — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
+- [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
+- [ ] **W5 list-track** (D-pass ✅ 완료) **← Next up** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **D2 잔여 §Needs Review 8건 일괄 결정**(D1 ✅ 2026-07-12). 대상 #W4-1a·1b·2a·6a·#W2-1·#W2-5·#W3-2·#W3-3·#W3-5b: 스펙 저자로 각 결정(모델 auto-decide+기록+스펙 반영)·구현 요하면 처리(#W2-5/#W3-2 SaveOutcome 판별자·#W3-3 controller 타입 정합 등). domain 판단만 §Open Q. 사용자 지시(2026-07-12): 발명금지 게이트 이 항목엔 해제·일괄 결정 후 진행. 이어 **W5 entry brief**(waves §W5~W7 규칙: 태스크 표 먼저 추가·커밋·계수 §10-A 182→~184).
+**Next up**: **W5 list-track entry-brief pass**(D-pass ✅ 2026-07-12 완료). waves §W5~W7 규칙: **태스크 표를 먼저 추가·커밋**한 뒤 실행. 참조 스펙 §5.1(withList/withFilter 신설)·§7·§2·§3.5·**§3.6**(withListConfig/withFilterable/withExcludeListFields→withList/withFilter 이관)+[8그룹 map](./analysis/2026-07-11/eg-group-capability-maps.md) LIST-TRACK. CAP-18·19·20. 계수 §10-A 표 갱신(182→~184·root 49→~55). **상위 티어 세션 권장**(entry-brief=설계 pass·신 세션 cold-start가 컨텍스트 보호).
 
 ---
 
 ## Needs Review (deviations — 사용자 확인 후 `[x]`)
 
-- [x] **전건 처분(30항목) 2026-07-11** — 사용자 지시로 모델 확정: P0-7 소비자 영향 직접검증 해소·changeSelectOptions 레이스→W2-8 전환·나머지 28건 확정. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md)
+- [x] **전건 처분(30항목) 2026-07-11** — 확정(P0-7 직접검증·changeSelectOptions→W2-8·+29). [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md)
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
-- [ ] **#W2-1 onInit 통합 시맨틱(마이그레이션 확인)** — 구 onFetchData+onInitialize 2배열→onInit 1배열(registration-order·ctx.data 분기·반환-교체 hatch 폐기, §4.2/§9 결정). W7 gjcu 마이그레이션서 등록순서 의존·반환교체 사용처 확인 · risk: migration
-- [ ] **#W2-5 SaveOutcome reason-less cancel 구별불가** — 스펙 §6.2 SaveOutcome는 exactOptional로 `cancelled: undefined` 불가 → reason 없는 cancel()이 {ok:false}로 validation-fail과 outcome 구별불가(부작용으로만 구별). 스펙 저자: 판별자 추가 or 현행 수용 · risk: api-semantics
-- [ ] **#W3-2 capability-denied outcome 구별불가** — controller save/delete의 capability 거부가 `{ok:false}` 반환(타입상 유일 non-error·non-cancel 선택) → validation-fail·reason-less cancel과 형태 동일(#W2-5 동류). silent block(adapter 미호출)은 정상. 스펙 §6.2 저자: 판별자(예: `blocked?: 'capability'`) 추가 여부 · risk: api-semantics · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
-- [ ] **#W3-5b replaces:'save' 커스텀 액션이 formReadOnly Save-숨김 우회** — formReadOnly는 빌트인 saveBuiltin만 제외(merge 전)·replaces:'save' 커스텀 액션은 getActions 경유라 미게이트 → readOnly 폼에 커스텀 save-slot 액션 렌더. 스펙 §3.1 "빌트인 Save 어포던스 숨김"=빌트인만(literal OK)이나 의도상 애매. 스펙 저자: replaces:'save'도 formReadOnly 숨김 대상인지 · risk: api-semantics(spec-ambiguous·저위험)
-- [ ] **#W4-1a getTitle 5단계 최종 폴백 문구(spec-silent)** — 스펙 §3.1 "renderType 기본문구"의 정확한 소비자 대면 카피 미명시 → 구현은 `this.name`(생성자 보장 non-empty) 폴백 채택(발명 회피). 스펙 저자: renderType별 기본문구(예: "새 college"/"college 수정") 확정 여부 or this.name 수용 · risk: ux-copy(저위험) · [detail](./progress-archive/phase-eg-api-redesign.md#w4--폼-완결-진행--hot-file-순차delegate-sonnetopus-검증--cap-050710132)
-- [ ] **#W4-6a 위저드 step-hidden(id-based) vs 필드-hidden(store renderType) 분기(spec-silent)** — phase-end 리뷰 발견#5. step-hidden은 `actionRenderType`(id-based·W3-6 Fix#3), 그 step 안 필드-hidden은 store `renderType`. prefill(id 없는데 fetchedData/initialData로 store renderType='update')+renderType-keyed 필드 조건에서만 발산(좁은 edge·테스트 없음). 스펙 저자: 분기를 의도로 문서화 vs wizardActive시 필드-hidden도 id-based로 통일 · risk: api-semantics(좁은 edge·저위험)
-- [x] **#W4-3a → DECIDED+구현(D1, 2026-07-12): async save-gating** — dirty이며 `asyncState!=='valid'`면 validateAll 실패→save 차단(shipped W4-3 게이트누락 수정)·reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정. [D1](./progress-archive/phase-eg-api-redesign.md)
-- [ ] **#W4-2a 위저드 전 step hidden시 액션바만 렌더(spec-silent edge)** — create 위저드에서 선언된 전 step이 hidden으로 해석되면 step content/nav 없이 액션바만 표시(크래시 없음·미테스트). 스펙 §3.2가 degenerate 케이스 미규정 → graceful fallback 채택. 스펙 저자: 이 케이스 의도 확정(예: 전체 폼 fallback or 경고) · risk: ux-edge(저위험)
-- [ ] **#W4-1b withTitle 재호출=replace(merge 아님)** — 스펙 §3.1이 재호출 시맨틱 미명시 → L1 with* 기본(설정/교체) 적용(withCapabilities/withMeta의 명시 merge와 다름·title은 스칼라라 자연스러움). 스펙 저자: 명시 문서화 여부 · risk: api-semantics(저위험·L1 정합)
-- [ ] **#W3-3 controller-optional vs ActionContext.controller(required) 타입 불일치** — ViewEntityForm.controller? optional인데 ActionContext.controller: FormRuntime(required) → controller 부재 시 커스텀 액션/빌트인 Delete/render-slot omit(빌트인 Save legacy만). 특히 replaces:'save'+no-controller=Save 버튼 아예 없음. 스펙 §3.4/§7 저자: controller required화 or ActionContext.controller optional화 · risk: api-type-consistency · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
+- [x] **#W4-3a → DECIDED+구현(D1, 2026-07-12)** — dirty 미확인 async=validateAll 실패→save 차단·스펙 §5.3/§6.2 개정. [D1](./progress-archive/phase-eg-api-redesign.md)
+- [x] **D2 잔여 9건 처분(2026-07-12)** — 스펙 저자 확정(발명금지 해제): 코드2+문서7·§Open Q 0. [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
 
 ## Progress notes
 

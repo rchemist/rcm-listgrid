@@ -129,10 +129,12 @@ export interface BeforeSaveContext {
   /**
    * Stops the save flow: no adapter call is made, no further onBeforeSave
    * handlers run, and `createFormController.save` resolves
-   * `{ ok: false, cancelled: reason }`. `reason`, if given, is also pushed to
-   * the store's message banner (`severity: 'info'`, spec §6.2). Distinct
-   * from a THROWN error — a handler that throws is logged and SKIPPED (spec
-   * §4.2), the flow continues; only an explicit `cancel()` call stops it.
+   * `{ ok: false, reason: 'cancelled', cancelled: reason }` (a reason-less
+   * `cancel()` still resolves `reason: 'cancelled'` — D2 #W2-5). `reason`, if
+   * given, is also pushed to the store's message banner (`severity: 'info'`,
+   * spec §6.2). Distinct from a THROWN error — a handler that throws is logged
+   * and SKIPPED (spec §4.2), the flow continues; only an explicit `cancel()`
+   * call stops it.
    */
   cancel(reason?: string): void;
 }

@@ -49,9 +49,9 @@
 | `withId` | `(id: string \| undefined): this` | renderType 판별자 |
 | `getId` | `(): string \| undefined` | — |
 | `getRenderType` | `(): RenderType` | `'update'` iff id 설정 |
-| `withTitle` | `(title: string \| { text?: string \| undefined; fromField?: string \| undefined }): this` | ReactNode 없음(→react slots.title) |
-| `getTitle` | `(values?: Record<string, unknown>): string` | **항상 해석된 문자열**: text → fromField의 values값 → `name` 필드 값 → id → renderType 기본문구. 구 `''` 기본 반환 금지 |
-| `withReadOnly` | `(readOnly?: boolean \| undefined): this` | **폼 전체 읽기전용 선언**(기본 true, undefined=해제). 선언에 실리므로 M2O 자식 폼 임베드에 그대로 전파(gjcu `UserEntityForm(true)` 변형 패턴 1:1). 의미론: store `formReadOnly` seed → 전 필드 effective readOnly OR + 빌트인 Save 어포던스 숨김. **데이터 쓰기 차단이 목적이면 `withCapabilities({update:false})`** — withReadOnly는 표시/편집 어포던스 계약(의도 명시, 검증 coverage-4) |
+| `withTitle` | `(title: string \| { text?: string \| undefined; fromField?: string \| undefined }): this` | ReactNode 없음(→react slots.title). **#W4-1b(2026-07-12)**: 재호출=**replace**(L1 기본·title은 스칼라·withCapabilities/withMeta의 merge와 의도적으로 다름) |
+| `getTitle` | `(values?: Record<string, unknown>): string` | **항상 해석된 문자열**: text → fromField의 values값 → `name` 필드 값 → id → **`this.name`**(엔티티 이름·생성자 보장 non-empty). 구 `''` 반환 금지. **#W4-1a(2026-07-12)**: 최종 폴백은 renderType별 카피("새 X"/"X 수정")를 **발명하지 않고** this.name — 대면 카피는 소비자 소관(withTitle/slots.title) |
+| `withReadOnly` | `(readOnly?: boolean \| undefined): this` | **폼 전체 읽기전용 선언**(기본 true, undefined=해제). 선언에 실리므로 M2O 자식 폼 임베드에 그대로 전파(gjcu `UserEntityForm(true)` 변형 패턴 1:1). 의미론: store `formReadOnly` seed → 전 필드 effective readOnly OR + **Save 어포던스 숨김**(**#W3-5b(2026-07-12): 빌트인 Save + `replaces:'save'` 커스텀 액션 둘 다** — 교체 액션도 Save 슬롯을 점유하므로 숨긴다. Delete·`replaces:'delete'`·일반 커스텀 액션은 무관, §6.1 Save 전용). **데이터 쓰기 차단이 목적이면 `withCapabilities({update:false})`** — withReadOnly는 표시/편집 어포던스 계약(의도 명시, 검증 coverage-4) |
 | `getReadOnly` | `(): boolean` | withReadOnly 리더 쌍(W3-5 with/get 쌍 보완 — 선언된 formReadOnly seed 질의). §3.6 리스트 순수질의와 무관 |
 | `withMeta` | `(patch: Record<string, unknown>): this` | **유일한** escape hatch(구 attribute bag 9종 대체). **shallow-merge**(replace 아님 — 프리셋/래퍼 다중 호출 시 last-write-wins 클로버 방지, 검증 dx-6). 키에 `undefined` 대입=키 제거(L4) |
 | `getMeta` | `(): Record<string, unknown>` | 기본 `{}` |
@@ -72,6 +72,10 @@
 | `getFields` / `getField` / `hasField` | 질의 3 | 현행 유지(order 정렬) |
 | `getTabs` / `getTab` / `hasTab` / `getFieldGroups` / `getGroupFields` / `getTabFields` | 질의 6 | getTabFields(tabId) 신설 유지(위저드 조합 실사용 5) |
 | `clone` | `(includeValues?: boolean): this` | **`this` 반환(L3** — 서브클래스 변형 보존, 검증 dx-5**)**. 깊은 복제 — 공유 참조 0(훅 배열·steps·meta 포함), 구 shallow-Map 누수 구조 불가 |
+
+**위저드 hidden 해석 (D2 #W4-2a·#W4-6a 확정 2026-07-12)**:
+- **#W4-6a — step-hidden vs 필드-hidden 분기는 의도**: step 가시성은 `actionRenderType`(id-based·"create 위저드=NEW 레코드 여부"·W3-6 Fix#3)로, 그 step **내부 필드** 가시성은 store `renderType`으로 해석한다. 둘은 다른 관심사(스텝=위저드/CRUD 모드, 필드=폼 렌더 모드)이므로 분기 유지가 정확 — 통일하지 않는다. prefill(id 없이 fetchedData/initialData로 store renderType='update')+renderType-keyed 필드-hidden의 좁은 발산은 각 관심사 내에서 일관되므로 수용.
+- **#W4-2a — 전 step hidden = graceful**: create 위저드에서 선언된 전 step이 hidden으로 해석되면 step content/nav 없이 **액션바만** 렌더(크래시 없음). degenerate(오설정) 케이스이므로 graceful fallback 채택 — "전체 폼 fallback" 같은 서프라이즈를 발명하지 않는다.
 
 ### 3.3 라이프사이클 훅 (8) — §4가 계약 정의
 
@@ -110,6 +114,8 @@ interface ActionContext {
 type ActionRender = (ctx: ActionContext) => ReactNode
 // ReactNode는 type-only import(L6, ConditionalReactNodeValue 선례) — 해석·렌더는 react 계층
 ```
+
+**ActionContext.controller 필수 vs ViewEntityForm.controller? 옵셔널 (D2 #W3-3 확정 2026-07-12)**: `ActionContext.controller: FormRuntime`은 **required 유지** — 커스텀 액션의 `run(ctx)`는 런타임(save/delete/reload/validate)을 가진다고 보장받는다(옵셔널화하면 액션 작성자마다 null-check 필요=흔한 케이스 열화). `ViewEntityForm.controller?`는 **옵셔널 유지**(§7) — 표시전용/host-owned-save(C7) 뷰가 유효. **상호작용(현 코드 동작 = 의도)**: controller 없는 뷰는 controller-의존 어포던스(빌트인 Delete·커스텀 액션·render 슬롯)를 **omit**하고 빌트인 Save만 legacy onSave 경로로 동작한다. 그래서 `replaces:'save'`+no-controller = Save 버튼 없음 = **정직한 결과**(교체 액션이 실행할 controller가 없음). 커스텀 액션은 controller를 전제한다 — 두 타입 모두 불변(코드 변경 없음).
 
 ### 3.5 데이터 전송 (2)
 
@@ -238,7 +244,8 @@ interface FormRuntime {
   reload(): Promise<void>       // 재fetch→재바인딩→onInit 재실행→같은 store에 반영 (구 no-op reload의 실동작 대체)
   validate(): Promise<boolean>
 }
-type SaveOutcome  = { ok: true; result: unknown } | { ok: false; cancelled?: string; error?: BackendError }
+type SaveOutcome  = { ok: true; result: unknown }
+  | { ok: false; reason: 'validation'|'cancelled'|'capability'|'error'; cancelled?: string; error?: BackendError }
 type DeleteOutcome = SaveOutcome
 
 // /state — 구현
@@ -250,6 +257,8 @@ function createFormController(opts: {
 **save 플로우(정준)**: capability(create|update) 해석 → (skip 아니면) validateAll(첫 invalid 필드 정보 포함 — sync ValidationItem 채널 **+ W4-3a async save-gate**: dirty이며 `asyncState!=='valid'`인 AsyncValidation 필드=invalid, §5.3) → store.toSaveData() → `onBeforeSave` 순차(cancel 가능·data 변형) → revision 주입(설정 시) → adapter.create/update → **실패**: `BackendError.fieldErrors`→필드 slice errors(**name-키** — 구 label-키 버그 금지)+미매핑분은 messages(severity:'error'), generic 메시지는 fieldErrors 존재 시 억제(suppress-generic) → **성공**: 비persistent messages clear(clear-on-success) → `onAfterSave` 순차 → outcome.
 **delete 플로우**: capability(delete) → `onBeforeDelete`(cancel) → adapter.remove(url, ids, revision?) → 성공 시 `onAfterDelete`.
 ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controller를 호출**(L7). 호스트 소유 저장(C7)도 여전히 가능 — controller는 편의 오케스트레이터지 강제 아님.
+
+**SaveOutcome.reason 판별자 (D2 #W2-5/#W3-2 확정 2026-07-12)**: 실패(`ok:false`)는 `reason`으로 네 원인을 구별한다 — `'validation'`(validateAll 실패·필드 slice errors 세팅)·`'cancelled'`(onBefore* 핸들러 `cancel(reason?)`·`cancelled`에 사유; **reason 없는 cancel도 `reason:'cancelled'`** = 구 exactOptional `cancelled:undefined` 불가로 validation과 구별불가였던 #W2-5 해소)·`'capability'`(CAP-06 거부·silent block=adapter 미호출·메시지 없음·#W3-2)·`'error'`(adapter throw·`error`=매핑된 BackendError). 소비자는 `ok`로 흐름제어, headless 호스트(C7)는 `reason`으로 분기(store 내부 미조회). 신 export 0(SaveOutcome 인라인 union 확장).
 
 ## 7. react 표면
 

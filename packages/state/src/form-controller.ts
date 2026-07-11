@@ -34,8 +34,9 @@ import type { FormStoreState } from './form-store';
 //
 // Save flow order (spec §6.2 EXACTLY, revision step now wired — W4-4):
 //   1. capability create|update gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
-//      => { ok: false }, silent (no adapter call, no message)
-//   2. validateAll() (unless opts.skipValidation) — fail => { ok: false }.
+//      => { ok: false, reason: 'capability' }, silent (no adapter call/message)
+//   2. validateAll() (unless opts.skipValidation) — fail =>
+//      { ok: false, reason: 'validation' }.
 //      Runs the SYNC ValidationItem channel AND the W4-3a async save-gate
 //      (spec §5.3/§6.2): a field declaring an AsyncValidation whose value is
 //      DIRTY but whose asyncState !== 'valid' ('unchecked'/'checking'/
@@ -57,13 +58,15 @@ import type { FormStoreState } from './form-store';
 //   7. failure => map BackendError.fieldErrors onto field slices (keyed by
 //      NAME) / an unmatched key onto a banner message; error.message is
 //      suppressed when fieldErrors is present (suppress-generic); otherwise
-//      addMessage({key:'save-error', ...}) — return { ok: false, error }
+//      addMessage({key:'save-error', ...}) — return
+//      { ok: false, reason: 'error', error }. (onBeforeSave cancel =>
+//      { ok: false, reason: 'cancelled', cancelled? } — step 4.)
 //   8. success => clearMessages() (clear-on-success) -> onAfterSave handlers,
 //      sequential, same per-handler try/catch -> { ok: true, result }
 //
 // Delete flow order (spec §6.2):
 //   1. capability delete gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
-//      => { ok: false }, silent (no adapter call, no message)
+//      => { ok: false, reason: 'capability' }, silent (no adapter call/message)
 //   2. ids = opts.ids ?? [entityForm.getId()]
 //   3. onBeforeDelete handlers, sequential; same cancel/throw contract
 //   4. adapter.remove(url, ids, revision?) — revision = entityForm.
@@ -71,7 +74,8 @@ import type { FormStoreState } from './form-store';
 //      through as-is (undefined when withRevision was never declared — the
 //      adapter's own optional 3rd param handles the "not set" case, no
 //      conditional call-site branching needed). failure =>
-//      addMessage({key:'delete-error', ...}), return { ok: false, error }
+//      addMessage({key:'delete-error', ...}), return
+//      { ok: false, reason: 'error', error }
 //   5. success => onAfterDelete handlers, sequential -> { ok: true, result: undefined }
 
 export interface CreateFormControllerOptions {
@@ -183,17 +187,18 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
 
     // spec §6.2 step 1 (CAP-06; W3-2) — capability-denied is a SILENT block:
     // no adapter call, no message (the view already hides the affordance;
-    // a headless caller just receives { ok: false }). Indistinguishable from
-    // a validation failure by SHAPE alone (SaveOutcome has no reason field
-    // for the non-error/non-cancel case) — deliberate, see this task's
-    // deviations note.
+    // a headless caller receives { ok: false, reason: 'capability' }). D2
+    // (#W3-2, 2026-07-12) gave SaveOutcome an explicit `reason` discriminant,
+    // so this is now distinguishable from a validation failure / cancel by
+    // shape (spec §6.2 SaveOutcome).
     const caps = entityForm.getCapabilities();
     const relevantCap = renderType === 'update' ? caps.update : caps.create;
-    if (!(await capAllowed(relevantCap, capCtx(renderType)))) return { ok: false };
+    if (!(await capAllowed(relevantCap, capCtx(renderType))))
+      return { ok: false, reason: 'capability' };
 
     if (!saveOpts?.skipValidation) {
       const valid = await store.getState().validateAll();
-      if (!valid) return { ok: false };
+      if (!valid) return { ok: false, reason: 'validation' };
     }
 
     let data = store.getState().toSaveData();
@@ -225,9 +230,9 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
       if (didCancel) {
         if (cancelled !== undefined) {
           store.getState().addMessage({ key: 'save-cancelled', severity: 'info', text: cancelled });
-          return { ok: false, cancelled };
+          return { ok: false, reason: 'cancelled', cancelled };
         }
-        return { ok: false };
+        return { ok: false, reason: 'cancelled' };
       }
     }
 
@@ -248,7 +253,7 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     } catch (e) {
       const error = toBackendError(e);
       applySaveError(error);
-      return { ok: false, error };
+      return { ok: false, reason: 'error', error };
     }
 
     store.getState().clearMessages();
@@ -269,7 +274,8 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     // capability gate. delete is always evaluated in 'update' mode (an
     // existing record is being removed — there is no create-mode delete).
     const caps = entityForm.getCapabilities();
-    if (!(await capAllowed(caps.delete, capCtx('update')))) return { ok: false };
+    if (!(await capAllowed(caps.delete, capCtx('update'))))
+      return { ok: false, reason: 'capability' };
 
     const ids = deleteOpts?.ids ?? [entityForm.getId()!];
 
@@ -295,9 +301,9 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
           store
             .getState()
             .addMessage({ key: 'delete-cancelled', severity: 'info', text: cancelled });
-          return { ok: false, cancelled };
+          return { ok: false, reason: 'cancelled', cancelled };
         }
-        return { ok: false };
+        return { ok: false, reason: 'cancelled' };
       }
     }
 
@@ -308,7 +314,7 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     } catch (e) {
       const error = toBackendError(e);
       applyDeleteError(error);
-      return { ok: false, error };
+      return { ok: false, reason: 'error', error };
     }
 
     for (const handler of entityForm.getAfterDeleteHandlers()) {

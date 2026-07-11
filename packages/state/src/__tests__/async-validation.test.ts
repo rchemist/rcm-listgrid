@@ -365,7 +365,7 @@ describe('createFormController.save (W4-3a async gate — spec §6.2)', () => {
 
     const outcome = await controller.save();
 
-    expect(outcome).toEqual({ ok: false });
+    expect(outcome).toEqual({ ok: false, reason: 'validation' });
     expect(create).not.toHaveBeenCalled();
   });
 
