@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 기반(…W1·W2) + **W3 권한·능력·액션 ✅ 완료**(6 sub-task+phase-end 하드닝·CAP-02/03/06/08/09/22/27 소화). **Next up**: **W4 폼 완결**(title·steps·AsyncValidation·revision·meta) — **⚠ W4-1 착수 전 /schema §10 ceiling 재산정 필수**(180/180 도달·§Open Q). **2003 unit/E2E 19**·계수 41/49/**180(==ceiling)** PASS. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 기반(W1·W2)+**W3 권한·능력·액션 ✅ 완료**(6 sub-task+phase-end 하드닝·CAP 7종). **Next up**: **W4 폼 완결** — ⚠ **W4-1 착수 전 /schema §10 ceiling 재산정 BLOCKING**(180/180 도달·§Open Q). 2003 unit/E2E 19·계수 41/49/180. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W3 ✅ 완료**. 새 세션(W4)은 ① [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)(도입 표면·Do-NOT·**W4-1 전 /schema ceiling 재산정 BLOCKING**) → ② [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+**W4 표** → ③ [스펙](./plans/entityform-public-api-spec.md) 인용 §만(§3.1·§5.3) → ④ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 (**W3 페이즈 ✅ 완료+seal** — W3-6 하드닝(phase-end 적대 리뷰 4버그 fix)+아카이브+Handoff. W3 전체 `4d30159`..`b4ecda3`(6 sub-task+하드닝)·**2003 unit·E2E 19**·계수 41/49/180. CAP 7종 소화. sonnet delegate·opus 검증(+phase-end 리뷰서 4버그 검출). **다음 세션 = W4**(착수 전 /schema ceiling 재산정). [W3 상세](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
+**Next session policy**: **W1~W3 ✅ 완료**. W4 새 세션은 §세션 인계 Handoff의 읽는 순서를 따른다 — [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)(BLOCKING ceiling 재산정 포함) → waves §W4 → 스펙 §3.1·§5.3.
+**Last updated**: 2026-07-11 (W3 ✅ seal + /progress heal-on-entry slim[본문 경량화·W1~W3 상세 아카이브 이월]. W3 `4d30159`..`b4ecda3`·2003 unit·E2E 19·계수 41/49/180. 다음 = **W4-1 전 /schema ceiling 재산정(BLOCKING)**.)
 
 ## Goal
 
@@ -51,9 +51,7 @@
 
 ## 세션 인계 (Handoff — **W3 페이즈 ✅ 완료·seal**. 다음: **W4 폼 완결**(착수 전 /schema ceiling 재산정) — 전체 인계는 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
 
-- **W2 완료(2026-07-11, 8 sub-task `005b4a3`..`ed77ecf`)**: 훅+컨트롤러 전건 — 라이프사이클 **8훅**(onInit/onChange/onBefore·After{Save,Delete,ListFetch})·InitContext(setMeta)·FormMutator+getRenderType/getSession·**messages** 채널·**serializeValue** seam(toSaveData 재작성)·**FormRuntime(schema)+createFormController(state)**·useEntityForm·EF6 제거·selectOptions 레이스 fix. **1936 unit/E2E 16 green·계수 EntityForm 37/45·root 49/120·/schema 175/180 PASS**. sonnet delegate 7+inline 1·opus 검증/커밋. 상세 [archive](./progress-archive/phase-eg-api-redesign.md#w2).
-- **W3 착수 규율(하드)**: 권한·능력·액션(CAP-02·03·06·08·09·22·27). hot-file 3종 **순차·fan-out 금지** 유지(ViewEntityForm=버튼/액션바 대폭 수정). **승계 배선점**: ① ✅**W3-1 완결**(TabDef.hidden conditional 정적해석=getStaticConditionalBoolean·deriveTabs+seed 2곳 TODO 마감) ② ✅**W3-2 완결**(capability 게이트=controller save/del step1·denied silent {ok:false}·Save 버튼 sync 가시성·withNeverDelete 제거) ③ ✅**W3-3 완결**(Save 버튼 rewire→controller.save 단일 validate·onSave=post-save 콜백·통합 액션 바·빌트인 Delete 파생=update&&controller만·confirm+E2E는 W3-4) ④ **계수 ceiling 도달**: /schema **180**/180 — **W4 신타입 진입 시 초과**(§Open Questions 등재·W4-1 착수 전 §10 재산정)·EntityForm 37/45 — W3-2/3 신타입(Capabilities·FormAction·ActionContext·ActionRender) 추가 시 180 접근 감시. 멤버 제거/개명 검증=tsc+npm test 둘 다(tsc -b는 __tests__ 미커버).
-- **설계 pass 완료(2026-07-11, fable)**: 공개 API 재설계 확정 — [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범: CAP-01~29·EntityForm 44멤버·훅 8종·FormRuntime/FormController·messages 채널·serializeValue seam)·[waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약: W1~W4 태스크급 완전 명세, W5~W7 entry-pass 규칙). 4렌즈 적대검증 22건(blocker 1) 전건 반영. 상세 [archive](./progress-archive/phase-eg-api-redesign.md).
+- **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
 - **이미 SOUND한 것(유지)**: store 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·FormMutator seam·EF1-7 파이프라인·필드 24+주소+Xref·권한 배선(EG1/EG2). **1887 unit/16 E2E, 전부 push.** 재설계는 공개 표면 — 엔진 재작성 아님.
@@ -94,7 +92,7 @@
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up (다음 세션)**: **W4 폼 완결**(W4-1 title·W4-2 steps·W4-3 AsyncValidation·W4-4 revision·W4-5 meta · 스펙 §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)). **⚠ W4-1 착수 전 BLOCKING**: /schema 계수 180/180 ceiling 재산정(§Open Questions·스펙 §10). hot-file 순차·delegate 기본 sonnet·opus 검증+**phase-end 적대 리뷰 필수**(W3서 4버그 검출 실증). W3 도입 표면·Do-NOT·미결은 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
+**Next up**: **W4 폼 완결**(W4-1 title·W4-2 steps·W4-3 AsyncValidation·W4-4 revision·W4-5 meta · 스펙 §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)). **⚠ W4-1 착수 전 BLOCKING**: /schema 180 ceiling 재산정(§Open Q·스펙 §10). 도입 표면·Do-NOT·미결=[W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
 
 ---
 
@@ -111,11 +109,7 @@
 ## Progress notes
 
 - EF/EA 페이즈 노트(EF-R2 stash anomaly·EF-gate FIND-ONLY·EA-A fan-out 커밋방식·EA-D reorder)는 [archive](./progress-archive/phase-e-track-tasks.md#progress-notes-본문-이월-2026-07-11--efea-페이즈-완료로-아카이브)로 이월.
-- 2026-07-11 W1 방법론: `tsc -b`(typecheck:packages)는 __tests__ 미타입체크 → EntityForm 멤버 제거/개명 시 테스트파일 콜러는 `npm test`로만 검출. rename 웨이브 검증은 tsc+test 둘 다 필수(W1-3에서 발견, W1-4/5 승계).
-- 2026-07-11 EG-D 검증: 4렌즈 적대검증(wf_c55e83dc-6b1) 22건(blocker 1·major 18·minor 3) **전건 수용·r2 반영** — blocker=InitContext.setMeta 부재(gjcu 774+118 콜사이트 이식 불가). opus 봉인 재검증 1회 수행.
-- 2026-07-11 교차리포: 실행급 스펙 규율을 harness에 제도화(팀규약·model-routing·progress-authoring/delegate·issue·codex 미러 — harness `b178fa6` push+install). 사용자 지시: opus-only 모드에서도 균질 실행.
-- 2026-07-11 W2 착수: 8 sub-task(W2-1~8) hot-file 순차·delegate 기본 sonnet(waves §W2 브리핑 원문)·opus 검증/커밋. sub-task 상세는 [phase-eg-api-redesign](./progress-archive/phase-eg-api-redesign.md)에 행 누적, W2 §Tasks 라인은 8/8 후 [x].
-- 2026-07-11 W3 착수: 5 sub-task(W3-1~5) hot-file 순차·fan-out 금지·delegate 기본 sonnet(waves §W3=브리핑 원문)·opus 검증(full gate+diff 발명감사)/커밋. 상세는 [archive #w3](./progress-archive/phase-eg-api-redesign.md#w3) 행 누적, W3 §Tasks 라인은 5/5 후 [x]. **W3-1 발명게이트 1건**(sync ConditionalBoolean 해석=async resolver뿐)→[blueprint EG4 sync 근사 GO](./plans/eg-entityform-full-parity.md) 사전판정 바인딩으로 해소(getStaticConditionalBoolean 신설·발명 아님).
+- W1~W3 방법론·검증 노트(W1 tsc+test 이중검증·EG-D 4렌즈·harness 교차리포·W2/W3 착수 규율·W3-1 발명게이트 해소)는 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-11 slim).
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 

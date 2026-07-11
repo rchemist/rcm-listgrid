@@ -94,3 +94,11 @@
 - **toSaveData 제외**: 비허가 필드는 저장 페이로드에서 배제(우회 저장 차단).
 - **FieldRenderer 하드게이트**: 렌더 계층에서 비허가 필드를 강제 차단 — EF1 파이프라인으로 우회 불가.
 - **규모**: +10 테스트(누계 1876 unit) · 16 E2E green. 재설계 스펙(CAP-02·03 권한군)이 이 배선을 상위 개념으로 흡수하나, 구현 자체는 SOUND로 유지(§세션 인계 Do-NOT: SOUND 내부 재작성 금지).
+
+## Progress notes (본문 이월 — W1~W3 방법론·검증, 2026-07-11 slim)
+
+- **W1 방법론**: `tsc -b`(typecheck:packages)는 __tests__ 미타입체크 → EntityForm 멤버 제거/개명 시 테스트파일 콜러는 `npm test`로만 검출. rename 웨이브 검증은 tsc+test 둘 다 필수(W1-3 발견, W1-4/5 승계).
+- **EG-D 검증**: 4렌즈 적대검증(wf_c55e83dc-6b1) 22건(blocker 1·major 18·minor 3) 전건 수용·r2 반영 — blocker=InitContext.setMeta 부재(gjcu 774+118 콜사이트 이식 불가). opus 봉인 재검증 1회.
+- **교차리포(harness)**: 실행급 스펙 규율을 harness에 제도화(팀규약·model-routing·progress-authoring/delegate·issue·codex 미러 — harness `b178fa6` push+install). 사용자 지시: opus-only 모드에서도 균질 실행.
+- **W2 착수**: 8 sub-task(W2-1~8) hot-file 순차·delegate 기본 sonnet(waves §W2 브리핑 원문)·opus 검증/커밋.
+- **W3 착수**: 5 sub-task(W3-1~5) hot-file 순차·fan-out 금지·delegate 기본 sonnet(waves §W3=브리핑 원문)·opus 검증(full gate+diff 발명감사)/커밋. **W3-1 발명게이트 1건**(sync ConditionalBoolean 해석=async resolver뿐)→[blueprint EG4 sync 근사 GO](../plans/eg-entityform-full-parity.md) 사전판정 바인딩으로 해소(getStaticConditionalBoolean 신설·발명 아님).
