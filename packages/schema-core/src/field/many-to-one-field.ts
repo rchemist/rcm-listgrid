@@ -1,4 +1,5 @@
 import type { EntityForm } from '../entity-form';
+import type { FieldEvalContext } from './eval-context';
 import type { FilterItem } from '../search/search-form';
 import { FormField } from './form-field';
 
@@ -63,5 +64,19 @@ export class ManyToOneField<TValue = unknown> extends FormField<TValue> {
   useListField(): this {
     this.showInList = true;
     return this;
+  }
+
+  /**
+   * Override (spec §5.2): flattens the selected related-entity object to its
+   * id under `<name>Id` — the exact `toSaveData` M2O branch this replaces
+   * (old form-store.ts duck-typed `getIdField` cast). Non-object values
+   * (undefined/null/a raw id already) fall through to the base `{ [name]:
+   * value }` shape unchanged — same as the old `else` branch.
+   */
+  override serializeValue(value: TValue, _ctx: FieldEvalContext): Record<string, unknown> {
+    if (value && typeof value === 'object') {
+      return { [`${this.getName()}Id`]: (value as Record<string, unknown>)[this.getIdField()] };
+    }
+    return { [this.getName()]: value };
   }
 }

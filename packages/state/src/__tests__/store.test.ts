@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   BooleanField,
   EntityForm,
+  FormField,
+  InlineMapField,
   ManyToOneField,
   SearchForm,
   StringField,
   type BackendAdapter,
+  type FieldEvalContext,
   type PageResult,
 } from '@listgrid/schema-core';
 import { createFormStore } from '../form-store';
@@ -86,6 +89,71 @@ describe('createFormStore (ADR-0002 value-slice store)', () => {
     expect(save.name).toBe('공학대학');
     expect(save.deanId).toBe('42');
     expect(save.dean).toBeUndefined();
+  });
+
+  // W2-4 (spec §5.2) — serializeValue seam: toSaveData no longer branches on
+  // field.type === 'manyToOne'; it merges every field's serializeValue()
+  // keyed contribution. These tests lock in the 3 NEW behaviors the seam
+  // adds on top of the (unchanged) characterization above.
+  describe('toSaveData serializeValue seam (W2-4, spec §5.2)', () => {
+    class UppercaseNameField extends FormField<string> {
+      constructor(name: string, order: number) {
+        super(name, order, 'custom');
+      }
+      override serializeValue(value: string, _ctx: FieldEvalContext): Record<string, unknown> {
+        return { [this.getName()]: typeof value === 'string' ? value.toUpperCase() : value };
+      }
+    }
+
+    it("a custom field's serializeValue override is honored by toSaveData", () => {
+      const form = new EntityForm('CustomFieldEntityForm', '/custom-field').addFields({
+        items: [new UppercaseNameField('nickname', 1)],
+      });
+      const store = createFormStore(form);
+      store.getState().setValue('nickname', 'kim');
+      const save = store.getState().toSaveData();
+      expect(save.nickname).toBe('KIM');
+    });
+
+    // Do-NOT (waves §W2-4): an object-valued field that is NOT manyToOne
+    // (InlineMapField's value is itself a Record<string,string>) must serialize
+    // under ITS OWN name, never mistaken for the M2O `<name>Id` flattening —
+    // proving the base serializeValue's `{ [name]: value }` shape, not a
+    // `field.type === 'manyToOne'` check, gates the flatten.
+    it('an object-valued non-M2O field (InlineMapField) does NOT collide with M2O <name>Id flattening', () => {
+      const form = new EntityForm('InlineMapEntityForm', '/inline-map').addFields({
+        items: [new InlineMapField('attrs', 1)],
+      });
+      const store = createFormStore(form);
+      store.getState().setValue('attrs', { color: 'red', size: 'L' });
+      const save = store.getState().toSaveData();
+      expect(save.attrs).toEqual({ color: 'red', size: 'L' });
+      expect(save.attrsId).toBeUndefined();
+    });
+
+    class DottedKeyField extends FormField<string> {
+      constructor(
+        name: string,
+        order: number,
+        private readonly targetKey: string,
+      ) {
+        super(name, order, 'custom');
+      }
+      override serializeValue(value: string, _ctx: FieldEvalContext): Record<string, unknown> {
+        return { [this.targetKey]: value };
+      }
+    }
+
+    it('a dotted-key serializeValue contribution is nested into the save payload', () => {
+      const form = new EntityForm('DottedEntityForm', '/dotted').addFields({
+        items: [new DottedKeyField('state', 1, 'address.state')],
+      });
+      const store = createFormStore(form);
+      store.getState().setValue('state', '서울');
+      const save = store.getState().toSaveData();
+      expect(save.address).toEqual({ state: '서울' });
+      expect(save.state).toBeUndefined();
+    });
   });
 
   // EF6 — submit-transform hook applied by toSaveData after the mechanical

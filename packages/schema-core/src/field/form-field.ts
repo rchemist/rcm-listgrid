@@ -107,6 +107,20 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   }
 
   /**
+   * Public extension seam (spec §5.2): contributes this field's save-payload
+   * entry as a keyed map. Base impl — every ordinary field saves under its
+   * own name. `ManyToOneField` overrides this to flatten to `<name>Id`
+   * (many-to-one-field.ts). `toSaveData` (@listgrid/state) merges every
+   * field's contribution with `Object.assign`, then applies dotted-name
+   * nesting in one pass — this method does NOT nest dotted names itself.
+   * `ctx` is unread here; it exists so a custom field's override can read
+   * sibling values/session/renderType (same context `validate` receives).
+   */
+  serializeValue(value: TValue, _ctx: FieldEvalContext): Record<string, unknown> {
+    return { [this.getName()]: value };
+  }
+
+  /**
    * Run required-blank check + declared validations. Transplant of
    * FormField.validate:779-823 — hidden/readOnly/unpermitted fields skip
    * validation; required-blank short-circuits; returns failing results only.

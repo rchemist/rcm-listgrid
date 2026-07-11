@@ -125,6 +125,20 @@ export interface EntityField<TValue = unknown> extends EntityItem {
    */
   validate(ctx: FieldEvalContext, override?: FieldMetaOverride): Promise<ValidateResult[]>;
 
+  /**
+   * Public extension seam (spec §5.2, one of 3 protected seams promoted to a
+   * documented public contract): contributes this field's save-payload entry
+   * as a KEYED map — always `{ [key]: value }` shaped, never a bare value —
+   * so `toSaveData` (@listgrid/state) can `Object.assign`-merge every field's
+   * contribution with no per-field-type branching. The base `FormField`
+   * implementation returns `{ [this.name]: value }`; `ManyToOneField`
+   * overrides it to flatten `{ [<name>Id]: id }` (the old duck-typed
+   * `getIdField` cast this replaces). Declared here (not just on `FormField`)
+   * so `toSaveData`, which iterates `EntityField`-typed `fieldDefs`, can call
+   * it without a cast.
+   */
+  serializeValue(value: TValue, ctx: FieldEvalContext): Record<string, unknown>;
+
   // --- chainable builders ---
   withRequired(required?: RequiredType): this;
   withValidations(...validations: Validation[]): this;

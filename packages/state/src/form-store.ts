@@ -33,6 +33,36 @@ export function resolveFetchedValue(data: Record<string, unknown>, name: string)
   return cur;
 }
 
+// nestDottedKeys — the write-side mirror of resolveFetchedValue's dotted-path
+// read: toSaveData (W2-4, spec §5.2) merges every field's serializeValue
+// contribution into one FLAT map first, then this pass nests any key
+// containing '.' into the equivalent object path (`{'a.b': v}` -> `{a: {b:
+// v}}`). A key with no dot is copied through unchanged, so for the current
+// field set — none of whose serializeValue contributions use a dotted key —
+// this is a strict no-op (existing toSaveData characterization tests are
+// unaffected).
+function nestDottedKeys(flat: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(flat)) {
+    if (!key.includes('.')) {
+      out[key] = value;
+      continue;
+    }
+    const parts = key.split('.');
+    let cur = out;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const part = parts[i] as string;
+      const existing = cur[part];
+      if (typeof existing !== 'object' || existing === null) {
+        cur[part] = {};
+      }
+      cur = cur[part] as Record<string, unknown>;
+    }
+    cur[parts[parts.length - 1] as string] = value;
+  }
+  return out;
+}
+
 // createFormStore — the per-instance, value-slice form store (ADR-0002). The
 // store holds ONLY the value slices + form-level UI state; the field META lives
 // on the EntityForm/field instances. Renderers subscribe to a single field's
@@ -644,7 +674,11 @@ export function createFormStore(
 
       toSaveData() {
         const s = get();
-        const out: Record<string, unknown> = {};
+        // W2-4 (spec §5.2): merge every field's serializeValue keyed
+        // contribution — no more per-field-type (manyToOne) branching here;
+        // the duck-typed `getIdField` cast this used to need is gone (it now
+        // lives on ManyToOneField.serializeValue, many-to-one-field.ts).
+        const merged: Record<string, unknown> = {};
         for (const field of Object.values(s.fieldDefs)) {
           if (field.exceptOnSave) continue;
           // EG1 — security hard-gate: a field the session is not permitted
@@ -654,19 +688,16 @@ export function createFormStore(
           if (!field.isPermitted(userPermissions)) continue;
           const name = field.getName();
           const value = getCurrentValue(s.fields[name], s.renderType);
-          if (field.type === 'manyToOne' && value && typeof value === 'object') {
-            const idField = (field as { getIdField?: () => string }).getIdField?.() ?? 'id';
-            out[`${name}Id`] = (value as Record<string, unknown>)[idField];
-          } else {
-            out[name] = value;
-          }
+          Object.assign(merged, field.serializeValue(value, buildCtx(s, name)));
         }
+        // dotted-name nesting pass, applied once AFTER the merge (spec §5.2).
+        const nested = nestDottedKeys(merged);
         // EF6 — apply the EntityForm's registered submit-transform (if any)
         // to the mechanical dump above (0.3.x withOverrideSubmitData parity).
         // Pure application: a throwing handler propagates (host bug), not
         // swallowed like the fire-and-forget onChanges dispatch above.
         const transform = entityForm.getSubmitTransform();
-        return transform ? transform(out, entityForm) : out;
+        return transform ? transform(nested, entityForm) : nested;
       },
     };
   });
