@@ -91,7 +91,8 @@
 - [ ] **EC-F1** student-address E2E flake(Daum 스텁 dialog 타이밍 — EC2 부재에도 재현된 기존 결함) 대기 로직 보강
 - [ ] **EC-F2** 커서/IME 조합 보존 회귀 핀(사용자 질문 2026-07-11) — 문자열 필드 keystroke 후 selectionStart 보존 + composition 이벤트 테스트. 0.4는 D4 store-직결로 구조 해결(EF4 테스트가 DOM identity 증명), 변형 필드(Tel/Birthday)는 로컬버퍼+blur 기적용 — IME 엣지만 미핀
 - [x] **EF6** ✅ `8eac9a3` · withSubmitTransform(단일슬롯 replace, 구 parity)+toSaveData 적용(flatten 후)·collabo 훅 이관(E2E 무변경 green=실브라우저 증명) · +9(1766)·12 E2E
-- [ ] **EF7 [O]** onInitialize 값-보정 vs hydrate clobber 설계(EC2 갭② — 구엔진 가능·신 파이프 불가. onFetchData data-변형 반환 vs hydrate의 init-set 존중)
+- [~] **EF7+API감사 [O]** — **사용자 지시(2026-07-11): EntityForm 전 공개 API가 정상 동작(stub/no-op/미이식 금지)**. 범위: ① EntityForm 신/구 API 전수 대조 감사(scout) — 이식됨+실동작(테스트/실효과) / stub·no-op / 미이식(successor 있음) 분류 ② 갭별 라우팅(port·fix·문서화 omission) ③ EF7 seam(`withFetchDataTransform((data)=>data)` — fetch 직후·hydrate 전, EC2 갭②)은 감사 항목 중 하나로 포함.
+  - **Reuse review**: Extend: EntityForm(EF2/EF3 훅-배열 패턴)·initializeFormStore — New: 감사에서 나온 미이식 API별 결정
 - [x] **EC3** ✅ `6a5095c` · Major 재현 — **tab-hidden+self-ref+xref 4시나리오 pass·결함 0**·mock 백엔드 실 필터 적용 · E2E 12→15 · cascade ping-pong 교훈([archive](./progress-archive/phase-e-track-tasks.md))
 - [x] **EC3-0** ✅ `edff22c` · TAB-자체-숨김 3층 + deriveTabs 필터 + "필드 캐스케이드 안 함" 계약 · +24(1838)
 - [x] **EC-R1 (EC 게이트 수정 2건)** ✅ `1ec8fe9` · async filter `.catch` 4곳(role=alert·언필터 폴백 금지)+major.spec scenario e(edit self-exclude 실증) · +7(1845)·16 E2E
