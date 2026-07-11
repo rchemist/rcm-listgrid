@@ -183,6 +183,10 @@ export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
 // initializeFormStore, @listgrid/state) ---
 export type { OnFetchDataHandler, OnInitializeHandler } from './entity-form';
 
+// --- imperative lifecycle: submit-transform hook (EF6; applied by
+// toSaveData, @listgrid/state) ---
+export type { SubmitTransformHandler } from './entity-form';
+
 // --- onChanges builder catalog (EF2; port of 0.3.x
 // src/listgrid/config/OnChangeEntityForm.ts:76-361 — changeHidden/
 // changeRequired/changeSelectOptions only; derivedValidations is out of

@@ -353,30 +353,25 @@ export function CollaboEntityForm(): EntityForm {
       }
 
       return ef;
-    });
+    })
+    // §5 submit-transform (ec2-collabo-briefing.md :313-325 —
+    // `withOverrideSubmitData`, contracted string→Boolean), now the EF6 hook
+    // instead of a page-level workaround. GJCU's `contracted` column is a
+    // Boolean; the SelectField's value is the string enum the `collaborated`
+    // cascade swaps in ('NONE'|'GENERAL'|'CONTRACTED'). Applied by
+    // toSaveData (@listgrid/state) right before POST/PUT.
+    //
+    // NOTE (residual, EF6+EF7 composition — see the §2-branch-2 comment
+    // inside `withOnInitialize` above): this converts the OUTBOUND payload
+    // only. A record saved through this transform, if reopened for edit,
+    // would show its `contracted` Select unmatched (raw boolean vs. the
+    // string-valued options) — the dropped onInitialize fixup (EF7 gap) and
+    // this submit transform (EF6) compose into that residual; reconciling
+    // the two is out of EC2's scope. None of EC2's 5 E2E scenarios
+    // round-trips a saved `contracted` value through edit, so it is inert
+    // for this port but worth flagging to the conductor for EF6/EF7
+    // sequencing.
+    .withSubmitTransform((data) => ({ ...data, contracted: data.contracted === 'CONTRACTED' }));
 
   return entityForm;
-}
-
-/**
- * §5 submit-transform workaround (ec2-collabo-briefing.md :313-325 —
- * `withOverrideSubmitData`, contracted string→Boolean; gap① — EntityForm has
- * no equivalent hook yet, tracked as EF6). GJCU's `contracted` column is a
- * Boolean; the SelectField's value is the string enum the `collaborated`
- * cascade swaps in ('NONE'|'GENERAL'|'CONTRACTED'). Applied by the
- * page-level `onSave` (apps/sample/app/collabo/new + [id] pages) before
- * POST/PUT — the only place available until EF6 lands a form-level hook.
- *
- * NOTE (residual, EF6+EF7 composition — see the §2-branch-2 comment inside
- * `withOnInitialize` above): this converts the OUTBOUND payload only. A
- * record saved through this transform, if reopened for edit, would show its
- * `contracted` Select unmatched (raw boolean vs. the string-valued options) —
- * the dropped onInitialize fixup (EF7 gap) and this submit workaround (EF6
- * gap) compose into that residual; reconciling the two is out of EC2's
- * scope. None of EC2's 5 E2E scenarios round-trips a saved `contracted`
- * value through edit, so it is inert for this port but worth flagging to the
- * conductor for EF6/EF7 sequencing.
- */
-export function toCollaboSaveData(data: Record<string, unknown>): Record<string, unknown> {
-  return { ...data, contracted: data.contracted === 'CONTRACTED' };
 }

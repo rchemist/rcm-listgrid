@@ -502,7 +502,12 @@ export function createFormStore(
             out[name] = value;
           }
         }
-        return out;
+        // EF6 — apply the EntityForm's registered submit-transform (if any)
+        // to the mechanical dump above (0.3.x withOverrideSubmitData parity).
+        // Pure application: a throwing handler propagates (host bug), not
+        // swallowed like the fire-and-forget onChanges dispatch above.
+        const transform = entityForm.getSubmitTransform();
+        return transform ? transform(out, entityForm) : out;
       },
     };
   });

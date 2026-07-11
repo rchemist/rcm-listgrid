@@ -4,23 +4,20 @@ import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { createFormStore } from '@listgrid/state';
 import { ViewEntityForm } from '@listgrid/react';
-import {
-  CollaboEntityForm,
-  collaboFetchUrl,
-  toCollaboSaveData,
-} from '../../../lib/entities/collabo';
+import { CollaboEntityForm, collaboFetchUrl } from '../../../lib/entities/collabo';
 import { rcmAdapter } from '../../../lib/adapter';
 
 // Create a new Collabo — ViewEntityForm validates then POSTs via the
-// adapter. `toCollaboSaveData` applies the §5 submit-transform workaround
-// (contracted string→boolean; EF6 gap — see the entity file's doc comment).
+// adapter. The §5 submit-transform (contracted string→boolean) is applied by
+// toSaveData via CollaboEntityForm's .withSubmitTransform(...) (EF6) — no
+// page-level workaround needed anymore.
 export default function CollaboNewPage() {
   const router = useRouter();
   const entityForm = useMemo(() => CollaboEntityForm(), []);
   const store = useMemo(() => createFormStore(entityForm), [entityForm]);
 
   async function handleSave(data: Record<string, unknown>): Promise<void> {
-    await rcmAdapter.create(collaboFetchUrl, toCollaboSaveData(data));
+    await rcmAdapter.create(collaboFetchUrl, data);
     router.push('/collabo');
   }
 

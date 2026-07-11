@@ -3,11 +3,7 @@
 import { useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEntityFormInitializer, ViewEntityForm } from '@listgrid/react';
-import {
-  CollaboEntityForm,
-  collaboFetchUrl,
-  toCollaboSaveData,
-} from '../../../lib/entities/collabo';
+import { CollaboEntityForm, collaboFetchUrl } from '../../../lib/entities/collabo';
 import { rcmAdapter } from '../../../lib/adapter';
 
 // Edit an existing Collabo — the EF3 `useEntityFormInitializer` pipeline
@@ -31,7 +27,7 @@ export default function CollaboEditPage() {
   });
 
   async function handleSave(data: Record<string, unknown>): Promise<void> {
-    await rcmAdapter.update(collaboFetchUrl, id, toCollaboSaveData(data));
+    await rcmAdapter.update(collaboFetchUrl, id, data);
     router.push('/collabo');
   }
 

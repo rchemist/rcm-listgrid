@@ -32,6 +32,21 @@ export type OnInitializeHandler = (
   session?: Session,
 ) => EntityForm | Promise<EntityForm>;
 
+/**
+ * Submit-transform hook (EF6): applied by toSaveData (@listgrid/state) to the
+ * mechanical save-payload dump (exceptOnSave dropped, ManyToOne flattened to
+ * `<name>Id`) immediately before it is returned to the caller. Successor to
+ * the 0.3.x `withOverrideSubmitData` (src/listgrid/config/EntityForm.tsx —
+ * CollaboEntityForm.tsx:313-325 was a call site) — single-slot there too (a
+ * plain override, not a list), so this hook is single-slot as well (parity,
+ * not an EF2-style handler array). Pure (data in, data out) — no store/
+ * mutator, same state-agnostic posture as OnFetchDataHandler.
+ */
+export type SubmitTransformHandler = (
+  data: Record<string, unknown>,
+  entityForm: EntityForm,
+) => Record<string, unknown>;
+
 // EntityForm — the single declaration from which BOTH the list and the form
 // screens derive (charter C1). React-free: it is the declaration + query model;
 // the RUNTIME value state lives in the form store (ADR-0002 §Decision 5 — the
@@ -90,6 +105,12 @@ export class EntityForm {
    */
   private onFetchData: OnFetchDataHandler[] = [];
   private onInitialize: OnInitializeHandler[] = [];
+  /**
+   * Submit-transform hook (EF6): single-slot, unlike the onChanges/onFetchData/
+   * onInitialize arrays — 0.3.x `withOverrideSubmitData` was a plain override,
+   * not a list, so this mirrors that (parity, not an EF2-style array).
+   */
+  private submitTransform?: SubmitTransformHandler;
 
   constructor(name: string, fetchUrl: string) {
     this.name = name;
@@ -123,6 +144,15 @@ export class EntityForm {
   /** Append an onInitialize handler (EF3); registration order is dispatch order. */
   withOnInitialize(handler: OnInitializeHandler): this {
     this.onInitialize.push(handler);
+    return this;
+  }
+  /**
+   * Set the submit-transform handler (EF6); single-slot — a later call
+   * REPLACES any previously set handler (0.3.x `withOverrideSubmitData`
+   * parity, not an append like withOnChanges/withOnFetchData/withOnInitialize).
+   */
+  withSubmitTransform(handler: SubmitTransformHandler): this {
+    this.submitTransform = handler;
     return this;
   }
 
@@ -184,6 +214,10 @@ export class EntityForm {
   getOnInitialize(): OnInitializeHandler[] {
     return this.onInitialize;
   }
+  /** the registered submit-transform handler, if any (EF6). */
+  getSubmitTransform(): SubmitTransformHandler | undefined {
+    return this.submitTransform;
+  }
 
   /** All fields, ordered by their declared `order`. */
   getFields(): EntityField[] {
@@ -228,6 +262,8 @@ export class EntityForm {
     // propagate onFetchData/onInitialize (EF3, same clone-propagation contract).
     copy.onFetchData = [...this.onFetchData];
     copy.onInitialize = [...this.onInitialize];
+    // propagate submitTransform (EF6, same clone-propagation contract).
+    if (this.submitTransform !== undefined) copy.submitTransform = this.submitTransform;
     return copy;
   }
 }
