@@ -271,5 +271,21 @@ proposed_helper: 없음.
 
 이식 21종: 트리비얼 12(Checkbox·MultiSelect·Password·Month·Year·Time·Link·Tag·ColorPreset·MessageView·Profile·MappedJoin) + 모더릿 5(Datetime·CustomOption·Birthday·TelephoneNumber·Color) + 업로드 3(File·Image·MultipleAsset) + InlineMap. 공유 기반: OptionsField/MultiOptions·cascade:false seam·CustomOptionProvider·FileInput/TagsInput/UserView/InlineMap 슬롯·배열 isDirty 정규화·phone/url utils·buildAssetConfig. Dead/연기 5종(증거 기록): Html(중복)·ContentAsset·Rule·XrefPrice·XrefAvailableDate. 이월: Xref Mapping/Prefer → EA-D2(ViewListGrid 확장 선행, EC2 뒤). 테스트 1234→1727.
 
+## EA-D2 — Xref 인프라+이식 ✅
+
+- **D2-0** `4907291`(+19): ViewListGrid selection{enabled,onConfirm}/toolbar(ctx)/columns 유니온 + list-store postFetch(adapter try/catch 밖) + ManyToOneConfig.filter(zero-arg — parent EntityForm 렌더러 컨텍스트 미도달, 사전 인가 협소화)→initialSearch. V0.4 "의도적 최소" ViewListGrid 첫 확장, 기존 12 E2E 무변경 green.
+- **D2-1** `518f8ac`(+37): XrefMappingField(plain)+XrefPreferMappingField(+'xrefPreferMapping' 타입). 값 wire pass-through(backend DTO parity·EF6 seam 불필요 확인). **required=자동부착 CustomValidation(mapped.length)** — envelope이 제네릭 isBlank에 안 보이는 InlineMap 함정을 설계로 회피. filters 단일함수형(구 degrees `[fn]` 버그 시그니처 교정). 구 단일-preferred onSave 경로 dead code 규명. NR: Prefer 재편집 add-only 축소.
+
+## Phase EC — 실폼 재현 실증 (delegate, 실브라우저) + EC3-0
+
+- **EC3-0** `edff22c`(+24): TAB-자체-숨김 3층(선언 TabDef.hidden / pre-store EntityForm.setTabHidden / post-store FormMutator.setTabHidden) + deriveTabs 필터(구 getViewableTabs parity — 탭 버튼 소멸) + **계약: tab-hidden은 필드 hidden meta 캐스케이드 안 함**(작성자가 setMeta 병행 — EB1 "hidden=validate 사망" 교훈의 계약화).
+- **EC1** `142fbf9`: StudentAddress+Daum 스텁 E2E 2건 — **주소 스택 첫 실브라우저 결함 0**. Daum CDN route-intercept 스텁 패턴 확립(무 외부네트워크).
+- **EC2** `060418d`(collabo)+`8eac9a3`(EF6): Collabo 재현 — **EF2/EF3 첫 실브라우저 실증 5/5·결함 0**(옵션스왑+readonly·promoterType 상호배제+값클리어·M2O nested 자동채움·onInit 첫페인트·required 게이트). 갭 라우팅: EF6(submit-transform 훅, 당일 해소)·EF7(hydrate clobber, 대기).
+- **EC3** `6a5095c`: Major 재현 — **tab-hidden+self-ref+xref 실브라우저 4시나리오 pass·결함 0**. mock 백엔드에 실 필터 적용(EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE — 이전 전 엔티티에서 no-op였음)+set-based mapped/deleted merge. self-ref는 MajorEntityForm(currentId) baked-in filter(edit-only). onInitialize 무조건 실행(구 Major parity) → create도 useEntityFormInitializer.
+
+### ⚠ 이식 교훈 (LESSON — 후속 폼 이식 시 필수 확인)
+
+**구엔진 hand-written cascade 문자적 이식은 EF2 sync-batch에서 자멸(ping-pong)**: 구엔진 executeOnChanges는 single-shot(핸들러가 형제 setValue해도 재dispatch 안 함)이나 신 EF2는 **중첩 setValue가 형제 핸들러를 재dispatch**(loop-guard는 무한만 막고 1회 재진입은 허용). college↔parentMajor 상호배제를 1:1 이식하면 "college 선택→parentMajor reset→그 reset이 다시 college 핸들러 트리거→college reset" 왕복. **회피 규칙**: ① 상호배제는 **truthy 브랜치에서만 형제 값 reset**(falsy 브랜치는 값 안 건드림) ② 한 핸들러 안에서 **모든 setValue를 모든 setMeta보다 먼저** 실행(브랜치 자신의 setMeta가 최종 authoritative write가 되어 중첩 cascade의 stray meta write에 면역). EC3 major.ts 주석에 상세.
+
 
 
