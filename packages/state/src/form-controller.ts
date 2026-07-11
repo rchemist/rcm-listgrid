@@ -35,13 +35,14 @@ import type { FormStoreState } from './form-store';
 // Save flow order (spec §6.2 EXACTLY, revision step now wired — W4-4):
 //   1. capability create|update gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
 //      => { ok: false }, silent (no adapter call, no message)
-//   2. validateAll() (unless opts.skipValidation) — fail => { ok: false }
-//      (W4-3 Needs-Review: validateAll runs the SYNC ValidationItem channel
-//      only — an AsyncValidation-carrying field's asyncState ('unchecked'/
-//      'checking'/'invalid') is NEVER consulted here. Save does NOT block on
-//      an unconfirmed/failed 중복확인. Spec §5.3/§6.2 are silent on whether
-//      async-gating save is intended — deliberately NOT wired per that
-//      task's SCOPE note; a spec decision is needed before this changes.)
+//   2. validateAll() (unless opts.skipValidation) — fail => { ok: false }.
+//      Runs the SYNC ValidationItem channel AND the W4-3a async save-gate
+//      (spec §5.3/§6.2): a field declaring an AsyncValidation whose value is
+//      DIRTY but whose asyncState !== 'valid' ('unchecked'/'checking'/
+//      'invalid') is invalid, so an unconfirmed/failed 중복확인 blocks save.
+//      No network here — validateAll reads the stored tri-state (the check
+//      runs only via store.runAsyncValidation). An untouched update-form
+//      field (not dirty) is exempt — its persisted value is already confirmed.
 //   3. toSaveData()
 //   4. onBeforeSave handlers, sequential; setData threads the payload;
 //      cancel() stops the flow; a THROWING handler is logged + SKIPPED

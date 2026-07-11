@@ -112,7 +112,23 @@
 - **⚠ W5 착수 전 필수(entry 브리핑 pass — waves §W5~W7 규칙)**: 태스크 표를 **먼저 추가·커밋**한 뒤 실행. W5=list-track: withList/withFilter(필드)→ViewListGrid 컬럼/정렬/필터 파생→registerListCellRenderer/registerFilterRenderer→고급검색 패널→페이지 셸 가이드(Wrapper 대응). 참조: 스펙 §5.1(withList/withFilter 신설)·§7·§2·§3.5·**§3.6**(withListConfig(199)/withFilterable(5)/withExcludeListFields(8)→withList/withFilter 이관·나머지 list 순수질의는 엔진 내부화)·[8그룹 map](../analysis/2026-07-11/eg-group-capability-maps.md) LIST-TRACK. CAP-18·19·20. **계수 재검증**: W5 신타입(FieldListConfig·FieldFilterConfig) §10-A 표 갱신·182→184 예상(190 여유)·root는 register*2+ViewListGrid 등 49→~55(120 여유).
 - **W4 패턴 재사용**: hot-file 순차(entity-form/form-store/ViewEntityForm/FieldRenderer). delegate 기본 sonnet(브리프=실행급: 파일경로·before→after·기계적 수용·항목별 Do-NOT·재사용 근거 grep)·opus 검증(full gate+E2E 독립 재실행+diff intent-conformance)+커밋. **phase-end 적대 리뷰 필수**(W3 4버그·W4 4버그 검출 실증 — cross-sub-task 합성버그는 개별 게이트가 구조적으로 못 잡음). E2E는 전용 fixture(action-demo/steps-demo/async-demo 선례)로 격리.
 - **Do-NOT(W4 승계)**: getStaticConditionalBoolean을 restrictive-gate(visible/enabled/capability/step-hidden) **함수 분기**에 쓰지 말 것(항상숨김 역극성·W3-6·함수는 async getConditionalBoolean)·store.renderType↔`actionRenderType`(id-based) 혼용 주의(위저드/액션바/CRUD=id-based·탭/필드=store)·**async validation은 sync validate() 중립 유지**(validateAll 네트워크화 금지)·getMeta 반환 mutate 금지(treat-as-immutable)·adapter.remove revision 옵셔널 유지·exactOptional 조건 spread·SOUND 내부 재작성 금지·store 직접 수신 금지(FormMutator 경유).
-- **미결(§Needs Review 이월)**: #W4-1a(getTitle renderType 기본문구)·#W4-1b(withTitle replace)·#W4-2a(전 step hidden edge)·**#W4-3a(async save-gating**=중요·중복확인 미완료시 save 차단 여부·CAP-05 완결성·GA 전 결정 필요)·#W4-6a(step vs 필드 hidden renderType 분기). 전부 스펙 저자 판단감·비블로킹(W5 진행 무관).
+- **미결(§Needs Review 이월)**: #W4-1a(getTitle renderType 기본문구)·#W4-1b(withTitle replace)·#W4-2a(전 step hidden edge)·**#W4-3a(async save-gating**=**✅ D1서 구현·아래 참조**)·#W4-6a(step vs 필드 hidden renderType 분기). 나머지 4건 스펙 저자 판단감·비블로킹(D2 처분).
+
+## D-pass — W4→W5 사이 미결 처분 (사용자 지시 2026-07-12: 일괄 결정+결함 수정)
+
+### #D1 async save-gating 구현 (#W4-3a 확정 → CAP-05 완결)
+
+**결정(사용자 2026-07-12)**: AsyncValidation = 일반 validation → 미완료/실패 async 필드는 save 차단. **shipped W4-3 결함 수정**: `validate()`가 중립이라 validateAll이 asyncState를 무시하고 통과시키던 갭. 스펙 §5.3(save-gating 블록)·§6.2(save 플로우 validateAll 스텝) 개정 반영.
+
+**구현(Model A — dirty-gate, opus 인라인·hot-file form-store.ts):**
+- **validateAll 게이트**(`form-store.ts` validateAll): `findAsyncValidation(field) && slice.dirty===true && asyncState!=='valid'` → invalid + `asyncGateMessage(state)`. **네트워크 없음**(sync validate() 중립 유지·저장된 tri-state만 read). **dirty 게이트**가 핵심: update 폼 미터치(persisted) 값=재확인 불요·resetValue→'unchecked'(W4-6 FIX#3)+dirty=false=비차단 — seed-'valid'-on-update 대신 dirty 조건으로 update-baseline·revert 문제 동시 해결(기존 resetValue 동작과 무충돌).
+- **reset-on-edit**(`writeValue`): 값 변경 시(`prev.asyncState!==undefined && !Object.is(prev.current,value)`) asyncState→'unchecked'. **확인 후 값 변경으로 게이트 우회하던 구멍 봉인**(button 트리거는 재확인 전까지 차단·change 트리거는 debounce 재확인). 키 없는 필드엔 추가 안 함(resetValue 불변식 미러).
+- **stale in-flight 가드**(`runAsyncValidationNow`): check 진행 중 값이 바뀌면(`!Object.is(현재값, 캡처값)`) 결과 폐기 — stale valid 부활 방지(button 트리거 race).
+- **게이트 메시지**: state별 결정적 문구(unchecked='확인이 필요합니다.'·checking='확인이 진행 중…'·invalid='확인에 실패했습니다…'). check 고유 메시지(예 '이미 사용 중')는 확인 시점 노출·저장 시점엔 generic(단일 errors 채널의 sync/async commingling·idempotency 문제 회피 — 별도 asyncMessage 필드 신설=기존 "no separate message field" 설계 반전이라 미채택).
+
+**doc 동기화**: form-store `runAsyncValidation` SCOPE 노트(OUT→SAVE-GATING)·form-controller 헤더 save-flow NOTE·schema-core `FieldValueSlice.asyncState` JSDoc·`async-validation.ts` 2채널 헤더(validate() 중립이나 validateAll이 저장 tri-state 별도 게이트).
+
+**검증**: +11 unit(**2114**: dirty unchecked/invalid/checking→validateAll false·valid→true·untouched-update(initializeFormStore) 면제·reset-on-edit·same-value no-reset·stale-guard·controller.save 차단/valid통과/skipValidation 우회)·+3 E2E(**27**: async-demo Save 차단 unverified/edited-stale/invalid). full gate 독립 PASS(type-check·2114·lint 0err·format·build·계수 47/49/182 무변경=신 export 0). 파일: form-store.ts·form-controller.ts·types.ts·async-validation.ts(schema)·async-validation.test.ts·async-validation.spec.ts·async-demo.ts·async-demo/new/page.tsx·스펙 §5.3/§6.2.
 
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 

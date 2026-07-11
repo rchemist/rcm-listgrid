@@ -1,6 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { AsyncValidation, EntityForm, StringField, ValidateResult } from '@listgrid/schema-core';
+import {
+  AsyncValidation,
+  EntityForm,
+  StringField,
+  ValidateResult,
+  type BackendAdapter,
+} from '@listgrid/schema-core';
 import { createFormStore } from '../form-store';
+import { createFormController } from '../form-controller';
+import { initializeFormStore } from '../initialize-form-store';
 
 // W4-3 (spec §5.3, CAP-05) — the store-owned half of AsyncValidation: the
 // asyncState tri-state ('unchecked'|'checking'|'valid'|'invalid'), the
@@ -218,5 +226,182 @@ describe("form-store AsyncValidation (W4-3) — 'change' trigger debounce", () =
     await vi.advanceTimersByTimeAsync(1000);
     expect(check).toHaveBeenCalledTimes(1);
     expect(store.getState().fields.alias?.asyncState).toBe('invalid');
+  });
+});
+
+// W4-3a (D1) — async SAVE-GATING (spec §5.3/§6.2, resolving the W4-3
+// Needs-Review #W4-3a). validateAll treats a DIRTY AsyncValidation field whose
+// asyncState !== 'valid' as invalid, so an unconfirmed/failed 중복확인 blocks
+// save; a value change resets the tri-state ('unchecked') so a stale 'valid'
+// can't survive an edit; an in-flight check whose value moved on is discarded;
+// an untouched (not-dirty) field is exempt. No network at validate time — the
+// sync validate() stays neutral and validateAll only reads the stored state.
+
+/** Minimal BackendAdapter double for the controller.save gating tests. */
+function fakeAdapter(overrides: Partial<BackendAdapter> = {}): BackendAdapter {
+  return {
+    list: vi.fn(),
+    getOne: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+    ...overrides,
+  };
+}
+
+describe('form-store AsyncValidation (W4-3a) — save-gating in validateAll', () => {
+  it('a DIRTY field left unchecked is invalid (validateAll false) + gets a gate message', async () => {
+    const store = createFormStore(ButtonForm(async () => ValidateResult.success()));
+    store.getState().setValue('alias', 'candidate'); // dirty, still 'unchecked'
+    expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
+
+    expect(await store.getState().validateAll()).toBe(false);
+    expect(store.getState().fields.alias?.errors).toEqual([{ message: '확인이 필요합니다.' }]);
+  });
+
+  it('a DIRTY field checked INVALID stays invalid at save time (validateAll false)', async () => {
+    const store = createFormStore(ButtonForm(async () => ValidateResult.fail('이미 사용 중')));
+    store.getState().setValue('alias', 'taken');
+    await store.getState().runAsyncValidation('alias');
+    expect(store.getState().fields.alias?.asyncState).toBe('invalid');
+
+    expect(await store.getState().validateAll()).toBe(false);
+  });
+
+  it('a DIRTY field checked VALID passes (validateAll true, no gate error)', async () => {
+    const store = createFormStore(ButtonForm(async () => ValidateResult.success()));
+    store.getState().setValue('alias', 'unique');
+    await store.getState().runAsyncValidation('alias');
+    expect(store.getState().fields.alias?.asyncState).toBe('valid');
+
+    expect(await store.getState().validateAll()).toBe(true);
+    expect(store.getState().fields.alias?.errors ?? []).toEqual([]);
+  });
+
+  it("a field 'checking' (in flight) blocks save (validateAll false)", async () => {
+    let resolveCheck!: (r: ValidateResult) => void;
+    const store = createFormStore(
+      ButtonForm(() => new Promise<ValidateResult>((res) => (resolveCheck = res))),
+    );
+    store.getState().setValue('alias', 'candidate');
+    const pending = store.getState().runAsyncValidation('alias'); // -> 'checking', not awaited
+    expect(store.getState().fields.alias?.asyncState).toBe('checking');
+
+    expect(await store.getState().validateAll()).toBe(false);
+
+    resolveCheck(ValidateResult.success());
+    await pending;
+  });
+
+  it("resets to 'unchecked' when the value changes after a passing check (edit can't survive the gate)", async () => {
+    const store = createFormStore(ButtonForm(async () => ValidateResult.success()));
+    store.getState().setValue('alias', 'unique');
+    await store.getState().runAsyncValidation('alias');
+    expect(store.getState().fields.alias?.asyncState).toBe('valid');
+
+    store.getState().setValue('alias', 'edited'); // stale 'valid' must not survive
+    expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
+    expect(await store.getState().validateAll()).toBe(false);
+  });
+
+  it('setValue with the SAME value does NOT reset a passing check', async () => {
+    const store = createFormStore(ButtonForm(async () => ValidateResult.success()));
+    store.getState().setValue('alias', 'unique');
+    await store.getState().runAsyncValidation('alias');
+
+    store.getState().setValue('alias', 'unique'); // no-op echo
+    expect(store.getState().fields.alias?.asyncState).toBe('valid');
+    expect(await store.getState().validateAll()).toBe(true);
+  });
+
+  it('drops a stale in-flight result when the value moved on before it resolved', async () => {
+    let resolveCheck!: (r: ValidateResult) => void;
+    const store = createFormStore(
+      ButtonForm(() => new Promise<ValidateResult>((res) => (resolveCheck = res))),
+    );
+    store.getState().setValue('alias', 'first');
+    const pending = store.getState().runAsyncValidation('alias'); // checks 'first'
+    store.getState().setValue('alias', 'second'); // value moved on -> 'unchecked'
+    resolveCheck(ValidateResult.success()); // resolves for the stale 'first'
+    await pending;
+
+    // the stale 'valid' (for 'first') must NOT be written back over 'second'.
+    expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
+    expect(await store.getState().validateAll()).toBe(false);
+  });
+
+  it('an untouched (not-dirty) update-form field is exempt — its persisted value needs no re-check', async () => {
+    const form = new EntityForm('AsyncUpdateEntityForm', '/async-update').addFields({
+      items: [
+        new StringField('alias', 1)
+          .withLabel('Alias')
+          .withValidations(
+            new AsyncValidation(async () => ValidateResult.success(), { trigger: 'button' }),
+          ),
+      ],
+    });
+    const adapter = fakeAdapter({ getOne: vi.fn(async () => ({ alias: 'persisted' })) });
+    const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+
+    expect(store.getState().renderType).toBe('update');
+    expect(store.getState().fields.alias?.dirty ?? false).toBe(false);
+    expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
+    // not dirty -> the async gate is skipped, so the untouched record saves.
+    expect(await store.getState().validateAll()).toBe(true);
+  });
+});
+
+describe('createFormController.save (W4-3a async gate — spec §6.2)', () => {
+  it('blocks save on a dirty unchecked async field: adapter never called, { ok: false }', async () => {
+    const entityForm = ButtonForm(async () => ValidateResult.success());
+    const store = createFormStore(entityForm);
+    store.getState().setValue('alias', 'candidate'); // dirty, unchecked
+    const create = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('allows save once the async field resolves valid: adapter called, { ok: true }', async () => {
+    const entityForm = ButtonForm(async () => ValidateResult.success());
+    const store = createFormStore(entityForm);
+    store.getState().setValue('alias', 'unique');
+    await store.getState().runAsyncValidation('alias');
+    const created = { id: '1', alias: 'unique' };
+    const create = vi.fn(async () => created);
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: true, result: created });
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('skipValidation bypasses the async gate entirely (headless-host escape hatch)', async () => {
+    const entityForm = ButtonForm(async () => ValidateResult.success());
+    const store = createFormStore(entityForm);
+    store.getState().setValue('alias', 'candidate'); // dirty, unchecked
+    const create = vi.fn(async () => ({ id: '1' }));
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save({ skipValidation: true });
+
+    expect(outcome).toEqual({ ok: true, result: { id: '1' } });
+    expect(create).toHaveBeenCalledTimes(1);
   });
 });

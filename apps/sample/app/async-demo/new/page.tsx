@@ -6,9 +6,9 @@ import { AsyncDemoEntityForm } from '../../../lib/entities/async-demo';
 import { rcmAdapter } from '../../../lib/adapter';
 
 // W4-3 E2E fixture page — see lib/entities/async-demo.ts header. useEntityForm
-// (W2-7) supplies the FormRuntime `controller`, but the E2E never
-// clicks Save/triggers a save — it only exercises the AsyncValidation button
-// affordance — so `rcmAdapter`'s create/update routes are never hit even
+// (W2-7) supplies the FormRuntime `controller`. The E2E clicks Save to exercise
+// W4-3a save-gating, but every tested save is BLOCKED by validateAll before the
+// adapter call, so `rcmAdapter`'s create/update routes are never hit even
 // though no `/api/async-demo/*` route exists (action-demo.ts precedent).
 export default function AsyncDemoNewPage() {
   const entityFormDecl = useMemo(() => AsyncDemoEntityForm(), []);

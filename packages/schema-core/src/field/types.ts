@@ -116,6 +116,13 @@ export interface FieldValueSlice<TValue = unknown> extends FieldValue<TValue> {
    * 'invalid' from the resolved `ValidateResult` (an invalid result's message
    * lands on this same slice's `errors`, the existing per-field error
    * channel — no separate message field).
+   *
+   * SAVE-GATING (W4-3a, spec §5.3/§6.2): NOT display-only. `validateAll`
+   * treats a field whose value is DIRTY and whose `asyncState !== 'valid'` as
+   * invalid, so an unconfirmed/failed async check blocks save (no network at
+   * validate time — it reads this stored tri-state). A value change resets it
+   * to 'unchecked' (form-store `writeValue`); an untouched update-form field
+   * (not dirty) is exempt — its persisted value is already confirmed.
    */
   asyncState?: 'unchecked' | 'checking' | 'valid' | 'invalid';
 }

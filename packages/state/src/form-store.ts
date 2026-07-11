@@ -83,6 +83,25 @@ function findAsyncValidation(
   );
 }
 
+// asyncGateMessage — W4-3a (D1, spec §5.3/§6.2): the save-time gate message
+// validateAll writes for a DIRTY AsyncValidation field that has not resolved to
+// 'valid'. Deterministic per state — deliberately NOT the check's own message:
+// the specific check message (e.g. '이미 사용 중인 별칭입니다') surfaces at
+// check time via runAsyncValidation, written to the same per-field `errors`
+// channel; by save time that channel may have been overwritten, so a stable
+// per-state line explains the block. Kept generic (the affordance label
+// defaults to '확인'); an app localizes via its own message layer if needed.
+function asyncGateMessage(state: FieldValueSlice['asyncState']): string {
+  switch (state) {
+    case 'invalid':
+      return '확인에 실패했습니다. 값을 수정한 뒤 다시 확인해 주세요.';
+    case 'checking':
+      return '확인이 진행 중입니다. 잠시 후 다시 시도해 주세요.';
+    default: // 'unchecked' | undefined
+      return '확인이 필요합니다.';
+  }
+}
+
 // createFormStore — the per-instance, value-slice form store (ADR-0002). The
 // store holds ONLY the value slices + form-level UI state; the field META lives
 // on the EntityForm/field instances. Renderers subscribe to a single field's
@@ -247,10 +266,14 @@ export interface FormStoreState {
    * Cancels any pending 'change'-trigger debounce for `name` first, so an
    * explicit call always wins over a stale pending timer.
    *
-   * SCOPE (W4-3 — save-gating is OUT of scope, spec §5.3/§6.2 silent):
-   * `asyncState` is a display/UX signal only here — `controller.save`
-   * (@listgrid/state/form-controller.ts) does NOT consult it. See that
-   * file's header NOTES / this task's report for the flagged Needs-Review.
+   * SAVE-GATING (W4-3a, D1 — spec §5.3/§6.2, resolving the W4-3 Needs-Review):
+   * `asyncState` is NOT display-only — `validateAll` (and therefore
+   * `controller.save`/`controller.validate`) treats a DIRTY field whose
+   * `asyncState !== 'valid'` as invalid, so an unconfirmed/failed 중복확인
+   * blocks save. This action only RESOLVES the tri-state (checking→valid/
+   * invalid); the gate itself lives in `validateAll`. A value change resets
+   * the tri-state to 'unchecked' (writeValue), so a stale 'valid' can't
+   * survive an edit past the gate.
    */
   runAsyncValidation(name: string): Promise<void>;
   /** reset every slice to its baseline (create→default, update→fetched). */
@@ -484,6 +507,14 @@ export function createFormStore(
       const value = getCurrentValue(state.fields[name], state.renderType);
       const ctx = buildCtx(state, name);
       const result = await validation.check(value, ctx);
+      // W4-3a (D1): stale-result guard. If the field's value changed while
+      // `check` was in flight (a keystroke / cascade / an explicit re-run),
+      // this result belongs to a value the user has since moved past — writing
+      // it would resurrect a stale 'valid'/'invalid' (e.g. re-marking an
+      // already-edited duplicate as 'valid'), reopening the save-gating bypass
+      // that D1 closes. Drop it: the newer write (reset-on-edit's 'unchecked'
+      // in writeValue, or a newer check) owns the tri-state now.
+      if (!Object.is(getCurrentValue(get().fields[name], get().renderType), value)) return;
       set((s) => ({
         fields: {
           ...s.fields,
@@ -536,6 +567,18 @@ export function createFormStore(
         const prev = s.fields[name] ?? {};
         const next: FieldValueSlice = { ...prev, current: value };
         next.dirty = computeDirty(next);
+        // W4-3a (D1, spec §5.3): a value change invalidates any prior async
+        // verification — reset the tri-state to 'unchecked' so save-gating
+        // (validateAll) re-requires a check. Only a field that DECLARED an
+        // AsyncValidation carries asyncState (guard on `!== undefined` so this
+        // never ADDS the key to a field that never had one — mirrors
+        // resetValue's invariant). A 'change'-trigger field re-verifies via the
+        // debounce scheduler in performSetValue right after; a 'button'-trigger
+        // field stays 'unchecked' until its 확인 affordance is pressed again —
+        // this is what closes the stale-'valid'-after-edit save bypass.
+        if (prev.asyncState !== undefined && !Object.is(prev.current, value)) {
+          next.asyncState = 'unchecked';
+        }
         return { fields: { ...s.fields, [name]: next } };
       });
     }
@@ -776,8 +819,26 @@ export function createFormStore(
         for (const field of sortedFieldDefs(s)) {
           const name = field.getName();
           const errs = await field.validate(buildCtx(s, name), s.meta[name]);
-          fields[name] = { ...fields[name], errors: errs.map((e) => ({ message: e.message })) };
-          if (errs.length > 0) valid = false;
+          const messages = errs.map((e) => ({ message: e.message }));
+          // W4-3a (D1, spec §5.3/§6.2): async save-gating. A field declaring an
+          // AsyncValidation whose value is DIRTY but has not resolved to
+          // 'valid' is invalid — NO network here: the sync validate() above
+          // stays neutral (AsyncValidation.validate() always succeeds), and
+          // this reads the stored tri-state the check already resolved. Gated
+          // on `dirty` so an untouched update-form field (its persisted value
+          // already confirmed) needs no re-check, and a reverted value
+          // (resetValue -> 'unchecked', dirty=false) doesn't block save. See
+          // FieldValueSlice.asyncState + form-controller.ts save flow.
+          const slice = s.fields[name];
+          if (
+            findAsyncValidation(field) !== undefined &&
+            slice?.dirty === true &&
+            slice.asyncState !== 'valid'
+          ) {
+            messages.push({ message: asyncGateMessage(slice.asyncState) });
+          }
+          fields[name] = { ...fields[name], errors: messages };
+          if (messages.length > 0) valid = false;
         }
         set({ fields });
         return valid;

@@ -10,16 +10,20 @@
 // constraint: ANY field gets the capability by attaching one to
 // `withValidations()`.
 //
-// Two-channel split (deliberate, spec §5.3 + this task's SCOPE note):
+// Two-channel split (deliberate, spec §5.3):
 //   1. The SYNC channel — `validate()`, inherited from ValidationItem, called
 //      by `FormField.validate()`/`validateAll` (form-store.ts). AsyncValidation
-//      is NEUTRAL here — it always resolves `ValidateResult.success()` and
-//      never blocks the existing sync validation flow. Running the real
-//      (potentially slow, potentially network-bound) `check` inline with
+//      is NEUTRAL here — its `validate()` always resolves
+//      `ValidateResult.success()` and never runs the real `check`. Running the
+//      real (potentially slow, potentially network-bound) `check` inline with
 //      every `validateAll()` call would silently turn every save/blur into a
 //      network round trip — the spec's asyncState tri-state exists
 //      specifically so the ASYNC determination is a separate, explicitly
-//      triggered/debounced flow instead.
+//      triggered/debounced flow instead. NOTE (W4-3a save-gating, spec
+//      §5.3/§6.2): `validate()` staying neutral does NOT mean save ignores the
+//      async result — `validateAll` SEPARATELY gates on the STORED `asyncState`
+//      (a dirty field not resolved to 'valid' is invalid), so no network runs
+//      at validate time yet an unconfirmed/failed check still blocks save.
 //   2. The REAL channel — the public `check` property, invoked directly by
 //      the form store's dedicated action (`FormStoreState.runAsyncValidation`,
 //      @listgrid/state/form-store.ts) which owns the `asyncState`

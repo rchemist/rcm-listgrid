@@ -7,10 +7,12 @@ import { AsyncValidation, EntityForm, StringField, ValidateResult } from '@listg
 // through a real browser. Isolated from college/major/etc. (perm-demo.ts/
 // action-demo.ts precedent) so this fixture can never perturb their own E2E
 // assertions. `check` is a client-side in-memory lookup against a tiny
-// taken-alias set (no `/api/async-demo/*` route — action-demo.ts precedent:
-// the E2E never saves, so no backend round trip is exercised), with a short
-// artificial delay so the 'checking' asyncState is actually observable by
-// Playwright rather than resolving within the same tick.
+// taken-alias set (no `/api/async-demo/*` route — action-demo.ts precedent).
+// The E2E DOES click Save (W4-3a save-gating acceptance), but every tested
+// save is BLOCKED by validateAll before the adapter call, so no backend round
+// trip is exercised. `check` has a short artificial delay so the 'checking'
+// asyncState is actually observable by Playwright rather than resolving within
+// the same tick.
 export const asyncDemoFetchUrl = '/async-demo';
 
 const TAKEN_ALIASES = new Set(['taken-alias']);

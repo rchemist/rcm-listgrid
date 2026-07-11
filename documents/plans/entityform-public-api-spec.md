@@ -206,6 +206,13 @@ class AsyncValidation extends ValidationItem {
 ```
 `withValidations()`에 승차(C5 단일 채널 — 별도 필드 클래스 불필요). 필드 slice에 `asyncState?: 'unchecked'|'checking'|'valid'|'invalid'`(store 관리), 렌더러가 button trigger 시 확인 버튼 어포던스. 구 tri-state·중복확인(Alias/ExternalId/Slug) capability 충족. 소비자가 "시도 후 포기"한 구 API(주석 처리 1건)의 원인 — 전용 필드 클래스 강제 — 를 제거.
 
+**save-gating (#W4-3a 확정 2026-07-12 — AsyncValidation = 일반 validation)**: `validateAll`은 AsyncValidation 보유 필드가 **dirty이면서 `asyncState !== 'valid'`**(unchecked/checking/invalid)이면 그 필드를 invalid로 판정 → **save 차단** + 필드 에러메시지. 규범:
+- **네트워크 없음**: sync `validate()`는 중립 유지(`check` 미호출·항상 success), `validateAll`은 store에 저장된 tri-state만 읽는다 — validate/save가 조용히 네트워크 라운드트립되지 않는다.
+- **dirty 게이트**: 미변경(persisted) 값은 이미 확정이므로 재확인 불요 → update 폼 미터치 필드는 통과. 값 되돌림(`resetValue` → 'unchecked', dirty=false)도 비차단.
+- **값 변경 시 tri-state 'unchecked' 리셋**: 값이 바뀌면 prior 확인은 무효 → 'change' 트리거는 debounce로 재확인, 'button' 트리거는 재확인 전까지 차단(확인 후 값 변경으로 게이트를 우회하던 구멍 봉인).
+- **in-flight stale 가드**: `check` 진행 중 값이 바뀌면 그 결과는 폐기(stale valid/invalid 부활 방지).
+- **게이트 메시지**: 저장 차단 시 문구는 asyncState별 결정적 기본값(unchecked/checking/invalid)이며, check 고유 메시지는 확인 시점(runAsyncValidation)에 노출된다.
+
 ## 6. 런타임 — store · FormController
 
 ### 6.1 form-store·FormMutator 변경점 (그 외 현행 유지)
@@ -240,7 +247,7 @@ function createFormController(opts: {
 }): FormRuntime
 ```
 
-**save 플로우(정준)**: capability(create|update) 해석 → (skip 아니면) validateAll(첫 invalid 필드 정보 포함) → store.toSaveData() → `onBeforeSave` 순차(cancel 가능·data 변형) → revision 주입(설정 시) → adapter.create/update → **실패**: `BackendError.fieldErrors`→필드 slice errors(**name-키** — 구 label-키 버그 금지)+미매핑분은 messages(severity:'error'), generic 메시지는 fieldErrors 존재 시 억제(suppress-generic) → **성공**: 비persistent messages clear(clear-on-success) → `onAfterSave` 순차 → outcome.
+**save 플로우(정준)**: capability(create|update) 해석 → (skip 아니면) validateAll(첫 invalid 필드 정보 포함 — sync ValidationItem 채널 **+ W4-3a async save-gate**: dirty이며 `asyncState!=='valid'`인 AsyncValidation 필드=invalid, §5.3) → store.toSaveData() → `onBeforeSave` 순차(cancel 가능·data 변형) → revision 주입(설정 시) → adapter.create/update → **실패**: `BackendError.fieldErrors`→필드 slice errors(**name-키** — 구 label-키 버그 금지)+미매핑분은 messages(severity:'error'), generic 메시지는 fieldErrors 존재 시 억제(suppress-generic) → **성공**: 비persistent messages clear(clear-on-success) → `onAfterSave` 순차 → outcome.
 **delete 플로우**: capability(delete) → `onBeforeDelete`(cancel) → adapter.remove(url, ids, revision?) → 성공 시 `onAfterDelete`.
 ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controller를 호출**(L7). 호스트 소유 저장(C7)도 여전히 가능 — controller는 편의 오케스트레이터지 강제 아님.
 
