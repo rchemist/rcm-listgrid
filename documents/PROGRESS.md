@@ -88,7 +88,7 @@
   - **Spec**: 스펙 §3·§7·§10-2 · **브리프**: [waves §W1](./plans/entityform-api-implementation-waves.md)(태스크 W1-1~7 파일·before→after·증명·Do-NOT 완비)
   - **Verification**: full gate + E2E 16 + 금지 식별자 grep 0 + 계수 리포트
 - [ ] **W2 훅+컨트롤러** — onInit/InitContext·FormRuntime/FormController·messages·serializeValue·list 훅 · Spec §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md) (**hot-file 순차 — fan-out 금지**)
-- [ ] **W3 권한·능력·액션** — 탭/그룹 권한·capabilities·addAction·delete flow E2E·withReadOnly · Spec §3.4·§6.2 · CAP-02·03·06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md)
+- [ ] **W3 권한·능력·액션** — 탭/그룹 권한·capabilities·addAction·delete flow E2E·withReadOnly · Spec §3.4·§6.2 · CAP-02·03·06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md) · **W1-5 인계**: TabDef.hidden conditional 해석(deriveTabs + form-store seed 2곳 TODO 마킹)
 - [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17

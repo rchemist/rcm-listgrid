@@ -150,11 +150,11 @@ describe('EC3-0 — declared hidden survives onInitialize through initializeForm
 
   it('an onInitialize handler UN-hiding a declared-hidden tab shows it on FIRST paint', async () => {
     // 'graduate' is declared hidden:true (threeTabForm) — an onInitialize
-    // handler flips it visible via the pre-store EntityForm.setTabHidden
+    // handler flips it visible via the pre-store EntityForm.withTab({hidden})
     // mutation, proving it flows through initializeFormStore's
     // build-after-hooks pipe into the store's seeded tabHidden slice,
     // correct on the very first render (no user action needed).
-    const form = threeTabForm().withOnInitialize((ef) => ef.setTabHidden('graduate', false));
+    const form = threeTabForm().withOnInitialize((ef) => ef.withTab('graduate', { hidden: false }));
     const { store, entityForm } = await initializeFormStore({
       entityForm: form,
       adapter: fakeAdapter(),

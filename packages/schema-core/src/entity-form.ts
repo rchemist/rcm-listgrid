@@ -1,4 +1,5 @@
 import type { Session } from './auth';
+import type { ConditionalBooleanValue } from './field/conditional';
 import type { EntityField } from './field/entity-field';
 import type { OnChangesHandler } from './field/form-mutator';
 import type { FieldValue, RenderType } from './field/types';
@@ -57,6 +58,10 @@ export interface FieldGroupDef {
   id: string;
   label?: string;
   order: number;
+  /** initial expand/collapse state for a collapsible group panel (spec §3.2). */
+  open?: boolean;
+  /** tab/group permission gate (EG3) — consumption is W3-1, not this task. */
+  requiredPermissions?: string[] | undefined;
 }
 
 export interface TabDef {
@@ -70,13 +75,17 @@ export interface TabDef {
    * `hidden` meta on the tab's fields — unlike the 0.3.x dual write
    * (EntityForm.tsx:349-353/413-428), the new engine keeps validation
    * running for fields in a hidden tab unless the form author ALSO calls
-   * setMeta(name, { hidden: true }) on them (see FormMutator.setTabHidden
-   * doc for the full contract). Read at store-build time as the seed for
-   * FormStoreState.tabHidden; a runtime override (EntityForm.setTabHidden
-   * pre-store, or FormMutator.setTabHidden/store.setTabHidden post-store)
-   * wins over this declared value.
+   * setMeta(name, { hidden: true }) on them (see the FormMutator runtime
+   * tab-hidden setter's doc for the full contract). Read at store-build time
+   * as the seed for FormStoreState.tabHidden; a runtime override
+   * (EntityForm.withTab({hidden}) pre-store, or the mutator/store's runtime
+   * tab-hidden setter post-store) wins over this declared value. Conditional
+   * (C2, spec §3.2) — resolution of a non-boolean ConditionalBooleanValue is
+   * W3-1's scope.
    */
-  hidden?: boolean;
+  hidden?: ConditionalBooleanValue;
+  /** tab/group permission gate (EG3) — consumption is W3-1, not this task. */
+  requiredPermissions?: string[] | undefined;
 }
 
 /** `addFields` tab placement input (spec §3.2). */
@@ -232,27 +241,6 @@ export class EntityForm {
     return this;
   }
 
-  /**
-   * Imperative tab-hidden mutation (EC3-0) — for use inside an
-   * onInitialize handler, which operates on the pre-store EntityForm clone
-   * (unlike FormMutator.setTabHidden/the form store's runtime tabHidden
-   * slice, which apply AFTER the store is built). Overrides (or sets)
-   * TabDef.hidden for `tabId` on THIS instance. If `tabId` has not been
-   * declared yet (no addFields() call has targeted it), a minimal TabDef
-   * stub is created so the tab still surfaces, hidden, once a field is
-   * later routed to it. Same contract as TabDef.hidden: does NOT cascade
-   * to field-level hidden meta (see FormMutator.setTabHidden doc).
-   */
-  setTabHidden(tabId: string, hidden: boolean): this {
-    const existing = this.tabs.get(tabId);
-    if (existing) {
-      this.tabs.set(tabId, { ...existing, hidden });
-    } else {
-      this.tabs.set(tabId, { id: tabId, order: this.tabSeq++, hidden });
-    }
-    return this;
-  }
-
   addFields(input: AddFieldsInput): this {
     const tabId = input.tab?.id ?? DEFAULT_TAB;
     if (!this.tabs.has(tabId)) {
@@ -276,6 +264,110 @@ export class EntityForm {
     for (const field of input.items) {
       field.form = { tabId, fieldGroupId: groupId };
       this.fields.push(field);
+    }
+    return this;
+  }
+
+  /**
+   * Declaration-time structural removal of field `name` (spec §3.2 — successor
+   * to the 0.3.x `removeField`). Shared-abstract-form variation: a caller
+   * clones a base EntityForm and drops fields the variant doesn't want. No-op
+   * if no field named `name` is declared. Distinct from the runtime
+   * `mutator.removeField` (no naming collision — L1 without* group).
+   */
+  withoutField(name: string): this {
+    const idx = this.fields.findIndex((f) => f.getName() === name);
+    if (idx !== -1) this.fields.splice(idx, 1);
+    return this;
+  }
+
+  /**
+   * Declaration-time structural removal of tab `tabId` (spec §3.2 — successor
+   * to the 0.3.x `removeTab`/`removeTabs`). Deletes the TabDef AND every
+   * field routed to it (cascade — avoids orphaned fields whose `form.tabId`
+   * no longer resolves to a declared tab). This is REMOVAL, not a hide
+   * downgrade — a caller who only wants to hide the tab should call
+   * `withTab(tabId, { hidden: true })` instead. No-op if `tabId` was never
+   * declared.
+   */
+  withoutTab(tabId: string): this {
+    if (!this.tabs.delete(tabId)) return this;
+    for (let i = this.fields.length - 1; i >= 0; i--) {
+      if (this.fields[i]?.form?.tabId === tabId) this.fields.splice(i, 1);
+    }
+    return this;
+  }
+
+  /**
+   * Adjust a declared tab's label/order/hidden/requiredPermissions (spec
+   * §3.2). If `tabId` was never declared (no `addFields()` call has targeted
+   * it), a minimal TabDef stub is created so the tab still surfaces once a
+   * field is later routed to it — this stub-create preserves the removed
+   * pre-store tab-hidden setter's contract (an onInitialize handler can flip
+   * a not-yet-declared tab hidden ahead of time). Only the DEFINED keys of
+   * `patch` are applied/assigned (exactOptionalPropertyTypes — no conditional
+   * spread). `hidden` accepts a `ConditionalBooleanValue` (C2); resolving a
+   * non-boolean conditional here is W3-1's scope.
+   */
+  withTab(
+    tabId: string,
+    patch: {
+      label?: string;
+      order?: number;
+      hidden?: ConditionalBooleanValue;
+      requiredPermissions?: string[];
+    },
+  ): this {
+    const existing = this.tabs.get(tabId);
+    if (existing) {
+      if (patch.label !== undefined) existing.label = patch.label;
+      if (patch.order !== undefined) existing.order = patch.order;
+      if (patch.hidden !== undefined) existing.hidden = patch.hidden;
+      if (patch.requiredPermissions !== undefined) {
+        existing.requiredPermissions = patch.requiredPermissions;
+      }
+    } else {
+      const stub: TabDef = { id: tabId, order: patch.order ?? this.tabSeq++ };
+      if (patch.label !== undefined) stub.label = patch.label;
+      if (patch.hidden !== undefined) stub.hidden = patch.hidden;
+      if (patch.requiredPermissions !== undefined) {
+        stub.requiredPermissions = patch.requiredPermissions;
+      }
+      this.tabs.set(tabId, stub);
+    }
+    return this;
+  }
+
+  /**
+   * Adjust a declared field group's label/order/open/requiredPermissions
+   * (spec §3.2 — absorbs the 0.3.x `withFieldGroupConfig`). Groups stay
+   * groupId-keyed (0.4 current structure) — `tabId` is accepted per the
+   * public signature but NOT used for lookup in this wave; reserved for
+   * future tab-scoped groups. If `groupId` was never declared, a minimal
+   * FieldGroupDef stub is created (same stub-create contract as `withTab`).
+   * Only the DEFINED keys of `patch` are applied (exactOptionalPropertyTypes).
+   */
+  withGroup(
+    tabId: string,
+    groupId: string,
+    patch: { label?: string; order?: number; open?: boolean; requiredPermissions?: string[] },
+  ): this {
+    const existing = this.groups.get(groupId);
+    if (existing) {
+      if (patch.label !== undefined) existing.label = patch.label;
+      if (patch.order !== undefined) existing.order = patch.order;
+      if (patch.open !== undefined) existing.open = patch.open;
+      if (patch.requiredPermissions !== undefined) {
+        existing.requiredPermissions = patch.requiredPermissions;
+      }
+    } else {
+      const stub: FieldGroupDef = { id: groupId, order: patch.order ?? this.groupSeq++ };
+      if (patch.label !== undefined) stub.label = patch.label;
+      if (patch.open !== undefined) stub.open = patch.open;
+      if (patch.requiredPermissions !== undefined) {
+        stub.requiredPermissions = patch.requiredPermissions;
+      }
+      this.groups.set(groupId, stub);
     }
     return this;
   }

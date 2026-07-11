@@ -237,7 +237,7 @@ export function createFormStore(
   // a dynamically-added field).
   const initialTabHidden: Record<string, boolean> = {};
   for (const tab of entityForm.getTabs()) {
-    if (tab.hidden !== undefined) initialTabHidden[tab.id] = tab.hidden;
+    if (typeof tab.hidden === 'boolean') initialTabHidden[tab.id] = tab.hidden; // TODO(W3-1): resolve ConditionalBooleanValue
   }
 
   function sortedFieldDefs(state: FormStoreState): EntityField[] {
@@ -404,7 +404,9 @@ export function createFormStore(
       // seeding a visible tab here keeps store.tabIndex itself consistent
       // rather than relying solely on the render-layer fallback.
       tabIndex:
-        entityForm.getTabs().find((t) => !t.hidden)?.id ?? entityForm.getTabs()[0]?.id ?? 'default',
+        entityForm.getTabs().find((t) => !(typeof t.hidden === 'boolean' ? t.hidden : false))?.id ??
+        entityForm.getTabs()[0]?.id ??
+        'default', // TODO(W3-1): resolve ConditionalBooleanValue
       initialized: true,
       saving: false,
       formErrors: [],

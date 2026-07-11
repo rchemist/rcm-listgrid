@@ -33,6 +33,9 @@
 
 - **W1-4** addFields `fieldGroup`→`group` — 6파일. 명명 `TabInput`/`GroupInput` 인터페이스 추출(스펙 §3.2)·`requiredPermissions?: string[] \| undefined` 타입슬롯 추가(소비 로직 0 — W3-1). 소비자 이관: sample 3(collabo/college/major)·applyFullAddressFields(AddressFieldsProps.fieldGroup→group·:217 forward)·test. **디스앰비**: 내부 `fieldGroupId`(field 배치 프로퍼티)는 무접촉(다른 개념). 검증: full gate green·1876·`grep -nw fieldGroup` 0·fieldGroupId 유지. deviation 0(it() 제목 개명은 rename-wave 정책 허용).
 
+- **W1-5** without*/withTab/withGroup 신설 + `EntityForm.setTabHidden` 제거 — 6파일·+11 unit(1887). **4 신멤버(스펙 §3.2)**: `withoutField`(splice)·`withoutTab`(**cascade** — 탭+소속 필드 제거, orphan 방지)·`withTab`(존재→병합·미존재→**stub-create**, setTabHidden 계약 보존)·`withGroup`(groupId-keyed, tabId 예약·미사용). 명시 대입(exactOptional·조건 spread 0). TabDef.hidden `boolean`→`ConditionalBooleanValue`·+requiredPermissions·FieldGroupDef +open?/+requiredPermissions(타입슬롯, 소비 W3-1). setTabHidden 콜러 이관(major·tab-hidden 테스트 2종, 어서션 무변경)·mutator/store setTabHidden 유지. 검증: full gate green·1887·grep clean.
+  - **⚠ W3-1 의존(TODO 마킹됨)**: TabDef.hidden 위닝의 **conditional 해석은 W3-1**(deriveTabs sync-근사). W1-5는 3 소비지점(form-store:240 seed·:407 default탭·ViewEntityForm deriveTabs)에 `typeof==='boolean'?x:false` 내로잉(현 값 전부 boolean=무변경). W3-1 브리핑에 "deriveTabs+seed 2곳 conditional 해석" 반드시 포함.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

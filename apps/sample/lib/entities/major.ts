@@ -246,7 +246,7 @@ export function MajorEntityForm(currentId?: string): EntityForm {
         // desired state, same as the old code relying on the field's
         // undisturbed default (only 'parentMajor'/majorCode/tab are touched).
         parentMajorField?.withHidden(true).withRequired(false);
-        ef.setTabHidden(GRADUATE_TAB_ID, true);
+        ef.withTab(GRADUATE_TAB_ID, { hidden: true });
         for (const name of GRADUATE_TAB_FIELDS) {
           (ef.getField(name) as FormField | undefined)?.withHidden(true);
         }
@@ -255,7 +255,7 @@ export function MajorEntityForm(currentId?: string): EntityForm {
         // :256-263
         collegeField?.withHidden(true).withRequired(false);
         parentMajorField?.withHidden(false).withRequired(true);
-        ef.setTabHidden(GRADUATE_TAB_ID, false);
+        ef.withTab(GRADUATE_TAB_ID, { hidden: false });
         for (const name of GRADUATE_TAB_FIELDS) {
           (ef.getField(name) as FormField | undefined)?.withHidden(false);
         }

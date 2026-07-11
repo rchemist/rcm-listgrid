@@ -73,7 +73,7 @@ function deriveTabs(
     if (!byId.has(tabId)) byId.set(tabId, { id: tabId, order: seq++ });
   }
   return [...byId.values()]
-    .filter((t) => !(tabHidden[t.id] ?? t.hidden ?? false))
+    .filter((t) => !(tabHidden[t.id] ?? (typeof t.hidden === 'boolean' ? t.hidden : false))) // TODO(W3-1): resolve ConditionalBooleanValue
     .sort((a, b) => a.order - b.order);
 }
 
