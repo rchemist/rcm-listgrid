@@ -94,7 +94,8 @@
 - [ ] **EF7 [O]** onInitialize 값-보정 vs hydrate clobber 설계(EC2 갭② — 구엔진 가능·신 파이프 불가. onFetchData data-변형 반환 vs hydrate의 init-set 존중)
 - [x] **EC3** ✅ `6a5095c` · Major 재현 — **tab-hidden+self-ref+xref 4시나리오 pass·결함 0**·mock 백엔드 실 필터 적용 · E2E 12→15 · cascade ping-pong 교훈([archive](./progress-archive/phase-e-track-tasks.md))
 - [x] **EC3-0** ✅ `edff22c` · TAB-자체-숨김 3층 + deriveTabs 필터 + "필드 캐스케이드 안 함" 계약 · +24(1838)
-- [~] **EC-R1 (EC 게이트 수정 2건)** — ① async filter resolution `.catch`(4곳 — EF-R1② 무한 loading 금지 계약 정합, store에 error 노출) ② parentMajor self-exclude edit-mode E2E assert 추가(major.spec 헤더 주장 실증)
+- [x] **EC-R1 (EC 게이트 수정 2건)** ✅ `1ec8fe9` · async filter `.catch` 4곳(role=alert·언필터 폴백 금지)+major.spec scenario e(edit self-exclude 실증) · +7(1845)·16 E2E
+- [~] **EC-F (test 하드닝 2건)** — EC-F1: student-address flake(Daum 스텁 dialog 대기 강화) · EC-F2: 커서/IME 보존 회귀 핀(String/Textarea/Markdown keystroke 후 selectionStart 보존 + composition 이벤트)
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
 
 **Next up**: **EA-A** (트리비얼 필드 12종 wave 전개 — 착수 시 필드별 `[ ]` 생성, 1필드=1커밋+테스트).
