@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · H·EF·EA·EB·EC ✅ + EG1/EG2(권한 배선) ✅ · **PIVOT(사용자 2026-07-11): Phase EG의 "0.3 충실 이식" 접근 폐기 → EntityForm 공개 API를 first-principles 제로베이스 재설계**(enterprise-grade·npm publishable). **Next up**: 재설계 설계 pass(**다음 세션 fable**). 1876 unit/16 E2E. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · H·EF·EA·EB·EC ✅ + EG1/EG2 ✅ + **EG-D 재설계 설계 pass ✅**(ADR-0009+스펙 r2+waves 브리프, 4렌즈 검증 22건 반영). **Next up**: W1 표면 정비(실행급 브리프 — opus/sonnet 실행 가능). 1876 unit/16 E2E. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
-**Model policy**: **재설계 phase = fable**(사용자 지시 — 세션 오케스트레이션·최종 설계 판단). 구현 fan-out은 sonnet 위임, 기계적 haiku. 설계 판단이 first-principles 원칙으로 안 풀리면 §Open Questions.
-**Next session policy**: 새 세션(fable)은 ① 이 문서 §세션 인계 Handoff → ② [EntityForm API 감사](./analysis/2026-07-11/entityform-api-audit.md)(갭+old 버그) → ③ [EG blueprint](./plans/eg-entityform-full-parity.md)를 **"이식 계획"이 아니라 "capability 체크리스트"로** 읽음 → ④ 구 `src/listgrid/`는 "무엇을 해야 하나" 레퍼런스(복사 템플릿 아님)·ADR-0002/0003·헌장 C1-C9. 그 위에서 **제로베이스 설계**.
-**Last updated**: 2026-07-11 12:05 (**PIVOT** — 사용자: "0.3 복붙 말고 enterprise-grade·publishable 수준으로 first-principles 재설계"·"다음 세션 fable 제로베이스". EG1/EG2(권한 배선 `a1f3deb`) 완료·커밋. transplant-EG(24태스크)는 capability 체크리스트로 강등. **Next=재설계 설계 pass(fable)**.)
+**Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
+**Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
+**Last updated**: 2026-07-11 17:30 (**EG-D 설계 pass 완료** — 4스카우트 수집→fable 설계→4렌즈 적대검증 22건 전건 반영(r2)→opus 봉인 재검증. ADR-0009·스펙(CAP-01~29·44멤버)·waves 브리프 신설, blueprint 강등. harness에 실행급 규율 제도화(`b178fa6`). **Next=W1**.)
 
 ## Goal
 
@@ -49,16 +49,14 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음: **EntityForm 공개 API first-principles 재설계**, fable)
+## 세션 인계 (Handoff — 다음: **W1 표면 정비** — opus/sonnet 실행 가능)
 
-- **목표(사용자 재확정 2026-07-11)**: v0.4를 **enterprise-grade·npm publishable** listgrid 라이브러리로. 0.3을 그대로 가져오는 게 아니라 **잘못 구현된 것을 제대로**, 공개 API를 **first-principles 제로베이스로 재설계**. 다음 세션 fable로 설계부터.
-- **핵심 원칙(재설계 판단 기준)**: ① **capability-complete ≠ API-parity** — 0.3의 *능력*은 전부 존재·작동해야 하나 *구현·공개 API는 0.4의 올바른 설계*(복사 아님). ② old 버그·스멜은 재현 금지, **fix가 기본**(감사가 다수 발견: label-키잉 에러맵·shallow-Map clone·getImportableFields:448 copy-paste·degrees `[fn]`·XrefPrefer dead onSave 등). ③ **공개 API 큐레이션** — 130 accreted 멤버 그대로 노출 금지. escape-hatch cruft(attribute bag·form-level alert) 재판단, 파편 라이프사이클 훅(onChanges/onInitialize/onFetchData/submitTransform+client-ext 14) 일관 설계로 통합 검토. semver 계약. ④ enterprise DX: 타입·tree-shakeable·docs·dead surface 0.
-- **사용자 선택 = "이상적 재설계(first-principles)"** — 0.3은 "어떤 능력이 필요한가" 체크리스트로만, @listgrid 이상적 공개 API를 밑바닥부터. escape-hatch 과감히 제거·훅 통합·전 버그 fix·최소 일관 표면. 새 API는 migration 가이드로 대응(GJCU/edustack 마이그레이션 비용 감수).
-- **읽을 것(순서)**: ① [EntityForm API 감사](./analysis/2026-07-11/entityform-api-audit.md)(130멤버 갭 매트릭스+old 버그+inert 3) → ② [EG blueprint](./plans/eg-entityform-full-parity.md)를 **capability 체크리스트로**(그 "충실 이식" 프레이밍은 폐기된 접근 — 무엇이 존재해야 하나만 취함) → ③ 8그룹 정밀 map은 저널 `subagents/workflows/wf_8d0b6d02-1cc/journal.jsonl`의 `map:*` → ④ 구 `src/listgrid/`(EntityForm.tsx+config/form/*.tsx 5 mixin)는 "무엇"의 레퍼런스(복사 템플릿 아님) · ADR-0002/0003 · 헌장 C1-C9.
-- **이미 SOUND한 것(유지 — 재설계는 공개 API 표면, 엔진 내부 재작성 아님)**: store 중심 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·D4 단일슬롯 구독·FormMutator seam·EF1-7 명령형 라이프사이클·필드 24+주소+Xref·EC1-3 실브라우저 실증·권한 배선(EG1/EG2). **1876 unit/16 E2E, 전부 push.** 이건 복붙 아닌 신설계 — 그 위에서 공개 API를 다듬는 것.
-- **Do-NOT**: ① 0.3 복붙·130멤버 API 노예적 재현 금지 ② old 버그 재현 금지(fix) ③ escape-hatch cruft를 공개 API에 노출 금지 ④ SOUND한 0.4 내부(store/EF1-7/seam) 폐기 금지 — **공개 API 재설계지 엔진 재작성 아님** ⑤ store 직접 수신 금지(FormMutator)·동적 mutation 후 entityForm.getFields() 직접 읽기 금지(store.fieldDefs) ⑥ **Agent 출력파일 jq 파이프 금지**(JSONL — 컨텍스트 원문→Write) ⑦ exactOptionalPropertyTypes 조건 spread(반복 결함 1위).
-- **첫 걸음(재설계 pass)**: capability 인벤토리(감사+blueprint)에서 출발 → "이상적 @listgrid 공개 API는?" 설계(패키지 경계·훅 모델·CRUD/권한/검증/list 표면·명명·타입) → 기존 SOUND 내부와 reconcile → 설계 문서(ADR/design doc) → 그 위에서 구현 wave. 설계=fable, 구현 fan-out=sonnet, 검증=full gate+E2E.
-- **작업 규율**: 완료=logic 커밋→PROGRESS 커밋→push(사용자: 전부 push). 게이트 `type-check && typecheck:packages && test && lint && format:check && build` + 16 E2E. active-session marker=이 PROGRESS.
+- **설계 pass 완료(2026-07-11, fable)**: 공개 API 재설계 확정 — [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범: CAP-01~29·EntityForm 44멤버·훅 8종·FormRuntime/FormController·messages 채널·serializeValue seam)·[waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약: W1~W4 태스크급 완전 명세, W5~W7 entry-pass 규칙). 4렌즈 적대검증 22건(blocker 1) 전건 반영. 상세 [archive](./progress-archive/phase-eg-api-redesign.md).
+- **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
+- **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
+- **이미 SOUND한 것(유지)**: store 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·FormMutator seam·EF1-7 파이프라인·필드 24+주소+Xref·권한 배선(EG1/EG2). **1876 unit/16 E2E, 전부 push.** 재설계는 공개 표면 — 엔진 재작성 아님.
+- **Do-NOT**: ① 0.3 복붙·구 버그 재현 금지(스펙 L8) ② SOUND 내부 재작성 금지 ③ store 직접 수신 금지(FormMutator 경유)·동적 mutation 후 entityForm.getFields() 직접 읽기 금지(store.fieldDefs) ④ exactOptionalPropertyTypes 조건 spread(반복 결함 1위 — waves 전역 규칙) ⑤ hot-file 3종(entity-form/form-store/ViewEntityForm) 병렬 편집 금지 ⑥ Agent 출력파일 jq 파이프 금지(JSONL — 구조화 추출→Write→Read) ⑦ **스펙 침묵 판단의 발명 금지**(위 실행 규율).
+- **작업 규율**: 완료=logic 커밋→PROGRESS 커밋→push(사용자: 전부 push). 게이트 waves §전역 규칙(full gate+E2E 16+). active-session marker=이 PROGRESS.
 
 ---
 
@@ -78,16 +76,25 @@
 
 #### Phase EA/EB/EC ✅ 완료 (2026-07-11) · [archive](./progress-archive/phase-e-track-tasks.md)
 - EA(21필드+공유기반·리뷰게이트 confirmed 5 해소)·EA-D2(Xref+ViewListGrid 확장)·EB(AddressField+Daum+renderedBy·게이트 3해소)·EC1(주소 실증)·EC2(EF2/EF3 실브라우저 5/5)·EC3(tab/self-ref/xref 4/5)·EC3-0(TAB-숨김 3층)·EC-R1(게이트 2)·EC-F(flake+커서/IME 핀)·EF6(submit-transform)·EF7(값 override 복원). E2E 5→16.
-- [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(EG4 권한 착지 후 role-readonly 실증으로 재개)
+- [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(**W3 권한·능력 착지 후** role-readonly 실증으로 재개)
 
-#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11 — transplant 접근 폐기)
+#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11)
 
-**접근 전환**: "0.3 충실 이식(24태스크)"은 폐기. [blueprint](./plans/eg-entityform-full-parity.md)는 이제 **capability 체크리스트**(무엇이 존재해야 하나)로만 사용. 대신 공개 API를 first-principles 제로베이스 재설계(사용자 선택 "이상적 재설계"). 원칙·읽을것·Do-NOT은 §세션 인계 Handoff.
+**규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 구 blueprint는 체크리스트로 강등.
 
 - [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` — isPermitted end-to-end(toSaveData 제외+FieldRenderer 하드게이트, EF1 우회 불가). LIVE 보안갭 fix, 재설계와 무관하게 유지. +10(1876)·16 E2E.
-- 남은 capability(재설계 대상, 체크리스트): 권한 가시성(EG3-4)·검증/서버에러(EG5-6)·CRUD/delete/버튼(EG7-10)·위저드(EG11)·title(EG16)·client-ext(EG12-14)·sugar(EG15,17,18)·data-transfer/Excel(EG19-20)·list-track(EG21-24) + 감사의 GAP-port·inert. 각 그룹 정밀 map=wf_8d0b6d02-1cc 저널. **이식이 아니라 각 능력의 올바른 0.4 API를 설계 후 구현.**
+- [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2(44멤버·8훅·FormRuntime)+waves 브리프 — 4렌즈 적대검증 22건 전건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [ ] **W1 표면 정비** — rename(readOnly/placeholder)·정체성(name/url prop)·without*·배럴 큐레이션·계수 CI
+  - **Spec**: 스펙 §3·§7·§10-2 · **브리프**: [waves §W1](./plans/entityform-api-implementation-waves.md)(태스크 W1-1~7 파일·before→after·증명·Do-NOT 완비)
+  - **Verification**: full gate + E2E 16 + 금지 식별자 grep 0 + 계수 리포트
+- [ ] **W2 훅+컨트롤러** — onInit/InitContext·FormRuntime/FormController·messages·serializeValue·list 훅 · Spec §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md) (**hot-file 순차 — fan-out 금지**)
+- [ ] **W3 권한·능력·액션** — 탭/그룹 권한·capabilities·addAction·delete flow E2E·withReadOnly · Spec §3.4·§6.2 · CAP-02·03·06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md)
+- [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
+- [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
+- [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
+- [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **EntityForm 공개 API first-principles 재설계 pass**(다음 세션 fable — capability 인벤토리→이상적 API 설계→SOUND 내부와 reconcile→설계문서→구현 wave).
+**Next up**: **W1**(delegate 기본 sonnet — waves 브리프가 브리핑 원문. 스펙 침묵 판단=구현 금지).
 
 ---
 
@@ -131,6 +138,8 @@
 - 2026-07-11 EF-gate: 무인 FIND-ONLY 준수 — 발견 3건 전부 태스크(EF-R1/R2) 경유로 수정, 리뷰 자체는 무변경.
 - 2026-07-11 EA-A fan-out: 12필드 병렬(disjoint 신규 파일+등록 manifest, 공유 무접촉 확인). **1필드=1커밋 대신 wave 단일 원자 커밋** — fanout 프로토콜(/progress 1회 커밋) 우선, 필드 단위는 파일·테스트로 보존. deviation 17건 중 benign(배럴 대기 import) 다수는 등록으로 해소, 실질 5건만 §Needs Review.
 - 2026-07-11 Reorder: EA-D를 분할 — InlineMap만 즉시, Xref 2종은 EA-D2로 EC2 뒤 배치(선행 병목 ViewListGrid 확장을 EC3 실폼 요구 주도로 설계하기 위함 — 과잉설계 방지). Dead 3종(~2.3k줄) 연기로 이식 예산 절약.
+- 2026-07-11 EG-D 검증: 4렌즈 적대검증(wf_c55e83dc-6b1) 22건(blocker 1·major 18·minor 3) **전건 수용·r2 반영** — blocker=InitContext.setMeta 부재(gjcu 774+118 콜사이트 이식 불가). opus 봉인 재검증 1회 수행.
+- 2026-07-11 교차리포: 실행급 스펙 규율을 harness에 제도화(팀규약·model-routing·progress-authoring/delegate·issue·codex 미러 — harness `b178fa6` push+install). 사용자 지시: opus-only 모드에서도 균질 실행.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
@@ -146,7 +155,7 @@
 - [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독.
 - [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
 - [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 실 worklist는 §Tasks(하드닝/확장 트랙)로 승격됨. **하드닝 H 트랙 완료**(게이트·CI·SubColl·H1 캐시·H2 a11y). 남음 = 확장 E 트랙(E1/E2).
-- [x] **E-트랙 우선순위 → 전부 (사용자 확정 2026-07-11)** — 구엔진 전 필드 이식 + 동작(onInitialize/onChanges/state) 실증 + Daum 주소(무료). GJCU 것 활용/창작 자유. 계획: [e-track-field-parity.md](./plans/e-track-field-parity.md). foundation-first(EF→EA→EB→EC).
+- [x] **E-트랙 우선순위 → 전부 (사용자 확정 2026-07-11)** — 전 필드 이식+동작 실증+Daum 주소, foundation-first(EF→EA→EB→EC) 완료로 종결. [계획](./plans/e-track-field-parity.md)
 - [ ] **업로드 backend seam (EA-C 착수 시 결정)** — File/Image/MultipleAsset/ContentAsset 이식은 업로드 저장/서빙 방식 필요. GJCU는 asset 서버 사용. sample 목업에 업로드 endpoint를 둘지 vs BackendAdapter에 upload 시그니처 추가 vs 외부 asset URL만 지원. EA-C 도달 시 GJCU 관례 확인 후 결정.
 
 ## 완료 기록 (페이즈 완료 시 progress-archive로 이동)

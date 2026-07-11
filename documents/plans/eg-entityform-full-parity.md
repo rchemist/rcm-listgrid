@@ -1,4 +1,6 @@
-# Phase EG — EntityForm 공개 API 완전 parity (이식 계획)
+# Phase EG — EntityForm 공개 API 완전 parity (이식 계획) — **강등: capability 체크리스트로만 유효**
+
+> **(2026-07-11 PIVOT)** "충실 이식" 접근은 폐기됨([ADR-0009](../adr/ADR-0009-entityform-public-api-redesign.md)). 이 문서는 "무엇이 존재해야 하나"의 체크리스트로만 사용 — 규범은 [공개 API 스펙](./entityform-public-api-spec.md), 실행은 [waves 브리프](./entityform-api-implementation-waves.md). EG 태스크 ID는 스펙 §8 CAP-ID로 매핑됨.
 
 > **근거**: 사용자 지시(2026-07-11) "EntityForm 제공 API 전부 정상 동작 + 미이식 전부 이식". [API 감사](../analysis/2026-07-11/entityform-api-audit.md) → 8-그룹 병렬 계획 워크플로우(wf_8d0b6d02-1cc, 9 agents) → opus 종합. 구엔진 소스가 리포 내(`src/listgrid/`)라 전 항목 충실 이식 가능. dead code만 증거와 함께 예외(ContentAsset/Rule 선례).
 > **규모 정직성**: 24 태스크. list-track(EG21-24)+Excel(EG20)은 구 list 생태계 ~10,300 LOC 대비 현 ViewListGrid 273 LOC — **별도 phase 급(EG/EH-scale)**, EA-wave 슬라이스 아님. 다중 세션 소요.
