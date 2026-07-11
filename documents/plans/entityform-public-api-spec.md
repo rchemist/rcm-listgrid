@@ -382,7 +382,7 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 
 - 마진 +4 = W5/W6 미분해 세부 타입(필터 operator 유니온·list align/width 헬퍼·DataTransfer 하위 spec 등). W5/W6 entry pass에서 실측이 190 근접 시 위 wave-entry 규칙으로 재산정.
 
-**루트 배럴 최종 ≈ 55 → 임계값 120 무변경** — 현 49 + W5(register*2·ViewListGrid·고급검색 등 ~6). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님).
+**루트 배럴 최종 ≈ 51 → 임계값 120 무변경** — 현 49(ViewListGrid/ViewListGridProps 이미 포함) + W5 신규 `registerListCellRenderer`·`registerFilterRenderer` +2(고급검색 패널은 ViewListGrid 내장 — 별도 export 아님, W5 entry-brief 결정 3-내장). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님).
 
 ## 11. 구현 wave (요약 — 실행 계약은 [waves 브리프](./entityform-api-implementation-waves.md))
 

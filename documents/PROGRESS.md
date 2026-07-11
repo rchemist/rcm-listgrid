@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W4 ✅ seal · **D-pass ✅**(D1 async save-gating + D2 §Needs Review 9건 처분, 2026-07-12). **Next up: W5 list-track**(entry-brief pass 선행). **2117 unit/E2E 27**·계수 47/49/182(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W4 ✅ · D-pass ✅ · **W5 entry-brief pass ✅**(2026-07-12 — waves §W5 표 W5-1~4). **Next up: W5-1 필드 substrate**(withList/withFilter 구현). **2117 unit/E2E 27**·계수 47/49/182(임계 55/120/190·W5 투영 47/~51/184). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W4 ✅ · D-pass ✅**(D1+D2). 새 세션은 **W5 list-track entry-brief pass 먼저** — [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track) 읽고 waves §W5 규칙대로 태스크 표 추가·커밋 후 실행. 스펙 §5.1·§7·§2·§3.5·§3.6+8그룹 map. **상위 티어 세션 권장**(entry-brief=설계 pass·스펙 개정 동반 가능).
-**Last updated**: 2026-07-12 (**D-pass ✅**(D1+D2). D2 = 잔여 §Needs Review 9건 스펙 저자 처분: 코드2(SaveOutcome `reason` 판별자 #W2-5+#W3-2·formReadOnly Save-슬롯 #W3-5b)+문서7·§Open Q 0. +6 unit(**2117**)·E2E 27·full gate 독립 PASS·계수 47/49/182 무변경. Next=**W5 list-track**(entry-brief pass).)
+**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅**. 새 세션은 **W5-1 필드 substrate부터 실행** — [waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-1~4 완전 명세·결정 4건·Do-NOT)만 읽고 착수(스펙 §5.1·§7·§3.6 인용됨). sonnet 위임 가능(실행급 브리프). 스펙 개정 필요 판단 시만 상위 티어.
+**Last updated**: 2026-07-12 (**W5 entry-brief pass ✅**. waves 브리프에 W5 W3/W4급 태스크 표(W5-1 필드 substrate·W5-2 컬럼 파생+list-cell·W5-3 고급검색+filter·W5-4 가이드) 작성 + wave-entry 결정 4건(페이지셸=문서·ManyToOne 합성필터 미이식·onFetchListData=onAfterListFetch 흡수·/presets 파킹) + §10-A root 정밀화. 현 코드 서베이(sonnet) 근거·file:line HEAD 9209f8f. 계수 무변경(투영 47/~51/184). Next=**W5-1 실행**.)
 
 ## Goal
 
@@ -49,9 +49,9 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W4 ✅ seal · D-pass ✅**. 다음: **W5 list-track**(entry-brief pass) — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
+## 세션 인계 (Handoff — **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅**. 다음: **W5-1 실행** — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
-- **⚠ 다음 = W5 list-track entry-brief pass (상위 티어 권장)**: **D-pass ✅ 완료 2026-07-12**. D1 async save-gating(#W4-3a·[D1](./progress-archive/phase-eg-api-redesign.md#d1-async-save-gating-구현-w4-3a-확정--cap-05-완결)) + D2 잔여 §Needs Review 9건 처분([dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md) — 코드2: SaveOutcome `reason` 판별자·formReadOnly Save-슬롯 / 문서7 / §Open Q 0). **W5 착수 규율**(waves §W5): 태스크 표를 **먼저 추가·커밋**한 뒤 실행 — 스펙 §5.1(withList/withFilter)·§7·§2·§3.5·§3.6+[8그룹 map](./analysis/2026-07-11/eg-group-capability-maps.md) LIST-TRACK·CAP-18·19·20·계수 §10-A 갱신(182→~184). **신규 공개 표면 = SaveOutcome.reason**(D2·인라인 union·headless 호스트가 실패 원인 분기 가능).
+- **⚠ 다음 = W5-1 필드 substrate 실행**(sonnet 위임 가능): W5 entry-brief pass ✅ 2026-07-12 — [waves §W5 표](./plans/entityform-api-implementation-waves.md)에 W5-1~4 완전 명세(파일·before→after·증명·Do-NOT)+wave-entry 결정 4건 확정. **W5-1** = FormField에 `withList(config?: FieldListConfig|false)`/`withFilter(...)` 빌더+타입 2 신설(§5.1)·ManyToOne `showInList`/`useListField()`→withList 통합(서베이: 현 리스트 opt-in은 M2O 한정, 판정이 ViewListGrid+xref-prefer 2곳 duck-typed 중복)·배럴 +2(→184). 이어 W5-2(컬럼 파생·마법폴백 폐기·list-cell 레지스트리)→W5-3(고급검색·filter 레지스트리, ViewListGrid.tsx 순차)→W5-4(가이드 문서). **결정(발명금지)**: ManyToOne 합성필터 자동주입 미이식·페이지셸=문서(컴포넌트 아님)·onFetchListData는 onAfterListFetch(W2-6)로 이미 흡수.
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -91,11 +91,15 @@
 - [x] **W4 폼 완결** ✅ `3b3518f`..`44edfae` · 6 sub+하드닝(4버그)·CAP-05·07·10·13·23·2103u/E2E24·계수 47/49/182 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D1 async save-gating** (#W4-3a) ✅ 2026-07-12 · dirty-gate+reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정 · 2114u/E2E27 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
-- [ ] **W5 list-track** (D-pass ✅ 완료) **← Next up** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
+- [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves 브리프 W5 표(W5-1~4)+§12 결정 4건+§10-A 정밀화 · 계수 47/49/182 무변경(투영 47/~51/184) · [brief](./plans/entityform-api-implementation-waves.md)
+- [ ] **W5-1 필드 substrate** (schema-core) — withList/withFilter+FieldListConfig/FilterConfig·ManyToOne showInList 통합 · §5.1 · CAP-18 · [brief](./plans/entityform-api-implementation-waves.md) **← Next up**
+- [ ] **W5-2 컬럼 파생+list-cell 레지스트리** (react) — ViewListGrid 파생 교체·마법폴백 폐기·sample withList 이행+E2E · §7 · CAP-19
+- [ ] **W5-3 고급검색+filter 레지스트리** (react) — ViewListGrid 내장 패널·SearchForm.addAndFilter+E2E · §7 · CAP-20
+- [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W5 list-track entry-brief pass**(D-pass ✅ 2026-07-12 완료). waves §W5~W7 규칙: **태스크 표를 먼저 추가·커밋**한 뒤 실행. 참조 스펙 §5.1(withList/withFilter 신설)·§7·§2·§3.5·**§3.6**(withListConfig/withFilterable/withExcludeListFields→withList/withFilter 이관)+[8그룹 map](./analysis/2026-07-11/eg-group-capability-maps.md) LIST-TRACK. CAP-18·19·20. 계수 §10-A 표 갱신(182→~184·root 49→~55). **상위 티어 세션 권장**(entry-brief=설계 pass·신 세션 cold-start가 컨텍스트 보호).
+**Next up**: **W5-1 필드 list/filter substrate**(schema-core). withList/withFilter 빌더+FieldListConfig/FieldFilterConfig 타입 신설(§5.1)·ManyToOne showInList/useListField→withList 통합·배럴 +2(→184). 실행 계약=[waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-1 행). Do-NOT: 마법 폴백·파생 정렬은 W5-2, FieldMetaOverride에 list 키 금지. 착수 전 file:line 재확인(HEAD 이동 가능).
 
 ---
 
