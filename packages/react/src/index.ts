@@ -14,7 +14,7 @@ export type { AuthProviderProps } from './providers/auth';
 export { RouterProvider, useRouter } from './providers/router';
 export type { RouterProviderProps, Router } from './providers/router';
 
-export { AdapterProvider, useAdapter } from './providers/adapter';
+export { AdapterProvider, useAdapter, useReferenceResolver } from './providers/adapter';
 export type { AdapterProviderProps } from './providers/adapter';
 
 export { CustomOptionProvider, useCustomOptions } from './providers/custom-option';
@@ -31,6 +31,7 @@ export {
   FormStoreProvider,
   useFormStore,
   useFormField,
+  useFieldMeta,
   useFieldValue,
   snapshotFieldValues,
 } from './providers/form-store';

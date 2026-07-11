@@ -36,6 +36,8 @@
 - **W1-5** without*/withTab/withGroup 신설 + `EntityForm.setTabHidden` 제거 — 6파일·+11 unit(1887). **4 신멤버(스펙 §3.2)**: `withoutField`(splice)·`withoutTab`(**cascade** — 탭+소속 필드 제거, orphan 방지)·`withTab`(존재→병합·미존재→**stub-create**, setTabHidden 계약 보존)·`withGroup`(groupId-keyed, tabId 예약·미사용). 명시 대입(exactOptional·조건 spread 0). TabDef.hidden `boolean`→`ConditionalBooleanValue`·+requiredPermissions·FieldGroupDef +open?/+requiredPermissions(타입슬롯, 소비 W3-1). setTabHidden 콜러 이관(major·tab-hidden 테스트 2종, 어서션 무변경)·mutator/store setTabHidden 유지. 검증: full gate green·1887·grep clean.
   - **⚠ W3-1 의존(TODO 마킹됨)**: TabDef.hidden 위닝의 **conditional 해석은 W3-1**(deriveTabs sync-근사). W1-5는 3 소비지점(form-store:240 seed·:407 default탭·ViewEntityForm deriveTabs)에 `typeof==='boolean'?x:false` 내로잉(현 값 전부 boolean=무변경). W3-1 브리핑에 "deriveTabs+seed 2곳 conditional 해석" 반드시 포함.
 
+- **W1-6** 배럴 큐레이션(스펙 §7) — 4파일. schema 배럴 -4: `SCHEMA_CORE_VERSION`(P1잔재·const+sample 소비 제거)·`PermissionPolicy`(사용0·def+export 제거, isPermitted/extractPermissions/mergeRequiredPermissions 유지)·`isEquals`/`isEqualCollection`(re-export만 제거 — util/compare def+value.ts 내부사용 유지). react 배럴 +2: `useReferenceResolver`(adapter)·`useFieldMeta`(form-store). sample page.tsx 워크스페이스 마커 표시 제거(published-library 표시 유지·렌더 유효). 검증: full gate green·1887·grep clean.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

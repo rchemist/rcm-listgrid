@@ -1,10 +1,10 @@
 // @listgrid/schema-core — EntityForm declarations, field metadata, validation,
-// SearchForm, PermissionPolicy — React-free (charter C7; lint-enforced in P4).
+// SearchForm, permission gating — React-free (charter C7; lint-enforced in P4).
 //
 // Re-foundation transplant target (ADR-0008). Verified 0.3.x logic is moved here
 // module-by-module under the P2 characterization oracle. P3-1 lands the CONTRACT
 // SKELETON: the pure-meta field interface, the runtime value slice, the eval
-// context, the field vocabulary, the unified PermissionPolicy, and the validation
+// context, the field vocabulary, the unified permission gate, and the validation
 // base. Concrete field/validation transplants follow in P4/P5.
 
 // --- auth (host-injected contract) ---
@@ -56,12 +56,7 @@ export type { FieldMetaOverride } from './field/field-meta';
 export type { FormMutator, OnChangesHandler } from './field/form-mutator';
 
 // --- permission policy (unified) ---
-export {
-  PermissionPolicy,
-  isPermitted,
-  extractPermissions,
-  mergeRequiredPermissions,
-} from './permission';
+export { isPermitted, extractPermissions, mergeRequiredPermissions } from './permission';
 
 // --- validation contract ---
 export type { Validation } from './validation';
@@ -91,7 +86,6 @@ export {
 
 // --- runtime value-slice operations (pure fns over the store slice, ADR-0002) ---
 export { getCurrentValue, isBlank, isDirty, normalizeEmptyValue, resetValue } from './field/value';
-export { isEquals, isEqualCollection } from './util/compare';
 
 // --- URL classification (EA-C0 pre-stage; consumers: File/Image field
 // external-URL bypass, ea-c-scout-briefing.md decision ⑥) ---
@@ -220,7 +214,3 @@ export type {
 
 // --- backend adapter contract (ADR-0005; impls in @listgrid/backend-*) ---
 export type { PageResult, BackendErrorCode, BackendError, BackendAdapter } from './backend/adapter';
-
-// P1-5 workspace-wiring marker — apps/sample imports this to prove the
-// @listgrid/* workspace path resolves. Now shipping real contract modules.
-export const SCHEMA_CORE_VERSION = '0.0.0';

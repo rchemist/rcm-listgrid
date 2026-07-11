@@ -1,6 +1,6 @@
 import type { Session } from './auth';
 
-// PermissionPolicy — the single, canonical permission-visibility rule.
+// Permission gating — the single, canonical permission-visibility rule.
 //
 // The 0.3.x engine duplicated this predicate byte-for-byte three times
 // (EntityTab.isPermitted:42-50, EntityFieldGroup.isPermitted:54-62,
@@ -53,10 +53,3 @@ export function mergeRequiredPermissions(
 ): string[] {
   return Array.from(new Set([...(existing ?? []), ...added]));
 }
-
-/** Namespaced accessor for ergonomic call sites: `PermissionPolicy.isPermitted(...)`. */
-export const PermissionPolicy = {
-  isPermitted,
-  extractPermissions,
-  mergeRequiredPermissions,
-} as const;
