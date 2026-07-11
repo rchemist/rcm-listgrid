@@ -155,3 +155,30 @@ describe('ViewEntityForm Save-button capability gating (CAP-06; W3-2)', () => {
     expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
   });
 });
+
+// spec §3.1 / W4-1 — the default (no slots.title) heading renders
+// entityForm.getTitle(values), reading the STORE's live field values (not
+// just the declared `text`) — proves the ViewEntityForm wiring, not just
+// EntityForm.getTitle in isolation (that's covered by
+// @listgrid/schema-core/src/__tests__/entity-form-title.test.ts).
+describe('ViewEntityForm default title — wired to EntityForm.getTitle (spec §3.1; W4-1)', () => {
+  it('withTitle({fromField}) resolves from the live store value, not just the declared text', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .withTitle({ fromField: 'name' })
+      .addFields({ items: [new StringField('name', 1).withLabel('Name')] });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Acme Corp');
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AuthProvider session={undefined}>
+          <FormStoreProvider store={store}>
+            <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+          </FormStoreProvider>
+        </AuthProvider>
+      </UIProvider>,
+    );
+
+    expect(await screen.findByRole('heading', { name: 'Acme Corp' })).toBeInTheDocument();
+  });
+});

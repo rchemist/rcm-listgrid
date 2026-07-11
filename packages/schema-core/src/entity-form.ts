@@ -380,10 +380,32 @@ export interface AddFieldsInput {
 const DEFAULT_TAB = 'default';
 const DEFAULT_GROUP = 'default';
 
+/**
+ * Normalized `withTitle` storage (spec §3.1) — `withTitle(string)`
+ * normalizes to `{ text: string }`; the object form is copied key-by-key
+ * (only DEFINED keys, exactOptionalPropertyTypes — no conditional spread).
+ * `getTitle`'s resolution chain reads this.
+ */
+interface TitleSpec {
+  text?: string | undefined;
+  fromField?: string | undefined;
+}
+
+/**
+ * Resolution-chain "empty" test (spec §3.1) shared by every `getTitle` step:
+ * `null`/`undefined`/`''`/whitespace-only all count as empty (String-convert
+ * then trim, so a value like `0`/`false` is NOT empty — `String(0) === '0'`).
+ */
+function nonEmptyString(value: unknown): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  const str = String(value);
+  return str.trim().length === 0 ? undefined : str;
+}
+
 export class EntityForm {
   readonly name: string;
   readonly url: string;
-  private title?: string;
+  private titleSpec: TitleSpec = {};
   private capabilities: Capabilities = {};
   /**
    * Declared form-level read-only (spec §3.1, CAP-27) — the store
@@ -457,8 +479,26 @@ export class EntityForm {
   }
 
   // --- builders (charter C1 grammar) ---
-  withTitle(title: string): this {
-    this.title = title;
+  /**
+   * Declare the form's title (spec §3.1) — REPLACES any previously-declared
+   * title (L1 `with*` default semantics: set/replace, no merge — unlike
+   * `withCapabilities`/`withMeta`, which document merge explicitly). A plain
+   * string normalizes to `{ text: string }`. This setter does no
+   * resolution/emptiness validation itself — `getTitle` resolves the final
+   * displayed string (spec §3.1 5-step chain) from whatever is stored here.
+   * ReactNode is NOT accepted (L6) — a fully custom rendered title is
+   * `ViewEntityForm`'s `slots.title` (`@listgrid/react`, W3-3), not this
+   * schema-core declaration.
+   */
+  withTitle(title: string | { text?: string | undefined; fromField?: string | undefined }): this {
+    if (typeof title === 'string') {
+      this.titleSpec = { text: title };
+      return this;
+    }
+    const next: TitleSpec = {};
+    if (title.text !== undefined) next.text = title.text;
+    if (title.fromField !== undefined) next.fromField = title.fromField;
+    this.titleSpec = next;
     return this;
   }
   /**
@@ -695,8 +735,44 @@ export class EntityForm {
   }
 
   // --- queries ---
-  getTitle(): string | undefined {
-    return this.title;
+  /**
+   * Resolve the display title (spec §3.1) — ALWAYS a non-empty string (the
+   * old engine's `''` default is a named 0.3.x defect, L8: a caller that
+   * never called `withTitle` still gets a usable title). 5-step chain, each
+   * step's "empty" test is {@link nonEmptyString} (null/undefined/''/
+   * whitespace-only all fall through to the next step):
+   *   1. declared `text` (`withTitle(string)` or `withTitle({text})`).
+   *   2. declared `fromField`'s value read off `values`
+   *      (`values?.[fromField]`, `withTitle({fromField})`).
+   *   3. the `name` FIELD's value read off `values` (`values?.['name']` —
+   *      NOT {@link EntityForm.name}, this entity-form's own identity
+   *      string; this is the declared field literally named `"name"`, if
+   *      any, and only surfaces when the caller passes its live value in
+   *      via `values`, e.g. the store's current field values).
+   *   4. `getId()` — the record's id, when this is an update-mode form.
+   *   5. final fallback — spec §3.1 calls for a "renderType 기본문구" here
+   *      but does not specify its copy (spec-silent, this task's
+   *      DEVIATIONS): {@link EntityForm.name} is used instead — a minimal,
+   *      constructor-guaranteed-non-empty fallback, no invented
+   *      consumer-facing copy.
+   */
+  getTitle(values?: Record<string, unknown>): string {
+    const text = nonEmptyString(this.titleSpec.text);
+    if (text !== undefined) return text;
+
+    const fromField = this.titleSpec.fromField;
+    if (fromField !== undefined) {
+      const fromFieldValue = nonEmptyString(values?.[fromField]);
+      if (fromFieldValue !== undefined) return fromFieldValue;
+    }
+
+    const nameFieldValue = nonEmptyString(values?.['name']);
+    if (nameFieldValue !== undefined) return nameFieldValue;
+
+    const id = nonEmptyString(this.id);
+    if (id !== undefined) return id;
+
+    return this.name;
   }
   getId(): string | undefined {
     return this.id;
@@ -788,7 +864,7 @@ export class EntityForm {
   /** Declaration clone (charter C1: `userForm.clone().withId(id)` for the form screen). */
   clone(includeValue = false): EntityForm {
     const copy = new EntityForm(this.name, this.url);
-    if (this.title !== undefined) copy.title = this.title;
+    copy.titleSpec = { ...this.titleSpec };
     copy.capabilities = { ...this.capabilities };
     copy.formReadOnly = this.formReadOnly;
     if (this.id !== undefined) copy.id = this.id;

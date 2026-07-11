@@ -383,7 +383,13 @@ function ViewEntityFormInner({
   // back to the first still-visible tab (EC3-0 active-tab-fallback contract).
   const activeTabId = tabs.find((t) => t.id === tabIndex)?.id ?? tabs[0]?.id ?? DEFAULT_TAB_ID;
   const groups = deriveGroups(entityForm, fields, activeTabId, userPermissions, renderType);
-  const title = entityForm.getTitle();
+  // spec §3.1 — getTitle's resolution chain (fromField/name-field steps)
+  // reads live field values; pass the store's current snapshot so a
+  // fromField/name-driven title reflects fetched/edited data, not just the
+  // declared `text`. Read via store.getState() (not a useStore subscription)
+  // — same D4-compliant, non-keystroke-reactive posture as `actionCtx` above
+  // (title updates on structural re-renders, not every keystroke).
+  const title = entityForm.getTitle(snapshotFieldValues(store.getState()));
 
   // Focus-first-error (a11y gap C): after a failed validateAll(), errors are
   // already committed to the store (form-store.ts validateAll sets
