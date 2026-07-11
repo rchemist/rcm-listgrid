@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 기반(H·EF·EA·EB·EC·EG1/2·EG-D·W1·W2) ✅ · **W3 진행(1/5 — W3-1 탭/그룹 권한·가시성 ✅)**. **Next up**: W3-2 withCapabilities(CRUD 플래그+controller save/del 게이트+ViewEntityForm 어포던스). **1950 unit/E2E 17**·계수 37/49/176 PASS. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 기반(H·EF·EA·EB·EC·EG1/2·EG-D·W1·W2) ✅ · **W3 진행(2/5 — W3-1 권한·가시성 ✅·W3-2 capabilities ✅)**. **Next up**: W3-3 addAction/getActions+FormAction+액션 바+slots(§3.4·§7·CAP-09). **1961 unit/E2E 17**·계수 37/49/177 PASS. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 (**W3-1 완료** — 탭/그룹 requiredPermissions 소비+hasVisibleContent 가시성 파생·getStaticConditionalBoolean 신설·W1-5 hidden TODO 3곳 마감. sonnet delegate·opus 검증(full gate+diff 발명감사)·logic `4d30159`. +14 unit(**1950**)·**E2E 17**·계수 37/49/176. **Next=W3-2**. [detail](./progress-archive/phase-eg-api-redesign.md#w3))
+**Last updated**: 2026-07-11 (**W3-2 완료** — withCapabilities/getCapabilities+controller save/delete 게이트+Save 어포던스. 구 withNeverDelete 제거→withCapabilities({delete:false}). sonnet delegate·opus 검증(full gate+diff 발명감사)·logic `fe49c91`. +11 unit(**1961**)·**E2E 17**·계수 37/49/177. deviation #W3-2(capability-denied {ok:false} 구별불가→§Needs Review). **Next=W3-3**. [detail](./progress-archive/phase-eg-api-redesign.md#w3))
 
 ## Goal
 
@@ -49,10 +49,10 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음: **W3-2 withCapabilities** (W3 1/5, W3-1 ✅) — hot-file 순차·fan-out 금지 유지, ViewEntityForm 대폭 수정)
+## 세션 인계 (Handoff — 다음: **W3-3 addAction/액션 바/slots** (W3 2/5, W3-1·W3-2 ✅) — hot-file 순차·fan-out 금지 유지, ViewEntityForm 대폭 수정)
 
 - **W2 완료(2026-07-11, 8 sub-task `005b4a3`..`ed77ecf`)**: 훅+컨트롤러 전건 — 라이프사이클 **8훅**(onInit/onChange/onBefore·After{Save,Delete,ListFetch})·InitContext(setMeta)·FormMutator+getRenderType/getSession·**messages** 채널·**serializeValue** seam(toSaveData 재작성)·**FormRuntime(schema)+createFormController(state)**·useEntityForm·EF6 제거·selectOptions 레이스 fix. **1936 unit/E2E 16 green·계수 EntityForm 37/45·root 49/120·/schema 175/180 PASS**. sonnet delegate 7+inline 1·opus 검증/커밋. 상세 [archive](./progress-archive/phase-eg-api-redesign.md#w2).
-- **W3 착수 규율(하드)**: 권한·능력·액션(CAP-02·03·06·08·09·22·27). hot-file 3종 **순차·fan-out 금지** 유지(ViewEntityForm=버튼/액션바 대폭 수정). **승계 배선점**: ① ✅**W3-1 완결**(TabDef.hidden conditional 정적해석=getStaticConditionalBoolean·deriveTabs+seed 2곳 TODO 마감) ② (W3-2) W2-5 **capability 게이트**=controller save/del 진입 step1·delete 버튼=ViewEntityForm(현 부재) ③ (W3-3) W2-7 **버튼 rewire**→controller(현 onSave prop 경유·double-validate 해소) ④ **계수 헤드룸 얇음**: /schema **176**/180·EntityForm 37/45 — W3-2/3 신타입(Capabilities·FormAction·ActionContext·ActionRender) 추가 시 180 접근 감시. 멤버 제거/개명 검증=tsc+npm test 둘 다(tsc -b는 __tests__ 미커버).
+- **W3 착수 규율(하드)**: 권한·능력·액션(CAP-02·03·06·08·09·22·27). hot-file 3종 **순차·fan-out 금지** 유지(ViewEntityForm=버튼/액션바 대폭 수정). **승계 배선점**: ① ✅**W3-1 완결**(TabDef.hidden conditional 정적해석=getStaticConditionalBoolean·deriveTabs+seed 2곳 TODO 마감) ② ✅**W3-2 완결**(capability 게이트=controller save/del step1·denied silent {ok:false}·Save 버튼 sync 가시성·withNeverDelete 제거) ③ (W3-3) W2-7 **Save 버튼 rewire**→controller(현 onSave prop 경유·double-validate 해소)·delete 버튼 신설=W3-4 ④ **계수 헤드룸 얇음**: /schema **177**/180(W3-3 FormAction/ActionContext/ActionRender +3 예상→180 도달 감시)·EntityForm 37/45 — W3-2/3 신타입(Capabilities·FormAction·ActionContext·ActionRender) 추가 시 180 접근 감시. 멤버 제거/개명 검증=tsc+npm test 둘 다(tsc -b는 __tests__ 미커버).
 - **설계 pass 완료(2026-07-11, fable)**: 공개 API 재설계 확정 — [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범: CAP-01~29·EntityForm 44멤버·훅 8종·FormRuntime/FormController·messages 채널·serializeValue seam)·[waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약: W1~W4 태스크급 완전 명세, W5~W7 entry-pass 규칙). 4렌즈 적대검증 22건(blocker 1) 전건 반영. 상세 [archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -88,13 +88,13 @@
 - [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
-- [ ] **W3 권한·능력·액션** (1/5 — W3-1 탭/그룹 권한·가시성 ✅ `4d30159`) — 남음: capabilities·addAction·delete flow E2E·withReadOnly · Spec §3.4·§6.2 · CAP-06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md) · W1-5 TabDef.hidden conditional 해석 **완결**(W3-1: store seed 2곳+deriveTabs)
+- [ ] **W3 권한·능력·액션** (2/5 — W3-1 권한·가시성 `4d30159`·W3-2 capabilities `fe49c91` ✅) — 남음: W3-3 addAction/slots·W3-4 delete flow E2E·W3-5 withReadOnly · Spec §3.4·§7·§6.2·§3.1 · CAP-08·09·27 · [waves §W3](./plans/entityform-api-implementation-waves.md)
 - [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W3-2 withCapabilities**(delegate sonnet · **hot-file 순차·fan-out 금지** · withCapabilities/getCapabilities+form-controller save/delete 게이트+ViewEntityForm 빌트인 어포던스 · 스펙 §3.4 · CAP-06·22 · [waves §W3](./plans/entityform-api-implementation-waves.md)). 이후 W3-3 액션/slots→W3-4 delete E2E→W3-5 withReadOnly.
+**Next up**: **W3-3 addAction/getActions+FormAction+액션 바+slots**(delegate sonnet · **hot-file 순차·fan-out 금지** · entity-form.ts+ViewEntityForm 빌트인 Save/Delete 파생+replaces 병합+visible/enabled/render 해석+slots{title,header,actions} · 스펙 §3.4·§7 · CAP-09 · [waves §W3](./plans/entityform-api-implementation-waves.md) · **W2-7 인계**: Save 버튼 rewire→controller(현 onSave prop·double-validate 해소)). 이후 W3-4 delete E2E→W3-5 withReadOnly.
 
 ---
 
@@ -104,6 +104,7 @@
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
 - [ ] **#W2-1 onInit 통합 시맨틱(마이그레이션 확인)** — 구 onFetchData+onInitialize 2배열→onInit 1배열(registration-order·ctx.data 분기·반환-교체 hatch 폐기, §4.2/§9 결정). W7 gjcu 마이그레이션서 등록순서 의존·반환교체 사용처 확인 · risk: migration
 - [ ] **#W2-5 SaveOutcome reason-less cancel 구별불가** — 스펙 §6.2 SaveOutcome는 exactOptional로 `cancelled: undefined` 불가 → reason 없는 cancel()이 {ok:false}로 validation-fail과 outcome 구별불가(부작용으로만 구별). 스펙 저자: 판별자 추가 or 현행 수용 · risk: api-semantics
+- [ ] **#W3-2 capability-denied outcome 구별불가** — controller save/delete의 capability 거부가 `{ok:false}` 반환(타입상 유일 non-error·non-cancel 선택) → validation-fail·reason-less cancel과 형태 동일(#W2-5 동류). silent block(adapter 미호출)은 정상. 스펙 §6.2 저자: 판별자(예: `blocked?: 'capability'`) 추가 여부 · risk: api-semantics · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
 
 ## Progress notes
 
