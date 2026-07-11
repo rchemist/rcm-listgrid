@@ -87,7 +87,7 @@
 - [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` — isPermitted end-to-end(FieldRenderer 하드게이트·EF1 우회불가)·LIVE 보안갭 fix·재설계 무관 유지. +10(1876)·16 E2E · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [ ] **W2 훅+컨트롤러** — onInit/InitContext·FormRuntime/FormController·messages·serializeValue·list 훅 · Spec §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md) (**hot-file 순차 — fan-out 금지**)
+- [~] **W2 훅+컨트롤러** (착수 0/8 — W2-1 진행) — onInit/InitContext·FormRuntime/FormController·messages·serializeValue·list 훅 · Spec §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md) (**hot-file 순차 — fan-out 금지**)
 - [ ] **W3 권한·능력·액션** — 탭/그룹 권한·capabilities·addAction·delete flow E2E·withReadOnly · Spec §3.4·§6.2 · CAP-02·03·06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md) · **W1-5 인계**: TabDef.hidden conditional 해석(deriveTabs + form-store seed 2곳 TODO 마킹)
 - [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
@@ -109,6 +109,7 @@
 - 2026-07-11 W1 방법론: `tsc -b`(typecheck:packages)는 __tests__ 미타입체크 → EntityForm 멤버 제거/개명 시 테스트파일 콜러는 `npm test`로만 검출. rename 웨이브 검증은 tsc+test 둘 다 필수(W1-3에서 발견, W1-4/5 승계).
 - 2026-07-11 EG-D 검증: 4렌즈 적대검증(wf_c55e83dc-6b1) 22건(blocker 1·major 18·minor 3) **전건 수용·r2 반영** — blocker=InitContext.setMeta 부재(gjcu 774+118 콜사이트 이식 불가). opus 봉인 재검증 1회 수행.
 - 2026-07-11 교차리포: 실행급 스펙 규율을 harness에 제도화(팀규약·model-routing·progress-authoring/delegate·issue·codex 미러 — harness `b178fa6` push+install). 사용자 지시: opus-only 모드에서도 균질 실행.
+- 2026-07-11 W2 착수: 8 sub-task(W2-1~8) hot-file 순차·delegate 기본 sonnet(waves §W2 브리핑 원문)·opus 검증/커밋. sub-task 상세는 [phase-eg-api-redesign](./progress-archive/phase-eg-api-redesign.md)에 행 누적, W2 §Tasks 라인은 8/8 후 [x].
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
