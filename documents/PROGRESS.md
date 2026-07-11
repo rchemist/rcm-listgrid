@@ -51,7 +51,7 @@
 
 ## 세션 인계 (Handoff — **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅**. 다음: **W5-1 실행** — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
-- **⚠ 다음 = W5-1 필드 substrate 실행**(sonnet 위임 가능): W5 entry-brief pass ✅ 2026-07-12 — [waves §W5 표](./plans/entityform-api-implementation-waves.md)에 W5-1~4 완전 명세(파일·before→after·증명·Do-NOT)+wave-entry 결정 4건 확정. **W5-1** = FormField에 `withList(config?: FieldListConfig|false)`/`withFilter(...)` 빌더+타입 2 신설(§5.1)·ManyToOne `showInList`/`useListField()`→withList 통합(서베이: 현 리스트 opt-in은 M2O 한정, 판정이 ViewListGrid+xref-prefer 2곳 duck-typed 중복)·배럴 +2(→184). 이어 W5-2(컬럼 파생·마법폴백 폐기·list-cell 레지스트리)→W5-3(고급검색·filter 레지스트리, ViewListGrid.tsx 순차)→W5-4(가이드 문서). **결정(발명금지)**: ManyToOne 합성필터 자동주입 미이식·페이지셸=문서(컴포넌트 아님)·onFetchListData는 onAfterListFetch(W2-6)로 이미 흡수.
+- **⚠ 다음 = W5-1 필드 substrate 실행**(sonnet 위임 가능): W5 entry-brief pass ✅ 2026-07-12 — [waves §W5 표](./plans/entityform-api-implementation-waves.md)에 W5-1~4 완전 명세(파일·before→after·증명·Do-NOT)+wave-entry 결정 4건 확정. **W5-1**(순수 additive) = FormField에 `withList(config?: FieldListConfig|false)`/`withFilter(...)` 빌더+타입 2 신설(§5.1)·배럴 +2(→184). **ManyToOne showInList/useListField→withList 통합은 W5-2**(서베이: 현 리스트 opt-in은 M2O 한정·판정이 ViewListGrid+xref-prefer 2곳 duck-typed 중복 → 소비처 재작성과 동반; W5-1은 아무도 안 읽는 신설이라 무파손). 이어 W5-2(컬럼 파생·마법폴백 폐기·list-cell 레지스트리·M2O 통합)→W5-3(고급검색·filter 레지스트리, ViewListGrid.tsx 순차)→W5-4(가이드 문서). **결정(발명금지)**: ManyToOne 합성필터 자동주입 미이식·페이지셸=문서(컴포넌트 아님)·onFetchListData는 onAfterListFetch(W2-6)로 이미 흡수.
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -92,14 +92,14 @@
 - [x] **D1 async save-gating** (#W4-3a) ✅ 2026-07-12 · dirty-gate+reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정 · 2114u/E2E27 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
 - [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves 브리프 W5 표(W5-1~4)+§12 결정 4건+§10-A 정밀화 · 계수 47/49/182 무변경(투영 47/~51/184) · [brief](./plans/entityform-api-implementation-waves.md)
-- [ ] **W5-1 필드 substrate** (schema-core) — withList/withFilter+FieldListConfig/FilterConfig·ManyToOne showInList 통합 · §5.1 · CAP-18 · [brief](./plans/entityform-api-implementation-waves.md) **← Next up**
-- [ ] **W5-2 컬럼 파생+list-cell 레지스트리** (react) — ViewListGrid 파생 교체·마법폴백 폐기·sample withList 이행+E2E · §7 · CAP-19
+- [ ] **W5-1 필드 substrate** (schema-core) — withList/withFilter 빌더+FieldListConfig/FilterConfig 타입 **순수 additive**(ManyToOne 미변경) · §5.1 · CAP-18 · [brief](./plans/entityform-api-implementation-waves.md) **← Next up**
+- [ ] **W5-2 컬럼 파생+list-cell 레지스트리** (react) — ViewListGrid 파생 교체·마법폴백 폐기·**ManyToOne showInList→withList 통합**·sample withList 이행+E2E · §7 · CAP-19
 - [ ] **W5-3 고급검색+filter 레지스트리** (react) — ViewListGrid 내장 패널·SearchForm.addAndFilter+E2E · §7 · CAP-20
 - [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W5-1 필드 list/filter substrate**(schema-core). withList/withFilter 빌더+FieldListConfig/FieldFilterConfig 타입 신설(§5.1)·ManyToOne showInList/useListField→withList 통합·배럴 +2(→184). 실행 계약=[waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-1 행). Do-NOT: 마법 폴백·파생 정렬은 W5-2, FieldMetaOverride에 list 키 금지. 착수 전 file:line 재확인(HEAD 이동 가능).
+**Next up**: **W5-1 필드 list/filter substrate**(schema-core·**순수 additive**). withList/withFilter 빌더+FieldListConfig/FieldFilterConfig 타입 신설(§5.1)·배럴 +2(→184). **ManyToOne showInList/useListField 통합은 W5-2**(소비처 재작성 동반 — W5-1은 아무도 안 읽는 신설이라 무파손). 실행 계약=[waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-1 행). Do-NOT: 마법 폴백·파생 정렬은 W5-2·FieldMetaOverride에 list 키 금지·ManyToOne/ViewListGrid 건드리지 말 것. 착수 전 file:line 재확인.
 
 ---
 
