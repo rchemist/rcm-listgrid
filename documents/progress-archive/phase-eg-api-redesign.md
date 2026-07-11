@@ -88,6 +88,12 @@
 - **Do-NOT(W3 승계)**: 스펙 침묵 판단=구현 금지(needs_decision/§Open Q)·getStaticConditionalBoolean을 restrictive-gate(visible/enabled/capability)의 함수 분기에 쓰지 말 것(항상 숨김 버그·W3-6)·store.renderType과 entityForm.getRenderType() 혼용 주의(fetchedData flip·액션 바=id-based)·exactOptional 조건 spread.
 - **미결(§Needs Review 이월)**: #W2-1·#W2-5·#W3-2(capability-denied {ok:false} 구별불가)·#W3-3(controller-optional vs ActionContext.controller required)·#W3-5b(replaces:'save'×formReadOnly). 전부 스펙 저자 판단감·비블로킹.
 
+## W4 — 폼 완결 (진행 — hot-file 순차·delegate sonnet→opus 검증) · CAP-05·07·10·13·23
+
+> 스펙 §3.1·§5.3 · [waves §W4](../plans/entityform-api-implementation-waves.md). **W4-0 계수 ceiling 재산정 ✅**(EntityForm 45→55·/schema 180→190·root 120 유지·스펙 §10-A 최종 인벤토리 근거·count-public-surface.mjs+waves entry-rule 반영, `3b3518f`). 실행: sonnet delegate(브리프=waves §W4+스펙 인용) → opus 검증(full gate 독립 재실행+diff intent-conformance)+커밋.
+
+- **W4-1** getTitle 해석 체인+ViewEntityForm 기본 title (§3.1) — 4파일(logic `228e8f0`). `getTitle(values?): string` **5단계 체인**(text→`values[fromField]`→`values['name']`→`getId()`→`this.name` 폴백)·**항상 non-empty**(구 `''` 봉인 L8·`nonEmptyString`=null/undefined/''/공백만 empty·`String(0)='0'`은 유지). `withTitle(string|{text?,fromField?})` 정규화(`TitleSpec`·**replace-not-merge**=L1 기본·exactOptional 조건spread 회피=명시대입)·`clone` titleSpec 전파. **ViewEntityForm** 기본 title=`getTitle(snapshotFieldValues(store.getState()))`(D4 미구독=구조 리렌더시만·slots.title 우선 유지·L6 ReactNode는 slots 소관). +18 unit(**2021**: no-arg/empty-values non-empty·5단계 우선순위 각·empty→다음단계 폴백·숫자 String화·replace 의미·clone 독립 + react render 1)·계수 41/49/180 무변경(신 export 0)·**full gate 독립 재실행 PASS**(type-check·typecheck:packages·test 2021·lint 0err·format·build). deviation(§Needs Review): ① 5단계 폴백=`this.name`(renderType 기본문구 spec-silent) ② withTitle replace 의미(L1 기본 적용·§3.1 미명시). logic `228e8f0`.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:
