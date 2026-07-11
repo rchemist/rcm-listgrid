@@ -207,7 +207,7 @@ export function CollaboEntityForm(): EntityForm {
       ],
     })
     .addFields({
-      fieldGroup: { id: 'promoter', label: '추진자 정보', order: 200 },
+      group: { id: 'promoter', label: '추진자 정보', order: 200 },
       items: [
         new SelectField('promoterType', 100, CollaboPromoterTypes).withLabel('추진자 유형'),
         new ManyToOneField('professor', 200, {
@@ -232,7 +232,7 @@ export function CollaboEntityForm(): EntityForm {
       ],
     })
     .addFields({
-      fieldGroup: { id: 'collaborated', label: '협약 현황', order: 300 },
+      group: { id: 'collaborated', label: '협약 현황', order: 300 },
       items: [
         new BooleanField('showOnApply', 100).withLabel('지원서 검색 가능 여부').withRequired(true),
         new BooleanField('collaborated', 200)

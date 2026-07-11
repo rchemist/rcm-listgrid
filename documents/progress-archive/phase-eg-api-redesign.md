@@ -31,6 +31,8 @@
 - **W1-3** EntityForm 정체성 — 12파일. `fetchUrl`→`url`(prop/ctor/clone)+trailing-slash strip 정규화(root 보존, 현 입력 전부 no-op=행동무변경)·`EntityForm.getName()/getUrl()` 제거→콜러 `.name`/`.url`(13사이트). **field-vs-form 판별=tsc**: `FormField.getName()`/`field.getName()`(100+ 사이트)는 무접촉 유지(디스앰비 리뷰로 확인 — field-core.test `x.getName()` 유지·`f.name` 전환). getFetchUrl 부활 0. 검증: full gate green·1876·`getUrl()` grep 0. 에이전트 done_with_deviations(테스트파일 4종 이관)은 **false-positive**(전부 브리프 명명 사이트·검증 green) — 리뷰로 종결, Needs Review 미등록.
 - **방법론(W1-4/5 승계)**: `tsc -b`(typecheck:packages)는 __tests__ 미타입체크 → EntityForm 멤버 제거/개명 시 **테스트파일 콜러는 `npm test`로만 검출**. rename 웨이브는 tsc+test 둘 다 필수.
 
+- **W1-4** addFields `fieldGroup`→`group` — 6파일. 명명 `TabInput`/`GroupInput` 인터페이스 추출(스펙 §3.2)·`requiredPermissions?: string[] \| undefined` 타입슬롯 추가(소비 로직 0 — W3-1). 소비자 이관: sample 3(collabo/college/major)·applyFullAddressFields(AddressFieldsProps.fieldGroup→group·:217 forward)·test. **디스앰비**: 내부 `fieldGroupId`(field 배치 프로퍼티)는 무접촉(다른 개념). 검증: full gate green·1876·`grep -nw fieldGroup` 0·fieldGroupId 유지. deviation 0(it() 제목 개명은 rename-wave 정책 허용).
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

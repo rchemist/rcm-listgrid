@@ -163,9 +163,9 @@ describe('applyFullAddressFields — declares composite + flat siblings', () => 
     expect(composite.showMap).toBe(true);
   });
 
-  it('tab/fieldGroup pass through to addFields', () => {
+  it('tab/group pass through to addFields', () => {
     const form = new EntityForm('StudentEntityForm', '/student');
-    applyFullAddressFields(form, { tab: { id: 'contact' }, fieldGroup: { id: 'addr-group' } });
+    applyFullAddressFields(form, { tab: { id: 'contact' }, group: { id: 'addr-group' } });
     const composite = form.getField('address')!;
     expect(composite.getTabId()).toBe('contact');
     expect(composite.getFieldGroupId()).toBe('addr-group');

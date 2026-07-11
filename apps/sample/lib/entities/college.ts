@@ -33,7 +33,7 @@ export function CollegeEntityForm(): EntityForm {
       ],
     })
     .addFields({
-      fieldGroup: { id: 'additional', label: '부가 정보', order: 200 },
+      group: { id: 'additional', label: '부가 정보', order: 200 },
       items: [new TextareaField('description', 210, 4).withLabel('대학 소개')],
     });
 }

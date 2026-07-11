@@ -79,12 +79,31 @@ export interface TabDef {
   hidden?: boolean;
 }
 
+/** `addFields` tab placement input (spec §3.2). */
+export interface TabInput {
+  id: string;
+  label?: string;
+  order?: number;
+  hidden?: boolean;
+  /** type-only slot — consumption is W3-1, not this task. */
+  requiredPermissions?: string[] | undefined;
+}
+
+/** `addFields` group placement input (spec §3.2). */
+export interface GroupInput {
+  id: string;
+  label?: string;
+  order?: number;
+  /** type-only slot — consumption is W3-1, not this task. */
+  requiredPermissions?: string[] | undefined;
+}
+
 export interface AddFieldsInput {
   items: EntityField[];
-  /** group these fields under a field group; default group id 'default'. */
-  fieldGroup?: { id: string; label?: string; order?: number };
   /** place under a tab; default tab id 'default'. */
-  tab?: { id: string; label?: string; order?: number; hidden?: boolean };
+  tab?: TabInput;
+  /** group these fields under a field group; default group id 'default'. */
+  group?: GroupInput;
 }
 
 const DEFAULT_TAB = 'default';
@@ -245,12 +264,12 @@ export class EntityForm {
       });
     }
 
-    const groupId = input.fieldGroup?.id ?? DEFAULT_GROUP;
+    const groupId = input.group?.id ?? DEFAULT_GROUP;
     if (!this.groups.has(groupId)) {
       this.groups.set(groupId, {
         id: groupId,
-        ...(input.fieldGroup?.label !== undefined ? { label: input.fieldGroup.label } : {}),
-        order: input.fieldGroup?.order ?? this.groupSeq++,
+        ...(input.group?.label !== undefined ? { label: input.group.label } : {}),
+        order: input.group?.order ?? this.groupSeq++,
       });
     }
 

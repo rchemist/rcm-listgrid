@@ -133,7 +133,7 @@ export interface AddressFieldsProps {
   /** also declare `longitude`/`latitude` NumberField siblings (0.3.x `showLongitudeLatitude`). */
   showLongitudeLatitude?: boolean;
   tab?: { id: string; label?: string; order?: number };
-  fieldGroup?: { id: string; label?: string; order?: number };
+  group?: { id: string; label?: string; order?: number };
 }
 
 /**
@@ -214,7 +214,7 @@ export function applyFullAddressFields(
 
   entityForm.addFields({
     ...(props?.tab !== undefined ? { tab: props.tab } : {}),
-    ...(props?.fieldGroup !== undefined ? { fieldGroup: props.fieldGroup } : {}),
+    ...(props?.group !== undefined ? { group: props.group } : {}),
     items,
   });
 

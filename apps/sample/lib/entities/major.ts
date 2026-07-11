@@ -179,7 +179,7 @@ export function MajorEntityForm(currentId?: string): EntityForm {
     })
     .addFields({
       tab: { id: 'main' },
-      fieldGroup: { id: 'professors', label: '소속 교수 정보', order: 400 },
+      group: { id: 'professors', label: '소속 교수 정보', order: 400 },
       items: [
         new XrefMappingField('professors', 400, {
           entityForm: () => ProfessorEntityForm(),
@@ -188,7 +188,7 @@ export function MajorEntityForm(currentId?: string): EntityForm {
     })
     .addFields({
       tab: { id: 'main' },
-      fieldGroup: { id: 'staffs', label: '조교 정보', order: 500 },
+      group: { id: 'staffs', label: '조교 정보', order: 500 },
       items: [
         // MajorEntityForm.tsx :121-127 — single async function form
         // (decision ③ — corrects the gjcu `filters:[fn]` array-of-one-
