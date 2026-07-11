@@ -212,6 +212,17 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
   const userPermissions = extractPermissions(session);
   const renderType = useStore(store, (s) => s.renderType); // FieldRenderer eval-ctx와 동일 소스
 
+  // CAP-06 (W3-2) — Save-button visibility derived from the declared
+  // create/update capability. Sync approximation (getStaticConditionalBoolean,
+  // W3-1 pattern): an async ConditionalBooleanValue resolves to `false` here
+  // (button hidden) — the AUTHORITATIVE gate is the controller.save capability
+  // check (form-controller.ts), this is affordance only. Delete-button
+  // wiring is W3-4 scope, not here.
+  const caps = entityForm.getCapabilities();
+  const saveCap = renderType === 'create' ? caps.create : caps.update;
+  const saveAllowed =
+    saveCap === undefined ? true : getStaticConditionalBoolean(saveCap, renderType);
+
   const fields = liveFields(store.getState().fieldDefs);
   const tabs = deriveTabs(entityForm, fields, tabHidden, userPermissions, renderType);
   // if the active tab became hidden, tabs.find(...) misses and this falls
@@ -306,9 +317,11 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
         </ul>
       )}
 
-      <Button type="button" onClick={() => void handleSave()} disabled={saving}>
-        Save
-      </Button>
+      {saveAllowed && (
+        <Button type="button" onClick={() => void handleSave()} disabled={saving}>
+          Save
+        </Button>
+      )}
     </div>
   );
 }

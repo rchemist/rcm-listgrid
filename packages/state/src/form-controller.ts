@@ -1,5 +1,6 @@
 import type { StoreApi } from 'zustand/vanilla';
 import {
+  getConditionalBoolean,
   getCurrentValue,
   type AfterDeleteContext,
   type AfterSaveContext,
@@ -7,10 +8,13 @@ import {
   type BackendError,
   type BeforeDeleteContext,
   type BeforeSaveContext,
+  type ConditionalBooleanValue,
   type DeleteOutcome,
   type EntityForm,
+  type FieldEvalContext,
   type FormMutator,
   type FormRuntime,
+  type RenderType,
   type SaveOutcome,
   type Session,
 } from '@listgrid/schema-core';
@@ -28,9 +32,10 @@ import type { FormStoreState } from './form-store';
 // both state-layer concerns — schema-core stays a pure declaration
 // (ADR-0003), importing FormRuntime as a TYPE only, never this module.
 //
-// Save flow order (spec §6.2 EXACTLY, capability + revision steps OMITTED —
-// later waves, W3-2/W4-4; see the NOTES this task's briefing asks for):
-//   1. (capability create|update — OMITTED, W3-2)
+// Save flow order (spec §6.2 EXACTLY, revision step still OMITTED — later
+// wave W4-4; see the NOTES this task's briefing asks for):
+//   1. capability create|update gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
+//      => { ok: false }, silent (no adapter call, no message)
 //   2. validateAll() (unless opts.skipValidation) — fail => { ok: false }
 //   3. toSaveData()
 //   4. onBeforeSave handlers, sequential; setData threads the payload;
@@ -45,8 +50,9 @@ import type { FormStoreState } from './form-store';
 //   8. success => clearMessages() (clear-on-success) -> onAfterSave handlers,
 //      sequential, same per-handler try/catch -> { ok: true, result }
 //
-// Delete flow order (spec §6.2, capability step OMITTED — W3-2):
-//   1. (capability delete — OMITTED, W3-2)
+// Delete flow order (spec §6.2):
+//   1. capability delete gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
+//      => { ok: false }, silent (no adapter call, no message)
 //   2. ids = opts.ids ?? [entityForm.getId()]
 //   3. onBeforeDelete handlers, sequential; same cancel/throw contract
 //   4. adapter.remove — failure => addMessage({key:'delete-error', ...}),
@@ -76,6 +82,23 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
       values[name] = getCurrentValue(slice, s.renderType);
     }
     return values;
+  }
+
+  // Capability resolver (spec §3.4/§6.2, CAP-06; W3-2) — encapsulates the
+  // default-true semantics: an undeclared (undefined) capability key is
+  // allowed. getConditionalBoolean(undefined) itself resolves to `false`
+  // (conditional.ts:58-60), so undefined MUST be special-cased here rather
+  // than delegated straight through.
+  async function capAllowed(
+    cap: ConditionalBooleanValue | undefined,
+    ctx: FieldEvalContext,
+  ): Promise<boolean> {
+    return cap === undefined ? true : getConditionalBoolean(ctx, cap);
+  }
+  function capCtx(renderType: RenderType): FieldEvalContext {
+    const ctx: FieldEvalContext = { renderType, values: snapshotValues() };
+    if (session !== undefined) ctx.session = session;
+    return ctx;
   }
 
   // Store-backed FormMutator for AfterSaveContext.mutator (spec §4.1) — the
@@ -141,13 +164,24 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
   }
 
   async function save(saveOpts?: { skipValidation?: boolean }): Promise<SaveOutcome> {
+    const renderType = entityForm.getRenderType();
+
+    // spec §6.2 step 1 (CAP-06; W3-2) — capability-denied is a SILENT block:
+    // no adapter call, no message (the view already hides the affordance;
+    // a headless caller just receives { ok: false }). Indistinguishable from
+    // a validation failure by SHAPE alone (SaveOutcome has no reason field
+    // for the non-error/non-cancel case) — deliberate, see this task's
+    // deviations note.
+    const caps = entityForm.getCapabilities();
+    const relevantCap = renderType === 'update' ? caps.update : caps.create;
+    if (!(await capAllowed(relevantCap, capCtx(renderType)))) return { ok: false };
+
     if (!saveOpts?.skipValidation) {
       const valid = await store.getState().validateAll();
       if (!valid) return { ok: false };
     }
 
     let data = store.getState().toSaveData();
-    const renderType = entityForm.getRenderType();
 
     for (const handler of entityForm.getBeforeSaveHandlers()) {
       let cancelled: string | undefined;
@@ -209,6 +243,12 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
   }
 
   async function del(deleteOpts?: { ids?: string[] }): Promise<DeleteOutcome> {
+    // spec §6.2 step 1 (CAP-06; W3-2) — same silent-block contract as save's
+    // capability gate. delete is always evaluated in 'update' mode (an
+    // existing record is being removed — there is no create-mode delete).
+    const caps = entityForm.getCapabilities();
+    if (!(await capAllowed(caps.delete, capCtx('update')))) return { ok: false };
+
     const ids = deleteOpts?.ids ?? [entityForm.getId()!];
 
     for (const handler of entityForm.getBeforeDeleteHandlers()) {

@@ -4,6 +4,7 @@ import {
   StringField,
   type BackendAdapter,
   type BackendError,
+  type FieldEvalContext,
 } from '@listgrid/schema-core';
 import { createFormStore } from '../form-store';
 import { createFormController } from '../form-controller';
@@ -15,10 +16,11 @@ import { createFormController } from '../form-controller';
 // transforming the payload via setData; a throwing handler logged+skipped
 // per spec §4.2 — REVERSING the old "throwing transform propagates"
 // assertion this replaces, see store.test.ts's removal note), and light
-// delete/reload/validate coverage. Capability (W3-2) and revision (W4-4)
-// steps are OMITTED from the flow under test — this task's scope stops at
-// validate -> toSaveData -> onBeforeSave -> adapter -> error-mapping/success
-// -> onAfterSave (spec §6.2, capability/revision steps excluded).
+// delete/reload/validate coverage. The revision step (W4-4) is still OMITTED
+// from the flow under test — this task's scope stops at validate ->
+// toSaveData -> onBeforeSave -> adapter -> error-mapping/success ->
+// onAfterSave (spec §6.2, revision step excluded). The capability gate
+// (CAP-06; W3-2) is covered separately below, in its own describe block.
 
 function WidgetForm(): EntityForm {
   return new EntityForm('WidgetEntityForm', '/widget').addFields({
@@ -334,6 +336,112 @@ describe('createFormController.delete (spec §6.2)', () => {
     expect(store.getState().messages).toContainEqual(
       expect.objectContaining({ key: 'delete-error', severity: 'error', text: 'not allowed' }),
     );
+  });
+});
+
+// CAP-06 (spec §3.4/§6.2; W3-2) — capability gate, save/delete step 1. A
+// conditional (role-based) capability is resolved through the SAME
+// FieldEvalContext (renderType/session/values) every other conditional uses.
+const isAdmin = async (ctx: FieldEvalContext): Promise<boolean> =>
+  ctx.session?.roles?.includes('ADMIN') ?? false;
+
+describe('createFormController capability gate (spec §3.4/§6.2, CAP-06; W3-2)', () => {
+  it('create mode + unauthorized session: save() returns { ok: false }, adapter.create is NOT called', async () => {
+    const entityForm = WidgetForm().withCapabilities({ create: isAdmin });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+      session: { roles: ['USER'] },
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('create mode + authorized session: capability passes and the existing flow (validate -> onBeforeSave -> adapter) runs unaffected', async () => {
+    const entityForm = WidgetForm().withCapabilities({ create: isAdmin });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async () => ({ id: '1' }));
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+      session: { roles: ['ADMIN'] },
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: true, result: { id: '1' } });
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('update mode + capabilities.update: false: save() returns { ok: false }, adapter.update is NOT called', async () => {
+    const entityForm = WidgetForm().withId('1').withCapabilities({ update: false });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const update = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('capabilities.delete conditional: unauthorized session -> del() returns { ok: false }, adapter.remove NOT called; authorized session -> passes through', async () => {
+    const entityForm = WidgetForm().withId('42').withCapabilities({ delete: isAdmin });
+    const remove = vi.fn(async () => undefined);
+
+    const deniedStore = createFormStore(entityForm);
+    const deniedController = createFormController({
+      entityForm,
+      store: deniedStore,
+      adapter: fakeAdapter({ remove }),
+      session: { roles: ['USER'] },
+    });
+    const deniedOutcome = await deniedController.delete();
+    expect(deniedOutcome).toEqual({ ok: false });
+    expect(remove).not.toHaveBeenCalled();
+
+    const allowedStore = createFormStore(entityForm);
+    const allowedController = createFormController({
+      entityForm,
+      store: allowedStore,
+      adapter: fakeAdapter({ remove }),
+      session: { roles: ['ADMIN'] },
+    });
+    const allowedOutcome = await allowedController.delete();
+    expect(allowedOutcome).toEqual({ ok: true, result: undefined });
+    expect(remove).toHaveBeenCalledTimes(1);
+  });
+
+  it('no capabilities declared: save/delete proceed exactly as before (default-true, backward compatible)', async () => {
+    const entityForm = WidgetForm().withId('1');
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const update = vi.fn(async () => ({ id: '1' }));
+    const remove = vi.fn(async () => undefined);
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update, remove }),
+    });
+
+    expect(await controller.save()).toEqual({ ok: true, result: { id: '1' } });
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(await controller.delete()).toEqual({ ok: true, result: undefined });
+    expect(remove).toHaveBeenCalledTimes(1);
   });
 });
 

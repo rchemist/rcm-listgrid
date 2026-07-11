@@ -1,6 +1,7 @@
 // GET/PUT /api/major/{id} — rcm-backend-framework 0.1.0 single-entity
-// endpoints (bare entity, no envelope). No DELETE — Major is `.withNeverDelete()`
-// (briefing §6 / GJCU parity), same as Collabo/College never wiring one up.
+// endpoints (bare entity, no envelope). No DELETE — Major is
+// `.withCapabilities({ delete: false })` (briefing §6 / GJCU parity), same as
+// Collabo/College never wiring one up.
 // Hand-written (not makeItemHandlers) for the same toWire/fromWire reason as
 // major/route.ts POST.
 import { NextRequest, NextResponse } from 'next/server';

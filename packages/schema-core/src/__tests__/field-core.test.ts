@@ -26,7 +26,7 @@ function ProfessorForm(): EntityForm {
 }
 function CollegeForm(): EntityForm {
   return new EntityForm('CollegeEntityForm', '/college')
-    .withNeverDelete()
+    .withCapabilities({ delete: false })
     .withTitle('menu.academic.university.college')
     .addFields({
       items: [
@@ -46,7 +46,7 @@ describe('EntityForm declaration (charter C1)', () => {
     expect(f.name).toBe('CollegeEntityForm');
     expect(f.url).toBe('/college');
     expect(f.getTitle()).toBe('menu.academic.university.college');
-    expect(f.isNeverDelete()).toBe(true);
+    expect(f.getCapabilities().delete).toBe(false);
     expect(f.getFields().map((x) => x.getName())).toEqual([
       'name',
       'englishName',
@@ -65,6 +65,32 @@ describe('EntityForm declaration (charter C1)', () => {
     const b = a.clone();
     expect(b.getField('name')).not.toBe(a.getField('name'));
     expect(b.getFields().length).toBe(a.getFields().length);
+  });
+});
+
+describe('EntityForm.withCapabilities/getCapabilities (spec §3.4, CAP-06/CAP-22)', () => {
+  it('defaults to {} — no capability declared, every key undefined (= allowed)', () => {
+    const f = new EntityForm('Widget', '/widget');
+    expect(f.getCapabilities()).toEqual({});
+  });
+
+  it('withCapabilities({ delete: false }) — the honest withNeverDelete replacement', () => {
+    const f = new EntityForm('Widget', '/widget').withCapabilities({ delete: false });
+    expect(f.getCapabilities().delete).toBe(false);
+  });
+
+  it('multiple withCapabilities calls shallow-merge (withMeta §3.1 clobber-avoidance precedent)', () => {
+    const f = new EntityForm('Widget', '/widget')
+      .withCapabilities({ create: false })
+      .withCapabilities({ update: false });
+    expect(f.getCapabilities()).toEqual({ create: false, update: false });
+  });
+
+  it('clone copies capabilities independently — mutating the clone via a later withCapabilities call does not affect the original', () => {
+    const a = new EntityForm('Widget', '/widget').withCapabilities({ delete: false });
+    const b = a.clone().withCapabilities({ create: false });
+    expect(a.getCapabilities()).toEqual({ delete: false });
+    expect(b.getCapabilities()).toEqual({ delete: false, create: false });
   });
 });
 

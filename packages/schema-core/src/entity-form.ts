@@ -285,6 +285,22 @@ export interface TabInput {
   requiredPermissions?: string[] | undefined;
 }
 
+/**
+ * CRUD capability declaration (spec §3.4, CAP-06/CAP-22) — successor to the
+ * 0.3.x `withNeverDelete` (a single delete-only inert flag). Each key
+ * defaults to allowed when omitted (`undefined` = true, spec §3.4 "기본 전부
+ * true"); a declared {@link ConditionalBooleanValue} is resolved by the
+ * engine (controller for the save/delete execution gate — async, view for
+ * button-visibility affordance — sync approximation, W3-1 pattern).
+ * `withCapabilities({ delete: false })` is the honest replacement for
+ * `withNeverDelete()` (CAP-22).
+ */
+export interface Capabilities {
+  create?: ConditionalBooleanValue | undefined;
+  update?: ConditionalBooleanValue | undefined;
+  delete?: ConditionalBooleanValue | undefined;
+}
+
 /** `addFields` group placement input (spec §3.2). */
 export interface GroupInput {
   id: string;
@@ -309,7 +325,7 @@ export class EntityForm {
   readonly name: string;
   readonly url: string;
   private title?: string;
-  private neverDelete = false;
+  private capabilities: Capabilities = {};
   private id?: string;
 
   private readonly fields: EntityField[] = [];
@@ -372,8 +388,15 @@ export class EntityForm {
     this.title = title;
     return this;
   }
-  withNeverDelete(): this {
-    this.neverDelete = true;
+  /**
+   * Declare CRUD capabilities (spec §3.4, CAP-06) — shallow-merges `caps`
+   * into any previously-declared capabilities (withMeta §3.1
+   * clobber-avoidance precedent — a preset composing with a later call
+   * doesn't blow away sibling keys the preset didn't touch). Successor to
+   * `manageEntityForm`/`withNeverDelete`.
+   */
+  withCapabilities(caps: Capabilities): this {
+    this.capabilities = { ...this.capabilities, ...caps };
     return this;
   }
   /** Mark this instance as an existing-record (update) form. */
@@ -579,8 +602,13 @@ export class EntityForm {
   getId(): string | undefined {
     return this.id;
   }
-  isNeverDelete(): boolean {
-    return this.neverDelete;
+  /**
+   * Declared raw capabilities (undefined key = default-allowed).
+   * Resolution (default-true + {@link ConditionalBooleanValue} evaluation) is
+   * the engine's job (controller/view), not this getter's.
+   */
+  getCapabilities(): Capabilities {
+    return this.capabilities;
   }
   /** create vs update — update iff an id is set (0.3.x getRenderType semantics). */
   getRenderType(): RenderType {
@@ -650,7 +678,7 @@ export class EntityForm {
   clone(includeValue = false): EntityForm {
     const copy = new EntityForm(this.name, this.url);
     if (this.title !== undefined) copy.title = this.title;
-    copy.neverDelete = this.neverDelete;
+    copy.capabilities = { ...this.capabilities };
     if (this.id !== undefined) copy.id = this.id;
     copy.groupSeq = this.groupSeq;
     copy.tabSeq = this.tabSeq;

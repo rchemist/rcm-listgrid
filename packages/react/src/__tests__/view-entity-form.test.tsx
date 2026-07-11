@@ -111,3 +111,47 @@ describe('ViewEntityForm (JSDOM render)', () => {
     expect(store.getState().getValue('foundedDate')).toBe('2026-07-10');
   });
 });
+
+// CAP-06 (spec §3.4/§6.2; W3-2) — Save-button visibility derived from the
+// declared create/update capability (sync approximation, getStaticConditionalBoolean).
+describe('ViewEntityForm Save-button capability gating (CAP-06; W3-2)', () => {
+  it('withCapabilities({ create: false }) in create mode: the Save button is not rendered', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .withCapabilities({ create: false })
+      .addFields({ items: [new StringField('name', 1).withLabel('Name')] });
+    const store = createFormStore(entityForm);
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AuthProvider session={undefined}>
+          <FormStoreProvider store={store}>
+            <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+          </FormStoreProvider>
+        </AuthProvider>
+      </UIProvider>,
+    );
+
+    await screen.findByLabelText(/^Name/);
+    expect(screen.queryByRole('button', { name: /save/i })).not.toBeInTheDocument();
+  });
+
+  it('no capabilities declared (default): the Save button renders', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget').addFields({
+      items: [new StringField('name', 1).withLabel('Name')],
+    });
+    const store = createFormStore(entityForm);
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AuthProvider session={undefined}>
+          <FormStoreProvider store={store}>
+            <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+          </FormStoreProvider>
+        </AuthProvider>
+      </UIProvider>,
+    );
+
+    await screen.findByLabelText(/^Name/);
+    expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
+  });
+});

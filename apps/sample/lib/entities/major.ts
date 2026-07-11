@@ -153,7 +153,7 @@ export function MajorEntityForm(currentId?: string): EntityForm {
     : undefined;
 
   const entityForm = new EntityForm('MajorEntityForm', majorFetchUrl)
-    .withNeverDelete()
+    .withCapabilities({ delete: false })
     .withTitle('학부/학과')
     .addFields({
       tab: { id: 'main', label: '기본정보', order: 0 },

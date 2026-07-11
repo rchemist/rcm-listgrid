@@ -194,7 +194,7 @@ function collaboOnChanges(m: FormMutator, changedField: string): void {
 
 export function CollaboEntityForm(): EntityForm {
   const entityForm = new EntityForm('CollaboEntityForm', collaboFetchUrl)
-    .withNeverDelete()
+    .withCapabilities({ delete: false })
     .withTitle('산학협력기관')
     .addFields({
       items: [

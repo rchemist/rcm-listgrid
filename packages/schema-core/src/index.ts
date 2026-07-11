@@ -186,7 +186,7 @@ export type { Address, AddressFieldsProps, AddressSiblingNames } from './field/a
 
 // --- EntityForm declaration (charter C1) ---
 export { EntityForm } from './entity-form';
-export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
+export type { FieldGroupDef, TabDef, AddFieldsInput, Capabilities } from './entity-form';
 
 // --- imperative lifecycle: consolidated init/fetch hook (spec §3.3/§4.1
 // `onInit`; W2-1 — dispatched by initializeFormStore, @listgrid/state) ---
