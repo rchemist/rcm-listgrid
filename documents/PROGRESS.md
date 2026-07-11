@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·EA·EB·EC1·**EC2 ✅**(EF2/EF3 실브라우저 실증 완료) · **Next up**: EF6(submit-transform 훅, 소형) → EA-D2(Xref 인프라 [O]) → EC3. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF(+EF6)·EA·EB·EC1·EC2 ✅ · **Next up**: EA-D2(Xref 인프라 [O] — ViewListGrid 확장 설계, EC3 실폼 요구 주도). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 11:00 (**EC2 완료** — Collabo `060418d`, **EF2/EF3 실브라우저 5/5·결함 0**. 1757 unit+**12 E2E** green. NR +1(changeSelectOptions 레이스)·EC-F1(기존 flake) 신설. **Next=EF6**(submit-transform 훅 — [브리핑 §5](./analysis/2026-07-11/ec2-collabo-briefing.md) 참조) → EA-D2 → EC3)
+**Last updated**: 2026-07-11 11:30 (**EF6 완료** — submit-transform 훅 `8eac9a3`, collabo 이관·E2E 무변경 green. 1766 unit+12 E2E. **Next=EA-D2**(Xref 인프라 [O] — [EA-D 브리핑 PART C/D](./analysis/2026-07-11/ea-d-scout-briefing.md) 기반, ViewListGrid selection/subCollection/onFetched/fields 확장 설계를 EC3(Major) 실폼 요구와 함께 conductor가 결정 후 위임))
 
 ## Goal
 
@@ -87,7 +87,7 @@
 - [x] **EC1** ✅ `142fbf9` · Student 폼+Daum 스텁 E2E 2건(create: required+focus+fan-out+왕복 / edit: hydrate+부분수정) · **라이브러리 결함 0**(주소 스택 첫 실브라우저 무결) · E2E 5→7 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [x] **EC2** ✅ `060418d` · Collabo 재현 — **EF2/EF3 첫 실브라우저 실증 5/5 pass·라이브러리 결함 0**(옵션스왑·상호배제·M2O자동채움·onInit 첫페인트·required 게이트) · E2E 7→12 · [브리핑](./analysis/2026-07-11/ec2-collabo-briefing.md)
 - [ ] **EC-F1** student-address E2E flake(Daum 스텁 dialog 타이밍 — EC2 부재에도 재현된 기존 결함) 대기 로직 보강
-- [ ] **EF6** submit-transform 훅(EntityForm.withSubmitTransform→toSaveData) — 구 withOverrideSubmitData 후속(EC2 갭①, GJCU 실사용). EC2는 page-level workaround
+- [x] **EF6** ✅ `8eac9a3` · withSubmitTransform(단일슬롯 replace, 구 parity)+toSaveData 적용(flatten 후)·collabo 훅 이관(E2E 무변경 green=실브라우저 증명) · +9(1766)·12 E2E
 - [ ] **EF7 [O]** onInitialize 값-보정 vs hydrate clobber 설계(EC2 갭② — 구엔진 가능·신 파이프 불가. onFetchData data-변형 반환 vs hydrate의 init-set 존중)
 - [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
