@@ -32,8 +32,7 @@ import type { FormStoreState } from './form-store';
 // both state-layer concerns — schema-core stays a pure declaration
 // (ADR-0003), importing FormRuntime as a TYPE only, never this module.
 //
-// Save flow order (spec §6.2 EXACTLY, revision step still OMITTED — later
-// wave W4-4; see the NOTES this task's briefing asks for):
+// Save flow order (spec §6.2 EXACTLY, revision step now wired — W4-4):
 //   1. capability create|update gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
 //      => { ok: false }, silent (no adapter call, no message)
 //   2. validateAll() (unless opts.skipValidation) — fail => { ok: false }
@@ -47,7 +46,12 @@ import type { FormStoreState } from './form-store';
 //   4. onBeforeSave handlers, sequential; setData threads the payload;
 //      cancel() stops the flow; a THROWING handler is logged + SKIPPED
 //      (spec §4.2 — does not propagate, does not cancel)
-//   5. (revision inject — OMITTED, W4-4)
+//   5. revision inject (spec §3.1/§6.2, CAP-07; W4-4) — ONLY when
+//      entityForm.getRevisionEntityName() is not undefined (i.e.
+//      withRevision was declared); writes data['revisionEntityName'] (0.3.x
+//      key/value port, EntityForm.tsx:468-470/879) — no always-truthy
+//      fallback (schema-core's getRevisionEntityName() already reports
+//      honest undefined, entity-form.ts).
 //   6. adapter.update (renderType 'update') | adapter.create (else)
 //   7. failure => map BackendError.fieldErrors onto field slices (keyed by
 //      NAME) / an unmatched key onto a banner message; error.message is
@@ -61,8 +65,12 @@ import type { FormStoreState } from './form-store';
 //      => { ok: false }, silent (no adapter call, no message)
 //   2. ids = opts.ids ?? [entityForm.getId()]
 //   3. onBeforeDelete handlers, sequential; same cancel/throw contract
-//   4. adapter.remove — failure => addMessage({key:'delete-error', ...}),
-//      return { ok: false, error }
+//   4. adapter.remove(url, ids, revision?) — revision = entityForm.
+//      getRevisionEntityName() (spec §3.1/§6.2, CAP-07; W4-4), passed
+//      through as-is (undefined when withRevision was never declared — the
+//      adapter's own optional 3rd param handles the "not set" case, no
+//      conditional call-site branching needed). failure =>
+//      addMessage({key:'delete-error', ...}), return { ok: false, error }
 //   5. success => onAfterDelete handlers, sequential -> { ok: true, result: undefined }
 
 export interface CreateFormControllerOptions {
@@ -222,6 +230,13 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
       }
     }
 
+    // spec §6.2 step 5 (CAP-07; W4-4) — revision inject, ONLY when declared
+    // (`withRevision`) — see this fn's header comment.
+    const revisionEntityName = entityForm.getRevisionEntityName();
+    if (revisionEntityName !== undefined) {
+      data = { ...data, revisionEntityName };
+    }
+
     let result: unknown;
     try {
       if (renderType === 'update') {
@@ -286,7 +301,9 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     }
 
     try {
-      await adapter.remove(entityForm.url, ids);
+      // spec §6.2 step 4 (CAP-07; W4-4) — revision passthrough (undefined
+      // when withRevision was never declared).
+      await adapter.remove(entityForm.url, ids, entityForm.getRevisionEntityName());
     } catch (e) {
       const error = toBackendError(e);
       applyDeleteError(error);

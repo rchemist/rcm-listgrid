@@ -470,6 +470,15 @@ export class EntityForm {
    */
   private steps: StepDef[] = [];
   /**
+   * Declared revision/audit-trail entity name (spec §3.1, C6, CAP-07; W4-4) —
+   * `withRevision`'s storage. `undefined` = not declared (the default —
+   * NEITHER save/delete payload injection happens, spec §6.2 "설정 시에만").
+   * Successor to the 0.3.x `EntityFormBase.revisionEntityName`
+   * (EntityFormBase.tsx:43); this field is declared `| undefined` explicitly
+   * (exactOptionalPropertyTypes) rather than left implicit.
+   */
+  private revisionEntityName: string | undefined = undefined;
+  /**
    * Imperative lifecycle hooks (EF2): dispatched by the form store after
    * setValue (see @listgrid/state createFormStore). Successor to the 0.3.x
    * `EntityForm.onChanges` array (src/listgrid/config/EntityForm.tsx:94,
@@ -800,6 +809,24 @@ export class EntityForm {
     return this;
   }
 
+  /**
+   * Declare the revision/audit-trail entity name (spec §3.1, C6, CAP-07;
+   * W4-4) — successor to the 0.3.x `withRevisionEntityName`. `undefined`
+   * CLEARS a previously-declared value back to "not declared" (L1 `with*`
+   * default semantics, `withSteps(undefined)` precedent) — from that point
+   * on `getRevisionEntityName()` reports `undefined` again and save/delete
+   * payload injection stops (spec §6.2 "설정 시에만"). Unlike the 0.3.x
+   * `getRevisionEntityName()`, there is NO always-truthy `menuUrl`/`name`
+   * fallback here — that was a named 0.3.x defect (every
+   * `if (getRevisionEntityName())` guard elsewhere was dead code, since
+   * `name` is a required constructor arg); this setter/getter pair reports
+   * exactly what was declared, honestly.
+   */
+  withRevision(entityName: string | undefined): this {
+    this.revisionEntityName = entityName;
+    return this;
+  }
+
   // --- queries ---
   /**
    * Resolve the display title (spec §3.1) — ALWAYS a non-empty string (the
@@ -941,6 +968,21 @@ export class EntityForm {
     return [...this.steps].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   }
 
+  /**
+   * Declared revision/audit-trail entity name (spec §3.1, C6, CAP-07; W4-4)
+   * — `withRevision`'s reader pair. Returns EXACTLY the stored value —
+   * `undefined` when never declared (or cleared via `withRevision(undefined)`
+   * — this is the "honest undefined" spec §3.1 calls for, sealing the 0.3.x
+   * always-truthy `revisionEntityName || menuUrl || name` fallback bug (no
+   * `menuUrl`/`name` fallback here, ever). The save flow
+   * (`createFormController.save`, @listgrid/state) and delete flow
+   * (`adapter.remove(url, ids, revision?)`) both read this directly and
+   * inject/pass it ONLY when it is not `undefined` (spec §6.2 "설정 시에만").
+   */
+  getRevisionEntityName(): string | undefined {
+    return this.revisionEntityName;
+  }
+
   /** Declaration clone (charter C1: `userForm.clone().withId(id)` for the form screen). */
   clone(includeValue = false): EntityForm {
     const copy = new EntityForm(this.name, this.url);
@@ -958,6 +1000,11 @@ export class EntityForm {
     // hidden filter here, mirrors getSteps() — the historical GJCU 0.3.x
     // clone dropped hidden steps entirely; this clone does not).
     copy.steps = this.steps.map((s) => cloneStepDef(s));
+    // propagate revision/audit-trail entity name (spec §3.1, C6, CAP-07;
+    // W4-4) — a plain string-or-undefined value, so assignment alone gives
+    // clone independence (no shared mutable structure to deep-copy, unlike
+    // `steps`).
+    copy.revisionEntityName = this.revisionEntityName;
     // propagate changeHandlers (0.3.x parity — src/listgrid/config/EntityForm.tsx:94).
     copy.changeHandlers = [...this.changeHandlers];
     // propagate initHandlers (spec §3.3/§4.1, same clone-propagation contract).

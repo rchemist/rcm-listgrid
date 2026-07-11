@@ -174,10 +174,17 @@ export function createRcmAdapter(opts: RcmAdapterOptions = {}): BackendAdapter {
       return (await response.json()) as T;
     },
 
-    async remove(url: string, ids: string[]): Promise<void> {
+    async remove(url: string, ids: string[], revision?: string): Promise<void> {
+      // spec §3.1/§6.2, CAP-07; W4-4 — bulk delete body: {ids, revisionEntityName?}.
+      // Ports the 0.3.x rcm-framework 0.1.0 bulk-delete wire contract
+      // (src/listgrid/config/EntityForm.tsx:462-470, "Decision #31":
+      // `formData = {ids}`, then `if (revisionEntityName) formData['revisionEntityName'] = revisionEntityName`)
+      // — key/value semantics, conditional-only-when-set.
+      const body: Record<string, unknown> = { ids };
+      if (revision !== undefined) body['revisionEntityName'] = revision;
       await request(url, {
         method: 'DELETE',
-        body: JSON.stringify({ ids }),
+        body: JSON.stringify(body),
       });
     },
   };

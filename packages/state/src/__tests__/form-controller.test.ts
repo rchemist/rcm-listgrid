@@ -16,10 +16,9 @@ import { createFormController } from '../form-controller';
 // transforming the payload via setData; a throwing handler logged+skipped
 // per spec §4.2 — REVERSING the old "throwing transform propagates"
 // assertion this replaces, see store.test.ts's removal note), and light
-// delete/reload/validate coverage. The revision step (W4-4) is still OMITTED
-// from the flow under test — this task's scope stops at validate ->
-// toSaveData -> onBeforeSave -> adapter -> error-mapping/success ->
-// onAfterSave (spec §6.2, revision step excluded). The capability gate
+// delete/reload/validate coverage. The revision inject step (spec §3.1/§6.2,
+// CAP-07; W4-4) — save payload `revisionEntityName` key + `adapter.remove`'s
+// 3rd arg — is covered in its own describe block below. The capability gate
 // (CAP-06; W3-2) is covered separately below, in its own describe block.
 
 function WidgetForm(): EntityForm {
@@ -336,6 +335,121 @@ describe('createFormController.delete (spec §6.2)', () => {
     expect(store.getState().messages).toContainEqual(
       expect.objectContaining({ key: 'delete-error', severity: 'error', text: 'not allowed' }),
     );
+  });
+});
+
+// revision inject (spec §3.1/§6.2, CAP-07; W4-4) — save flow step 5 / delete
+// flow step 4. `entityForm.getRevisionEntityName()` is the honest-undefined
+// getter (schema-core entity-form.ts); the controller injects/passes it ONLY
+// when withRevision was declared (spec §6.2 "설정 시에만") — no
+// always-truthy fallback survives into the wire payload.
+describe('createFormController revision inject (spec §3.1/§6.2, CAP-07; W4-4)', () => {
+  it('save: withRevision declared -> the adapter.create payload carries revisionEntityName with the declared value', async () => {
+    const entityForm = WidgetForm().withRevision('widget-revision');
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async (_url: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({ name: 'Widget A', revisionEntityName: 'widget-revision' });
+      return { id: '1' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome.ok).toBe(true);
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('save: withRevision NOT declared -> the adapter payload has no revisionEntityName key at all', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async (_url: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({ name: 'Widget A' });
+      expect('revisionEntityName' in data).toBe(false);
+      return { id: '1' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome.ok).toBe(true);
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('save: revision inject happens AFTER onBeforeSave (a handler-set value is preserved and the revision key is layered on top)', async () => {
+    const entityForm = WidgetForm()
+      .withRevision('widget-revision')
+      .onBeforeSave((ctx) => {
+        ctx.setData({ ...ctx.data, extra: true });
+      });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async (_url: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        name: 'Widget A',
+        extra: true,
+        revisionEntityName: 'widget-revision',
+      });
+      return { id: '1' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    await controller.save();
+
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('delete: withRevision declared -> adapter.remove is called with the declared value as its 3rd arg', async () => {
+    const entityForm = WidgetForm().withId('42').withRevision('widget-revision');
+    const store = createFormStore(entityForm);
+    const remove = vi.fn(async (url: string, ids: string[], revision?: string) => {
+      expect(url).toBe('/widget');
+      expect(ids).toEqual(['42']);
+      expect(revision).toBe('widget-revision');
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ remove }),
+    });
+
+    const outcome = await controller.delete();
+
+    expect(outcome).toEqual({ ok: true, result: undefined });
+    expect(remove).toHaveBeenCalledTimes(1);
+  });
+
+  it('delete: withRevision NOT declared -> adapter.remove is called with undefined as its 3rd arg', async () => {
+    const entityForm = WidgetForm().withId('42');
+    const store = createFormStore(entityForm);
+    const remove = vi.fn(async (url: string, ids: string[], revision?: string) => {
+      expect(url).toBe('/widget');
+      expect(ids).toEqual(['42']);
+      expect(revision).toBeUndefined();
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ remove }),
+    });
+
+    const outcome = await controller.delete();
+
+    expect(outcome).toEqual({ ok: true, result: undefined });
+    expect(remove).toHaveBeenCalledTimes(1);
   });
 });
 

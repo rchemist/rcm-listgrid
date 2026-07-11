@@ -35,6 +35,15 @@ export interface BackendAdapter {
     id: string,
     data: Record<string, unknown>,
   ): Promise<T>;
-  /** DELETE {url} with body {ids} — bulk (0.3.x has no per-row delete). */
-  remove(url: string, ids: string[]): Promise<void>;
+  /**
+   * DELETE {url} with body {ids} — bulk (0.3.x has no per-row delete).
+   * `revision` (spec §3.1/§6.2, CAP-07; W4-4) is OPTIONAL — additive, every
+   * existing 2-arg caller stays valid unchanged. Passed by
+   * `createFormController.delete` (@listgrid/state) as
+   * `entityForm.getRevisionEntityName()`, which is itself `undefined` unless
+   * `withRevision` was declared — an implementation includes it in the
+   * request only when defined (0.3.x `EntityForm.tsx:468-470` conditional-
+   * truthy injection parity, see `createRcmAdapter`'s implementation).
+   */
+  remove(url: string, ids: string[], revision?: string): Promise<void>;
 }

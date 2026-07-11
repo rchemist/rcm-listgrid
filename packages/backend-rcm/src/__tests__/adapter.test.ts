@@ -107,7 +107,7 @@ describe('createRcmAdapter (ADR-0005 default BackendAdapter — RCM 0.1.0 wire c
     expect(entity).toEqual({ id: '9', name: 'Renamed' });
   });
 
-  it('remove DELETEs {url} (bulk, no per-row delete) with body {ids}', async () => {
+  it('remove DELETEs {url} (bulk, no per-row delete) with body {ids} — no revision arg (2-arg call stays valid, W4-4 optional param)', async () => {
     fetchMock.mockResolvedValue(mockResponse(200, {}));
     const adapter = createRcmAdapter({ fetch: fetchMock as unknown as typeof fetch });
 
@@ -117,6 +117,20 @@ describe('createRcmAdapter (ADR-0005 default BackendAdapter — RCM 0.1.0 wire c
     expect(calledUrl).toBe('/college');
     expect(init.method).toBe('DELETE');
     expect(init.body).toBe(JSON.stringify({ ids: ['1', '2'] }));
+  });
+
+  it('remove DELETEs {url} with body {ids, revisionEntityName} when a revision is passed (spec §3.1/§6.2, CAP-07; W4-4 — 0.3.x wire-contract port)', async () => {
+    fetchMock.mockResolvedValue(mockResponse(200, {}));
+    const adapter = createRcmAdapter({ fetch: fetchMock as unknown as typeof fetch });
+
+    await adapter.remove('/college', ['1', '2'], 'college-revision');
+
+    const [calledUrl, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(calledUrl).toBe('/college');
+    expect(init.method).toBe('DELETE');
+    expect(init.body).toBe(
+      JSON.stringify({ ids: ['1', '2'], revisionEntityName: 'college-revision' }),
+    );
   });
 
   it('prefixes every request with baseUrl when provided', async () => {
