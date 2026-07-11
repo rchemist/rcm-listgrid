@@ -11,7 +11,7 @@ import {
   type HelpTextType,
   type HiddenType,
   type LabelType,
-  type PlaceHolderType,
+  type PlaceholderType,
   type ReadOnlyType,
   type RequiredType,
   type TooltipType,
@@ -48,7 +48,7 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   hidden?: HiddenType;
   readOnly?: ReadOnlyType;
   required?: RequiredType;
-  placeHolder?: PlaceHolderType;
+  placeholder?: PlaceholderType;
   hideLabel?: boolean;
   validations?: Validation[];
   requiredPermissions?: string[];
@@ -163,9 +163,9 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
     else delete this.hidden;
     return this;
   }
-  withPlaceHolder(placeHolder?: PlaceHolderType): this {
-    if (placeHolder !== undefined) this.placeHolder = placeHolder;
-    else delete this.placeHolder;
+  withPlaceholder(placeholder?: PlaceholderType): this {
+    if (placeholder !== undefined) this.placeholder = placeholder;
+    else delete this.placeholder;
     return this;
   }
   withHelpText(helpText?: HelpTextType): this {

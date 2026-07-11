@@ -26,7 +26,7 @@ export type {
   RequiredType,
   HiddenType,
   ReadOnlyType,
-  PlaceHolderType,
+  PlaceholderType,
   LabelType,
   HelpTextType,
   TooltipType,

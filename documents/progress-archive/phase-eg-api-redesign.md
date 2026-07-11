@@ -26,6 +26,8 @@
 
 - **W1-1** `readonly`→`readOnly` 식별자 개명(행동 무변경) — 18파일(schema-core field 8·state·react 5·sample collabo·테스트 3). ViewPreset 6프리셋+`isReadonly`→`isReadOnly` 메서드+`FieldMetaOverride.readonly`+`override?.readonly` 접근 전부. **proof=tsc**(개명이 stale 참조를 깨므로 green tsc=전 참조 개명). 제외: TS `readonly` 수식어·DOM `toHaveAttribute('readonly')`·0.3 인용 주석·로컬 var·`src/listgrid/**` 레거시(스코프 밖). 검증: full gate green·1876·`git grep -nw isReadonly` empty. deviation 0.
 
+- **W1-2** `placeHolder`→`placeholder` 개명 — 4파일(conditional/entity-field/form-field/index). **결정(opus)**: 타입 `PlaceHolderType`→`PlaceholderType`도 개명("placeholder"=1단어→PascalCase는 Placeholder. property fix의 평행. W1-1이 정상 케이싱 `ReadOnlyType`을 남긴 것과 정합 — read-only는 2단어). 소비자·렌더러 `.placeHolder` 접근 0(dormant 선언)·caller 0. 검증: full gate green·1876·grep empty. deviation 0.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

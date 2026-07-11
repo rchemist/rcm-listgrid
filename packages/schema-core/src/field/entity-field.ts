@@ -2,7 +2,7 @@ import type {
   HelpTextType,
   HiddenType,
   LabelType,
-  PlaceHolderType,
+  PlaceholderType,
   ReadOnlyType,
   RequiredType,
 } from './conditional';
@@ -83,7 +83,7 @@ export interface EntityField<TValue = unknown> extends EntityItem {
   type: FieldType;
   /** declaration seed value (current/fetched/default); runtime state lives in the store slice. */
   value?: FieldValue<TValue>;
-  placeHolder?: PlaceHolderType;
+  placeholder?: PlaceholderType;
   required?: RequiredType;
   validations?: Validation[];
   /** exclude this field's value from the save payload. */
@@ -128,6 +128,6 @@ export interface EntityField<TValue = unknown> extends EntityItem {
   // --- chainable builders ---
   withRequired(required?: RequiredType): this;
   withValidations(...validations: Validation[]): this;
-  withPlaceHolder(placeHolder?: PlaceHolderType): this;
+  withPlaceholder(placeholder?: PlaceholderType): this;
   withValue(value: TValue): this;
 }
