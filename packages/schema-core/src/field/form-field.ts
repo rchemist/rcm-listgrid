@@ -19,6 +19,7 @@ import {
 import type { EntityField } from './entity-field';
 import type { FieldEvalContext } from './eval-context';
 import type { FieldMetaOverride } from './field-meta';
+import type { FieldFilterConfig, FieldListConfig } from './list-config';
 import type { FieldType, FieldValue } from './types';
 import { isBlank } from './value';
 import type { ViewPreset } from './view-preset';
@@ -68,6 +69,14 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   attributes?: Map<string, unknown>;
   value?: FieldValue<TValue>;
   form?: { tabId: string; fieldGroupId: string };
+  /**
+   * List/filter declaration substrate (spec §5.1; W5-1 — purely additive,
+   * nothing consumes these yet). `undefined` = never declared; `false` =
+   * explicit exclude; an object = opt-in with that override config. See
+   * {@link withList}/{@link withFilter} below.
+   */
+  private listConfig?: FieldListConfig | false | undefined;
+  private filterConfig?: FieldFilterConfig | false | undefined;
 
   protected constructor(name: string, order: number, type: FieldType) {
     this.name = name;
@@ -244,11 +253,49 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
     return this;
   }
 
+  /**
+   * Declare this field's list-column participation (spec §5.1 — opt-in, no
+   * magic fallback). Omitting the call entirely leaves it `undefined`
+   * (not declared); `withList(false)` explicitly excludes the field;
+   * `withList()`/`withList({...})` opts in with the given override config
+   * (default `{}`). Replaces the 0.3.x useListField/withListConfig/
+   * useListFields/withExcludeListFields quartet. Consumption (column
+   * derivation/sorting) is W5-2 — this method only stores the declaration.
+   */
+  withList(config: FieldListConfig | false = {}): this {
+    this.listConfig = config;
+    return this;
+  }
+  getListConfig(): FieldListConfig | false | undefined {
+    return this.listConfig;
+  }
+  /**
+   * Declare this field's advanced-search participation (spec §5.1).
+   * Same opt-in/exclude/undeclared tri-state as {@link withList}.
+   * Consumption (filter panel, `SearchForm` mapping) is W5-3.
+   */
+  withFilter(config: FieldFilterConfig | false = {}): this {
+    this.filterConfig = config;
+    return this;
+  }
+  getFilterConfig(): FieldFilterConfig | false | undefined {
+    return this.filterConfig;
+  }
+
   /** Structural declaration clone; drops the value unless includeValue. */
   clone(includeValue = false): this {
     const copy = Object.assign(Object.create(Object.getPrototypeOf(this)), this) as this;
     if (this.validations) copy.validations = [...this.validations];
     if (this.requiredPermissions) copy.requiredPermissions = [...this.requiredPermissions];
+    // listConfig/filterConfig are object-or-false-or-undefined: only the
+    // object case needs a fresh copy (false/undefined are primitives —
+    // Object.assign above already carried them over with no aliasing risk).
+    if (this.listConfig && typeof this.listConfig === 'object') {
+      copy.listConfig = { ...this.listConfig };
+    }
+    if (this.filterConfig && typeof this.filterConfig === 'object') {
+      copy.filterConfig = { ...this.filterConfig };
+    }
     if (includeValue && this.value) {
       copy.value = { ...this.value };
     } else {

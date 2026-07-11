@@ -142,6 +142,20 @@
 
 **검증**: +6 unit(**2117**: reason-less cancel 구별·formReadOnly가 replaces:'save' 숨김+일반 커스텀 잔류)·E2E 27 무회귀·full gate 독립 PASS(type-check·2117·lint 0err·format·build·계수 47/49/182 무변경).
 
+## #W5-1 substrate (2026-07-12 · CAP-18)
+
+**순수 additive 필드 선언 substrate**(스펙 §5.1) — 소비 로직 0(파생·정렬·필터패널은 W5-2/W5-3). 위임(sonnet)→메인 authoritative 검증.
+
+**변경(4파일)**:
+- 신규 `field/list-config.ts`: `FieldListConfig {order?, label?, align?('left'|'center'|'right'), width?(number|string), sortable?}` · `FieldFilterConfig {operator?, order?, label?}` — 전 프로퍼티 `p?: T | undefined`(L4·exactOptionalPropertyTypes-safe).
+- `field/form-field.ts`: private `listConfig`/`filterConfig` 인스턴스 필드 + `withList(config: FieldListConfig|false = {}): this`/`getListConfig()`/`withFilter(...)`/`getFilterConfig()` (in-place mutate+return this, §5.2 관용구). tri-state: undefined=미선언·`{}`=옵트인 기본·`false`=명시제외. **clone() 전파**(:253-)=object일 때만 `{...}` 새 참조(validations/requiredPermissions 패턴 동일), false/undefined는 Object.assign 안전 — L8 clone 무손실.
+- `index.ts`: `export type { FieldListConfig, FieldFilterConfig }` (배럴 +2 → /schema 184).
+- `__tests__/field-core.test.ts`: +7(round-trip·tri-state 2·chainable·clone 무손실+참조 비공유·clone false/undefined 보존).
+
+**검증(메인 authoritative)**: full gate 독립 PASS — type-check·typecheck:packages·test **2124**(+7)·lint 0err·format·build · 계수 **47/49/184**(EntityForm·root 무변경·/schema +2). manifest=선언 4파일만·HEAD 불변·M2O/react 미변경 확인.
+
+**deviations(2)**: ① 에이전트가 검증용 read-only `git status/diff` 실행(명시 "no git" 위반이나 read-only·무영향 — 처분: trivial, 조치 없음). ② `FieldFilterConfig.operator`=`string`(QueryConditionType union 미채택) — 스펙 §10-A "필터 operator 유니온 미분해" 근거의 보수적 정답(브리핑도 string 지시). **W5-3에서 operator 타입 확정**(후보=`search-form.ts` QueryConditionType) → §Needs Review 등재.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W4 ✅ · D-pass ✅ · **W5 entry-brief pass ✅**(2026-07-12 — waves §W5 표 W5-1~4). **Next up: W5-1 필드 substrate**(withList/withFilter 구현). **2117 unit/E2E 27**·계수 47/49/182(임계 55/120/190·W5 투영 47/~51/184). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · **W5-1 필드 substrate ✅**(withList/withFilter, 2026-07-12). **Next up: W5-2 컬럼 파생+list-cell 레지스트리**(react). **2124 unit/E2E 27**·계수 47/49/**184**(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅**. 새 세션은 **W5-1 필드 substrate부터 실행** — [waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-1~4 완전 명세·결정 4건·Do-NOT)만 읽고 착수(스펙 §5.1·§7·§3.6 인용됨). sonnet 위임 가능(실행급 브리프). 스펙 개정 필요 판단 시만 상위 티어.
-**Last updated**: 2026-07-12 (**W5 entry-brief pass ✅**. waves 브리프에 W5 W3/W4급 태스크 표(W5-1 필드 substrate·W5-2 컬럼 파생+list-cell·W5-3 고급검색+filter·W5-4 가이드) 작성 + wave-entry 결정 4건(페이지셸=문서·ManyToOne 합성필터 미이식·onFetchListData=onAfterListFetch 흡수·/presets 파킹) + §10-A root 정밀화. 현 코드 서베이(sonnet) 근거·file:line HEAD 9209f8f. 계수 무변경(투영 47/~51/184). Next=**W5-1 실행**.)
+**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1 ✅**. 새 세션은 **W5-2부터 실행** — [waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-2 행: ViewListGrid 파생 교체·마법폴백 폐기·list-cell 레지스트리·ManyToOne showInList→withList 통합·sample withList 이행+E2E)만 읽고 착수. sonnet 위임 가능(실행급 브리프). ViewListGrid.tsx는 W5-2→W5-3 순차.
+**Last updated**: 2026-07-12 (**W5-1 필드 substrate ✅**. FormField `withList`/`withFilter` 빌더 + `FieldListConfig`/`FieldFilterConfig` 타입 신설(§5.1·순수 additive·clone 무손실 전파)·배럴 +2. delegate(sonnet)→메인 authoritative full gate 독립 PASS(**2124**u·+7·계수 47/49/**184**). deviation 2(read-only git·operator=string→W5-3 확정, §Needs Review 1). Next=**W5-2**(ViewListGrid 컬럼 파생+list-cell 레지스트리+ManyToOne 통합).)
 
 ## Goal
 
@@ -51,7 +51,7 @@
 
 ## 세션 인계 (Handoff — **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅**. 다음: **W5-1 실행** — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
-- **⚠ 다음 = W5-1 필드 substrate 실행**(sonnet 위임 가능): W5 entry-brief pass ✅ 2026-07-12 — [waves §W5 표](./plans/entityform-api-implementation-waves.md)에 W5-1~4 완전 명세(파일·before→after·증명·Do-NOT)+wave-entry 결정 4건 확정. **W5-1**(순수 additive) = FormField에 `withList(config?: FieldListConfig|false)`/`withFilter(...)` 빌더+타입 2 신설(§5.1)·배럴 +2(→184). **ManyToOne showInList/useListField→withList 통합은 W5-2**(서베이: 현 리스트 opt-in은 M2O 한정·판정이 ViewListGrid+xref-prefer 2곳 duck-typed 중복 → 소비처 재작성과 동반; W5-1은 아무도 안 읽는 신설이라 무파손). 이어 W5-2(컬럼 파생·마법폴백 폐기·list-cell 레지스트리·M2O 통합)→W5-3(고급검색·filter 레지스트리, ViewListGrid.tsx 순차)→W5-4(가이드 문서). **결정(발명금지)**: ManyToOne 합성필터 자동주입 미이식·페이지셸=문서(컴포넌트 아님)·onFetchListData는 onAfterListFetch(W2-6)로 이미 흡수.
+- **⚠ 다음 = W5-2 실행**(sonnet 위임 가능): W5 entry-brief ✅ + **W5-1 ✅**(FormField `withList`/`withFilter`+타입 2 신설·순수 additive·계수 184). [waves §W5 표](./plans/entityform-api-implementation-waves.md) W5-2 행 = **ViewListGrid 컬럼 파생 교체**(`ViewListGrid.tsx:75-134` deriveDefaultColumnNames→getListConfig() 파생·**마법폴백 폐기**=withList 0→빈+warn·`columns` prop escape hatch 유지·sortable 헤더→store.setSort) + **list-cell 레지스트리**(신규 `list-cell-renderer-registry.tsx`·`field-renderer-registry.tsx:28-38` 패턴·셀 bare `String()` 대체) + **ManyToOne showInList→withList 통합**(`many-to-one-field.ts:45,63-67` useListField→withList·showInList 제거·소비처 `ViewListGrid.tsx:75-98`+`xref-prefer-mapping-renderer.tsx:204-214` 2곳 duck-typed 중복을 getListConfig() 공유 파생으로 일원화) + sample withList 이행 + E2E(College/Subject). 이어 W5-3(고급검색·filter 레지스트리, ViewListGrid.tsx 순차)→W5-4(가이드 문서). **결정(발명금지)**: ManyToOne 합성필터 자동주입 미이식·페이지셸=문서·onFetchListData=onAfterListFetch(W2-6) 흡수·operator 타입은 W5-3 확정(§Needs Review).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -92,8 +92,8 @@
 - [x] **D1 async save-gating** (#W4-3a) ✅ 2026-07-12 · dirty-gate+reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정 · 2114u/E2E27 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
 - [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves 브리프 W5 표(W5-1~4)+§12 결정 4건+§10-A 정밀화 · 계수 47/49/182 무변경(투영 47/~51/184) · [brief](./plans/entityform-api-implementation-waves.md)
-- [ ] **W5-1 필드 substrate** (schema-core) — withList/withFilter 빌더+FieldListConfig/FilterConfig 타입 **순수 additive**(ManyToOne 미변경) · §5.1 · CAP-18 · [brief](./plans/entityform-api-implementation-waves.md) **← Next up**
-- [ ] **W5-2 컬럼 파생+list-cell 레지스트리** (react) — ViewListGrid 파생 교체·마법폴백 폐기·**ManyToOne showInList→withList 통합**·sample withList 이행+E2E · §7 · CAP-19
+- [x] **W5-1 필드 substrate** ✅ 2026-07-12 · withList/withFilter+타입2(additive)·배럴+2·gate·2124u·47/49/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
+- [ ] **W5-2 컬럼 파생+list-cell 레지스트리** (react) — ViewListGrid 파생 교체·마법폴백 폐기·**ManyToOne showInList→withList 통합**·sample withList 이행+E2E · §7 · CAP-19 **← Next up**
 - [ ] **W5-3 고급검색+filter 레지스트리** (react) — ViewListGrid 내장 패널·SearchForm.addAndFilter+E2E · §7 · CAP-20
 - [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
@@ -109,6 +109,7 @@
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
 - [x] **#W4-3a → DECIDED+구현(D1, 2026-07-12)** — dirty 미확인 async=validateAll 실패→save 차단·스펙 §5.3/§6.2 개정. [D1](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 잔여 9건 처분(2026-07-12)** — 스펙 저자 확정(발명금지 해제): 코드2+문서7·§Open Q 0. [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
+- [ ] **#W5-1 operator 타입** — FieldFilterConfig.operator=`string`(§10-A "operator 유니온 미분해" 근거·브리핑 지시) · risk: low · **W5-3서 확정**(후보=search-form.ts QueryConditionType) · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
 
 ## Progress notes
 

@@ -110,6 +110,10 @@ export { formatPhoneNumber, removePhoneNumberHyphens } from './util/phone-util';
 
 // --- field classes (meta; render lives in @listgrid/react) ---
 export { FormField } from './field/form-field';
+
+// --- list/filter declaration substrate (spec §5.1; W5-1 — purely additive,
+// nothing consumes these yet; consumption is W5-2/W5-3) ---
+export type { FieldListConfig, FieldFilterConfig } from './field/list-config';
 export {
   StringField,
   EmailField,

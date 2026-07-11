@@ -9,6 +9,8 @@ import {
   isDirty,
   resetValue,
   type FieldEvalContext,
+  type FieldFilterConfig,
+  type FieldListConfig,
   type FieldValueSlice,
 } from '../index';
 
@@ -276,5 +278,83 @@ describe('FormField.validate (transplant of FormField:779-823)', () => {
     const f = new StringField('z', 1).withRequired({ onCreate: true, onUpdate: false });
     expect(await f.validate(ctx({ current: '' }, 'create'))).toHaveLength(1);
     expect(await f.validate(ctx({ current: '' }, 'update'))).toEqual([]);
+  });
+});
+
+describe('FormField.withList/getListConfig, withFilter/getFilterConfig (spec §5.1; W5-1 — pure declaration substrate, purely additive)', () => {
+  it('withList(config) round-trips via getListConfig', () => {
+    const config: FieldListConfig = {
+      order: 2,
+      label: 'X',
+      align: 'right',
+      width: 120,
+      sortable: true,
+    };
+    const f = new StringField('x', 1).withList(config);
+    expect(f.getListConfig()).toEqual(config);
+  });
+
+  it('withList() with no arg opts in with {} — distinct from never-called (undefined) and withList(false) (false)', () => {
+    const notDeclared = new StringField('a', 1);
+    expect(notDeclared.getListConfig()).toBeUndefined();
+
+    const optedIn = new StringField('b', 1).withList();
+    expect(optedIn.getListConfig()).toEqual({});
+
+    const excluded = new StringField('c', 1).withList(false);
+    expect(excluded.getListConfig()).toBe(false);
+  });
+
+  it('withFilter(config) round-trips via getFilterConfig', () => {
+    const config: FieldFilterConfig = { operator: 'like', order: 1 };
+    const f = new StringField('x', 1).withFilter(config);
+    expect(f.getFilterConfig()).toEqual(config);
+  });
+
+  it('withFilter() with no arg opts in with {}; withFilter(false) explicitly excludes', () => {
+    const notDeclared = new StringField('a', 1);
+    expect(notDeclared.getFilterConfig()).toBeUndefined();
+
+    const optedIn = new StringField('b', 1).withFilter();
+    expect(optedIn.getFilterConfig()).toEqual({});
+
+    const excluded = new StringField('c', 1).withFilter(false);
+    expect(excluded.getFilterConfig()).toBe(false);
+  });
+
+  it('builders are chainable (return this)', () => {
+    const f = new StringField('x', 1);
+    expect(f.withList().withFilter()).toBe(f);
+  });
+
+  it('clone() preserves listConfig/filterConfig with no shared reference (L8 clone 무손실)', () => {
+    const original = new StringField('x', 1)
+      .withList({ order: 3, label: 'L', sortable: true })
+      .withFilter({ operator: 'eq', order: 1 });
+    const copy = original.clone();
+
+    expect(copy.getListConfig()).toEqual(original.getListConfig());
+    expect(copy.getListConfig()).not.toBe(original.getListConfig());
+    expect(copy.getFilterConfig()).toEqual(original.getFilterConfig());
+    expect(copy.getFilterConfig()).not.toBe(original.getFilterConfig());
+
+    // mutating the clone's config object must not leak back into the original
+    const cloneListConfig = copy.getListConfig();
+    if (cloneListConfig && typeof cloneListConfig === 'object') {
+      cloneListConfig.label = 'mutated';
+    }
+    expect((original.getListConfig() as FieldListConfig).label).toBe('L');
+  });
+
+  it('clone() preserves false (excluded) and undefined (undeclared) list/filter declarations', () => {
+    const excluded = new StringField('x', 1).withList(false).withFilter(false);
+    const clonedExcluded = excluded.clone();
+    expect(clonedExcluded.getListConfig()).toBe(false);
+    expect(clonedExcluded.getFilterConfig()).toBe(false);
+
+    const undeclared = new StringField('y', 1);
+    const clonedUndeclared = undeclared.clone();
+    expect(clonedUndeclared.getListConfig()).toBeUndefined();
+    expect(clonedUndeclared.getFilterConfig()).toBeUndefined();
   });
 });
