@@ -7,7 +7,7 @@
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 11:30 (**EF6 완료** — submit-transform 훅 `8eac9a3`, collabo 이관·E2E 무변경 green. 1766 unit+12 E2E. **Next=EA-D2**(Xref 인프라 [O] — [EA-D 브리핑 PART C/D](./analysis/2026-07-11/ea-d-scout-briefing.md) 기반, ViewListGrid selection/subCollection/onFetched/fields 확장 설계를 EC3(Major) 실폼 요구와 함께 conductor가 결정 후 위임))
+**Last updated**: 2026-07-11 12:10 (**EA-D2 설계 확정** — Major 전해부+Xref wire 대조 scout, [브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md). 최소형 ViewListGrid 4종+M2O filter·plain 뷰만·EC3-0(TAB숨김) 신설·트리/드래그 연기. **Next=EA-D2-0 pre-stage 위임** → D2-1 → EC3-0 → EC3)
 
 ## Goal
 
@@ -49,13 +49,13 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음 작업: EB 주소(Daum 우편번호))
+## 세션 인계 (Handoff — 다음 작업: EA-D2-0 → D2-1 → EC3-0 → EC3)
 
-- **현 상태**: H·EF·**EA(A~D+리뷰게이트)** ✅. 필드 21종 이식+명령형 라이프사이클 완비, **1727 unit + 5 E2E green**, 전부 push. 필드별 상세·패턴·게이트 기록은 [archive](./progress-archive/phase-e-track-tasks.md).
-- **다음 = EB1→EB2 (주소)**: 계획 §Phase EB에 설계 완결 — EB1: schema-core AddressField(`'address'` FieldType 추가 필요·exceptOnSave 가상 composite·Address 타입) + `applyFullAddressFields(entityForm, props)`(flat 형제 StringField/NumberField 생성, required는 형제에 부여 — form-store 무변경). EB2: react AddressRenderer(형제 useFieldValue 표시 + useUI 2단 모달 + `react-daum-postcode` 직접 import(구 PostCodeSelector 선례) + onComplete→형제 setValue fan-out, zonecode/roadAddress/sido/sigungu 매핑·address2는 사용자 입력) + peerDep react-daum-postcode(^3.1.3 루트 기존재). Kakao 지도 연기.
-- **Do-NOT**: ① store 직접 수신 금지(FormMutator 경유) ② 동적 mutation 후 entityForm.getFields()류 직접 읽기 금지(store.fieldDefs) ③ 동작 검증 생략 금지 ④ 형식 P3~P7 재개 금지 ⑤ toSaveData의 exceptOnSave skip 동작 확인 후 사용(계획: 이미 skip — 검증 필수).
-- **불변/함정**: EF1 override `??`·D4. EF2 loop-guard·cascade:false는 dispatch만. EF3 build-after-hooks+clone(true). 빈 non-array 쓰기는 undefined(InlineMap 규약). exactOptionalPropertyTypes(반복 결함 1위 — 조건 spread).
-- **작업 규율**: 설계=세션(conductor)·구현=sonnet 위임·검증=세션 rigorous(full gate+E2E). 완료=logic 커밋→PROGRESS 커밋→push. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`.
+- **현 상태**: H·EF(+EF6)·EA·EB·EC1·EC2 ✅ — **명령형 라이프사이클 실브라우저 실증 완료**(EC2 5/5·결함 0). **1766 unit + 12 E2E green**, 전부 push. 남은 것: EA-D2(Xref, [~] 설계 확정됨)→EC3-0→EC3, 후순위(EC4·EF7·EC-F1·M2O-tree).
+- **다음 = EA-D2-0 pre-stage**: [브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md) 배너 결정 ①②대로 — ViewListGrid `selection{enabled,onConfirm}`+`toolbar(ctx)`+list-store `postFetch(rows)`+columns 유니온+`ManyToOneConfig.filter`(→initialSearch 변환). 이후 D2-1(Xref 2종, plain 뷰만·값 pass-through·degrees [fn] 교정), EC3-0(TAB-자체-숨김), EC3(Major 재현 E2E 4시나리오 — 브리핑 §6).
+- **Do-NOT**: ① degrees `filters:[fn]` 원형 복제 금지(교정 포트) ② supportPriority/드래그·self-ref 트리 UI를 EA-D2/EC3에 편입 금지(증거 완비 연기) ③ SelectionOptions 전체 이식 금지(최소형) ④ store 직접 수신 금지(FormMutator) ⑤ entityForm.getFields() 직접 읽기 금지(store.fieldDefs) ⑥ 형식 P3~P7 재개 금지 ⑦ **Agent 출력 파일에 jq 파이프 금지**(JSONL 트랜스크립트 — EC2 사고, 컨텍스트 원문→Write만).
+- **불변/함정**: EF1 override `??`·D4. cascade:false=dispatch만. build-after-hooks+clone(true). 빈 non-array 쓰기 undefined. Xref 값은 toSaveData 무변환 통과(EF6 불필요 — 확인됨). exactOptionalPropertyTypes 조건 spread(반복 결함 1위).
+- **작업 규율**: 설계=세션(conductor)·구현=sonnet 위임·검증=세션 rigorous(full gate+12 E2E). 완료=logic 커밋→PROGRESS 커밋→push. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`.
 
 ---
 
@@ -77,7 +77,9 @@
 
 #### Phase EA ✅ 완료 (2026-07-11 — 21필드 이식+공유기반 · dead/연기 5종 · 리뷰게이트 confirmed 5 전해소 `2a79166` · 1727 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
 
-- [ ] **EA-D2 Xref 인프라+이식** (reorder: EC2 뒤·EC3 앞) — ViewListGrid 확장 4종(selection/subCollection/onFetched/fields — [O] 설계, EC3 실폼 요구 주도) → XrefMapping(29 사이트)+XrefPrefer(+'xrefPreferMapping' 타입). 드래그 재정렬 별도 판단.
+- [~] **EA-D2** Xref 인프라+이식 — **설계 확정**([브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md) 배너): 최소형 4종+M2O filter 채널·plain 뷰만(supportPriority 렌더 미구현 — Major 전수 미사용 증거)·degrees `[fn]` 교정 포트·트리/드래그 연기. 분할: **D2-0**(ViewListGrid+list-store+M2O filter pre-stage) → **D2-1**(Xref 2종 이식)
+  - **Reuse review**: Extend: ViewListGrid·list-store(initialSearch 기존재 확인)·ManyToOneConfig·ChildFormModal 동형 — New: selection/toolbar/postFetch/columns 유니온·Xref 2클래스/뷰·'xrefPreferMapping' 타입
+- [ ] **EC3-0** TAB-자체-숨김 기반(TabDef.hidden+store 탭 슬롯+FormMutator.setTabHidden+deriveTabs 필터) — 구 withHidden({type:'TAB'}) 대응(신엔진은 필드 캐스케이드만 가능, 탭바 숨김 전무 확인)
 
 #### Phase EB ✅ 완료 (2026-07-11 — AddressField+Daum 렌더러+renderedBy 억제 · 게이트 confirmed 3 전해소 `caf7cbe` · 1757 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EB2** react AddressRenderer — 형제 useFieldValue + useUI 2단 모달 + `<DaumPostcode>` 직접 import + onComplete→형제 setValue fan-out. peerDep react-daum-postcode. (Kakao 지도 연기)
