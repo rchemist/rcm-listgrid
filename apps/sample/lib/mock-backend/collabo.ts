@@ -22,6 +22,13 @@ export interface Staff {
   // ManyToOneRenderer picker carries `organization.id` into the parent
   // Collabo form with ZERO extra fetch (ec2-collabo-briefing.md §4).
   organization: { id: string; name: string };
+  // EC3 — the discriminating column Major's `staffs` XrefMappingField async
+  // `filters` targets (ea-d2-xref-major-briefing.md §1 — old gjcu used
+  // `assistant=true`; same column name, real boolean here instead of gjcu's
+  // string 'true'/'false' anomaly). Optional/undefined on rows that were
+  // never marked either way — treated as falsy by matchesFilter (EQUAL
+  // against `true` only matches the rows explicitly set `true`).
+  assistant?: boolean;
   [key: string]: unknown;
 }
 
@@ -66,25 +73,31 @@ const orgSeed: Org[] = [
 ];
 
 // Reuses professorSeed's id/name pairs (academic.ts:76-85) for the professor
-// M2O — same person, both fixtures agree.
+// M2O — same person, both fixtures agree. `assistant` deliberately mixed
+// true/false/undefined (EC3 major.spec.ts scenario d — "staffs picker only
+// shows rows passing the async filter" needs at least one PASSING and one
+// FAILING row to be a real proof, not a coincidence of "everything passes").
 const staffSeed: Staff[] = [
   {
     id: '1',
     name: '이서연',
     email: 'seoyeon.lee@example.ac.kr',
     organization: { id: '1', name: '산학협력단' },
+    assistant: true,
   },
   {
     id: '2',
     name: '박준서',
     email: 'junseo.park@example.ac.kr',
     organization: { id: '2', name: '연구지원팀' },
+    assistant: false,
   },
   {
     id: '3',
     name: '최윤아',
     email: 'yuna.choi@example.ac.kr',
     organization: { id: '3', name: '기획처' },
+    assistant: true,
   },
 ];
 

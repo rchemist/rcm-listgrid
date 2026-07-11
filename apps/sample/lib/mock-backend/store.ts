@@ -12,7 +12,64 @@
 // edit-triggered recompile. This is the same pattern used for dev-mode
 // Prisma-client singletons.
 
+import type { FilterItem } from '@listgrid/schema-core';
+
 export type WithId = { id: string; [key: string]: unknown };
+
+/** The exact `filters` shape SearchForm.toJSON() puts on the wire. */
+export interface SearchFilters {
+  AND: FilterItem[];
+  OR: FilterItem[];
+}
+
+// EC3 — real filter application (previously EVERY mock search handler
+// ignored `body.filters` entirely and just paginated all rows; harmless for
+// every entity ported so far since none of their e2e scenarios depended on
+// server-side filtering, but Major's XrefMapping IN/NOT_IN display+picker
+// queries and the staffs async domain filter (assistant=true) both NEED the
+// backend to actually narrow rows — otherwise every professor/staff would
+// show in both the display grid and the picker regardless of mapped state).
+// Minimal condition-type coverage — only what an audited filter channel in
+// this app actually emits (SearchForm.QueryConditionType has more; unused
+// ones fall through the `default: true` no-op below, same as the old
+// ignore-everything behavior).
+function matchesFilter(row: WithId, filter: FilterItem): boolean {
+  const rowValue = row[filter.name];
+  let result: boolean;
+  switch (filter.queryConditionType ?? 'EQUAL') {
+    case 'EQUAL':
+      result = String(rowValue) === String(filter.value);
+      break;
+    case 'NOT_EQUAL':
+      result = String(rowValue) !== String(filter.value);
+      break;
+    case 'IN':
+      result =
+        Array.isArray(filter.values) && filter.values.some((v) => String(v) === String(rowValue));
+      break;
+    case 'NOT_IN':
+      result = !(
+        Array.isArray(filter.values) && filter.values.some((v) => String(v) === String(rowValue))
+      );
+      break;
+    case 'LIKE':
+      result =
+        typeof rowValue === 'string' && typeof filter.value === 'string'
+          ? rowValue.toLowerCase().includes(filter.value.toLowerCase())
+          : false;
+      break;
+    default:
+      result = true;
+  }
+  return filter.not ? !result : result;
+}
+
+function matchesFilterGroup(row: WithId, filters?: SearchFilters): boolean {
+  if (!filters) return true;
+  const andOk = filters.AND.every((f) => matchesFilter(row, f));
+  const orOk = filters.OR.length === 0 || filters.OR.some((f) => matchesFilter(row, f));
+  return andOk && orOk;
+}
 
 function nextId(rows: WithId[]): string {
   const max = rows.reduce((acc, row) => {
@@ -29,11 +86,18 @@ export class EntityStore<T extends WithId> {
     this.rows = [...seed];
   }
 
-  search(page = 0, pageSize = 20): { content: T[]; totalElements: number; totalPages: number } {
-    const totalElements = this.rows.length;
+  search(
+    page = 0,
+    pageSize = 20,
+    filters?: SearchFilters,
+  ): { content: T[]; totalElements: number; totalPages: number } {
+    const filtered = filters
+      ? this.rows.filter((row) => matchesFilterGroup(row, filters))
+      : this.rows;
+    const totalElements = filtered.length;
     const totalPages = Math.max(1, Math.ceil(totalElements / Math.max(pageSize, 1)));
     const start = page * pageSize;
-    const content = this.rows.slice(start, start + pageSize);
+    const content = filtered.slice(start, start + pageSize);
     return { content, totalElements, totalPages };
   }
 

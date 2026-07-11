@@ -13,8 +13,18 @@
 //   DELETE {url}         -> bulk delete, body {ids:string[]} (no per-row DELETE)
 
 import { NextRequest, NextResponse } from 'next/server';
-import type { EntityStore, WithId } from './store';
+import type { EntityStore, SearchFilters, WithId } from './store';
 import { notFound, searchEnvelope } from './envelope';
+
+// Exported (not just used internally by makeSearchHandler) — major/search/
+// route.ts (EC3) needs the same wire `filters` extraction for its own
+// hand-written handler (its response body needs a toWire() transform
+// makeSearchHandler can't express generically).
+export function readFilters(body: Record<string, unknown>): SearchFilters | undefined {
+  const raw = body.filters as { AND?: unknown; OR?: unknown } | undefined;
+  if (!raw || !Array.isArray(raw.AND) || !Array.isArray(raw.OR)) return undefined;
+  return raw as SearchFilters;
+}
 
 export function makeSearchHandler<T extends WithId>(getStore: () => EntityStore<T>) {
   return async function POST(request: NextRequest) {
@@ -22,7 +32,8 @@ export function makeSearchHandler<T extends WithId>(getStore: () => EntityStore<
     const page = typeof body.page === 'number' ? body.page : 0;
     const pageSize = typeof body.pageSize === 'number' ? body.pageSize : 20;
 
-    const result = getStore().search(page, pageSize);
+    // EC3 — apply the wire `filters` (see store.ts matchesFilterGroup doc).
+    const result = getStore().search(page, pageSize, readFilters(body));
     return searchEnvelope(result, body);
   };
 }
