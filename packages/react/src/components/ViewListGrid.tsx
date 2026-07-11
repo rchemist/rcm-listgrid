@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
 import type { EntityForm } from '@listgrid/schema-core';
@@ -25,11 +25,51 @@ import { useUI } from '../providers/ui';
 // the click/keyboard/`data-row-id` affordance actually reaches the DOM, while
 // each cell still renders through `Table.Td`.
 
+/** EA-D2-0: bulk-select surface (replaces the 0.3.x `SelectionOptions`
+ * 29-consumer surface — the briefing's decision ① minimal-4 shape). `enabled`
+ * gates the checkbox COLUMN's existence (see `toolbar` doc below for the
+ * strict contract); `onConfirm` receives the current checked-id list;
+ * `confirmLabel` overrides the default confirm button text. */
+export interface ViewListGridSelection {
+  enabled: boolean;
+  onConfirm: (checkedIds: string[]) => void;
+  confirmLabel?: string;
+}
+
+/** `columns` union member: a bare field name renders as it always has
+ * (label from the field's own `getLabel()`, cell = `String(row[name])`); the
+ * object form renders a SYNTHETIC column with no backing field — `label` is
+ * the header, `render(row)` is the cell (EA-D2-0 decision ③ — absorbs the
+ * 0.3.x `fields: ListableFormField[]` composite-column need, e.g.
+ * XrefPreferMappingView's `preferred` boolean column). */
+export type ViewListGridColumn =
+  | string
+  | { name: string; label: string; render: (row: Record<string, unknown>) => ReactNode };
+
 export interface ViewListGridProps {
   entityForm: EntityForm;
   store: StoreApi<ListStoreState>;
   onRowClick?: (row: Record<string, unknown>) => void;
-  columns?: string[];
+  columns?: ViewListGridColumn[];
+  /** Row checkboxes + a confirm button. Checking a row's box does NOT
+   * trigger `onRowClick` (the checkbox cell stops click propagation before
+   * it reaches the row). */
+  selection?: ViewListGridSelection;
+  /**
+   * Rendered below the grid; receives the LIVE checked-id list so a host can
+   * assemble add/delete/custom buttons around it (0.3.x `subCollection`
+   * absorbed here — decision ③).
+   *
+   * CONTRACT (strict, do not loosen): the checkbox COLUMN's existence is
+   * driven ONLY by `selection?.enabled` — `toolbar` never grows a checkbox
+   * column by itself. When `selection` is absent, or present with
+   * `enabled: false`, `toolbar` still renders but always receives
+   * `checkedIds: []` (there is no checkbox UI for anything to be checked
+   * through). A host that wants `toolbar` to see checked ids MUST also pass
+   * `selection.enabled: true` (it may supply a no-op `onConfirm` if it does
+   * not want the separate confirm button's behavior).
+   */
+  toolbar?: (ctx: { checkedIds: string[] }) => ReactNode;
 }
 
 function hasShowInList(field: unknown): field is { showInList: boolean } {
@@ -41,13 +81,11 @@ function hasShowInList(field: unknown): field is { showInList: boolean } {
   );
 }
 
-/** Column names: explicit prop wins; else fields marked showInList; else the
- * first ~4 non-hidden fields (static `hidden === true` check only — the full
- * conditional/async predicate needs a FieldEvalContext this sync derivation
- * doesn't have). */
-function deriveColumnNames(entityForm: EntityForm, explicit?: string[]): string[] {
-  if (explicit && explicit.length > 0) return explicit;
-
+/** Default column NAMES (no explicit `columns` prop): fields marked
+ * showInList; else the first ~4 non-hidden fields (static `hidden === true`
+ * check only — the full conditional/async predicate needs a
+ * FieldEvalContext this sync derivation doesn't have). */
+function deriveDefaultColumnNames(entityForm: EntityForm): string[] {
   // sub-collections are never list columns (they're child grids, not scalars).
   const fields = entityForm.getFields().filter((f) => f.type !== 'subCollection');
   const marked = fields.filter((f) => hasShowInList(f) && f.showInList);
@@ -66,8 +104,44 @@ function resolveHeader(entityForm: EntityForm, name: string): string {
   return typeof label === 'string' ? label : name;
 }
 
-export function ViewListGrid({ entityForm, store, onRowClick, columns }: ViewListGridProps) {
-  const { Table, Pagination, LoadingOverlay, TextInput } = useUI();
+interface ResolvedColumn {
+  name: string;
+  header: string;
+  cell: (row: Record<string, unknown>) => ReactNode;
+}
+
+/** Resolve the `columns` union prop (or the default-derivation fallback)
+ * into a uniform render shape — string members keep today's behavior
+ * (header via `resolveHeader`, cell = `String(row[name])`); object members
+ * render their own `label`/`render(row)` (EA-D2-0 decision ③). */
+function resolveColumns(entityForm: EntityForm, explicit?: ViewListGridColumn[]): ResolvedColumn[] {
+  if (explicit && explicit.length > 0) {
+    return explicit.map((col) =>
+      typeof col === 'string'
+        ? {
+            name: col,
+            header: resolveHeader(entityForm, col),
+            cell: (row: Record<string, unknown>) => String(row[col] ?? ''),
+          }
+        : { name: col.name, header: col.label, cell: col.render },
+    );
+  }
+  return deriveDefaultColumnNames(entityForm).map((name) => ({
+    name,
+    header: resolveHeader(entityForm, name),
+    cell: (row: Record<string, unknown>) => String(row[name] ?? ''),
+  }));
+}
+
+export function ViewListGrid({
+  entityForm,
+  store,
+  onRowClick,
+  columns,
+  selection,
+  toolbar,
+}: ViewListGridProps) {
+  const { Table, Pagination, LoadingOverlay, TextInput, CheckBox, Button } = useUI();
 
   const rows = useStore(store, (s) => s.rows);
   const totalElements = useStore(store, (s) => s.totalElements);
@@ -81,14 +155,32 @@ export function ViewListGrid({ entityForm, store, onRowClick, columns }: ViewLis
     void store.getState().fetch();
   }, [store]);
 
-  const columnNames = useMemo(() => deriveColumnNames(entityForm, columns), [entityForm, columns]);
+  const resolvedColumns = useMemo(() => resolveColumns(entityForm, columns), [entityForm, columns]);
 
   const quickSearchField = useMemo(() => {
-    const firstText = columnNames.find((name) => entityForm.getField(name)?.type === 'text');
-    return firstText ?? columnNames[0];
-  }, [columnNames, entityForm]);
+    const firstText = resolvedColumns.find((c) => entityForm.getField(c.name)?.type === 'text');
+    return (firstText ?? resolvedColumns[0])?.name;
+  }, [resolvedColumns, entityForm]);
 
   const [quickSearchValue, setQuickSearchValue] = useState('');
+
+  // EA-D2-0 selection: local checked-ids state, reset whenever `rows`'
+  // identity changes (a fresh fetch/page — the previous page's checks don't
+  // carry over). The checkbox COLUMN only exists when `selection.enabled` —
+  // see the `toolbar` prop doc for the strict contract.
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  useEffect(() => {
+    setCheckedIds([]);
+  }, [rows]);
+
+  function toggleChecked(id: string, checked: boolean): void {
+    setCheckedIds((prev) => {
+      if (checked) return prev.includes(id) ? prev : [...prev, id];
+      return prev.filter((existing) => existing !== id);
+    });
+  }
+
+  const effectiveCheckedIds = selection?.enabled ? checkedIds : [];
 
   return (
     <div data-list-grid={entityForm.getName()} style={{ position: 'relative' }}>
@@ -109,8 +201,9 @@ export function ViewListGrid({ entityForm, store, onRowClick, columns }: ViewLis
       <Table>
         <Table.Thead>
           <Table.Tr>
-            {columnNames.map((name) => (
-              <Table.Th key={name}>{resolveHeader(entityForm, name)}</Table.Th>
+            {selection?.enabled && <Table.Th />}
+            {resolvedColumns.map((c) => (
+              <Table.Th key={c.name}>{c.header}</Table.Th>
             ))}
           </Table.Tr>
         </Table.Thead>
@@ -118,6 +211,7 @@ export function ViewListGrid({ entityForm, store, onRowClick, columns }: ViewLis
           {rows.map((row, i) => {
             const rawId = row['id'];
             const rowId = rawId !== undefined && rawId !== null ? String(rawId) : undefined;
+            const selectionId = rowId ?? String(i);
             return (
               <tr
                 key={rowId ?? i}
@@ -129,14 +223,43 @@ export function ViewListGrid({ entityForm, store, onRowClick, columns }: ViewLis
                   if (e.key === 'Enter' || e.key === ' ') onRowClick?.(row);
                 }}
               >
-                {columnNames.map((name) => (
-                  <Table.Td key={name}>{String(row[name] ?? '')}</Table.Td>
+                {selection?.enabled && (
+                  <Table.Td>
+                    {/* The wrapping <span> intercepts the click during bubble
+                        (stopPropagation) before it reaches the <tr>'s
+                        onClick — CheckBoxProps.onChange carries no DOM
+                        event, so this is the only place to stop it. */}
+                    <span onClick={(e) => e.stopPropagation()}>
+                      <CheckBox
+                        ariaLabel={`Select row ${selectionId}`}
+                        checked={checkedIds.includes(selectionId)}
+                        onChange={(checked) => toggleChecked(selectionId, checked)}
+                      />
+                    </span>
+                  </Table.Td>
+                )}
+                {resolvedColumns.map((c) => (
+                  <Table.Td key={c.name}>{c.cell(row)}</Table.Td>
                 ))}
               </tr>
             );
           })}
         </Table.Tbody>
       </Table>
+
+      {selection?.enabled && (
+        <div data-selection-actions>
+          <Button
+            type="button"
+            onClick={() => selection.onConfirm(checkedIds)}
+            disabled={checkedIds.length === 0}
+          >
+            {selection.confirmLabel ?? '확인'}
+          </Button>
+        </div>
+      )}
+
+      {toolbar && <div data-list-grid-toolbar>{toolbar({ checkedIds: effectiveCheckedIds })}</div>}
 
       <div data-total-elements={totalElements}>
         <Pagination

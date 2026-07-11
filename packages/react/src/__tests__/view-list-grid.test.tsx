@@ -92,4 +92,142 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(onRowClick).toHaveBeenCalledTimes(1);
     expect(onRowClick).toHaveBeenCalledWith(expect.objectContaining({ id: '2', name: 'Medicine' }));
   });
+
+  // EA-D2-0 selection — decision ① minimal-4 shape (§3).
+  describe('selection', () => {
+    it('checking rows and confirming calls onConfirm with the checked ids', async () => {
+      const entityForm = collegeForm();
+      const adapter = mockAdapter();
+      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const onConfirm = vi.fn();
+      const onRowClick = vi.fn();
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid
+            entityForm={entityForm}
+            store={store}
+            onRowClick={onRowClick}
+            selection={{ enabled: true, onConfirm, confirmLabel: '선택 완료' }}
+          />
+        </UIProvider>,
+      );
+
+      await screen.findByText('Engineering');
+
+      const confirmButton = screen.getByRole('button', { name: '선택 완료' });
+      expect(confirmButton).toBeDisabled(); // 0 checked
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 3' }));
+
+      expect(confirmButton).not.toBeDisabled();
+      // the checkbox click must NOT also fire the row's onRowClick.
+      expect(onRowClick).not.toHaveBeenCalled();
+
+      fireEvent.click(confirmButton);
+      expect(onConfirm).toHaveBeenCalledTimes(1);
+      expect(onConfirm).toHaveBeenCalledWith(['1', '3']);
+    });
+
+    it('row click still fires normally when a DIFFERENT part of the row is clicked', async () => {
+      const entityForm = collegeForm();
+      const adapter = mockAdapter();
+      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const onRowClick = vi.fn();
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid
+            entityForm={entityForm}
+            store={store}
+            onRowClick={onRowClick}
+            selection={{ enabled: true, onConfirm: vi.fn() }}
+          />
+        </UIProvider>,
+      );
+
+      const medicineCell = await screen.findByText('Medicine');
+      fireEvent.click(medicineCell.closest('tr') as HTMLElement);
+      expect(onRowClick).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // EA-D2-0 toolbar — receives the live checkedIds; the checkbox column's
+  // existence is driven strictly by selection.enabled, not by toolbar's mere
+  // presence (contract documented on ViewListGridProps.toolbar).
+  describe('toolbar', () => {
+    it('receives live checkedIds as boxes are (un)checked', async () => {
+      const entityForm = collegeForm();
+      const adapter = mockAdapter();
+      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const toolbar = vi.fn((ctx: { checkedIds: string[] }) => (
+        <div data-testid="toolbar-checked">{ctx.checkedIds.join(',')}</div>
+      ));
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid
+            entityForm={entityForm}
+            store={store}
+            selection={{ enabled: true, onConfirm: vi.fn() }}
+            toolbar={toolbar}
+          />
+        </UIProvider>,
+      );
+
+      await screen.findByText('Engineering');
+      expect(screen.getByTestId('toolbar-checked')).toHaveTextContent('');
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 2' }));
+      expect(screen.getByTestId('toolbar-checked')).toHaveTextContent('2');
+    });
+
+    it('receives an empty array when selection is absent, even though toolbar is present', async () => {
+      const entityForm = collegeForm();
+      const adapter = mockAdapter();
+      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const toolbar = vi.fn((ctx: { checkedIds: string[] }) => (
+        <div data-testid="toolbar-checked">{ctx.checkedIds.join(',')}</div>
+      ));
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid entityForm={entityForm} store={store} toolbar={toolbar} />
+        </UIProvider>,
+      );
+
+      await screen.findByText('Engineering');
+      expect(screen.queryByRole('checkbox')).toBeNull(); // no selection => no checkbox column
+      expect(screen.getByTestId('toolbar-checked')).toHaveTextContent('');
+    });
+  });
+
+  // EA-D2-0 columns union — synthetic object columns render via render(row).
+  it('renders a synthetic column via its render(row) function', async () => {
+    const entityForm = collegeForm();
+    const adapter = mockAdapter();
+    const store = createListStore({ url: entityForm.getUrl(), adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          columns={[
+            'name',
+            {
+              name: 'shout',
+              label: 'SHOUT',
+              render: (row) => <strong>{String(row['name']).toUpperCase()}!</strong>,
+            },
+          ]}
+        />
+      </UIProvider>,
+    );
+
+    expect(await screen.findByText('SHOUT')).toBeInTheDocument();
+    expect(await screen.findByText('ENGINEERING!')).toBeInTheDocument();
+    expect(screen.getByText('MEDICINE!')).toBeInTheDocument();
+  });
 });

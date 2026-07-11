@@ -1,4 +1,5 @@
 import type { EntityForm } from '../entity-form';
+import type { FilterItem } from '../search/search-form';
 import { FormField } from './form-field';
 
 /**
@@ -17,6 +18,24 @@ export interface ManyToOneConfig {
   labelField?: string;
   /** render as a searchable tree instead of a flat picker. */
   tree?: boolean;
+  /**
+   * EA-D2-0 (decision ②, §3): resolved when the picker opens; the returned
+   * `FilterItem[]` is AND-ed into the picker's `SearchForm` as
+   * `initialSearch` (ManyToOneRenderer). Covers both the XrefPrefer
+   * mini-form filter channel and a self-referencing entity's exclude-self
+   * filter (e.g. `parentMajor`'s `NOT_EQUAL` on its own id).
+   *
+   * NARROWED from the briefing's sketched `(parentEntityForm?) =>
+   * Promise<FilterItem[]>` (§3) to zero-arg: `FieldRendererComponentProps`
+   * carries no `EntityForm` reference and `FormStoreState` (the renderer's
+   * only other context) does not hold one either (fields live as
+   * `state.fieldDefs`, not a wrapped `EntityForm`) — there is no CURRENT
+   * renderer-context value to pass as `parentEntityForm` without a wiring
+   * change out of scope for EA-D2-0. Recorded as a deviation; widening this
+   * back to `(parentEntityForm?) => ...` is additive (optional param) if a
+   * later task threads the parent form through.
+   */
+  filter?: () => Promise<FilterItem[]>;
 }
 
 /** Searchable reference to another entity (0.3.x ManyToOneField, type 'manyToOne'). */

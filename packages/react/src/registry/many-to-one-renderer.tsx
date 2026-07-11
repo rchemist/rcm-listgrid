@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { StoreApi } from 'zustand';
 import type { ManyToOneField } from '@listgrid/schema-core';
-import { createListStore } from '@listgrid/state';
+import { SearchForm } from '@listgrid/schema-core';
+import { createListStore, type ListStoreState } from '@listgrid/state';
 import { useUI } from '../providers/ui';
 import { useAdapter, useReferenceResolver } from '../providers/adapter';
 import { useFieldValue, useFormStore } from '../providers/form-store';
@@ -40,6 +42,38 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
   const [open, setOpen] = useState(false);
   const [resolvedLabel, setResolvedLabel] = useState<string | undefined>(undefined);
 
+  // EA-D2-0 M2O filter channel (decision ②): config.filter, when present, is
+  // resolved fresh EVERY time the picker opens — the resolved FilterItem[]
+  // becomes the filtered picker store's `initialSearch` (AND-ed). Covers the
+  // XrefPrefer mini-form filter and a self-referencing entity's exclude-self
+  // filter (e.g. parentMajor's NOT_EQUAL on its own id). Cancellation-safe:
+  // a close (or unmount) before resolution discards the result.
+  const [filteredStore, setFilteredStore] = useState<StoreApi<ListStoreState> | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (!open) {
+      // clear so the NEXT open re-resolves rather than reusing a stale
+      // filtered store from a previous open.
+      setFilteredStore(undefined);
+      return;
+    }
+    const resolveFilter = m2o.config.filter;
+    if (!resolveFilter) return;
+
+    let cancelled = false;
+    void resolveFilter().then((items) => {
+      if (cancelled) return;
+      let initialSearch = SearchForm.create();
+      for (const item of items) initialSearch = initialSearch.addAndFilter(item);
+      setFilteredStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, m2o, target, adapter]);
+
   // if the slice holds a bare id (edit mode, from the server), resolve it to the
   // referenced entity's label for display (charter C3 — a reference is not an
   // id textbox).
@@ -63,6 +97,13 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
 
   const display = resolvedLabel ?? labelOf(value, labelField);
 
+  // when config.filter exists, the picker MUST wait for the filtered store
+  // (not fall back to the unfiltered pickerStore) — showing unfiltered rows
+  // even momentarily would defeat the filter channel (e.g. parentMajor
+  // briefly listing itself as selectable).
+  const hasFilter = typeof m2o.config.filter === 'function';
+  const activeStore = hasFilter ? filteredStore : pickerStore;
+
   return (
     <span data-field="manyToOne">
       <span data-m2o-value={name}>{display || '(선택 안 됨)'}</span>{' '}
@@ -72,10 +113,10 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
         </Button>
       )}
       <Modal open={open} onClose={() => setOpen(false)} title={`${labelField} 선택`}>
-        {open && (
+        {open && activeStore && (
           <ViewListGrid
             entityForm={target}
-            store={pickerStore}
+            store={activeStore}
             onRowClick={(row) => {
               store.getState().setValue(name, row);
               setOpen(false);

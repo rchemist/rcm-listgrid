@@ -199,4 +199,57 @@ describe('createListStore (charter C9)', () => {
     expect(store.getState().error).toBe('boom');
     expect(store.getState().loading).toBe(false);
   });
+
+  // EA-D2-0 postFetch (decision ①, §3) — the Priority-view reordering hook:
+  // applied to page.content right before set(), on EVERY fetch.
+  describe('postFetch (EA-D2-0)', () => {
+    // reverse + annotate — proves both a reorder AND a row-shape change land
+    // in `rows` (not just a pass-through no-op).
+    function reverseAndAnnotate(pageRows: Record<string, unknown>[]): Record<string, unknown>[] {
+      return [...pageRows].reverse().map((r) => ({ ...r, annotated: true }));
+    }
+
+    it('transforms rows on the initial fetch', async () => {
+      const store = createListStore({
+        url: '/college',
+        adapter: mockAdapter(rows),
+        initialSearch: SearchForm.create({ pageSize: 10 }),
+        postFetch: reverseAndAnnotate,
+      });
+      await store.getState().fetch();
+      const got = store.getState().rows;
+      expect(got).toHaveLength(10);
+      expect(got[0]).toEqual({ id: '10', name: 'c10', annotated: true });
+      expect(got.every((r) => r['annotated'] === true)).toBe(true);
+    });
+
+    it('transforms rows again on a page-change refetch (not just the first load)', async () => {
+      const store = createListStore({
+        url: '/college',
+        adapter: mockAdapter(rows),
+        initialSearch: SearchForm.create({ pageSize: 10 }),
+        postFetch: reverseAndAnnotate,
+      });
+      await store.getState().fetch();
+      await store.getState().setPage(2);
+      const got = store.getState().rows;
+      expect(got).toHaveLength(5); // last page: 25 - 20
+      expect(got[0]).toEqual({ id: '25', name: 'c25', annotated: true });
+      expect(got.every((r) => r['annotated'] === true)).toBe(true);
+    });
+
+    it('a throwing postFetch propagates — not swallowed as an adapter error', async () => {
+      const store = createListStore({
+        url: '/college',
+        adapter: mockAdapter(rows),
+        postFetch: () => {
+          throw new Error('postFetch boom');
+        },
+      });
+      await expect(store.getState().fetch()).rejects.toThrow('postFetch boom');
+      // NOT surfaced as the adapter-failure `error` state (that catch block
+      // only wraps the adapter call, not postFetch).
+      expect(store.getState().error).toBeUndefined();
+    });
+  });
 });
