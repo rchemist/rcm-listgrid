@@ -4,10 +4,10 @@
 **Status**: active · H·EF·EA·EB·EC ✅ + EG1/EG2 ✅ + **EG-D 재설계 설계 pass ✅**(ADR-0009+스펙 r2+waves 브리프, 4렌즈 검증 22건 반영). **Next up**: W1 표면 정비(실행급 브리프 — opus/sonnet 실행 가능). 1876 unit/16 E2E. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
-**Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
+**Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 17:30 (**EG-D 설계 pass 완료** — 4스카우트 수집→fable 설계→4렌즈 적대검증 22건 전건 반영(r2)→opus 봉인 재검증. ADR-0009·스펙(CAP-01~29·44멤버)·waves 브리프 신설, blueprint 강등. harness에 실행급 규율 제도화(`b178fa6`). **Next=W1**.)
+**Last updated**: 2026-07-11 18:10 (**미결 전건 처분+0.3.26 배포** — Needs Review 30항목 확정([dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md))·Open Questions 4건 종결·**v0.3.26 태그 push→latest 배포**(소비자 4곳 무회귀 직접 검증)·Push auto 전환·레이스 1건 W2-8 전환. **Next=W1**.)
 
 ## Goal
 
@@ -17,7 +17,7 @@
 
 - **브랜치**: `main`=0.3.x 유지보수(P0만). **`v0.4`**=재기초(현 작업 브랜치). main에 0.4 코드 금지, v0.4에 0.3 픽스 직접 커밋 금지.
 - **환경**: Node은 `.nvmrc` 기준. **Node 26에서는 기존 테스트 27건이 jsdom localStorage 문제로 실패하니 버전 확인 필수**(P0-8 폴리필로 해소됨). 품질 게이트: `npm run type-check && npm test && npm run lint && npm run format:check && npm run build`.
-- **릴리스**: 0.3.26(main, P0), 0.4.0-alpha.N(v0.4, dist-tag `next`), 0.4.0 GA(P7). **npm publish는 외부 공개 — 반드시 사용자 승인 후.**
+- **릴리스**: 0.3.26 **배포됨(2026-07-11)**, 0.4.0-alpha.N(W2 후·dist-tag `next`), 0.4.0 GA(W7 후). **배포 자율 실행(사용자 확정 2026-07-11)** — 게이트(CHANGELOG==version·full gate) 선행 + 소비자 영향 직접 검증. 타 팀 프로덕션 반영 조율만 보고 대상.
 - 근거 문서: ADR-0001~0008 · 헌장 · [apps/sample 명세](./prd/sample-site-spec.md) · [로드맵](./plans/v1-roadmap.md)(페이즈 정의 원본 — 어긋나면 로드맵 우선).
 
 ## 불변 규율 (전 세션 공통 — ADR-0008 방지 장치)
@@ -100,37 +100,8 @@
 
 ## Needs Review (deviations — 사용자 확인 후 `[x]`)
 
-- [ ] **P0-7 Breaking 소비자 영향** (最우선, publish 전 확인) — simpleCrypt cryptKey 미설정 throw / HTML 싱크 텍스트폴백 / asset-url 폴백제거. GJCU·edustack이 `configureRuntime({cryptKey})` + (HTML 필요시)`configureHtmlSanitizer` 설정하는지 확인해야 무회귀. [detail](./plans/migration-0.3-to-0.4.md#1-0325--0326-하드닝-릴리스--지금-조치-필요)
-- [ ] **P0-7 API 범위** — ADR-0006 §3의 encrypt/decrypt 공개 API 제거는 v1.0 단계로 판단, 이번엔 폴백키 제거+throw만 구현(encrypt/decrypt 여전히 export). 의도 확인.
-- [ ] **P0-3 신규 사용자 문구** — 에러 표면화 시 `'필드 값을 처리하는 중 오류가 발생했습니다.'` 신설(리포 관례 '~하는 중 오류가 발생했습니다.' 따름). i18n 키화는 P5 동시처리 목록으로 이월.
-- [ ] **P0-4 최소범위 초과** — hook이 per-list defaultPageSize에 접근 불가라 `QuickSearchBar`/`ViewListGrid`에 prop 스레딩 추가(1→3파일). 브리핑의 useListGridLogic 우선순위 정렬 지시상 불가피.
-- [ ] **P0-8 동결 방식** — no-explicit-any 135파일 동결을 인라인 주석 대신 `eslint.config.mjs` override 블록으로(동일 효과·1파일 diff·whittle-down 용이).
-- [ ] **P1-2 ESM 메인배럴 caveat** — 순수 Node ESM `import('@rchemist/listgrid')`(메인)은 `react-sortablejs`(CJS-only peer)의 named export 미검출로 실패. 번들러(Next/webpack) 소비자는 정상. 대응: (a) 수용+MIGRATION 명시 / (b) v0.4에서 @dnd-kit 등 ESM 대체로 교체(P5). 결정 필요.
+- [x] **전건 처분(30항목) 2026-07-11** — 사용자 지시("미결 정리·확정")로 모델 확정: P0-7 소비자 영향은 **직접 검증으로 해소**(영향권 4소비자 cryptKey 전원 설정·HTML/asset 사용 0·gjcu는 ^0.2.x 비영향), changeSelectOptions 레이스 1건은 **W2-8 태스크 전환**, 나머지 28건 확정. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md)
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
-- [ ] **P2 렌더 파일수 게이트** — 게이트 문구는 "렌더 테스트 파일 9→25+"이나 실제는 밀도높은 5파일 68테스트. 파일수 목표 문자적 충족 vs 행동밀도 인정 — 커버리지 래칫 재측정과 함께 판단.
-- [ ] **P3-1 조건부 컨텍스트 협소화 (소비자 breaking)** — 조건부 함수 `withHidden((props)=>…)` 등이 EntityForm-carrying `ConditionalValue` 대신 순수 `FieldEvalContext{renderType,session,value,values}`를 받음. 근거 ADR-0003§4·헌장 C2. MIGRATION 1:1 대응표 필요 + P5 렌더러 배선서 실사용 검증. [detail](../packages/schema-core/src/field/eval-context.ts)
-- [ ] **P3-1 권한추출 협소화 (행동 narrowing)** — canonical `extractPermissions`=2-way(`roles ?? authentication.roles`)만; 구엔진 getViewableTabs의 `this.session` 인스턴스 폴백(EntityFormBase:356-361) 제거(ADR-0002 정합). 무영향 예상 — 확인. [detail](../packages/schema-core/src/permission.ts)
-- [ ] **EF2 meta options 확장** — FieldMetaOverride.options `SelectOption[]`→`| undefined`(revert가 선언옵션 폴백하려면 필요, exactOptionalPropertyTypes) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF2 빌더 자체필터** — 구엔진 매변경 무조건 재계산 → 신 빌더3종은 changedField≠source면 skip(루프는 전핸들러 호출 유지·settled state 동일) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF2 미이식 2건** — ConditionalSelectOption defaultValue(구소스 dead code 확인)·withShouldReload(신 대응개념 없음, EF4 영역) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF2 onChanges 내부표현** — `onChanges?:` 옵셔널 대신 private 빈배열(공개 getOnChanges 계약은 스펙대로) · risk: negligible · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF3 withId 전파** — 브리핑 미명시였으나 clone 직후 `withId(id)` 추가(fetch-error 경로도 update 모드 유지, sample idiom 일치) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF3 hydrate dotted 수정(공유코드)** — "지원 확인" 결과 미지원이라 hydrate 내부 resolveFetchedValue 신설(flat 동작 동일·1176 green). EC2 실사용 검증 예정 · risk: low-med · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF4 fieldDefs=단일 진실** — 동적 mutation 후 entityForm.getFields()류 직접 읽기는 stale(현 콜사이트 0 확인·Handoff Do-NOT 등재). EA/EC 신규 소비자는 store 경유 필수 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-A MultiOptions validate 특성** — min/max-count 체크가 hidden/readonly 상태 재확인 없이 수행(base 설계) — hidden+limited 필드의 빈 값이 count 검증에 걸릴 수 있음 · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-A Password 참조 push** — withStrength가 구 shallow-copy 대신 validation 참조 유지(구 방식은 프로토타입 메서드 소실 latent bug — 의도적 개선) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-A Time 브리핑 정정** — range 'now' sentinel=+12시간(+12분 아님, 구 원본 재확인 후 충실 이식) · risk: none(기록) · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-A Month min/max 미전달** — 렌더러가 native input min/max 속성 미전달(TextInputProps에 없음) — validate가 실게이트, UX만 차이 · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-A Checkbox combo 추가** — withComboType(row/column 힌트)을 base 아닌 Checkbox 전용으로 이식(브리핑 미명시 판단) · risk: negligible · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-B Telephone round-trip** — 마운트 시 fetched 하이픈 정규화 안 함(사용자 미편집 값은 원본 유지 — 구 getSaveValue 방어 strip과 다를 수 있음) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-B CustomOption layout** — 공유 FormField에 layout 멤버가 없어 필드 own-property로 선언(그룹/레이아웃 시스템 도입 시 재정렬 후보) · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-C ContentAsset 연기** — "전 필드 이식" 스코프에서 제외: 양 소비자 실사용 0·구엔진에서도 업로드 미완성 스텁(동작 실증 불가)·child EntityForm+FileField 대체 실존 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
-- [ ] **EA-D Dead 3종 연기** — Rule(1264줄, 채택 0·bespoke 계약 미확인)·XrefPrice(자체 opt-in 격리)·XrefAvailableDate(순수 미채택): 양 소비자 실사용 0 전수 확인 · risk: 스코프 축소(의도 확인) · [detail](./analysis/2026-07-11/ea-d-scout-briefing.md)
-- [ ] **EA-D Map compare 갭(시스테믹)** — schema-core isEquals/normalizeEmptyValue가 Map 인스턴스 전맹(Object.keys 기반 — blank/equal 오판·JSON `{}` 소실). InlineMap은 Record 협소화로 회피; 장래 Map 값 필드 도입 시 선결 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EF2 changeSelectOptions 배열-clause 레이스** — 동일 필드를 겨냥한 2 clause에서 unmatched의 revert가 matched의 apply 뒤 실행될 수 있음(iteration order 의존 — EC2 구현이 이 사유로 빌더 대신 hand-written 채택) · risk: med(빌더 소비자) · [detail](./analysis/2026-07-11/ec2-collabo-briefing.md)
-- [ ] **EA-D2 Prefer 재편집 미이식** — 구 뷰의 "표시 행 클릭→preferred 재설정" 경로 add-only로 축소(삭제 후 재추가 대체). 중복 폼에러는 구조적 방지(NOT_IN)+조용한 가드로 동등 · risk: low · [detail](./analysis/2026-07-11/ea-d2-xref-major-briefing.md)
-- [ ] **XrefPrefer/postFetch 실브라우저 증명 부재** — unit-only(D2-1 37테스트). Major는 XrefMapping만 사용, 실폼 소비자 부재로 수용. LectureEntityForm류 실사용 폼 이식 시 E2E 추가 · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EA-C 값 shape 다운그레이드** — FileFieldValue envelope 대신 plain string/string[](purity·소비자·백엔드 3중 정합). 구 envelope wire 계약을 쓰는 호스트는 어댑터 변환 필요 · risk: med(마이그레이션 문서화 필요) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 
 ## Progress notes
 
@@ -150,13 +121,13 @@
 ## Open Questions
 
 - [x] **릴리스 기전 확정(2026-07-10)** — `v*` 태그 push→`publish.yml` 자동배포(dist-tag `-alpha`→next/`0.2.x`→legacy-0.2/else latest). 게이트 선행.
-- [ ] **0.3.26 실배포 트리거 (외부 — 사용자 실행/승인)** — 준비 완료(`p0-hotfixes`, 게이트 green). 절차: `p0-hotfixes`→main 병합 → `git tag v0.3.26` → push → latest 자동배포. **선결: 0.3.26은 hardening Breaking 3종 포함(patch에 breaking) — GJCU/edustack이 cryptKey/sanitizer 설정했는지 확인 후 배포**(§Needs Review). 로컬 미푸시 유지 중.
-- [ ] **0.4.0-alpha.N 배포** — `v0.4.0-alpha.N` 태그 push → next 자동배포. P1 완료로 준비됨. 사용자 실행/승인 시점 결정.
-- [ ] apps/sample 목업 백엔드에 실제 rcm-backend-framework 연결 옵션(로컬 인스턴스)을 둘지 — 현재 명세는 fixture 단독.
+- [x] **0.3.26 실배포 — 실행 완료(2026-07-11)** — 소비자 검증(무회귀 확인) → main ff-merge `853660b` → `v0.3.26` 태그 push → publish.yml latest 자동배포. 처분 상세 [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md).
+- [x] **0.4.0-alpha.N → W2 착지 후 보류(모델 결정 2026-07-11)** — 현 표면은 W1이 즉시 대개명할 표면(폐기 예정 이름에 소비자 통합 방지). W2 완료 시 자동 재개.
+- [x] apps/sample 실백엔드 연결 → **fixture 단독 유지(모델 결정 2026-07-11)** — GA 데모 요구 시 재검토(§Backlog).
 - [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
 - [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 실 worklist는 §Tasks(하드닝/확장 트랙)로 승격됨. **하드닝 H 트랙 완료**(게이트·CI·SubColl·H1 캐시·H2 a11y). 남음 = 확장 E 트랙(E1/E2).
 - [x] **E-트랙 우선순위 → 전부 (사용자 확정 2026-07-11)** — 전 필드 이식+동작 실증+Daum 주소, foundation-first(EF→EA→EB→EC) 완료로 종결. [계획](./plans/e-track-field-parity.md)
-- [ ] **업로드 backend seam (EA-C 착수 시 결정)** — File/Image/MultipleAsset/ContentAsset 이식은 업로드 저장/서빙 방식 필요. GJCU는 asset 서버 사용. sample 목업에 업로드 endpoint를 둘지 vs BackendAdapter에 upload 시그니처 추가 vs 외부 asset URL만 지원. EA-C 도달 시 GJCU 관례 확인 후 결정.
+- [x] **업로드 backend seam → 사용자 질문 아님으로 재분류(2026-07-11)** — W5/W6 착수 시 GJCU 관례 확인 후 모델 자동 결정(옵션: sample 업로드 endpoint / BackendAdapter.upload / 외부 URL만).
 
 ## 완료 기록 (페이즈 완료 시 progress-archive로 이동)
 
