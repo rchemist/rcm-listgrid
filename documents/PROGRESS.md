@@ -7,7 +7,7 @@
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 (**W3-4 완료** — 빌트인 Delete confirm 게이트(messages registry showConfirm·fail-closed)+College create→delete→소멸 E2E·post-delete 네비=onAfterDelete(§4.1, 새 prop 없음). sonnet delegate·opus 검증(full gate+diff+hot-file 가드)·logic `69dad6e`. +2 unit(**1980**)·**E2E 19**·계수 39/49/180 무변경. deviation 0. **Next=W3-5 withReadOnly**(마지막 W3). [detail](./progress-archive/phase-eg-api-redesign.md#w3))
+**Last updated**: 2026-07-11 (**W3-5 완료 → W3 5/5**·phase-end 리뷰 게이트 대기 — withReadOnly/getReadOnly+formReadOnly seed·전 필드 effReadOnly OR·Save 어포던스 숨김(§6.1)·M2O 전파 자동·save 하드게이트 없음. sonnet delegate·opus 검증·logic `1753aaa`. +15 unit(**1995**)·**E2E 19**·계수 41/49/180. **Next=W3 phase-end 리뷰(intent-conformance)→아카이브→W4**. [detail](./progress-archive/phase-eg-api-redesign.md#w3))
 
 ## Goal
 
