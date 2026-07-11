@@ -385,6 +385,11 @@ export class EntityForm {
   readonly url: string;
   private title?: string;
   private capabilities: Capabilities = {};
+  /**
+   * Declared form-level read-only (spec §3.1, CAP-27) — the store
+   * `formReadOnly` seed source. Defaults false (unset = editable).
+   */
+  private formReadOnly = false;
   private id?: string;
 
   private readonly fields: EntityField[] = [];
@@ -465,6 +470,21 @@ export class EntityForm {
    */
   withCapabilities(caps: Capabilities): this {
     this.capabilities = { ...this.capabilities, ...caps };
+    return this;
+  }
+  /**
+   * Declare the whole form read-only (spec §3.1, CAP-27). Defaults to
+   * `true` when called with no argument; `withReadOnly(false)` clears a
+   * previously-declared read-only. A store built from this form seeds
+   * `formReadOnly` from it, which ORs into every field's effective
+   * readOnly + hides the built-in Save affordance (spec §6.1). A
+   * **display/edit-affordance contract only** — it does not block writes;
+   * for write-blocking use `withCapabilities({ update: false })`. Declared
+   * property, so it propagates through `clone()` and into embedded M2O
+   * child forms (successor to the 0.3.x `setReadOnly`).
+   */
+  withReadOnly(readOnly = true): this {
+    this.formReadOnly = readOnly;
     return this;
   }
   /**
@@ -689,6 +709,10 @@ export class EntityForm {
   getCapabilities(): Capabilities {
     return this.capabilities;
   }
+  /** Declared form-level read-only (spec §3.1) — `withReadOnly`'s reader pair; the store `formReadOnly` seed source. */
+  getReadOnly(): boolean {
+    return this.formReadOnly;
+  }
   /**
    * Declared custom form actions, order-sorted (spec §3.4, CAP-09; W3-3).
    * The built-in Save/Delete are NOT included — merging them in (capability
@@ -766,6 +790,7 @@ export class EntityForm {
     const copy = new EntityForm(this.name, this.url);
     if (this.title !== undefined) copy.title = this.title;
     copy.capabilities = { ...this.capabilities };
+    copy.formReadOnly = this.formReadOnly;
     if (this.id !== undefined) copy.id = this.id;
     copy.groupSeq = this.groupSeq;
     copy.tabSeq = this.tabSeq;

@@ -48,6 +48,11 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
       .join('|'),
   );
 
+  // Declared-level form read-only seed (spec §3.1/§6.1, CAP-27; W3-5) — ORs
+  // into effReadOnly below regardless of the field's own declared/meta
+  // readOnly, independent of the permission hard-gate (effHidden).
+  const formReadOnly = useStore(store, (s) => s.formReadOnly);
+
   const [hidden, setHidden] = useState(false);
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
@@ -96,7 +101,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   // un-hide a field the session isn't permitted for.
   const effHidden = !permitted || (metaOverride.hidden ?? hidden);
   const effRequired = metaOverride.required ?? required;
-  const effReadOnly = metaOverride.readOnly ?? readOnly;
+  const effReadOnly = formReadOnly || (metaOverride.readOnly ?? readOnly);
 
   if (effHidden) return null;
 

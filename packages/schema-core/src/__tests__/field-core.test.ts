@@ -94,6 +94,29 @@ describe('EntityForm.withCapabilities/getCapabilities (spec §3.4, CAP-06/CAP-22
   });
 });
 
+describe('EntityForm.withReadOnly/getReadOnly (spec §3.1/§6.1, CAP-27; W3-5)', () => {
+  it('defaults to false — withReadOnly never called', () => {
+    const f = new EntityForm('Widget', '/widget');
+    expect(f.getReadOnly()).toBe(false);
+  });
+
+  it('withReadOnly() with no argument defaults to true', () => {
+    const f = new EntityForm('Widget', '/widget').withReadOnly();
+    expect(f.getReadOnly()).toBe(true);
+  });
+
+  it('withReadOnly(false) clears a previously-declared read-only', () => {
+    const f = new EntityForm('Widget', '/widget').withReadOnly(true).withReadOnly(false);
+    expect(f.getReadOnly()).toBe(false);
+  });
+
+  it('clone preserves formReadOnly', () => {
+    const a = new EntityForm('Widget', '/widget').withReadOnly(true);
+    const b = a.clone();
+    expect(b.getReadOnly()).toBe(true);
+  });
+});
+
 describe('EntityForm.addAction/getActions (spec §3.4, CAP-09; W3-3)', () => {
   it('defaults to [] — no action declared', () => {
     const f = new EntityForm('Widget', '/widget');

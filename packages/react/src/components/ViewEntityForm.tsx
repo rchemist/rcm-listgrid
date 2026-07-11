@@ -342,6 +342,10 @@ function ViewEntityFormInner({
   const session = useSession();
   const userPermissions = extractPermissions(session);
   const renderType = useStore(store, (s) => s.renderType); // FieldRenderer eval-ctx와 동일 소스
+  // Declared-level form read-only (spec §6.1, CAP-27; W3-5) — hides the
+  // built-in Save affordance only. Delete stays capability-governed
+  // (formReadOnly does not gate it — spec §6.1 names Save only).
+  const formReadOnly = useStore(store, (s) => s.formReadOnly);
 
   const actionCtx = buildActionCtx(store, entityForm, controller, session);
 
@@ -431,7 +435,9 @@ function ViewEntityFormInner({
     ...(saveCap !== undefined ? { visible: saveCap } : {}),
     run: runBuiltinSave,
   };
-  const builtins: FormAction[] = [saveBuiltin];
+  // formReadOnly excludes the Save candidate entirely (spec §6.1 — Save
+  // ONLY; Delete is unaffected, see the builtins.push below).
+  const builtins: FormAction[] = formReadOnly ? [] : [saveBuiltin];
   // Delete built-in is a candidate ONLY in update mode with a controller
   // (W3-3 §설계 결정 1 — group-cap-map:55g "delete NEVER shows in create
   // mode"); its own capability-derived `visible` is still applied below in

@@ -133,6 +133,16 @@ export interface FormStoreState {
   initialized: boolean;
   saving: boolean;
   /**
+   * Declared-level form read-only seed (spec §3.1, CAP-27; W3-5), from
+   * `entityForm.getReadOnly()` at store build. FieldRenderer ORs this into
+   * every field's effective readOnly and ViewEntityForm hides the built-in
+   * Save affordance when true (spec §6.1) — a display/edit-affordance
+   * contract only, NOT a write hard-gate (controller.save/delete do not
+   * consult it; write-blocking is `withCapabilities({ update: false })`'s
+   * job). Declared seed only — no runtime setter in this slice.
+   */
+  formReadOnly: boolean;
+  /**
    * W2-3 (spec §6.1) — the form-level banner channel. Replaces the old
    * inert `formErrors: string[]` (never written by anything — confirmed
    * dead). Field-level validation errors are NOT stored here (see
@@ -514,6 +524,7 @@ export function createFormStore(
         'default',
       initialized: true,
       saving: false,
+      formReadOnly: entityForm.getReadOnly(),
       messages: [],
 
       getValue(name) {

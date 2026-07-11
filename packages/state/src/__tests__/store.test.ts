@@ -38,6 +38,18 @@ describe('createFormStore (ADR-0002 value-slice store)', () => {
     expect(store.getState().renderType).toBe('create');
   });
 
+  // W3-5 (spec §3.1/§6.1, CAP-27) — createFormStore seeds formReadOnly from
+  // entityForm.getReadOnly() at build time.
+  it('seeds formReadOnly false when the form never declared withReadOnly', () => {
+    const store = createFormStore(CollegeForm());
+    expect(store.getState().formReadOnly).toBe(false);
+  });
+
+  it('seeds formReadOnly true when the form declared withReadOnly(true)', () => {
+    const store = createFormStore(CollegeForm().withReadOnly(true));
+    expect(store.getState().formReadOnly).toBe(true);
+  });
+
   it('setValue updates only that field slice + recomputes dirty (D4)', () => {
     const store = createFormStore(CollegeForm());
     const before = store.getState().fields;

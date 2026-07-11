@@ -445,6 +445,46 @@ describe('createFormController capability gate (spec §3.4/§6.2, CAP-06; W3-2)'
   });
 });
 
+// W3-5 (spec §3.1/§6.1, CAP-27) — withReadOnly is a display/edit-affordance
+// contract only (hides the built-in Save button + ORs every field's
+// effective readOnly). It does NOT hard-gate controller.save/delete —
+// write-blocking is withCapabilities' job. These tests lock the ABSENCE of
+// any formReadOnly check in the controller.
+describe('createFormController + withReadOnly (spec §3.1/§6.1, CAP-27; W3-5) — no save/delete hard-gate', () => {
+  it('withReadOnly(true) + capability allowed: save() still calls adapter.create (formReadOnly does not block writes)', async () => {
+    const entityForm = WidgetForm().withReadOnly(true);
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async () => ({ id: '1' }));
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: true, result: { id: '1' } });
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('withReadOnly(true) + capability allowed: delete() still calls adapter.remove (formReadOnly does not block writes)', async () => {
+    const entityForm = WidgetForm().withId('1').withReadOnly(true);
+    const store = createFormStore(entityForm);
+    const remove = vi.fn(async () => undefined);
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ remove }),
+    });
+
+    const outcome = await controller.delete();
+
+    expect(outcome).toEqual({ ok: true, result: undefined });
+    expect(remove).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('createFormController.validate / reload (spec §6.2)', () => {
   it('validate() delegates to store.validateAll()', async () => {
     const entityForm = WidgetForm();
