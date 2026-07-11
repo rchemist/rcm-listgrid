@@ -46,10 +46,36 @@ window.daum.Postcode = function Postcode(options) {
 };
 `;
 
+// EC-F1 — the Daum-stub script-load race (student-address flake root cause):
+// AddressFieldRenderer only mounts <DaumPostcode> once the picker Modal is open
+// ({open && <DaumPostcode ... />} in address-renderer.tsx), so the
+// react-daum-postcode script tag is injected — and `window.daum.Postcode`
+// starts loading — AT THE SAME MOMENT the '주소 찾기' click opens the dialog,
+// not before it. react-daum-postcode's `DaumPostcodeEmbed.componentDidMount`
+// then chains scriptOnload → resolve → .then(initiate) → `new Postcode(...).embed()`
+// → this stub's synchronous `oncomplete(...)` → handleComplete's `setOpen(false)`,
+// all off ONE macrotask (the script tag's `onload` event) with no other
+// scheduling boundary in between. Against a same-process `page.route` intercept
+// (near-zero latency, unlike a real CDN fetch) that whole open→complete→close
+// cycle can finish faster than the browser paints a frame, so Playwright's
+// `getByRole('dialog').toBeVisible()` poll can observe "never existed" instead
+// of "appeared then closed" — an intermittent, pre-existing flake, not
+// something a bigger timeout fixes (the dialog really does close again before
+// any poll interval elapses).
+//
+// Fix: restore a small, realistic network delay before fulfilling the script
+// request. This changes ONLY the stub's timing, not its contract — same
+// script body, same fixture, same synchronous oncomplete-on-embed behavior —
+// but guarantees the Modal gets at least one paint while `open` is still true,
+// which is exactly what a real (non-zero-latency) CDN fetch would have given
+// it for free.
+const DAUM_STUB_LATENCY_MS = 50;
+
 async function stubDaumPostcode(page: Page): Promise<void> {
-  await page.route(DAUM_SCRIPT_URL, (route) =>
-    route.fulfill({ contentType: 'application/javascript', body: DAUM_STUB_SCRIPT }),
-  );
+  await page.route(DAUM_SCRIPT_URL, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, DAUM_STUB_LATENCY_MS));
+    await route.fulfill({ contentType: 'application/javascript', body: DAUM_STUB_SCRIPT });
+  });
 }
 
 test('Student create: required fires on empty address, Daum stub fills it, save round-trips flat columns', async ({
