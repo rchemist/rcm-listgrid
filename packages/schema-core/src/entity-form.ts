@@ -451,6 +451,13 @@ export class EntityForm {
   private titleSpec: TitleSpec = {};
   private capabilities: Capabilities = {};
   /**
+   * `withMeta`'s storage (spec §3.1, CAP-23) — the sole escape hatch
+   * replacing the 0.3.x 9-way attribute-bag sprawl. Shallow-merged on each
+   * `withMeta` call (never replaced), same clobber-avoidance posture as
+   * {@link capabilities}.
+   */
+  private meta: Record<string, unknown> = {};
+  /**
    * Declared form-level read-only (spec §3.1, CAP-27) — the store
    * `formReadOnly` seed source. Defaults false (unset = editable).
    */
@@ -810,6 +817,30 @@ export class EntityForm {
   }
 
   /**
+   * Declare escape-hatch metadata (spec §3.1, CAP-23) — the **sole** escape
+   * hatch replacing the 0.3.x 9-way attribute-bag sprawl. **Shallow-merges**
+   * `patch` into any previously-declared meta (never replaces — the
+   * `withCapabilities` clobber-avoidance precedent: a preset/wrapper
+   * composing via multiple `withMeta` calls must not blow away sibling keys
+   * an earlier call set, verified dx-6). A key set to `undefined` in `patch`
+   * REMOVES that key from the stored meta (L4 "undefined = clear"), rather
+   * than storing an `undefined` value — so `getMeta()` never reports a key
+   * with an `undefined` value.
+   */
+  withMeta(patch: Record<string, unknown>): this {
+    const next = { ...this.meta };
+    for (const key of Object.keys(patch)) {
+      if (patch[key] === undefined) {
+        delete next[key];
+      } else {
+        next[key] = patch[key];
+      }
+    }
+    this.meta = next;
+    return this;
+  }
+
+  /**
    * Declare the revision/audit-trail entity name (spec §3.1, C6, CAP-07;
    * W4-4) — successor to the 0.3.x `withRevisionEntityName`. `undefined`
    * CLEARS a previously-declared value back to "not declared" (L1 `with*`
@@ -969,6 +1000,15 @@ export class EntityForm {
   }
 
   /**
+   * Declared escape-hatch metadata (spec §3.1, CAP-23) — `withMeta`'s reader
+   * pair. Defaults to `{}` (never called). Same no-defensive-copy posture as
+   * {@link getCapabilities} — returns the live stored object, not a clone.
+   */
+  getMeta(): Record<string, unknown> {
+    return this.meta;
+  }
+
+  /**
    * Declared revision/audit-trail entity name (spec §3.1, C6, CAP-07; W4-4)
    * — `withRevision`'s reader pair. Returns EXACTLY the stored value —
    * `undefined` when never declared (or cleared via `withRevision(undefined)`
@@ -988,6 +1028,11 @@ export class EntityForm {
     const copy = new EntityForm(this.name, this.url);
     copy.titleSpec = { ...this.titleSpec };
     copy.capabilities = { ...this.capabilities };
+    // propagate escape-hatch meta (spec §3.1, CAP-23) — SHALLOW copy
+    // (clone independence: a later withMeta call on either instance
+    // rebuilds its own object, never mutating the other's), same posture
+    // as `capabilities` above.
+    copy.meta = { ...this.meta };
     copy.formReadOnly = this.formReadOnly;
     if (this.id !== undefined) copy.id = this.id;
     copy.groupSeq = this.groupSeq;
