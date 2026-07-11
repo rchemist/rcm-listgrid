@@ -19,3 +19,10 @@
 **실행급 상향(사용자 지시 반영)**: 스펙 §8 CAP-ID·§10 발명금지 게이트·계수 규칙 + waves 브리프(W1~W4 태스크급 파일·before→after·증명·Do-NOT, W5~W7 entry-pass 규칙). 동일 규율을 harness에 제도화(팀규약·model-routing·progress-authoring/delegate·issue·codex 미러 — harness `b178fa6`).
 
 **커밋**: (이 아카이브와 같은 번들) — analysis 4종 + ADR-0009 + 스펙 + waves + blueprint 강등 배너 + PROGRESS.
+
+## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
+
+**LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:
+- **toSaveData 제외**: 비허가 필드는 저장 페이로드에서 배제(우회 저장 차단).
+- **FieldRenderer 하드게이트**: 렌더 계층에서 비허가 필드를 강제 차단 — EF1 파이프라인으로 우회 불가.
+- **규모**: +10 테스트(누계 1876 unit) · 16 E2E green. 재설계 스펙(CAP-02·03 권한군)이 이 배선을 상위 개념으로 흡수하나, 구현 자체는 SOUND로 유지(§세션 인계 Do-NOT: SOUND 내부 재작성 금지).

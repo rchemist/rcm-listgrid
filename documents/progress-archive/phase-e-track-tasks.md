@@ -299,5 +299,12 @@ proposed_helper: 없음.
 **refuted 4**(정당 각하): ViewListGrid row-id 충돌(fallback id는 id 없는 행만 — 실소비자 전부 id 보유)·professors IN 필터 미검증 주장(실은 검증됨)·staffs 필터 picker만 주장(실은 커버)·XrefPrefer/postFetch E2E 0(unit 충분·실폼 미사용 — 수용). **library-correctness/intent 이탈 0**(순수성·값 pass-through·CustomValidation·priority 미구현 유지 전부 확인).
 **후속 NR**: XrefPrefer/postFetch는 unit-only(실브라우저 증명 없음 — 실폼 소비자 부재로 수용, 실사용 폼 등장 시 E2E 추가).
 
+## Progress notes (본문 이월 2026-07-11 — EF/EA 페이즈 완료로 아카이브)
+
+- EF-R2 anomaly: 위임 에이전트가 red-green 증명에 `git stash` 사용(no-git 규칙 위반) — HEAD 불변·stash 잔여 없음 확인, 피해 없음. 브리핑의 no-git 문구는 유지.
+- EF-gate: 무인 FIND-ONLY 준수 — 발견 3건 전부 태스크(EF-R1/R2) 경유로 수정, 리뷰 자체는 무변경.
+- EA-A fan-out: 12필드 병렬(disjoint 신규 파일+등록 manifest, 공유 무접촉 확인). **1필드=1커밋 대신 wave 단일 원자 커밋** — fanout 프로토콜(/progress 1회 커밋) 우선, 필드 단위는 파일·테스트로 보존. deviation 17건 중 benign(배럴 대기 import) 다수는 등록으로 해소, 실질 5건만 §Needs Review.
+- Reorder EA-D 분할: InlineMap만 즉시, Xref 2종은 EA-D2로 EC2 뒤 배치(선행 병목 ViewListGrid 확장을 EC3 실폼 요구 주도로 설계 — 과잉설계 방지). Dead 3종(~2.3k줄) 연기로 이식 예산 절약.
+
 
 

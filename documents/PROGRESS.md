@@ -7,7 +7,7 @@
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 18:10 (**미결 전건 처분+0.3.26 배포** — Needs Review 30항목 확정([dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md))·Open Questions 4건 종결·**v0.3.26 태그 push→latest 배포**(소비자 4곳 무회귀 직접 검증)·Push auto 전환·레이스 1건 W2-8 전환. **Next=W1**.)
+**Last updated**: 2026-07-11 (**진입 slim + W1 착수** — 완료상세 3건(EA/EB/EC 열거·EG1+EG2·전건처분) archive 이월·EF/EA 노트 archive 이월, 본문 134→131줄·정보보존. **Next=W1 표면 정비**.)
 
 ## Goal
 
@@ -75,15 +75,15 @@
 #### Phase EF ✅ 완료 (2026-07-11 — EF1~5 + 리뷰게이트 R1·R2 + gate 통과, 명령형 라이프사이클 완비 · 1205 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md) · parity map [analysis](./analysis/2026-07-11/ef-gate-parity-map.md)
 
 #### Phase EA/EB/EC ✅ 완료 (2026-07-11) · [archive](./progress-archive/phase-e-track-tasks.md)
-- EA(21필드+공유기반·리뷰게이트 confirmed 5 해소)·EA-D2(Xref+ViewListGrid 확장)·EB(AddressField+Daum+renderedBy·게이트 3해소)·EC1(주소 실증)·EC2(EF2/EF3 실브라우저 5/5)·EC3(tab/self-ref/xref 4/5)·EC3-0(TAB-숨김 3층)·EC-R1(게이트 2)·EC-F(flake+커서/IME 핀)·EF6(submit-transform)·EF7(값 override 복원). E2E 5→16.
+- EA(필드21+공유기반)·EA-D2(Xref)·EB(주소+Daum)·EC1~3(실브라우저 실증)·EC3-0(TAB숨김)·EC-R1/EC-F·EF6/EF7 완료. E2E 5→16. 상세 [archive](./progress-archive/phase-e-track-tasks.md).
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(**W3 권한·능력 착지 후** role-readonly 실증으로 재개)
 
 #### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11)
 
 **규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 구 blueprint는 체크리스트로 강등.
 
-- [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` — isPermitted end-to-end(toSaveData 제외+FieldRenderer 하드게이트, EF1 우회 불가). LIVE 보안갭 fix, 재설계와 무관하게 유지. +10(1876)·16 E2E.
-- [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2(44멤버·8훅·FormRuntime)+waves 브리프 — 4렌즈 적대검증 22건 전건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` — isPermitted end-to-end(FieldRenderer 하드게이트·EF1 우회불가)·LIVE 보안갭 fix·재설계 무관 유지. +10(1876)·16 E2E · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [ ] **W1 표면 정비** — rename(readOnly/placeholder)·정체성(name/url prop)·without*·배럴 큐레이션·계수 CI
   - **Spec**: 스펙 §3·§7·§10-2 · **브리프**: [waves §W1](./plans/entityform-api-implementation-waves.md)(태스크 W1-1~7 파일·before→after·증명·Do-NOT 완비)
   - **Verification**: full gate + E2E 16 + 금지 식별자 grep 0 + 계수 리포트
@@ -100,15 +100,12 @@
 
 ## Needs Review (deviations — 사용자 확인 후 `[x]`)
 
-- [x] **전건 처분(30항목) 2026-07-11** — 사용자 지시("미결 정리·확정")로 모델 확정: P0-7 소비자 영향은 **직접 검증으로 해소**(영향권 4소비자 cryptKey 전원 설정·HTML/asset 사용 0·gjcu는 ^0.2.x 비영향), changeSelectOptions 레이스 1건은 **W2-8 태스크 전환**, 나머지 28건 확정. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md)
+- [x] **전건 처분(30항목) 2026-07-11** — 사용자 지시로 모델 확정: P0-7 소비자 영향 직접검증 해소·changeSelectOptions 레이스→W2-8 전환·나머지 28건 확정. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md)
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
 
 ## Progress notes
 
-- 2026-07-11 EF-R2 anomaly: 위임 에이전트가 red-green 증명에 `git stash` 사용(no-git 규칙 위반) — HEAD 불변·stash 잔여 없음 확인, 피해 없음. 브리핑의 no-git 문구는 유지.
-- 2026-07-11 EF-gate: 무인 FIND-ONLY 준수 — 발견 3건 전부 태스크(EF-R1/R2) 경유로 수정, 리뷰 자체는 무변경.
-- 2026-07-11 EA-A fan-out: 12필드 병렬(disjoint 신규 파일+등록 manifest, 공유 무접촉 확인). **1필드=1커밋 대신 wave 단일 원자 커밋** — fanout 프로토콜(/progress 1회 커밋) 우선, 필드 단위는 파일·테스트로 보존. deviation 17건 중 benign(배럴 대기 import) 다수는 등록으로 해소, 실질 5건만 §Needs Review.
-- 2026-07-11 Reorder: EA-D를 분할 — InlineMap만 즉시, Xref 2종은 EA-D2로 EC2 뒤 배치(선행 병목 ViewListGrid 확장을 EC3 실폼 요구 주도로 설계하기 위함 — 과잉설계 방지). Dead 3종(~2.3k줄) 연기로 이식 예산 절약.
+- EF/EA 페이즈 노트(EF-R2 stash anomaly·EF-gate FIND-ONLY·EA-A fan-out 커밋방식·EA-D reorder)는 [archive](./progress-archive/phase-e-track-tasks.md#progress-notes-본문-이월-2026-07-11--efea-페이즈-완료로-아카이브)로 이월.
 - 2026-07-11 EG-D 검증: 4렌즈 적대검증(wf_c55e83dc-6b1) 22건(blocker 1·major 18·minor 3) **전건 수용·r2 반영** — blocker=InitContext.setMeta 부재(gjcu 774+118 콜사이트 이식 불가). opus 봉인 재검증 1회 수행.
 - 2026-07-11 교차리포: 실행급 스펙 규율을 harness에 제도화(팀규약·model-routing·progress-authoring/delegate·issue·codex 미러 — harness `b178fa6` push+install). 사용자 지시: opus-only 모드에서도 균질 실행.
 
