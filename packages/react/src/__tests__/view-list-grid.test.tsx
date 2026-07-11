@@ -55,7 +55,7 @@ describe('ViewListGrid (JSDOM render)', () => {
   it('fetches on mount and renders the 3 rows with their names', async () => {
     const entityForm = collegeForm();
     const adapter = mockAdapter();
-    const store = createListStore({ url: entityForm.getUrl(), adapter });
+    const store = createListStore({ url: entityForm.url, adapter });
 
     render(
       <UIProvider components={defaultUIComponents}>
@@ -73,7 +73,7 @@ describe('ViewListGrid (JSDOM render)', () => {
   it('calls onRowClick with the clicked row', async () => {
     const entityForm = collegeForm();
     const adapter = mockAdapter();
-    const store = createListStore({ url: entityForm.getUrl(), adapter });
+    const store = createListStore({ url: entityForm.url, adapter });
     const onRowClick = vi.fn();
 
     render(
@@ -98,7 +98,7 @@ describe('ViewListGrid (JSDOM render)', () => {
     it('checking rows and confirming calls onConfirm with the checked ids', async () => {
       const entityForm = collegeForm();
       const adapter = mockAdapter();
-      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const store = createListStore({ url: entityForm.url, adapter });
       const onConfirm = vi.fn();
       const onRowClick = vi.fn();
 
@@ -133,7 +133,7 @@ describe('ViewListGrid (JSDOM render)', () => {
     it('row click still fires normally when a DIFFERENT part of the row is clicked', async () => {
       const entityForm = collegeForm();
       const adapter = mockAdapter();
-      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const store = createListStore({ url: entityForm.url, adapter });
       const onRowClick = vi.fn();
 
       render(
@@ -160,7 +160,7 @@ describe('ViewListGrid (JSDOM render)', () => {
     it('receives live checkedIds as boxes are (un)checked', async () => {
       const entityForm = collegeForm();
       const adapter = mockAdapter();
-      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const store = createListStore({ url: entityForm.url, adapter });
       const toolbar = vi.fn((ctx: { checkedIds: string[] }) => (
         <div data-testid="toolbar-checked">{ctx.checkedIds.join(',')}</div>
       ));
@@ -186,7 +186,7 @@ describe('ViewListGrid (JSDOM render)', () => {
     it('receives an empty array when selection is absent, even though toolbar is present', async () => {
       const entityForm = collegeForm();
       const adapter = mockAdapter();
-      const store = createListStore({ url: entityForm.getUrl(), adapter });
+      const store = createListStore({ url: entityForm.url, adapter });
       const toolbar = vi.fn((ctx: { checkedIds: string[] }) => (
         <div data-testid="toolbar-checked">{ctx.checkedIds.join(',')}</div>
       ));
@@ -207,7 +207,7 @@ describe('ViewListGrid (JSDOM render)', () => {
   it('renders a synthetic column via its render(row) function', async () => {
     const entityForm = collegeForm();
     const adapter = mockAdapter();
-    const store = createListStore({ url: entityForm.getUrl(), adapter });
+    const store = createListStore({ url: entityForm.url, adapter });
 
     render(
       <UIProvider components={defaultUIComponents}>

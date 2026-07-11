@@ -43,8 +43,8 @@ function CollegeForm(): EntityForm {
 describe('EntityForm declaration (charter C1)', () => {
   it('captures fields ordered + form-level config', () => {
     const f = CollegeForm();
-    expect(f.getName()).toBe('CollegeEntityForm');
-    expect(f.getUrl()).toBe('/college');
+    expect(f.name).toBe('CollegeEntityForm');
+    expect(f.url).toBe('/college');
     expect(f.getTitle()).toBe('menu.academic.university.college');
     expect(f.isNeverDelete()).toBe(true);
     expect(f.getFields().map((x) => x.getName())).toEqual([
@@ -76,7 +76,7 @@ describe('ManyToOne lazy thunk (decision D1 — no eager recursion)', () => {
     expect(dean.getIdField()).toBe('id');
     expect(dean.getLabelField()).toBe('name');
     const target = dean.getEntityForm();
-    expect(target.getName()).toBe('ProfessorEntityForm');
+    expect(target.name).toBe('ProfessorEntityForm');
   });
 });
 

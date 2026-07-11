@@ -89,7 +89,7 @@ function PreferMiniFormModal({
   // ChildFormModal isolation idiom: the mini-form's state never touches the
   // parent form's store, and reopening always starts create-mode blank.
   const [miniForm] = useState(() =>
-    new SchemaEntityForm('XrefPreferMiniForm', target.getUrl()).addFields({
+    new SchemaEntityForm('XrefPreferMiniForm', target.url).addFields({
       items: [
         new ManyToOneField('mapping', 100, {
           entityForm: () => target,
@@ -175,7 +175,7 @@ export function XrefPreferMappingRenderer({ field, name, readOnly }: FieldRender
         for (const item of configFilters) initialSearch = initialSearch.addAndFilter(item);
         setDisplayStore(
           createListStore({
-            url: target.getUrl(),
+            url: target.url,
             adapter,
             initialSearch,
             postFetch: (rows) =>

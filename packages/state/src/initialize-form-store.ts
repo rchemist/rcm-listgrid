@@ -123,7 +123,7 @@ export async function initializeFormStore(
   let data: Record<string, unknown> | undefined = initialData;
   if (data === undefined && id != null && adapter) {
     try {
-      data = (await adapter.getOne(ef.getUrl(), id)) as Record<string, unknown>;
+      data = (await adapter.getOne(ef.url, id)) as Record<string, unknown>;
     } catch (e) {
       // c. fetch error: skip bind/hooks entirely, return a usable-but-empty store.
       return { store: createFormStore(ef, storeOpts), entityForm: ef, error: toBackendError(e) };

@@ -78,7 +78,7 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
           values: mapped,
         });
         for (const item of filterItems) initialSearch = initialSearch.addAndFilter(item);
-        setDisplayStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+        setDisplayStore(createListStore({ url: target.url, adapter, initialSearch }));
       } catch (err) {
         if (cancelled) return;
         console.error(
@@ -132,7 +132,7 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
           });
         }
         for (const item of filterItems) initialSearch = initialSearch.addAndFilter(item);
-        setPickerStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+        setPickerStore(createListStore({ url: target.url, adapter, initialSearch }));
       } catch (err) {
         if (cancelled) return;
         console.error('[@listgrid/react] XrefMappingRenderer picker filter resolution failed', err);

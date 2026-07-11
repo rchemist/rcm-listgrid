@@ -28,6 +28,9 @@
 
 - **W1-2** `placeHolder`→`placeholder` 개명 — 4파일(conditional/entity-field/form-field/index). **결정(opus)**: 타입 `PlaceHolderType`→`PlaceholderType`도 개명("placeholder"=1단어→PascalCase는 Placeholder. property fix의 평행. W1-1이 정상 케이싱 `ReadOnlyType`을 남긴 것과 정합 — read-only는 2단어). 소비자·렌더러 `.placeHolder` 접근 0(dormant 선언)·caller 0. 검증: full gate green·1876·grep empty. deviation 0.
 
+- **W1-3** EntityForm 정체성 — 12파일. `fetchUrl`→`url`(prop/ctor/clone)+trailing-slash strip 정규화(root 보존, 현 입력 전부 no-op=행동무변경)·`EntityForm.getName()/getUrl()` 제거→콜러 `.name`/`.url`(13사이트). **field-vs-form 판별=tsc**: `FormField.getName()`/`field.getName()`(100+ 사이트)는 무접촉 유지(디스앰비 리뷰로 확인 — field-core.test `x.getName()` 유지·`f.name` 전환). getFetchUrl 부활 0. 검증: full gate green·1876·`getUrl()` grep 0. 에이전트 done_with_deviations(테스트파일 4종 이관)은 **false-positive**(전부 브리프 명명 사이트·검증 green) — 리뷰로 종결, Needs Review 미등록.
+- **방법론(W1-4/5 승계)**: `tsc -b`(typecheck:packages)는 __tests__ 미타입체크 → EntityForm 멤버 제거/개명 시 **테스트파일 콜러는 `npm test`로만 검출**. rename 웨이브는 tsc+test 둘 다 필수.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

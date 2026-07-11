@@ -108,7 +108,7 @@ describe('createFormStore (ADR-0002 value-slice store)', () => {
       const entityForm = CollegeForm().withSubmitTransform((data, ef) => {
         expect(data.deanId).toBe('42');
         expect(data.dean).toBeUndefined(); // already flattened by the time the transform runs
-        expect(ef.getName()).toBe('CollegeEntityForm');
+        expect(ef.name).toBe('CollegeEntityForm');
         return { ...data, active: data.active ? 'Y' : 'N' };
       });
       const store = createFormStore(entityForm);

@@ -35,7 +35,7 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
 
   const target = useMemo(() => m2o.getEntityForm(), [m2o]);
   const pickerStore = useMemo(
-    () => createListStore({ url: target.getUrl(), adapter }),
+    () => createListStore({ url: target.url, adapter }),
     [target, adapter],
   );
 
@@ -77,7 +77,7 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
         if (cancelled) return;
         let initialSearch = SearchForm.create();
         for (const item of items) initialSearch = initialSearch.addAndFilter(item);
-        setFilteredStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+        setFilteredStore(createListStore({ url: target.url, adapter, initialSearch }));
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -95,7 +95,7 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
   useEffect(() => {
     let cancelled = false;
     if (value != null && typeof value !== 'object') {
-      resolveReference(target.getUrl(), String(value))
+      resolveReference(target.url, String(value))
         .then((entity) => {
           if (!cancelled) setResolvedLabel(labelOf(entity, labelField));
         })

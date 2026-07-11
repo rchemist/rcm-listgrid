@@ -33,7 +33,7 @@ describe('XrefMappingField construction', () => {
     expect(thunk).not.toHaveBeenCalled();
     const resolved = f.getEntityForm();
     expect(thunk).toHaveBeenCalledTimes(1);
-    expect(resolved.getName()).toBe('ProfessorEntityForm');
+    expect(resolved.name).toBe('ProfessorEntityForm');
   });
 
   it('excludeId/filters are carried on config, default undefined', () => {

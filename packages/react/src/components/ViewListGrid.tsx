@@ -183,7 +183,7 @@ export function ViewListGrid({
   const effectiveCheckedIds = selection?.enabled ? checkedIds : [];
 
   return (
-    <div data-list-grid={entityForm.getName()} style={{ position: 'relative' }}>
+    <div data-list-grid={entityForm.name} style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
 
       {quickSearchField !== undefined && (

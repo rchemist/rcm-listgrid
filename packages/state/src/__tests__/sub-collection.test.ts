@@ -26,7 +26,7 @@ describe('SubCollectionField declaration (charter C3)', () => {
     expect(field.type).toBe('subCollection');
     expect(field.getVariant()).toBe('table');
     const child = field.getChildEntityForm();
-    expect(child.getName()).toBe('DegreeEntityForm');
+    expect(child.name).toBe('DegreeEntityForm');
     expect(child.getFields().map((f) => f.getName())).toEqual(['school', 'year']);
   });
 });

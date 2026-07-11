@@ -178,7 +178,7 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
   }
 
   return (
-    <div data-entity-form={entityForm.getName()}>
+    <div data-entity-form={entityForm.name}>
       {title && <h2>{title}</h2>}
 
       {tabs.length > 1 && (

@@ -92,7 +92,7 @@ const DEFAULT_GROUP = 'default';
 
 export class EntityForm {
   readonly name: string;
-  readonly fetchUrl: string;
+  readonly url: string;
   private title?: string;
   private neverDelete = false;
   private id?: string;
@@ -126,9 +126,9 @@ export class EntityForm {
    */
   private submitTransform?: SubmitTransformHandler;
 
-  constructor(name: string, fetchUrl: string) {
+  constructor(name: string, url: string) {
     this.name = name;
-    this.fetchUrl = fetchUrl;
+    this.url = url.length > 1 && url.endsWith('/') ? url.slice(0, -1) : url;
   }
 
   // --- builders (charter C1 grammar) ---
@@ -262,12 +262,6 @@ export class EntityForm {
   }
 
   // --- queries ---
-  getName(): string {
-    return this.name;
-  }
-  getUrl(): string {
-    return this.fetchUrl;
-  }
   getTitle(): string | undefined {
     return this.title;
   }
@@ -327,7 +321,7 @@ export class EntityForm {
 
   /** Declaration clone (charter C1: `userForm.clone().withId(id)` for the form screen). */
   clone(includeValue = false): EntityForm {
-    const copy = new EntityForm(this.name, this.fetchUrl);
+    const copy = new EntityForm(this.name, this.url);
     if (this.title !== undefined) copy.title = this.title;
     copy.neverDelete = this.neverDelete;
     if (this.id !== undefined) copy.id = this.id;
