@@ -83,12 +83,12 @@
 
 **규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 구 blueprint는 체크리스트로 강등.
 
-- [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` — isPermitted end-to-end(FieldRenderer 하드게이트·EF1 우회불가)·LIVE 보안갭 fix·재설계 무관 유지. +10(1876)·16 E2E · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` · isPermitted end-to-end(FieldRenderer 하드게이트·EF1 우회불가) · +10(1876)·16 E2E · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
-- [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` — 6 sub-task+W3-6 하드닝·CAP 7종·2003 unit·E2E 19·phase-end 4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
-- [x] **W4 폼 완결** ✅ `3b3518f`..`44edfae` — 6 서브태스크+하드닝(4버그 fix)·CAP-05·07·10·13·23·2103u/E2E24·계수 47/49/182 · [detail](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track)
+- [x] **W1 표면 정비** ✅ 2026-07-11 · `599a3f3`..`4c04906` · 개명·without*·배럴·계수 CI · full gate·E2E 16·CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · E2E 16·1936u·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
+- [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` · 6 sub+W3-6 하드닝·CAP 7종·2003u·E2E 19·4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
+- [x] **W4 폼 완결** ✅ `3b3518f`..`44edfae` · 6 sub+하드닝(4버그)·CAP-05·07·10·13·23·2103u/E2E24·계수 47/49/182 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [ ] **D1 async save-gating 구현** (#W4-3a **결정됨 2026-07-12**·CAP-05 완결) **← Next up** — `validateAll`이 AsyncValidation 보유 필드를 `asyncState==='valid'`일 때만 통과·그 외(unchecked/checking/invalid)=필드 invalid→**save 차단**+에러메시지. sync `validate()`는 network 없음(validateAll이 저장 asyncState 게이트). **shipped W4-3 결함 수정**. 파일: `packages/state/src/form-store.ts`(validateAll)·`async-validation.ts`. 스펙 §5.3/§6.2 반영. 증명: unchecked/invalid async 필드로 save 차단 unit+E2E.
 - [ ] **D2 잔여 §Needs Review 전건 결정** (사용자 지시 2026-07-12: 일괄·발명금지 해제) — #W4-1a·1b·2a·6a·#W2-1·#W2-5·#W3-2·#W3-3·#W3-5b: 스펙 저자로 각 결정(모델 auto-decide+기록+스펙 반영)·구현 요하면 처리(#W2-5/#W3-2 SaveOutcome 판별자·#W3-3 controller 타입 정합 등). domain 판단만 §Open Q. workflow 적합(항목별 병렬 결정안→종합).
 - [ ] **W5 list-track** (D-pass 완료 후) — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
