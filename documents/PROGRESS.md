@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W3·W4-0·1·2·3·**4 revision ✅**. **Next up**: **W4-5 withMeta/getMeta**(§3.1 shallow-merge·W4 마지막)→**W4 phase-end 적대 리뷰**. **2086 unit/E2E 23**·계수 45/49/182(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · **W4-0~5 전 서브태스크 ✅**(title·steps·async·revision·meta). **Next up**: **W4 phase-end 적대 리뷰**(진행 중·통과 시 CAP-05·07·10·13·23 대조→seal)→ W5 list-track. **2097 unit/E2E 23**·계수 47/49/182(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W3 ✅ 완료**. W4 새 세션은 §세션 인계 Handoff의 읽는 순서를 따른다 — [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)(BLOCKING ceiling 재산정 포함) → waves §W4 → 스펙 §3.1·§5.3.
-**Last updated**: 2026-07-11 (**W4-4 withRevision ✅** `e96906b` — 정직한 undefined(구 always-truthy 폴백 봉인)·adapter.remove(url,ids,revision?) 옵셔널·form-controller 주입 un-omit·+16 unit(2086)·E2E 23 무회귀·full gate 독립 PASS·계수 45/49/182·deviation 0. 앞서 slim·W4-0·1·2·3. 다음 = **W4-5 withMeta**(W4 마지막)→phase-end 리뷰.)
+**Last updated**: 2026-07-11 (**W4-5 withMeta/getMeta ✅** `8092900` — shallow-merge(dx-6 클로버 방지)·undefined 키 제거·+11 unit(2097)·full gate 독립 PASS·계수 47/49/182(=구 임계 45 초과→W4-0 재산정 필요성 확정). **W4 전 서브태스크 완료** → 이제 **phase-end 적대 리뷰** 진행 중(W3서 4버그 검출 실적)→통과+CAP 대조 후 W4 seal.)
 
 ## Goal
 
@@ -87,7 +87,7 @@
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
 - [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` — 6 sub-task+W3-6 하드닝·CAP 7종·2003 unit·E2E 19·phase-end 4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
-- [~] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md) · **W4-0·1·2·3·4 revision ✅**(`e96906b`·2086 unit·E2E 23·계수 45/49/182), **W4-5 meta만 남음** → 이후 phase-end 리뷰 · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [~] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md) · **W4-0~5 전 서브태스크 ✅**(`8092900`·2097 unit·E2E 23·계수 47/49/182), **phase-end 적대 리뷰 진행 중** → 통과+CAP 대조 후 seal · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
