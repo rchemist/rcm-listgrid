@@ -156,7 +156,7 @@ export interface AddressFieldsProps {
  * DEVIATION (recorded, EB1): siblings are declared VISIBLE — `withHidden(true)` is
  * DELIBERATELY NOT applied, even though the AddressRenderer (EB2) is meant to visually own
  * them. `FormField.validate()` short-circuits the ENTIRE required/validations check when a
- * field is hidden OR readonly (`form-field.ts:110-112`, itself a faithful transplant of the
+ * field is hidden OR readOnly (`form-field.ts:110-112`, itself a faithful transplant of the
  * 0.3.x `FormField.tsx:786-789` short-circuit) — declaring `address1`/`postalCode` hidden
  * would make their `required` silently dead code (never evaluated by `validateField`/
  * `validateAll`, `@listgrid/state` `form-store.ts:442-467`), defeating the plan's explicit

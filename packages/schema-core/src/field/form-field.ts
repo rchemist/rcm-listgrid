@@ -46,7 +46,7 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   helpText?: HelpTextType;
   tooltip?: TooltipType;
   hidden?: HiddenType;
-  readonly?: ReadOnlyType;
+  readOnly?: ReadOnlyType;
   required?: RequiredType;
   placeHolder?: PlaceHolderType;
   hideLabel?: boolean;
@@ -96,8 +96,8 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
   async isHidden(ctx: FieldEvalContext): Promise<boolean> {
     return getConditionalBoolean(ctx, this.hidden);
   }
-  async isReadonly(ctx: FieldEvalContext): Promise<boolean> {
-    return getConditionalBoolean(ctx, this.readonly);
+  async isReadOnly(ctx: FieldEvalContext): Promise<boolean> {
+    return getConditionalBoolean(ctx, this.readOnly);
   }
   async isRequired(ctx: FieldEvalContext): Promise<boolean> {
     return getConditionalBoolean(ctx, this.required);
@@ -108,7 +108,7 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
 
   /**
    * Run required-blank check + declared validations. Transplant of
-   * FormField.validate:779-823 — hidden/readonly/unpermitted fields skip
+   * FormField.validate:779-823 — hidden/readOnly/unpermitted fields skip
    * validation; required-blank short-circuits; returns failing results only.
    *
    * `override` (EF1) is the imperative per-field meta override held in the
@@ -119,8 +119,8 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
    */
   async validate(ctx: FieldEvalContext, override?: FieldMetaOverride): Promise<ValidateResult[]> {
     const hidden = override?.hidden ?? (await this.isHidden(ctx));
-    const readonly = override?.readonly ?? (await this.isReadonly(ctx));
-    if (hidden || readonly) return [];
+    const readOnly = override?.readOnly ?? (await this.isReadOnly(ctx));
+    if (hidden || readOnly) return [];
     if (!this.isPermitted(extractPermissions(ctx.session))) {
       return [];
     }
@@ -155,7 +155,7 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
     return this;
   }
   withReadOnly(readOnly?: ReadOnlyType): this {
-    this.readonly = readOnly === undefined ? true : readOnly;
+    this.readOnly = readOnly === undefined ? true : readOnly;
     return this;
   }
   withHidden(hidden?: HiddenType): this {
@@ -202,7 +202,7 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
     return this;
   }
   withViewPreset(preset: ViewPreset): this {
-    if (preset.readonly !== undefined) this.readonly = preset.readonly;
+    if (preset.readOnly !== undefined) this.readOnly = preset.readOnly;
     if (preset.hidden !== undefined) this.hidden = preset.hidden;
     return this;
   }

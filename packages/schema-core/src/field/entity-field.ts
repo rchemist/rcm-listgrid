@@ -22,7 +22,7 @@ import type { Validation, ValidateResult } from '../validation';
  *      / `getTooltip()` methods move to the renderer layer. Declarations that
  *      merely CARRY a ReactNode (`label`, `helpText`) stay — they are type-only
  *      React (ADR-0003 §5). Predicates that resolve BOOLEAN conditions
- *      (`isHidden`/`isReadonly`) stay: they are pure over meta + context.
+ *      (`isHidden`/`isReadOnly`) stay: they are pure over meta + context.
  *
  *   2. PERMISSION LIFTED TO THE BASE (charter C2): `requiredPermissions` +
  *      `isPermitted()` lived only on EntityField in 0.3.x, leaving SubCollections
@@ -38,7 +38,7 @@ export interface EntityItem {
   label?: LabelType;
   helpText?: HelpTextType;
   hidden?: HiddenType;
-  readonly?: ReadOnlyType;
+  readOnly?: ReadOnlyType;
   hideLabel?: boolean;
   /** layout placement — which tab / field-group this item renders under. */
   form?: { tabId: string; fieldGroupId: string };
@@ -54,7 +54,7 @@ export interface EntityItem {
 
   // --- pure predicates (over meta + context) ---
   isHidden(ctx: FieldEvalContext): Promise<boolean>;
-  isReadonly(ctx: FieldEvalContext): Promise<boolean>;
+  isReadOnly(ctx: FieldEvalContext): Promise<boolean>;
   /** ANY-OF permission check — see ../permission isPermitted. */
   isPermitted(userPermissions?: string[]): boolean;
 
@@ -89,7 +89,7 @@ export interface EntityField<TValue = unknown> extends EntityItem {
   /** exclude this field's value from the save payload. */
   exceptOnSave?: boolean;
   /**
-   * Sibling fields this field's conditionals (hidden/readonly/required) read.
+   * Sibling fields this field's conditionals (hidden/readOnly/required) read.
    * The renderer re-resolves those predicates when any listed field's value
    * changes — the ADR-0002 §Consequences answer to cross-field conditionals,
    * staying D4-safe (subscribe only to declared deps, not the whole form).

@@ -11,8 +11,8 @@ import type { EntityField, FieldType } from '@listgrid/schema-core';
 /**
  * Props every registered field-type component receives. `readOnly` is an
  * additive convenience (not in the original {field, name} minimum) so the
- * FieldRenderer wrapper's resolved readonly state can reach the concrete
- * input without every renderer re-deriving it via `field.isReadonly()`.
+ * FieldRenderer wrapper's resolved readOnly state can reach the concrete
+ * input without every renderer re-deriving it via `field.isReadOnly()`.
  */
 export interface FieldRendererComponentProps {
   field: EntityField;

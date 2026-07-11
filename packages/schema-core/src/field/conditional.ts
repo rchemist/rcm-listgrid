@@ -33,7 +33,7 @@ export type ConditionalBooleanValue = boolean | OptionalBoolean | ValuedBoolean;
 export type ConditionalStringValue = string | OptionalString | ValuedString;
 export type ConditionalReactNodeValue = ReactNode | OptionalReactNode | ValuedReactNode;
 
-// Named aliases (charter C2 vocabulary) — required/hidden/readonly share one
+// Named aliases (charter C2 vocabulary) — required/hidden/readOnly share one
 // boolean-conditional type; placeholder is string-conditional; label/help/tooltip
 // carry ReactNode (type-only).
 export type RequiredType = ConditionalBooleanValue;

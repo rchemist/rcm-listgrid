@@ -29,7 +29,7 @@ import { FormField } from './form-field';
 export class ProfileField extends FormField<unknown> {
   constructor(name: string, order: number) {
     super(name, order, 'profile');
-    this.readonly = true;
+    this.readOnly = true;
     this.hideLabel = true;
   }
 }

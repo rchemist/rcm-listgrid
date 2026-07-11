@@ -2,7 +2,7 @@ import { createContext, useContext, type ReactNode } from 'react';
 import type { Session } from '@listgrid/schema-core';
 
 // AuthProvider — threads the host's Session through to field predicates
-// (isHidden/isReadonly/isRequired/validate all take a FieldEvalContext with an
+// (isHidden/isReadOnly/isRequired/validate all take a FieldEvalContext with an
 // optional `session`) and to any UI that needs to know who's looking (charter
 // C7). The provider itself is a required wiring seam (missing it is a host
 // bug); the session VALUE it carries is legitimately optional (unauthenticated

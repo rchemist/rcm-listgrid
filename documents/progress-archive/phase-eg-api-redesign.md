@@ -20,6 +20,12 @@
 
 **커밋**: (이 아카이브와 같은 번들) — analysis 4종 + ADR-0009 + 스펙 + waves + blueprint 강등 배너 + PROGRESS.
 
+## #W1 표면 정비 (진행 중 — 실행 로그)
+
+> 스펙 §3·§7·§10-2 · [waves §W1](../plans/entityform-api-implementation-waves.md). 실행: sonnet delegate(waves 브리프=브리핑 원문) → opus 검증(full gate)+커밋. hot-file 순차. 착수 green baseline: 1876 unit·type-check/typecheck:packages/lint(0err)/format/build 전부 ✅.
+
+- **W1-1** `readonly`→`readOnly` 식별자 개명(행동 무변경) — 18파일(schema-core field 8·state·react 5·sample collabo·테스트 3). ViewPreset 6프리셋+`isReadonly`→`isReadOnly` 메서드+`FieldMetaOverride.readonly`+`override?.readonly` 접근 전부. **proof=tsc**(개명이 stale 참조를 깨므로 green tsc=전 참조 개명). 제외: TS `readonly` 수식어·DOM `toHaveAttribute('readonly')`·0.3 인용 주석·로컬 var·`src/listgrid/**` 레거시(스코프 밖). 검증: full gate green·1876·`git grep -nw isReadonly` empty. deviation 0.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

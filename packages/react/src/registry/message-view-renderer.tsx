@@ -9,7 +9,7 @@ import type { FieldRendererComponentProps } from './field-renderer-registry';
 // MessageViewField.renderInstance (src/listgrid/components/fields/
 // MessageViewField.tsx:22-26) — a bare `<div>{this.message}</div>`, nothing
 // else: no UI primitive, no store read/write (the field is display-only, and
-// its constructor-forced readonly=true/hideLabel=true already keep
+// its constructor-forced readOnly=true/hideLabel=true already keep
 // FieldRenderer from emitting a <label> or an editable-control wrapper
 // around it, message-view-field.ts).
 //

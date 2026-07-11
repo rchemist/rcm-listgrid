@@ -29,7 +29,7 @@ describe('MessageViewField (constructor)', () => {
 
   it('forces readonly=true and hideLabel=true (0.3.x MessageViewField.tsx:14-15)', () => {
     const f = new MessageViewField('notice', 200, '안내 메시지');
-    expect(f.readonly).toBe(true);
+    expect(f.readOnly).toBe(true);
     expect(f.hideLabel).toBe(true);
   });
 
@@ -77,7 +77,7 @@ describe('MessageViewField.clone', () => {
     expect(copy).not.toBe(original);
     expect(copy.type).toBe('messageView');
     expect(copy.message).toBe('안내 메시지');
-    expect(copy.readonly).toBe(true);
+    expect(copy.readOnly).toBe(true);
     expect(copy.hideLabel).toBe(true);
     expect(copy.getLabel()).toBe('공지');
   });

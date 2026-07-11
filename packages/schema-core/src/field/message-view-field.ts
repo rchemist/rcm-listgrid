@@ -32,7 +32,7 @@ export class MessageViewField extends FormField<unknown> {
 
   constructor(name: string, order: number, message: ConditionalReactNodeValue) {
     super(name, order, 'messageView');
-    this.readonly = true;
+    this.readOnly = true;
     this.hideLabel = true;
     this.message = message;
   }

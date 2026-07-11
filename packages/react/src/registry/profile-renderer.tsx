@@ -12,9 +12,9 @@ import type { FieldRendererComponentProps } from './field-renderer-registry';
 // real host replaces the slot with a user-lookup/avatar view without
 // touching this renderer.
 //
-// ProfileField forces readonly=true in its constructor (profile-field.ts), so
+// ProfileField forces readOnly=true in its constructor (profile-field.ts), so
 // there is no onChange/setValue wiring here by default — same as 0.3.x, which
-// never offered an editable path for this field. If a caller un-sets readonly
+// never offered an editable path for this field. If a caller un-sets readOnly
 // via `.withReadOnly(false)`, this renderer still has no write path (the
 // UserView slot contract is display-only, {@link
 // packages/ui-default/src/types.ts} `UserViewProps`) — that mirrors 0.3.x,

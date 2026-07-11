@@ -18,8 +18,8 @@ import { getFieldRenderer } from '../registry/field-renderer-registry';
 // FieldRenderer — the per-field wrapper (task item 4): label + required
 // asterisk + the type-dispatched input + error list. Subscribes to exactly
 // this field's slice (useFormField, decision D4) so a keystroke re-renders one
-// field. required/readonly/hidden are resolved from field.isRequired/
-// isReadonly/isHidden — all `Promise<boolean>` predicates over a
+// field. required/readOnly/hidden are resolved from field.isRequired/
+// isReadOnly/isHidden — all `Promise<boolean>` predicates over a
 // FieldEvalContext — so they're resolved ASYNCHRONOUSLY in an effect into
 // local state; until resolved the field defaults to visible + not-required
 // (never hidden-by-default, so a slow predicate never hides required input).
@@ -64,16 +64,16 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
         ...(session !== undefined ? { session } : {}),
       };
 
-      const [isHidden, isRequired, isReadonly] = await Promise.all([
+      const [isHidden, isRequired, isReadOnly] = await Promise.all([
         field.isHidden(ctx),
         field.isRequired(ctx),
-        field.isReadonly(ctx),
+        field.isReadOnly(ctx),
       ]);
 
       if (!cancelled) {
         setHidden(isHidden);
         setRequired(isRequired);
-        setReadOnly(isReadonly);
+        setReadOnly(isReadOnly);
       }
     })();
     return () => {
@@ -96,7 +96,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   // un-hide a field the session isn't permitted for.
   const effHidden = !permitted || (metaOverride.hidden ?? hidden);
   const effRequired = metaOverride.required ?? required;
-  const effReadOnly = metaOverride.readonly ?? readOnly;
+  const effReadOnly = metaOverride.readOnly ?? readOnly;
 
   if (effHidden) return null;
 

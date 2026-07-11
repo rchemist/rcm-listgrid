@@ -95,13 +95,13 @@ function collaboOnChanges(m: FormMutator, changedField: string): void {
     if (collaborated) {
       m.setMeta('contracted', {
         options: CollaboContractTypesCollaborated,
-        readonly: false,
+        readOnly: false,
         required: true,
       });
     } else {
       m.setMeta('contracted', {
         options: CollaboContractTypesNoneOnly,
-        readonly: true,
+        readOnly: true,
         required: false,
       });
       m.setValue('contracted', 'NONE');

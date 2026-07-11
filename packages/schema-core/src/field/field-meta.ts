@@ -10,7 +10,7 @@ import type { SelectOption } from './basic-fields';
 export interface FieldMetaOverride {
   required?: boolean;
   hidden?: boolean;
-  readonly?: boolean;
+  readOnly?: boolean;
   /**
    * `| undefined` (beyond plain optionality) is intentional: EF2's
    * changeSelectOptions builder explicitly writes `{ options: undefined }`

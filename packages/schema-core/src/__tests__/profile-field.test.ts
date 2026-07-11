@@ -28,13 +28,13 @@ describe('ProfileField (builders)', () => {
 
   it('constructor unconditionally forces readonly=true and hideLabel=true (faithful transplant)', () => {
     const f = new ProfileField('profile', 10);
-    expect(f.readonly).toBe(true);
+    expect(f.readOnly).toBe(true);
     expect(f.hideLabel).toBe(true);
   });
 
   it('a caller can still un-set readonly/hideLabel afterward (ordinary last-write-wins builder semantics)', () => {
     const f = new ProfileField('profile', 10).withReadOnly(false).withHideLabel(false);
-    expect(f.readonly).toBe(false);
+    expect(f.readOnly).toBe(false);
     expect(f.hideLabel).toBe(false);
   });
 
@@ -79,7 +79,7 @@ describe('ProfileField.clone', () => {
     const copy = original.clone();
     expect(copy).not.toBe(original);
     expect(copy.type).toBe('profile');
-    expect(copy.readonly).toBe(true);
+    expect(copy.readOnly).toBe(true);
     expect(copy.hideLabel).toBe(true);
     expect(copy.getLabel()).toBe('Profile');
   });

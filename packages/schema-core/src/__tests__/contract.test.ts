@@ -103,7 +103,7 @@ describe('view presets', () => {
   it('HAS_VALUE_READONLY becomes readonly once the field has a value', async () => {
     const withValue: FieldEvalContext = { value: { current: 'x' } };
     const empty: FieldEvalContext = { value: {} };
-    const readonlyFn = HAS_VALUE_READONLY.readonly as (ctx: FieldEvalContext) => Promise<boolean>;
+    const readonlyFn = HAS_VALUE_READONLY.readOnly as (ctx: FieldEvalContext) => Promise<boolean>;
     expect(await readonlyFn(withValue)).toBe(true);
     expect(await readonlyFn(empty)).toBe(false);
   });

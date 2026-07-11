@@ -574,7 +574,7 @@ export function createFormStore(
           if (field.exceptOnSave) continue;
           // EG1 — security hard-gate: a field the session is not permitted
           // for is excluded from the save payload entirely (old parity:
-          // EntityForm.tsx:909-916). This is independent of hidden/readonly —
+          // EntityForm.tsx:909-916). This is independent of hidden/readOnly —
           // a hidden-but-unpermitted field must never be smuggled through.
           if (!field.isPermitted(userPermissions)) continue;
           const name = field.getName();
