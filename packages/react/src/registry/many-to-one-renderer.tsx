@@ -51,24 +51,39 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
   const [filteredStore, setFilteredStore] = useState<StoreApi<ListStoreState> | undefined>(
     undefined,
   );
+  // EC-R1: a rejecting config.filter must not strand the picker with a
+  // perpetually-undefined filteredStore (infinite blank) — surface a visible
+  // error instead of silently hanging or falling back to the unfiltered
+  // pickerStore (these filters express exclusion, e.g. parentMajor's
+  // NOT_EQUAL self; an unfiltered fallback would let a user pick a
+  // duplicate/self).
+  const [filterError, setFilterError] = useState(false);
 
   useEffect(() => {
     if (!open) {
       // clear so the NEXT open re-resolves rather than reusing a stale
       // filtered store from a previous open.
       setFilteredStore(undefined);
+      setFilterError(false);
       return;
     }
     const resolveFilter = m2o.config.filter;
     if (!resolveFilter) return;
 
     let cancelled = false;
-    void resolveFilter().then((items) => {
-      if (cancelled) return;
-      let initialSearch = SearchForm.create();
-      for (const item of items) initialSearch = initialSearch.addAndFilter(item);
-      setFilteredStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
-    });
+    setFilterError(false);
+    void resolveFilter()
+      .then((items) => {
+        if (cancelled) return;
+        let initialSearch = SearchForm.create();
+        for (const item of items) initialSearch = initialSearch.addAndFilter(item);
+        setFilteredStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        console.error('[@listgrid/react] ManyToOneRenderer filter resolution failed', err);
+        setFilterError(true);
+      });
     return () => {
       cancelled = true;
     };
@@ -113,7 +128,8 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
         </Button>
       )}
       <Modal open={open} onClose={() => setOpen(false)} title={`${labelField} 선택`}>
-        {open && activeStore && (
+        {open && filterError && <div role="alert">목록 필터를 불러오지 못했습니다.</div>}
+        {open && !filterError && activeStore && (
           <ViewListGrid
             entityForm={target}
             store={activeStore}

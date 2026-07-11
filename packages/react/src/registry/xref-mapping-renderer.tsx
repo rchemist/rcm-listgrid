@@ -53,23 +53,41 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
   // the pragmatic parity: same visible empty-state result, one fewer network
   // round trip).
   const [displayStore, setDisplayStore] = useState<StoreApi<ListStoreState> | undefined>(undefined);
+  // EC-R1: a rejecting config.filters() must not strand the display grid
+  // with a perpetually-undefined store (infinite blank) — surface a visible
+  // error instead of hanging or falling back to an unfiltered store (this
+  // channel also gates which mapped rows are SHOWN, e.g. an `assistant=true`
+  // domain filter).
+  const [displayError, setDisplayError] = useState(false);
 
   useEffect(() => {
     if (mapped.length === 0) {
       setDisplayStore(undefined);
+      setDisplayError(false);
       return;
     }
     let cancelled = false;
+    setDisplayError(false);
     void (async () => {
-      const filterItems = await resolveFilters(xf);
-      if (cancelled) return;
-      let initialSearch = SearchForm.create({ pageSize: 1000 }).addAndFilter({
-        name: 'id',
-        queryConditionType: 'IN',
-        values: mapped,
-      });
-      for (const item of filterItems) initialSearch = initialSearch.addAndFilter(item);
-      setDisplayStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+      try {
+        const filterItems = await resolveFilters(xf);
+        if (cancelled) return;
+        let initialSearch = SearchForm.create({ pageSize: 1000 }).addAndFilter({
+          name: 'id',
+          queryConditionType: 'IN',
+          values: mapped,
+        });
+        for (const item of filterItems) initialSearch = initialSearch.addAndFilter(item);
+        setDisplayStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+      } catch (err) {
+        if (cancelled) return;
+        console.error(
+          '[@listgrid/react] XrefMappingRenderer display filter resolution failed',
+          err,
+        );
+        setDisplayStore(undefined);
+        setDisplayError(true);
+      }
     })();
     return () => {
       cancelled = true;
@@ -81,34 +99,46 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
   // open (M2O filter-channel pattern, many-to-one-renderer.tsx).
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerStore, setPickerStore] = useState<StoreApi<ListStoreState> | undefined>(undefined);
+  // EC-R1: same infinite-blank hazard as the display grid above, for the
+  // picker's NOT_IN(mapped) + config.filters() resolution.
+  const [pickerError, setPickerError] = useState(false);
 
   useEffect(() => {
     if (!pickerOpen) {
       setPickerStore(undefined);
+      setPickerError(false);
       return;
     }
     let cancelled = false;
+    setPickerError(false);
     void (async () => {
-      const filterItems = await resolveFilters(xf);
-      if (cancelled) return;
-      let initialSearch = SearchForm.create();
-      const excludeId = xf.getExcludeId();
-      if (excludeId !== undefined) {
-        initialSearch = initialSearch.addAndFilter({
-          name: 'id',
-          queryConditionType: 'NOT_EQUAL',
-          value: excludeId,
-        });
+      try {
+        const filterItems = await resolveFilters(xf);
+        if (cancelled) return;
+        let initialSearch = SearchForm.create();
+        const excludeId = xf.getExcludeId();
+        if (excludeId !== undefined) {
+          initialSearch = initialSearch.addAndFilter({
+            name: 'id',
+            queryConditionType: 'NOT_EQUAL',
+            value: excludeId,
+          });
+        }
+        if (mapped.length > 0) {
+          initialSearch = initialSearch.addAndFilter({
+            name: 'id',
+            queryConditionType: 'NOT_IN',
+            values: mapped,
+          });
+        }
+        for (const item of filterItems) initialSearch = initialSearch.addAndFilter(item);
+        setPickerStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
+      } catch (err) {
+        if (cancelled) return;
+        console.error('[@listgrid/react] XrefMappingRenderer picker filter resolution failed', err);
+        setPickerStore(undefined);
+        setPickerError(true);
       }
-      if (mapped.length > 0) {
-        initialSearch = initialSearch.addAndFilter({
-          name: 'id',
-          queryConditionType: 'NOT_IN',
-          values: mapped,
-        });
-      }
-      for (const item of filterItems) initialSearch = initialSearch.addAndFilter(item);
-      setPickerStore(createListStore({ url: target.getUrl(), adapter, initialSearch }));
     })();
     return () => {
       cancelled = true;
@@ -139,6 +169,8 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
     <div data-field="xrefMapping" data-xref-mapping={name}>
       {mapped.length === 0 ? (
         <div data-xref-empty>매핑된 항목이 없습니다.</div>
+      ) : displayError ? (
+        <div role="alert">목록 필터를 불러오지 못했습니다.</div>
       ) : (
         displayStore && (
           <ViewListGrid
@@ -165,7 +197,8 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
         </Button>
       )}
       <Modal open={pickerOpen} onClose={() => setPickerOpen(false)} title={`${label} 선택`}>
-        {pickerOpen && pickerStore && (
+        {pickerOpen && pickerError && <div role="alert">목록 필터를 불러오지 못했습니다.</div>}
+        {pickerOpen && !pickerError && pickerStore && (
           <ViewListGrid
             entityForm={target}
             store={pickerStore}

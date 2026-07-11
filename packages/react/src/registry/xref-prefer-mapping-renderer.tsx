@@ -150,34 +150,50 @@ export function XrefPreferMappingRenderer({ field, name, readOnly }: FieldRender
   // 253-265). Empty mapped => no store mounted (XrefMapping's
   // no-IN-empty-query posture, ported here too).
   const [displayStore, setDisplayStore] = useState<StoreApi<ListStoreState> | undefined>(undefined);
+  // EC-R1: a rejecting config.filters() must not strand the display grid
+  // with a perpetually-undefined store (infinite blank) — surface a visible
+  // error instead of hanging or falling back to an unfiltered store.
+  const [displayError, setDisplayError] = useState(false);
 
   useEffect(() => {
     if (ids.length === 0) {
       setDisplayStore(undefined);
+      setDisplayError(false);
       return;
     }
     let cancelled = false;
+    setDisplayError(false);
     void (async () => {
-      const configFilters = await resolveConfigFilters();
-      if (cancelled) return;
-      let initialSearch = SearchForm.create({ pageSize: 1000 }).addAndFilter({
-        name: 'id',
-        queryConditionType: 'IN',
-        values: ids,
-      });
-      for (const item of configFilters) initialSearch = initialSearch.addAndFilter(item);
-      setDisplayStore(
-        createListStore({
-          url: target.getUrl(),
-          adapter,
-          initialSearch,
-          postFetch: (rows) =>
-            rows.map((row) => {
-              const match = mapped.find((m) => m.id === String(row['id']));
-              return match ? { ...row, preferred: match.preferred === true } : row;
-            }),
-        }),
-      );
+      try {
+        const configFilters = await resolveConfigFilters();
+        if (cancelled) return;
+        let initialSearch = SearchForm.create({ pageSize: 1000 }).addAndFilter({
+          name: 'id',
+          queryConditionType: 'IN',
+          values: ids,
+        });
+        for (const item of configFilters) initialSearch = initialSearch.addAndFilter(item);
+        setDisplayStore(
+          createListStore({
+            url: target.getUrl(),
+            adapter,
+            initialSearch,
+            postFetch: (rows) =>
+              rows.map((row) => {
+                const match = mapped.find((m) => m.id === String(row['id']));
+                return match ? { ...row, preferred: match.preferred === true } : row;
+              }),
+          }),
+        );
+      } catch (err) {
+        if (cancelled) return;
+        console.error(
+          '[@listgrid/react] XrefPreferMappingRenderer display filter resolution failed',
+          err,
+        );
+        setDisplayStore(undefined);
+        setDisplayError(true);
+      }
     })();
     return () => {
       cancelled = true;
@@ -240,6 +256,8 @@ export function XrefPreferMappingRenderer({ field, name, readOnly }: FieldRender
     <div data-field="xrefPreferMapping" data-xref-prefer-mapping={name}>
       {ids.length === 0 ? (
         <div data-xref-empty>매핑된 항목이 없습니다.</div>
+      ) : displayError ? (
+        <div role="alert">목록 필터를 불러오지 못했습니다.</div>
       ) : (
         displayStore && (
           <ViewListGrid

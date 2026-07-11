@@ -132,6 +132,22 @@ describe('XrefMappingRenderer — display grid (IN derivation)', () => {
     ]);
   });
 
+  it('EC-R1: a rejecting config.filters() surfaces a visible error in the display grid instead of an infinite blank', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const filters = vi.fn(async (): Promise<FilterItem[]> => {
+      throw new Error('filters backend unavailable');
+    });
+    const field = new XrefMappingField('professors', 1, { entityForm: professorForm, filters });
+    const { adapter, listCalls } = mockAdapter();
+    renderRenderer(field, adapter, { mapped: ['1'], deleted: [] });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('목록 필터를 불러오지 못했습니다.');
+    expect(listCalls).toHaveLength(0);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
   it('toolbar 삭제 moves a checked id mapped -> deleted', async () => {
     const field = new XrefMappingField('professors', 1, { entityForm: professorForm });
     const { adapter } = mockAdapter();
@@ -185,6 +201,51 @@ describe('XrefMappingRenderer — picker modal (NOT_IN derivation)', () => {
     expect(listCalls[0]?.toJSON().filters.AND).toEqual([
       { name: 'id', queryConditionType: 'NOT_EQUAL', value: '2' },
     ]);
+  });
+
+  it('EC-R1: a rejecting config.filters() surfaces a visible error in the picker instead of an infinite blank', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const filters = vi.fn(async (): Promise<FilterItem[]> => {
+      throw new Error('filters backend unavailable');
+    });
+    const field = new XrefMappingField('professors', 1, { entityForm: professorForm, filters });
+    const { adapter, listCalls } = mockAdapter();
+    renderRenderer(field, adapter);
+
+    fireEvent.click(screen.getByRole('button', { name: '선택' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('목록 필터를 불러오지 못했습니다.');
+    expect(listCalls).toHaveLength(0);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('EC-R1: closing the picker before a rejecting config.filters() resolves does not show the alert afterward', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    let reject!: (err: Error) => void;
+    const filters = vi.fn(
+      () =>
+        new Promise<FilterItem[]>((_resolve, rej) => {
+          reject = rej;
+        }),
+    );
+    const field = new XrefMappingField('professors', 1, { entityForm: professorForm, filters });
+    const { adapter } = mockAdapter();
+    renderRenderer(field, adapter);
+
+    fireEvent.click(screen.getByRole('button', { name: '선택' }));
+    await waitFor(() => expect(filters).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    reject(new Error('too late'));
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('selection + onConfirm ("선택 완료") multi-adds all checked ids and closes', async () => {

@@ -114,4 +114,75 @@ describe('ManyToOneRenderer — config.filter channel (EA-D2-0)', () => {
     expect(listCalls).toHaveLength(1);
     expect(listCalls[0]?.toJSON().filters.AND).toEqual([]);
   });
+
+  it('EC-R1: a rejecting config.filter surfaces a visible error instead of an infinite blank picker', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const filter = vi.fn(async () => {
+      throw new Error('filter backend unavailable');
+    });
+    const entityForm = collegeFormWithDean({ filter });
+    const { adapter, listCalls } = mockAdapter();
+    const store = createFormStore(entityForm);
+    const field = entityForm.getField('dean') as ManyToOneField;
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AdapterProvider adapter={adapter}>
+          <FormStoreProvider store={store}>
+            <ManyToOneRenderer field={field} name="dean" />
+          </FormStoreProvider>
+        </AdapterProvider>
+      </UIProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '찾기' }));
+
+    await waitFor(() => expect(filter).toHaveBeenCalledTimes(1));
+    expect(await screen.findByRole('alert')).toHaveTextContent('목록 필터를 불러오지 못했습니다.');
+    // no fallback to the unfiltered picker store — no list request at all.
+    expect(listCalls).toHaveLength(0);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('EC-R1: closing before a rejecting config.filter resolves does not set error after unmount of the modal content', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    let reject!: (err: Error) => void;
+    const filter = vi.fn(
+      () =>
+        new Promise<never>((_resolve, rej) => {
+          reject = rej;
+        }),
+    );
+    const entityForm = collegeFormWithDean({ filter });
+    const { adapter } = mockAdapter();
+    const store = createFormStore(entityForm);
+    const field = entityForm.getField('dean') as ManyToOneField;
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AdapterProvider adapter={adapter}>
+          <FormStoreProvider store={store}>
+            <ManyToOneRenderer field={field} name="dean" />
+          </FormStoreProvider>
+        </AdapterProvider>
+      </UIProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '찾기' }));
+    await waitFor(() => expect(filter).toHaveBeenCalledTimes(1));
+
+    // close the picker BEFORE the filter promise settles.
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    reject(new Error('too late'));
+    await new Promise((r) => setTimeout(r, 0));
+
+    // cancelled — the closed modal must not show the alert.
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
 });

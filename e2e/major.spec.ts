@@ -157,3 +157,32 @@ test('Scenario d — staffs XrefMapping picker only shows rows passing the async
   await expect(dialog.getByText('최윤아')).toBeVisible();
   await expect(dialog.getByText('박준서')).toHaveCount(0);
 });
+
+test('Scenario e — edit mode: parentMajor picker self-excludes the open major (NOT_EQUAL self-filter)', async ({
+  page,
+}) => {
+  // EC-R1 — the file header claims edit-mode NOT_EQUAL self-filter coverage,
+  // but every prior scenario only opens /major/new (parentMajorFilter is
+  // only built when MajorEntityForm(currentId) has a truthy id — major.ts
+  // ~line 140). Seed row id '1' 컴퓨터공학과 (type MAJOR, parentMajorId '2')
+  // — mock-backend/major.ts majorSeed — is a MAJOR-type row so parentMajor
+  // stays visible (DEPARTMENT-type rows hide it via the type cascade).
+  await page.goto('/major/1');
+  await expect(page.getByLabel(/학과명/)).toHaveValue('컴퓨터공학과');
+  await expect(page.locator('#type')).toHaveValue('MAJOR');
+  await expect(page.locator('[data-field-name="parentMajor"]')).toBeVisible();
+
+  await page
+    .locator('[data-field-name="parentMajor"]')
+    .getByRole('button', { name: '찾기' })
+    .click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+
+  // the mock backend's server-side NOT_EQUAL application (EC3, store.ts
+  // matchesFilterGroup) actually excludes the open major's OWN row — a
+  // different major (id '2', 공과대학) stays pickable, proving this is a
+  // real exclusion and not an accidentally-empty picker.
+  await expect(dialog.getByText('공과대학')).toBeVisible();
+  await expect(dialog.getByText('컴퓨터공학과')).toHaveCount(0);
+});

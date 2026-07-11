@@ -138,6 +138,56 @@ describe('XrefPreferMappingRenderer — display grid (IN derivation + synthetic 
     expect(checkboxes[1]).not.toBeChecked(); // Medicine (id 2) — preferred: false
   });
 
+  it('EC-R1: a rejecting config.filters() surfaces a visible error in the display grid instead of an infinite blank', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const filters = vi.fn(async () => {
+      throw new Error('filters backend unavailable');
+    });
+    const field = new XrefPreferMappingField('college', 1, {
+      entityForm: collegeForm,
+      filters,
+    }).withLabel('단과대학');
+    const { adapter, listCalls } = mockAdapter();
+    renderRenderer(field, adapter, { mapped: [{ id: '1', preferred: true }] });
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('목록 필터를 불러오지 못했습니다.');
+    expect(listCalls).toHaveLength(0);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('EC-R1: closing/re-emptying before a rejecting config.filters() resolves does not show the alert afterward', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    let reject!: (err: Error) => void;
+    const filters = vi.fn(
+      () =>
+        new Promise<never>((_resolve, rej) => {
+          reject = rej;
+        }),
+    );
+    const field = new XrefPreferMappingField('college', 1, {
+      entityForm: collegeForm,
+      filters,
+    }).withLabel('단과대학');
+    const { adapter } = mockAdapter();
+    const { store } = renderRenderer(field, adapter, { mapped: [{ id: '1', preferred: true }] });
+
+    await waitFor(() => expect(filters).toHaveBeenCalledTimes(1));
+
+    // clear mapped before the filters() promise settles — the display grid
+    // unmounts (empty-state text) ahead of the stale resolution.
+    store.getState().setValue('college', { mapped: [] });
+    await screen.findByText('매핑된 항목이 없습니다.');
+
+    reject(new Error('too late'));
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
+
   it('toolbar 삭제 removes mapped-only (no deleted array) and promotes mapped[0] when the preferred row is removed', async () => {
     const field = new XrefPreferMappingField('college', 1, { entityForm: collegeForm }).withLabel(
       '단과대학',
