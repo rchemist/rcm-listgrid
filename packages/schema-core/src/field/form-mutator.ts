@@ -46,6 +46,27 @@ export interface FormMutator {
    * bump). Otherwise bumps the store's structureVersion.
    */
   removeField(name: string): void;
+  /**
+   * Runtime tab-hidden override (EC3-0) — writes the form store's
+   * `tabHidden` slice for `tabId`, which ViewEntityForm consults (winning
+   * over TabDef.hidden) to decide whether the tab BUTTON renders at all
+   * (0.3.x getViewableTabs parity — old engine's withHidden({type:'TAB',
+   * ...})). Renderers subscribed to the store's tabHidden slice re-render;
+   * if the currently active tab becomes hidden, ViewEntityForm falls back
+   * to the first still-visible tab.
+   *
+   * Deliberately does NOT cascade to field-level `hidden` meta on the
+   * tab's fields (unlike the 0.3.x dual write — EntityForm.tsx:349-353/
+   * 413-428) — a field hidden via setMeta(name, {hidden:true}) is skipped
+   * by validate(); silently skipping validation for every field in a
+   * hidden tab is a decision only the form author can make correctly (a
+   * hidden tab is not always inapplicable — see the EB1 lesson). A form
+   * that wants the old MAJOR-form behavior (hidden tab's fields also stop
+   * validating) must pair setTabHidden with per-field setMeta(name,
+   * {hidden: true}) calls for each field in that tab — this method only
+   * ever touches the tab bar.
+   */
+  setTabHidden(tabId: string, hidden: boolean): void;
 }
 
 /**

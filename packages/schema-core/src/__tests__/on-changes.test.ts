@@ -21,9 +21,9 @@ function OneFieldForm(): EntityForm {
 
 /**
  * Minimal in-memory FormMutator double for unit-testing builders in
- * isolation. addField/removeField (EF4) are unused by the EF2 builder
- * catalog under test here — no-op stubs, present only to satisfy the
- * interface.
+ * isolation. addField/removeField (EF4) and setTabHidden (EC3-0) are unused
+ * by the EF2 builder catalog under test here — no-op stubs, present only to
+ * satisfy the interface.
  */
 function fakeMutator(values: Record<string, unknown> = {}): FormMutator & {
   metaCalls: Array<[string, Record<string, unknown>]>;
@@ -40,6 +40,7 @@ function fakeMutator(values: Record<string, unknown> = {}): FormMutator & {
     },
     addField: () => {},
     removeField: () => {},
+    setTabHidden: () => {},
     metaCalls: meta,
   };
 }

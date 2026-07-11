@@ -53,14 +53,28 @@ function liveFields(fieldDefs: Record<string, EntityField>): EntityField[] {
     .sort((a, b) => a.getOrder() - b.getOrder());
 }
 
-function deriveTabs(entityForm: EntityForm, fields: EntityField[]): TabDef[] {
+// EC3-0 — a tab is filtered out of the tab bar entirely (0.3.x
+// getViewableTabs parity) when its EFFECTIVE hidden is true: the store's
+// runtime tabHidden override for the tab id, falling back to the declared
+// TabDef.hidden, falling back to visible. This does NOT filter the tab's
+// fields out of `fields` — a hidden tab's fields still render if some OTHER
+// visible tab is never made active for them (they simply have no tab to be
+// shown under), and still validate (see FormMutator.setTabHidden doc,
+// @listgrid/schema-core, for the non-cascading contract).
+function deriveTabs(
+  entityForm: EntityForm,
+  fields: EntityField[],
+  tabHidden: Record<string, boolean>,
+): TabDef[] {
   const byId = new Map(entityForm.getTabs().map((t) => [t.id, t]));
   let seq = byId.size;
   for (const field of fields) {
     const tabId = field.getTabId() || DEFAULT_TAB_ID;
     if (!byId.has(tabId)) byId.set(tabId, { id: tabId, order: seq++ });
   }
-  return [...byId.values()].sort((a, b) => a.order - b.order);
+  return [...byId.values()]
+    .filter((t) => !(tabHidden[t.id] ?? t.hidden ?? false))
+    .sort((a, b) => a.order - b.order);
 }
 
 function deriveGroups(
@@ -102,14 +116,17 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
   const tabIndex = useStore(store, (s) => s.tabIndex);
   const formErrors = useStore(store, (s) => s.formErrors);
   const saving = useStore(store, (s) => s.saving);
-  // EF4: subscribe to structureVersion ONLY — a value edit must NOT re-derive
-  // tabs/groups (D4 stays intact, per FieldRenderer/useFormField); an
-  // addField/removeField bump is the only thing that re-runs the derivation
-  // below.
+  // EF4/EC3-0: subscribe to structureVersion and tabHidden ONLY — a value
+  // edit must NOT re-derive tabs/groups (D4 stays intact, per
+  // FieldRenderer/useFormField); an addField/removeField bump or a
+  // setTabHidden call are the only things that re-run the derivation below.
   useStore(store, (s) => s.structureVersion);
+  const tabHidden = useStore(store, (s) => s.tabHidden);
 
   const fields = liveFields(store.getState().fieldDefs);
-  const tabs = deriveTabs(entityForm, fields);
+  const tabs = deriveTabs(entityForm, fields, tabHidden);
+  // if the active tab became hidden, tabs.find(...) misses and this falls
+  // back to the first still-visible tab (EC3-0 active-tab-fallback contract).
   const activeTabId = tabs.find((t) => t.id === tabIndex)?.id ?? tabs[0]?.id ?? DEFAULT_TAB_ID;
   const groups = deriveGroups(entityForm, fields, activeTabId);
   const title = entityForm.getTitle();

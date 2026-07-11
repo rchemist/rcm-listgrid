@@ -63,6 +63,20 @@ export interface TabDef {
   id: string;
   label?: string;
   order: number;
+  /**
+   * Declared-level tab-hidden (EC3-0). When true, the tab bar BUTTON for
+   * this tab is suppressed (0.3.x getViewableTabs parity — old engine's
+   * withHidden({type:'TAB', ...})). Does NOT cascade to field-level
+   * `hidden` meta on the tab's fields — unlike the 0.3.x dual write
+   * (EntityForm.tsx:349-353/413-428), the new engine keeps validation
+   * running for fields in a hidden tab unless the form author ALSO calls
+   * setMeta(name, { hidden: true }) on them (see FormMutator.setTabHidden
+   * doc for the full contract). Read at store-build time as the seed for
+   * FormStoreState.tabHidden; a runtime override (EntityForm.setTabHidden
+   * pre-store, or FormMutator.setTabHidden/store.setTabHidden post-store)
+   * wins over this declared value.
+   */
+  hidden?: boolean;
 }
 
 export interface AddFieldsInput {
@@ -70,7 +84,7 @@ export interface AddFieldsInput {
   /** group these fields under a field group; default group id 'default'. */
   fieldGroup?: { id: string; label?: string; order?: number };
   /** place under a tab; default tab id 'default'. */
-  tab?: { id: string; label?: string; order?: number };
+  tab?: { id: string; label?: string; order?: number; hidden?: boolean };
 }
 
 const DEFAULT_TAB = 'default';
@@ -156,6 +170,27 @@ export class EntityForm {
     return this;
   }
 
+  /**
+   * Imperative tab-hidden mutation (EC3-0) — for use inside an
+   * onInitialize handler, which operates on the pre-store EntityForm clone
+   * (unlike FormMutator.setTabHidden/the form store's runtime tabHidden
+   * slice, which apply AFTER the store is built). Overrides (or sets)
+   * TabDef.hidden for `tabId` on THIS instance. If `tabId` has not been
+   * declared yet (no addFields() call has targeted it), a minimal TabDef
+   * stub is created so the tab still surfaces, hidden, once a field is
+   * later routed to it. Same contract as TabDef.hidden: does NOT cascade
+   * to field-level hidden meta (see FormMutator.setTabHidden doc).
+   */
+  setTabHidden(tabId: string, hidden: boolean): this {
+    const existing = this.tabs.get(tabId);
+    if (existing) {
+      this.tabs.set(tabId, { ...existing, hidden });
+    } else {
+      this.tabs.set(tabId, { id: tabId, order: this.tabSeq++, hidden });
+    }
+    return this;
+  }
+
   addFields(input: AddFieldsInput): this {
     const tabId = input.tab?.id ?? DEFAULT_TAB;
     if (!this.tabs.has(tabId)) {
@@ -163,6 +198,7 @@ export class EntityForm {
         id: tabId,
         ...(input.tab?.label !== undefined ? { label: input.tab.label } : {}),
         order: input.tab?.order ?? this.tabSeq++,
+        ...(input.tab?.hidden !== undefined ? { hidden: input.tab.hidden } : {}),
       });
     }
 

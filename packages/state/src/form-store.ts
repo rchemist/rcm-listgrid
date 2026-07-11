@@ -64,6 +64,17 @@ export interface FormStoreState {
    * useEntityFormLogic.ts:263-273).
    */
   structureVersion: number;
+  /**
+   * Runtime tab-hidden override slice (EC3-0), seeded from each declared
+   * TabDef.hidden at store build. A key set here WINS over the declared
+   * TabDef.hidden — ViewEntityForm reads `tabHidden[tabId] ??
+   * TabDef.hidden ?? false` as the effective hidden used to filter the tab
+   * bar (0.3.x getViewableTabs parity). Mutated by setTabHidden (and the
+   * FormMutator adapter it backs) — NEVER cascades to field-level `hidden`
+   * meta (see FormMutator.setTabHidden doc, @listgrid/schema-core, for the
+   * full contract/rationale).
+   */
+  tabHidden: Record<string, boolean>;
   renderType: RenderType;
   tabIndex: string;
   initialized: boolean;
@@ -117,6 +128,13 @@ export interface FormStoreState {
   isDirty(): boolean;
   setSaving(saving: boolean): void;
   setTabIndex(tabIndex: string): void;
+  /**
+   * Runtime tab-hidden override (EC3-0): writes `tabHidden[tabId]`,
+   * overriding the tab's declared TabDef.hidden. See FormStoreState.tabHidden
+   * doc for the effective-hidden resolution order and FormMutator.setTabHidden
+   * (@listgrid/schema-core) for the non-cascading contract.
+   */
+  setTabHidden(tabId: string, hidden: boolean): void;
   /** build the save payload (exceptOnSave dropped, ManyToOne flattened → `<name>Id`). */
   toSaveData(): Record<string, unknown>;
 }
@@ -175,6 +193,16 @@ export function createFormStore(
   for (const field of entityForm.getFields()) {
     initialFieldDefs[field.getName()] = field;
     initialFields[field.getName()] = seedSlice(field);
+  }
+
+  // EC3-0: seed the runtime tabHidden slice from each declared TabDef.hidden
+  // — only tabs that actually declare a `hidden` value get an entry here (a
+  // tab a declaration never marked hidden falls through to the `?? false`
+  // default at read time, same as an entirely undeclared tab discovered via
+  // a dynamically-added field).
+  const initialTabHidden: Record<string, boolean> = {};
+  for (const tab of entityForm.getTabs()) {
+    if (tab.hidden !== undefined) initialTabHidden[tab.id] = tab.hidden;
   }
 
   function sortedFieldDefs(state: FormStoreState): EntityField[] {
@@ -321,6 +349,9 @@ export function createFormStore(
       removeField(name) {
         get().removeField(name);
       },
+      setTabHidden(tabId, hidden) {
+        get().setTabHidden(tabId, hidden);
+      },
     };
 
     return {
@@ -328,8 +359,14 @@ export function createFormStore(
       meta: {},
       fieldDefs: initialFieldDefs,
       structureVersion: 0,
+      tabHidden: initialTabHidden,
       renderType,
-      tabIndex: entityForm.getTabs()[0]?.id ?? 'default',
+      // prefer the first non-hidden declared tab (EC3-0) — ViewEntityForm's
+      // own tabs.find(...)?? tabs[0] fallback covers this regardless, but
+      // seeding a visible tab here keeps store.tabIndex itself consistent
+      // rather than relying solely on the render-layer fallback.
+      tabIndex:
+        entityForm.getTabs().find((t) => !t.hidden)?.id ?? entityForm.getTabs()[0]?.id ?? 'default',
       initialized: true,
       saving: false,
       formErrors: [],
@@ -486,6 +523,10 @@ export function createFormStore(
 
       setTabIndex(tabIndex) {
         set({ tabIndex });
+      },
+
+      setTabHidden(tabId, hidden) {
+        set((s) => ({ tabHidden: { ...s.tabHidden, [tabId]: hidden } }));
       },
 
       toSaveData() {
