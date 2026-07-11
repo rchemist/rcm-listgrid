@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W3·W4-0(계수 45→55·180→190)·**W4-1 title ✅**. **Next up**: **W4-2 withSteps 위저드**(§3.2 StepDef·E2E 3-step). **2021 unit/E2E 19**·계수 41/49/180(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W3·W4-0(계수)·W4-1 title·**W4-2 steps 위저드 ✅**. **Next up**: **W4-3 AsyncValidation**(§5.3·중복확인·tri-state·E2E). **2044 unit/E2E 21**·계수 43/49/181(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W3 ✅ 완료**. W4 새 세션은 §세션 인계 Handoff의 읽는 순서를 따른다 — [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)(BLOCKING ceiling 재산정 포함) → waves §W4 → 스펙 §3.1·§5.3.
-**Last updated**: 2026-07-11 (**W4-1 getTitle 해석 체인 ✅** `228e8f0` — 5단계 항상 non-empty·구 `''` 봉인·+18 unit(2021)·full gate 독립 재실행 PASS·sonnet delegate→opus 검증. deviation 2건→§Needs Review(#W4-1a/b). 앞서 heal-on-entry slim+W4-0 계수 재산정(55/120/190). 다음 = **W4-2 withSteps**.)
+**Last updated**: 2026-07-11 (**W4-2 withSteps 위저드 ✅** `9969914` — StepDef+clone hidden-보존 버그봉인·create 위저드(W3-6 하이브리드 hidden)·+23 unit(2044)·+2 E2E(3-step 실브라우저 완주·21/21)·full gate+E2E 독립 재실행 PASS·계수 43/49/181. deviation→#W4-2a. 앞서 slim·W4-0 재산정·W4-1 title. 다음 = **W4-3 AsyncValidation**.)
 
 ## Goal
 
@@ -49,7 +49,7 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W3 ✅ seal · W4-0 계수 재산정 · W4-1 title ✅**. 다음: **W4-2 withSteps** — 전체 인계는 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
+## 세션 인계 (Handoff — **W3 ✅ · W4-0 계수 · W4-1 title · W4-2 steps ✅**. 다음: **W4-3 AsyncValidation** — 전체 인계는 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
 
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
@@ -87,12 +87,12 @@
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
 - [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` — 6 sub-task+W3-6 하드닝·CAP 7종·2003 unit·E2E 19·phase-end 4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
-- [~] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md) · **W4-0 계수재산정·W4-1 title ✅**(`228e8f0`·2021 unit), W4-2~5 남음 · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [~] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md) · **W4-0·W4-1 title·W4-2 steps ✅**(`9969914`·2044 unit·E2E 21), W4-3~5 남음 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W4-2 withSteps 위저드**(withSteps(StepDef[])/getSteps·clone hidden step 보존·`StepDef` /schema export·create 모드 Stepper UI·**E2E 3-step 생성 1**) · 스펙 §3.2 · CAP-10 · [waves §W4](./plans/entityform-api-implementation-waves.md). 이후 W4-3 AsyncValidation·W4-4 revision·W4-5 meta. hot-file 순차·delegate 기본 sonnet·opus 검증(full gate 독립+diff intent)+**phase-end 적대 리뷰 필수**(W3서 4버그 검출). 도입 표면·Do-NOT·미결=[W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
+**Next up**: **W4-3 AsyncValidation**(`AsyncValidation extends ValidationItem`·withValidations 승차·필드 slice `asyncState` tri-state·렌더러 button trigger 확인버튼·`AsyncValidation` /schema export) · 스펙 §5.3 · CAP-05 · [waves §W4](./plans/entityform-api-implementation-waves.md) · 증명 trigger 'change'(debounce)/'button' tri-state unit + E2E 중복확인 1. 이후 W4-4 revision·W4-5 meta. hot-file 순차·delegate 기본 sonnet·opus 검증(full gate+E2E 독립+diff intent)+**phase-end 적대 리뷰 필수**(W3서 4버그 검출). 도입 표면·Do-NOT·미결=[W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
 
 ---
 
@@ -105,6 +105,7 @@
 - [ ] **#W3-2 capability-denied outcome 구별불가** — controller save/delete의 capability 거부가 `{ok:false}` 반환(타입상 유일 non-error·non-cancel 선택) → validation-fail·reason-less cancel과 형태 동일(#W2-5 동류). silent block(adapter 미호출)은 정상. 스펙 §6.2 저자: 판별자(예: `blocked?: 'capability'`) 추가 여부 · risk: api-semantics · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
 - [ ] **#W3-5b replaces:'save' 커스텀 액션이 formReadOnly Save-숨김 우회** — formReadOnly는 빌트인 saveBuiltin만 제외(merge 전)·replaces:'save' 커스텀 액션은 getActions 경유라 미게이트 → readOnly 폼에 커스텀 save-slot 액션 렌더. 스펙 §3.1 "빌트인 Save 어포던스 숨김"=빌트인만(literal OK)이나 의도상 애매. 스펙 저자: replaces:'save'도 formReadOnly 숨김 대상인지 · risk: api-semantics(spec-ambiguous·저위험)
 - [ ] **#W4-1a getTitle 5단계 최종 폴백 문구(spec-silent)** — 스펙 §3.1 "renderType 기본문구"의 정확한 소비자 대면 카피 미명시 → 구현은 `this.name`(생성자 보장 non-empty) 폴백 채택(발명 회피). 스펙 저자: renderType별 기본문구(예: "새 college"/"college 수정") 확정 여부 or this.name 수용 · risk: ux-copy(저위험) · [detail](./progress-archive/phase-eg-api-redesign.md#w4--폼-완결-진행--hot-file-순차delegate-sonnetopus-검증--cap-050710132)
+- [ ] **#W4-2a 위저드 전 step hidden시 액션바만 렌더(spec-silent edge)** — create 위저드에서 선언된 전 step이 hidden으로 해석되면 step content/nav 없이 액션바만 표시(크래시 없음·미테스트). 스펙 §3.2가 degenerate 케이스 미규정 → graceful fallback 채택. 스펙 저자: 이 케이스 의도 확정(예: 전체 폼 fallback or 경고) · risk: ux-edge(저위험)
 - [ ] **#W4-1b withTitle 재호출=replace(merge 아님)** — 스펙 §3.1이 재호출 시맨틱 미명시 → L1 with* 기본(설정/교체) 적용(withCapabilities/withMeta의 명시 merge와 다름·title은 스칼라라 자연스러움). 스펙 저자: 명시 문서화 여부 · risk: api-semantics(저위험·L1 정합)
 - [ ] **#W3-3 controller-optional vs ActionContext.controller(required) 타입 불일치** — ViewEntityForm.controller? optional인데 ActionContext.controller: FormRuntime(required) → controller 부재 시 커스텀 액션/빌트인 Delete/render-slot omit(빌트인 Save legacy만). 특히 replaces:'save'+no-controller=Save 버튼 아예 없음. 스펙 §3.4/§7 저자: controller required화 or ActionContext.controller optional화 · risk: api-type-consistency · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
 
