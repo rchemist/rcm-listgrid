@@ -34,6 +34,12 @@ export type FieldType =
   | 'xrefMapping'
   | 'xrefPriorityMapping'
   | 'xrefAvailableMapping'
+  // EA-D2-1 addition (ea-d2-xref-major-briefing.md decision ③ — Xref
+  // transplant, plain views only). 'xrefPriorityMapping' stays
+  // renderer-less (0 audited consumers, briefing §1/§5); 'xrefMapping'
+  // itself pre-existed as a bare type string with no field class/renderer
+  // until this task landed both.
+  | 'xrefPreferMapping'
   | 'revision'
   | 'contentAsset'
   | 'subCollection'

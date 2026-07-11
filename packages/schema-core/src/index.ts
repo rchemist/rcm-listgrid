@@ -171,6 +171,17 @@ export { ColorField } from './field/color-field';
 export { InlineMapField } from './field/inline-map-field';
 export type { InlineMapConfig, InlineMapValue, MapKey, KeyValue } from './field/inline-map-field';
 
+// --- EA-D2-1 Xref (plain views only; ea-d2-xref-major-briefing.md §1/§2/§4
+// — supportPriority/add NOT ported, filters narrowed to single-function-form
+// only, correcting the 0.3.x FilterItem[]|fn union / gjcu degrees [fn] bug) ---
+export { XrefMappingField } from './field/xref-mapping-field';
+export type { XrefMappingConfig, XrefMappingValue } from './field/xref-mapping-field';
+export { XrefPreferMappingField } from './field/xref-prefer-mapping-field';
+export type {
+  XrefPreferMappingConfig,
+  XrefPreferMappingValue,
+} from './field/xref-prefer-mapping-field';
+
 // --- EB1/EB2 Address (Daum 우편번호 composite handle + flat siblings — plan §EB) ---
 export { AddressField, applyFullAddressFields, addressSiblingNames } from './field/address-field';
 export type { Address, AddressFieldsProps, AddressSiblingNames } from './field/address-field';
