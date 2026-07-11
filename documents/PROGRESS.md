@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 기반(H·EF·EA·EB·EC·EG1/2·EG-D·W1·W2) ✅ · **W3 🟡 Partial(W3-1~5 구현 완료·phase-end 리뷰서 액션 바 합성 버그 4건 발견 → W3-6 하드닝 진행)**. **Next up**: **W3-6 액션 바 하드닝**(phase-end findings #1~4 fix). **1995 unit/E2E 19**·계수 41/49/**180(==ceiling)** PASS. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 기반(…W1·W2) + **W3 권한·능력·액션 ✅ 완료**(6 sub-task+phase-end 하드닝·CAP-02/03/06/08/09/22/27 소화). **Next up**: **W4 폼 완결**(title·steps·AsyncValidation·revision·meta) — **⚠ W4-1 착수 전 /schema §10 ceiling 재산정 필수**(180/180 도달·§Open Q). **2003 unit/E2E 19**·계수 41/49/**180(==ceiling)** PASS. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 (**W3-5 완료 → W3 5/5**·phase-end 리뷰 게이트 대기 — withReadOnly/getReadOnly+formReadOnly seed·전 필드 effReadOnly OR·Save 어포던스 숨김(§6.1)·M2O 전파 자동·save 하드게이트 없음. sonnet delegate·opus 검증·logic `1753aaa`. +15 unit(**1995**)·**E2E 19**·계수 41/49/180. **Next=W3 phase-end 리뷰(intent-conformance)→아카이브→W4**. [detail](./progress-archive/phase-eg-api-redesign.md#w3))
+**Next session policy**: **W1~W3 ✅ 완료**. 새 세션(W4)은 ① [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)(도입 표면·Do-NOT·**W4-1 전 /schema ceiling 재산정 BLOCKING**) → ② [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+**W4 표** → ③ [스펙](./plans/entityform-public-api-spec.md) 인용 §만(§3.1·§5.3) → ④ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사는 W5 entry pass까지 불필요.
+**Last updated**: 2026-07-11 (**W3 페이즈 ✅ 완료+seal** — W3-6 하드닝(phase-end 적대 리뷰 4버그 fix)+아카이브+Handoff. W3 전체 `4d30159`..`b4ecda3`(6 sub-task+하드닝)·**2003 unit·E2E 19**·계수 41/49/180. CAP 7종 소화. sonnet delegate·opus 검증(+phase-end 리뷰서 4버그 검출). **다음 세션 = W4**(착수 전 /schema ceiling 재산정). [W3 상세](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
 
 ## Goal
 
@@ -49,7 +49,7 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음: **W3-5 withReadOnly** (W3 4/5, W3-1~4 ✅·마지막 W3) — hot-file 순차·fan-out 금지 유지)
+## 세션 인계 (Handoff — **W3 페이즈 ✅ 완료·seal**. 다음: **W4 폼 완결**(착수 전 /schema ceiling 재산정) — 전체 인계는 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
 
 - **W2 완료(2026-07-11, 8 sub-task `005b4a3`..`ed77ecf`)**: 훅+컨트롤러 전건 — 라이프사이클 **8훅**(onInit/onChange/onBefore·After{Save,Delete,ListFetch})·InitContext(setMeta)·FormMutator+getRenderType/getSession·**messages** 채널·**serializeValue** seam(toSaveData 재작성)·**FormRuntime(schema)+createFormController(state)**·useEntityForm·EF6 제거·selectOptions 레이스 fix. **1936 unit/E2E 16 green·계수 EntityForm 37/45·root 49/120·/schema 175/180 PASS**. sonnet delegate 7+inline 1·opus 검증/커밋. 상세 [archive](./progress-archive/phase-eg-api-redesign.md#w2).
 - **W3 착수 규율(하드)**: 권한·능력·액션(CAP-02·03·06·08·09·22·27). hot-file 3종 **순차·fan-out 금지** 유지(ViewEntityForm=버튼/액션바 대폭 수정). **승계 배선점**: ① ✅**W3-1 완결**(TabDef.hidden conditional 정적해석=getStaticConditionalBoolean·deriveTabs+seed 2곳 TODO 마감) ② ✅**W3-2 완결**(capability 게이트=controller save/del step1·denied silent {ok:false}·Save 버튼 sync 가시성·withNeverDelete 제거) ③ ✅**W3-3 완결**(Save 버튼 rewire→controller.save 단일 validate·onSave=post-save 콜백·통합 액션 바·빌트인 Delete 파생=update&&controller만·confirm+E2E는 W3-4) ④ **계수 ceiling 도달**: /schema **180**/180 — **W4 신타입 진입 시 초과**(§Open Questions 등재·W4-1 착수 전 §10 재산정)·EntityForm 37/45 — W3-2/3 신타입(Capabilities·FormAction·ActionContext·ActionRender) 추가 시 180 접근 감시. 멤버 제거/개명 검증=tsc+npm test 둘 다(tsc -b는 __tests__ 미커버).
@@ -88,14 +88,13 @@
 - [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
-- [~] **W3 권한·능력·액션** (5/5 구현 `1753aaa` ✅·**🟡 phase-end 하드닝 W3-6 진행**) — W3-1~5 완료·phase-end 리뷰(sonnet+high, opus 검증)서 액션 바 합성 버그 4 confirmed → W3-6 fix 후 [x]+아카이브 · [waves §W3](./plans/entityform-api-implementation-waves.md)
-  - [ ] **W3-6 액션 바 하드닝**(phase-end findings) — **#1** function-conditional visible/enabled/capability=항상 숨김(getStaticConditionalBoolean(fn)→false, restrictive-gate 역극성) → async 해석(getConditionalBoolean, FieldRenderer 패턴) · **#2** actionCtx.values stale(render-time·D4 미구독) → runAction 클릭시 fresh ctx · **#3** store.renderType('update' when initialData) vs entityForm.getId() 불일치 → 액션바 CRUD는 getRenderType()/getId() 사용(phantom Delete·adapter.remove([undefined]) fix) · **#4** custom id='save'+no-controller 크래시 → saveBuiltin 정체성 필터 · 4건 red→green 테스트
+- [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3`(6 sub-task+W3-6 하드닝) — CAP-02/03/06/08/09/22/27 소화·2003 unit·E2E 19·계수 41/49/180·phase-end 적대 리뷰(4버그 검출→fix) · [detail](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)
 - [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W3-5 withReadOnly+formReadOnly**(마지막 W3 · delegate sonnet · **hot-file 순차**: entity-form.ts(withReadOnly §3.1)·form-store.ts(formReadOnly seed)·FieldRenderer(effective readOnly OR) · M2O 자식 폼 임베드 전파(gjcu UserEntityForm(true) 패턴) · 스펙 §3.1·§6.1 · CAP-27 · [waves §W3](./plans/entityform-api-implementation-waves.md) · **증명**: 전 필드 readOnly+Save 숨김 unit·M2O child readOnly 유지·**save 하드게이트 없음 명시**(쓰기 차단은 capabilities 소관)). W3 종료 게이트→W4.
+**Next up (다음 세션)**: **W4 폼 완결**(W4-1 title·W4-2 steps·W4-3 AsyncValidation·W4-4 revision·W4-5 meta · 스펙 §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)). **⚠ W4-1 착수 전 BLOCKING**: /schema 계수 180/180 ceiling 재산정(§Open Questions·스펙 §10). hot-file 순차·delegate 기본 sonnet·opus 검증+**phase-end 적대 리뷰 필수**(W3서 4버그 검출 실증). W3 도입 표면·Do-NOT·미결은 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
 
 ---
 

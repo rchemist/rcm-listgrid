@@ -74,6 +74,20 @@
 
 - **W3-5** withReadOnly+formReadOnly(§3.1·§6.1·CAP-27·마지막 W3) — 8파일(logic `1753aaa`). **schema-core** `withReadOnly(readOnly=true)`/`getReadOnly()`+`private formReadOnly=false`+clone 전파(선언 property). **state** FormStoreState `+formReadOnly:boolean`·createFormStore seed=`entityForm.getReadOnly()`(reload도 이 경로 재seed·런타임 setter 없음). **react** FieldRenderer `effReadOnly=formReadOnly||(meta.readOnly??field)`(**최우선 OR**·permission 하드게이트[effHidden]와 독립). ViewEntityForm `builtins=formReadOnly?[]:[saveBuiltin]`(**Save만 숨김**·스펙 §6.1 문구 그대로·Delete는 capability 소관 무변경). **M2O 렌더러 무변경**=picker(찾기 버튼)가 readOnly prop 이미 존중→formReadOnly→FieldRenderer effReadOnly→M2O readOnly 자동 전파. 계수 EntityForm 39→**41/45**(withReadOnly+getReadOnly)·/schema 180 무변경. +15 unit(**1995**·기본 false/무인자 true/false 해제/clone 보존·store seed·FieldRenderer OR·**M2O 찾기 숨김 전파**·Save-only 숨김·**save/delete 하드게이트 없음 명시**=readOnly 폼도 capability 허용 시 adapter 호출)·E2E 19. deviation: withReadOnly(undefined)=기본 param으로 true 수렴·getReadOnly 게터 보완(with*/get* 쌍 완성·스펙 §3.1 리더 누락 보완, 발명 아님). logic `1753aaa`.
 
+- **W3-6** 액션 바 하드닝(phase-end findings·ViewEntityForm만) — 2파일(logic `b4ecda3`). W3 **phase-end 적대 리뷰**(sonnet+high·opus 검증, `git diff b6663dc..HEAD`)서 cross-sub-task 합성 버그 4 confirmed→fix: **#1** function-conditional visible/enabled/capability=항상 숨김(`getStaticConditionalBoolean(fn)→false`가 hidden엔 permissive-safe이나 restrictive-gate엔 역극성) → **hybrid**(literal/OptionalBoolean sync exact 유지·**함수 분기만 async** getConditionalBoolean 해석·FieldRenderer 패턴·pending=show·`mergedRef`로 effect dep-loop 회피·값-의존은 스냅샷 한계). **#2** actionCtx.values stale(render-time 1회·D4 미구독) → runAction 클릭시 fresh `buildActionCtx`. **#3** store.renderType('update' when fetchedData/initialData) vs entityForm.getId() 불일치→phantom Delete·`adapter.remove([undefined])` → 액션 바 CRUD는 `actionRenderType=entityForm.getRenderType()`(id-based·controller 일치)·deriveTabs는 store.renderType 유지(FieldRenderer 일치). **#4** custom id='save'+no-controller 크래시 → `a===saveBuiltin` 정체성 필터. +8 red→green unit(**2003**)·계수 41/49/180 무변경·E2E 19. deviation: render-fn ctx는 render-time 유지(display-time·저위험, run-time #2만 fix)·#5(replaces:'save'×formReadOnly)=§Needs Review. logic `b4ecda3`.
+
+---
+
+## W3 페이즈 완료 인계 (Handoff → W4 폼 완결)
+
+**W3 권한·능력·액션 ✅ 완료(2026-07-11, `4d30159`..`b4ecda3` 6 sub-task+하드닝·2003 unit·E2E 19·계수 41/49/180)**. CAP-02·03·06·08·09·22·27 전건 소화(phase-end 리뷰서 CAP-coverage 대조 완료).
+
+- **도입 표면(W4 승계)**: EntityForm에 addFields.requiredPermissions·withCapabilities/getCapabilities(Capabilities)·addAction/getActions(FormAction/ActionContext/ActionRender)·withReadOnly/getReadOnly. store에 formReadOnly. ViewEntityForm 통합 액션 바(빌트인 Save/Delete 파생+addAction 병합+replaces+visible/enabled 해석[literal sync·함수 async]+render 슬롯+slots{title,header,actions})·Save→controller.save rewire·Delete confirm(messages registry). getStaticConditionalBoolean(schema-core, sync 정적)·getConditionalBoolean(async).
+- **⚠ W4 착수 전 필수(BLOCKING)**: **/schema 계수 180/180 ceiling 도달** — W4 신타입(StepDef·FieldListConfig·FieldFilterConfig·AsyncValidation·DataFieldSpec 등) 첫 export에서 초과. **W4-1 착수 전 스펙 §10 ceiling을 최종 타입 인벤토리 기준으로 재산정**(§Open Questions·임의완화 아님=초기 추정 미달). count-public-surface.mjs 임계값+CI 조정 동반.
+- **W4 패턴 재사용**: withTitle/getTitle(§3.1 해석 체인·구 `''` 버그)·withSteps(StepDef·clone 무손실)·AsyncValidation(§5.3, withValidations 승차)·withRevision(§3.1·adapter.remove revision 인자)·withMeta/getMeta(shallow-merge). hot-file 순차 유지(entity-form/form-store/ViewEntityForm). delegate 기본 sonnet·opus 검증(full gate+diff 발명감사+**phase-end 적대 리뷰 필수**=W3서 4버그 검출 실증).
+- **Do-NOT(W3 승계)**: 스펙 침묵 판단=구현 금지(needs_decision/§Open Q)·getStaticConditionalBoolean을 restrictive-gate(visible/enabled/capability)의 함수 분기에 쓰지 말 것(항상 숨김 버그·W3-6)·store.renderType과 entityForm.getRenderType() 혼용 주의(fetchedData flip·액션 바=id-based)·exactOptional 조건 spread.
+- **미결(§Needs Review 이월)**: #W2-1·#W2-5·#W3-2(capability-denied {ok:false} 구별불가)·#W3-3(controller-optional vs ActionContext.controller required)·#W3-5b(replaces:'save'×formReadOnly). 전부 스펙 저자 판단감·비블로킹.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:
