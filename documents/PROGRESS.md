@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · H·EF·EA·EB·EC ✅ + EG1/EG2 ✅ + EG-D 설계 pass ✅ + **W1 표면 정비 ✅**(7커밋·sonnet delegate). **Next up**: W2 훅+컨트롤러(hot-file 순차·fan-out 금지). **1887 unit/16 E2E**·계수 31/46/161 PASS. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · H·EF·EA·EB·EC ✅ + EG1/EG2 ✅ + EG-D 설계 pass ✅ + W1 표면 정비 ✅ + **W2 훅+컨트롤러 ✅**(8 sub-task·delegate/opus). **Next up**: W3 권한·능력·액션(hot-file 순차·ViewEntityForm 대폭). **1936 unit/E2E 16**·계수 37/49/175 PASS. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 (**W2-7 완료** — useEntityForm(react §7): initializer 합성+controller 동봉·college 페이지 controller.save 이관·initializer @deprecated. opus 리뷰교정 1(validateOnChange 배선). sonnet delegate→opus 검증(full gate green·**1934 unit**·계수 37/49/175 PASS). **Next=W2-8 changeSelectOptions 레이스 fix(W2 마지막)**.)
+**Last updated**: 2026-07-11 (**W2 훅+컨트롤러 완료** — 8 sub-task(`005b4a3`..`ed77ecf`)·라이프사이클 8훅+FormRuntime/Controller+messages+serializeValue+useEntityForm+EF6제거+레이스fix. sonnet delegate 7+inline 1·전건 opus 검증/커밋/push. full gate+**E2E 16**·**1936 unit**·계수 37/49/175·CAP 6+주입점 대조완료. **Next=W3 권한·능력·액션**.)
 
 ## Goal
 
@@ -49,10 +49,10 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음: **W2 훅+컨트롤러** — hot-file 3종 관통·전 태스크 순차·fan-out 금지)
+## 세션 인계 (Handoff — 다음: **W3 권한·능력·액션** — hot-file 순차·fan-out 금지 유지, ViewEntityForm 대폭 수정)
 
-- **W1 완료(2026-07-11, 7커밋 `599a3f3`..`4c04906`)**: 표면 정비 전건 — readOnly/placeholder 개명·EntityForm name/url(fetchUrl 제거·trailing-slash strip)·fieldGroup→group·without*/withTab/withGroup+setTabHidden 제거·배럴 -4/+2·계수 CI. **1887 unit/16 E2E green·grep 5종 0·계수 31/46/161 PASS**. sonnet delegate 7건+opus 검증/커밋. 상세 [archive](./progress-archive/phase-eg-api-redesign.md).
-- **W2 착수 규율(하드)**: hot-file 3종(entity-form/form-store/ViewEntityForm) **전 태스크 순차·fan-out 금지**. 멤버 제거/개명 검증은 **tsc + npm test 둘 다**(tsc -b는 __tests__ 미커버 — W1-3 발견). **W1-5 인계→W3-1**: deriveTabs+form-store seed 2곳 TabDef.hidden conditional 해석 필요(`TODO(W3-1)` 마킹됨).
+- **W2 완료(2026-07-11, 8 sub-task `005b4a3`..`ed77ecf`)**: 훅+컨트롤러 전건 — 라이프사이클 **8훅**(onInit/onChange/onBefore·After{Save,Delete,ListFetch})·InitContext(setMeta)·FormMutator+getRenderType/getSession·**messages** 채널·**serializeValue** seam(toSaveData 재작성)·**FormRuntime(schema)+createFormController(state)**·useEntityForm·EF6 제거·selectOptions 레이스 fix. **1936 unit/E2E 16 green·계수 EntityForm 37/45·root 49/120·/schema 175/180 PASS**. sonnet delegate 7+inline 1·opus 검증/커밋. 상세 [archive](./progress-archive/phase-eg-api-redesign.md#w2).
+- **W3 착수 규율(하드)**: 권한·능력·액션(CAP-02·03·06·08·09·22·27). hot-file 3종 **순차·fan-out 금지** 유지(ViewEntityForm=버튼/액션바 대폭 수정). **승계 배선점**: ① W1-5→W3-1 TabDef.hidden **conditional 해석**(deriveTabs+form-store seed 2곳 `TODO(W3-1)` 마킹) ② W2-5 **capability 게이트**=controller save/del 진입 step1·delete 버튼=ViewEntityForm(현 부재) ③ W2-7 **버튼 rewire**→controller(현 onSave prop 경유·double-validate 해소) ④ **계수 헤드룸 얇음**: /schema 175/180·EntityForm 37/45 — W3 신타입/멤버 감시. 멤버 제거/개명 검증=tsc+npm test 둘 다(tsc -b는 __tests__ 미커버).
 - **설계 pass 완료(2026-07-11, fable)**: 공개 API 재설계 확정 — [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범: CAP-01~29·EntityForm 44멤버·훅 8종·FormRuntime/FormController·messages 채널·serializeValue seam)·[waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약: W1~W4 태스크급 완전 명세, W5~W7 entry-pass 규칙). 4렌즈 적대검증 22건(blocker 1) 전건 반영. 상세 [archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -87,14 +87,14 @@
 - [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` — isPermitted end-to-end(FieldRenderer 하드게이트·EF1 우회불가)·LIVE 보안갭 fix·재설계 무관 유지. +10(1876)·16 E2E · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [~] **W2 훅+컨트롤러** (8/8 코드완료 — 웨이브종료 게이트 진행: E2E+CAP 대조) — onInit/InitContext·FormRuntime/FormController·messages·serializeValue·list 훅 · Spec §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md) (**hot-file 순차 — fan-out 금지**)
+- [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅·InitContext·messages·serializeValue·FormRuntime/Controller·useEntityForm · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
 - [ ] **W3 권한·능력·액션** — 탭/그룹 권한·capabilities·addAction·delete flow E2E·withReadOnly · Spec §3.4·§6.2 · CAP-02·03·06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md) · **W1-5 인계**: TabDef.hidden conditional 해석(deriveTabs + form-store seed 2곳 TODO 마킹)
 - [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W2 훅+컨트롤러**(delegate 기본 sonnet · **hot-file 3종 관통 — 전 태스크 순차·fan-out 금지** · 스펙 §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md)).
+**Next up**: **W3 권한·능력·액션**(delegate 기본 sonnet · **hot-file 순차·fan-out 금지** · ViewEntityForm 버튼/액션바 대폭 · 스펙 §3.4·§6.2 · CAP-02·03·06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md) · W1-5 conditional 해석 승계).
 
 ---
 
