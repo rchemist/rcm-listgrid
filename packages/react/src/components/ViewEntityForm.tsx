@@ -13,6 +13,7 @@ import type {
   FormRuntime,
   RenderType,
   Session,
+  StepDef,
   TabDef,
 } from '@listgrid/schema-core';
 import {
@@ -229,6 +230,18 @@ function tabHasVisibleContent(
   return deriveGroups(entityForm, fields, tabId, userPermissions, renderType).length > 0;
 }
 
+// create-mode wizard (spec §3.2, C6; W4-2) — StepDef.hidden resolution is
+// the SAME hybrid pattern as the action bar's visible/enabled (W3-6 Fix#1),
+// wired inside the component below (resolveStepHidden): literal/
+// OptionalBoolean resolve sync via getStaticConditionalBoolean; a
+// function-typed `hidden` resolves ASYNCHRONOUSLY via getConditionalBoolean
+// (the `stepFnHidden` state + effect), defaulting to NOT hidden while
+// pending. Naively using getStaticConditionalBoolean for the function
+// branch (it always returns `false`, regardless of what the function would
+// actually decide) is the exact restrictive-gate mis-resolution W3-6 fixed
+// for actions' visible/enabled — see this component's `fnFlags` doc above
+// for the full writeup; step `hidden` reuses the identical fix shape.
+
 // ActionContext assembly (spec §3.4; W3-3) — built by the VIEW (L7:
 // schema-core only declares the shape, never executes a hook/action). The
 // mutator mirrors form-controller.ts's `buildMutator` (@listgrid/state)
@@ -343,6 +356,22 @@ function ViewEntityFormInner({
   // dep (a new array identity every render would otherwise re-run it every
   // render, W3-6 브리프 mergedRef pattern).
   const mergedRef = useRef<FormAction[]>([]);
+  // create-mode wizard (spec §3.2, C6; W4-2) — async-resolved function-typed
+  // StepDef.hidden, keyed by step id (W3-6 Fix#1 hybrid pattern, same shape
+  // as `fnFlags` above); literal/OptionalBoolean never populate this (they
+  // resolve sync in `resolveStepHidden` below). Local view state — no new
+  // form-store slice.
+  const [stepFnHidden, setStepFnHidden] = useState<Record<string, boolean>>({});
+  // the wizard's current position, as an INDEX INTO `visibleSteps` (computed
+  // below) — local view state (ephemeral UI position, not form data).
+  // Clamped to the visible range at render time (`clampedStepIndex` below)
+  // rather than reset via an effect, so a step becoming hidden mid-wizard
+  // degrades gracefully instead of throwing/blanking.
+  const [stepIndex, setStepIndex] = useState(0);
+  // latest declared steps (`entityForm.getSteps()` returns a NEW array every
+  // call) — read by the async hidden-resolution effect without making it an
+  // effect dep (mergedRef precedent immediately above).
+  const rawStepsRef = useRef<StepDef[]>([]);
   // EF4/EC3-0: subscribe to structureVersion and tabHidden ONLY — a value
   // edit must NOT re-derive tabs/groups (D4 stays intact, per
   // FieldRenderer/useFormField); an addField/removeField bump or a
@@ -377,12 +406,57 @@ function ViewEntityFormInner({
 
   const actionCtx = buildActionCtx(store, entityForm, controller, session);
 
+  // --- create-mode wizard derivation (spec §3.2, C6; W4-2) ---
+  // Gate: declared steps non-empty AND create mode — id-based
+  // `actionRenderType` (W3-6 Fix#3 precedent: a create-mode wizard is about
+  // whether this is a NEW record, not about whether initialData/fetchedData
+  // pre-filled it). Steps undeclared or update mode ⇒ wizardActive is
+  // false, and the tab/group rendering below is UNCHANGED (Do-NOT: no
+  // regression to the non-wizard path).
+  const rawSteps = entityForm.getSteps();
+  rawStepsRef.current = rawSteps;
+  const wizardActive = actionRenderType === 'create' && rawSteps.length > 0;
+
+  // literal/OptionalBoolean: sync exact (getStaticConditionalBoolean,
+  // actionRenderType — Fix#3 precedent). function branch: async
+  // stepFnHidden, defaulting to NOT hidden while pending (never
+  // hidden-by-default — see the module comment above, W3-6 Fix#1 shape).
+  function resolveStepHidden(step: StepDef): boolean {
+    if (step.hidden === undefined) return false;
+    if (typeof step.hidden === 'function') return stepFnHidden[step.id] ?? false;
+    return getStaticConditionalBoolean(step.hidden, actionRenderType);
+  }
+
+  const visibleSteps = wizardActive ? rawSteps.filter((s) => !resolveStepHidden(s)) : [];
+  const clampedStepIndex = Math.min(stepIndex, Math.max(visibleSteps.length - 1, 0));
+  const currentStep = visibleSteps[clampedStepIndex];
+  const isLastStep = clampedStepIndex >= visibleSteps.length - 1;
+
+  function goToPrevStep(): void {
+    setStepIndex((i) => Math.max(i - 1, 0));
+  }
+  function goToNextStep(): void {
+    setStepIndex((i) => Math.min(i + 1, visibleSteps.length - 1));
+  }
+
   const fields = liveFields(store.getState().fieldDefs);
-  const tabs = deriveTabs(entityForm, fields, tabHidden, userPermissions, renderType);
+  // the current step's fields ONLY (spec §3.2 — "각 step은 step.fields에
+  // 나열된 필드만 표시"), in the same declaration/order-sorted sequence
+  // `fields` already carries (deriveGroupFields precedent below — step.fields
+  // is a membership set, not a render-order override).
+  const stepFields =
+    wizardActive && currentStep
+      ? fields.filter((f) => currentStep.fields.includes(f.getName()))
+      : [];
+  const tabs = wizardActive
+    ? []
+    : deriveTabs(entityForm, fields, tabHidden, userPermissions, renderType);
   // if the active tab became hidden, tabs.find(...) misses and this falls
   // back to the first still-visible tab (EC3-0 active-tab-fallback contract).
   const activeTabId = tabs.find((t) => t.id === tabIndex)?.id ?? tabs[0]?.id ?? DEFAULT_TAB_ID;
-  const groups = deriveGroups(entityForm, fields, activeTabId, userPermissions, renderType);
+  const groups = wizardActive
+    ? []
+    : deriveGroups(entityForm, fields, activeTabId, userPermissions, renderType);
   // spec §3.1 — getTitle's resolution chain (fromField/name-field steps)
   // reads live field values; pass the store's current snapshot so a
   // fromField/name-driven title reflects fetched/edited data, not just the
@@ -553,6 +627,41 @@ function ViewEntityFormInner({
     // capability/formReadOnly/controller changes only.
   }, [store, session, entityForm, formReadOnly, controller, structureVersion, actionRenderType]);
 
+  // create-mode wizard (spec §3.2, C6; W4-2) — function-typed StepDef.hidden
+  // resolved ASYNCHRONOUSLY, identical shape to the W3-6 Fix#1 effect above
+  // (this is the SAME restrictive-gate mis-resolution class: naively
+  // resolving a function-typed `hidden` via getStaticConditionalBoolean
+  // always returns `false`, i.e. never the function's real answer — Do-NOT
+  // reach for that sync helper here). Literal/OptionalBoolean stay on the
+  // sync path (`resolveStepHidden` above) — unchanged, no flash. Skipped
+  // entirely when the wizard isn't active (no steps declared / update mode).
+  useEffect(() => {
+    if (!wizardActive) return;
+    const functionSteps = rawStepsRef.current.filter((s) => typeof s.hidden === 'function');
+    if (functionSteps.length === 0) return;
+    let cancelled = false;
+    void (async () => {
+      const s = store.getState();
+      const evalCtx: FieldEvalContext = {
+        renderType: actionRenderType, // id-based — matches the action bar (Fix#3)
+        values: snapshotFieldValues(s),
+        ...(session !== undefined ? { session } : {}),
+      };
+      const next: Record<string, boolean> = {};
+      for (const step of functionSteps) {
+        next[step.id] = await getConditionalBoolean(evalCtx, step.hidden);
+      }
+      if (!cancelled) setStepFnHidden((prev) => ({ ...prev, ...next }));
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Same D4-compliant snapshot posture as the Fix#1 effect above.
+    // Re-resolves on structural/renderType/session changes + wizardActive
+    // itself (a form that flips out of create mode / loses its steps stops
+    // re-resolving).
+  }, [store, session, entityForm, structureVersion, actionRenderType, wizardActive]);
+
   // literal/OptionalBoolean: sync exact (getStaticConditionalBoolean, W3-1
   // pattern, actionRenderType — Fix#3). function branch: async fnFlags,
   // default show/enabled while pending (Fix#1).
@@ -693,6 +802,34 @@ function ViewEntityFormInner({
         </fieldset>
       ))}
 
+      {/* create-mode wizard (spec §3.2, C6; W4-2) — replaces the tab bar/groups
+          above (both derive to [] when wizardActive, so nothing else renders
+          there) with a step indicator + the CURRENT step's fields only. */}
+      {wizardActive && (
+        <div role="list" data-steps-indicator="" aria-label="steps">
+          {visibleSteps.map((step, i) => (
+            <span
+              key={step.id}
+              role="listitem"
+              data-step-indicator={step.id}
+              aria-current={i === clampedStepIndex ? 'step' : undefined}
+            >
+              {i + 1}. {step.label}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {wizardActive && currentStep && (
+        <fieldset key={currentStep.id} data-step={currentStep.id}>
+          <legend>{currentStep.label}</legend>
+          {currentStep.description && <p>{currentStep.description}</p>}
+          {stepFields.map((field) => (
+            <FieldRenderer key={field.getName()} field={field} />
+          ))}
+        </fieldset>
+      )}
+
       {messages.length > 0 && (
         <ul role="alert" data-form-errors="">
           {messages.map((m) => (
@@ -705,8 +842,33 @@ function ViewEntityFormInner({
 
       {slots?.actions !== undefined ? (
         resolveSlot(slots.actions, actionCtx)
+      ) : wizardActive && !isLastStep ? (
+        // non-last wizard step: prev/next navigation ONLY — no Save/Delete/
+        // custom actions (spec §3.2 — "마지막 step에서 기존 Save 어포던스").
+        <div data-form-actions="" data-wizard-nav="">
+          {clampedStepIndex > 0 && (
+            <Button type="button" onClick={goToPrevStep}>
+              이전
+            </Button>
+          )}
+          <Button type="button" onClick={goToNextStep}>
+            다음
+          </Button>
+        </div>
       ) : (
-        <div data-form-actions="">{visibleActions.map(renderAction)}</div>
+        // non-wizard tabs/groups OR the wizard's LAST step: the existing
+        // action bar (Save/Delete/custom) — plus a wizard "이전" affordance
+        // when this IS the wizard's last step and there's somewhere to go
+        // back to (minimal, non-invented nav — Do-NOT: no step-level
+        // validation gating).
+        <div data-form-actions="">
+          {wizardActive && clampedStepIndex > 0 && (
+            <Button type="button" onClick={goToPrevStep}>
+              이전
+            </Button>
+          )}
+          {visibleActions.map(renderAction)}
+        </div>
       )}
     </div>
   );

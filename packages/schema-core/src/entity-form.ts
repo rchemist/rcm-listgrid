@@ -288,6 +288,49 @@ export interface TabInput {
 }
 
 /**
+ * Declared create-mode wizard step (spec §3.2, C6; W4-2) — `withSteps`/
+ * `getSteps`. Distinct from {@link TabDef}: a step groups fields by NAME
+ * reference (`fields`) instead of each field declaring its own tabId — the
+ * wizard is an independent, additive create-mode rendering mode (spec §3.2),
+ * not a replacement for the tab/group model (update mode keeps rendering
+ * tabs/groups even when steps are declared, `@listgrid/react`'s
+ * ViewEntityForm, W4-2). `hidden` reuses {@link ConditionalBooleanValue}
+ * (CAP-10, L5 — no new conditional type is introduced for this); resolving a
+ * non-boolean value needs a {@link FieldEvalContext} this pure declaration
+ * layer doesn't have, so that's the render layer's job, same posture as
+ * `TabDef.hidden`.
+ */
+export interface StepDef {
+  id: string;
+  label: string;
+  order?: number | undefined;
+  fields: string[];
+  description?: string | undefined;
+  hidden?: ConditionalBooleanValue | undefined;
+}
+
+/**
+ * Deep-copy a StepDef, INCLUDING its `fields` array (spec §3.2; W4-2) — the
+ * copy shares no mutable structure with the input, so a caller mutating the
+ * array/objects it passed to `withSteps` after the call (or mutating what
+ * `getSteps()`/`clone()` handed back) can never reach into this instance's
+ * storage. Every optional key is assigned unconditionally (both StepDef and
+ * this fn's return type declare `| undefined` explicitly — no
+ * exactOptionalPropertyTypes conditional-spread dance needed, Capabilities/
+ * FormAction precedent).
+ */
+function cloneStepDef(step: StepDef): StepDef {
+  return {
+    id: step.id,
+    label: step.label,
+    order: step.order,
+    fields: [...step.fields],
+    description: step.description,
+    hidden: step.hidden,
+  };
+}
+
+/**
  * CRUD capability declaration (spec §3.4, CAP-06/CAP-22) — successor to the
  * 0.3.x `withNeverDelete` (a single delete-only inert flag). Each key
  * defaults to allowed when omitted (`undefined` = true, spec §3.4 "기본 전부
@@ -419,6 +462,13 @@ export class EntityForm {
   private readonly groups = new Map<string, FieldGroupDef>();
   private groupSeq = 0;
   private tabSeq = 0;
+  /**
+   * Declared create-mode wizard steps (spec §3.2, C6; W4-2) — `withSteps`'s
+   * storage. A whole-array REPLACE slot (L1 `with*` semantics), not a
+   * per-id map like `tabs`/`groups` — there's no addFields-driven
+   * incremental registration to dedupe against.
+   */
+  private steps: StepDef[] = [];
   /**
    * Imperative lifecycle hooks (EF2): dispatched by the form store after
    * setValue (see @listgrid/state createFormStore). Successor to the 0.3.x
@@ -734,6 +784,22 @@ export class EntityForm {
     return this;
   }
 
+  /**
+   * Declare the create-mode wizard's steps (spec §3.2, C6; W4-2) — REPLACES
+   * any previously-declared steps (L1 `with*` default semantics,
+   * `withTitle` precedent — set/replace, no merge). `undefined` clears back
+   * to no wizard: `getSteps()` returns `[]`, and the view (ViewEntityForm)
+   * falls back to its normal tab/group rendering since the wizard gate is
+   * "declared steps non-empty" (W4-2). Each StepDef — and its `fields`
+   * array — is deep-copied into storage ({@link cloneStepDef}) so a later
+   * mutation of the caller's input array/objects can't reach into this
+   * instance.
+   */
+  withSteps(steps: StepDef[] | undefined): this {
+    this.steps = steps === undefined ? [] : steps.map((s) => cloneStepDef(s));
+    return this;
+  }
+
   // --- queries ---
   /**
    * Resolve the display title (spec §3.1) — ALWAYS a non-empty string (the
@@ -860,6 +926,20 @@ export class EntityForm {
       (f) => f.getTabId() === tabId && (f.getFieldGroupId() || DEFAULT_GROUP) === groupId,
     );
   }
+  /**
+   * Declared wizard steps (spec §3.2, C6; W4-2), order-sorted ascending
+   * (stable sort — `getTabs()`/`getFields()` precedent, missing `order`
+   * treated as 0). Declaration order is NOT dispatch/render order. `hidden`
+   * is NOT filtered here — `getSteps()` always returns every declared step,
+   * hidden or not (spec §3.2: resolving a non-boolean
+   * `ConditionalBooleanValue` needs a `FieldEvalContext` this pure
+   * declaration layer doesn't have; that resolution, and the hidden-step
+   * exclusion it drives, is the view's job — `@listgrid/react`'s
+   * ViewEntityForm, W4-2).
+   */
+  getSteps(): StepDef[] {
+    return [...this.steps].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }
 
   /** Declaration clone (charter C1: `userForm.clone().withId(id)` for the form screen). */
   clone(includeValue = false): EntityForm {
@@ -873,6 +953,11 @@ export class EntityForm {
     for (const [k, v] of this.tabs) copy.tabs.set(k, { ...v });
     for (const [k, v] of this.groups) copy.groups.set(k, { ...v });
     for (const f of this.fields) copy.fields.push(f.clone(includeValue));
+    // propagate wizard steps (spec §3.2, C6; W4-2) — DEEP copy via
+    // cloneStepDef, and every declared step INCLUDING a hidden one (no
+    // hidden filter here, mirrors getSteps() — the historical GJCU 0.3.x
+    // clone dropped hidden steps entirely; this clone does not).
+    copy.steps = this.steps.map((s) => cloneStepDef(s));
     // propagate changeHandlers (0.3.x parity — src/listgrid/config/EntityForm.tsx:94).
     copy.changeHandlers = [...this.changeHandlers];
     // propagate initHandlers (spec §3.3/§4.1, same clone-propagation contract).

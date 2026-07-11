@@ -188,6 +188,10 @@ export type { Address, AddressFieldsProps, AddressSiblingNames } from './field/a
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput, Capabilities } from './entity-form';
 
+// --- create-mode wizard (spec §3.2, C6; W4-2 — withSteps/getSteps declared
+// on EntityForm above; StepDef.hidden reuses ConditionalBooleanValue, CAP-10) ---
+export type { StepDef } from './entity-form';
+
 // --- imperative lifecycle: consolidated init/fetch hook (spec §3.3/§4.1
 // `onInit`; W2-1 — dispatched by initializeFormStore, @listgrid/state) ---
 export type { InitContext, InitHandler } from './entity-form';
