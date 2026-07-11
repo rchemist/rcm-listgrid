@@ -49,10 +49,11 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — 다음 작업: EA-D2-0 → D2-1 → EC3-0 → EC3)
+## 세션 인계 (Handoff — 현재: EC3 위임 실행 중, 이후 EC 마무리)
 
-- **현 상태**: H·EF(+EF6)·EA·EB·EC1·EC2 ✅ — **명령형 라이프사이클 실브라우저 실증 완료**(EC2 5/5·결함 0). **1766 unit + 12 E2E green**, 전부 push. 남은 것: EA-D2(Xref, [~] 설계 확정됨)→EC3-0→EC3, 후순위(EC4·EF7·EC-F1·M2O-tree).
-- **다음 = EA-D2-0 pre-stage**: [브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md) 배너 결정 ①②대로 — ViewListGrid `selection{enabled,onConfirm}`+`toolbar(ctx)`+list-store `postFetch(rows)`+columns 유니온+`ManyToOneConfig.filter`(→initialSearch 변환). 이후 D2-1(Xref 2종, plain 뷰만·값 pass-through·degrees [fn] 교정), EC3-0(TAB-자체-숨김), EC3(Major 재현 E2E 4시나리오 — 브리핑 §6).
+- **현 상태**: H·EF(+EF6)·EA(+D2)·EB·EC1·EC2·EC3-0 ✅. **1838 unit + 12 E2E green**, 전부 push. **EC3(Major 재현)가 sonnet 위임으로 실행 중**(wf_3a3f8656-d64) — 복귀 시 §Post-return 프로토콜(아카이브→HEAD/manifest→full gate+E2E→logic 커밋→PROGRESS 커밋→push→deviation 라우팅) 그대로.
+- **이후 순서**: EC3 종결 → **EC 페이즈 리뷰 게이트**(delegate 페이즈 의무 — EF/EA/EB 게이트와 동일 패턴: find(sonnet)+verify(opus), 무인 FIND-ONLY, blocking→수정 태스크·나머지→NR) → EC 아카이브+Handoff → 소형 마무리(EC-F1 flake·EC-F2 커서/IME 핀) → **EF7 [O] 설계**(유일한 잔여 아키텍처 결정 — [ec2 브리핑 §2](./analysis/2026-07-11/ec2-collabo-briefing.md)에 기전·선택지 기록) → 선택(EC4·M2O-tree·드래그는 후순위/보류).
+- **모델 정책(사용자 확정 2026-07-11)**: 세션 opus 전환 승인 — 실행 루프는 패턴화 완료(브리핑 예제는 workflows/scripts/*.js + analysis/*.md), [O]=EF7만 상위 판단. fable 불필요(원래 정책대로).
 - **Do-NOT**: ① degrees `filters:[fn]` 원형 복제 금지(교정 포트) ② supportPriority/드래그·self-ref 트리 UI를 EA-D2/EC3에 편입 금지(증거 완비 연기) ③ SelectionOptions 전체 이식 금지(최소형) ④ store 직접 수신 금지(FormMutator) ⑤ entityForm.getFields() 직접 읽기 금지(store.fieldDefs) ⑥ 형식 P3~P7 재개 금지 ⑦ **Agent 출력 파일에 jq 파이프 금지**(JSONL 트랜스크립트 — EC2 사고, 컨텍스트 원문→Write만).
 - **불변/함정**: EF1 override `??`·D4. cascade:false=dispatch만. build-after-hooks+clone(true). 빈 non-array 쓰기 undefined. Xref 값은 toSaveData 무변환 통과(EF6 불필요 — 확인됨). exactOptionalPropertyTypes 조건 spread(반복 결함 1위).
 - **작업 규율**: 설계=세션(conductor)·구현=sonnet 위임·검증=세션 rigorous(full gate+12 E2E). 완료=logic 커밋→PROGRESS 커밋→push. 게이트: `type-check && typecheck:packages && test && lint && format:check && build`.
