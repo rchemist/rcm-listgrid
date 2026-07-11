@@ -107,7 +107,14 @@ export function isDirty(slice: FieldValue | undefined): boolean {
 /**
  * Reset current back to the mode's baseline (update→fetched, create→default).
  * Returns a NEW slice (immutable — the store replaces the slice). Transplant of
- * FormField.resetValue:757-767.
+ * FormField.resetValue:757-767. W4-6 FIX #3 (phase-end hardening) — a slice
+ * carrying the W4-3 `asyncState` tri-state is ALSO reset to `'unchecked'`
+ * here, mirroring how `errors` is cleared just below: a reverted value is by
+ * definition unchecked again (a stale 'valid'/'checking' from before the
+ * reset must not linger and mislead the AsyncValidation button/status UI).
+ * A slice with no `asyncState` key (no declared AsyncValidation on the
+ * field) is left untouched — this must never ADD the key to a field that
+ * never had one.
  */
 export function resetValue<T>(
   slice: FieldValueSlice<T>,
@@ -122,5 +129,8 @@ export function resetValue<T>(
   }
   next.dirty = false;
   delete next.errors;
+  if (next.asyncState !== undefined) {
+    next.asyncState = 'unchecked';
+  }
   return next;
 }

@@ -9,8 +9,8 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { EntityForm, StringField, type StepDef } from '@listgrid/schema-core';
-import { createFormStore } from '@listgrid/state';
+import { EntityForm, StringField, type BackendAdapter, type StepDef } from '@listgrid/schema-core';
+import { createFormController, createFormStore } from '@listgrid/state';
 import { defaultUIComponents } from '@listgrid/ui-default';
 import { AuthProvider } from '../providers/auth';
 import { UIProvider } from '../providers/ui';
@@ -207,6 +207,107 @@ describe('create-mode wizard — hidden-step exclusion (W3-6 Fix#1 hybrid patter
     await screen.findByLabelText(/^A/);
     await waitFor(() => {
       expect(screen.getByText('2. Step 2')).toBeInTheDocument();
+    });
+  });
+});
+
+// W4-6 FIX #1 (phase-end hardening) — Save's validateAll() runs over EVERY
+// declared field (다음 never validates the step it leaves, spec §3.2).
+// Before this fix, a required field left blank on a NON-current step
+// silently dead-ended Save on the last step: the store recorded the error,
+// but that field's <FieldRenderer> was never mounted (only the current
+// step's `fields` render), so `focusFirstInvalidField`'s
+// `document.getElementById` lookup missed — no navigation, no visible
+// error. Wired with a REAL `createFormController` (not a fake) so
+// `controller.save()` genuinely runs `store.getState().validateAll()`,
+// mirroring how the other wizard tests above wire controller/store.
+describe('create-mode wizard — Save failure navigates back to the invalid step (W4-6 FIX #1)', () => {
+  function requiredStepsForm(): EntityForm {
+    return new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [
+          new StringField('a', 1).withRequired(true).withLabel('A'),
+          new StringField('b', 2).withRequired(true).withLabel('B'),
+          new StringField('c', 3).withRequired(true).withLabel('C'),
+        ],
+      })
+      .withSteps(defaultSteps());
+  }
+
+  function fakeAdapter(): BackendAdapter {
+    return {
+      list: vi.fn(async () => ({ content: [], totalElements: 0, totalPages: 0 })),
+      getOne: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      remove: vi.fn(),
+    };
+  }
+
+  function renderWithController(entityForm: EntityForm) {
+    const store = createFormStore(entityForm);
+    const controller = createFormController({ entityForm, store, adapter: fakeAdapter() });
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AuthProvider session={undefined}>
+          <FormStoreProvider store={store}>
+            <ViewEntityForm
+              entityForm={entityForm}
+              store={store}
+              controller={controller}
+              onSave={vi.fn()}
+            />
+          </FormStoreProvider>
+        </AuthProvider>
+      </UIProvider>,
+    );
+    return { store };
+  }
+
+  it('leaves step 1 blank, advances to the last step, clicks Save: the wizard navigates back to step 1 and shows its error', async () => {
+    const entityForm = requiredStepsForm();
+    renderWithController(entityForm);
+
+    // step 1 — leave 'a' BLANK, advance anyway (다음 never validates).
+    await screen.findByLabelText(/^A/);
+    fireEvent.click(screen.getByRole('button', { name: '다음' }));
+
+    // step 2 — fill 'b' so it's not ALSO invalid, advance.
+    const bInput = await screen.findByLabelText(/^B/);
+    fireEvent.change(bInput, { target: { value: 'bee' } });
+    fireEvent.click(screen.getByRole('button', { name: '다음' }));
+
+    // step 3 — fill 'c', click Save (validateAll fails on 'a' only).
+    const cInput = await screen.findByLabelText(/^C/);
+    fireEvent.change(cInput, { target: { value: 'cee' } });
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    // FIX #1: navigates BACK to step 1 — 'a' mounts again and its
+    // required-field error renders. Previously: stuck on step 3, no
+    // navigation, no visible error.
+    const aInputAgain = await screen.findByLabelText(/^A/);
+    expect(aInputAgain).toBeInTheDocument();
+    expect(screen.queryByLabelText(/^C/)).not.toBeInTheDocument();
+    expect(screen.getByText('1. Step 1')).toBeInTheDocument();
+
+    const fieldWrapper = aInputAgain.closest('[data-field-name="a"]');
+    expect(fieldWrapper).not.toBeNull();
+    expect(fieldWrapper?.querySelector('[role="alert"]')).toBeInTheDocument();
+  });
+
+  it('non-wizard forms are unaffected: Save failure still just focuses/errors in place (no step index exists)', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget').addFields({
+      items: [new StringField('a', 1).withRequired(true).withLabel('A')],
+    });
+    renderWithController(entityForm);
+
+    await screen.findByLabelText(/^A/);
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    const aField = await screen.findByLabelText(/^A/);
+    const fieldWrapper = aField.closest('[data-field-name="a"]');
+    await waitFor(() => {
+      expect(fieldWrapper?.querySelector('[role="alert"]')).toBeInTheDocument();
     });
   });
 });

@@ -99,4 +99,21 @@ describe('FieldRenderer — AsyncValidation button affordance', () => {
     await waitFor(() => expect(screen.getByText('이미 사용 중인 별칭입니다')).toBeInTheDocument());
     expect(store.getState().fields.alias?.asyncState).toBe('invalid');
   });
+
+  // W4-6 FIX #4 (phase-end hardening) — the confirm button's `disabled` was
+  // only `asyncState === 'checking'`, so a readOnly field/form still let a
+  // user click it and mutate asyncState/errors. `effReadOnly` (formReadOnly
+  // OR the field's own declared/meta readOnly, FieldRenderer.tsx) must ALSO
+  // disable the button.
+  it('formReadOnly disables the confirm button even when asyncState is "unchecked" (not just while "checking")', async () => {
+    const check = vi.fn(async () => ValidateResult.success());
+    renderForm(AsyncDemoForm(check).withReadOnly(true));
+
+    await screen.findByLabelText(/^별칭/);
+    const button = screen.getByRole('button', { name: '중복확인' });
+    expect(button).toBeDisabled();
+
+    fireEvent.click(button);
+    expect(check).not.toHaveBeenCalled();
+  });
 });

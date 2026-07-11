@@ -826,6 +826,13 @@ export class EntityForm {
    * REMOVES that key from the stored meta (L4 "undefined = clear"), rather
    * than storing an `undefined` value — so `getMeta()` never reports a key
    * with an `undefined` value.
+   *
+   * W4-6 FIX #2 (phase-end hardening) — a nested value/array given in
+   * `patch` (e.g. `withMeta({ tags: ['a'] })`) is stored BY REFERENCE, not
+   * deep-cloned (arbitrary meta values aren't safely structuredClone-able).
+   * To change such a value, call `withMeta` again with a brand-new
+   * value/array — do NOT mutate the one you already passed in, or one read
+   * back via `getMeta()`; see that getter's treat-as-immutable doc.
    */
   withMeta(patch: Record<string, unknown>): this {
     const next = { ...this.meta };
@@ -1002,7 +1009,17 @@ export class EntityForm {
   /**
    * Declared escape-hatch metadata (spec §3.1, CAP-23) — `withMeta`'s reader
    * pair. Defaults to `{}` (never called). Same no-defensive-copy posture as
-   * {@link getCapabilities} — returns the live stored object, not a clone.
+   * {@link getCapabilities} — returns the LIVE stored object, not a clone.
+   * W4-6 FIX #2 (phase-end hardening) — **treat the return value as
+   * IMMUTABLE** (same posture `getCapabilities` already documents):
+   * consumers REPLACE a value via `withMeta({ key: newValue })`, and must
+   * NOT mutate the object (or a nested value/array inside it) this getter
+   * hands back. `clone()` only gives independence at the TOP-LEVEL-KEY
+   * granularity (see `clone()`'s doc) — a nested value/array is shared BY
+   * REFERENCE between an original and its clone, so mutating one through
+   * this getter's return value is visible through the other's `getMeta()`
+   * too. This is a documentation contract, not an enforced one — `withMeta`
+   * is the only sanctioned write path.
    */
   getMeta(): Record<string, unknown> {
     return this.meta;
@@ -1028,10 +1045,18 @@ export class EntityForm {
     const copy = new EntityForm(this.name, this.url);
     copy.titleSpec = { ...this.titleSpec };
     copy.capabilities = { ...this.capabilities };
-    // propagate escape-hatch meta (spec §3.1, CAP-23) — SHALLOW copy
-    // (clone independence: a later withMeta call on either instance
-    // rebuilds its own object, never mutating the other's), same posture
-    // as `capabilities` above.
+    // propagate escape-hatch meta (spec §3.1, CAP-23) — SHALLOW copy, so
+    // clone independence holds at the TOP-LEVEL-KEY granularity only (a
+    // later withMeta call on either instance rebuilds its own top-level
+    // object, never mutating the other's), same posture as `capabilities`
+    // above. W4-6 FIX #2 (phase-end hardening) — a NESTED value/array
+    // stored under a key (e.g. withMeta({ tags: ['a'] })) is SHARED BY
+    // REFERENCE between `this` and `copy`: mutating it in place (e.g.
+    // `copy.getMeta().tags.push('b')`) is visible through BOTH instances'
+    // getMeta(). Documented and intentional, NOT deep-cloned (arbitrary
+    // meta values aren't safely structuredClone-able) — getMeta()'s
+    // treat-as-immutable contract is what actually prevents this in
+    // practice; see that doc.
     copy.meta = { ...this.meta };
     copy.formReadOnly = this.formReadOnly;
     if (this.id !== undefined) copy.id = this.id;

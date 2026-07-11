@@ -497,19 +497,52 @@ function ViewEntityFormInner({
     }
   }
 
+  // W4-6 FIX #1 (phase-end hardening) — wizard Save dead-end: 다음 never
+  // validates the step it leaves (spec §3.2), so a required field on a
+  // NON-current step can still be invalid when Save's validateAll() runs
+  // (both controller.save() and the legacy store.validateAll() validate
+  // EVERY declared field, not just the current step's). Only the CURRENT
+  // step's fields are mounted (`stepFields` above) — an off-step invalid
+  // field has no element in the DOM, so `focusFirstInvalidField`'s
+  // `document.getElementById` lookup silently misses: no focus move, no
+  // visible error, the user is stuck on the last step with zero feedback.
+  // Navigate to the step that OWNS the first invalid field BEFORE focusing,
+  // so that field actually mounts and its error renders. No-op when not
+  // wizardActive (non-wizard forms: every field is already mounted,
+  // unaffected — Do-NOT regress the existing path) or when no invalid
+  // field/owning step is found (defensive — should not happen the instant
+  // validateAll() has just reported failure).
+  function jumpToInvalidStep(): void {
+    if (!wizardActive) return;
+    const state = store.getState();
+    const invalidFields = Object.values(state.fieldDefs)
+      .filter((f) => (state.fields[f.getName()]?.errors?.length ?? 0) > 0)
+      .sort((a, b) => a.getOrder() - b.getOrder());
+    const firstInvalid = invalidFields[0];
+    if (!firstInvalid) return;
+    const targetIndex = visibleSteps.findIndex((s) => s.fields.includes(firstInvalid.getName()));
+    if (targetIndex !== -1 && targetIndex !== clampedStepIndex) {
+      setStepIndex(targetIndex);
+    }
+  }
+
   // Save rewire (W3-3 briefing §설계 결정 2 — deviation: onSave repurpose) —
   // controller present: SINGLE validate happens inside controller.save()
   // (resolves the old double-validate — this view no longer calls
   // validateAll() itself first), onSave becomes a post-save success
   // callback (e.g. host navigation), a11y focus-first-invalid is preserved
   // on the ok:false branch. controller absent: legacy path unchanged
-  // (validateAll → onSave(data) as the save transport itself).
+  // (validateAll → onSave(data) as the save transport itself). W4-6 FIX #1
+  // — jumpToInvalidStep() runs BEFORE focusFirstInvalidField() on both
+  // failure branches, so a wizard whose failing field lives off the current
+  // step navigates there first (see that fn's doc above).
   async function runBuiltinSave(): Promise<void> {
     if (controller) {
       const outcome = await controller.save();
       if (outcome.ok) {
         await onSave?.(store.getState().toSaveData());
       } else {
+        jumpToInvalidStep();
         focusFirstInvalidField();
       }
     } else {
@@ -517,6 +550,7 @@ function ViewEntityFormInner({
       if (valid) {
         await onSave?.(store.getState().toSaveData());
       } else {
+        jumpToInvalidStep();
         focusFirstInvalidField();
       }
     }

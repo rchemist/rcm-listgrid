@@ -149,7 +149,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
           <button
             type="button"
             onClick={() => void store.getState().runAsyncValidation(fieldName)}
-            disabled={slice.asyncState === 'checking'}
+            disabled={effReadOnly || slice.asyncState === 'checking'}
           >
             {asyncValidation.buttonLabel}
           </button>

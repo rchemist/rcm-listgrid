@@ -51,3 +51,40 @@ test('다음 does not validate the current step — the wizard advances even wit
   await page.getByRole('button', { name: '다음' }).click(); // firstName left blank
   await expect(page.getByLabel(/^성/)).toBeVisible();
 });
+
+// W4-6 FIX #1 (phase-end hardening) — Save's validateAll() runs over EVERY
+// declared field, not just the current step's (다음 never validates the
+// step it leaves). Before this fix, clicking Save on the last step with an
+// earlier step's required field left blank silently dead-ended: the store
+// recorded the error, but that field's <FieldRenderer> was never mounted
+// (only the CURRENT step's fields render), so focusFirstInvalidField's
+// getElementById lookup missed — no navigation, no visible error, no focus.
+test('Save on the last step with an earlier step left blank navigates the wizard back to that step and shows its error', async ({
+  page,
+}) => {
+  await page.goto('/steps-demo/new');
+
+  // step 1 (이름) — leave firstName BLANK, advance anyway (다음 never validates)
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // step 2 (성) — fill lastName so it's the ONLY invalid field once Save runs
+  await page.getByLabel(/^성/).fill('홍');
+  await page.getByRole('button', { name: '다음' }).click();
+
+  // step 3 (연락처) — fill email, then Save (validateAll fails on firstName only)
+  await page.getByLabel(/^이메일/).fill('hong@example.com');
+  await page.getByRole('button', { name: 'Save' }).click();
+
+  // the wizard must navigate BACK to step 1 — firstName mounts again, its
+  // step indicator becomes current, and its required-field error renders.
+  await expect(page.getByLabel(/^이름/)).toBeVisible();
+  await expect(page.getByLabel(/^성/)).not.toBeVisible();
+  await expect(page.locator('[data-step-indicator="name"]')).toHaveAttribute(
+    'aria-current',
+    'step',
+  );
+  await expect(page.locator('[data-field-name="firstName"] [role="alert"]')).toBeVisible();
+
+  // save never actually went through — still on /new, not /done
+  await expect(page).toHaveURL(/\/steps-demo\/new$/);
+});

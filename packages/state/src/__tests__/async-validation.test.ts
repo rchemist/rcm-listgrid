@@ -112,6 +112,24 @@ describe("form-store AsyncValidation (W4-3) — 'button' trigger tri-state", () 
     const store = createFormStore(ButtonForm(async () => ValidateResult.success()));
     await expect(store.getState().runAsyncValidation('nonexistent')).resolves.toBeUndefined();
   });
+
+  // W4-6 FIX #3 (phase-end hardening) — resetValue (schema-core/field/
+  // value.ts, pre-W4-3) cleared current/dirty/errors but never touched the
+  // W4-3 `asyncState` slice field: after store.reset() a field checked
+  // 'valid' for a now-reverted value kept showing "사용 가능" (or a
+  // mid-flight 'checking' left the confirm button disabled forever). reset()
+  // must bring a declared-AsyncValidation field's asyncState back to
+  // 'unchecked' — a reset value is by definition unchecked again.
+  it('store.reset() brings a checked field back to asyncState "unchecked" (W4-6 FIX #3)', async () => {
+    const store = createFormStore(ButtonForm(async () => ValidateResult.success()));
+    store.getState().setValue('alias', 'unique-alias');
+    await store.getState().runAsyncValidation('alias');
+    expect(store.getState().fields.alias?.asyncState).toBe('valid');
+
+    store.getState().reset();
+
+    expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
+  });
 });
 
 describe("form-store AsyncValidation (W4-3) — 'change' trigger debounce", () => {

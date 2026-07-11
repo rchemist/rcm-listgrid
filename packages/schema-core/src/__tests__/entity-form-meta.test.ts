@@ -88,3 +88,33 @@ describe('EntityForm.getMeta — no defensive copy (mirrors getCapabilities conv
     expect(form.getMeta()).toEqual({ a: 999 });
   });
 });
+
+// W4-6 FIX #2 (phase-end hardening) — clone()'s meta copy is SHALLOW at the
+// top-level-key granularity only (entity-form.ts clone() doc): a nested
+// value/array is shared BY REFERENCE between an original and its clone, not
+// deep-cloned (arbitrary meta values aren't safely structuredClone-able).
+// These tests PIN that contract explicitly (documented + intentional, not
+// an accidental gap) — getMeta() itself is the "treat as immutable" guard
+// that keeps this from surprising a well-behaved caller; a caller who
+// mutates a nested value in place (instead of replacing it via `withMeta`)
+// is going against that documented contract, and this is what they get.
+describe('EntityForm.clone() — nested meta values are shared by reference (W4-6 FIX #2, documented — NOT deep-cloned)', () => {
+  it('a nested array value is shared between the original and the clone: mutating it in place via one is visible through the other', () => {
+    const original = BareForm().withMeta({ tags: ['a'] });
+    const cloned = original.clone();
+
+    (original.getMeta()['tags'] as string[]).push('b');
+
+    expect(cloned.getMeta()).toEqual({ tags: ['a', 'b'] });
+  });
+
+  it('replacing the key via withMeta (not mutating in place) gives the clone its OWN value — top-level independence is intact', () => {
+    const original = BareForm().withMeta({ tags: ['a'] });
+    const cloned = original.clone().withMeta({ tags: ['x'] });
+
+    (original.getMeta()['tags'] as string[]).push('b');
+
+    expect(original.getMeta()).toEqual({ tags: ['a', 'b'] });
+    expect(cloned.getMeta()).toEqual({ tags: ['x'] });
+  });
+});
