@@ -91,8 +91,7 @@
 - [ ] **EC-F1** student-address E2E flake(Daum 스텁 dialog 타이밍 — EC2 부재에도 재현된 기존 결함) 대기 로직 보강
 - [ ] **EC-F2** 커서/IME 조합 보존 회귀 핀(사용자 질문 2026-07-11) — 문자열 필드 keystroke 후 selectionStart 보존 + composition 이벤트 테스트. 0.4는 D4 store-직결로 구조 해결(EF4 테스트가 DOM identity 증명), 변형 필드(Tel/Birthday)는 로컬버퍼+blur 기적용 — IME 엣지만 미핀
 - [x] **EF6** ✅ `8eac9a3` · withSubmitTransform(단일슬롯 replace, 구 parity)+toSaveData 적용(flatten 후)·collabo 훅 이관(E2E 무변경 green=실브라우저 증명) · +9(1766)·12 E2E
-- [~] **EF7 [O] onInit/onFetchData 값-변형 복원** (EF3 파이프 순서 회귀 수정 — 사용자 지적 2026-07-11, [감사](./analysis/2026-07-11/entityform-api-audit.md)) — `EntityForm.setValue`/`setFetchedValue` 이식(누락 복원) + init 파이프 재정렬(clone→fetch→**값 바인딩**→onFetchData[setValue]→onInitialize[setValue override]→동적필드 rebind→build). 우선순위 hook>fetched>default. clobbering hydrate 제거(구 EntityForm.tsx:162-306 순서 복원). 대상 schema-core+state.
-  - **Reuse review**: Extend: EntityForm(값 API 이식)·initialize-form-store(재정렬)·form-store(seedSlice/data 보존, hydrate 로직 재사용) — New: 없음(복원)
+- [x] **EF7 [O] onInit/onFetchData 값-변형 복원** ✅ `3c0c13d` · setValue/setFetchedValue 이식+파이프 재정렬(bind→hooks[override]→rebind→build, 우선순위 hook>fetched>default)·seedSlice fetched 복사 버그 수정 · +17(1866)·16 E2E×2 · dev 0 · [감사](./analysis/2026-07-11/entityform-api-audit.md)
 - [ ] **EF8 EntityForm inert API 배선 3건** (감사) — ① formErrors(fetch/서버에러→슬라이스, ViewEntityForm 이미 렌더) ② EntityField.isPermitted end-to-end(FieldRenderer effHidden + deriveTabs 권한 — 보안) ③ withNeverDelete honest(delete flow gate와 묶어 문서화)
 - [x] **EC3** ✅ `6a5095c` · Major 재현 — **tab-hidden+self-ref+xref 4시나리오 pass·결함 0**·mock 백엔드 실 필터 적용 · E2E 12→15 · cascade ping-pong 교훈([archive](./progress-archive/phase-e-track-tasks.md))
 - [x] **EC3-0** ✅ `edff22c` · TAB-자체-숨김 3층 + deriveTabs 필터 + "필드 캐스케이드 안 함" 계약 · +24(1838)
