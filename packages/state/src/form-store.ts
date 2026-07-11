@@ -180,6 +180,20 @@ export interface FormStoreState {
   removeField(name: string): void;
   /** validate one field; writes errors to its slice; returns valid. */
   validateField(name: string): Promise<boolean>;
+  /**
+   * W2-5 (spec §6.2 save-flow error-mapping step) — writes field `name`'s
+   * slice `errors` directly from a list of message strings (as opposed to
+   * `validateField`, which DERIVES errors by running the field's own
+   * `Validation`s). The controller's save flow uses this to map a
+   * `BackendError.fieldErrors` entry onto its field's slice, keyed by field
+   * NAME (not label — the old EF3.x label-key bug this deliberately avoids).
+   * A no-op if `name` names no declared field (mirrors `removeField`'s
+   * silent-no-op-on-unknown-name contract) — the controller is expected to
+   * check `fieldDefs` itself before calling this to decide between this
+   * action and a banner `addMessage` (spec §6.2), but this guard keeps the
+   * action safe to call unconditionally too.
+   */
+  setFieldErrors(name: string, messages: string[]): void;
   /** validate every field; returns whether the whole form is valid. */
   validateAll(): Promise<boolean>;
   /** reset every slice to its baseline (create→default, update→fetched). */
@@ -618,6 +632,18 @@ export function createFormStore(
         return errs.length === 0;
       },
 
+      setFieldErrors(name, messages) {
+        set((s) => {
+          if (!(name in s.fieldDefs)) return {}; // unknown field name: silent no-op (see doc comment above)
+          return {
+            fields: {
+              ...s.fields,
+              [name]: { ...s.fields[name], errors: messages.map((m) => ({ message: m })) },
+            },
+          };
+        });
+      },
+
       async validateAll() {
         const s = get();
         let valid = true;
@@ -691,13 +717,11 @@ export function createFormStore(
           Object.assign(merged, field.serializeValue(value, buildCtx(s, name)));
         }
         // dotted-name nesting pass, applied once AFTER the merge (spec §5.2).
-        const nested = nestDottedKeys(merged);
-        // EF6 — apply the EntityForm's registered submit-transform (if any)
-        // to the mechanical dump above (0.3.x withOverrideSubmitData parity).
-        // Pure application: a throwing handler propagates (host bug), not
-        // swallowed like the fire-and-forget onChanges dispatch above.
-        const transform = entityForm.getSubmitTransform();
-        return transform ? transform(nested, entityForm) : nested;
+        // EF6's submitTransform application used to run here as a final pure
+        // pass (data in, data out) — REMOVED (spec §4.2: replaced by the
+        // onBeforeSave hook, dispatched by createFormController.save,
+        // @listgrid/state/form-controller.ts, AFTER this method returns).
+        return nestDottedKeys(merged);
       },
     };
   });

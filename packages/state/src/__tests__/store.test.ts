@@ -156,44 +156,21 @@ describe('createFormStore (ADR-0002 value-slice store)', () => {
     });
   });
 
-  // EF6 — submit-transform hook applied by toSaveData after the mechanical
-  // dump (exceptOnSave drop, M2O flatten).
-  describe('toSaveData submit-transform (EF6)', () => {
-    it('no registered transform leaves the mechanical dump unchanged', () => {
-      const store = createFormStore(CollegeForm());
-      store.getState().setValue('name', '공학대학');
-      store.getState().setValue('dean', { id: '42', name: '김교수' });
-      const save = store.getState().toSaveData();
-      expect(save).toEqual({
-        name: '공학대학',
-        englishName: undefined,
-        deanId: '42',
-        active: true,
-      });
-    });
-
-    it('applies the registered transform AFTER the flatten — sees <name>Id keys', () => {
-      const entityForm = CollegeForm().withSubmitTransform((data, ef) => {
-        expect(data.deanId).toBe('42');
-        expect(data.dean).toBeUndefined(); // already flattened by the time the transform runs
-        expect(ef.name).toBe('CollegeEntityForm');
-        return { ...data, active: data.active ? 'Y' : 'N' };
-      });
-      const store = createFormStore(entityForm);
-      store.getState().setValue('dean', { id: '42', name: '김교수' });
-      const save = store.getState().toSaveData();
-      expect(save.deanId).toBe('42');
-      expect(save.active).toBe('Y');
-    });
-
-    it('a throwing transform propagates (host bug) — not swallowed', () => {
-      const entityForm = CollegeForm().withSubmitTransform(() => {
-        throw new Error('boom');
-      });
-      const store = createFormStore(entityForm);
-      expect(() => store.getState().toSaveData()).toThrow('boom');
-    });
-  });
+  // EF6's "submit-transform hook applied by toSaveData" describe block
+  // (3 tests: unchanged-dump / applies-after-flatten / throwing-propagates)
+  // lived here — REMOVED (spec §4.2: EF6 withSubmitTransform is gone;
+  // toSaveData no longer applies any transform, so "no registered transform
+  // leaves the dump unchanged" is now simply always true, already covered by
+  // the characterization test above and the W2-4 serializeValue-seam block).
+  // The equivalent semantics moved to the controller layer and are covered
+  // in @listgrid/state/__tests__/form-controller.test.ts:
+  //   - "applies the registered transform AFTER the flatten" -> an
+  //     onBeforeSave handler mutating ctx.data via setData (that file's
+  //     "onBeforeSave setData mutates the payload the adapter receives").
+  //   - "a throwing transform propagates (host bug) — not swallowed" -> spec
+  //     §4.2 REVERSES this for onBeforeSave: a throwing handler is now
+  //     logged + SKIPPED, NOT propagated (that file's "a throwing
+  //     onBeforeSave handler is logged + SKIPPED, not propagated").
 });
 
 // A tiny in-memory adapter for the list store tests.

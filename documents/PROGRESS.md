@@ -7,7 +7,7 @@
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: 새 세션은 ① [waves 브리프](./plans/entityform-api-implementation-waves.md) 전역 규칙+W1 표 → ② [스펙](./plans/entityform-public-api-spec.md)의 인용 §만 → ③ (판단 필요 시) [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md). 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요.
-**Last updated**: 2026-07-11 (**W2-4 완료** — serializeValue seam(§5.2): FormField/ManyToOne serializeValue+toSaveData 재작성(duck-cast 제거·nestDottedKeys). 특성화 전량 무편집 green. sonnet delegate→opus 검증(full gate green·**1907 unit**·계수 27/46/161 PASS). **Next=W2-5 FormRuntime/FormController+save/delete 훅+EF6 대체**.)
+**Last updated**: 2026-07-11 (**W2-5 완료** — FormRuntime(schema)+createFormController(state)+save/delete 4훅+EF6 대체(§6.2). 레이어 규칙 준수·flow 정확·capability/revision W3-2/W4-4 이연. sonnet delegate→opus 검증(full gate green·**1926 unit**·계수 33/46/171 PASS). deviation 6(§Needs Review 1: reason-less cancel). **Next=W2-6 list 훅 축(onBefore/AfterListFetch)**.)
 
 ## Goal
 
@@ -87,7 +87,7 @@
 - [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` — isPermitted end-to-end(FieldRenderer 하드게이트·EF1 우회불가)·LIVE 보안갭 fix·재설계 무관 유지. +10(1876)·16 E2E · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [~] **W2 훅+컨트롤러** (착수 4/8 — W2-1~4 ✅, 다음 W2-5) — onInit/InitContext·FormRuntime/FormController·messages·serializeValue·list 훅 · Spec §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md) (**hot-file 순차 — fan-out 금지**)
+- [~] **W2 훅+컨트롤러** (착수 5/8 — W2-1~5 ✅, 다음 W2-6) — onInit/InitContext·FormRuntime/FormController·messages·serializeValue·list 훅 · Spec §4·§6 · CAP-04·11·14·21·25·26 · [waves §W2](./plans/entityform-api-implementation-waves.md) (**hot-file 순차 — fan-out 금지**)
 - [ ] **W3 권한·능력·액션** — 탭/그룹 권한·capabilities·addAction·delete flow E2E·withReadOnly · Spec §3.4·§6.2 · CAP-02·03·06·08·09·22·27 · [waves §W3](./plans/entityform-api-implementation-waves.md) · **W1-5 인계**: TabDef.hidden conditional 해석(deriveTabs + form-store seed 2곳 TODO 마킹)
 - [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
@@ -103,6 +103,7 @@
 - [x] **전건 처분(30항목) 2026-07-11** — 사용자 지시로 모델 확정: P0-7 소비자 영향 직접검증 해소·changeSelectOptions 레이스→W2-8 전환·나머지 28건 확정. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md)
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
 - [ ] **#W2-1 onInit 통합 시맨틱(마이그레이션 확인)** — 구 onFetchData+onInitialize 2배열→onInit 1배열(registration-order·ctx.data 분기·반환-교체 hatch 폐기, §4.2/§9 결정). W7 gjcu 마이그레이션서 등록순서 의존·반환교체 사용처 확인 · risk: migration
+- [ ] **#W2-5 SaveOutcome reason-less cancel 구별불가** — 스펙 §6.2 SaveOutcome는 exactOptional로 `cancelled: undefined` 불가 → reason 없는 cancel()이 {ok:false}로 validation-fail과 outcome 구별불가(부작용으로만 구별). 스펙 저자: 판별자 추가 or 현행 수용 · risk: api-semantics
 
 ## Progress notes
 

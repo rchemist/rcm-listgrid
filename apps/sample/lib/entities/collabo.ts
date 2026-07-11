@@ -356,23 +356,27 @@ export function CollaboEntityForm(): EntityForm {
       }
     })
     // §5 submit-transform (ec2-collabo-briefing.md :313-325 —
-    // `withOverrideSubmitData`, contracted string→Boolean), now the EF6 hook
-    // instead of a page-level workaround. GJCU's `contracted` column is a
-    // Boolean; the SelectField's value is the string enum the `collaborated`
-    // cascade swaps in ('NONE'|'GENERAL'|'CONTRACTED'). Applied by
-    // toSaveData (@listgrid/state) right before POST/PUT.
+    // `withOverrideSubmitData`, contracted string→Boolean), now the
+    // onBeforeSave hook (spec §4.1/§6.2; W2-5 — successor to the removed EF6
+    // `withSubmitTransform` single-slot) instead of a page-level workaround.
+    // GJCU's `contracted` column is a Boolean; the SelectField's value is the
+    // string enum the `collaborated` cascade swaps in
+    // ('NONE'|'GENERAL'|'CONTRACTED'). Dispatched by createFormController.save
+    // (@listgrid/state), right before the adapter's create/update call —
+    // ctx.data is already toSaveData()'s flattened dump at this point.
     //
-    // NOTE (residual, EF6+EF7 composition — see the §2-branch-2 comment
-    // inside the second onInit handler above): this converts the OUTBOUND
-    // payload only. A record saved through this transform, if reopened for
-    // edit, would show its `contracted` Select unmatched (raw boolean vs.
+    // NOTE (residual, onBeforeSave+EF7 composition — see the §2-branch-2
+    // comment inside the second onInit handler above): this converts the
+    // OUTBOUND payload only. A record saved through this hook, if reopened
+    // for edit, would show its `contracted` Select unmatched (raw boolean vs.
     // the string-valued options) — the dropped onInit fixup (EF7 gap) and
-    // this submit transform (EF6) compose into that residual; reconciling
-    // the two is out of EC2's scope. None of EC2's 5 E2E scenarios
-    // round-trips a saved `contracted` value through edit, so it is inert
-    // for this port but worth flagging to the conductor for EF6/EF7
-    // sequencing.
-    .withSubmitTransform((data) => ({ ...data, contracted: data.contracted === 'CONTRACTED' }));
+    // this onBeforeSave hook compose into that residual; reconciling the two
+    // is out of EC2's scope. None of EC2's 5 E2E scenarios round-trips a
+    // saved `contracted` value through edit, so it is inert for this port but
+    // worth flagging to the conductor for onInit/onBeforeSave sequencing.
+    .onBeforeSave((ctx) => {
+      ctx.setData({ ...ctx.data, contracted: ctx.data.contracted === 'CONTRACTED' });
+    });
 
   return entityForm;
 }

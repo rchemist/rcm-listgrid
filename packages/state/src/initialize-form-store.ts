@@ -74,7 +74,12 @@ export interface InitializeFormStoreResult {
   error?: BackendError;
 }
 
-function toBackendError(e: unknown): BackendError {
+// exported (W2-5) — createFormController (form-controller.ts) reuses this
+// exact mapping for its adapter create/update/remove try/catch (spec §6.2:
+// "map to a BackendError — there is an existing toBackendError helper... reuse
+// it"), keeping error normalization identical whether the fetch/save/delete
+// call site is initializeFormStore's or the controller's.
+export function toBackendError(e: unknown): BackendError {
   if (
     e !== null &&
     typeof e === 'object' &&

@@ -1,0 +1,279 @@
+import type { StoreApi } from 'zustand/vanilla';
+import {
+  getCurrentValue,
+  type AfterDeleteContext,
+  type AfterSaveContext,
+  type BackendAdapter,
+  type BackendError,
+  type BeforeDeleteContext,
+  type BeforeSaveContext,
+  type DeleteOutcome,
+  type EntityForm,
+  type FormMutator,
+  type FormRuntime,
+  type SaveOutcome,
+  type Session,
+} from '@listgrid/schema-core';
+import {
+  initializeFormStore,
+  toBackendError,
+  type InitializeFormStoreOptions,
+} from './initialize-form-store';
+import type { FormStoreState } from './form-store';
+
+// createFormController (spec §6.2; W2-5) — the sole IMPLEMENTATION of
+// FormRuntime (@listgrid/schema-core/form-runtime.ts). Lives in @listgrid/
+// state (not schema-core) because the save/delete flow needs the form store
+// (validateAll/toSaveData/messages/field-slice errors) + a BackendAdapter,
+// both state-layer concerns — schema-core stays a pure declaration
+// (ADR-0003), importing FormRuntime as a TYPE only, never this module.
+//
+// Save flow order (spec §6.2 EXACTLY, capability + revision steps OMITTED —
+// later waves, W3-2/W4-4; see the NOTES this task's briefing asks for):
+//   1. (capability create|update — OMITTED, W3-2)
+//   2. validateAll() (unless opts.skipValidation) — fail => { ok: false }
+//   3. toSaveData()
+//   4. onBeforeSave handlers, sequential; setData threads the payload;
+//      cancel() stops the flow; a THROWING handler is logged + SKIPPED
+//      (spec §4.2 — does not propagate, does not cancel)
+//   5. (revision inject — OMITTED, W4-4)
+//   6. adapter.update (renderType 'update') | adapter.create (else)
+//   7. failure => map BackendError.fieldErrors onto field slices (keyed by
+//      NAME) / an unmatched key onto a banner message; error.message is
+//      suppressed when fieldErrors is present (suppress-generic); otherwise
+//      addMessage({key:'save-error', ...}) — return { ok: false, error }
+//   8. success => clearMessages() (clear-on-success) -> onAfterSave handlers,
+//      sequential, same per-handler try/catch -> { ok: true, result }
+//
+// Delete flow order (spec §6.2, capability step OMITTED — W3-2):
+//   1. (capability delete — OMITTED, W3-2)
+//   2. ids = opts.ids ?? [entityForm.getId()]
+//   3. onBeforeDelete handlers, sequential; same cancel/throw contract
+//   4. adapter.remove — failure => addMessage({key:'delete-error', ...}),
+//      return { ok: false, error }
+//   5. success => onAfterDelete handlers, sequential -> { ok: true, result: undefined }
+
+export interface CreateFormControllerOptions {
+  entityForm: EntityForm;
+  store: StoreApi<FormStoreState>;
+  adapter: BackendAdapter;
+  session?: Session;
+}
+
+export function createFormController(opts: CreateFormControllerOptions): FormRuntime {
+  const { entityForm, store, adapter } = opts;
+  const session = opts.session;
+
+  // Readonly<Record<string,unknown>> snapshot of every field's current
+  // resolved value (spec §4.1 BeforeSaveContext.values) — built the same way
+  // the store's own internal mutator.getValues() is (form-store.ts), since
+  // that mutator is not itself externally reachable (W2-5 briefing deviation
+  // — see this task's DEVIATIONS note).
+  function snapshotValues(): Record<string, unknown> {
+    const s = store.getState();
+    const values: Record<string, unknown> = {};
+    for (const [name, slice] of Object.entries(s.fields)) {
+      values[name] = getCurrentValue(slice, s.renderType);
+    }
+    return values;
+  }
+
+  // Store-backed FormMutator for AfterSaveContext.mutator (spec §4.1) — the
+  // store's own internal mutator (form-store.ts) is a closure-private const,
+  // not part of FormStoreState, so this rebuilds an equivalent adapter from
+  // the store's PUBLIC actions only (no new store accessor needed).
+  function buildMutator(): FormMutator {
+    return {
+      getValue(name) {
+        return store.getState().getValue(name);
+      },
+      getValues() {
+        return snapshotValues();
+      },
+      setValue(name, value) {
+        store.getState().setValue(name, value);
+      },
+      setMeta(name, partial) {
+        store.getState().setMeta(name, partial);
+      },
+      addField(field) {
+        store.getState().addField(field);
+      },
+      removeField(name) {
+        store.getState().removeField(name);
+      },
+      setTabHidden(tabId, hidden) {
+        store.getState().setTabHidden(tabId, hidden);
+      },
+      getRenderType() {
+        return entityForm.getRenderType();
+      },
+      getSession() {
+        return session;
+      },
+    };
+  }
+
+  // spec §6.2 step 7 — field-name-keyed error mapping + suppress-generic.
+  function applySaveError(error: BackendError): void {
+    const fieldErrors = error.fieldErrors;
+    if (fieldErrors !== undefined && Object.keys(fieldErrors).length > 0) {
+      const fieldDefs = store.getState().fieldDefs;
+      for (const [name, messages] of Object.entries(fieldErrors)) {
+        if (name in fieldDefs) {
+          store.getState().setFieldErrors(name, messages);
+        } else {
+          store.getState().addMessage({ key: name, severity: 'error', text: messages.join(', ') });
+        }
+      }
+      // suppress-generic (spec §6.2): error.message is NOT also banner-ed
+      // when fieldErrors is present.
+    } else {
+      store.getState().addMessage({ key: 'save-error', severity: 'error', text: error.message });
+    }
+  }
+
+  // delete has no per-field error channel (bulk ids, not fields) — spec §6.2
+  // delete step 4 is the plain banner-message form only, no fieldErrors
+  // mapping/suppress-generic (that machinery is save-specific, step 7).
+  function applyDeleteError(error: BackendError): void {
+    store.getState().addMessage({ key: 'delete-error', severity: 'error', text: error.message });
+  }
+
+  async function save(saveOpts?: { skipValidation?: boolean }): Promise<SaveOutcome> {
+    if (!saveOpts?.skipValidation) {
+      const valid = await store.getState().validateAll();
+      if (!valid) return { ok: false };
+    }
+
+    let data = store.getState().toSaveData();
+    const renderType = entityForm.getRenderType();
+
+    for (const handler of entityForm.getBeforeSaveHandlers()) {
+      let cancelled: string | undefined;
+      let didCancel = false;
+      const ctx: BeforeSaveContext = {
+        data,
+        setData(next) {
+          data = next;
+        },
+        values: snapshotValues(),
+        renderType,
+        session,
+        cancel(reason) {
+          didCancel = true;
+          cancelled = reason;
+        },
+      };
+      try {
+        await handler(ctx);
+      } catch (e) {
+        // spec §4.2 — a throwing onBeforeSave handler is logged + SKIPPED;
+        // it does NOT propagate and does NOT cancel the flow.
+        console.error('[@listgrid/state] onBeforeSave handler threw — skipping it', e);
+        continue;
+      }
+      if (didCancel) {
+        if (cancelled !== undefined) {
+          store.getState().addMessage({ key: 'save-cancelled', severity: 'info', text: cancelled });
+          return { ok: false, cancelled };
+        }
+        return { ok: false };
+      }
+    }
+
+    let result: unknown;
+    try {
+      if (renderType === 'update') {
+        result = await adapter.update(entityForm.url, entityForm.getId()!, data);
+      } else {
+        result = await adapter.create(entityForm.url, data);
+      }
+    } catch (e) {
+      const error = toBackendError(e);
+      applySaveError(error);
+      return { ok: false, error };
+    }
+
+    store.getState().clearMessages();
+    for (const handler of entityForm.getAfterSaveHandlers()) {
+      const ctx: AfterSaveContext = { result, data, renderType, session, mutator: buildMutator() };
+      try {
+        await handler(ctx);
+      } catch (e) {
+        console.error('[@listgrid/state] onAfterSave handler threw — skipping it', e);
+      }
+    }
+
+    return { ok: true, result };
+  }
+
+  async function del(deleteOpts?: { ids?: string[] }): Promise<DeleteOutcome> {
+    const ids = deleteOpts?.ids ?? [entityForm.getId()!];
+
+    for (const handler of entityForm.getBeforeDeleteHandlers()) {
+      let cancelled: string | undefined;
+      let didCancel = false;
+      const ctx: BeforeDeleteContext = {
+        ids,
+        session,
+        cancel(reason) {
+          didCancel = true;
+          cancelled = reason;
+        },
+      };
+      try {
+        await handler(ctx);
+      } catch (e) {
+        console.error('[@listgrid/state] onBeforeDelete handler threw — skipping it', e);
+        continue;
+      }
+      if (didCancel) {
+        if (cancelled !== undefined) {
+          store
+            .getState()
+            .addMessage({ key: 'delete-cancelled', severity: 'info', text: cancelled });
+          return { ok: false, cancelled };
+        }
+        return { ok: false };
+      }
+    }
+
+    try {
+      await adapter.remove(entityForm.url, ids);
+    } catch (e) {
+      const error = toBackendError(e);
+      applyDeleteError(error);
+      return { ok: false, error };
+    }
+
+    for (const handler of entityForm.getAfterDeleteHandlers()) {
+      const ctx: AfterDeleteContext = { ids, session };
+      try {
+        await handler(ctx);
+      } catch (e) {
+        console.error('[@listgrid/state] onAfterDelete handler threw — skipping it', e);
+      }
+    }
+
+    return { ok: true, result: undefined };
+  }
+
+  async function reload(): Promise<void> {
+    const id = entityForm.getId();
+    if (id === undefined) return; // create mode: nothing to re-fetch (spec §6.2 FormRuntime.reload doc)
+    const initOpts: InitializeFormStoreOptions = { entityForm, id, adapter };
+    if (session !== undefined) initOpts.session = session;
+    const fresh = await initializeFormStore(initOpts);
+    // reflect the freshly-built store (fetch -> BIND -> onInit -> build) into
+    // the SAME store instance the caller's subscribers already hold (zustand
+    // `replace: true` — spec §6.2 suggested implementation).
+    store.setState(fresh.store.getState(), true);
+  }
+
+  async function validate(): Promise<boolean> {
+    return store.getState().validateAll();
+  }
+
+  return { save, delete: del, reload, validate };
+}

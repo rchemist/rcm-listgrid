@@ -1,0 +1,386 @@
+import { describe, expect, it, vi } from 'vitest';
+import {
+  EntityForm,
+  StringField,
+  type BackendAdapter,
+  type BackendError,
+} from '@listgrid/schema-core';
+import { createFormStore } from '../form-store';
+import { createFormController } from '../form-controller';
+
+// W2-5 (spec §6.2) — createFormController's save/delete/reload/validate flow.
+// Covers the 6 proof scenarios the wave briefing calls out (success /
+// validation-fail / cancel / server fieldErrors mapping / suppress-generic /
+// clear-on-success), the migrated EF6 semantics (an onBeforeSave handler
+// transforming the payload via setData; a throwing handler logged+skipped
+// per spec §4.2 — REVERSING the old "throwing transform propagates"
+// assertion this replaces, see store.test.ts's removal note), and light
+// delete/reload/validate coverage. Capability (W3-2) and revision (W4-4)
+// steps are OMITTED from the flow under test — this task's scope stops at
+// validate -> toSaveData -> onBeforeSave -> adapter -> error-mapping/success
+// -> onAfterSave (spec §6.2, capability/revision steps excluded).
+
+function WidgetForm(): EntityForm {
+  return new EntityForm('WidgetEntityForm', '/widget').addFields({
+    items: [new StringField('name', 1).withRequired(true).withLabel('Name')],
+  });
+}
+
+/** Minimal BackendAdapter double — every method is a vi.fn(); tests override only what they exercise. */
+function fakeAdapter(overrides: Partial<BackendAdapter> = {}): BackendAdapter {
+  return {
+    list: vi.fn(),
+    getOne: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+    ...overrides,
+  };
+}
+
+describe('createFormController.save (spec §6.2)', () => {
+  it('success: validates, builds the payload, calls adapter.create, and returns { ok: true, result }', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const created = { id: '1', name: 'Widget A' };
+    const create = vi.fn(async (url: string, data: Record<string, unknown>) => {
+      expect(url).toBe('/widget');
+      expect(data).toEqual({ name: 'Widget A' });
+      return created;
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: true, result: created });
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('validation-fail: skips the adapter call entirely and returns { ok: false }', async () => {
+    const entityForm = WidgetForm(); // 'name' required, left blank
+    const store = createFormStore(entityForm);
+    const create = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false });
+    expect(create).not.toHaveBeenCalled();
+    expect(store.getState().fields.name?.errors?.length).toBeGreaterThan(0); // validateAll already populated this
+  });
+
+  it('cancel: an onBeforeSave handler calling ctx.cancel(reason) stops the flow before the adapter call', async () => {
+    const entityForm = WidgetForm().onBeforeSave((ctx) => {
+      ctx.cancel('user declined');
+    });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false, cancelled: 'user declined' });
+    expect(create).not.toHaveBeenCalled();
+    expect(store.getState().messages).toContainEqual(
+      expect.objectContaining({ severity: 'info', text: 'user declined' }),
+    );
+  });
+
+  it('server fieldErrors mapping: a declared field is keyed by NAME (not label)', async () => {
+    const entityForm = WidgetForm().withId('1'); // update mode
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const error: BackendError = {
+      code: 'VALIDATION',
+      message: 'Validation failed',
+      fieldErrors: { name: ['too short'] },
+    };
+    const update = vi.fn(async () => {
+      throw error;
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false, error });
+    expect(store.getState().fields.name?.errors).toEqual([{ message: 'too short' }]);
+  });
+
+  it('an unmatched fieldErrors key (no declared field of that name) becomes a banner message instead', async () => {
+    const entityForm = WidgetForm().withId('1');
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const error: BackendError = {
+      code: 'VALIDATION',
+      message: 'Validation failed',
+      fieldErrors: { nonField: ['server-side check failed'] },
+    };
+    const update = vi.fn(async () => {
+      throw error;
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await controller.save();
+
+    expect(store.getState().messages).toContainEqual(
+      expect.objectContaining({
+        key: 'nonField',
+        severity: 'error',
+        text: 'server-side check failed',
+      }),
+    );
+  });
+
+  it('suppress-generic: error.message is NOT banner-ed when fieldErrors is present', async () => {
+    const entityForm = WidgetForm().withId('1');
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const error: BackendError = {
+      code: 'VALIDATION',
+      message: 'Validation failed',
+      fieldErrors: { name: ['too short'] },
+    };
+    const update = vi.fn(async () => {
+      throw error;
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await controller.save();
+
+    expect(store.getState().messages.some((m) => m.text === 'Validation failed')).toBe(false);
+    expect(store.getState().messages.some((m) => m.key === 'save-error')).toBe(false);
+  });
+
+  it('no fieldErrors: error.message IS banner-ed as { key: "save-error" }', async () => {
+    const entityForm = WidgetForm().withId('1');
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const error: BackendError = { code: 'UNKNOWN', message: 'network down' };
+    const update = vi.fn(async () => {
+      throw error;
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome).toEqual({ ok: false, error });
+    expect(store.getState().messages).toContainEqual(
+      expect.objectContaining({ key: 'save-error', severity: 'error', text: 'network down' }),
+    );
+  });
+
+  it('clear-on-success: a non-persistent message is cleared, a persistent one survives', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    store.getState().addMessage({ key: 'stale', severity: 'warning', text: 'stale' });
+    store
+      .getState()
+      .addMessage({ key: 'sticky', severity: 'info', text: 'sticky', persistent: true });
+    const create = vi.fn(async () => ({ id: '1' }));
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    await controller.save();
+
+    const keys = store.getState().messages.map((m) => m.key);
+    expect(keys).not.toContain('stale');
+    expect(keys).toContain('sticky');
+  });
+
+  it('onBeforeSave setData mutates the payload the adapter receives (successor to EF6 submitTransform)', async () => {
+    const entityForm = WidgetForm().onBeforeSave((ctx) => {
+      ctx.setData({ ...ctx.data, extra: true });
+    });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async (_url: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({ name: 'Widget A', extra: true });
+      return { id: '1' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(outcome.ok).toBe(true);
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it('a throwing onBeforeSave handler is logged + SKIPPED, not propagated (spec §4.2) — remaining handlers still run and save proceeds', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const calls: string[] = [];
+    const entityForm = WidgetForm()
+      .onBeforeSave(() => {
+        calls.push('first');
+        throw new Error('boom');
+      })
+      .onBeforeSave((ctx) => {
+        calls.push('second');
+        ctx.setData({ ...ctx.data, seenSecond: true });
+      });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async (_url: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({ name: 'Widget A', seenSecond: true });
+      return { id: '1' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const outcome = await controller.save();
+
+    expect(calls).toEqual(['first', 'second']);
+    expect(outcome.ok).toBe(true); // NOT cancelled/failed — the throw did not propagate
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+});
+
+describe('createFormController.delete (spec §6.2)', () => {
+  it('success: calls adapter.remove with [id] and returns { ok: true, result: undefined }', async () => {
+    const entityForm = WidgetForm().withId('42');
+    const store = createFormStore(entityForm);
+    const remove = vi.fn(async (url: string, ids: string[]) => {
+      expect(url).toBe('/widget');
+      expect(ids).toEqual(['42']);
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ remove }),
+    });
+
+    const outcome = await controller.delete();
+
+    expect(outcome).toEqual({ ok: true, result: undefined });
+  });
+
+  it('cancel: an onBeforeDelete handler calling ctx.cancel(reason) stops the flow before adapter.remove', async () => {
+    const entityForm = WidgetForm()
+      .withId('42')
+      .onBeforeDelete((ctx) => {
+        ctx.cancel('confirm declined');
+      });
+    const store = createFormStore(entityForm);
+    const remove = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ remove }),
+    });
+
+    const outcome = await controller.delete();
+
+    expect(outcome).toEqual({ ok: false, cancelled: 'confirm declined' });
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('adapter error: addMessage with the generic text, returns { ok: false, error }', async () => {
+    const entityForm = WidgetForm().withId('42');
+    const store = createFormStore(entityForm);
+    const error: BackendError = { code: 'FORBIDDEN', message: 'not allowed' };
+    const remove = vi.fn(async () => {
+      throw error;
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ remove }),
+    });
+
+    const outcome = await controller.delete();
+
+    expect(outcome).toEqual({ ok: false, error });
+    expect(store.getState().messages).toContainEqual(
+      expect.objectContaining({ key: 'delete-error', severity: 'error', text: 'not allowed' }),
+    );
+  });
+});
+
+describe('createFormController.validate / reload (spec §6.2)', () => {
+  it('validate() delegates to store.validateAll()', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    const controller = createFormController({ entityForm, store, adapter: fakeAdapter() });
+
+    expect(await controller.validate()).toBe(false); // required 'name' left blank
+    store.getState().setValue('name', 'Widget A');
+    expect(await controller.validate()).toBe(true);
+  });
+
+  it('reload() is a no-op in create mode (no id to re-fetch)', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    const getOne = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ getOne }),
+    });
+
+    await controller.reload();
+
+    expect(getOne).not.toHaveBeenCalled();
+  });
+
+  it('reload() re-fetches and reflects the fresh record into the SAME store instance', async () => {
+    const entityForm = WidgetForm().withId('42');
+    const store = createFormStore(entityForm, { fetchedData: { name: 'stale' } });
+    store.getState().hydrate({ name: 'stale' });
+    const getOne = vi.fn(async (url: string, id: string) => {
+      expect(url).toBe('/widget');
+      expect(id).toBe('42');
+      return { name: 'fresh' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ getOne }),
+    });
+
+    await controller.reload();
+
+    expect(getOne).toHaveBeenCalledTimes(1);
+    expect(store.getState().getValue('name')).toBe('fresh');
+  });
+});

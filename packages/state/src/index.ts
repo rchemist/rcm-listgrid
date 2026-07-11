@@ -14,3 +14,9 @@ export type {
   InitializeFormStoreOptions,
   InitializeFormStoreResult,
 } from './initialize-form-store';
+
+// --- createFormController (spec §6.2; W2-5) — the FormRuntime
+// (@listgrid/schema-core) implementation: canonical save/delete lifecycle
+// over a form store + BackendAdapter ---
+export { createFormController } from './form-controller';
+export type { CreateFormControllerOptions } from './form-controller';

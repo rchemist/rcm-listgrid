@@ -8,9 +8,12 @@ import { CollaboEntityForm, collaboFetchUrl } from '../../../lib/entities/collab
 import { rcmAdapter } from '../../../lib/adapter';
 
 // Create a new Collabo — ViewEntityForm validates then POSTs via the
-// adapter. The §5 submit-transform (contracted string→boolean) is applied by
-// toSaveData via CollaboEntityForm's .withSubmitTransform(...) (EF6) — no
-// page-level workaround needed anymore.
+// adapter. CollaboEntityForm's §5 .onBeforeSave(...) hook (spec §4.1/§6.2;
+// W2-5 — successor to EF6 withSubmitTransform) is dispatched by
+// createFormController.save, not by ViewEntityForm's current toSaveData()-
+// direct Save button (controller rewiring is W3/W7) — inert for this page's
+// E2E today (see the collabo.ts NOTE at the hook's declaration), no
+// page-level workaround needed either way.
 export default function CollaboNewPage() {
   const router = useRouter();
   const entityForm = useMemo(() => CollaboEntityForm(), []);

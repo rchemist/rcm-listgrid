@@ -2,7 +2,7 @@ import type { Session } from './auth';
 import type { ConditionalBooleanValue } from './field/conditional';
 import type { EntityField } from './field/entity-field';
 import type { FieldMetaOverride } from './field/field-meta';
-import type { ChangeHandler } from './field/form-mutator';
+import type { ChangeHandler, FormMutator } from './field/form-mutator';
 import type { RenderType } from './field/types';
 
 /**
@@ -99,19 +99,87 @@ export interface InitContext {
 export type InitHandler = (ctx: InitContext) => void | Promise<void>;
 
 /**
- * Submit-transform hook (EF6): applied by toSaveData (@listgrid/state) to the
- * mechanical save-payload dump (exceptOnSave dropped, ManyToOne flattened to
- * `<name>Id`) immediately before it is returned to the caller. Successor to
- * the 0.3.x `withOverrideSubmitData` (src/listgrid/config/EntityForm.tsx —
- * CollaboEntityForm.tsx:313-325 was a call site) — single-slot there too (a
- * plain override, not a list), so this hook is single-slot as well (parity,
- * not an EF2-style handler array). Pure (data in, data out) — no store/
- * mutator, same state-agnostic posture as {@link InitHandler}.
+ * Context passed to a {@link BeforeSaveHandler} (`onBeforeSave`, spec
+ * §4.1/§6.2; W2-5). Dispatched by `createFormController.save`
+ * (@listgrid/state/form-controller.ts), sequentially in registration order,
+ * AFTER `toSaveData()` has built the mechanical payload and BEFORE the
+ * adapter create/update call (spec §6.2 canonical save flow). Successor to
+ * the EF6 `SubmitTransformHandler`/`withSubmitTransform` (single-slot, pure
+ * data-in/data-out) — this hook is a LIST (EF2/onInit-style append, not a
+ * replace-slot) and additionally carries a cancel escape hatch the old
+ * single pure transform never had.
  */
-export type SubmitTransformHandler = (
-  data: Record<string, unknown>,
-  entityForm: EntityForm,
-) => Record<string, unknown>;
+export interface BeforeSaveContext {
+  /**
+   * The save payload as of THIS handler's turn — starts as `toSaveData()`'s
+   * output, then reflects any earlier handler's `setData` call in this same
+   * run (handlers compose, not overwrite from scratch).
+   */
+  data: Record<string, unknown>;
+  /** Replace {@link data} for every handler after this one AND the eventual adapter call. */
+  setData(next: Record<string, unknown>): void;
+  /** Read-only snapshot of every field's current value (post-validate, pre-serialize — NOT the same shape as {@link data}, which is already serialized/flattened). */
+  values: Readonly<Record<string, unknown>>;
+  /** create vs update (spec §3.1), identical to `EntityForm.getRenderType()`. */
+  renderType: RenderType;
+  session?: Session | undefined;
+  /**
+   * Stops the save flow: no adapter call is made, no further onBeforeSave
+   * handlers run, and `createFormController.save` resolves
+   * `{ ok: false, cancelled: reason }`. `reason`, if given, is also pushed to
+   * the store's message banner (`severity: 'info'`, spec §6.2). Distinct
+   * from a THROWN error — a handler that throws is logged and SKIPPED (spec
+   * §4.2), the flow continues; only an explicit `cancel()` call stops it.
+   */
+  cancel(reason?: string): void;
+}
+
+/**
+ * Context passed to an {@link AfterSaveHandler} (`onAfterSave`, spec
+ * §4.1/§6.2; W2-5) — dispatched ONLY after a successful adapter create/update
+ * call, sequentially, after the store's non-persistent messages have already
+ * been cleared (spec §6.2 "clear-on-success" step runs BEFORE onAfterSave).
+ */
+export interface AfterSaveContext {
+  /** the entity the adapter's create/update call returned. */
+  result: unknown;
+  /** the final save payload actually sent (post every onBeforeSave `setData`). */
+  data: Record<string, unknown>;
+  renderType: RenderType;
+  session?: Session | undefined;
+  /** store-backed mutation surface (EF2 parity) — e.g. to seed the newly-created record's id/values back onto the form. */
+  mutator: FormMutator;
+}
+
+/**
+ * Context passed to a {@link BeforeDeleteHandler} (`onBeforeDelete`, spec
+ * §4.1/§6.2; W2-5) — dispatched sequentially, before `adapter.remove`. Same
+ * cancel/throw contract as {@link BeforeSaveContext.cancel}.
+ */
+export interface BeforeDeleteContext {
+  /** the ids about to be deleted (`opts.ids` if given, else `[entityForm.getId()]`). */
+  ids: string[];
+  session?: Session | undefined;
+  cancel(reason?: string): void;
+}
+
+/**
+ * Context passed to an {@link AfterDeleteHandler} (`onAfterDelete`, spec
+ * §4.1/§6.2; W2-5) — dispatched ONLY after a successful `adapter.remove` call.
+ */
+export interface AfterDeleteContext {
+  ids: string[];
+  session?: Session | undefined;
+}
+
+/** Save-lifecycle hook (spec §4.1/§6.2; W2-5). See {@link BeforeSaveContext}. */
+export type BeforeSaveHandler = (ctx: BeforeSaveContext) => void | Promise<void>;
+/** Save-lifecycle hook, success only (spec §4.1/§6.2; W2-5). See {@link AfterSaveContext}. */
+export type AfterSaveHandler = (ctx: AfterSaveContext) => void | Promise<void>;
+/** Delete-lifecycle hook (spec §4.1/§6.2; W2-5). See {@link BeforeDeleteContext}. */
+export type BeforeDeleteHandler = (ctx: BeforeDeleteContext) => void | Promise<void>;
+/** Delete-lifecycle hook, success only (spec §4.1/§6.2; W2-5). See {@link AfterDeleteContext}. */
+export type AfterDeleteHandler = (ctx: AfterDeleteContext) => void | Promise<void>;
 
 // EntityForm — the single declaration from which BOTH the list and the form
 // screens derive (charter C1). React-free: it is the declaration + query model;
@@ -215,12 +283,20 @@ export class EntityForm {
    */
   private initHandlers: InitHandler[] = [];
   /**
-   * Submit-transform hook (EF6): single-slot, unlike the changeHandlers/
-   * initHandlers arrays — 0.3.x `withOverrideSubmitData` was a plain
-   * override, not a list, so this mirrors that (parity, not an EF2-style
-   * array).
+   * Save-lifecycle hooks (spec §4.1/§6.2; W2-5) — dispatched by
+   * `createFormController.save` (@listgrid/state/form-controller.ts),
+   * sequentially in registration order, AFTER `toSaveData()`/BEFORE the
+   * adapter call. Successor to the EF6 `submitTransform` single-slot (see
+   * {@link BeforeSaveContext} doc) — an append-list like `changeHandlers`/
+   * `initHandlers`, not a replace-slot.
    */
-  private submitTransform?: SubmitTransformHandler;
+  private beforeSaveHandlers: BeforeSaveHandler[] = [];
+  /** Save-lifecycle hooks, success only (spec §4.1/§6.2; W2-5). Dispatched after adapter success + clear-on-success. */
+  private afterSaveHandlers: AfterSaveHandler[] = [];
+  /** Delete-lifecycle hooks (spec §4.1/§6.2; W2-5). Dispatched before `adapter.remove`. */
+  private beforeDeleteHandlers: BeforeDeleteHandler[] = [];
+  /** Delete-lifecycle hooks, success only (spec §4.1/§6.2; W2-5). Dispatched after `adapter.remove` succeeds. */
+  private afterDeleteHandlers: AfterDeleteHandler[] = [];
 
   constructor(name: string, url: string) {
     this.name = name;
@@ -256,12 +332,27 @@ export class EntityForm {
     return this;
   }
   /**
-   * Set the submit-transform handler (EF6); single-slot — a later call
-   * REPLACES any previously set handler (0.3.x `withOverrideSubmitData`
-   * parity, not an append like onChange/onInit).
+   * Append an onBeforeSave handler (spec §4.1/§6.2; W2-5 — successor to EF6
+   * `withSubmitTransform`); registration order is dispatch order. See
+   * {@link BeforeSaveHandler}/{@link BeforeSaveContext} for the contract.
    */
-  withSubmitTransform(handler: SubmitTransformHandler): this {
-    this.submitTransform = handler;
+  onBeforeSave(handler: BeforeSaveHandler): this {
+    this.beforeSaveHandlers.push(handler);
+    return this;
+  }
+  /** Append an onAfterSave handler (spec §4.1/§6.2; W2-5); registration order is dispatch order. See {@link AfterSaveHandler}. */
+  onAfterSave(handler: AfterSaveHandler): this {
+    this.afterSaveHandlers.push(handler);
+    return this;
+  }
+  /** Append an onBeforeDelete handler (spec §4.1/§6.2; W2-5); registration order is dispatch order. See {@link BeforeDeleteHandler}. */
+  onBeforeDelete(handler: BeforeDeleteHandler): this {
+    this.beforeDeleteHandlers.push(handler);
+    return this;
+  }
+  /** Append an onAfterDelete handler (spec §4.1/§6.2; W2-5); registration order is dispatch order. See {@link AfterDeleteHandler}. */
+  onAfterDelete(handler: AfterDeleteHandler): this {
+    this.afterDeleteHandlers.push(handler);
     return this;
   }
 
@@ -418,9 +509,21 @@ export class EntityForm {
   getInitHandlers(): InitHandler[] {
     return this.initHandlers;
   }
-  /** the registered submit-transform handler, if any (EF6). */
-  getSubmitTransform(): SubmitTransformHandler | undefined {
-    return this.submitTransform;
+  /** registered onBeforeSave handlers, in dispatch order (spec §4.1/§6.2; engine-internal — not barrel-exported). */
+  getBeforeSaveHandlers(): BeforeSaveHandler[] {
+    return this.beforeSaveHandlers;
+  }
+  /** registered onAfterSave handlers, in dispatch order (spec §4.1/§6.2; engine-internal — not barrel-exported). */
+  getAfterSaveHandlers(): AfterSaveHandler[] {
+    return this.afterSaveHandlers;
+  }
+  /** registered onBeforeDelete handlers, in dispatch order (spec §4.1/§6.2; engine-internal — not barrel-exported). */
+  getBeforeDeleteHandlers(): BeforeDeleteHandler[] {
+    return this.beforeDeleteHandlers;
+  }
+  /** registered onAfterDelete handlers, in dispatch order (spec §4.1/§6.2; engine-internal — not barrel-exported). */
+  getAfterDeleteHandlers(): AfterDeleteHandler[] {
+    return this.afterDeleteHandlers;
   }
 
   /** All fields, ordered by their declared `order`. */
@@ -465,8 +568,11 @@ export class EntityForm {
     copy.changeHandlers = [...this.changeHandlers];
     // propagate initHandlers (spec §3.3/§4.1, same clone-propagation contract).
     copy.initHandlers = [...this.initHandlers];
-    // propagate submitTransform (EF6, same clone-propagation contract).
-    if (this.submitTransform !== undefined) copy.submitTransform = this.submitTransform;
+    // propagate save/delete lifecycle hooks (spec §4.1/§6.2; W2-5, same clone-propagation contract).
+    copy.beforeSaveHandlers = [...this.beforeSaveHandlers];
+    copy.afterSaveHandlers = [...this.afterSaveHandlers];
+    copy.beforeDeleteHandlers = [...this.beforeDeleteHandlers];
+    copy.afterDeleteHandlers = [...this.afterDeleteHandlers];
     return copy;
   }
 }

@@ -188,9 +188,24 @@ export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
 // `onInit`; W2-1 — dispatched by initializeFormStore, @listgrid/state) ---
 export type { InitContext, InitHandler } from './entity-form';
 
-// --- imperative lifecycle: submit-transform hook (EF6; applied by
-// toSaveData, @listgrid/state) ---
-export type { SubmitTransformHandler } from './entity-form';
+// --- imperative lifecycle: save/delete hooks (spec §4.1/§6.2; W2-5 —
+// dispatched by createFormController, @listgrid/state/form-controller.ts;
+// successor to the EF6 submit-transform single-slot) ---
+export type {
+  BeforeSaveContext,
+  AfterSaveContext,
+  BeforeDeleteContext,
+  AfterDeleteContext,
+  BeforeSaveHandler,
+  AfterSaveHandler,
+  BeforeDeleteHandler,
+  AfterDeleteHandler,
+} from './entity-form';
+
+// --- FormRuntime (save/delete/reload/validate contract; spec §6.2; W2-5 —
+// structural interface only, implemented by createFormController in
+// @listgrid/state/form-controller.ts) ---
+export type { FormRuntime, SaveOutcome, DeleteOutcome } from './form-runtime';
 
 // --- onChanges builder catalog (EF2; port of 0.3.x
 // src/listgrid/config/OnChangeEntityForm.ts:76-361 — changeHidden/
