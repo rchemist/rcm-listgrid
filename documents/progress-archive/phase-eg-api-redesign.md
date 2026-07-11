@@ -60,6 +60,12 @@
 
 - **W2-8** changeSelectOptions 배열-clause 레이스 fix(§Needs Review #27 처분 완료) — 2파일(change-select-options.ts+on-changes.test). **버그**: 단일-pass 루프에서 동일 필드 겨냥 2 clause(matched apply+unmatched revert)가 clause 순서에 따라 settled options 상이(unmatched revert가 matched apply clobber). **fix=2-pass**: pass1 전 clause 순회→target 집합+matched applied 맵 수집; pass2 matched 필드 적용·나머지만 revert(**matched는 revert 제외**). 매치가 순서 무관 승리·필드당 setMeta 정확히 1회. 두-matched-동일필드는 last-match-wins(내재 모호성·순서안정). 빌더 시그니처 무변경. **red→green 실증**: race 테스트가 구 로직서 fail(`[Array(2)]`=apply+revert 2콜)·신 로직 pass(1콜). +2 unit(**1936**). **inline 실행**(단일 non-hot-file 알고리즘 fix·opus 직접·delegate 예외). 계수 root 49/120·/schema 175/180 PASS. 커밋 `052246f`.
 
+## W3 — 권한·능력·액션 (진행 — hot-file 순차·delegate sonnet→opus 검증)
+
+> 스펙 §3.2·§3.4·§6.2·§7 · [waves §W3](../plans/entityform-api-implementation-waves.md) · CAP-02·03·06·08·09·22·27. 실행: sonnet delegate(waves 브리프=브리핑 원문) → opus 검증(full gate+계수+diff 발명감사)+커밋. hot-file 순차, fan-out 금지(ViewEntityForm 대폭 수정).
+
+- **W3-1** 탭/그룹 requiredPermissions 소비+가시성 파생(§3.2·CAP-02/03) — 11파일(logic `4d30159`). **getStaticConditionalBoolean 신설**(schema-core conditional.ts, `getConditionalBoolean`의 sync 형제·async `ValuedBoolean`→false=FieldRenderer per-field 재평가, **blueprint EG4 sync 근사 GO** 사전판정 바인딩)+배럴 export(/schema 175→176). **addFields** TabInput/GroupInput.requiredPermissions→TabDef/FieldGroupDef 전파(누락분·조건 spread). **form-store** seed(:337)+default-tab-pick(:509) `typeof===boolean` 내로잉→`getStaticConditionalBoolean(hidden, renderType)`(W1-5 TODO 3곳 중 store 2곳 마감·**권한 게이트는 뷰 전용**=seed는 정적 hidden만). **ViewEntityForm** deriveTabs/deriveGroups +isPermitted(CAP-02)+hasVisibleContent(CAP-03, 구 getViewableTabs→getViewableFieldGroups semantics=group viewable iff ∃ field `isPermitted&&!staticHidden`, tab viewable iff isPermitted&&∃viewable group·`tabHasVisibleContent=deriveGroups(...).length>0` DRY)+useSession/renderType 배선(D4 무영향=값편집 미재파생). **seed 정적화 등가성 검증**: tabHidden 소비 전부 `[id] ?? …`(presence-check 0)=absent≡false. 봉인: W1-5 TabDef.hidden conditional 해석 TODO(3곳 중 store 2 완결·ViewEntityForm 1 완결). +14 unit(**1950**)·계수 EntityForm 37/45·root 49/120·/schema **176/180** PASS·**E2E +1(tab-permission, 실브라우저 CAP-02/03: ADMIN탭 표시/SUPERADMIN탭·빈그룹 숨김, 17 green)**. deviation: E2E fixture=전용 최소 perm-demo(브리프 허용 옵션·기존 major E2E 회귀 회피). logic `4d30159`.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:
