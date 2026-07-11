@@ -187,4 +187,43 @@ describe('changeSelectOptions builder', () => {
       ['province', { options: undefined }],
     ]);
   });
+
+  it('a matched clause wins over an unmatched same-field clause regardless of order (W2-8 race)', () => {
+    const KR_OPTIONS = [{ value: 'kr', label: 'KR' }];
+    // Both clauses target `state`: US matches (apply A_OPTIONS), KR does not
+    // (would revert). Old single-pass: the apply and the revert raced, so the
+    // settled options depended on clause order. Two-pass: the match always
+    // wins, and each field settles with exactly ONE setMeta call.
+    const forward = changeSelectOptions('country', [
+      { value: 'US', result: { state: A_OPTIONS } },
+      { value: 'KR', result: { state: KR_OPTIONS } },
+    ]);
+    const reversed = changeSelectOptions('country', [
+      { value: 'KR', result: { state: KR_OPTIONS } },
+      { value: 'US', result: { state: A_OPTIONS } },
+    ]);
+
+    const mForward = fakeMutator({ country: 'US' });
+    forward(mForward, 'country');
+    expect(mForward.metaCalls).toEqual([['state', { options: A_OPTIONS }]]);
+
+    const mReversed = fakeMutator({ country: 'US' });
+    reversed(mReversed, 'country');
+    expect(mReversed.metaCalls).toEqual([['state', { options: A_OPTIONS }]]);
+  });
+
+  it('reverts a field no matched clause claims, even when a sibling field is matched', () => {
+    // `state` matched (US) → applied; `zip` only appears in the unmatched KR
+    // clause → reverted. One settled setMeta per field.
+    const handler = changeSelectOptions('country', [
+      { value: 'US', result: { state: A_OPTIONS } },
+      { value: 'KR', result: { zip: A_OPTIONS } },
+    ]);
+    const m = fakeMutator({ country: 'US' });
+    handler(m, 'country');
+    expect(m.metaCalls).toEqual([
+      ['state', { options: A_OPTIONS }],
+      ['zip', { options: undefined }],
+    ]);
+  });
 });

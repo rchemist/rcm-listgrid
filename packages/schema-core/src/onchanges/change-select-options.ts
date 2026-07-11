@@ -45,16 +45,27 @@ export function changeSelectOptions(
     if (changedField !== sourceField) return;
     const value = m.getValue(sourceField);
     const clauses = Array.isArray(when) ? when : [when];
+    // Two-pass (W2-8): with the old single pass, two clauses targeting the
+    // SAME field raced — an unmatched clause's revert could clobber a matched
+    // clause's apply (or vice-versa) depending on clause order, so the settled
+    // options depended on ordering. Pass 1 collects every target field and the
+    // options from any MATCHED clause; pass 2 applies matched fields and only
+    // reverts fields no matched clause claimed. A match therefore ALWAYS wins
+    // over a revert regardless of order (matched fields are excluded from the
+    // revert set). Two matched clauses on the same field keep last-match-wins
+    // (an inherent authoring ambiguity, order-stable within the matched set).
+    const applied = new Map<string, SelectOption[]>();
+    const targets = new Set<string>();
     for (const clause of clauses) {
-      if (isMatched(clause, value)) {
-        for (const [field, options] of Object.entries(clause.result)) {
-          m.setMeta(field, { options });
-        }
-      } else {
-        for (const field of Object.keys(clause.result)) {
-          m.setMeta(field, { options: undefined });
-        }
+      const matched = isMatched(clause, value);
+      for (const [field, options] of Object.entries(clause.result)) {
+        targets.add(field);
+        if (matched) applied.set(field, options);
       }
+    }
+    for (const field of targets) {
+      const options = applied.get(field);
+      m.setMeta(field, { options: options ?? undefined });
     }
   };
 }
