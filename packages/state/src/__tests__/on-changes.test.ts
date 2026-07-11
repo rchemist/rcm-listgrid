@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { EntityForm, StringField, type FormMutator } from '@listgrid/schema-core';
+import { EntityForm, StringField, type FormMutator, type Session } from '@listgrid/schema-core';
 import { createFormStore } from '../form-store';
 
 // EF2 — onChanges cascade (state layer). Covers: dispatch order, sibling
@@ -147,5 +147,54 @@ describe('form-store onChanges cascade (EF2)', () => {
     store.getState().setValue('b', 'B1');
     store.getState().setValue('a', 'A1');
     expect(snapshot).toEqual({ a: 'A1', b: 'B1', c: undefined });
+  });
+});
+
+// W2-2 — FormMutator additive extension (spec §6.1): getRenderType/getSession.
+// getRenderType() must delegate to the backing EntityForm.getRenderType()
+// (id-based — spec §3.1), the same source InitContext.renderType (W2-1)
+// already reads, so onChange and onInit handlers observe an identical value.
+describe('form-store FormMutator getRenderType/getSession (W2-2)', () => {
+  it('an onChange handler branches on mutator.getRenderType() — "update" when the form has an id', () => {
+    let seenRenderType: string | undefined;
+    const form = ThreeFieldForm()
+      .withId('existing-1')
+      .onChange((m: FormMutator, changedField) => {
+        if (changedField === 'a') seenRenderType = m.getRenderType();
+      });
+    const store = createFormStore(form);
+    store.getState().setValue('a', 'x');
+    expect(seenRenderType).toBe('update');
+  });
+
+  it('an onChange handler branches on mutator.getRenderType() — "create" when the form has no id', () => {
+    let seenRenderType: string | undefined;
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
+      if (changedField === 'a') seenRenderType = m.getRenderType();
+    });
+    const store = createFormStore(form);
+    store.getState().setValue('a', 'x');
+    expect(seenRenderType).toBe('create');
+  });
+
+  it('mutator.getSession() returns the session the store was created with', () => {
+    const session: Session = { roles: ['sales:read'] };
+    let seenSession: Session | undefined;
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
+      if (changedField === 'a') seenSession = m.getSession();
+    });
+    const store = createFormStore(form, { session });
+    store.getState().setValue('a', 'x');
+    expect(seenSession).toBe(session);
+  });
+
+  it('mutator.getSession() returns undefined when the store was created without a session', () => {
+    let seenSession: Session | undefined = { roles: ['stale'] };
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
+      if (changedField === 'a') seenSession = m.getSession();
+    });
+    const store = createFormStore(form);
+    store.getState().setValue('a', 'x');
+    expect(seenSession).toBeUndefined();
   });
 });

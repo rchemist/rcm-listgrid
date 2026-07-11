@@ -1,5 +1,7 @@
+import type { Session } from '../auth';
 import type { FieldMetaOverride } from './field-meta';
 import type { FormField } from './form-field';
+import type { RenderType } from './types';
 
 // FormMutator (EF2) — the state-agnostic mutation surface an onChanges
 // handler receives. Declared here (schema-core), not @listgrid/state,
@@ -67,6 +69,17 @@ export interface FormMutator {
    * ever touches the tab bar.
    */
   setTabHidden(tabId: string, hidden: boolean): void;
+  /**
+   * The form's current create/update mode (spec §3.1) — delegates to the
+   * backing EntityForm's `getRenderType()` (id-based: 'update' iff an id is
+   * set), so a handler observes the SAME renderType `InitContext.renderType`
+   * (W2-1) already exposes to `onInit` handlers. Closes the asymmetry where
+   * pre-W2-2 `onChange` handler bodies could not branch on renderType at all
+   * (verification consumer-3).
+   */
+  getRenderType(): RenderType;
+  /** the host-injected auth session this form was built with, if any (spec §6.1). */
+  getSession(): Session | undefined;
 }
 
 /**

@@ -400,6 +400,12 @@ export function createFormStore(
       setTabHidden(tabId, hidden) {
         get().setTabHidden(tabId, hidden);
       },
+      getRenderType() {
+        return entityForm.getRenderType();
+      },
+      getSession() {
+        return session;
+      },
     };
 
     return {
