@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
@@ -6,6 +6,7 @@ import type {
   ActionContext,
   EntityField,
   EntityForm,
+  FieldEvalContext,
   FieldGroupDef,
   FormAction,
   FormMutator,
@@ -16,6 +17,7 @@ import type {
 } from '@listgrid/schema-core';
 import {
   extractPermissions,
+  getConditionalBoolean,
   getCurrentValue,
   getStaticConditionalBoolean,
   isPermitted,
@@ -23,7 +25,7 @@ import {
 import type { FormStoreState } from '@listgrid/state';
 import { useSession } from '../providers/auth';
 import { useUI } from '../providers/ui';
-import { FormStoreProvider } from '../providers/form-store';
+import { FormStoreProvider, snapshotFieldValues } from '../providers/form-store';
 import { FieldRenderer } from './FieldRenderer';
 import { getMessages } from '../messages';
 
@@ -329,6 +331,18 @@ function ViewEntityFormInner({
   // store's `saving` slice is form-store's own concern, read-only if ever
   // needed — Save's in-flight indicator is now `runningActionId === 'save'`).
   const [runningActionId, setRunningActionId] = useState<string | undefined>(undefined);
+  // W3-6 Fix#1 — async-resolved function-conditional (ValuedBoolean)
+  // visible/enabled per action id; literal/OptionalBoolean never populate
+  // this (they resolve sync in resolveVisible/resolveEnabled below). See the
+  // effect further down for how/when it's (re)computed.
+  const [fnFlags, setFnFlags] = useState<Record<string, { visible: boolean; enabled: boolean }>>(
+    {},
+  );
+  // latest `merged` (computed below, after builtins/custom are assembled) —
+  // read by the resolution effect without making `merged` itself an effect
+  // dep (a new array identity every render would otherwise re-run it every
+  // render, W3-6 브리프 mergedRef pattern).
+  const mergedRef = useRef<FormAction[]>([]);
   // EF4/EC3-0: subscribe to structureVersion and tabHidden ONLY — a value
   // edit must NOT re-derive tabs/groups (D4 stays intact, per
   // FieldRenderer/useFormField); an addField/removeField bump or a
@@ -336,16 +350,30 @@ function ViewEntityFormInner({
   // session (CAP-02/03, W3-1) and renderType are also read here, but neither
   // changes on a value edit (session is per-mount from AuthProvider,
   // renderType is fixed for the store's lifetime), so reading them does not
-  // weaken the D4 guarantee.
-  useStore(store, (s) => s.structureVersion);
+  // weaken the D4 guarantee. structureVersion doubles as a dep of the W3-6
+  // Fix#1 resolution effect below (an addField/removeField that adds/removes
+  // a custom action's target field should re-resolve its condition).
+  const structureVersion = useStore(store, (s) => s.structureVersion);
   const tabHidden = useStore(store, (s) => s.tabHidden);
   const session = useSession();
   const userPermissions = extractPermissions(session);
-  const renderType = useStore(store, (s) => s.renderType); // FieldRenderer eval-ctx와 동일 소스
+  // FieldRenderer eval-ctx와 동일 소스 — deriveTabs/deriveGroups/field hidden
+  // 해석 ONLY (W3-6 Fix#3: fetchedData/initialData가 있으면 getId()와 무관하게
+  // 'update'로 flip되므로, 액션 바 자체의 CRUD 판단에는 쓰지 않는다— 아래
+  // actionRenderType 참조).
+  const renderType = useStore(store, (s) => s.renderType);
   // Declared-level form read-only (spec §6.1, CAP-27; W3-5) — hides the
   // built-in Save affordance only. Delete stays capability-governed
   // (formReadOnly does not gate it — spec §6.1 names Save only).
   const formReadOnly = useStore(store, (s) => s.formReadOnly);
+
+  // W3-6 Fix#3 — the action bar's OWN CRUD decisions (saveCap, Delete
+  // candidacy, visible/enabled resolution) use the id-based renderType —
+  // identical to what form-controller.ts/entityForm.getRenderType() itself
+  // branches on — NOT the store's `renderType` above. deriveTabs/deriveGroups
+  // intentionally keep using the store's `renderType` (must match
+  // FieldRenderer's eval-ctx source for field/tab hidden resolution).
+  const actionRenderType = entityForm.getRenderType();
 
   const actionCtx = buildActionCtx(store, entityForm, controller, session);
 
@@ -426,7 +454,9 @@ function ViewEntityFormInner({
 
   // --- built-in action synthesis (spec §3.4; CAP-06 capability → visible) ---
   const caps = entityForm.getCapabilities();
-  const saveCap = renderType === 'create' ? caps.create : caps.update;
+  // W3-6 Fix#3 — id-based actionRenderType (was store's renderType, which
+  // flips to 'update' on fetchedData/initialData regardless of getId()).
+  const saveCap = actionRenderType === 'create' ? caps.create : caps.update;
   const saveBuiltin: FormAction = {
     id: 'save',
     label: 'Save',
@@ -438,11 +468,12 @@ function ViewEntityFormInner({
   // formReadOnly excludes the Save candidate entirely (spec §6.1 — Save
   // ONLY; Delete is unaffected, see the builtins.push below).
   const builtins: FormAction[] = formReadOnly ? [] : [saveBuiltin];
-  // Delete built-in is a candidate ONLY in update mode with a controller
-  // (W3-3 §설계 결정 1 — group-cap-map:55g "delete NEVER shows in create
-  // mode"); its own capability-derived `visible` is still applied below in
-  // the shared visible-filter pass, same as every other action.
-  if (renderType === 'update' && controller) {
+  // Delete built-in is a candidate ONLY in update mode (id-based, W3-6
+  // Fix#3 — getId() !== undefined) with a controller (W3-3 §설계 결정 1 —
+  // group-cap-map:55g "delete NEVER shows in create mode"); its own
+  // capability-derived `visible` is still applied below in the shared
+  // visible-filter pass, same as every other action.
+  if (actionRenderType === 'update' && controller) {
     const ctrl = controller;
     builtins.push({
       id: 'delete',
@@ -464,44 +495,125 @@ function ViewEntityFormInner({
     (b) => !replacedSlots.has(b.id) && !customIds.has(b.id),
   );
   const merged = [...remainingBuiltins, ...custom].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  mergedRef.current = merged;
 
-  // --- visible filter (sync approximation, getStaticConditionalBoolean — W3-1 pattern) ---
+  // W3-6 Fix#1 — function-conditional (ValuedBoolean) `visible`/`enabled`
+  // resolved ASYNCHRONOUSLY, mirroring FieldRenderer's async-predicate
+  // pattern. getStaticConditionalBoolean's function branch always returns
+  // `false` (conditional.ts — correct polarity for HIDDEN's
+  // permissive-false default, WRONG for visible/enabled/capability's
+  // restrictive-false default): a function-typed visible/enabled/capability
+  // action was ALWAYS hidden/disabled, for every user — including ones the
+  // predicate should have permitted (the controller, which gates the same
+  // condition via async getConditionalBoolean, would still have let the
+  // action run — "button hidden, action still works" — the bug this fixes).
+  // Literal/OptionalBoolean stay on the sync getStaticConditionalBoolean
+  // path (resolveVisible/resolveEnabled below) — unchanged, no flash, no
+  // regression; ONLY the function branch is deferred to this effect,
+  // defaulting to visible+enabled while pending (never hidden-by-default,
+  // FieldRenderer precedent).
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      const s = store.getState();
+      const evalCtx: FieldEvalContext = {
+        renderType: actionRenderType, // id-based — matches controller (Fix#3)
+        values: snapshotFieldValues(s),
+        ...(session !== undefined ? { session } : {}),
+      };
+      const next: Record<string, { visible: boolean; enabled: boolean }> = {};
+      for (const a of mergedRef.current) {
+        if (typeof a.visible === 'function' || typeof a.enabled === 'function') {
+          next[a.id] = {
+            visible:
+              typeof a.visible === 'function'
+                ? await getConditionalBoolean(evalCtx, a.visible)
+                : true,
+            enabled:
+              typeof a.enabled === 'function'
+                ? await getConditionalBoolean(evalCtx, a.enabled)
+                : true,
+          };
+        }
+      }
+      if (!cancelled) setFnFlags(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Value-dependent conditions resolve off a SNAPSHOT (D4 — not a
+    // keystroke-reactive whole-store subscription; documented limitation,
+    // W3-6 브리프). Re-resolves on structural/renderType/session/
+    // capability/formReadOnly/controller changes only.
+  }, [store, session, entityForm, formReadOnly, controller, structureVersion, actionRenderType]);
+
+  // literal/OptionalBoolean: sync exact (getStaticConditionalBoolean, W3-1
+  // pattern, actionRenderType — Fix#3). function branch: async fnFlags,
+  // default show/enabled while pending (Fix#1).
+  function resolveVisible(a: FormAction): boolean {
+    if (a.visible === undefined) return true;
+    if (typeof a.visible === 'function') return fnFlags[a.id]?.visible ?? true;
+    return getStaticConditionalBoolean(a.visible, actionRenderType);
+  }
+  function resolveEnabled(a: FormAction): boolean {
+    if (a.enabled === undefined) return true;
+    if (typeof a.enabled === 'function') return fnFlags[a.id]?.enabled ?? true;
+    return getStaticConditionalBoolean(a.enabled, actionRenderType);
+  }
+
+  // --- visible filter (W3-1 sync-approximation pattern + W3-6 Fix#1 async function branch) ---
   // (W3-3 briefing §설계 결정 6 / Needs-Review) — when `controller` is absent,
-  // `actionCtx` is undefined and NO custom action (label+run OR render) can
-  // be given one; the built-in Delete candidate was already excluded at
-  // synthesis time (only pushed when `controller` is truthy, above), so the
-  // only action ever allowed through here is the built-in Save (id 'save'),
-  // which still works via its legacy (validateAll + onSave) path. A custom
-  // action that `replaces: 'save'` is ALSO omitted in this case (it IS a
-  // custom action) — the built-in Save it displaced does not come back, so
-  // no Save button renders at all; a deliberate, literal reading of the
+  // NO custom action (label+run OR render) can be given an ActionContext;
+  // the built-in Delete candidate was already excluded at synthesis time
+  // (only pushed when `controller` is truthy, above), so the only action
+  // ever allowed through here is the built-in Save ITSELF — identity-
+  // checked (`a === saveBuiltin`, W3-6 Fix#4), not `a.id === 'save'` (a
+  // CUSTOM action reusing id 'save' would otherwise pass this filter too,
+  // then crash at click time — runAction below assumes id 'save' implies
+  // the built-in's `run`, which ignores `ctx` entirely; a same-id custom
+  // action's own `run` would receive `ctx=undefined` unguarded). It still
+  // works via its legacy (validateAll + onSave) path. A custom action that
+  // `replaces: 'save'` is ALSO omitted in this case (it IS a custom
+  // action) — the built-in Save it displaced does not come back, so no
+  // Save button renders at all; a deliberate, literal reading of the
   // decision, not an invented carve-out.
   const visibleActions = merged
-    .filter((a) =>
-      a.visible === undefined ? true : getStaticConditionalBoolean(a.visible, renderType),
-    )
-    .filter((a) => actionCtx !== undefined || a.id === 'save');
+    .filter((a) => resolveVisible(a))
+    .filter((a) => controller !== undefined || a === saveBuiltin);
 
   async function runAction(action: FormAction): Promise<void> {
     setRunningActionId(action.id);
     try {
+      // W3-6 Fix#2 — a FRESH ActionContext built at CLICK time, not the
+      // render-time `actionCtx` closed over above: D4 (FieldRenderer/
+      // useFormField field-level subscription) means a keystroke in a
+      // field does NOT re-render ViewEntityFormInner, so a render-time
+      // actionCtx captured before the keystroke would hand a custom
+      // action's `run` STALE `values` (e.g. `ctx.values.name` reading
+      // `undefined` after the user typed into `name`, because the ctx was
+      // built before the keystroke). Building it here reads
+      // store.getState() at the moment of the click, guaranteeing current
+      // values regardless of whether the component re-rendered since.
+      //
       // (W3-3 briefing §설계 결정 6 / Needs-Review — controller-optional vs
       // ActionContext.controller: FormRuntime required) — when `controller`
-      // is absent, `actionCtx` is undefined and the ONLY action ever
-      // reachable here is the built-in Save (every other candidate was
-      // already omitted at merge/render time, see `renderAction` below);
-      // `runBuiltinSave` ignores its `ctx` argument entirely (it closes
-      // over `controller`/`store`/`onSave` directly), so this cast is safe
-      // in practice despite the type-level mismatch.
-      await action.run?.(actionCtx as ActionContext);
+      // is absent, `ctx` is undefined and the ONLY action ever reachable
+      // here is the built-in Save (every other candidate is excluded by
+      // the identity filter above, Fix#4); `runBuiltinSave` ignores its
+      // `ctx` argument entirely (it closes over `controller`/`store`/
+      // `onSave` directly), so this cast is safe in practice despite the
+      // type-level mismatch.
+      const ctx = buildActionCtx(store, entityForm, controller, session);
+      await action.run?.(ctx as ActionContext);
     } finally {
       setRunningActionId(undefined);
     }
   }
 
   function renderAction(action: FormAction): ReactNode {
-    const enabledResolved =
-      action.enabled === undefined ? true : getStaticConditionalBoolean(action.enabled, renderType);
+    // W3-6 Fix#1 — same resolveEnabled as the visible filter above (literal
+    // sync-exact / function async fnFlags).
+    const enabledResolved = resolveEnabled(action);
 
     let node: ReactNode;
     if (action.render) {
