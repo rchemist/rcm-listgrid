@@ -7,14 +7,15 @@ import {
 } from '@listgrid/schema-core';
 import { initializeFormStore } from '../initialize-form-store';
 
-// EF3 — initializeFormStore pipe. Covers: dispatch order (onFetchData before
-// onInitialize, both before build/hydrate — src/listgrid/config/
+// EF3/EF7 — initializeFormStore pipe. Covers: dispatch order (BIND before
+// onFetchData before onInitialize before REBIND/build — src/listgrid/config/
 // EntityForm.tsx:162-306 successor), handler-returns-new-EntityForm respected,
 // onInitialize per-handler try/catch (259-264 parity), dynamically-added
 // fields getting first-class store slices + fetched values (flat AND dotted
 // names), initialData bypassing the adapter, fetch-error short-circuit
 // (198-203 parity), create mode, and the EF2 dispatch-isolation invariant
-// (hydrate seeding must not fire onChanges handlers).
+// (BIND seeding must not fire onChanges handlers). The 'EF7' describe block
+// below covers the hook-setValue-overrides-fetched-value reorder fix.
 
 function WidgetForm(): EntityForm {
   return new EntityForm('WidgetEntityForm', '/widget').addFields({
@@ -235,5 +236,140 @@ describe('initializeFormStore (EF3)', () => {
     expect(() => result.store.getState().setValue('name', 'x')).not.toThrow();
     expect(result.store.getState().getValue('name')).toBe('x');
     consoleError.mockRestore();
+  });
+
+  // EF7 — the core fix: onInitialize/onFetchData setValue must OVERRIDE the
+  // bound fetched value, not be clobbered by it (regression: an earlier pipe
+  // ordering ran hooks -> build -> hydrate, so hydrate ran LAST and silently
+  // won over any hook-set value).
+  describe('EF7 — hook setValue overrides the fetched value', () => {
+    function ContractedForm(): EntityForm {
+      return new EntityForm('EnrollmentEntityForm', '/enrollment').addFields({
+        items: [new StringField('contracted', 1).withLabel('Contracted')],
+      });
+    }
+
+    it('onInitialize setValue overrides a boolean fetched value with a derived string', async () => {
+      const form = ContractedForm().withOnInitialize((ef) => {
+        const fetchedContracted = ef.getField('contracted')?.value?.current;
+        return ef.setValue('contracted', fetchedContracted ? 'CONTRACTED' : 'GENERAL');
+      });
+      const adapter = fakeAdapter(async () => ({ id: '1', contracted: true }));
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      expect(store.getState().getValue('contracted')).toBe('CONTRACTED');
+    });
+
+    it('onFetchData setValue also overrides the fetched value', async () => {
+      const form = ContractedForm().withOnFetchData((ef, data) => {
+        return ef.setValue('contracted', data.contracted ? 'CONTRACTED' : 'GENERAL');
+      });
+      const adapter = fakeAdapter(async () => ({ id: '1', contracted: true }));
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      expect(store.getState().getValue('contracted')).toBe('CONTRACTED');
+    });
+
+    it('precedence: hook setValue > fetched record > declared default', async () => {
+      const base = () =>
+        new EntityForm('WidgetEntityForm', '/widget').addFields({
+          items: [new StringField('name', 1).withDefaultValue('D')],
+        });
+
+      // hook wins over record.
+      const withHook = base().withOnInitialize((ef) => ef.setValue('name', 'H'));
+      const adapterR = fakeAdapter(async () => ({ id: '1', name: 'R' }));
+      const r1 = await initializeFormStore({ entityForm: withHook, adapter: adapterR, id: '1' });
+      expect(r1.store.getState().getValue('name')).toBe('H');
+
+      // without the hook, record wins over the declared default.
+      const adapterR2 = fakeAdapter(async () => ({ id: '1', name: 'R' }));
+      const r2 = await initializeFormStore({ entityForm: base(), adapter: adapterR2, id: '1' });
+      expect(r2.store.getState().getValue('name')).toBe('R');
+
+      // create mode (no record): the declared default applies.
+      const r3 = await initializeFormStore({ entityForm: base() });
+      expect(r3.store.getState().getValue('name')).toBe('D');
+    });
+
+    it('a field ADDED by an onInitialize handler gets its fetched value from the record (rebind)', async () => {
+      const form = ContractedForm().withOnInitialize((ef) =>
+        ef.addFields({ items: [new StringField('extra', 2)] }),
+      );
+      const adapter = fakeAdapter(async () => ({
+        id: '1',
+        contracted: true,
+        extra: 'from-record',
+      }));
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      expect(store.getState().getValue('extra')).toBe('from-record');
+    });
+
+    it('a field absent from the record in edit mode has current=undefined (default dropped) unless a hook sets it', async () => {
+      const form = new EntityForm('WidgetEntityForm', '/widget').addFields({
+        items: [new StringField('absentField', 1).withDefaultValue('declared-default')],
+      });
+      const adapter = fakeAdapter(async () => ({ id: '1' })); // no `absentField` in the record
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      expect(store.getState().getValue('absentField')).toBeUndefined();
+    });
+
+    it('a hook can set a value for a field absent from the record — its override is NOT dropped', async () => {
+      const form = new EntityForm('WidgetEntityForm', '/widget')
+        .addFields({
+          items: [new StringField('absentField', 1).withDefaultValue('declared-default')],
+        })
+        .withOnInitialize((ef) => ef.setValue('absentField', 'hook-set'));
+      const adapter = fakeAdapter(async () => ({ id: '1' }));
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      expect(store.getState().getValue('absentField')).toBe('hook-set');
+    });
+
+    it('dotted names bind correctly through the BIND step', async () => {
+      const form = new EntityForm('WidgetEntityForm', '/widget').addFields({
+        items: [new StringField('user.state', 1)],
+      });
+      const adapter = fakeAdapter(async () => ({ id: '1', user: { state: 'CA' } }));
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      expect(store.getState().getValue('user.state')).toBe('CA');
+    });
+
+    it('dirty=false and renderType="update" after a plain (no-override) init with data', async () => {
+      const form = ContractedForm();
+      const adapter = fakeAdapter(async () => ({ id: '1', contracted: 'x' }));
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      expect(store.getState().isDirty()).toBe(false);
+      expect(store.getState().renderType).toBe('update');
+    });
+
+    it('renderType="create" and dirty=false in create mode', async () => {
+      const { store } = await initializeFormStore({ entityForm: ContractedForm() });
+      expect(store.getState().isDirty()).toBe(false);
+      expect(store.getState().renderType).toBe('create');
+    });
+
+    // EF4 parity: the init pipe retains the record on the store (via
+    // CreateFormStoreOptions.fetchedData) so a field added at RUNTIME (well
+    // after initializeFormStore returns, e.g. from an onChanges handler)
+    // still rebinds — the same mechanism a direct hydrate() call fed before
+    // this reorder.
+    it('a field added at runtime AFTER init still rebinds from the retained record (EF4 parity)', async () => {
+      const form = ContractedForm();
+      const adapter = fakeAdapter(async () => ({
+        id: '1',
+        contracted: 'x',
+        extra: 'runtime-value',
+      }));
+
+      const { store } = await initializeFormStore({ entityForm: form, adapter, id: '1' });
+      store.getState().addField(new StringField('extra', 2));
+
+      expect(store.getState().getValue('extra')).toBe('runtime-value');
+    });
   });
 });

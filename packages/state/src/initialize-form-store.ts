@@ -1,21 +1,35 @@
 import type { StoreApi } from 'zustand/vanilla';
 import type { BackendAdapter, BackendError, EntityForm, Session } from '@listgrid/schema-core';
-import { createFormStore, type CreateFormStoreOptions, type FormStoreState } from './form-store';
+import {
+  createFormStore,
+  resolveFetchedValue,
+  type CreateFormStoreOptions,
+  type FormStoreState,
+} from './form-store';
 
-// initializeFormStore (EF3) — the async pipe that reassembles the 0.3.x
-// EntityForm.initialize() (src/listgrid/config/EntityForm.tsx:162-306) on top
-// of the new engine's primitives. Does NOT re-implement createFormStore or
-// hydrate — it calls them, in this order:
+// initializeFormStore (EF3, reordered EF7) — the async pipe that reassembles
+// the 0.3.x EntityForm.initialize() (src/listgrid/config/EntityForm.tsx:
+// 162-306) on top of the new engine's primitives, in this order:
 //
-//   clone -> fetch (unless initialData given) -> onFetchData* -> onInitialize*
-//   -> createFormStore (build) -> hydrate
+//   clone -> fetch (unless initialData given) -> BIND -> onFetchData*
+//   -> onInitialize* -> REBIND -> createFormStore (build)
 //
-// Building the store AFTER the hooks run (unlike 0.3.x, which bound fetched
-// values to fields BEFORE onInitialize and needed a second late-added-field
-// rebinding pass at EntityForm.tsx:268-302) makes any field an onInitialize
-// handler adds first-class from the start: createFormStore seeds a slice for
-// it, and the subsequent hydrate() call fills its fetched value like any
-// other field — the old rebinding pass falls out structurally.
+// EF7 fix: an earlier version of this pipe ran hooks -> build -> hydrate,
+// which made hydrate() the LAST write and let it silently clobber any value
+// an onFetchData/onInitialize handler had just set via EntityForm.setValue —
+// backwards from 0.3.x, where setFetchedValues (the BIND step here) ran
+// BEFORE onInitialize specifically so a handler's override could WIN
+// (EntityForm.tsx:181,257). This version restores that: BIND applies the
+// fetched record onto the EntityForm clone's fields first (same per-field
+// logic createFormStore's slice-building reads verbatim — see seedSlice,
+// form-store.ts), THEN onFetchData/onInitialize run and may call
+// ef.setValue/ef.setFetchedValue to override what BIND just wrote, THEN
+// REBIND fills in any field a hook ADDED after BIND already ran (0.3.x
+// EntityForm.tsx:268-302 late-added-field parity) — without clobbering a
+// hook-set current on a field BIND already touched. createFormStore is
+// called LAST and reads each field's already-final value; no separate
+// hydrate() call is made in this path (precedence: hook setValue > fetched
+// record > declared default).
 
 export interface InitializeFormStoreOptions {
   /** the declared form; never mutated — a clone is initialized (see EntityForm.clone). */
@@ -36,8 +50,8 @@ export interface InitializeFormStoreResult {
   /** the initialized EntityForm (post onFetchData/onInitialize) — may carry fields the
    *  declared entityForm did not have; use this, not the input entityForm, to render. */
   entityForm: EntityForm;
-  /** set only on a fetch failure (0.3.x EntityForm.tsx:198-203 parity) — hooks/hydrate
-   *  were skipped, but `store` is still a valid, usable (empty/default) store. */
+  /** set only on a fetch failure (0.3.x EntityForm.tsx:198-203 parity) — BIND/hooks/
+   *  REBIND were all skipped, but `store` is still a valid, usable (empty/default) store. */
   error?: BackendError;
 }
 
@@ -52,6 +66,40 @@ function toBackendError(e: unknown): BackendError {
     return e as BackendError;
   }
   return { code: 'UNKNOWN', message: e instanceof Error ? e.message : String(e) };
+}
+
+// BIND — apply `data` onto every field of `ef` BEFORE any hook runs (0.3.x
+// EntityForm.tsx:181 setFetchedValues parity). UNCONDITIONALLY overwrites
+// each field's current+fetched with the record's value for its name
+// (undefined where the record lacks it — this is deliberate: it is what
+// makes the update-mode contract "a declared default does not apply to a
+// field absent from the record" hold, same as form-store.ts hydrate(),
+// whose per-field logic this mirrors exactly). Mutates `ef`'s field
+// instances in place (safe — `ef` is always the pipe's clone(true), never
+// the caller's declared form).
+function bindFetchedData(ef: EntityForm, data: Record<string, unknown>): void {
+  for (const field of ef.getFields()) {
+    const value = resolveFetchedValue(data, field.getName());
+    field.value = { ...field.value, fetched: value, current: value };
+  }
+}
+
+// REBIND — fill in a field a hook (onFetchData/onInitialize) ADDED after
+// BIND already ran; BIND never saw it, so its `fetched` is still absent
+// (0.3.x EntityForm.tsx:268-302 late-added-field parity — the exact same
+// `field.value?.fetched !== undefined` skip-guard). Only fields BIND missed
+// are touched: any field BIND already bound has `fetched` set (even to
+// `undefined`, for a record-absent field — an own key, still reads as
+// `undefined` here, and the second condition below then finds nothing to
+// rebind for it either, so it is never re-touched), so a hook's setValue on
+// a pre-existing field is never clobbered by this step.
+function rebindLateAddedFields(ef: EntityForm, data: Record<string, unknown>): void {
+  for (const field of ef.getFields()) {
+    if (field.value?.fetched !== undefined) continue;
+    const value = resolveFetchedValue(data, field.getName());
+    if (value === undefined) continue;
+    field.value = { ...field.value, fetched: value, current: value };
+  }
 }
 
 export async function initializeFormStore(
@@ -77,13 +125,21 @@ export async function initializeFormStore(
     try {
       data = (await adapter.getOne(ef.getUrl(), id)) as Record<string, unknown>;
     } catch (e) {
-      // c. fetch error: skip hooks and hydrate, return a usable-but-empty store.
+      // c. fetch error: skip bind/hooks entirely, return a usable-but-empty store.
       return { store: createFormStore(ef, storeOpts), entityForm: ef, error: toBackendError(e) };
     }
   }
 
-  // d. onFetchData — sequential, only when there is fetched/provided data.
-  // a throwing handler is logged and skipped, remaining handlers still run
+  // d. BIND — see bindFetchedData doc above. Runs BEFORE onFetchData/
+  // onInitialize so a handler's ef.setValue/ef.setFetchedValue can override
+  // what BIND just wrote (the EF7 fix — 0.3.x ran onInitialize AFTER
+  // setFetchedValues for exactly this reason).
+  if (data) {
+    bindFetchedData(ef, data);
+  }
+
+  // e. onFetchData — sequential, only when there is fetched/provided data. a
+  // throwing handler is logged and skipped, remaining handlers still run
   // (0.3.x per-handler isolation parity — EntityForm.tsx:591-600), same as
   // the onInitialize loop below.
   if (data) {
@@ -96,7 +152,7 @@ export async function initializeFormStore(
     }
   }
 
-  // e. onInitialize — sequential, always (create mode too); a throwing handler
+  // f. onInitialize — sequential, always (create mode too); a throwing handler
   // is logged and skipped, remaining handlers still run (0.3.x EntityForm.tsx:259-264).
   for (const handler of ef.getOnInitialize()) {
     try {
@@ -106,13 +162,21 @@ export async function initializeFormStore(
     }
   }
 
-  // f. build AFTER hooks, so fields onInitialize added are first-class slices.
-  const store = createFormStore(ef, storeOpts);
-
-  // g. seed fetched values (flat + dotted names — see form-store.ts hydrate).
+  // g. REBIND — see rebindLateAddedFields doc above. Runs AFTER both hook
+  // passes so it only ever fills a gap a hook's addFields left, never a
+  // value a hook explicitly set.
   if (data) {
-    store.getState().hydrate(data);
+    rebindLateAddedFields(ef, data);
   }
+
+  // h. build LAST — every field's value.current is already final (hook
+  // override > fetched record > declared default); seedSlice
+  // (form-store.ts) reads it as-is, no separate hydrate() call needed here.
+  // Retain `data` on the store (EF4) so a field registered at RUNTIME (e.g.
+  // from an onChanges handler, after this pipe returns) can still rebind
+  // from the same record.
+  if (data !== undefined) storeOpts.fetchedData = data;
+  const store = createFormStore(ef, storeOpts);
 
   return { store, entityForm: ef };
 }

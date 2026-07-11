@@ -1,7 +1,7 @@
 import type { Session } from './auth';
 import type { EntityField } from './field/entity-field';
 import type { OnChangesHandler } from './field/form-mutator';
-import type { RenderType } from './field/types';
+import type { FieldValue, RenderType } from './field/types';
 
 /**
  * Imperative lifecycle hook (EF3): runs once per registered handler, in
@@ -167,6 +167,49 @@ export class EntityForm {
    */
   withSubmitTransform(handler: SubmitTransformHandler): this {
     this.submitTransform = handler;
+    return this;
+  }
+
+  /**
+   * Imperative value override (EF7) — for use inside an onFetchData/
+   * onInitialize handler (initializeFormStore, @listgrid/state), which
+   * operates on the pre-store EntityForm clone those hooks receive.
+   * UNCONDITIONALLY overwrites field `name`'s current value — this is the
+   * override primitive: a handler calling this AFTER the pipe has bound the
+   * fetched record onto the clone (see initializeFormStore's BIND step)
+   * wins over that fetched value (0.3.x parity — the old engine ran
+   * onInitialize AFTER setFetchedValues for exactly this reason,
+   * EntityForm.tsx:181,257). No-op (returns `this` unchanged) if `name`
+   * names no declared field. Distinct from {@link setFetchedValue}: this
+   * never touches `fetched`, so a subsequent `reset()` still falls back to
+   * the record's original value, not this override.
+   */
+  setValue(name: string, value: unknown): this {
+    const field = this.getField(name);
+    if (field) {
+      field.value = { ...field.value, current: value };
+    }
+    return this;
+  }
+
+  /**
+   * Imperative fetched-baseline override (EF7) — corrects field `name`'s
+   * `fetched` value (e.g. a handler normalizing/deriving the record's raw
+   * value) rather than overriding the user-facing current value outright.
+   * Sets `current` too, but ONLY when `current` is not already set (a
+   * declared `withValue`/an earlier `setValue` call on this field wins) —
+   * mirrors the old engine's EntityForm.tsx:135-152 `setFetchedValue`
+   * verbatim. No-op if `name` names no declared field.
+   */
+  setFetchedValue(name: string, value: unknown): this {
+    const field = this.getField(name);
+    if (field) {
+      const next: FieldValue<unknown> = { ...field.value, fetched: value };
+      if (field.value?.current === undefined) {
+        next.current = value;
+      }
+      field.value = next;
+    }
     return this;
   }
 

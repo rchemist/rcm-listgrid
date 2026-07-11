@@ -17,10 +17,12 @@ import {
 // data record. A dotted name (e.g. 'user.state') addresses a nested object in
 // the record (0.3.x parity — src/listgrid/config/EntityForm.tsx
 // setFetchedValues:553-575 walked the same `key.split('.')` path for
-// pre-existing fields; EF3's initializeFormStore relies on hydrate covering
-// both flat and dotted names since it builds/hydrates AFTER onInitialize may
-// have added a dotted-named field).
-function resolveFetchedValue(data: Record<string, unknown>, name: string): unknown {
+// pre-existing fields). Exported (EF7) — initializeFormStore
+// (@listgrid/state) reuses this exact resolution for its pre-hook BIND step
+// and its post-hook REBIND-late-added-fields step, so both the store's own
+// `hydrate()`/`addField()` and the init pipe read a dotted/flat name
+// identically.
+export function resolveFetchedValue(data: Record<string, unknown>, name: string): unknown {
   if (!name.includes('.')) return data[name];
   let cur: unknown = data;
   for (const part of name.split('.')) {
@@ -153,6 +155,21 @@ export interface CreateFormStoreOptions {
    * either).
    */
   validateOnChange?: boolean | { debounceMs?: number };
+  /**
+   * EF7 — the fetched/provided record the init pipe (initializeFormStore,
+   * @listgrid/state) already bound onto `entityForm`'s fields (+ let
+   * onFetchData/onInitialize override) BEFORE calling createFormStore. When
+   * present, createFormStore does NOT re-derive field values from it
+   * (seedSlice already reads the final bound+hook-adjusted value straight
+   * off each field) — it is retained ONLY for the EF4 late-added-field
+   * rebind (a field registered by addField AFTER the store is built, e.g.
+   * from an onChanges handler, still needs to pull its fetched value from
+   * the same record — see the `fetchedData` closure var below) and to mark
+   * the store's initial `renderType` 'update' (0.3.x parity: a record was
+   * loaded, so this is an edit, even if the caller never set an `id`, e.g.
+   * host-preloaded `initialData`).
+   */
+  fetchedData?: Record<string, unknown>;
 }
 
 interface ValidateOnChangeConfig {
@@ -171,7 +188,12 @@ export function createFormStore(
   entityForm: EntityForm,
   opts: CreateFormStoreOptions = {},
 ): StoreApi<FormStoreState> {
-  const renderType = opts.renderType ?? entityForm.getRenderType();
+  // EF7: opts.fetchedData present means a record was loaded/provided for
+  // this form — that is an edit, even when the caller never called
+  // entityForm.withId (e.g. host-preloaded initialData with no id yet).
+  // opts.renderType, if explicitly given, still wins over both.
+  const renderType =
+    opts.renderType ?? (opts.fetchedData !== undefined ? 'update' : entityForm.getRenderType());
   const session = opts.session;
   const validateOnChangeConfig = resolveValidateOnChange(opts.validateOnChange);
 
@@ -182,6 +204,14 @@ export function createFormStore(
     const seed = field.value;
     const slice: FieldValueSlice = {};
     if (seed?.default !== undefined) slice.default = seed.default;
+    // EF7: carry `fetched` too — the init pipe (initializeFormStore) now
+    // binds the fetched record onto field.value BEFORE calling
+    // createFormStore, so this is the only place that value reaches the
+    // store slice. Without it, computeDirty/resetValue would see
+    // fetched=undefined for every bound field and misjudge dirty/reset
+    // baselines (fetched vs default confusion — see isDirty's create-mode
+    // vs update-mode branch split, ../schema-core field/value.ts).
+    if (seed?.fetched !== undefined) slice.fetched = seed.fetched;
     if (seed && Object.prototype.hasOwnProperty.call(seed, 'current')) {
       slice.current = seed.current;
     }
@@ -269,13 +299,16 @@ export function createFormStore(
       validationTimers.set(name, timer);
     }
 
-    // EF4 — the last hydrated data payload, retained so a field registered
-    // AFTER hydrate() (a post-init addField, e.g. from an onChanges handler)
-    // can still rebind its fetched value (0.3.x EntityForm.tsx:268-302 late-
-    // added-field parity; init-time additions never hit this path — EF3's
-    // build-after-hooks pipe already seeds them via the hydrate() call that
-    // follows onInitialize).
-    let fetchedData: Record<string, unknown> | undefined;
+    // EF4 — the last hydrated/provided data payload, retained so a field
+    // registered AFTER init (a post-init addField, e.g. from an onChanges
+    // handler) can still rebind its fetched value (0.3.x EntityForm.tsx:
+    // 268-302 late-added-field parity). Seeded from opts.fetchedData (EF7 —
+    // the init pipe's already-bound record) and/or overwritten by a later
+    // explicit hydrate() call; init-time additions (fields an
+    // onFetchData/onInitialize handler added) never hit THIS path — the
+    // init pipe's own REBIND step (initialize-form-store.ts) already bound
+    // them onto the EntityForm clone before createFormStore ever ran.
+    let fetchedData: Record<string, unknown> | undefined = opts.fetchedData;
 
     function dispatchOnChanges(changedField: string): void {
       for (const handler of entityForm.getOnChanges()) {
