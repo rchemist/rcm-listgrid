@@ -114,7 +114,7 @@ export function ViewEntityForm({ entityForm, store, onSave }: ViewEntityFormProp
 function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps) {
   const { Button } = useUI();
   const tabIndex = useStore(store, (s) => s.tabIndex);
-  const formErrors = useStore(store, (s) => s.formErrors);
+  const messages = useStore(store, (s) => s.messages);
   const saving = useStore(store, (s) => s.saving);
   // EF4/EC3-0: subscribe to structureVersion and tabHidden ONLY — a value
   // edit must NOT re-derive tabs/groups (D4 stays intact, per
@@ -207,10 +207,12 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
         </fieldset>
       ))}
 
-      {formErrors.length > 0 && (
+      {messages.length > 0 && (
         <ul role="alert" data-form-errors="">
-          {formErrors.map((err, i) => (
-            <li key={i}>{err}</li>
+          {messages.map((m) => (
+            <li key={m.key} data-severity={m.severity}>
+              {m.text}
+            </li>
           ))}
         </ul>
       )}

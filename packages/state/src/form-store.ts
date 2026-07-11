@@ -39,6 +39,25 @@ export function resolveFetchedValue(data: Record<string, unknown>, name: string)
 // slice (`state.fields[name]`), so a keystroke re-renders one field, not the
 // whole form (decision D4 — the 0.3.x clone(true) path is gone).
 
+/**
+ * W2-3 (spec §6.1) — a single entry in the form-level banner channel
+ * (`FormStoreState.messages`). This is NOT a field-error store — field
+ * validation errors live on their own field's slice (`state.fields[name].
+ * errors`), untouched by this type. `messages` is the single form-level
+ * banner channel server entity errors (EG5), the old `alertMessages` (EG17),
+ * and a `cancel` reason all land on (W2-5 wires those writers; this type +
+ * the store actions below are the channel they write through).
+ */
+export interface FormMessage {
+  key: string;
+  severity: 'error' | 'warning' | 'info';
+  text: string;
+  /** optional association to a field name. */
+  field?: string | undefined;
+  /** survives a clear-on-success `clearMessages()` call unless `includePersistent` is set. */
+  persistent?: boolean | undefined;
+}
+
 export interface FormStoreState {
   fields: Record<string, FieldValueSlice>;
   /**
@@ -82,7 +101,14 @@ export interface FormStoreState {
   tabIndex: string;
   initialized: boolean;
   saving: boolean;
-  formErrors: string[];
+  /**
+   * W2-3 (spec §6.1) — the form-level banner channel. Replaces the old
+   * inert `formErrors: string[]` (never written by anything — confirmed
+   * dead). Field-level validation errors are NOT stored here (see
+   * FormMessage doc) — this array is exclusively the banner ViewEntityForm
+   * renders below the field groups.
+   */
+  messages: FormMessage[];
 
   // --- actions ---
   /**
@@ -138,6 +164,23 @@ export interface FormStoreState {
    * (@listgrid/schema-core) for the non-cascading contract.
    */
   setTabHidden(tabId: string, hidden: boolean): void;
+  /**
+   * W2-3 (spec §6.1) — append `msg` to the form-level banner channel. A
+   * `msg.key` that already matches an existing message REPLACES it (keys
+   * are the dedup/removal handle `removeMessage` looks up) rather than
+   * producing a duplicate entry.
+   */
+  addMessage(msg: FormMessage): void;
+  /** remove the message with `key` from the banner channel; no-op if absent (spec §6.1). */
+  removeMessage(key: string): void;
+  /**
+   * W2-3 (spec §6.1) — clear the banner channel. With no/empty `opts`, only
+   * NON-persistent messages are cleared (the save-flow "성공: 비persistent
+   * messages clear" clear-on-success step, spec §6.2 canonical save flow).
+   * `{ includePersistent: true }` clears every message regardless of its
+   * `persistent` flag.
+   */
+  clearMessages(opts?: { includePersistent?: boolean }): void;
   /** build the save payload (exceptOnSave dropped, ManyToOne flattened → `<name>Id`). */
   toSaveData(): Record<string, unknown>;
 }
@@ -425,7 +468,7 @@ export function createFormStore(
         'default', // TODO(W3-1): resolve ConditionalBooleanValue
       initialized: true,
       saving: false,
-      formErrors: [],
+      messages: [],
 
       getValue(name) {
         return getCurrentValue(get().fields[name], get().renderType);
@@ -583,6 +626,20 @@ export function createFormStore(
 
       setTabHidden(tabId, hidden) {
         set((s) => ({ tabHidden: { ...s.tabHidden, [tabId]: hidden } }));
+      },
+
+      addMessage(msg) {
+        set((s) => ({ messages: [...s.messages.filter((m) => m.key !== msg.key), msg] }));
+      },
+
+      removeMessage(key) {
+        set((s) => ({ messages: s.messages.filter((m) => m.key !== key) }));
+      },
+
+      clearMessages(opts) {
+        set((s) => ({
+          messages: opts?.includePersistent ? [] : s.messages.filter((m) => m.persistent === true),
+        }));
       },
 
       toSaveData() {
