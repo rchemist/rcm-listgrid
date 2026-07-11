@@ -443,6 +443,9 @@ export class EntityForm {
         ...(input.tab?.label !== undefined ? { label: input.tab.label } : {}),
         order: input.tab?.order ?? this.tabSeq++,
         ...(input.tab?.hidden !== undefined ? { hidden: input.tab.hidden } : {}),
+        ...(input.tab?.requiredPermissions !== undefined
+          ? { requiredPermissions: input.tab.requiredPermissions }
+          : {}),
       });
     }
 
@@ -452,6 +455,9 @@ export class EntityForm {
         id: groupId,
         ...(input.group?.label !== undefined ? { label: input.group.label } : {}),
         order: input.group?.order ?? this.groupSeq++,
+        ...(input.group?.requiredPermissions !== undefined
+          ? { requiredPermissions: input.group.requiredPermissions }
+          : {}),
       });
     }
 

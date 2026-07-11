@@ -1,7 +1,19 @@
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
-import type { EntityField, EntityForm, FieldGroupDef, TabDef } from '@listgrid/schema-core';
+import type {
+  EntityField,
+  EntityForm,
+  FieldGroupDef,
+  RenderType,
+  TabDef,
+} from '@listgrid/schema-core';
+import {
+  extractPermissions,
+  getStaticConditionalBoolean,
+  isPermitted,
+} from '@listgrid/schema-core';
 import type { FormStoreState } from '@listgrid/state';
+import { useSession } from '../providers/auth';
 import { useUI } from '../providers/ui';
 import { FormStoreProvider } from '../providers/form-store';
 import { FieldRenderer } from './FieldRenderer';
@@ -55,16 +67,28 @@ function liveFields(fieldDefs: Record<string, EntityField>): EntityField[] {
 
 // EC3-0 — a tab is filtered out of the tab bar entirely (0.3.x
 // getViewableTabs parity) when its EFFECTIVE hidden is true: the store's
-// runtime tabHidden override for the tab id, falling back to the declared
-// TabDef.hidden, falling back to visible. This does NOT filter the tab's
+// runtime tabHidden override for the tab id, falling back to the STATIC
+// resolution of the declared TabDef.hidden (getStaticConditionalBoolean —
+// literal/OptionalBoolean branches only; an async ValuedBoolean resolves to
+// `false` here and is re-evaluated per-field at render instead, blueprint
+// EG4 sync 근사), falling back to visible. This does NOT filter the tab's
 // fields out of `fields` — a hidden tab's fields still render if some OTHER
 // visible tab is never made active for them (they simply have no tab to be
 // shown under), and still validate (see FormMutator.setTabHidden doc,
 // @listgrid/schema-core, for the non-cascading contract).
+//
+// CAP-02/CAP-03 (W3-1) — additionally gated on the tab's own
+// `requiredPermissions` (isPermitted) and on whether the tab has any visible
+// content at all (tabHasVisibleContent below — old-engine getViewableTabs/
+// getViewableFieldGroups semantics): a tab with zero permitted+visible
+// fields across every one of its groups is suppressed even when nothing
+// ever declared it `hidden`.
 function deriveTabs(
   entityForm: EntityForm,
   fields: EntityField[],
   tabHidden: Record<string, boolean>,
+  userPermissions: string[],
+  renderType: RenderType,
 ): TabDef[] {
   const byId = new Map(entityForm.getTabs().map((t) => [t.id, t]));
   let seq = byId.size;
@@ -73,14 +97,25 @@ function deriveTabs(
     if (!byId.has(tabId)) byId.set(tabId, { id: tabId, order: seq++ });
   }
   return [...byId.values()]
-    .filter((t) => !(tabHidden[t.id] ?? (typeof t.hidden === 'boolean' ? t.hidden : false))) // TODO(W3-1): resolve ConditionalBooleanValue
+    .filter((t) => {
+      const hidden = tabHidden[t.id] ?? getStaticConditionalBoolean(t.hidden, renderType);
+      if (hidden) return false;
+      if (!isPermitted(t.requiredPermissions, userPermissions)) return false; // CAP-02
+      return tabHasVisibleContent(entityForm, fields, t.id, userPermissions, renderType); // CAP-03
+    })
     .sort((a, b) => a.order - b.order);
 }
 
+// CAP-02/CAP-03 (W3-1) — a group is included only when it has fields routed
+// to it (existing activeIds check), the group ITSELF is permitted
+// (requiredPermissions), and it has at least one visible field
+// (groupHasVisibleContent below).
 function deriveGroups(
   entityForm: EntityForm,
   fields: EntityField[],
   tabId: string,
+  userPermissions: string[],
+  renderType: RenderType,
 ): FieldGroupDef[] {
   const inTab = fields.filter((f) => f.getTabId() === tabId);
   const byId = new Map(entityForm.getFieldGroups(tabId).map((g) => [g.id, g]));
@@ -90,13 +125,60 @@ function deriveGroups(
     if (!byId.has(groupId)) byId.set(groupId, { id: groupId, order: seq++ });
   }
   const activeIds = new Set(inTab.map((f) => f.getFieldGroupId() || DEFAULT_GROUP_ID));
-  return [...byId.values()].filter((g) => activeIds.has(g.id)).sort((a, b) => a.order - b.order);
+  return [...byId.values()]
+    .filter(
+      (g) =>
+        activeIds.has(g.id) &&
+        isPermitted(g.requiredPermissions, userPermissions) && // CAP-02
+        groupHasVisibleContent(fields, tabId, g.id, userPermissions, renderType), // CAP-03
+    )
+    .sort((a, b) => a.order - b.order);
 }
 
 function deriveGroupFields(fields: EntityField[], tabId: string, groupId: string): EntityField[] {
   return fields.filter(
     (f) => f.getTabId() === tabId && (f.getFieldGroupId() || DEFAULT_GROUP_ID) === groupId,
   );
+}
+
+// CAP-03 (W3-1) hasVisibleContent — old-engine semantics (group-capability-
+// map:403-406): a field counts as "visible" here iff the session is
+// permitted for it AND it isn't STATICALLY hidden (an async-hidden field
+// counts as visible at this derivation layer — the render layer,
+// FieldRenderer, null-renders it once the real async predicate resolves;
+// that per-field truth isn't available synchronously here, blueprint EG4). A
+// group is viewable iff it has >=1 such field; a tab is viewable iff it has
+// >=1 viewable group — reusing `deriveGroups` directly folds the group
+// permission gate into the tab's own viewability the same way the old
+// engine's getViewableTabs -> getViewableFieldGroups chain did (DRY).
+function fieldIsVisible(
+  f: EntityField,
+  userPermissions: string[],
+  renderType: RenderType,
+): boolean {
+  return f.isPermitted(userPermissions) && !getStaticConditionalBoolean(f.hidden, renderType);
+}
+
+function groupHasVisibleContent(
+  fields: EntityField[],
+  tabId: string,
+  groupId: string,
+  userPermissions: string[],
+  renderType: RenderType,
+): boolean {
+  return deriveGroupFields(fields, tabId, groupId).some((f) =>
+    fieldIsVisible(f, userPermissions, renderType),
+  );
+}
+
+function tabHasVisibleContent(
+  entityForm: EntityForm,
+  fields: EntityField[],
+  tabId: string,
+  userPermissions: string[],
+  renderType: RenderType,
+): boolean {
+  return deriveGroups(entityForm, fields, tabId, userPermissions, renderType).length > 0;
 }
 
 export function ViewEntityForm({ entityForm, store, onSave }: ViewEntityFormProps) {
@@ -120,15 +202,22 @@ function ViewEntityFormInner({ entityForm, store, onSave }: ViewEntityFormProps)
   // edit must NOT re-derive tabs/groups (D4 stays intact, per
   // FieldRenderer/useFormField); an addField/removeField bump or a
   // setTabHidden call are the only things that re-run the derivation below.
+  // session (CAP-02/03, W3-1) and renderType are also read here, but neither
+  // changes on a value edit (session is per-mount from AuthProvider,
+  // renderType is fixed for the store's lifetime), so reading them does not
+  // weaken the D4 guarantee.
   useStore(store, (s) => s.structureVersion);
   const tabHidden = useStore(store, (s) => s.tabHidden);
+  const session = useSession();
+  const userPermissions = extractPermissions(session);
+  const renderType = useStore(store, (s) => s.renderType); // FieldRenderer eval-ctx와 동일 소스
 
   const fields = liveFields(store.getState().fieldDefs);
-  const tabs = deriveTabs(entityForm, fields, tabHidden);
+  const tabs = deriveTabs(entityForm, fields, tabHidden, userPermissions, renderType);
   // if the active tab became hidden, tabs.find(...) misses and this falls
   // back to the first still-visible tab (EC3-0 active-tab-fallback contract).
   const activeTabId = tabs.find((t) => t.id === tabIndex)?.id ?? tabs[0]?.id ?? DEFAULT_TAB_ID;
-  const groups = deriveGroups(entityForm, fields, activeTabId);
+  const groups = deriveGroups(entityForm, fields, activeTabId, userPermissions, renderType);
   const title = entityForm.getTitle();
 
   // Focus-first-error (a11y gap C): after a failed validateAll(), errors are

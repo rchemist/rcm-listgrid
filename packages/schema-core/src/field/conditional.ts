@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { FieldEvalContext } from './eval-context';
+import type { RenderType } from './types';
 
 // Conditional value types (charter C2 — "정책은 코드가 아니라 데이터다").
 // A policy value is one of: a literal, a per-render-type pair, or a function of
@@ -64,6 +65,28 @@ export async function getConditionalBoolean(
     return condition;
   }
   const renderType = ctx.renderType;
+  const result = renderType
+    ? renderType === 'create'
+      ? condition.onCreate
+      : condition.onUpdate
+    : (condition.onCreate ?? condition.onUpdate);
+  return result ?? false;
+}
+
+/**
+ * Sync static resolution of a boolean conditional (blueprint EG4 sync 근사 — GO).
+ * Literal + per-renderType (OptionalBoolean) branches only. The async
+ * `ValuedBoolean` (function) branch cannot be awaited here and resolves to
+ * `false`; that predicate is re-evaluated per-field at render (FieldRenderer).
+ * Byte-mirror of getConditionalBoolean minus the await + function branch.
+ */
+export function getStaticConditionalBoolean(
+  condition: ConditionalBooleanValue | undefined,
+  renderType: RenderType | undefined,
+): boolean {
+  if (!condition) return false;
+  if (typeof condition === 'function') return false; // async — deferred to render
+  if (typeof condition === 'boolean') return condition;
   const result = renderType
     ? renderType === 'create'
       ? condition.onCreate

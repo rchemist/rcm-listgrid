@@ -31,7 +31,11 @@ export type {
   HelpTextType,
   TooltipType,
 } from './field/conditional';
-export { getConditionalBoolean, getConditionalString } from './field/conditional';
+export {
+  getConditionalBoolean,
+  getConditionalString,
+  getStaticConditionalBoolean,
+} from './field/conditional';
 
 // --- view presets ---
 export type { ViewPreset, ViewPresetType } from './field/view-preset';

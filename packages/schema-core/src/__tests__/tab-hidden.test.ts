@@ -193,6 +193,36 @@ describe('EntityForm.withTab (label/order adjustment)', () => {
   });
 });
 
+// W3-1 (spec §3.2, CAP-02) — addFields propagates TabInput/GroupInput's
+// requiredPermissions onto the created TabDef/FieldGroupDef, symmetric with
+// the already-working label/order/hidden copy above. Consumption (permission
+// gating the tab bar/group panel) lives in @listgrid/react's ViewEntityForm.
+describe('addFields requiredPermissions propagation (W3-1)', () => {
+  it('TabInput.requiredPermissions ⇒ TabDef.requiredPermissions', () => {
+    const form = new EntityForm('WidgetEntityForm', '/widget').addFields({
+      items: [new StringField('name', 1)],
+      tab: { id: 'admin', order: 0, requiredPermissions: ['ADMIN'] },
+    });
+    expect(form.getTabs().find((t) => t.id === 'admin')?.requiredPermissions).toEqual(['ADMIN']);
+  });
+
+  it('GroupInput.requiredPermissions ⇒ FieldGroupDef.requiredPermissions', () => {
+    const form = new EntityForm('WidgetEntityForm', '/widget').addFields({
+      items: [new StringField('name', 1)],
+      tab: { id: 'main', order: 0 },
+      group: { id: 'secret', order: 0, requiredPermissions: ['SUPERADMIN'] },
+    });
+    expect(form.getFieldGroups('main').find((g) => g.id === 'secret')?.requiredPermissions).toEqual(
+      ['SUPERADMIN'],
+    );
+  });
+
+  it('a tab/group with no requiredPermissions declared stays undefined (not [])', () => {
+    const form = TwoTabForm();
+    expect(form.getTabs().find((t) => t.id === 'main')?.requiredPermissions).toBeUndefined();
+  });
+});
+
 describe('EntityForm.withGroup', () => {
   function GroupedForm(): EntityForm {
     return new EntityForm('WidgetEntityForm', '/widget').addFields({

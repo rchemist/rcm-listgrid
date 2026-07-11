@@ -6,6 +6,7 @@ import {
   extractPermissions,
   getConditionalBoolean,
   getConditionalString,
+  getStaticConditionalBoolean,
   getViewPreset,
   isPermitted,
   mergeRequiredPermissions,
@@ -77,6 +78,28 @@ describe('getConditionalBoolean (transplant of Config.ts:108-135)', () => {
   });
   it('no renderType ⇒ onCreate ?? onUpdate', async () => {
     expect(await getConditionalBoolean({}, { onUpdate: true })).toBe(true);
+  });
+});
+
+describe('getStaticConditionalBoolean (W3-1 — sync static resolution, blueprint EG4 근사)', () => {
+  it('undefined ⇒ false', () => {
+    expect(getStaticConditionalBoolean(undefined, 'create')).toBe(false);
+  });
+  it('boolean literal passes through', () => {
+    expect(getStaticConditionalBoolean(true, 'create')).toBe(true);
+    expect(getStaticConditionalBoolean(false, 'create')).toBe(false);
+  });
+  it('OptionalBoolean resolves per renderType — create reads onCreate, update reads onUpdate', () => {
+    const cond = { onCreate: true, onUpdate: false };
+    expect(getStaticConditionalBoolean(cond, 'create')).toBe(true);
+    expect(getStaticConditionalBoolean(cond, 'update')).toBe(false);
+  });
+  it('the async ValuedBoolean (function) branch cannot be resolved synchronously ⇒ false', () => {
+    const fn = (_ctx: FieldEvalContext): Promise<boolean> => Promise.resolve(true);
+    expect(getStaticConditionalBoolean(fn, 'create')).toBe(false);
+  });
+  it('no renderType ⇒ onCreate ?? onUpdate', () => {
+    expect(getStaticConditionalBoolean({ onUpdate: true }, undefined)).toBe(true);
   });
 });
 

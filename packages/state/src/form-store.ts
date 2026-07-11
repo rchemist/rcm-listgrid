@@ -2,6 +2,7 @@ import { createStore, type StoreApi } from 'zustand/vanilla';
 import {
   extractPermissions,
   getCurrentValue,
+  getStaticConditionalBoolean,
   isDirty as computeDirty,
   resetValue,
   type EntityField,
@@ -334,7 +335,8 @@ export function createFormStore(
   // a dynamically-added field).
   const initialTabHidden: Record<string, boolean> = {};
   for (const tab of entityForm.getTabs()) {
-    if (typeof tab.hidden === 'boolean') initialTabHidden[tab.id] = tab.hidden; // TODO(W3-1): resolve ConditionalBooleanValue
+    const staticHidden = getStaticConditionalBoolean(tab.hidden, renderType);
+    if (staticHidden) initialTabHidden[tab.id] = staticHidden;
   }
 
   function sortedFieldDefs(state: FormStoreState): EntityField[] {
@@ -507,9 +509,9 @@ export function createFormStore(
       // seeding a visible tab here keeps store.tabIndex itself consistent
       // rather than relying solely on the render-layer fallback.
       tabIndex:
-        entityForm.getTabs().find((t) => !(typeof t.hidden === 'boolean' ? t.hidden : false))?.id ??
+        entityForm.getTabs().find((t) => !getStaticConditionalBoolean(t.hidden, renderType))?.id ??
         entityForm.getTabs()[0]?.id ??
-        'default', // TODO(W3-1): resolve ConditionalBooleanValue
+        'default',
       initialized: true,
       saving: false,
       messages: [],
