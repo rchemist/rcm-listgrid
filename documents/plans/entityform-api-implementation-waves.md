@@ -64,7 +64,7 @@
 
 ## W5~W7 — 계약 수준 (wave-entry 브리핑 pass 필수)
 
-**규칙**: W5~W7은 규모(구 list 생태계 ~10.3k LOC)와 선행 의존 때문에 지금 태스크 분해하면 스펙-드리프트가 생긴다. 각 wave 착수 시 **entry 브리핑 pass**(스펙 §5.1·§7·§2·§3.5 + [8그룹 map](../analysis/2026-07-11/eg-group-capability-maps.md)의 해당 그룹 인용)로 이 문서에 W3/W4급 태스크 표를 **먼저 추가·커밋**한 뒤 실행한다. 스펙에 없는 판단이 필요하면 스펙 개정이 선행(§10 게이트 4).
+**규칙**: W5~W7은 규모(구 list 생태계 ~10.3k LOC)와 선행 의존 때문에 지금 태스크 분해하면 스펙-드리프트가 생긴다. 각 wave 착수 시 **entry 브리핑 pass**(스펙 §5.1·§7·§2·§3.5 + [8그룹 map](../analysis/2026-07-11/eg-group-capability-maps.md)의 해당 그룹 인용)로 이 문서에 W3/W4급 태스크 표를 **먼저 추가·커밋**한 뒤 실행한다. 스펙에 없는 판단이 필요하면 스펙 개정이 선행(§10 게이트 4). **계수 임계값 재검증(필수)**: entry pass는 그 wave의 신규 `/schema`·EntityForm·root 심볼을 스펙 §10-A 인벤토리 표에 추가하고, 합계가 임계값(EntityForm 55·root 120·`/schema` 190)에 근접/초과하면 같은 entry 커밋에서 표 근거와 함께 임계값을 재산정한다(2026-07-11 W4 착수 전 1차 재산정 완료 — §10-A).
 
 - **W5 list-track** (CAP-18·19·20): withList/withFilter(필드) → ViewListGrid 컬럼/정렬/필터 파생 → registerListCellRenderer/registerFilterRenderer → 고급검색 패널 → 페이지 셸 가이드(Wrapper 대응 — 마이그레이션 최대 항목). 참조 map: `LIST-TRACK`·구 ViewListGrid/AdvancedSearchForm.
 - **W6 data-transfer** (CAP-16·17): withDataTransfer 표면(schema) → `/excel` subpath(DataExporter/Importer, xlsx optional) → ViewListGrid 툴바 opt-in. :448 대칭 코드 공유로 구조적 fix. 참조 map: `DATA TRANSFER/EXCEL`.

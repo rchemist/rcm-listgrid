@@ -33,14 +33,14 @@
 | `/presets` `/presets/rcm` | presets-* | 제네릭/도메인 필드 프리셋(감사필드 헬퍼 등) | (없음) |
 
 - **headless 계약**: `/schema`+`/state`만 import → React/UI peer 0으로 빌드(테스트 고정). showcase 사례(§감사 6-2)의 1급화.
-- sideEffects:false·ESM-first(ADR-0001)·`import type` 강제. 공개 심볼 수 CI 계수(§10 게이트 2의 계수 규칙): 루트 ≤120, `/schema` ≤180.
+- sideEffects:false·ESM-first(ADR-0001)·`import type` 강제. 공개 심볼 수 CI 계수(§10 게이트 2의 계수 규칙): 루트 ≤120, `/schema` ≤190 (임계값 도출은 §10-A).
 - 멀티테넌트류 요청 컨텍스트(§감사 6-4): `RcmAdapterOptions.headers`를 `Record<string,string> | () => Record<string,string>`로 — 헤더 지연 평가가 1급.
 
-## 3. EntityForm — 선언 표면 (전 44멤버 — 계수 규칙은 §10 게이트 2)
+## 3. EntityForm — 선언 표면 (전 45 소비자 멤버 — 계수 규칙·기계 계수 도출은 §10 게이트 2 / §10-A)
 
 `class EntityForm` (`/schema`). 선언+구조 질의만. 런타임 상태·실행 없음.
 
-### 3.1 정체성·구성 (13)
+### 3.1 정체성·구성 (14)
 
 | 멤버 | 시그니처 | 비고 |
 |---|---|---|
@@ -52,6 +52,7 @@
 | `withTitle` | `(title: string \| { text?: string \| undefined; fromField?: string \| undefined }): this` | ReactNode 없음(→react slots.title) |
 | `getTitle` | `(values?: Record<string, unknown>): string` | **항상 해석된 문자열**: text → fromField의 values값 → `name` 필드 값 → id → renderType 기본문구. 구 `''` 기본 반환 금지 |
 | `withReadOnly` | `(readOnly?: boolean \| undefined): this` | **폼 전체 읽기전용 선언**(기본 true, undefined=해제). 선언에 실리므로 M2O 자식 폼 임베드에 그대로 전파(gjcu `UserEntityForm(true)` 변형 패턴 1:1). 의미론: store `formReadOnly` seed → 전 필드 effective readOnly OR + 빌트인 Save 어포던스 숨김. **데이터 쓰기 차단이 목적이면 `withCapabilities({update:false})`** — withReadOnly는 표시/편집 어포던스 계약(의도 명시, 검증 coverage-4) |
+| `getReadOnly` | `(): boolean` | withReadOnly 리더 쌍(W3-5 with/get 쌍 보완 — 선언된 formReadOnly seed 질의). §3.6 리스트 순수질의와 무관 |
 | `withMeta` | `(patch: Record<string, unknown>): this` | **유일한** escape hatch(구 attribute bag 9종 대체). **shallow-merge**(replace 아님 — 프리셋/래퍼 다중 호출 시 last-write-wins 클로버 방지, 검증 dx-6). 키에 `undefined` 대입=키 제거(L4) |
 | `getMeta` | `(): Record<string, unknown>` | 기본 `{}` |
 | `withRevision` | `(entityName: string \| undefined): this` | C6. 설정 시에만 save/delete payload에 주입 |
@@ -337,12 +338,35 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 ## 10. 검증 게이트 (설계→구현 공통)
 
 1. **커버리지**: §8 CAP-01~29 빈 행 0 — 각 구현 태스크는 소화하는 CAP-ID를 명시하고, wave 종료 게이트에서 매트릭스 대조(전 ID 소화 or 명시 이월). 누락 검출은 기억이 아니라 표 대조.
-2. **표면 계수(규칙 고정)**: *atomic public member* = public 인스턴스 메서드·getter·public 프로퍼티 각 1(생성자 포함, 묶음 행은 전개 계수). EntityForm ≤45(현 스펙 44) · 루트 배럴 ≤120 · `/schema` ≤180 (CI 스크립트).
+2. **표면 계수(규칙 고정 — 임계값은 §10-A 최종 인벤토리 기준)**: *atomic public member* = public 인스턴스 메서드·getter·public 프로퍼티 각 1(생성자 포함, 묶음 행은 전개 계수). **EntityForm ≤55 · 루트 배럴 ≤120 · `/schema` ≤190** (CI: `scripts/count-public-surface.mjs`). 계수 **규칙**은 고정 — 숫자 맞추려 규칙 완화 금지, 표면을 줄여라. **임계값**은 §10-A 최종 설계 인벤토리+소폭 마진에서 도출(원 45/180은 W2 훅·전 타입 인벤토리 설계 이전 추정이라 최종 설계에 미달했던 것을 정정 — 임의 완화 아님, 재산정 2026-07-11). **wave-entry 규칙(W5~W7)**: 각 wave 브리핑 pass는 신규 심볼을 §10-A 표에 추가하고, 합계가 임계값에 근접/초과하면 같은 entry 커밋에서 표 근거와 함께 임계값을 재산정한다.
 3. **법칙 준수**: L1~L8 — 특히 `set*` 0개+2단계 동명 0개(EntityForm), 훅 실행 뷰 코드 0(L7), camelCase(L2), 조건부 타입 단일(`ConditionalBooleanValue`, L5).
 4. **발명 금지 게이트**(harness team-conventions §설계 산출물): 구현 브리핑은 본 스펙 §번호를 인용해야 하며, 스펙이 결정하지 않은 설계 판단이 나오면 구현하지 말고 §Open Questions/needs_decision으로 — 스펙 개정이 먼저다.
 5. **headless 빌드**: `/schema`+`/state`만 import하는 fixture가 React 없이 tsc+실행 green.
 6. **구 결함 원장**: 카탈로그 §1~9 각각에 "신 표면에서 불가능한 이유" 1행(재현 테스트 또는 타입 증명).
 7. 기존 게이트: type-check && typecheck:packages && test && lint && format:check && build + E2E 16+.
+
+## 10-A. 표면 계수 최종 인벤토리 (임계값 도출 근거 — 2026-07-11 W4 착수 전 재산정)
+
+원 임계값 45/120/180은 W1 시점 추정 — W2 훅 시스템(get*Handlers ×8)과 W4~W6 신규 타입 인벤토리 설계 이전 값이라 최종 설계에 미달(§Open Question "초기 추정 미달, 임의완화 아님"의 정정). 아래 최종 인벤토리 + 소폭 마진에서 재산정한다. 계수 규칙(§10 게이트 2) 자체는 무변경.
+
+**EntityForm 최종 = 53 → 임계값 55 (+2 마진)**
+- 소비자 선언 멤버 **45** = §3.1 14(getReadOnly 포함) + §3.2 17 + §3.3 8(on* 훅) + §3.4 4 + §3.5 2.
+- + **엔진 내부 `get*Handlers` ×8**(§3.3 — 배럴 비공개이나 public 메서드라 기계 계수됨; 훅당 1 자동 파생).
+- = 53. 마진 +2 = wave 내 with*/get* 비대칭 중간상태 흡수. **W4 궤적**: 41(현재)→W4-2 steps +2→W4-4 revision +2→W4-5 meta +2 = 47, 이후 §3.2 질의(hasField/getTab/hasTab/getTabFields)+§3.5 = 53.
+
+**`/schema` 배럴 최종 ≈ 186 → 임계값 190 (+4 마진)**
+
+| wave | 신규 배럴 타입 | Δ | 누계 |
+|---|---|---|---|
+| ~W3(현재) | — | — | 180 |
+| W4 | `StepDef`(§3.2) · `AsyncValidation`(§5.3) | +2 | 182 |
+| W5 | `FieldListConfig` · `FieldFilterConfig`(§5.1) | +2 | 184 |
+| W6 | `DataFieldSpec`(§3.5) · DataTransfer 반환형 | +2 | 186 |
+| W7 | 패키징 — schema 타입 0 | 0 | 186 |
+
+- 마진 +4 = W5/W6 미분해 세부 타입(필터 operator 유니온·list align/width 헬퍼·DataTransfer 하위 spec 등). W5/W6 entry pass에서 실측이 190 근접 시 위 wave-entry 규칙으로 재산정.
+
+**루트 배럴 최종 ≈ 55 → 임계값 120 무변경** — 현 49 + W5(register*2·ViewListGrid·고급검색 등 ~6). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님).
 
 ## 11. 구현 wave (요약 — 실행 계약은 [waves 브리프](./entityform-api-implementation-waves.md))
 

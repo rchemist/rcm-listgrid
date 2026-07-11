@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 기반(W1·W2)+**W3 권한·능력·액션 ✅ 완료**(6 sub-task+phase-end 하드닝·CAP 7종). **Next up**: **W4 폼 완결** — ⚠ **W4-1 착수 전 /schema §10 ceiling 재산정 BLOCKING**(180/180 도달·§Open Q). 2003 unit/E2E 19·계수 41/49/180. P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W3 ✅ · **W4-0 계수 ceiling 재산정 ✅**(EntityForm 45→55·/schema 180→190·스펙 §10-A 인벤토리 근거). **Next up**: **W4-1 title 해석 체인**(W4 진입 blocker 해소됨). 2003 unit/E2E 19·계수 41/49/180(임계값 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W3 ✅ 완료**. W4 새 세션은 §세션 인계 Handoff의 읽는 순서를 따른다 — [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)(BLOCKING ceiling 재산정 포함) → waves §W4 → 스펙 §3.1·§5.3.
-**Last updated**: 2026-07-11 (W3 ✅ seal + /progress heal-on-entry slim[본문 경량화·W1~W3 상세 아카이브 이월]. W3 `4d30159`..`b4ecda3`·2003 unit·E2E 19·계수 41/49/180. 다음 = **W4-1 전 /schema ceiling 재산정(BLOCKING)**.)
+**Last updated**: 2026-07-11 (heal-on-entry slim + **W4-0 계수 ceiling 재산정 완료** — 스펙 §10-A 최종 인벤토리 근거로 EntityForm 45→55·/schema 180→190(root 120 유지), count-public-surface.mjs+waves entry-rule 반영. EntityForm도 최종 53(get*Handlers 8+getReadOnly)으로 45 초과 예정이라 동반 상향. 다음 = **W4-1 title**.)
 
 ## Goal
 
@@ -49,7 +49,7 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W3 페이즈 ✅ 완료·seal**. 다음: **W4 폼 완결**(착수 전 /schema ceiling 재산정) — 전체 인계는 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
+## 세션 인계 (Handoff — **W3 ✅ seal · W4-0 계수 재산정 ✅**. 다음: **W4-1 title** — 전체 인계는 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
 
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
@@ -87,12 +87,12 @@
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
 - [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` — 6 sub-task+W3-6 하드닝·CAP 7종·2003 unit·E2E 19·phase-end 4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
-- [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
+- [~] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md) · **W4-0 계수 재산정 ✅**(§10-A), W4-1~5 남음
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W4 폼 완결**(W4-1 title·W4-2 steps·W4-3 AsyncValidation·W4-4 revision·W4-5 meta · 스펙 §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)). **⚠ W4-1 착수 전 BLOCKING**: /schema 180 ceiling 재산정(§Open Q·스펙 §10). 도입 표면·Do-NOT·미결=[W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
+**Next up**: **W4-1 title 해석 체인**(getTitle 항상 비어있지 않은 문자열: text→fromField→name필드→id→기본문구·구 `''` 봉인 + slots.title) · 스펙 §3.1 · [waves §W4](./plans/entityform-api-implementation-waves.md). 이후 W4-2 steps·W4-3 AsyncValidation·W4-4 revision·W4-5 meta. **W4-0 계수 ceiling 재산정 ✅ 완료**(§10-A). hot-file 순차·delegate 기본 sonnet·opus 검증+**phase-end 적대 리뷰 필수**. 도입 표면·Do-NOT·미결=[W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
 
 ---
 
@@ -110,6 +110,7 @@
 
 - EF/EA 페이즈 노트(EF-R2 stash anomaly·EF-gate FIND-ONLY·EA-A fan-out 커밋방식·EA-D reorder)는 [archive](./progress-archive/phase-e-track-tasks.md#progress-notes-본문-이월-2026-07-11--efea-페이즈-완료로-아카이브)로 이월.
 - W1~W3 방법론·검증 노트(W1 tsc+test 이중검증·EG-D 4렌즈·harness 교차리포·W2/W3 착수 규율·W3-1 발명게이트 해소)는 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-11 slim).
+- 2026-07-11 W4-0 계수 재산정 방법론: `scripts/count-public-surface.mjs`의 EntityForm 계수는 public `get*Handlers`(훅당 1, §3.3 "엔진 내부"이나 cross-package라 public 필수)+getReadOnly까지 포함 → 최종 53. 스펙 "44 소비자 멤버"와 기계 계수(53)의 갭을 §10-A 표로 명문화. 계수 **규칙**은 무변경(임계값만 재산정). 대안(get*Handlers 계수 제외 규칙)은 채택 안 함 — cross-package public 불가피·규칙 예외 추가는 invention 리스크. W5/W6는 entry pass에서 §10-A 표 갱신+임계 재검증(waves 규칙 반영).
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
@@ -127,7 +128,7 @@
 - [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 실 worklist는 §Tasks(하드닝/확장 트랙)로 승격됨. **하드닝 H 트랙 완료**(게이트·CI·SubColl·H1 캐시·H2 a11y). 남음 = 확장 E 트랙(E1/E2).
 - [x] **E-트랙 우선순위 → 전부 (사용자 확정 2026-07-11)** — 전 필드 이식+동작 실증+Daum 주소, foundation-first(EF→EA→EB→EC) 완료로 종결. [계획](./plans/e-track-field-parity.md)
 - [x] **업로드 backend seam → 사용자 질문 아님으로 재분류(2026-07-11)** — W5/W6 착수 시 GJCU 관례 확인 후 모델 자동 결정(옵션: sample 업로드 endpoint / BackendAdapter.upload / 외부 URL만).
-- [ ] **/schema 계수 ceiling(스펙 §10) 재산정 — W4 착수 전(모델/스펙 저자)** — W3-3에서 /schema 180/180 도달(FormAction/ActionContext/ActionRender +3). W4 신타입(StepDef·FieldListConfig·FieldFilterConfig·AsyncValidation·DataFieldSpec 등)은 첫 export에서 180 초과. §10 ceiling을 **최종 타입 인벤토리 기준으로 재산정**(임의완화 아님 — 초기 추정치가 최종 설계에 미달). W4-1 착수 시 처리. risk: gate-blocking
+- [x] **계수 ceiling 재산정 완료(2026-07-11, W4-0)** — 스펙 §10-A 최종 인벤토리 근거로 재산정: **EntityForm 45→55**(최종 53=45 소비자멤버+8 get*Handlers+getReadOnly)·**/schema 180→190**(최종 186=180+W4 2+W5 2+W6 2)·root 120 유지(최종 ~55). count-public-surface.mjs+스펙 §2/§3/§10/§10-A+waves entry-rule 반영. **범위 확장**: Open Q는 /schema만 지목했으나 EntityForm도 최종 45 초과(W4-4서 46) 발견→동반 상향. 임의완화 아님(현값 41/180은 이미 PASS·상한을 최종 설계에 맞춤). gate 재검증: 41/49/180 PASS(임계 55/120/190).
 
 ## 완료 기록 (페이즈 완료 시 progress-archive로 이동)
 
