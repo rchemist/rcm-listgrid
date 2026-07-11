@@ -94,6 +94,7 @@
 - [ ] **EF7 [O]** onInitialize 값-보정 vs hydrate clobber 설계(EC2 갭② — 구엔진 가능·신 파이프 불가. onFetchData data-변형 반환 vs hydrate의 init-set 존중)
 - [x] **EC3** ✅ `6a5095c` · Major 재현 — **tab-hidden+self-ref+xref 4시나리오 pass·결함 0**·mock 백엔드 실 필터 적용 · E2E 12→15 · cascade ping-pong 교훈([archive](./progress-archive/phase-e-track-tasks.md))
 - [x] **EC3-0** ✅ `edff22c` · TAB-자체-숨김 3층 + deriveTabs 필터 + "필드 캐스케이드 안 함" 계약 · +24(1838)
+- [~] **EC-R1 (EC 게이트 수정 2건)** — ① async filter resolution `.catch`(4곳 — EF-R1② 무한 loading 금지 계약 정합, store에 error 노출) ② parentMajor self-exclude edit-mode E2E assert 추가(major.spec 헤더 주장 실증)
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
 
 **Next up**: **EA-A** (트리비얼 필드 12종 wave 전개 — 착수 시 필드별 `[ ]` 생성, 1필드=1커밋+테스트).
@@ -131,6 +132,7 @@
 - [ ] **EA-D Map compare 갭(시스테믹)** — schema-core isEquals/normalizeEmptyValue가 Map 인스턴스 전맹(Object.keys 기반 — blank/equal 오판·JSON `{}` 소실). InlineMap은 Record 협소화로 회피; 장래 Map 값 필드 도입 시 선결 · risk: low(latent) · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EF2 changeSelectOptions 배열-clause 레이스** — 동일 필드를 겨냥한 2 clause에서 unmatched의 revert가 matched의 apply 뒤 실행될 수 있음(iteration order 의존 — EC2 구현이 이 사유로 빌더 대신 hand-written 채택) · risk: med(빌더 소비자) · [detail](./analysis/2026-07-11/ec2-collabo-briefing.md)
 - [ ] **EA-D2 Prefer 재편집 미이식** — 구 뷰의 "표시 행 클릭→preferred 재설정" 경로 add-only로 축소(삭제 후 재추가 대체). 중복 폼에러는 구조적 방지(NOT_IN)+조용한 가드로 동등 · risk: low · [detail](./analysis/2026-07-11/ea-d2-xref-major-briefing.md)
+- [ ] **XrefPrefer/postFetch 실브라우저 증명 부재** — unit-only(D2-1 37테스트). Major는 XrefMapping만 사용, 실폼 소비자 부재로 수용. LectureEntityForm류 실사용 폼 이식 시 E2E 추가 · risk: low · [detail](./progress-archive/phase-e-track-tasks.md)
 - [ ] **EA-C 값 shape 다운그레이드** — FileFieldValue envelope 대신 plain string/string[](purity·소비자·백엔드 3중 정합). 구 envelope wire 계약을 쓰는 호스트는 어댑터 변환 필요 · risk: med(마이그레이션 문서화 필요) · [detail](./analysis/2026-07-11/ea-c-scout-briefing.md)
 
 ## Progress notes

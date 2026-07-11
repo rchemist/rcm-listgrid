@@ -287,5 +287,17 @@ proposed_helper: 없음.
 
 **구엔진 hand-written cascade 문자적 이식은 EF2 sync-batch에서 자멸(ping-pong)**: 구엔진 executeOnChanges는 single-shot(핸들러가 형제 setValue해도 재dispatch 안 함)이나 신 EF2는 **중첩 setValue가 형제 핸들러를 재dispatch**(loop-guard는 무한만 막고 1회 재진입은 허용). college↔parentMajor 상호배제를 1:1 이식하면 "college 선택→parentMajor reset→그 reset이 다시 college 핸들러 트리거→college reset" 왕복. **회피 규칙**: ① 상호배제는 **truthy 브랜치에서만 형제 값 reset**(falsy 브랜치는 값 안 건드림) ② 한 핸들러 안에서 **모든 setValue를 모든 setMeta보다 먼저** 실행(브랜치 자신의 setMeta가 최종 authoritative write가 되어 중첩 cascade의 stray meta write에 면역). EC3 major.ts 주석에 상세.
 
+### EC 페이즈 리뷰 게이트 (2026-07-11) — confirmed 2(non-blocking) / refuted 4
+
+**실행**: 3차원(library-correctness·intent-conformance·**e2e-integrity**) find(sonnet)+opus verify — 9 agents/564k tokens · diff `caf7cbe..HEAD`(미검토 라이브러리 EF6/EA-D2-0/EA-D2-1/EC3-0 27파일 +2641 + EC1/2/3 sample+e2e) · 무인 FIND-ONLY → EC-R1
+
+| # | sev | 발견 | 라우팅 |
+|---|---|---|---|
+| 1 | non-blocking·high | **async filter resolution `.catch` 부재(4곳)** — many-to-one-renderer:66·xref-mapping-renderer:63/91·xref-prefer:160. rejecting host 필터 시 store 영구 undefined(무한 loading). **EF-R1② "무한 loading 금지" 계약 모순**(M2O sibling resolveReference엔 이미 .catch). 실소비자 전부 sync라 false-green 아님(latent) | EC-R1① |
+| 2 | non-blocking·high | **parentMajor self-exclude edit-mode E2E 미커버** — spec 헤더는 "edit mode 테스트" 주장이나 전 시나리오 /major/new(currentId=undefined→필터 미적용). filter 클로저는 unit 커버·자명, E2E 증명만 부재(false-green 갭) | EC-R1② |
+
+**refuted 4**(정당 각하): ViewListGrid row-id 충돌(fallback id는 id 없는 행만 — 실소비자 전부 id 보유)·professors IN 필터 미검증 주장(실은 검증됨)·staffs 필터 picker만 주장(실은 커버)·XrefPrefer/postFetch E2E 0(unit 충분·실폼 미사용 — 수용). **library-correctness/intent 이탈 0**(순수성·값 pass-through·CustomValidation·priority 미구현 유지 전부 확인).
+**후속 NR**: XrefPrefer/postFetch는 unit-only(실브라우저 증명 없음 — 실폼 소비자 부재로 수용, 실사용 폼 등장 시 E2E 추가).
+
 
 
