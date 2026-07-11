@@ -40,6 +40,12 @@
 
 - **W1-7** 공개 표면 계수 스크립트+CI(스펙 §10 게이트2) — 3파일(신설 `scripts/count-public-surface.mjs`·package.json `check:surface`·ci.yml quality job step). TS compiler API(5.9.3)로 atomic member 계수: EntityForm 공개멤버(method/getter/setter/prop/ctor, private/protected/#제외)·배럴 export명(named+decl, type+value dedup). **현재값(전부 PASS)**: EntityForm 31/45·root(react) 46/120·/schema 161/180. export* 방어 throw. fail-path 검증(temp copy·삭제). 임의완화 금지 명문화. **주의(W4)**: get*Handlers 등 엔진-내부 getter도 §10 리터럴로 계수됨 — W4 완료 시 45 근접 감시.
 
+## W2 — 훅 통합 + FormRuntime/FormController (진행 — hot-file 순차·delegate sonnet→opus 검증)
+
+> 스펙 §4·§5.2·§6 · [waves §W2](../plans/entityform-api-implementation-waves.md) · CAP-04·07(주입점)·11·14·21·25·26. 실행: sonnet delegate(waves 브리프=브리핑 원문) → opus 검증(full gate+계수+diff 발명감사)+커밋.
+
+- **W2-1** 훅 개명+InitContext+EF7 값세터 이전 — 28파일. `withOnChanges`→`onChange`·`withOnFetchData`+`withOnInitialize`→**`onInit` 통합**(단일 배열·ctx.data 분기, spec §4.2)·`EntityForm.setValue`/`setFetchedValue` 제거→`InitContext.values.set/setFetched`(initialize-form-store closure)·`OnChangesHandler`→`ChangeHandler`(form-mutator)·`OnFetchData/OnInitializeHandler`→`InitContext`/`InitHandler`(§4.1 그대로)·`getOnChanges/OnFetchData/OnInitialize`→`getChangeHandlers`/`getInitHandlers`(엔진-내부, 배럴 비공개). **초기화 파이프 재배선**(initialize-form-store): `clone→fetch→BIND→onInit*(always)→REBIND→build` 순서 불변(EF7 회귀 없음)·1 shared ctx·precedence hook.set>fetched>default 보존·`ctx.setMeta`→`createFormStore` 신 `initialMeta` 옵션 seed(→store.getMeta 반영). onchanges 3종·form-store dispatch는 타입-개명만(change-select-options 로직 무접촉=W2-8 스코프 보존). entity-form-value.test 삭제→8 어서션 initialize-form-store.test로 이관+신규 setMeta 테스트 4. **opus 리뷰-교정 1건**: `InitContext.renderType`을 data-based(`data!==undefined?'update'`)→**id-based `ef.getRenderType()`**로 교정 — initialData 프리필 create폼이 'update'로 오보되는 latent bug(§3.1 id기반 정합·W2-2 mutator.getRenderType()과 일치·doc 코멘트 동반 수정). 검증: full gate green·**1887 unit**·계수 EntityForm 27/45·root 46/120·/schema 161/180 PASS. **봉인(구결함원장)**: §값세터 파편화(setValue/setFetchedValue 2메서드→ctx.values 1객체)·§onInitialize 이중발화(2배열 dispatch→1배열, save후 재발화 없음). 에이전트 자기보고 deviation 5건은 전부 spec-conformant(§9 반환-교체 폐기·§4.2 단일배열)/브리프-허가(테스트 이관)/무해(주석)—리뷰 종결. commit 시 hash 기입.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

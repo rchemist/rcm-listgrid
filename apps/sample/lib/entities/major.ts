@@ -42,8 +42,8 @@ const GRADUATE_TAB_ID = 'graduate';
 // validating) must ALSO setMeta(name, {hidden}) on each field in that tab).
 const GRADUATE_TAB_FIELDS = ['majorMandatory', 'majorSelective', 'minorMandatory'];
 
-// Source field onInitialize needs to READ before the store/hydrate exist —
-// same withOnFetchData pre-seed pattern as collabo.ts (ONINITIALIZE_SOURCE_FIELDS).
+// Source field onInit needs to READ before the store/hydrate exist — same
+// ctx.data pre-seed pattern as collabo.ts (ONINITIALIZE_SOURCE_FIELDS).
 const ONINITIALIZE_SOURCE_FIELDS = ['type'];
 
 /**
@@ -217,24 +217,30 @@ export function MajorEntityForm(currentId?: string): EntityForm {
     });
 
   entityForm
-    .withOnChanges(majorOnChanges)
-    .withOnFetchData((ef, data) => {
-      // Pre-store seeding for onInitialize (same pattern as collabo.ts) — 'type'
-      // is the only field MajorEntityForm.tsx's onInitialize (:248-266) reads.
+    .onChange(majorOnChanges)
+    .onInit((ctx) => {
+      // Pre-store seeding for the second onInit handler below (same pattern
+      // as collabo.ts) — 'type' is the only field MajorEntityForm.tsx's
+      // onInitialize (:248-266) reads. Guarded on ctx.data — the old
+      // withOnFetchData pass only ever dispatched when data was fetched/
+      // provided (spec §4.2 branch-on-ctx.data replaces that dispatch-time
+      // gate).
+      if (!ctx.data) return;
+      const data = ctx.data;
       for (const name of ONINITIALIZE_SOURCE_FIELDS) {
         if (Object.prototype.hasOwnProperty.call(data, name)) {
-          ef.getField(name)?.withValue(data[name]);
+          ctx.form.getField(name)?.withValue(data[name]);
         }
       }
-      return ef;
     })
-    .withOnInitialize((ef) => {
+    .onInit((ctx) => {
       // MajorEntityForm.tsx :248-266 — deliberately NOT update-gated (unlike
-      // Collabo's onInitialize): re-verified against source, the old handler
-      // runs unconditionally on EVERY render (create too), so a freshly
-      // created record's default type ('MAJOR') gets its college/parentMajor/
+      // Collabo's onInit): re-verified against source, the old handler runs
+      // unconditionally on EVERY render (create too), so a freshly created
+      // record's default type ('MAJOR') gets its college/parentMajor/
       // majorCode/graduate-tab flips applied on first paint too, not just on
       // load-an-existing-record.
+      const ef = ctx.form;
       const type = (ef.getField('type') as FormField | undefined)?.value?.current;
       const collegeField = ef.getField('college') as FormField | undefined;
       const parentMajorField = ef.getField('parentMajor') as FormField | undefined;
@@ -261,7 +267,6 @@ export function MajorEntityForm(currentId?: string): EntityForm {
         }
         majorCodeField?.withHidden(false).withRequired(true);
       }
-      return ef;
     });
 
   return entityForm;

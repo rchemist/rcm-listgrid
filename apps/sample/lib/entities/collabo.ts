@@ -59,8 +59,8 @@ export const CollaboPromoterTypes: SelectOption[] = [
   { label: '기타', value: 'MANUAL' },
 ];
 
-// Source fields §2's onInitialize branches 1/3/4 need to READ before the
-// store/hydrate exist (see the withOnFetchData handler below).
+// Source fields §2's onInit branches 1/3/4 need to READ before the
+// store/hydrate exist (see the pre-seed onInit handler below).
 const ONINITIALIZE_SOURCE_FIELDS = [
   'collaborated',
   'type',
@@ -254,28 +254,31 @@ export function CollaboEntityForm(): EntityForm {
   applyFullAddressFields(entityForm, { order: 900, required: false });
 
   entityForm
-    .withOnChanges(changeRequired('type', { value: 'ETC', result: { representative: false } }))
-    .withOnChanges(collaboOnChanges)
-    .withOnFetchData((ef, data) => {
+    .onChange(changeRequired('type', { value: 'ETC', result: { representative: false } }))
+    .onChange(collaboOnChanges)
+    .onInit((ctx) => {
       // Pre-store value seeding — NOT the dropped §2 branch-2 value-fixup
-      // side channel. onInitialize below runs BEFORE the store/hydrate exist
-      // (initializeFormStore order: onFetchData → onInitialize → build →
-      // hydrate), so it has no direct access to fetched `data`; seeding the
-      // SAME raw value onto each field's declaration here lets onInitialize
-      // read it via `field.value.current`. hydrate() unconditionally
-      // overwrites the store slice with this SAME raw value afterward (no
-      // transform), so there is no clobber risk — unlike a value TRANSFORM
-      // (branch 2, dropped), which hydrate WOULD clobber.
+      // side channel. The second onInit handler below runs BEFORE the store/
+      // hydrate exist (initializeFormStore order: BIND → onInit → REBIND →
+      // build), so it has no direct access to fetched `data` beyond
+      // ctx.data; seeding the SAME raw value onto each field's declaration
+      // here lets it read it via `field.value.current`. hydrate() (i.e. this
+      // pipe's REBIND/build) unconditionally carries this SAME raw value
+      // forward afterward (no transform), so there is no clobber risk —
+      // unlike a value TRANSFORM (branch 2, dropped), which hydrate WOULD
+      // clobber.
+      if (!ctx.data) return;
+      const data = ctx.data;
       for (const name of ONINITIALIZE_SOURCE_FIELDS) {
         if (Object.prototype.hasOwnProperty.call(data, name)) {
-          ef.getField(name)?.withValue(data[name]);
+          ctx.form.getField(name)?.withValue(data[name]);
         }
       }
-      return ef;
     })
-    .withOnInitialize((ef) => {
+    .onInit((ctx) => {
       // §2 (:232-308) — update-mode gated (:234), never runs on create.
-      if (ef.getRenderType() !== 'update') return ef;
+      const ef = ctx.form;
+      if (ef.getRenderType() !== 'update') return;
 
       const seeded = (name: string): unknown => ef.getField(name)?.value?.current;
 
@@ -339,7 +342,7 @@ export function CollaboEntityForm(): EntityForm {
           // `staff.organization.id` here (:288) when it isn't already set —
           // NOT reproduced as a VALUE write: it would be silently clobbered
           // by hydrate() straight after (same gap as dropped branch 2, just
-          // a second occurrence of it — see the withOnFetchData comment
+          // a second occurrence of it — see the pre-seed onInit comment
           // above). Only the hidden/required META flips below survive.
           promoterDepartmentField?.withHidden(false).withRequired(true);
         } else {
@@ -351,8 +354,6 @@ export function CollaboEntityForm(): EntityForm {
         promoterDepartmentField?.withHidden(true).withRequired(false);
         promoterNameField?.withHidden(false).withRequired(true);
       }
-
-      return ef;
     })
     // §5 submit-transform (ec2-collabo-briefing.md :313-325 —
     // `withOverrideSubmitData`, contracted string→Boolean), now the EF6 hook
@@ -362,10 +363,10 @@ export function CollaboEntityForm(): EntityForm {
     // toSaveData (@listgrid/state) right before POST/PUT.
     //
     // NOTE (residual, EF6+EF7 composition — see the §2-branch-2 comment
-    // inside `withOnInitialize` above): this converts the OUTBOUND payload
-    // only. A record saved through this transform, if reopened for edit,
-    // would show its `contracted` Select unmatched (raw boolean vs. the
-    // string-valued options) — the dropped onInitialize fixup (EF7 gap) and
+    // inside the second onInit handler above): this converts the OUTBOUND
+    // payload only. A record saved through this transform, if reopened for
+    // edit, would show its `contracted` Select unmatched (raw boolean vs.
+    // the string-valued options) — the dropped onInit fixup (EF7 gap) and
     // this submit transform (EF6) compose into that residual; reconciling
     // the two is out of EC2's scope. None of EC2's 5 E2E scenarios
     // round-trips a saved `contracted` value through edit, so it is inert

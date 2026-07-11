@@ -8,7 +8,7 @@
 // Distinctive pitfall under test (briefing PART A / EA-B0 seam): intermediate
 // keystrokes commit via `setValue(name, v, { cascade: false })` — old
 // commit=false/propagation=false parity — while blur commits with the
-// default (cascading) `setValue`. A `withOnChanges` spy handler proves the
+// default (cascading) `setValue`. An `onChange` spy handler proves the
 // cascade is actually skipped mid-typing and actually fires on blur, not
 // just that the store value looks right.
 
@@ -115,12 +115,12 @@ describe('BirthdayFieldRenderer (JSDOM render)', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('EA-B0 seam: intermediate typing does NOT fire a withOnChanges handler; blur commit DOES', async () => {
+  it('EA-B0 seam: intermediate typing does NOT fire an onChange handler; blur commit DOES', async () => {
     const calls: string[] = [];
     const field = new BirthdayField('birthDate', 100).withLabel('Birth Date');
     const entityForm = new EntityForm('StudentEntityForm', '/student')
       .addFields({ items: [field] })
-      .withOnChanges((_mutator, changedField) => {
+      .onChange((_mutator, changedField) => {
         calls.push(changedField);
       });
 

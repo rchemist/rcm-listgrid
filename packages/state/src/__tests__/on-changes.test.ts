@@ -21,10 +21,10 @@ describe('form-store onChanges cascade (EF2)', () => {
   it('runs every registered handler, in registration order, on every setValue', () => {
     const calls: string[] = [];
     const form = ThreeFieldForm()
-      .withOnChanges(() => {
+      .onChange(() => {
         calls.push('first');
       })
-      .withOnChanges(() => {
+      .onChange(() => {
         calls.push('second');
       });
     const store = createFormStore(form);
@@ -34,7 +34,7 @@ describe('form-store onChanges cascade (EF2)', () => {
 
   it('every handler runs on every field change (not just its "own" field)', () => {
     const seen: Array<[string, string]> = [];
-    const form = ThreeFieldForm().withOnChanges((_m, changedField) => {
+    const form = ThreeFieldForm().onChange((_m, changedField) => {
       seen.push(['handler', changedField]);
     });
     const store = createFormStore(form);
@@ -47,7 +47,7 @@ describe('form-store onChanges cascade (EF2)', () => {
   });
 
   it('a handler mutating a sibling field via m.setValue is visible in the store', () => {
-    const form = ThreeFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'a') m.setValue('b', `derived-from-${m.getValue('a')}`);
     });
     const store = createFormStore(form);
@@ -56,7 +56,7 @@ describe('form-store onChanges cascade (EF2)', () => {
   });
 
   it('a handler mutating meta via m.setMeta is visible via the EF1 meta read path', () => {
-    const form = ThreeFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'a') m.setMeta('b', { required: true, hidden: true });
     });
     const store = createFormStore(form);
@@ -65,7 +65,7 @@ describe('form-store onChanges cascade (EF2)', () => {
   });
 
   it('chain A -> B -> C fully executes', () => {
-    const form = ThreeFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'a') m.setValue('b', 'from-a');
       if (changedField === 'b') m.setValue('c', 'from-b');
     });
@@ -77,7 +77,7 @@ describe('form-store onChanges cascade (EF2)', () => {
 
   it('loop-guard: A -> B -> A terminates and both values are written', () => {
     let bDispatchCount = 0;
-    const form = ThreeFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'a') {
         m.setValue('b', 'from-a');
       } else if (changedField === 'b') {
@@ -99,7 +99,7 @@ describe('form-store onChanges cascade (EF2)', () => {
   });
 
   it('a later, independent top-level setValue starts a fresh batch (not blocked by a prior guard)', () => {
-    const form = ThreeFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'a') m.setValue('b', 'from-a');
     });
     const store = createFormStore(form);
@@ -113,7 +113,7 @@ describe('form-store onChanges cascade (EF2)', () => {
     const pending = new Promise<void>((resolve) => {
       resolveHandler = resolve;
     });
-    const form = ThreeFieldForm().withOnChanges(async (m: FormMutator, changedField) => {
+    const form = ThreeFieldForm().onChange(async (m: FormMutator, changedField) => {
       if (changedField !== 'a') return;
       await pending;
       m.setValue('b', 'after-await');
@@ -129,7 +129,7 @@ describe('form-store onChanges cascade (EF2)', () => {
   });
 
   it('an async handler rejection does not surface as an unhandled rejection / does not throw', async () => {
-    const form = ThreeFieldForm().withOnChanges(async (_m, changedField) => {
+    const form = ThreeFieldForm().onChange(async (_m, changedField) => {
       if (changedField === 'a') throw new Error('boom');
     });
     const store = createFormStore(form);
@@ -140,7 +140,7 @@ describe('form-store onChanges cascade (EF2)', () => {
 
   it('mutator.getValues() snapshots every field’s resolved current value', () => {
     let snapshot: Record<string, unknown> = {};
-    const form = ThreeFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = ThreeFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'a') snapshot = m.getValues();
     });
     const store = createFormStore(form);

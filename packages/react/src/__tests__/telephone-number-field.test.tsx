@@ -46,9 +46,7 @@ function widgetForm(options?: {
   if (options?.defaultValue !== undefined) field.withDefaultValue(options.defaultValue);
   const form = new EntityForm('WidgetEntityForm', '/widget').addFields({ items: [field] });
   if (options?.onChangesSpy) {
-    form.withOnChanges((_m: FormMutator, changedField: string) =>
-      options.onChangesSpy!(changedField),
-    );
+    form.onChange((_m: FormMutator, changedField: string) => options.onChangesSpy!(changedField));
   }
   return form;
 }

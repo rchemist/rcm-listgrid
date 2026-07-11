@@ -31,7 +31,7 @@ afterEach(() => {
 describe('form-store setValue cascade option (EA-B0)', () => {
   it('cascade:false skips onChanges dispatch for that write; a sibling default setValue still dispatches', () => {
     const calls: string[] = [];
-    const form = TwoFieldForm().withOnChanges((_m, changedField) => {
+    const form = TwoFieldForm().onChange((_m, changedField) => {
       calls.push(changedField);
     });
     const store = createFormStore(form);
@@ -61,7 +61,7 @@ describe('form-store setValue cascade option (EA-B0)', () => {
 
   it('the loop-guard is unaffected: a handler-driven cascade write (no opts) still runs, and re-entry still terminates', () => {
     let bDispatchCount = 0;
-    const form = TwoFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = TwoFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'a') {
         m.setValue('b', 'from-a');
       } else if (changedField === 'b') {
@@ -86,7 +86,7 @@ describe('form-store setValue cascade option (EA-B0)', () => {
 
   it('FormMutator handler-driven setValue is unchanged (no opts param, always cascades)', () => {
     const calls: string[] = [];
-    const form = TwoFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = TwoFieldForm().onChange((m: FormMutator, changedField) => {
       calls.push(changedField);
       if (changedField === 'a') m.setValue('b', 'derived');
     });
@@ -98,7 +98,7 @@ describe('form-store setValue cascade option (EA-B0)', () => {
 
   it('omitting opts entirely (2-arg call) keeps default cascading behavior (back-compat)', () => {
     const calls: string[] = [];
-    const form = TwoFieldForm().withOnChanges((_m, changedField) => calls.push(changedField));
+    const form = TwoFieldForm().onChange((_m, changedField) => calls.push(changedField));
     const store = createFormStore(form);
     store.getState().setValue('a', 'x');
     expect(calls).toEqual(['a']);

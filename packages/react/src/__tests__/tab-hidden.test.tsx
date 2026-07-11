@@ -51,7 +51,7 @@ function threeTabForm(): EntityForm {
       items: [new StringField('thesis', 4).withLabel('Thesis')],
       tab: { id: 'graduate', label: 'Graduate', order: 2, hidden: true },
     })
-    .withOnChanges((m: FormMutator, changedField) => {
+    .onChange((m: FormMutator, changedField) => {
       if (changedField !== 'kind') return;
       m.setTabHidden('graduate', m.getValue('kind') !== 'grad');
     });
@@ -148,13 +148,13 @@ describe('EC3-0 — declared hidden survives onInitialize through initializeForm
     };
   }
 
-  it('an onInitialize handler UN-hiding a declared-hidden tab shows it on FIRST paint', async () => {
-    // 'graduate' is declared hidden:true (threeTabForm) — an onInitialize
-    // handler flips it visible via the pre-store EntityForm.withTab({hidden})
+  it('an onInit handler UN-hiding a declared-hidden tab shows it on FIRST paint', async () => {
+    // 'graduate' is declared hidden:true (threeTabForm) — an onInit handler
+    // flips it visible via the pre-store ctx.form.withTab({hidden})
     // mutation, proving it flows through initializeFormStore's
     // build-after-hooks pipe into the store's seeded tabHidden slice,
     // correct on the very first render (no user action needed).
-    const form = threeTabForm().withOnInitialize((ef) => ef.withTab('graduate', { hidden: false }));
+    const form = threeTabForm().onInit((ctx) => ctx.form.withTab('graduate', { hidden: false }));
     const { store, entityForm } = await initializeFormStore({
       entityForm: form,
       adapter: fakeAdapter(),

@@ -52,8 +52,8 @@ export {
 export type { EntityItem, EntityField } from './field/entity-field';
 export type { FieldMetaOverride } from './field/field-meta';
 
-// --- imperative lifecycle: onChanges cascade (EF2) ---
-export type { FormMutator, OnChangesHandler } from './field/form-mutator';
+// --- imperative lifecycle: onChange cascade (EF2) ---
+export type { FormMutator, ChangeHandler } from './field/form-mutator';
 
 // --- permission policy (unified) ---
 export { isPermitted, extractPermissions, mergeRequiredPermissions } from './permission';
@@ -184,9 +184,9 @@ export type { Address, AddressFieldsProps, AddressSiblingNames } from './field/a
 export { EntityForm } from './entity-form';
 export type { FieldGroupDef, TabDef, AddFieldsInput } from './entity-form';
 
-// --- imperative lifecycle: fetch/init hooks (EF3; dispatched by
-// initializeFormStore, @listgrid/state) ---
-export type { OnFetchDataHandler, OnInitializeHandler } from './entity-form';
+// --- imperative lifecycle: consolidated init/fetch hook (spec §3.3/§4.1
+// `onInit`; W2-1 — dispatched by initializeFormStore, @listgrid/state) ---
+export type { InitContext, InitHandler } from './entity-form';
 
 // --- imperative lifecycle: submit-transform hook (EF6; applied by
 // toSaveData, @listgrid/state) ---

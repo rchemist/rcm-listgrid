@@ -8,11 +8,11 @@ import { rcmAdapter } from '../../../lib/adapter';
 
 // Create a new Major — via the EF3 useEntityFormInitializer pipe (NOT the
 // sync createFormStore + no-op pattern collabo/college/new use). Deliberate:
-// MajorEntityForm's `withOnInitialize` runs UNCONDITIONALLY (re-verified
+// MajorEntityForm's second `onInit` handler runs UNCONDITIONALLY (re-verified
 // against source — MajorEntityForm.tsx:248-266 has no update-mode gate,
 // unlike Collabo's), so a freshly-created record (default type 'MAJOR')
 // needs the pipe to run even with no `id` — plain createFormStore never
-// calls onInitialize at all (initializeFormStore's step e runs "always,
+// calls onInit at all (initializeFormStore's onInit step runs "always,
 // create mode too" — @listgrid/state doc). Without this, college would
 // incorrectly show required+visible (its static declaration) instead of the
 // type='MAJOR'-derived hidden+not-required state.

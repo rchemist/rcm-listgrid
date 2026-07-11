@@ -77,7 +77,7 @@ describe('form-store validate-on-change (EF5)', () => {
   });
 
   it('cascade writes (onChanges setting a sibling) do not mark it touched / schedule validation, while the user-edited source field still validates', async () => {
-    const form = RequiredForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = RequiredForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'name') m.setValue('other', ''); // nested, invalid
     });
     const store = createFormStore(form, { validateOnChange: true });
@@ -114,7 +114,7 @@ describe('form-store validate-on-change (EF5)', () => {
     // duplicate-replace path). Without cleanup, the stale timer for the old
     // 'name' fires validateField('name') against the new, never-touched
     // field and writes a spurious error into its slice.
-    const form = RequiredForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = RequiredForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'other') {
         m.removeField('name');
         m.addField(new StringField('name', 1).withRequired(true).withLabel('Name'));

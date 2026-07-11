@@ -7,13 +7,13 @@ import { CollaboEntityForm, collaboFetchUrl } from '../../../lib/entities/collab
 import { rcmAdapter } from '../../../lib/adapter';
 
 // Edit an existing Collabo — the EF3 `useEntityFormInitializer` pipeline
-// (fetch -> onFetchData -> onInitialize -> build -> hydrate), NOT the sync
+// (fetch -> BIND -> onInit -> REBIND -> build), NOT the sync
 // `createFormStore` + `useEffect(hydrate)` pattern college/student's edit
 // pages use. Deliberate (EC2 plan §6 scenario 4, task item 3): Collabo's
-// `withOnInitialize` branches (collaboratedAt visibility/required +
-// contracted options swap on first paint, update-mode gated) only run
-// inside this pipe — the sync path never calls onFetchData/onInitialize at
-// all, so those effects would silently never fire.
+// second `onInit` handler (collaboratedAt visibility/required + contracted
+// options swap on first paint, update-mode gated) only runs inside this pipe
+// — the sync path never calls onInit at all, so those effects would
+// silently never fire.
 export default function CollaboEditPage() {
   const router = useRouter();
   const params = useParams();

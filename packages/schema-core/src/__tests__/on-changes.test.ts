@@ -8,8 +8,11 @@ import {
   type FormMutator,
 } from '../index';
 
-// EF2 — onChanges cascade (schema-core layer). Covers EntityForm.withOnChanges/
-// getOnChanges + clone propagation, and the 3-builder catalog (port of
+// EF2 — onChange cascade (schema-core layer). Covers EntityForm.onChange/
+// getChangeHandlers + clone propagation (W2-1 rename from withOnChanges/
+// getOnChanges), the onInit/getInitHandlers registration surface (spec
+// §3.3/§4.1; W2-1 consolidation of the former withOnFetchData/
+// withOnInitialize pair), and the 3-builder catalog (port of
 // src/listgrid/config/OnChangeEntityForm.ts:76-361) against a fake FormMutator
 // — no store dependency, per the schema-core purity constraint (ADR-0003).
 
@@ -45,76 +48,58 @@ function fakeMutator(values: Record<string, unknown> = {}): FormMutator & {
   };
 }
 
-describe('EntityForm.withOnChanges / getOnChanges (EF2)', () => {
-  it('withOnChanges appends handlers; getOnChanges returns them in registration order', () => {
+describe('EntityForm.onChange / getChangeHandlers (EF2; W2-1 renamed from withOnChanges/getOnChanges)', () => {
+  it('onChange appends handlers; getChangeHandlers returns them in registration order', () => {
     const h1 = () => {};
     const h2 = () => {};
-    const form = OneFieldForm().withOnChanges(h1).withOnChanges(h2);
-    expect(form.getOnChanges()).toEqual([h1, h2]);
+    const form = OneFieldForm().onChange(h1).onChange(h2);
+    expect(form.getChangeHandlers()).toEqual([h1, h2]);
   });
 
-  it('a fresh EntityForm has no onChanges handlers', () => {
-    expect(OneFieldForm().getOnChanges()).toEqual([]);
+  it('a fresh EntityForm has no change handlers', () => {
+    expect(OneFieldForm().getChangeHandlers()).toEqual([]);
   });
 
-  it('clone() propagates onChanges (0.3.x parity — EntityForm.tsx:94)', () => {
+  it('clone() propagates changeHandlers (0.3.x parity — EntityForm.tsx:94)', () => {
     const h1 = () => {};
-    const original = OneFieldForm().withOnChanges(h1);
+    const original = OneFieldForm().onChange(h1);
     const cloned = original.clone();
-    expect(cloned.getOnChanges()).toEqual([h1]);
+    expect(cloned.getChangeHandlers()).toEqual([h1]);
 
     // independent arrays — mutating one does not affect the other.
-    cloned.withOnChanges(() => {});
-    expect(original.getOnChanges()).toHaveLength(1);
-    expect(cloned.getOnChanges()).toHaveLength(2);
+    cloned.onChange(() => {});
+    expect(original.getChangeHandlers()).toHaveLength(1);
+    expect(cloned.getChangeHandlers()).toHaveLength(2);
   });
 });
 
-describe('EntityForm.withOnInitialize / getOnInitialize (EF3)', () => {
-  it('appends handlers; getOnInitialize returns them in registration order', () => {
-    const h1 = (ef: EntityForm) => ef;
-    const h2 = (ef: EntityForm) => ef;
-    const form = OneFieldForm().withOnInitialize(h1).withOnInitialize(h2);
-    expect(form.getOnInitialize()).toEqual([h1, h2]);
+// spec §3.3/§4.1 (W2-1) — onInit consolidates the former separate
+// withOnFetchData/withOnInitialize arrays into one; these registration-order/
+// clone-propagation tests are behavior-equivalent to the old
+// withOnInitialize/withOnFetchData describe blocks they replace (only the
+// registration surface changed — dispatch-order semantics are covered at the
+// pipe level, @listgrid/state/__tests__/initialize-form-store.test.ts).
+describe('EntityForm.onInit / getInitHandlers (spec §3.3/§4.1)', () => {
+  it('onInit appends handlers; getInitHandlers returns them in registration order', () => {
+    const h1 = () => {};
+    const h2 = () => {};
+    const form = OneFieldForm().onInit(h1).onInit(h2);
+    expect(form.getInitHandlers()).toEqual([h1, h2]);
   });
 
-  it('a fresh EntityForm has no onInitialize handlers', () => {
-    expect(OneFieldForm().getOnInitialize()).toEqual([]);
+  it('a fresh EntityForm has no init handlers', () => {
+    expect(OneFieldForm().getInitHandlers()).toEqual([]);
   });
 
-  it('clone() propagates onInitialize independently of the original', () => {
-    const h1 = (ef: EntityForm) => ef;
-    const original = OneFieldForm().withOnInitialize(h1);
+  it('clone() propagates initHandlers independently of the original', () => {
+    const h1 = () => {};
+    const original = OneFieldForm().onInit(h1);
     const cloned = original.clone();
-    expect(cloned.getOnInitialize()).toEqual([h1]);
+    expect(cloned.getInitHandlers()).toEqual([h1]);
 
-    cloned.withOnInitialize((ef) => ef);
-    expect(original.getOnInitialize()).toHaveLength(1);
-    expect(cloned.getOnInitialize()).toHaveLength(2);
-  });
-});
-
-describe('EntityForm.withOnFetchData / getOnFetchData (EF3)', () => {
-  it('appends handlers; getOnFetchData returns them in registration order', () => {
-    const h1 = (ef: EntityForm) => ef;
-    const h2 = (ef: EntityForm) => ef;
-    const form = OneFieldForm().withOnFetchData(h1).withOnFetchData(h2);
-    expect(form.getOnFetchData()).toEqual([h1, h2]);
-  });
-
-  it('a fresh EntityForm has no onFetchData handlers', () => {
-    expect(OneFieldForm().getOnFetchData()).toEqual([]);
-  });
-
-  it('clone() propagates onFetchData independently of the original', () => {
-    const h1 = (ef: EntityForm) => ef;
-    const original = OneFieldForm().withOnFetchData(h1);
-    const cloned = original.clone();
-    expect(cloned.getOnFetchData()).toEqual([h1]);
-
-    cloned.withOnFetchData((ef) => ef);
-    expect(original.getOnFetchData()).toHaveLength(1);
-    expect(cloned.getOnFetchData()).toHaveLength(2);
+    cloned.onInit(() => {});
+    expect(original.getInitHandlers()).toHaveLength(1);
+    expect(cloned.getInitHandlers()).toHaveLength(2);
   });
 });
 

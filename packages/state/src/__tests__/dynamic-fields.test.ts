@@ -110,7 +110,7 @@ describe('form-store.removeField (EF4)', () => {
 describe('FormMutator.addField/removeField via onChanges (EF4)', () => {
   it('an onChanges handler can add a field mid-cascade; it does not retro-fire dispatch for itself', () => {
     const dispatched: string[] = [];
-    const form = TwoFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = TwoFieldForm().onChange((m: FormMutator, changedField) => {
       dispatched.push(changedField);
       if (changedField === 'kind' && m.getValue('kind') === 'extended') {
         m.addField(new StringField('extra', 3).withDefaultValue('added'));
@@ -128,7 +128,7 @@ describe('FormMutator.addField/removeField via onChanges (EF4)', () => {
   });
 
   it('an onChanges handler can remove a field mid-cascade', () => {
-    const form = TwoFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = TwoFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'kind' && m.getValue('kind') === 'minimal') {
         m.removeField('name');
       }
@@ -146,7 +146,7 @@ describe('FormMutator.addField/removeField via onChanges (EF4)', () => {
     // routed through performSetValue's dispatchBatch — a version bump must
     // never suppress or be suppressed by the synchronous setValue loop-guard.
     let bDispatchCount = 0;
-    const form = TwoFieldForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = TwoFieldForm().onChange((m: FormMutator, changedField) => {
       if (changedField === 'name') {
         m.addField(new StringField('extra', 3));
         m.setValue('kind', 'from-name');

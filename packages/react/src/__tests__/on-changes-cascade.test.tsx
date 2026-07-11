@@ -1,6 +1,6 @@
 // EF2 — onChanges cascade integration (react layer). A builder from the
 // schema-core catalog (changeHidden) is registered on the EntityForm via
-// withOnChanges; a real user edit on one field's input drives
+// onChange; a real user edit on one field's input drives
 // store.setValue, which dispatches the cascade, which mutates a sibling
 // field's EF1 meta override — and that is asserted through the actual
 // useFieldMeta render path (not by calling store.getState().setMeta
@@ -31,7 +31,7 @@ function widgetForm(): EntityForm {
         new StringField('secret', 2).withLabel('Secret'),
       ],
     })
-    .withOnChanges(changeHidden('kind', { value: 'hide-it', result: { secret: true } }));
+    .onChange(changeHidden('kind', { value: 'hide-it', result: { secret: true } }));
 }
 
 function renderForm(entityForm: EntityForm) {

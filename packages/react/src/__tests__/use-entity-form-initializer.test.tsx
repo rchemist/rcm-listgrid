@@ -1,6 +1,6 @@
 // EF3 — useEntityFormInitializer integration (react layer). Drives the real
 // initializeFormStore pipe (@listgrid/state) through a fake adapter + an
-// onInitialize handler that adds a field, then renders the RESULT through
+// onInit handler that adds a field, then renders the RESULT through
 // ViewEntityForm — proving loading resolves and the dynamically-added field
 // shows up in the DOM with its fetched value, not just that the pipe compiles.
 
@@ -20,8 +20,8 @@ registerDefaultRenderers();
 function widgetForm(): EntityForm {
   return new EntityForm('WidgetEntityForm', '/widget')
     .addFields({ items: [new StringField('name', 1).withLabel('Name')] })
-    .withOnInitialize((ef) =>
-      ef.addFields({ items: [new StringField('extra', 2).withLabel('Extra')] }),
+    .onInit((ctx) =>
+      ctx.form.addFields({ items: [new StringField('extra', 2).withLabel('Extra')] }),
     );
 }
 

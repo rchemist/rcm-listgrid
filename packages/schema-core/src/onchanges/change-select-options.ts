@@ -1,5 +1,5 @@
 import type { SelectOption } from '../field/basic-fields';
-import type { FormMutator, OnChangesHandler } from '../field/form-mutator';
+import type { ChangeHandler, FormMutator } from '../field/form-mutator';
 
 /**
  * A single "when sourceField's value matches, apply these option lists"
@@ -40,7 +40,7 @@ function isMatched(clause: ConditionalSelectOptionsClause, value: unknown): bool
 export function changeSelectOptions(
   sourceField: string,
   when: ConditionalSelectOptionsClause | ConditionalSelectOptionsClause[],
-): OnChangesHandler {
+): ChangeHandler {
   return (m: FormMutator, changedField: string) => {
     if (changedField !== sourceField) return;
     const value = m.getValue(sourceField);

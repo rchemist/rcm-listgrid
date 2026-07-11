@@ -85,7 +85,7 @@ describe('store.setTabHidden (runtime override)', () => {
 
 describe('FormMutator.setTabHidden — onChanges wiring (EC3-0)', () => {
   it('an onChanges handler calling m.setTabHidden updates the store tabHidden slice', () => {
-    const form = TwoTabForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = TwoTabForm().onChange((m: FormMutator, changedField) => {
       if (changedField !== 'name') return;
       m.setTabHidden('graduate', m.getValue('name') === 'hide-graduate');
     });
@@ -101,7 +101,7 @@ describe('FormMutator.setTabHidden — onChanges wiring (EC3-0)', () => {
 
   it('setTabHidden from within a handler does not itself dispatch onChanges (no field changed)', () => {
     const dispatched: string[] = [];
-    const form = TwoTabForm().withOnChanges((m: FormMutator, changedField) => {
+    const form = TwoTabForm().onChange((m: FormMutator, changedField) => {
       dispatched.push(changedField);
       if (changedField === 'name') m.setTabHidden('graduate', true);
     });

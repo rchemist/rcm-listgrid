@@ -38,7 +38,7 @@ function widgetForm(onChangesSpy?: (changedField: string) => void): EntityForm {
     .withDefaultValue('#ffffff');
   const form = new EntityForm('WidgetEntityForm', '/widget').addFields({ items: [field] });
   if (onChangesSpy) {
-    form.withOnChanges((_m: FormMutator, changedField: string) => onChangesSpy(changedField));
+    form.onChange((_m: FormMutator, changedField: string) => onChangesSpy(changedField));
   }
   return form;
 }

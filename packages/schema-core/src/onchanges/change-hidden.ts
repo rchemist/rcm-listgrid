@@ -1,4 +1,4 @@
-import type { FormMutator, OnChangesHandler } from '../field/form-mutator';
+import type { ChangeHandler, FormMutator } from '../field/form-mutator';
 
 /**
  * A single "when sourceField's value matches, apply these booleans" clause.
@@ -38,7 +38,7 @@ function isMatched(clause: ConditionalMetaClause, value: unknown): boolean {
 export function changeHidden(
   sourceField: string,
   when: ConditionalMetaClause | ConditionalMetaClause[],
-): OnChangesHandler {
+): ChangeHandler {
   return (m: FormMutator, changedField: string) => {
     if (changedField !== sourceField) return;
     const value = m.getValue(sourceField);

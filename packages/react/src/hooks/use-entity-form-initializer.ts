@@ -4,11 +4,11 @@ import type { BackendAdapter, BackendError, EntityForm, Session } from '@listgri
 import { initializeFormStore, type FormStoreState } from '@listgrid/state';
 
 // useEntityFormInitializer (EF3) — the react-layer entry point for the
-// initializeFormStore pipe (@listgrid/state): fetch -> onFetchData ->
-// onInitialize -> build -> hydrate. Additive: existing synchronous
-// createFormStore call sites (e.g. apps/sample edit pages) keep working
-// unchanged — this hook is an alternative for forms that declare
-// onFetchData/onInitialize hooks (EF3), not a replacement for createFormStore.
+// initializeFormStore pipe (@listgrid/state): fetch -> BIND -> onInit ->
+// REBIND -> build. Additive: existing synchronous createFormStore call
+// sites (e.g. apps/sample edit pages) keep working unchanged — this hook is
+// an alternative for forms that declare onInit hooks (EF3/spec §4.1), not a
+// replacement for createFormStore.
 
 export interface UseEntityFormInitializerOptions {
   /** the declared form; never mutated. */

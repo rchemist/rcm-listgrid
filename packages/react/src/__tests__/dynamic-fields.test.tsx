@@ -1,5 +1,5 @@
 // EF4 — dynamic field add/remove + structure-version (react layer). An
-// onChanges handler (registered via withOnChanges, same wiring EF2 uses)
+// onChange handler (registered via onChange, same wiring EF2 uses)
 // calls m.addField/m.removeField on a select change; asserts the new field
 // APPEARS/disappears in the DOM through the real render path (not by poking
 // the store directly) and — critically — that the form is NOT remounted: a
@@ -33,7 +33,7 @@ function widgetForm(): EntityForm {
         ]).withLabel('Kind'),
       ],
     })
-    .withOnChanges((m: FormMutator, changedField) => {
+    .onChange((m: FormMutator, changedField) => {
       if (changedField !== 'kind') return;
       if (m.getValue('kind') === 'extended') {
         m.addField(

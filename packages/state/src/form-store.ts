@@ -171,6 +171,16 @@ export interface CreateFormStoreOptions {
    * host-preloaded `initialData`).
    */
   fetchedData?: Record<string, unknown>;
+  /**
+   * W2-1 (spec §4.1) — the accumulated `InitContext.setMeta` calls from every
+   * `onInit` handler the init pipe (initializeFormStore, @listgrid/state) ran
+   * BEFORE calling createFormStore. Seeds the store's initial `meta` slice
+   * (EF1) directly — same shallow-merge-per-field shape `store.setMeta`
+   * itself produces, just pre-populated at build time instead of accumulated
+   * via runtime calls. Absent/undefined seeds an empty `meta: {}`, identical
+   * to pre-W2-1 behavior.
+   */
+  initialMeta?: Record<string, FieldMetaOverride>;
 }
 
 interface ValidateOnChangeConfig {
@@ -316,7 +326,7 @@ export function createFormStore(
     let fetchedData: Record<string, unknown> | undefined = opts.fetchedData;
 
     function dispatchOnChanges(changedField: string): void {
-      for (const handler of entityForm.getOnChanges()) {
+      for (const handler of entityForm.getChangeHandlers()) {
         const result = handler(mutator, changedField);
         if (result && typeof (result as Promise<void>).then === 'function') {
           // fire-and-forget (see doc comment above) — swallow rejections so
@@ -360,8 +370,8 @@ export function createFormStore(
       }
     }
 
-    // Store-backed FormMutator adapter (EF2) injected into every onChanges
-    // handler. Keeps schema-core's OnChangesHandler state-agnostic
+    // Store-backed FormMutator adapter (EF2) injected into every onChange
+    // handler. Keeps schema-core's ChangeHandler state-agnostic
     // (ADR-0003) while giving handlers read/write access to this store.
     const mutator: FormMutator = {
       getValue(name) {
@@ -394,7 +404,7 @@ export function createFormStore(
 
     return {
       fields: initialFields,
-      meta: {},
+      meta: opts.initialMeta ?? {},
       fieldDefs: initialFieldDefs,
       structureVersion: 0,
       tabHidden: initialTabHidden,

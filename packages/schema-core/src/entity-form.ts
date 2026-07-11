@@ -1,37 +1,102 @@
 import type { Session } from './auth';
 import type { ConditionalBooleanValue } from './field/conditional';
 import type { EntityField } from './field/entity-field';
-import type { OnChangesHandler } from './field/form-mutator';
-import type { FieldValue, RenderType } from './field/types';
+import type { FieldMetaOverride } from './field/field-meta';
+import type { ChangeHandler } from './field/form-mutator';
+import type { RenderType } from './field/types';
 
 /**
- * Imperative lifecycle hook (EF3): runs once per registered handler, in
- * registration order, after data is fetched but BEFORE onInitialize
- * (initializeFormStore, @listgrid/state). Receives the already-normalized
- * fetched DATA payload — NOT a raw response like the 0.3.x
- * ModifyFetchedEntityFormFunc(entityForm, response?) (src/listgrid/config/
- * Config.ts:459) — the new BackendAdapter (ADR-0005 decision D2) already
- * unwraps the envelope, so the handler gets the entity data directly.
- * Pure (EntityForm in, EntityForm out) — no store/mutator, unlike
- * OnChangesHandler, so schema-core stays free of a state dependency.
+ * The context object passed to an {@link InitHandler} (`onInit`, spec §4.1;
+ * W2-1). Consolidates the former separate EF3 `OnFetchDataHandler`
+ * (`(entityForm, data) => EntityForm`) and `OnInitializeHandler`
+ * (`(entityForm, session?) => EntityForm`) arrays into one — a handler
+ * branches on {@link data}'s presence itself instead of the engine
+ * dispatching two separate passes (spec §4.2). Constructed by
+ * initializeFormStore (@listgrid/state) AFTER BIND and BEFORE the store is
+ * built (spec §4.2) — {@link form}'s field instances already carry the bound
+ * fetched record (if any) by the time the first handler sees them. The SAME
+ * ctx instance (closed over the same `form`) is reused across every
+ * registered handler in a run.
  */
-export type OnFetchDataHandler = (
-  entityForm: EntityForm,
-  data: Record<string, unknown>,
-) => EntityForm | Promise<EntityForm>;
+export interface InitContext {
+  /**
+   * The draft EntityForm clone — structural changes (`addFields`/
+   * `withoutField`/`withTab`/`withGroup`/etc.) are valid here (spec §5.2:
+   * FormField builders mutate in place + `return this`, so no
+   * re-registration is needed). A handler mutates this IN PLACE; `onInit`
+   * does NOT support the old onFetchData/onInitialize "return a replacement
+   * EntityForm" pattern — an old handler that used to
+   * `return ef.clone().withTitle('X')` becomes an in-place
+   * `ctx.form.withTitle('X')` (spec §9 migration table).
+   */
+  form: EntityForm;
+  /**
+   * The fetched/provided payload — present in update mode (a record was
+   * loaded via the adapter or given via `initialData`), absent in create
+   * mode. Branch on this to replicate the old onFetchData-only-with-data
+   * gating (spec §4.2): `if (ctx.data) { ... }`.
+   */
+  data?: Record<string, unknown> | undefined;
+  /** Value read/override surface (EF7) — operates on {@link form}'s field instances. */
+  values: {
+    /**
+     * The field's current draft value (post-BIND, mid-hook — reflects any
+     * earlier handler's `set`/`setFetched` call in this same run). Equivalent
+     * to reading `ctx.form.getField(name)?.value?.current` directly.
+     */
+    get(name: string): unknown;
+    /**
+     * Hook override (EF7) — UNCONDITIONALLY overwrites field `name`'s
+     * current value. This is the override primitive: calling this AFTER
+     * BIND has bound the fetched record onto {@link form} wins over that
+     * fetched value (precedence: hook `set` > fetched record > declared
+     * default — 0.3.x parity, the old engine ran onInitialize AFTER
+     * setFetchedValues for exactly this reason, EntityForm.tsx:181,257).
+     * Never touches `fetched`, so a subsequent `reset()` still falls back to
+     * the record's original value. No-op if `name` names no declared field.
+     */
+    set(name: string, value: unknown): void;
+    /**
+     * Corrects the dirty baseline (EF7) — writes field `name`'s `fetched`
+     * value. Also sets `current`, but ONLY when `current` is not already set
+     * (a declared `withValue`/an earlier `values.set` call on this field
+     * wins) — mirrors the old engine's EntityForm.tsx:135-152
+     * `setFetchedValue` verbatim. No-op if `name` names no declared field.
+     */
+    setFetched(name: string, value: unknown): void;
+  };
+  /**
+   * Shallow-merges `patch` into field `name`'s meta override — the canonical
+   * path for hidden/required/readOnly/options toggles inside `onInit` (spec
+   * §4.1). Seeds the form store's initial meta override (same contract as
+   * `FormMutator.setMeta`, EF1; `createFormStore`'s new `initialMeta` option,
+   * @listgrid/state) — does NOT touch {@link form}'s field declarations (for
+   * that, mutate {@link form} directly, e.g. `ctx.form.getField('x')
+   * ?.withHidden(true)`, spec §5.2).
+   */
+  setMeta(name: string, patch: FieldMetaOverride): void;
+  session?: Session | undefined;
+  /**
+   * create vs update — id-based, identical to {@link EntityForm.getRenderType}
+   * ('update' iff an id is set, spec §3.1). Independent of {@link data}: a
+   * create form may carry `data` via `initialData` (prefill/template), so
+   * branch on `ctx.data` for "data present", on `renderType` for create/update.
+   */
+  renderType: RenderType;
+}
 
 /**
- * Imperative lifecycle hook (EF3): runs once per registered handler, in
- * registration order, after onFetchData and before the form store is built.
- * 0.3.x parity — src/listgrid/config/Config.ts OnInitializeFunc, dispatched
- * at EntityForm.tsx:259-264 (per-handler try/catch: a throwing handler is
- * logged and skipped, remaining handlers still run — initializeFormStore,
- * @listgrid/state, reproduces that contract).
+ * Consolidated init/fetch lifecycle hook (spec §3.3/§4.1; W2-1) — successor
+ * to the separate EF3 `OnFetchDataHandler`/`OnInitializeHandler` arrays.
+ * Dispatched by initializeFormStore (@listgrid/state), sequentially, in
+ * registration order, ALWAYS (create mode too — 0.3.x onInitialize parity,
+ * EntityForm.tsx:259-264); a throwing handler is logged and skipped,
+ * remaining handlers still run (spec §4.2). Does NOT re-fire after save.
+ * Returns void — mutate {@link InitContext.form}/`values`/`setMeta` in
+ * place; there is no "return a replacement EntityForm" escape hatch (see
+ * {@link InitContext.form} doc).
  */
-export type OnInitializeHandler = (
-  entityForm: EntityForm,
-  session?: Session,
-) => EntityForm | Promise<EntityForm>;
+export type InitHandler = (ctx: InitContext) => void | Promise<void>;
 
 /**
  * Submit-transform hook (EF6): applied by toSaveData (@listgrid/state) to the
@@ -41,7 +106,7 @@ export type OnInitializeHandler = (
  * CollaboEntityForm.tsx:313-325 was a call site) — single-slot there too (a
  * plain override, not a list), so this hook is single-slot as well (parity,
  * not an EF2-style handler array). Pure (data in, data out) — no store/
- * mutator, same state-agnostic posture as OnFetchDataHandler.
+ * mutator, same state-agnostic posture as {@link InitHandler}.
  */
 export type SubmitTransformHandler = (
   data: Record<string, unknown>,
@@ -137,20 +202,23 @@ export class EntityForm {
    * 122-127) — now typed against the state-agnostic FormMutator instead of
    * carrying the store/EntityForm instance directly (ADR-0003 purity).
    */
-  private onChanges: OnChangesHandler[] = [];
+  private changeHandlers: ChangeHandler[] = [];
   /**
-   * Fetch/init lifecycle hooks (EF3): dispatched by initializeFormStore
-   * (@listgrid/state), in this order — onFetchData first (once, if data was
-   * fetched/provided), then onInitialize (always, create or update).
-   * Successor to the 0.3.x EntityForm.onInitialize array (Config.ts
-   * OnInitializeFunc) / modifyFetchedEntityForm (ModifyFetchedEntityFormFunc).
+   * Init/fetch lifecycle hooks (spec §3.3/§4.1 `onInit`; W2-1): dispatched by
+   * initializeFormStore (@listgrid/state), in registration order, ALWAYS
+   * (create mode too), AFTER BIND and BEFORE the store is built. Consolidates
+   * the former separate onFetchData (once, if data was fetched/provided) and
+   * onInitialize (always) arrays into one — a handler branches on
+   * `InitContext.data` itself (spec §4.2). Successor to the 0.3.x
+   * EntityForm.onInitialize array (Config.ts OnInitializeFunc) /
+   * modifyFetchedEntityForm (ModifyFetchedEntityFormFunc).
    */
-  private onFetchData: OnFetchDataHandler[] = [];
-  private onInitialize: OnInitializeHandler[] = [];
+  private initHandlers: InitHandler[] = [];
   /**
-   * Submit-transform hook (EF6): single-slot, unlike the onChanges/onFetchData/
-   * onInitialize arrays — 0.3.x `withOverrideSubmitData` was a plain override,
-   * not a list, so this mirrors that (parity, not an EF2-style array).
+   * Submit-transform hook (EF6): single-slot, unlike the changeHandlers/
+   * initHandlers arrays — 0.3.x `withOverrideSubmitData` was a plain
+   * override, not a list, so this mirrors that (parity, not an EF2-style
+   * array).
    */
   private submitTransform?: SubmitTransformHandler;
 
@@ -173,71 +241,27 @@ export class EntityForm {
     this.id = id;
     return this;
   }
-  /** Append an onChanges handler (EF2); registration order is dispatch order. */
-  withOnChanges(handler: OnChangesHandler): this {
-    this.onChanges.push(handler);
+  /** Append an onChange handler (EF2; spec §3.3, formerly `withOnChanges`); registration order is dispatch order. */
+  onChange(handler: ChangeHandler): this {
+    this.changeHandlers.push(handler);
     return this;
   }
-  /** Append an onFetchData handler (EF3); registration order is dispatch order. */
-  withOnFetchData(handler: OnFetchDataHandler): this {
-    this.onFetchData.push(handler);
-    return this;
-  }
-  /** Append an onInitialize handler (EF3); registration order is dispatch order. */
-  withOnInitialize(handler: OnInitializeHandler): this {
-    this.onInitialize.push(handler);
+  /**
+   * Append an onInit handler (spec §3.3/§4.1; W2-1 — formerly the separate
+   * `withOnFetchData`/`withOnInitialize`); registration order is dispatch
+   * order. See {@link InitHandler}/{@link InitContext} for the contract.
+   */
+  onInit(handler: InitHandler): this {
+    this.initHandlers.push(handler);
     return this;
   }
   /**
    * Set the submit-transform handler (EF6); single-slot — a later call
    * REPLACES any previously set handler (0.3.x `withOverrideSubmitData`
-   * parity, not an append like withOnChanges/withOnFetchData/withOnInitialize).
+   * parity, not an append like onChange/onInit).
    */
   withSubmitTransform(handler: SubmitTransformHandler): this {
     this.submitTransform = handler;
-    return this;
-  }
-
-  /**
-   * Imperative value override (EF7) — for use inside an onFetchData/
-   * onInitialize handler (initializeFormStore, @listgrid/state), which
-   * operates on the pre-store EntityForm clone those hooks receive.
-   * UNCONDITIONALLY overwrites field `name`'s current value — this is the
-   * override primitive: a handler calling this AFTER the pipe has bound the
-   * fetched record onto the clone (see initializeFormStore's BIND step)
-   * wins over that fetched value (0.3.x parity — the old engine ran
-   * onInitialize AFTER setFetchedValues for exactly this reason,
-   * EntityForm.tsx:181,257). No-op (returns `this` unchanged) if `name`
-   * names no declared field. Distinct from {@link setFetchedValue}: this
-   * never touches `fetched`, so a subsequent `reset()` still falls back to
-   * the record's original value, not this override.
-   */
-  setValue(name: string, value: unknown): this {
-    const field = this.getField(name);
-    if (field) {
-      field.value = { ...field.value, current: value };
-    }
-    return this;
-  }
-
-  /**
-   * Imperative fetched-baseline override (EF7) — corrects field `name`'s
-   * `fetched` value (e.g. a handler normalizing/deriving the record's raw
-   * value) rather than overriding the user-facing current value outright.
-   * Sets `current` too, but ONLY when `current` is not already set (a
-   * declared `withValue`/an earlier `setValue` call on this field wins) —
-   * mirrors the old engine's EntityForm.tsx:135-152 `setFetchedValue`
-   * verbatim. No-op if `name` names no declared field.
-   */
-  setFetchedValue(name: string, value: unknown): this {
-    const field = this.getField(name);
-    if (field) {
-      const next: FieldValue<unknown> = { ...field.value, fetched: value };
-      if (field.value?.current === undefined) {
-        next.current = value;
-      }
-      field.value = next;
-    }
     return this;
   }
 
@@ -386,17 +410,13 @@ export class EntityForm {
   getRenderType(): RenderType {
     return this.id !== undefined ? 'update' : 'create';
   }
-  /** registered onChanges handlers, in dispatch order (EF2). */
-  getOnChanges(): OnChangesHandler[] {
-    return this.onChanges;
+  /** registered onChange handlers, in dispatch order (EF2; engine-internal — not barrel-exported). */
+  getChangeHandlers(): ChangeHandler[] {
+    return this.changeHandlers;
   }
-  /** registered onFetchData handlers, in dispatch order (EF3). */
-  getOnFetchData(): OnFetchDataHandler[] {
-    return this.onFetchData;
-  }
-  /** registered onInitialize handlers, in dispatch order (EF3). */
-  getOnInitialize(): OnInitializeHandler[] {
-    return this.onInitialize;
+  /** registered onInit handlers, in dispatch order (spec §3.3/§4.1; engine-internal — not barrel-exported). */
+  getInitHandlers(): InitHandler[] {
+    return this.initHandlers;
   }
   /** the registered submit-transform handler, if any (EF6). */
   getSubmitTransform(): SubmitTransformHandler | undefined {
@@ -441,11 +461,10 @@ export class EntityForm {
     for (const [k, v] of this.tabs) copy.tabs.set(k, { ...v });
     for (const [k, v] of this.groups) copy.groups.set(k, { ...v });
     for (const f of this.fields) copy.fields.push(f.clone(includeValue));
-    // propagate onChanges (0.3.x parity — src/listgrid/config/EntityForm.tsx:94).
-    copy.onChanges = [...this.onChanges];
-    // propagate onFetchData/onInitialize (EF3, same clone-propagation contract).
-    copy.onFetchData = [...this.onFetchData];
-    copy.onInitialize = [...this.onInitialize];
+    // propagate changeHandlers (0.3.x parity — src/listgrid/config/EntityForm.tsx:94).
+    copy.changeHandlers = [...this.changeHandlers];
+    // propagate initHandlers (spec §3.3/§4.1, same clone-propagation contract).
+    copy.initHandlers = [...this.initHandlers];
     // propagate submitTransform (EF6, same clone-propagation contract).
     if (this.submitTransform !== undefined) copy.submitTransform = this.submitTransform;
     return copy;

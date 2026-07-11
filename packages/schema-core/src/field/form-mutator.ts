@@ -12,7 +12,7 @@ import type { FormField } from './form-field';
 // handler) is written against this interface only.
 
 /**
- * Mutation surface passed to an {@link OnChangesHandler}. Backed by the form
+ * Mutation surface passed to a {@link ChangeHandler}. Backed by the form
  * store (@listgrid/state) — getValue/getValues read the resolved current
  * value (create->default, update->fetched, else explicit current, per
  * @listgrid/schema-core getCurrentValue); setValue/setMeta write through to
@@ -70,12 +70,13 @@ export interface FormMutator {
 }
 
 /**
- * An onChanges handler (EF2). Registered on an EntityForm via
- * `withOnChanges`; dispatched by the form store after every setValue, in
- * registration order, once per handler per changed field (0.3.x parity —
- * src/listgrid/config/EntityForm.tsx:122-127: EVERY handler runs on EVERY
- * change and is expected to filter itself by `changedField`). Async handlers
- * are fire-and-forget: the store does not await them, and setValue's own
- * signature stays synchronous, matching 0.3.x executeOnChanges.
+ * An onChange handler (EF2; spec §3.3 — renamed from `OnChangesHandler`,
+ * registered via `EntityForm.onChange` (formerly `withOnChanges`), W2-1).
+ * Dispatched by the form store after every setValue, in registration order,
+ * once per handler per changed field (0.3.x parity — src/listgrid/config/
+ * EntityForm.tsx:122-127: EVERY handler runs on EVERY change and is expected
+ * to filter itself by `changedField`). Async handlers are fire-and-forget:
+ * the store does not await them, and setValue's own signature stays
+ * synchronous, matching 0.3.x executeOnChanges.
  */
-export type OnChangesHandler = (mutator: FormMutator, changedField: string) => void | Promise<void>;
+export type ChangeHandler = (mutator: FormMutator, changedField: string) => void | Promise<void>;
