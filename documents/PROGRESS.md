@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · **W4-0~5 전 서브태스크 ✅**(title·steps·async·revision·meta). **Next up**: **W4 phase-end 적대 리뷰**(진행 중·통과 시 CAP-05·07·10·13·23 대조→seal)→ W5 list-track. **2097 unit/E2E 23**·계수 47/49/182(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · **W4 폼 완결 ✅ seal**(6 서브태스크+phase-end 하드닝·CAP-05·07·10·13·23 소화). **Next up**: **W5 list-track**(⚠ entry 브리핑 pass 선행=태스크 표 먼저). **2103 unit/E2E 24**·계수 47/49/182(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W3 ✅ 완료**. W4 새 세션은 §세션 인계 Handoff의 읽는 순서를 따른다 — [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결)(BLOCKING ceiling 재산정 포함) → waves §W4 → 스펙 §3.1·§5.3.
-**Last updated**: 2026-07-11 (**W4-5 withMeta/getMeta ✅** `8092900` — shallow-merge(dx-6 클로버 방지)·undefined 키 제거·+11 unit(2097)·full gate 독립 PASS·계수 47/49/182(=구 임계 45 초과→W4-0 재산정 필요성 확정). **W4 전 서브태스크 완료** → 이제 **phase-end 적대 리뷰** 진행 중(W3서 4버그 검출 실적)→통과+CAP 대조 후 W4 seal.)
+**Next session policy**: **W1~W4 ✅ 완료**. 새 세션(W5)은 ① [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track)(도입 표면·W5 entry 규칙·Do-NOT·미결) → ② waves §W5~W7 규칙(**entry 브리핑 pass=태스크 표 먼저 추가·커밋 후 실행**) → ③ 스펙 §5.1·§7·§2·§3.5·§3.6 인용 §만 + [8그룹 map](./analysis/2026-07-11/eg-group-capability-maps.md) LIST-TRACK.
+**Last updated**: 2026-07-11~12 (**W4 폼 완결 ✅ seal** — 6 서브태스크(W4-0 계수재산정·1 title·2 steps·3 async·4 revision·5 meta)+W4-6 phase-end 하드닝(적대 리뷰 4버그 fix). W4 전체 `3b3518f`..`44edfae`·2103 unit·E2E 24·계수 41→47/55·180→182/190. CAP 5종 소화. sonnet delegate·opus 검증(+phase-end 리뷰서 cross-sub-task 4버그 검출). 다음 = **W5**(entry 브리핑 pass 선행). [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
 ## Goal
 
@@ -45,11 +45,11 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF ✅ · EA 착수) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC·EG W1~W4 ✅ · W5~W7 남음) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W3 ✅ · W4-0·1·2·3·4 revision ✅**. 다음: **W4-5 withMeta**(W4 마지막)→phase-end 리뷰 — 전체 인계는 [W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결))
+## 세션 인계 (Handoff — **W1~W4 ✅ seal**. 다음: **W5 list-track**(entry 브리핑 pass 선행) — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
@@ -87,12 +87,12 @@
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
 - [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` — 6 sub-task+W3-6 하드닝·CAP 7종·2003 unit·E2E 19·phase-end 4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
-- [~] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md) · **W4-0~5 전 서브태스크 ✅**(`8092900`·2097 unit·E2E 23·계수 47/49/182), **phase-end 적대 리뷰 진행 중** → 통과+CAP 대조 후 seal · [detail](./progress-archive/phase-eg-api-redesign.md)
+- [x] **W4 폼 완결** ✅ `3b3518f`..`44edfae` — 6 서브태스크+phase-end 하드닝(4버그 fix)·CAP-05·07·10·13·23·2103u/E2E24·계수 47/49/182 · [detail](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W4-5 withMeta/getMeta**(withMeta(patch: Record<string,unknown>)/getMeta·**shallow-merge**·`undefined` 키=키 제거·유일 escape hatch=구 attribute bag 9종 대체·프리셋 2회 호출 합성 클로버 없음=검증 dx-6) · 스펙 §3.1 · CAP-23 · [waves §W4](./plans/entityform-api-implementation-waves.md) · 증명 프리셋 2회 합성 unit. EntityForm 45→47/55. **W4 마지막 → 완료 후 phase-end 적대 리뷰 필수**(`git diff <W4-start>..HEAD`·sonnet+high·opus 검증·W3서 cross-sub-task 4버그 검출 실증)+CAP-05·07·10·13·23 대조. hot-file 순차·delegate 기본 sonnet·opus 검증. 도입 표면·Do-NOT·미결=[W3 Handoff](./progress-archive/phase-eg-api-redesign.md#w3-페이즈-완료-인계-handoff--w4-폼-완결).
+**Next up**: **W5 list-track**(⚠ **entry 브리핑 pass 선행**=waves §W5~W7 규칙: 스펙 §5.1·§7·§2·§3.5·§3.6+[8그룹 map](./analysis/2026-07-11/eg-group-capability-maps.md) LIST-TRACK 인용해 W3/W4급 태스크 표를 이 문서에 **먼저 추가·커밋**한 뒤 실행) · CAP-18·19·20 · withList/withFilter→ViewListGrid 컬럼/정렬/필터 파생·register*·고급검색·페이지 셸. 계수 재검증(§10-A·182→~184). 전체 인계·Do-NOT·미결=[W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track).
 
 ---
 
@@ -105,6 +105,7 @@
 - [ ] **#W3-2 capability-denied outcome 구별불가** — controller save/delete의 capability 거부가 `{ok:false}` 반환(타입상 유일 non-error·non-cancel 선택) → validation-fail·reason-less cancel과 형태 동일(#W2-5 동류). silent block(adapter 미호출)은 정상. 스펙 §6.2 저자: 판별자(예: `blocked?: 'capability'`) 추가 여부 · risk: api-semantics · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
 - [ ] **#W3-5b replaces:'save' 커스텀 액션이 formReadOnly Save-숨김 우회** — formReadOnly는 빌트인 saveBuiltin만 제외(merge 전)·replaces:'save' 커스텀 액션은 getActions 경유라 미게이트 → readOnly 폼에 커스텀 save-slot 액션 렌더. 스펙 §3.1 "빌트인 Save 어포던스 숨김"=빌트인만(literal OK)이나 의도상 애매. 스펙 저자: replaces:'save'도 formReadOnly 숨김 대상인지 · risk: api-semantics(spec-ambiguous·저위험)
 - [ ] **#W4-1a getTitle 5단계 최종 폴백 문구(spec-silent)** — 스펙 §3.1 "renderType 기본문구"의 정확한 소비자 대면 카피 미명시 → 구현은 `this.name`(생성자 보장 non-empty) 폴백 채택(발명 회피). 스펙 저자: renderType별 기본문구(예: "새 college"/"college 수정") 확정 여부 or this.name 수용 · risk: ux-copy(저위험) · [detail](./progress-archive/phase-eg-api-redesign.md#w4--폼-완결-진행--hot-file-순차delegate-sonnetopus-검증--cap-050710132)
+- [ ] **#W4-6a 위저드 step-hidden(id-based) vs 필드-hidden(store renderType) 분기(spec-silent)** — phase-end 리뷰 발견#5. step-hidden은 `actionRenderType`(id-based·W3-6 Fix#3), 그 step 안 필드-hidden은 store `renderType`. prefill(id 없는데 fetchedData/initialData로 store renderType='update')+renderType-keyed 필드 조건에서만 발산(좁은 edge·테스트 없음). 스펙 저자: 분기를 의도로 문서화 vs wizardActive시 필드-hidden도 id-based로 통일 · risk: api-semantics(좁은 edge·저위험)
 - [ ] **#W4-3a AsyncValidation save-gating 미결(스펙 저자)** — unchecked/invalid asyncState가 `controller.save`를 게이트해야 하는지 §5.3/§6.2 침묵. W4-3은 asyncState=표시/UX만 구현·save 미배선(form-controller.ts validateAll 스텝 주석 플래그). 스펙 저자: 중복확인 미완료/실패 시 save 차단 여부(차단하면 어느 상태 기준·headless 계약 포함) · risk: api-semantics(중요·CAP-05 완결성)
 - [ ] **#W4-2a 위저드 전 step hidden시 액션바만 렌더(spec-silent edge)** — create 위저드에서 선언된 전 step이 hidden으로 해석되면 step content/nav 없이 액션바만 표시(크래시 없음·미테스트). 스펙 §3.2가 degenerate 케이스 미규정 → graceful fallback 채택. 스펙 저자: 이 케이스 의도 확정(예: 전체 폼 fallback or 경고) · risk: ux-edge(저위험)
 - [ ] **#W4-1b withTitle 재호출=replace(merge 아님)** — 스펙 §3.1이 재호출 시맨틱 미명시 → L1 with* 기본(설정/교체) 적용(withCapabilities/withMeta의 명시 merge와 다름·title은 스칼라라 자연스러움). 스펙 저자: 명시 문서화 여부 · risk: api-semantics(저위험·L1 정합)
