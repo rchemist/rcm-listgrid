@@ -1,7 +1,7 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 기반(H·EF·EA·EB·EC·EG1/2·EG-D·W1·W2) ✅ · **W3 진행(4/5 — 권한·가시성·capabilities·액션 바·delete flow ✅)**. **Next up**: W3-5 withReadOnly+formReadOnly(폼 전체 읽기전용·FieldRenderer effective OR·M2O 자식 전파·§3.1·§6.1·CAP-27, 마지막 W3). **1980 unit/E2E 19**·계수 39/49/**180(==ceiling)** PASS. P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 기반(H·EF·EA·EB·EC·EG1/2·EG-D·W1·W2) ✅ · **W3 🟡 Partial(W3-1~5 구현 완료·phase-end 리뷰서 액션 바 합성 버그 4건 발견 → W3-6 하드닝 진행)**. **Next up**: **W3-6 액션 바 하드닝**(phase-end findings #1~4 fix). **1995 unit/E2E 19**·계수 41/49/**180(==ceiling)** PASS. P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
@@ -88,7 +88,8 @@
 - [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W1 표면 정비** ✅ 2026-07-11 · 7커밋 `599a3f3`..`4c04906` · 개명·정체성·without*·배럴·계수 CI · full gate+E2E 16·계수 PASS · CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · 8 sub-task `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · full gate+E2E 16·1936 unit·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
-- [ ] **W3 권한·능력·액션** (4/5 — W3-1..3 + W3-4 delete flow `69dad6e` ✅) — 남음: **W3-5 withReadOnly+formReadOnly**(마지막) · Spec §3.1·§6.1 · CAP-27 · [waves §W3](./plans/entityform-api-implementation-waves.md)
+- [~] **W3 권한·능력·액션** (5/5 구현 `1753aaa` ✅·**🟡 phase-end 하드닝 W3-6 진행**) — W3-1~5 완료·phase-end 리뷰(sonnet+high, opus 검증)서 액션 바 합성 버그 4 confirmed → W3-6 fix 후 [x]+아카이브 · [waves §W3](./plans/entityform-api-implementation-waves.md)
+  - [ ] **W3-6 액션 바 하드닝**(phase-end findings) — **#1** function-conditional visible/enabled/capability=항상 숨김(getStaticConditionalBoolean(fn)→false, restrictive-gate 역극성) → async 해석(getConditionalBoolean, FieldRenderer 패턴) · **#2** actionCtx.values stale(render-time·D4 미구독) → runAction 클릭시 fresh ctx · **#3** store.renderType('update' when initialData) vs entityForm.getId() 불일치 → 액션바 CRUD는 getRenderType()/getId() 사용(phantom Delete·adapter.remove([undefined]) fix) · **#4** custom id='save'+no-controller 크래시 → saveBuiltin 정체성 필터 · 4건 red→green 테스트
 - [ ] **W4 폼 완결** — title·steps·AsyncValidation·revision·meta(merge) · Spec §3.1·§5.3 · CAP-05·07·10·13·23 · [waves §W4](./plans/entityform-api-implementation-waves.md)
 - [ ] **W5 list-track** — **entry 브리핑 pass 선행**(waves §W5 규칙: 태스크 표를 먼저 추가·커밋) · CAP-18·19·20
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
@@ -105,6 +106,7 @@
 - [ ] **#W2-1 onInit 통합 시맨틱(마이그레이션 확인)** — 구 onFetchData+onInitialize 2배열→onInit 1배열(registration-order·ctx.data 분기·반환-교체 hatch 폐기, §4.2/§9 결정). W7 gjcu 마이그레이션서 등록순서 의존·반환교체 사용처 확인 · risk: migration
 - [ ] **#W2-5 SaveOutcome reason-less cancel 구별불가** — 스펙 §6.2 SaveOutcome는 exactOptional로 `cancelled: undefined` 불가 → reason 없는 cancel()이 {ok:false}로 validation-fail과 outcome 구별불가(부작용으로만 구별). 스펙 저자: 판별자 추가 or 현행 수용 · risk: api-semantics
 - [ ] **#W3-2 capability-denied outcome 구별불가** — controller save/delete의 capability 거부가 `{ok:false}` 반환(타입상 유일 non-error·non-cancel 선택) → validation-fail·reason-less cancel과 형태 동일(#W2-5 동류). silent block(adapter 미호출)은 정상. 스펙 §6.2 저자: 판별자(예: `blocked?: 'capability'`) 추가 여부 · risk: api-semantics · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
+- [ ] **#W3-5b replaces:'save' 커스텀 액션이 formReadOnly Save-숨김 우회** — formReadOnly는 빌트인 saveBuiltin만 제외(merge 전)·replaces:'save' 커스텀 액션은 getActions 경유라 미게이트 → readOnly 폼에 커스텀 save-slot 액션 렌더. 스펙 §3.1 "빌트인 Save 어포던스 숨김"=빌트인만(literal OK)이나 의도상 애매. 스펙 저자: replaces:'save'도 formReadOnly 숨김 대상인지 · risk: api-semantics(spec-ambiguous·저위험)
 - [ ] **#W3-3 controller-optional vs ActionContext.controller(required) 타입 불일치** — ViewEntityForm.controller? optional인데 ActionContext.controller: FormRuntime(required) → controller 부재 시 커스텀 액션/빌트인 Delete/render-slot omit(빌트인 Save legacy만). 특히 replaces:'save'+no-controller=Save 버튼 아예 없음. 스펙 §3.4/§7 저자: controller required화 or ActionContext.controller optional화 · risk: api-type-consistency · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
 
 ## Progress notes
