@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useStore } from 'zustand';
-import { getCurrentValue, type EntityField, type FieldEvalContext } from '@listgrid/schema-core';
+import {
+  extractPermissions,
+  getCurrentValue,
+  type EntityField,
+  type FieldEvalContext,
+} from '@listgrid/schema-core';
 import { useSession } from '../providers/auth';
 import {
   useFieldMeta,
@@ -79,9 +84,17 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
     // whole store) keeps D4 — only fields that DECLARE a dependency pay for it.
   }, [store, session, field, fieldName, slice, depSignal]);
 
+  // EG2 — security hard-gate: permission is resolved synchronously (no
+  // predicate/async involved) straight from the field's declared
+  // requiredPermissions + the session in scope.
+  const permitted = field.isPermitted(extractPermissions(session));
+
   // EF1: the imperative meta override wins over the async-resolved
-  // predicate/declared value when a key has been set via setMeta().
-  const effHidden = metaOverride.hidden ?? hidden;
+  // predicate/declared value when a key has been set via setMeta() — EXCEPT
+  // permission, which is a hard gate: `!permitted` must short-circuit FIRST
+  // (before the `??`) so that setMeta(name, { hidden: false }) can never
+  // un-hide a field the session isn't permitted for.
+  const effHidden = !permitted || (metaOverride.hidden ?? hidden);
   const effRequired = metaOverride.required ?? required;
   const effReadOnly = metaOverride.readonly ?? readOnly;
 

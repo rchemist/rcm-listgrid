@@ -1,5 +1,6 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import {
+  extractPermissions,
   getCurrentValue,
   isDirty as computeDirty,
   resetValue,
@@ -196,6 +197,10 @@ export function createFormStore(
     opts.renderType ?? (opts.fetchedData !== undefined ? 'update' : entityForm.getRenderType());
   const session = opts.session;
   const validateOnChangeConfig = resolveValidateOnChange(opts.validateOnChange);
+  // EG1 — computed once; consulted by toSaveData's per-field permission gate
+  // below (security: a field the session lacks permission for must never
+  // reach the save payload, regardless of hidden/exceptOnSave state).
+  const userPermissions = extractPermissions(session);
 
   // seed a slice from a field's declaration values (default / declared
   // current) — shared by the initial-fields build below AND addField (EF4),
@@ -567,6 +572,11 @@ export function createFormStore(
         const out: Record<string, unknown> = {};
         for (const field of Object.values(s.fieldDefs)) {
           if (field.exceptOnSave) continue;
+          // EG1 — security hard-gate: a field the session is not permitted
+          // for is excluded from the save payload entirely (old parity:
+          // EntityForm.tsx:909-916). This is independent of hidden/readonly —
+          // a hidden-but-unpermitted field must never be smuggled through.
+          if (!field.isPermitted(userPermissions)) continue;
           const name = field.getName();
           const value = getCurrentValue(s.fields[name], s.renderType);
           if (field.type === 'manyToOne' && value && typeof value === 'object') {
