@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import type { StoreApi } from 'zustand/vanilla';
 import type { BackendAdapter, BackendError, EntityForm, Session } from '@listgrid/schema-core';
-import { initializeFormStore, type FormStoreState } from '@listgrid/state';
+import {
+  initializeFormStore,
+  type CreateFormStoreOptions,
+  type FormStoreState,
+} from '@listgrid/state';
 
 // useEntityFormInitializer (EF3) — the react-layer entry point for the
 // initializeFormStore pipe (@listgrid/state): fetch -> BIND -> onInit ->
@@ -20,6 +24,8 @@ export interface UseEntityFormInitializerOptions {
   session?: Session;
   /** bypasses the adapter fetch — data already loaded by the host. */
   initialData?: Record<string, unknown>;
+  /** EF5 — opt-in validate-on-change (default OFF); forwarded to the store build. */
+  validateOnChange?: CreateFormStoreOptions['validateOnChange'];
 }
 
 export interface UseEntityFormInitializerResult {
@@ -47,11 +53,13 @@ interface InternalState {
  * `session`/`initialData` are read at run time but intentionally excluded from
  * the re-run key (EF3 contract: identity of the form/transport/record drives
  * re-initialization, not every session/initialData reference change).
+ *
+ * @deprecated W2-7 — use {@link useEntityForm} (bundles the controller). Removed a wave later.
  */
 export function useEntityFormInitializer(
   options: UseEntityFormInitializerOptions,
 ): UseEntityFormInitializerResult {
-  const { entityForm, adapter, id, session, initialData } = options;
+  const { entityForm, adapter, id, session, initialData, validateOnChange } = options;
   const [state, setState] = useState<InternalState>({ loading: true });
 
   useEffect(() => {
@@ -64,6 +72,7 @@ export function useEntityFormInitializer(
       ...(id !== undefined ? { id } : {}),
       ...(session !== undefined ? { session } : {}),
       ...(initialData !== undefined ? { initialData } : {}),
+      ...(validateOnChange !== undefined ? { validateOnChange } : {}),
     })
       .then((result) => {
         if (cancelled) return;

@@ -38,11 +38,17 @@ export {
 export type { FormStoreProviderProps } from './providers/form-store';
 
 // --- initializeFormStore pipe entry point (EF3) ---
+/** @deprecated W2-7 — use {@link useEntityForm} (bundles the controller). Removed a wave later. */
 export { useEntityFormInitializer } from './hooks/use-entity-form-initializer';
 export type {
   UseEntityFormInitializerOptions,
   UseEntityFormInitializerResult,
 } from './hooks/use-entity-form-initializer';
+
+// --- useEntityForm (spec §7; W2-7) — bundles useEntityFormInitializer +
+// createFormController into the single react-layer entry point ---
+export { useEntityForm } from './hooks/use-entity-form';
+export type { UseEntityFormOptions, UseEntityFormResult } from './hooks/use-entity-form';
 
 // --- FieldRenderer registry (ADR-0003 §2) ---
 export {
