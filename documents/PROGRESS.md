@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF(+EF6)·EA·EB·EC1·EC2 ✅ · **Next up**: EA-D2(Xref 인프라 [O] — ViewListGrid 확장 설계, EC3 실폼 요구 주도). P0/P1 publish는 외부 승인 대기(별건).
+**Status**: active · 구동 트랙 = **하드닝/확장 트랙**(무인모드) · H·EF·EA·EB·EC ✅(필드 24+주소·명령형 라이프사이클 실브라우저 실증·1866 unit/16 E2E) · **Phase EG 진행**(EntityForm 전 API 이식 — 사용자 지시, 24 태스크, [계획](./plans/eg-entityform-full-parity.md)) · **Next up**: EG1(권한 save-payload). P0/P1 publish는 외부 승인 대기(별건).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: manual (커밋까지 완료 후 사용자에게 push 대상 보고)
 **Model policy**: fable 불필요. 세션 기본 sonnet, `[O]` 태스크만 opus. `[H]`=haiku 위임 가능. 설계 판단이 ADR/헌장으로 해소되지 않으면 구현하지 말고 §Open Questions에 기록 후 질의.
 **Next session policy**: 새 세션은 ① 이 문서 → ② [documents/README.md](./README.md)(권위 순서) → ③ 착수 태스크가 가리키는 ADR만 읽고 재개. 분석 원자료(analysis/2026-07-10/raw/)는 읽지 않는다(정정 전 주장 포함).
-**Last updated**: 2026-07-11 12:10 (**EA-D2 설계 확정** — Major 전해부+Xref wire 대조 scout, [브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md). 최소형 ViewListGrid 4종+M2O filter·plain 뷰만·EC3-0(TAB숨김) 신설·트리/드래그 연기. **Next=EA-D2-0 pre-stage 위임** → D2-1 → EC3-0 → EC3)
+**Last updated**: 2026-07-11 13:30 (**Phase EG 개시** — EntityForm 전 API 감사+8그룹 계획→24 태스크 [blueprint](./plans/eg-entityform-full-parity.md). EF7(값 override 복원 `3c0c13d`) 완료. 사용자 지시 "미이식 전부". **Next=EG1**(권한 save-payload gate — LIVE 보안갭). list-track/Excel(EG20-24)은 XL·다중세션.)
 
 ## Goal
 
@@ -76,30 +76,20 @@
 
 #### Phase EF ✅ 완료 (2026-07-11 — EF1~5 + 리뷰게이트 R1·R2 + gate 통과, 명령형 라이프사이클 완비 · 1205 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md) · parity map [analysis](./analysis/2026-07-11/ef-gate-parity-map.md)
 
-#### Phase EA ✅ 완료 (2026-07-11 — 21필드 이식+공유기반 · dead/연기 5종 · 리뷰게이트 confirmed 5 전해소 `2a79166` · 1727 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
+#### Phase EA/EB/EC ✅ 완료 (2026-07-11) · [archive](./progress-archive/phase-e-track-tasks.md)
+- EA(21필드+공유기반·리뷰게이트 confirmed 5 해소)·EA-D2(Xref+ViewListGrid 확장)·EB(AddressField+Daum+renderedBy·게이트 3해소)·EC1(주소 실증)·EC2(EF2/EF3 실브라우저 5/5)·EC3(tab/self-ref/xref 4/5)·EC3-0(TAB-숨김 3층)·EC-R1(게이트 2)·EC-F(flake+커서/IME 핀)·EF6(submit-transform)·EF7(값 override 복원). E2E 5→16.
+- [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(EG4 권한 착지 후 role-readonly 실증으로 재개)
 
-- [x] **EA-D2** ✅ D2-0 `4907291`(ViewListGrid 4종+M2O filter, +19)+D2-1 `518f8ac`(Xref 2종, +37 — required=CustomValidation 설계·filters 단일함수형 교정·prefer onSave dead code 규명) · 1813 unit·12 E2E · [브리핑](./analysis/2026-07-11/ea-d2-xref-major-briefing.md)
-- [ ] **EC3-0** TAB-자체-숨김 기반(TabDef.hidden+store 탭 슬롯+FormMutator.setTabHidden+deriveTabs 필터) — 구 withHidden({type:'TAB'}) 대응(신엔진은 필드 캐스케이드만 가능, 탭바 숨김 전무 확인)
+#### Phase EG — EntityForm 공개 API 완전 parity **[계획](./plans/eg-entityform-full-parity.md)** (24 태스크·8 wave — 사용자 지시 "전부 이식")
 
-#### Phase EB ✅ 완료 (2026-07-11 — AddressField+Daum 렌더러+renderedBy 억제 · 게이트 confirmed 3 전해소 `caf7cbe` · 1757 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md)
-- [ ] **EB2** react AddressRenderer — 형제 useFieldValue + useUI 2단 모달 + `<DaumPostcode>` 직접 import + onComplete→형제 setValue fan-out. peerDep react-daum-postcode. (Kakao 지도 연기)
+감사→8그룹 계획→opus 종합. 상세 매트릭스·conductor 판정·리스크는 blueprint. Wave 순서: **권한/보안(EG1-4)** → 검증/에러(EG5-6) → CRUD(EG7-10) → 위저드(EG11)+title(EG16) → client-ext(EG12-14) → sugar(EG15,17,18) → data-transfer(EG19-20) → **list-track(EG21-24, XL·별도 phase급 ~10k LOC)**.
 
-#### Phase EC — EntityForm 사용예 + E2E (동작 실증)
+- [~] **EG1** Permission save-payload gate — toSaveData가 unpermitted 필드 제외(LIVE 보안갭, 구 EntityForm.tsx:909-916)
+- [ ] **EG2** Permission render 하드게이트 — FieldRenderer isPermitted(EF1 override 불가)
+- [ ] **EG3** Tab/FieldGroup requiredPermissions 선언 · [ ] **EG4** ViewEntityForm 권한+hasVisibleContent 가시성
+- [ ] EG5~EG24 — blueprint 순서대로(검증·CRUD·위저드·client-ext·sugar·data-transfer·list-track). 착수 시 해당 그룹 map(wf_8d0b6d02-1cc 저널) 인용.
 
-- [x] **EC1** ✅ `142fbf9` · Student 폼+Daum 스텁 E2E 2건(create: required+focus+fan-out+왕복 / edit: hydrate+부분수정) · **라이브러리 결함 0**(주소 스택 첫 실브라우저 무결) · E2E 5→7 · [상세](./progress-archive/phase-e-track-tasks.md)
-- [x] **EC2** ✅ `060418d` · Collabo 재현 — **EF2/EF3 첫 실브라우저 실증 5/5 pass·라이브러리 결함 0**(옵션스왑·상호배제·M2O자동채움·onInit 첫페인트·required 게이트) · E2E 7→12 · [브리핑](./analysis/2026-07-11/ec2-collabo-briefing.md)
-- [ ] **EC-F1** student-address E2E flake(Daum 스텁 dialog 타이밍 — EC2 부재에도 재현된 기존 결함) 대기 로직 보강
-- [ ] **EC-F2** 커서/IME 조합 보존 회귀 핀(사용자 질문 2026-07-11) — 문자열 필드 keystroke 후 selectionStart 보존 + composition 이벤트 테스트. 0.4는 D4 store-직결로 구조 해결(EF4 테스트가 DOM identity 증명), 변형 필드(Tel/Birthday)는 로컬버퍼+blur 기적용 — IME 엣지만 미핀
-- [x] **EF6** ✅ `8eac9a3` · withSubmitTransform(단일슬롯 replace, 구 parity)+toSaveData 적용(flatten 후)·collabo 훅 이관(E2E 무변경 green=실브라우저 증명) · +9(1766)·12 E2E
-- [x] **EF7 [O] onInit/onFetchData 값-변형 복원** ✅ `3c0c13d` · setValue/setFetchedValue 이식+파이프 재정렬(bind→hooks[override]→rebind→build, 우선순위 hook>fetched>default)·seedSlice fetched 복사 버그 수정 · +17(1866)·16 E2E×2 · dev 0 · [감사](./analysis/2026-07-11/entityform-api-audit.md)
-- [ ] **EF8 EntityForm inert API 배선 3건** (감사) — ① formErrors(fetch/서버에러→슬라이스, ViewEntityForm 이미 렌더) ② EntityField.isPermitted end-to-end(FieldRenderer effHidden + deriveTabs 권한 — 보안) ③ withNeverDelete honest(delete flow gate와 묶어 문서화)
-- [x] **EC3** ✅ `6a5095c` · Major 재현 — **tab-hidden+self-ref+xref 4시나리오 pass·결함 0**·mock 백엔드 실 필터 적용 · E2E 12→15 · cascade ping-pong 교훈([archive](./progress-archive/phase-e-track-tasks.md))
-- [x] **EC3-0** ✅ `edff22c` · TAB-자체-숨김 3층 + deriveTabs 필터 + "필드 캐스케이드 안 함" 계약 · +24(1838)
-- [x] **EC-R1 (EC 게이트 수정 2건)** ✅ `1ec8fe9` · async filter `.catch` 4곳(role=alert·언필터 폴백 금지)+major.spec scenario e(edit self-exclude 실증) · +7(1845)·16 E2E
-- [x] **EC-F (test 하드닝 2건)** ✅ `41e2545` · EC-F1 flake 근본원인(스텁 near-zero latency→paint 전 close)+50ms 지연으로 해소(2/10→15/15) · EC-F2 커서/IME 핀(node identity 보존=0.3 caret-loss 구조적 제거 증명, 라이브러리 버그 0) · +4(1849)·16 E2E
-- [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
-
-**Next up**: **EA-A** (트리비얼 필드 12종 wave 전개 — 착수 시 필드별 `[ ]` 생성, 1필드=1커밋+테스트).
+**Next up**: **EG1** (권한 save-payload — 착수).
 
 ---
 
