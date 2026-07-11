@@ -31,6 +31,9 @@ jobs:
       - name: Type check (v0.4 packages — composite tsc -b)
         run: npm run typecheck:packages
 
+      - name: Public surface count
+        run: npm run check:surface
+
       - name: Lint
         run: npm run lint
 

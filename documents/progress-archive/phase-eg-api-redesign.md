@@ -38,6 +38,8 @@
 
 - **W1-6** 배럴 큐레이션(스펙 §7) — 4파일. schema 배럴 -4: `SCHEMA_CORE_VERSION`(P1잔재·const+sample 소비 제거)·`PermissionPolicy`(사용0·def+export 제거, isPermitted/extractPermissions/mergeRequiredPermissions 유지)·`isEquals`/`isEqualCollection`(re-export만 제거 — util/compare def+value.ts 내부사용 유지). react 배럴 +2: `useReferenceResolver`(adapter)·`useFieldMeta`(form-store). sample page.tsx 워크스페이스 마커 표시 제거(published-library 표시 유지·렌더 유효). 검증: full gate green·1887·grep clean.
 
+- **W1-7** 공개 표면 계수 스크립트+CI(스펙 §10 게이트2) — 3파일(신설 `scripts/count-public-surface.mjs`·package.json `check:surface`·ci.yml quality job step). TS compiler API(5.9.3)로 atomic member 계수: EntityForm 공개멤버(method/getter/setter/prop/ctor, private/protected/#제외)·배럴 export명(named+decl, type+value dedup). **현재값(전부 PASS)**: EntityForm 31/45·root(react) 46/120·/schema 161/180. export* 방어 throw. fail-path 검증(temp copy·삭제). 임의완화 금지 명문화. **주의(W4)**: get*Handlers 등 엔진-내부 getter도 §10 리터럴로 계수됨 — W4 완료 시 45 근접 감시.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:
