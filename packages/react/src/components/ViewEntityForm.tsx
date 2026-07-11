@@ -25,6 +25,7 @@ import { useSession } from '../providers/auth';
 import { useUI } from '../providers/ui';
 import { FormStoreProvider } from '../providers/form-store';
 import { FieldRenderer } from './FieldRenderer';
+import { getMessages } from '../messages';
 
 // ViewEntityForm — the top-level form screen (task item 5): title, a simple
 // tab bar (only rendered when there's more than one tab — single/no-tab forms
@@ -73,6 +74,12 @@ export interface ViewEntityFormProps {
 
 const DEFAULT_TAB_ID = 'default';
 const DEFAULT_GROUP_ID = 'default';
+
+// W3-4 — built-in Delete confirm gate (CAP-08): messages registry showConfirm,
+// not a bespoke modal (Do-NOT). A host that never calls configureMessages()
+// gets the messages.ts console-fallback (returns false) — delete is a no-op
+// until the host wires showConfirm, by design (fail-closed, not fail-open).
+const DELETE_CONFIRM_MESSAGE = '정말 삭제하시겠습니까?';
 
 // EF4 — tabs/groups/field-list are re-derived from the store's LIVE field
 // registry (state.fieldDefs), not entityForm.getFields()/getTabs()/
@@ -404,8 +411,12 @@ function ViewEntityFormInner({
   }
 
   // Delete (W3-3 briefing §설계 결정 1 — built-in Delete is update-mode-only,
-  // controller-required; confirm dialog + E2E is W3-4, not this task).
+  // controller-required). W3-4 §설계 결정 1/2: confirm gate via the messages
+  // registry (showConfirm) — cancel is a no-op (controller.delete is never
+  // called, no message emitted); confirm proceeds to controller.delete().
   async function runBuiltinDelete(ctrl: FormRuntime): Promise<void> {
+    const confirmed = await getMessages().showConfirm(DELETE_CONFIRM_MESSAGE);
+    if (!confirmed) return;
     await ctrl.delete();
   }
 

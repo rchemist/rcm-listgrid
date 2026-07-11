@@ -8,7 +8,7 @@
 // ViewEntityForm's own FormStoreProvider), same harness as
 // view-entity-form.test.tsx.
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EntityForm, StringField, type FormRuntime } from '@listgrid/schema-core';
 import { createFormStore } from '@listgrid/state';
@@ -17,8 +17,16 @@ import { AuthProvider } from '../providers/auth';
 import { UIProvider } from '../providers/ui';
 import { registerDefaultRenderers } from '../registry/default-renderers';
 import { ViewEntityForm } from '../components/ViewEntityForm';
+import { configureMessages, resetMessages } from '../messages';
 
 registerDefaultRenderers();
+
+// every test that calls configureMessages() must not leak its mock into a
+// later test — resetMessages() restores the console-fallback registry
+// (messages.ts) unconditionally after each test (no-op if unused).
+afterEach(() => {
+  resetMessages();
+});
 
 /** Minimal FormRuntime double — every method is a vi.fn(); tests override only what they exercise. */
 function fakeController(overrides: Partial<FormRuntime> = {}): FormRuntime {
@@ -141,7 +149,8 @@ describe('ViewEntityForm built-in Delete — update-mode-only (spec §3.4 §설�
     expect(screen.queryByRole('button', { name: /^Delete$/ })).not.toBeInTheDocument();
   });
 
-  it('clicking Delete calls controller.delete()', async () => {
+  it('clicking Delete calls controller.delete() (confirmed via messages registry)', async () => {
+    configureMessages({ showConfirm: async () => true });
     const controller = fakeController();
     const entityForm = WidgetForm().withId('7');
     renderForm(entityForm, { controller });
@@ -149,6 +158,36 @@ describe('ViewEntityForm built-in Delete — update-mode-only (spec §3.4 §설�
     await screen.findByLabelText(/^Name/);
     fireEvent.click(screen.getByRole('button', { name: /^Delete$/ }));
     await waitFor(() => expect(controller.delete).toHaveBeenCalledTimes(1));
+  });
+});
+
+describe('ViewEntityForm built-in Delete — confirm gate (spec §7 messages registry; W3-4, CAP-08)', () => {
+  it('showConfirm resolving true: clicking Delete calls controller.delete()', async () => {
+    const showConfirm = vi.fn(async () => true);
+    configureMessages({ showConfirm });
+    const controller = fakeController();
+    const entityForm = WidgetForm().withId('7');
+    renderForm(entityForm, { controller });
+
+    await screen.findByLabelText(/^Name/);
+    fireEvent.click(screen.getByRole('button', { name: /^Delete$/ }));
+
+    await waitFor(() => expect(controller.delete).toHaveBeenCalledTimes(1));
+    expect(showConfirm).toHaveBeenCalledTimes(1);
+  });
+
+  it('showConfirm resolving false: clicking Delete does NOT call controller.delete() (cancel = no-op)', async () => {
+    const showConfirm = vi.fn(async () => false);
+    configureMessages({ showConfirm });
+    const controller = fakeController();
+    const entityForm = WidgetForm().withId('7');
+    renderForm(entityForm, { controller });
+
+    await screen.findByLabelText(/^Name/);
+    fireEvent.click(screen.getByRole('button', { name: /^Delete$/ }));
+
+    await waitFor(() => expect(showConfirm).toHaveBeenCalledTimes(1));
+    expect(controller.delete).not.toHaveBeenCalled();
   });
 });
 

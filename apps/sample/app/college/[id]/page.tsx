@@ -17,7 +17,13 @@ export default function CollegeEditPage() {
   const params = useParams();
   const id = String(params.id);
 
-  const entityFormDecl = useMemo(() => CollegeEntityForm(), []);
+  // W3-4 — post-delete nav via onAfterDelete (spec §4.1; existing surface,
+  // not a new onDelete prop): fires only after controller.delete() succeeds
+  // (form-controller.ts del()), so a failed delete leaves the form mounted.
+  const entityFormDecl = useMemo(
+    () => CollegeEntityForm().onAfterDelete(() => router.push('/college')),
+    [router],
+  );
   const { store, entityForm, controller, loading } = useEntityForm({
     entityForm: entityFormDecl,
     adapter: rcmAdapter,
