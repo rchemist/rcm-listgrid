@@ -1,5 +1,13 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
-import { SearchForm, type BackendAdapter, type Direction } from '@listgrid/schema-core';
+import {
+  SearchForm,
+  type BackendAdapter,
+  type BeforeListFetchContext,
+  type AfterListFetchContext,
+  type Direction,
+  type EntityForm,
+  type Session,
+} from '@listgrid/schema-core';
 
 // createListStore — the list-grid store (charter C9). Holds the SearchForm +
 // page results; every interaction (page/sort/quick-search) produces a new
@@ -26,6 +34,15 @@ export interface CreateListStoreOptions {
   adapter: BackendAdapter;
   initialSearch?: SearchForm;
   /**
+   * The hook source (spec §4.1; W2-6) — when given, `fetch()` dispatches its
+   * `onBeforeListFetch`/`onAfterListFetch` handlers (see {@link EntityForm.
+   * getBeforeListFetchHandlers}/`getAfterListFetchHandlers`). Absent or
+   * handler-less is a no-op fetch pipe (unchanged pre-W2-6 behavior).
+   */
+  entityForm?: EntityForm;
+  /** Passed through as `session` on every list-fetch hook context (spec §4.1). */
+  session?: Session;
+  /**
    * EA-D2-0 (decision ①, §3): applied to `page.content` right before `set()`
    * — on EVERY `fetch()` call, including pagination/sort/quick-search
    * refetches, not just the initial load (the briefing's Priority-view
@@ -34,7 +51,8 @@ export interface CreateListStoreOptions {
    * `searchForm`. A throwing `postFetch` propagates out of `fetch()`
    * uncaught by this try/catch (by design — it runs after the adapter call
    * succeeds, so a bug here should surface, not be swallowed as a fetch
-   * error).
+   * error). Runs AFTER the onAfterListFetch hooks (spec §4.2) — it is a
+   * store-level final pass over whatever the hooks produced.
    */
   postFetch?: (rows: Record<string, unknown>[]) => Record<string, unknown>[];
 }
@@ -52,21 +70,70 @@ export function createListStore<T = Record<string, unknown>>(
 
     async fetch() {
       set({ loading: true, error: undefined });
+      const session = opts.session;
+
+      // onBeforeListFetch (spec §4.1/§4.2; W2-6): sequential, registration
+      // order, BEFORE adapter.list. setSearchForm is the REAL injection path
+      // — the LAST set instance wins and is what the adapter sees. Scoped to
+      // THIS fetch only: effectiveSearch is a local, never written back onto
+      // the store's own `searchForm` (an injected filter must not become
+      // sticky across a later pagination/sort/quick-search refetch).
+      let effectiveSearch = get().searchForm;
+      for (const handler of opts.entityForm?.getBeforeListFetchHandlers() ?? []) {
+        const ctx: BeforeListFetchContext = {
+          searchForm: effectiveSearch,
+          setSearchForm(next) {
+            effectiveSearch = next;
+          },
+          session,
+        };
+        try {
+          await handler(ctx);
+        } catch (e) {
+          // spec §4.2 — a throwing list-fetch handler is logged + SKIPPED;
+          // the rest still run, fetch still completes.
+          console.error('[@listgrid/state] onBeforeListFetch handler threw — skipping it', e);
+        }
+      }
+
       let page;
       try {
-        page = await opts.adapter.list<T>(opts.url, get().searchForm);
+        page = await opts.adapter.list<T>(opts.url, effectiveSearch);
       } catch (e) {
         set({ loading: false, error: e instanceof Error ? e.message : String(e) });
         return;
       }
+
+      // onAfterListFetch (spec §4.1/§4.2; W2-6): sequential, registration
+      // order, AFTER a successful adapter.list, BEFORE postFetch. setRows is
+      // the injection path — the LAST set instance wins.
+      let effectiveRows = page.content as unknown as Record<string, unknown>[];
+      for (const handler of opts.entityForm?.getAfterListFetchHandlers() ?? []) {
+        const ctx: AfterListFetchContext = {
+          rows: effectiveRows,
+          totalElements: page.totalElements,
+          setRows(rows) {
+            effectiveRows = rows as Record<string, unknown>[];
+          },
+          session,
+        };
+        try {
+          await handler(ctx);
+        } catch (e) {
+          console.error('[@listgrid/state] onAfterListFetch handler threw — skipping it', e);
+        }
+      }
+
       // EA-D2-0 postFetch: applied on EVERY fetch (initial + pagination/sort/
-      // quick-search), right before set(). Deliberately OUTSIDE the
-      // adapter's try/catch above — a throwing postFetch must propagate out
-      // of fetch() (a bug in caller-supplied logic), not be swallowed into
-      // the store's `error` state like an adapter failure.
+      // quick-search), right before set(), AFTER the onAfterListFetch hooks
+      // (a store-level final pass over whatever the hooks produced).
+      // Deliberately OUTSIDE both hook try/catches above — a throwing
+      // postFetch must propagate out of fetch() (a bug in caller-supplied
+      // logic), not be swallowed into the store's `error` state like an
+      // adapter failure, and not logged+skipped like a list-fetch hook.
       const rows = opts.postFetch
-        ? (opts.postFetch(page.content as unknown as Record<string, unknown>[]) as unknown as T[])
-        : page.content;
+        ? (opts.postFetch(effectiveRows) as unknown as T[])
+        : (effectiveRows as unknown as T[]);
       set({
         rows,
         totalElements: page.totalElements,

@@ -4,6 +4,7 @@ import type { EntityField } from './field/entity-field';
 import type { FieldMetaOverride } from './field/field-meta';
 import type { ChangeHandler, FormMutator } from './field/form-mutator';
 import type { RenderType } from './field/types';
+import type { SearchForm } from './search/search-form';
 
 /**
  * The context object passed to an {@link InitHandler} (`onInit`, spec §4.1;
@@ -181,6 +182,59 @@ export type BeforeDeleteHandler = (ctx: BeforeDeleteContext) => void | Promise<v
 /** Delete-lifecycle hook, success only (spec §4.1/§6.2; W2-5). See {@link AfterDeleteContext}. */
 export type AfterDeleteHandler = (ctx: AfterDeleteContext) => void | Promise<void>;
 
+/**
+ * Context passed to a {@link BeforeListFetchHandler} (`onBeforeListFetch`,
+ * spec §4.1; W2-6) — dispatched by `createListStore`'s `fetch()`
+ * (@listgrid/state/list-store.ts), sequentially in registration order,
+ * BEFORE `adapter.list` is called. {@link setSearchForm} is the REAL
+ * injection path (spec §4.1) — `fetch()` sends the LAST
+ * `setSearchForm`-set instance to the adapter; the injection is scoped to
+ * THIS fetch call only and is never written back onto the store's own
+ * `searchForm` (spec §4.2 — an injected filter must not become sticky
+ * across a later pagination/sort/quick-search refetch).
+ */
+export interface BeforeListFetchContext {
+  /**
+   * The search state as of THIS handler's turn — starts as the store's
+   * current `searchForm`, then reflects any earlier handler's
+   * {@link setSearchForm} call in this same run (handlers compose, not
+   * overwrite from scratch). Immutable — every SearchForm builder
+   * (`addAndFilter`/`withSort`/etc.) returns a NEW instance; mutate via
+   * {@link setSearchForm}, never in place.
+   */
+  searchForm: SearchForm;
+  /**
+   * The REAL injection path (spec §4.1) — replaces {@link searchForm} for
+   * every handler after this one AND the eventual `adapter.list` call.
+   */
+  setSearchForm(next: SearchForm): void;
+  session?: Session | undefined;
+}
+
+/**
+ * Context passed to an {@link AfterListFetchHandler} (`onAfterListFetch`,
+ * spec §4.1; W2-6) — dispatched by `createListStore`'s `fetch()`,
+ * sequentially in registration order, AFTER a successful `adapter.list`
+ * call and BEFORE the store's own `postFetch` transform (EA-D2-0) runs.
+ */
+export interface AfterListFetchContext {
+  /**
+   * The fetched page's rows as of THIS handler's turn — starts as
+   * `page.content`, then reflects any earlier handler's {@link setRows}
+   * call in this same run.
+   */
+  rows: unknown[];
+  totalElements: number;
+  /** Replace {@link rows} for every handler after this one AND the store's `postFetch` input. */
+  setRows(rows: unknown[]): void;
+  session?: Session | undefined;
+}
+
+/** List-fetch lifecycle hook (spec §4.1; W2-6). See {@link BeforeListFetchContext}. */
+export type BeforeListFetchHandler = (ctx: BeforeListFetchContext) => void | Promise<void>;
+/** List-fetch lifecycle hook, success only (spec §4.1; W2-6). See {@link AfterListFetchContext}. */
+export type AfterListFetchHandler = (ctx: AfterListFetchContext) => void | Promise<void>;
+
 // EntityForm — the single declaration from which BOTH the list and the form
 // screens derive (charter C1). React-free: it is the declaration + query model;
 // the RUNTIME value state lives in the form store (ADR-0002 §Decision 5 — the
@@ -297,6 +351,16 @@ export class EntityForm {
   private beforeDeleteHandlers: BeforeDeleteHandler[] = [];
   /** Delete-lifecycle hooks, success only (spec §4.1/§6.2; W2-5). Dispatched after `adapter.remove` succeeds. */
   private afterDeleteHandlers: AfterDeleteHandler[] = [];
+  /**
+   * List-fetch lifecycle hooks (spec §4.1; W2-6) — dispatched by
+   * `createListStore`'s `fetch()` (@listgrid/state/list-store.ts),
+   * sequentially in registration order, BEFORE `adapter.list`. See
+   * {@link BeforeListFetchContext} for the `setSearchForm` injection
+   * contract.
+   */
+  private beforeListFetchHandlers: BeforeListFetchHandler[] = [];
+  /** List-fetch lifecycle hooks, success only (spec §4.1; W2-6). Dispatched after `adapter.list` succeeds, before the store's `postFetch` transform. */
+  private afterListFetchHandlers: AfterListFetchHandler[] = [];
 
   constructor(name: string, url: string) {
     this.name = name;
@@ -353,6 +417,21 @@ export class EntityForm {
   /** Append an onAfterDelete handler (spec §4.1/§6.2; W2-5); registration order is dispatch order. See {@link AfterDeleteHandler}. */
   onAfterDelete(handler: AfterDeleteHandler): this {
     this.afterDeleteHandlers.push(handler);
+    return this;
+  }
+  /**
+   * Append an onBeforeListFetch handler (spec §4.1; W2-6); registration
+   * order is dispatch order. See {@link BeforeListFetchHandler}/
+   * {@link BeforeListFetchContext} for the `setSearchForm` injection
+   * contract.
+   */
+  onBeforeListFetch(handler: BeforeListFetchHandler): this {
+    this.beforeListFetchHandlers.push(handler);
+    return this;
+  }
+  /** Append an onAfterListFetch handler (spec §4.1; W2-6); registration order is dispatch order. See {@link AfterListFetchHandler}. */
+  onAfterListFetch(handler: AfterListFetchHandler): this {
+    this.afterListFetchHandlers.push(handler);
     return this;
   }
 
@@ -525,6 +604,14 @@ export class EntityForm {
   getAfterDeleteHandlers(): AfterDeleteHandler[] {
     return this.afterDeleteHandlers;
   }
+  /** registered onBeforeListFetch handlers, in dispatch order (spec §4.1; engine-internal — not barrel-exported). */
+  getBeforeListFetchHandlers(): BeforeListFetchHandler[] {
+    return this.beforeListFetchHandlers;
+  }
+  /** registered onAfterListFetch handlers, in dispatch order (spec §4.1; engine-internal — not barrel-exported). */
+  getAfterListFetchHandlers(): AfterListFetchHandler[] {
+    return this.afterListFetchHandlers;
+  }
 
   /** All fields, ordered by their declared `order`. */
   getFields(): EntityField[] {
@@ -573,6 +660,9 @@ export class EntityForm {
     copy.afterSaveHandlers = [...this.afterSaveHandlers];
     copy.beforeDeleteHandlers = [...this.beforeDeleteHandlers];
     copy.afterDeleteHandlers = [...this.afterDeleteHandlers];
+    // propagate list-fetch lifecycle hooks (spec §4.1; W2-6, same clone-propagation contract).
+    copy.beforeListFetchHandlers = [...this.beforeListFetchHandlers];
+    copy.afterListFetchHandlers = [...this.afterListFetchHandlers];
     return copy;
   }
 }

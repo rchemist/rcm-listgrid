@@ -202,6 +202,15 @@ export type {
   AfterDeleteHandler,
 } from './entity-form';
 
+// --- imperative lifecycle: list-fetch hooks (spec §4.1; W2-6 — dispatched
+// by createListStore's fetch(), @listgrid/state/list-store.ts) ---
+export type {
+  BeforeListFetchContext,
+  AfterListFetchContext,
+  BeforeListFetchHandler,
+  AfterListFetchHandler,
+} from './entity-form';
+
 // --- FormRuntime (save/delete/reload/validate contract; spec §6.2; W2-5 —
 // structural interface only, implemented by createFormController in
 // @listgrid/state/form-controller.ts) ---

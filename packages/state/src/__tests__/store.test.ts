@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   BooleanField,
   EntityForm,
@@ -295,6 +295,124 @@ describe('createListStore (charter C9)', () => {
       // NOT surfaced as the adapter-failure `error` state (that catch block
       // only wraps the adapter call, not postFetch).
       expect(store.getState().error).toBeUndefined();
+    });
+  });
+
+  // W2-6 (spec §4.1/§4.2) — onBeforeListFetch/onAfterListFetch, dispatched by
+  // fetch() itself. setSearchForm is the REAL injection path (spec §4.1):
+  // fetch() sends the adapter the LAST setSearchForm-set instance. setRows
+  // mirrors that for the fetched rows, ahead of the (unrelated, pre-existing)
+  // postFetch pass.
+  describe('onBeforeListFetch / onAfterListFetch (spec §4.1/§4.2, W2-6)', () => {
+    function CollegeListForm(): EntityForm {
+      return new EntityForm('CollegeListEntityForm', '/college');
+    }
+
+    it("onBeforeListFetch's setSearchForm(filter 추가) reaches the adapter.list body", async () => {
+      let seenSearch: SearchForm | undefined;
+      const adapter: BackendAdapter = {
+        ...mockAdapter(rows),
+        async list(url, search) {
+          seenSearch = search;
+          return mockAdapter(rows).list(url, search);
+        },
+      };
+      const entityForm = CollegeListForm().onBeforeListFetch((ctx) => {
+        ctx.setSearchForm(ctx.searchForm.addAndFilter({ name: 'active', value: true }));
+      });
+      const store = createListStore({
+        url: '/college',
+        adapter,
+        entityForm,
+        initialSearch: SearchForm.create({ pageSize: 10 }),
+      });
+
+      await store.getState().fetch();
+
+      expect(seenSearch?.toJSON().filters.AND).toContainEqual({ name: 'active', value: true });
+    });
+
+    it("onAfterListFetch's setRows is reflected in the store's rows", async () => {
+      const entityForm = CollegeListForm().onAfterListFetch((ctx) => {
+        ctx.setRows(ctx.rows.map((r) => ({ ...(r as Record<string, unknown>), tagged: true })));
+      });
+      const store = createListStore({
+        url: '/college',
+        adapter: mockAdapter(rows),
+        entityForm,
+        initialSearch: SearchForm.create({ pageSize: 10 }),
+      });
+
+      await store.getState().fetch();
+
+      const got = store.getState().rows;
+      expect(got).toHaveLength(10);
+      expect(got.every((r) => (r as Record<string, unknown>)['tagged'] === true)).toBe(true);
+    });
+
+    it('a filter injected via onBeforeListFetch is per-fetch, not persisted onto the store searchForm', async () => {
+      const entityForm = CollegeListForm().onBeforeListFetch((ctx) => {
+        ctx.setSearchForm(ctx.searchForm.addAndFilter({ name: 'active', value: true }));
+      });
+      const store = createListStore({
+        url: '/college',
+        adapter: mockAdapter(rows),
+        entityForm,
+        initialSearch: SearchForm.create({ pageSize: 10 }),
+      });
+
+      await store.getState().fetch();
+
+      // SearchForm immutability (Do-NOT): the injected filter never lands on
+      // the store's own searchForm — addAndFilter returned a NEW instance,
+      // and fetch() never set() it back.
+      expect(store.getState().searchForm.toJSON().filters.AND).toHaveLength(0);
+    });
+
+    it('a throwing onBeforeListFetch handler is logged + skipped — fetch still completes', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const entityForm = CollegeListForm().onBeforeListFetch(() => {
+        throw new Error('hook boom');
+      });
+      const store = createListStore({
+        url: '/college',
+        adapter: mockAdapter(rows),
+        entityForm,
+        initialSearch: SearchForm.create({ pageSize: 10 }),
+      });
+
+      await store.getState().fetch();
+
+      expect(store.getState().error).toBeUndefined();
+      expect(store.getState().rows).toHaveLength(10);
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining('onBeforeListFetch handler threw'),
+        expect.any(Error),
+      );
+      consoleError.mockRestore();
+    });
+
+    it('a throwing onAfterListFetch handler is logged + skipped — fetch still completes', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const entityForm = CollegeListForm().onAfterListFetch(() => {
+        throw new Error('hook boom');
+      });
+      const store = createListStore({
+        url: '/college',
+        adapter: mockAdapter(rows),
+        entityForm,
+        initialSearch: SearchForm.create({ pageSize: 10 }),
+      });
+
+      await store.getState().fetch();
+
+      expect(store.getState().error).toBeUndefined();
+      expect(store.getState().rows).toHaveLength(10);
+      expect(consoleError).toHaveBeenCalledWith(
+        expect.stringContaining('onAfterListFetch handler threw'),
+        expect.any(Error),
+      );
+      consoleError.mockRestore();
     });
   });
 });
