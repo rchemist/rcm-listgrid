@@ -88,6 +88,7 @@
 - [x] **EC1** ✅ `142fbf9` · Student 폼+Daum 스텁 E2E 2건(create: required+focus+fan-out+왕복 / edit: hydrate+부분수정) · **라이브러리 결함 0**(주소 스택 첫 실브라우저 무결) · E2E 5→7 · [상세](./progress-archive/phase-e-track-tasks.md)
 - [x] **EC2** ✅ `060418d` · Collabo 재현 — **EF2/EF3 첫 실브라우저 실증 5/5 pass·라이브러리 결함 0**(옵션스왑·상호배제·M2O자동채움·onInit 첫페인트·required 게이트) · E2E 7→12 · [브리핑](./analysis/2026-07-11/ec2-collabo-briefing.md)
 - [ ] **EC-F1** student-address E2E flake(Daum 스텁 dialog 타이밍 — EC2 부재에도 재현된 기존 결함) 대기 로직 보강
+- [ ] **EC-F2** 커서/IME 조합 보존 회귀 핀(사용자 질문 2026-07-11) — 문자열 필드 keystroke 후 selectionStart 보존 + composition 이벤트 테스트. 0.4는 D4 store-직결로 구조 해결(EF4 테스트가 DOM identity 증명), 변형 필드(Tel/Birthday)는 로컬버퍼+blur 기적용 — IME 엣지만 미핀
 - [x] **EF6** ✅ `8eac9a3` · withSubmitTransform(단일슬롯 replace, 구 parity)+toSaveData 적용(flatten 후)·collabo 훅 이관(E2E 무변경 green=실브라우저 증명) · +9(1766)·12 E2E
 - [ ] **EF7 [O]** onInitialize 값-보정 vs hydrate clobber 설계(EC2 갭② — 구엔진 가능·신 파이프 불가. onFetchData data-변형 반환 vs hydrate의 init-set 존중)
 - [ ] **EC3** Major 재현(TAB hidden·self-ref tree M2O·xref) + E2E
