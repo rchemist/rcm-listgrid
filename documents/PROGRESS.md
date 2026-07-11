@@ -95,7 +95,7 @@
 - [x] **EC3** ✅ `6a5095c` · Major 재현 — **tab-hidden+self-ref+xref 4시나리오 pass·결함 0**·mock 백엔드 실 필터 적용 · E2E 12→15 · cascade ping-pong 교훈([archive](./progress-archive/phase-e-track-tasks.md))
 - [x] **EC3-0** ✅ `edff22c` · TAB-자체-숨김 3층 + deriveTabs 필터 + "필드 캐스케이드 안 함" 계약 · +24(1838)
 - [x] **EC-R1 (EC 게이트 수정 2건)** ✅ `1ec8fe9` · async filter `.catch` 4곳(role=alert·언필터 폴백 금지)+major.spec scenario e(edit self-exclude 실증) · +7(1845)·16 E2E
-- [~] **EC-F (test 하드닝 2건)** — EC-F1: student-address flake(Daum 스텁 dialog 대기 강화) · EC-F2: 커서/IME 보존 회귀 핀(String/Textarea/Markdown keystroke 후 selectionStart 보존 + composition 이벤트)
+- [x] **EC-F (test 하드닝 2건)** ✅ `41e2545` · EC-F1 flake 근본원인(스텁 near-zero latency→paint 전 close)+50ms 지연으로 해소(2/10→15/15) · EC-F2 커서/IME 핀(node identity 보존=0.3 caret-loss 구조적 제거 증명, 라이브러리 버그 0) · +4(1849)·16 E2E
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위/선택
 
 **Next up**: **EA-A** (트리비얼 필드 12종 wave 전개 — 착수 시 필드별 `[ ]` 생성, 1필드=1커밋+테스트).
