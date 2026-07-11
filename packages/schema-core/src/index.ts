@@ -220,6 +220,11 @@ export type {
 // @listgrid/state/form-controller.ts) ---
 export type { FormRuntime, SaveOutcome, DeleteOutcome } from './form-runtime';
 
+// --- form actions (spec §3.4, CAP-09; W3-3 — addAction/getActions declared
+// here; built-in Save/Delete merge + visible/enabled/render resolution is
+// @listgrid/react's ViewEntityForm) ---
+export type { FormAction, ActionContext, ActionRender } from './entity-form';
+
 // --- onChanges builder catalog (EF2; port of 0.3.x
 // src/listgrid/config/OnChangeEntityForm.ts:76-361 — changeHidden/
 // changeRequired/changeSelectOptions only; derivedValidations is out of

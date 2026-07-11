@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react';
 import type { Session } from './auth';
 import type { ConditionalBooleanValue } from './field/conditional';
 import type { EntityField } from './field/entity-field';
 import type { FieldMetaOverride } from './field/field-meta';
 import type { ChangeHandler, FormMutator } from './field/form-mutator';
 import type { RenderType } from './field/types';
+import type { FormRuntime } from './form-runtime';
 import type { SearchForm } from './search/search-form';
 
 /**
@@ -301,6 +303,63 @@ export interface Capabilities {
   delete?: ConditionalBooleanValue | undefined;
 }
 
+/**
+ * Declared custom form action (spec §3.4, CAP-09; W3-3) — the sole way to add
+ * a button to the ViewEntityForm action bar beyond the built-in Save/Delete
+ * (which are derived from {@link Capabilities}, not declared as FormActions —
+ * see `EntityForm.addAction` doc). `replaces: 'save' | 'delete'` lets a
+ * custom action occupy a built-in's slot (the built-in candidate with that id
+ * is dropped before merge, spec §3.4) instead of merely appending alongside
+ * it. Resolution — visible/enabled/render, the built-in merge, click
+ * dispatch — is entirely the VIEW's job (`@listgrid/react`'s ViewEntityForm,
+ * W3-3); this interface is a pure declaration (L7 — schema-core never
+ * executes a `run`/`render`).
+ */
+export interface FormAction {
+  id: string;
+  /** required when {@link render} is absent — runtime-checked by the view (dev warn + skip, not a throw; spec §3.4). */
+  label?: string | undefined;
+  variant?: 'primary' | 'secondary' | 'danger' | undefined;
+  /** style escape hatch (former `withClassName`, gjcu `withButtons`/`withHeaderArea` class usage — spec §9). */
+  className?: string | undefined;
+  order?: number | undefined;
+  visible?: ConditionalBooleanValue | undefined;
+  enabled?: ConditionalBooleanValue | undefined;
+  /** occupies a built-in action's slot instead of appending — spec §3.4. */
+  replaces?: 'save' | 'delete' | undefined;
+  run?: ((ctx: ActionContext) => void | Promise<void>) | undefined;
+  /**
+   * Fully custom rendered node (former ReactNode-button pattern, spec §3.4).
+   * When present, the view renders THIS instead of the default `<Button>` —
+   * `label`/`run` become optional (the render fn owns its own click wiring
+   * via `ctx`), while `order`/`visible`/`enabled` still gate this action the
+   * same as a label+run action.
+   */
+  render?: ActionRender | undefined;
+}
+
+/**
+ * Context passed to a {@link FormAction.run}/{@link FormAction.render} (spec
+ * §3.4; W3-3) — assembled by the VIEW (ViewEntityForm, `@listgrid/react`),
+ * never by this module (L7: schema-core declares the shape only). `controller`
+ * is the same {@link FormRuntime} instance the built-in Save/Delete actions
+ * call — a structural reference only (§6.2; no layer violation, schema-core
+ * never imports `@listgrid/state`, verified feasibility-1).
+ */
+export interface ActionContext {
+  controller: FormRuntime;
+  mutator: FormMutator;
+  values: Readonly<Record<string, unknown>>;
+  session?: Session | undefined;
+}
+
+/**
+ * Fully custom action render fn (spec §3.4; W3-3) — type-only `ReactNode`
+ * (L6, the `ConditionalReactNodeValue` precedent); resolution/rendering is
+ * entirely the react layer's responsibility.
+ */
+export type ActionRender = (ctx: ActionContext) => ReactNode;
+
 /** `addFields` group placement input (spec §3.2). */
 export interface GroupInput {
   id: string;
@@ -377,6 +436,15 @@ export class EntityForm {
   private beforeListFetchHandlers: BeforeListFetchHandler[] = [];
   /** List-fetch lifecycle hooks, success only (spec §4.1; W2-6). Dispatched after `adapter.list` succeeds, before the store's `postFetch` transform. */
   private afterListFetchHandlers: AfterListFetchHandler[] = [];
+  /**
+   * Declared custom form actions (spec §3.4, CAP-09; W3-3) — appended via
+   * `addAction`, in registration order (order-sorted by `getActions`). The
+   * built-in Save/Delete are NOT stored here — they're derived from
+   * {@link Capabilities} by the view (ViewEntityForm), which merges them
+   * with this list (a `replaces`-carrying custom action drops its built-in
+   * counterpart before merge).
+   */
+  private actions: FormAction[] = [];
 
   constructor(name: string, url: string) {
     this.name = name;
@@ -397,6 +465,17 @@ export class EntityForm {
    */
   withCapabilities(caps: Capabilities): this {
     this.capabilities = { ...this.capabilities, ...caps };
+    return this;
+  }
+  /**
+   * Append a custom form action (spec §3.4, CAP-09; W3-3). The built-in
+   * Save/Delete are derived from {@link Capabilities}, not declared this
+   * way — `addAction({ ..., replaces: 'save' })` is how a custom action
+   * occupies the Save slot instead of merely appending beside it. Merge/
+   * visible/enabled/render resolution is the view's job (ViewEntityForm).
+   */
+  addAction(action: FormAction): this {
+    this.actions.push(action);
     return this;
   }
   /** Mark this instance as an existing-record (update) form. */
@@ -610,6 +689,14 @@ export class EntityForm {
   getCapabilities(): Capabilities {
     return this.capabilities;
   }
+  /**
+   * Declared custom form actions, order-sorted (spec §3.4, CAP-09; W3-3).
+   * The built-in Save/Delete are NOT included — merging them in (capability
+   * derivation + `replaces`) is the view's job, not this getter's.
+   */
+  getActions(): FormAction[] {
+    return [...this.actions].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }
   /** create vs update — update iff an id is set (0.3.x getRenderType semantics). */
   getRenderType(): RenderType {
     return this.id !== undefined ? 'update' : 'create';
@@ -697,6 +784,11 @@ export class EntityForm {
     // propagate list-fetch lifecycle hooks (spec §4.1; W2-6, same clone-propagation contract).
     copy.beforeListFetchHandlers = [...this.beforeListFetchHandlers];
     copy.afterListFetchHandlers = [...this.afterListFetchHandlers];
+    // propagate declared actions (spec §3.4, CAP-09; W3-3) — shallow-copy each
+    // FormAction (function refs shared, not values — L3's deep-clone contract
+    // is about structural independence of the ARRAY, not the handler
+    // closures it carries, same posture as the hook arrays above).
+    copy.actions = this.actions.map((a) => ({ ...a }));
     return copy;
   }
 }

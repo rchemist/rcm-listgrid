@@ -94,6 +94,44 @@ describe('EntityForm.withCapabilities/getCapabilities (spec §3.4, CAP-06/CAP-22
   });
 });
 
+describe('EntityForm.addAction/getActions (spec §3.4, CAP-09; W3-3)', () => {
+  it('defaults to [] — no action declared', () => {
+    const f = new EntityForm('Widget', '/widget');
+    expect(f.getActions()).toEqual([]);
+  });
+
+  it('getActions returns declared actions order-sorted regardless of registration order', () => {
+    const f = new EntityForm('Widget', '/widget')
+      .addAction({ id: 'z', label: 'Z', order: 5 })
+      .addAction({ id: 'a', label: 'A', order: 1 })
+      .addAction({ id: 'm', label: 'M', order: 3 });
+    expect(f.getActions().map((a) => a.id)).toEqual(['a', 'm', 'z']);
+  });
+
+  it('order-less actions default to 0 (sort ahead of any positive order)', () => {
+    const f = new EntityForm('Widget', '/widget')
+      .addAction({ id: 'first', label: 'First' })
+      .addAction({ id: 'second', label: 'Second', order: 10 });
+    expect(f.getActions().map((a) => a.id)).toEqual(['first', 'second']);
+  });
+
+  it('clone independently copies actions — a later addAction on the original does not leak into the clone', () => {
+    const a = new EntityForm('Widget', '/widget').addAction({ id: 'x', label: 'X' });
+    const b = a.clone();
+    a.addAction({ id: 'y', label: 'Y' });
+    expect(a.getActions().map((act) => act.id)).toEqual(['x', 'y']);
+    expect(b.getActions().map((act) => act.id)).toEqual(['x']);
+  });
+
+  it('clone independently copies actions — a later addAction on the CLONE does not leak into the original', () => {
+    const a = new EntityForm('Widget', '/widget').addAction({ id: 'x', label: 'X' });
+    const b = a.clone();
+    b.addAction({ id: 'y', label: 'Y' });
+    expect(a.getActions().map((act) => act.id)).toEqual(['x']);
+    expect(b.getActions().map((act) => act.id)).toEqual(['x', 'y']);
+  });
+});
+
 describe('ManyToOne lazy thunk (decision D1 — no eager recursion)', () => {
   it('resolves the target form only when called', () => {
     const dean = CollegeForm().getField('dean') as ManyToOneField;
