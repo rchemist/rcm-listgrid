@@ -246,3 +246,15 @@
 **검증(메인 authoritative)**: full gate 독립 PASS — type-check·tsc-b(packages/excel dist 빌드=root ref 작동)·test **2201**(신 45)·lint 0err·format·build. 계수 49/57/186 무변경(/excel=신 subpath·3-예산 밖). vitest 기존 glob으로 packages/excel 테스트 발견(config 무변경).
 
 **deviations(3·§Needs Review 등재)**: ① importValue +optional `options` 3번째 인자(brief는 2-arg이나 select/multiselect label→value=option 필수·round-trip 테스트 불가능 → 기계적 필연·exportValue 대칭·발명 아님) ② multiselect `|||` 양방향(구 Type.ts import 분기 latent bug=`,` 검사후 `|||` split → brief 명시대로 양방향 `|||`·L8 구결함 봉인·round-trip green) ③ fDate/fDateTime = `new Date()` UTC파싱+local getter → 음수-UTC-offset 브라우저서 date-range export 하루 밀림 가능(구 date-fns fDate 동작 계승=회귀 아님·테스트는 TZ=UTC 고정·**실 GJCU 데이터 소비자 검증 필요**). multiselect 런타임값=신엔진 `string[]` ↔ `|||` 문자열 브리징은 export/import CORE(2b) 소관(value-transform 주석 명시).
+
+## #W6-2b /excel export/import core (CAP-17)
+
+✅ 2026-07-12 · sonnet 위임(brief=waves W6-2 착수 노트+W6-2a foundation)→메인 authoritative 검증(full gate 독립 재실행+로직 리뷰). W6-2a foundation 위 export/import 런타임 코어+thin 모달.
+
+**변경**: `package.json`(+`@listgrid/react` dep·+`react` peer·devDep) · `tsconfig.json`(+ref `../react`) · 신규 `field-resolution.ts`(filterFlatFields TIER3 필터+warn 공유·getFieldSelectOptions duck-cast) · `export-core.ts`(resolveExportConfig/buildExportAoa/buildExportWorksheet/downloadExportWorkbook — 구 `ExcelProvider.ts:71-219` 이식·header `${label}\n[${name}]`·text-format 셀·헤더 스타일·XLSX.write+FileSaver·**password/history/skipHeader 제외**) · `import-core.ts`(parseWorkbookArrayBuffer/matchImportColumns/resolveImportFields/buildImportRows — 구 `DataImporter.tsx:113-387` 이식·`[name]` 헤더매칭·per-cell importValue·blank-row drop·**preview/result/sample 제외**) · `DataExporter.tsx`/`DataImporter.tsx`(thin 모달·useUI Modal/Button 재사용 C7·file input=native) · `registry.ts`(props 타입 정제) · `index.ts`(+DataExporter/DataImporter/registerExcelDataTransfer) · 6 test(45)+package-lock.
+
+**결정 배선**: 결정6 import upload=**호스트 공급 `onSubmit:(rows)=>Promise<void>|void` prop**(어댑터 메서드/endpoint 하드코딩 없음·W6-3 sample이 POST 소유) · 결정4 UI=ViewListGrid toolbar seam에서만 렌더(useUI 안전) · 결정7 미이관(officecrypto/history/Sample/Result/Dynamic) 준수 · multiselect `string[]`↔`|||` 브리징=export/import core 경계(bridgeExport/ImportValue).
+
+**결정5 TIER3 필터 uniform 확정(W6-2b)**: `getDataTransfer()`가 명시/파생 discriminator 미보유(schema 순수 선언) → /excel이 반환 필드 전체에 **uniform** TIER3 필터. flat cell 무의미(String=garbage)라 명시여도 제외가 정답(스칼라 평탄화가 소비자 경로). spec §3.5·waves W6-2 노트 동반 개정(구 "명시 시 포함" 폐기).
+
+**검증(메인 authoritative)**: full gate 독립 PASS — tsc-b(packages/excel dist)·test **2235**(신 34·excel 79 누계)·lint 0err·format·build. 계수 49/57/186 무변경. deviation 1(결정5 uniform 해석·문서 개정으로 해소).

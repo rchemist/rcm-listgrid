@@ -1,4 +1,6 @@
 import type { ComponentType } from 'react';
+import type { DataExporterProps } from './DataExporter';
+import type { DataImporterProps } from './DataImporter';
 
 /**
  * Injection seam for the data export / import UI (ported from 0.3.x
@@ -18,22 +20,17 @@ import type { ComponentType } from 'react';
  * degrade gracefully (the modal renders nothing).
  *
  * Mirrors the existing DI pattern used by `configureApiClient` / `UIProvider`.
- * The 0.3.x original typed both members `ComponentType<any>` ("house style
- * for injected components") — this package's lint config runs
- * `@typescript-eslint/no-explicit-any` as an error with no grandfather entry
- * for new `packages/*` code (unlike the legacy `src/` allowlist), so the
- * props are typed as `Record<string, unknown>` here: a minimal placeholder
- * that is exactly as untyped at the call site as `any` was, but does not
- * trip the lint gate. W6-2b's concrete `DataExporter`/`DataImporter`
- * components refine this to their real props shape (this package has no
- * React runtime dependency yet in W6-2a — only the type-only `react` import
- * below, which resolves without the `react` package installed).
+ * W6-2a typed both members `ComponentType<Record<string, unknown>>` (a
+ * placeholder — this package had no concrete components yet). W6-2b refines
+ * this to the REAL prop types (`DataExporterProps`/`DataImporterProps`,
+ * `./DataExporter` / `./DataImporter`) now that they exist — a same-package
+ * sibling import, not a new external dependency, so no circularity risk.
  */
 export interface DataTransferComponents {
-  /** Export modal. Props: `{ config?, searchForm, fileName, onClose }`. */
-  Exporter: ComponentType<Record<string, unknown>>;
-  /** Import modal. Props: `{ config?, sampleFileName, onClose }`. */
-  Importer: ComponentType<Record<string, unknown>>;
+  /** Export modal — see `DataExporterProps` (`./DataExporter.tsx`). */
+  Exporter: ComponentType<DataExporterProps>;
+  /** Import modal — see `DataImporterProps` (`./DataImporter.tsx`). */
+  Importer: ComponentType<DataImporterProps>;
 }
 
 let _components: DataTransferComponents | null = null;
