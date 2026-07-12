@@ -1,5 +1,6 @@
 import type { AssetConfig } from '@listgrid/schema-core';
 import { useUI } from '../providers/ui';
+import { useAssetUrl } from '../providers/asset-base';
 import { useFieldValue, useFormStore } from '../providers/form-store';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
 
@@ -63,6 +64,7 @@ export function ImageFieldRenderer({
   describedBy,
 }: FieldRendererComponentProps) {
   const { FileInput } = useUI();
+  const resolveAsset = useAssetUrl();
   const store = useFormStore();
   const value = useFieldValue<string | string[]>(name);
   const imageField = field as unknown as ImageFieldLike;
@@ -91,7 +93,7 @@ export function ImageFieldRenderer({
           {...(invalid ? { invalid: true } : {})}
           {...(describedBy !== undefined ? { describedBy } : {})}
         />
-        {url ? <img src={url} alt="" style={style} /> : null}
+        {url ? <img src={resolveAsset(url)} alt="" style={style} /> : null}
       </div>
     );
   }
@@ -140,7 +142,7 @@ export function ImageFieldRenderer({
             {...(accept !== undefined ? { accept } : {})}
             {...(readOnly !== undefined ? { readOnly } : {})}
           />
-          <img src={url} alt="" style={style} />
+          <img src={resolveAsset(url)} alt="" style={style} />
           {!readOnly && (
             <button
               type="button"

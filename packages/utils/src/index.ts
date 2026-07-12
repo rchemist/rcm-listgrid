@@ -75,10 +75,7 @@ export {
 export {
   ASSET_SERVER_URL,
   ASSET_PREFIX,
-  setAssetServerBase,
-  configureAssetServerUrl,
-  configureAssetPrefix,
-  getAccessableAssetUrl,
+  resolveAssetUrl,
   removeAssetServerPrefix,
   validatedAssetFileName,
 } from './asset-url';

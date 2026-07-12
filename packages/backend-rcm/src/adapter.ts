@@ -19,6 +19,13 @@ export interface RcmAdapterOptions {
    * value can change between calls without recreating the adapter.
    */
   headers?: Record<string, string> | (() => Record<string, string>);
+  /**
+   * Optional per-adapter asset-server base — forwarded verbatim onto the
+   * returned adapter's `BackendAdapter.assetBaseUrl` (tier i in the asset-URL
+   * resolution design). Resolves RELATIVE asset paths; absolute URLs pass
+   * through. Orthogonal to `baseUrl` (the CRUD transport origin).
+   */
+  assetBaseUrl?: string;
 }
 
 /** Row shape coming back over the wire before id-coercion (D2: ids are always strings). */
@@ -210,5 +217,8 @@ export function createRcmAdapter(opts: RcmAdapterOptions = {}): BackendAdapter {
         body: JSON.stringify(body),
       });
     },
+    // tier i asset base — forwarded verbatim; conditional so an omitted option
+    // doesn't set `assetBaseUrl: undefined` (exactOptionalPropertyTypes).
+    ...(opts.assetBaseUrl !== undefined ? { assetBaseUrl: opts.assetBaseUrl } : {}),
   };
 }

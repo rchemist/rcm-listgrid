@@ -10,7 +10,8 @@
   "references": [
     { "path": "../schema-core" },
     { "path": "../state" },
-    { "path": "../ui-default" }
+    { "path": "../ui-default" },
+    { "path": "../utils" }
   ],
   "include": [
     "src/**/*.ts",

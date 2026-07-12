@@ -17,6 +17,9 @@ export type { RouterProviderProps, Router } from './providers/router';
 export { AdapterProvider, useAdapter, useReferenceResolver } from './providers/adapter';
 export type { AdapterProviderProps } from './providers/adapter';
 
+export { AssetBaseProvider, useAssetUrl } from './providers/asset-base';
+export type { AssetBaseProviderProps, AssetUrlResolver } from './providers/asset-base';
+
 export { CustomOptionProvider, useCustomOptions } from './providers/custom-option';
 export type {
   CustomOptionProviderProps,

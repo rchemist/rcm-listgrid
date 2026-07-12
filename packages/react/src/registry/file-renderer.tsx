@@ -1,6 +1,7 @@
 import type { AssetConfig } from '@listgrid/schema-core';
 import { isExternalUrl } from '@listgrid/schema-core';
 import { useUI } from '../providers/ui';
+import { useAssetUrl } from '../providers/asset-base';
 import { useFieldValue, useFormStore } from '../providers/form-store';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
 
@@ -76,9 +77,12 @@ function buildAccept(config: AssetConfig | undefined): string | undefined {
 /** External-URL bypass row (0.3.x `pickExternalUrl`/FileField.tsx:27-39,
  *  101-113) — a bare download link, no asset-server prefixing. */
 function ExternalUrlLink({ url }: { url: string }) {
+  // Resolve the display href: a foreign absolute URL passes through untouched;
+  // an own-server absolute URL is normalized. The label keeps the raw `url`.
+  const resolveAsset = useAssetUrl();
   return (
     <div className="rcm-file-field-external">
-      <a href={url} target="_blank" rel="noreferrer" className="rcm-file-field-link">
+      <a href={resolveAsset(url)} target="_blank" rel="noreferrer" className="rcm-file-field-link">
         {url}
       </a>
     </div>

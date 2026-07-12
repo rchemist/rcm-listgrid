@@ -9,6 +9,7 @@ import type {
   MultipleAssetField,
 } from '../../../schema-core/src/field/multiple-asset-field';
 import { useUI } from '../providers/ui';
+import { useAssetUrl } from '../providers/asset-base';
 import { useFieldValue, useFormStore } from '../providers/form-store';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
 
@@ -104,6 +105,7 @@ export function MultipleAssetFieldRenderer({
   describedBy,
 }: FieldRendererComponentProps) {
   const { Modal, TextInput, FileInput, CheckBox, Button } = useUI();
+  const resolveAsset = useAssetUrl();
   const store = useFormStore();
   const value = useFieldValue<AssetItem[]>(name);
   const assetField = field as MultipleAssetField;
@@ -227,7 +229,10 @@ export function MultipleAssetFieldRenderer({
                 onClick={() => openForSlot(tag)}
               >
                 {filled ? (
-                  <img src={asset!.url} alt={asset!.description ?? asset!.name ?? ''} />
+                  <img
+                    src={resolveAsset(asset!.url)}
+                    alt={asset!.description ?? asset!.name ?? ''}
+                  />
                 ) : (
                   '+'
                 )}

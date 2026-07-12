@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import type { BackendAdapter } from '@listgrid/schema-core';
+import { AssetBaseContext } from './asset-base';
 
 // AdapterProvider — injects the BackendAdapter (ADR-0005) so renderer-layer
 // components that must fetch on their own (the ManyToOne picker fetching the
@@ -51,10 +52,24 @@ export function AdapterProvider({ adapter, children }: AdapterProviderProps) {
     [adapter, cache],
   );
 
+  // Asset base (tier i) — provided as a THIRD sibling context, memoized on the
+  // effective base so it's referentially stable. adapter.assetBaseUrl wins;
+  // `??` lets an undefined base fall through to an inherited/host/env value
+  // (nesting composes). NO useEffect, NO module-global write — this is the
+  // exact contrast with the rejected GX-6 (setAssetServerBase) mechanism.
+  const inheritedAsset = useContext(AssetBaseContext);
+  const assetBase = useMemo(
+    () => ({
+      serverUrl: adapter.assetBaseUrl ?? inheritedAsset.serverUrl,
+      prefix: inheritedAsset.prefix,
+    }),
+    [adapter.assetBaseUrl, inheritedAsset.serverUrl, inheritedAsset.prefix],
+  );
+
   return (
     <AdapterContext.Provider value={adapter}>
       <ReferenceResolverContext.Provider value={resolveReference}>
-        {children}
+        <AssetBaseContext.Provider value={assetBase}>{children}</AssetBaseContext.Provider>
       </ReferenceResolverContext.Provider>
     </AdapterContext.Provider>
   );

@@ -46,4 +46,13 @@ export interface BackendAdapter {
    * truthy injection parity, see `createRcmAdapter`'s implementation).
    */
   remove(url: string, ids: string[], revision?: string): Promise<void>;
+  /**
+   * Optional per-adapter asset-server base (tier i) for resolving RELATIVE
+   * asset paths (image/file/profile/multipleAsset). Absolute URLs pass
+   * through untouched. Plain data — React-free. When undefined, resolution
+   * falls through to a host-global <AssetBaseProvider> then
+   * NEXT_PUBLIC_ASSET_SERVER. Read by @listgrid/react's AdapterProvider into
+   * an AssetBase context; never a module global.
+   */
+  assetBaseUrl?: string;
 }

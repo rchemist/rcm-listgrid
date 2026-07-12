@@ -18,6 +18,7 @@
     "@listgrid/schema-core": "*",
     "@listgrid/state": "*",
     "@listgrid/ui-default": "*",
+    "@listgrid/utils": "*",
     "zustand": "^4.5.7"
   },
   "devDependencies": {

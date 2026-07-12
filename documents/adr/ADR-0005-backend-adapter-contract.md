@@ -80,4 +80,4 @@ const proxyFetch: typeof fetch = (input, init) => {
 const adapter = createRcmAdapter({ baseUrl: '', fetch: proxyFetch });
 ```
 
-**미해결(별도 트래킹)**: `getExternalApiData`/`callExternalHttpRequest` 계열(SMS 발송·캐시 클리어 등 CRUD 밖 임의 백엔드 호출)은 0.4 `BackendAdapter`에 범용 대응이 없다(좁은 `CustomOptionProvider.fetchOptions` seam만 존재). 이는 해당 UI 컴포넌트 이식 여부와 얽힌 **컴포넌트-parity 문제**로, 본 프록시 아키텍처와 분리해 다룬다. **asset-URL** 리졸브도 어댑터 base 주입(`setAssetServerBase`)이 미배선(GX-3 §Needs Review) — `RcmAdapterOptions`에 `assetBaseUrl` 필드 추가 여부는 후속 스펙 결정.
+**미해결(별도 트래킹)**: `getExternalApiData`/`callExternalHttpRequest` 계열(SMS 발송·캐시 클리어 등 CRUD 밖 임의 백엔드 호출)은 0.4 `BackendAdapter`에 범용 대응이 없다(좁은 `CustomOptionProvider.fetchOptions` seam만 존재). 이는 해당 UI 컴포넌트 이식 여부와 얽힌 **컴포넌트-parity 문제**로, 본 프록시 아키텍처와 분리해 다룬다. **asset-URL** 리졸브: **결정됨(2026-07-13)** — `BackendAdapter.assetBaseUrl?`(tier i·plain data·React-free) 채택 + `@listgrid/react`의 **context-스코프 3티어 해석**(`AssetBaseProvider`/`useAssetUrl`/순수 `resolveAssetUrl`). 전역 mutable 싱글턴(구 `setAssetServerBase`, GX-6)은 SSR/멀티테넌트 비안전으로 **기각·제거**. 규범=[asset-url-resolution-design.md](../plans/asset-url-resolution-design.md).
