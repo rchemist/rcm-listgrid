@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
-import type { Direction, EntityField, EntityForm, QueryConditionType } from '@listgrid/schema-core';
+import type {
+  Direction,
+  EntityField,
+  EntityForm,
+  FilterItem,
+  QueryConditionType,
+} from '@listgrid/schema-core';
 import type { ListStoreState } from '@listgrid/state';
 import { useUI } from '../providers/ui';
 import { getListCellRenderer } from '../registry/list-cell-renderer-registry';
@@ -250,31 +256,37 @@ export function ViewListGrid({
     setFilterValues((prev) => ({ ...prev, [name]: value }));
   }
 
-  // Apply: fold every NON-EMPTY filter value into the store's current
-  // SearchForm via the existing `addAndFilter` (no schema-core API change),
-  // then hand the result to `setSearchForm` (page-reset + refetch, same pipe
-  // quickSearch/setSort already use). `config.operator` (spec §5.1's open
-  // `string`) is cast to `QueryConditionType` ONLY when present — omitted
-  // entirely otherwise (exactOptionalPropertyTypes forbids `queryConditionType:
-  // undefined`; no default operator is invented).
+  // Apply: collect every NON-EMPTY filter value into a FilterItem[] and fold
+  // them into the store's current SearchForm via the existing `withFilter`
+  // (no schema-core API change), then hand the result to `setSearchForm`
+  // (page-reset + refetch, same pipe quickSearch/setSort already use).
+  // `config.operator` (spec §5.1's open `string`) is cast to
+  // `QueryConditionType` ONLY when present — omitted entirely otherwise
+  // (exactOptionalPropertyTypes forbids `queryConditionType: undefined`; no
+  // default operator is invented).
   //
-  // NOTE (deviation, see §Report): this starts from `store.getState()
-  // .searchForm` — the CURRENT accumulated AND-filters — so re-applying with
-  // DIFFERENT values across two searches stacks a second `name`-keyed AND
-  // clause rather than replacing the first (SearchForm has no "remove by
-  // name" primitive in its W5-3 scope — see the brief's re-apply de-dup
-  // Do-NOT). A single apply (this task's acceptance bar) is unaffected.
+  // R2 fix (advanced-search re-apply): `withFilter('AND', ...)` REPLACES an
+  // existing same-`name` AND clause in place (0.3.x replace-by-name semantics,
+  // search-form.ts:229-245) instead of the previous `addAndFilter` STACKING —
+  // so editing a field and re-applying yields a single `{name: current}`
+  // clause, not the unsatisfiable `AND(name=old, name=new)` that returned 0
+  // rows. Non-panel AND clauses (host/hook-seeded) are preserved: `withFilter`
+  // only touches the names it is handed. A clause for a field the user CLEARS
+  // between applies is not removed (withFilter has no remove path) — out of
+  // R2's scope; a `removeAndFilter*` primitive would be a separate
+  // public-surface decision.
   function applyAdvancedSearch(): void {
-    let next = store.getState().searchForm;
+    const items: FilterItem[] = [];
     for (const { field, config } of filterFields) {
       const value = filterValues[field.getName()];
       if (value === undefined || value === null || value === '') continue;
-      next = next.addAndFilter({
+      items.push({
         name: field.getName(),
         value,
         ...(config.operator ? { queryConditionType: config.operator as QueryConditionType } : {}),
       });
     }
+    const next = store.getState().searchForm.withFilter('AND', ...items);
     void store.getState().setSearchForm(next);
   }
 

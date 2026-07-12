@@ -509,6 +509,45 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     expect(listCalls[1]?.page).toBe(0);
   });
 
+  it('re-applying with an edited value REPLACES the prior same-field AND clause instead of stacking (R2)', async () => {
+    const entityForm = filterForm();
+    const { adapter, listCalls } = rowsAdapterWithCalls([
+      { id: '1', name: 'Engineering', code: 'ENG' },
+    ]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+
+    // apply #1: name = ABC
+    fireEvent.change(screen.getByLabelText('Name Filter'), { target: { value: 'ABC' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'name', value: 'ABC', queryConditionType: 'LIKE' },
+    ]);
+
+    // apply #2: edit the SAME field to name = XYZ and re-apply
+    fireEvent.change(screen.getByLabelText('Name Filter'), { target: { value: 'XYZ' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+
+    // R2: a SINGLE {name: XYZ} clause, NOT the stacked AND(name=ABC, name=XYZ)
+    expect(listCalls[2]?.toJSON().filters.AND).toEqual([
+      { name: 'name', value: 'XYZ', queryConditionType: 'LIKE' },
+    ]);
+    // and the live store's searchForm agrees
+    expect(store.getState().searchForm.toJSON().filters.AND).toEqual([
+      { name: 'name', value: 'XYZ', queryConditionType: 'LIKE' },
+    ]);
+  });
+
   it("omits queryConditionType entirely for a withFilter() field with no configured operator (never 'queryConditionType: undefined')", async () => {
     const entityForm = filterForm();
     const { adapter, listCalls } = rowsAdapterWithCalls([
