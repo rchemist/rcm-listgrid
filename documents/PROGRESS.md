@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W6 ✅ · W7 entry ✅ · **W7-1/2/3/4 ✅**(2026-07-12·패키징+headless+adapter 함수형+MIGRATION/codemod·smoke:load 신맵 green). **Next up: W7-5 wave-end**(마지막 wave 봉인→GA 게이트). 계수 49/57/186(임계 55/120/190). §Needs Review 4건 open. P0/P1 publish=외부 승인 대기.
+**Status**: active · **Phase EG(공개 API 재설계, W1~W7) ✅ 완료**(2026-07-12·W7 종료 게이트 전건 green: full gate+E2E30+smoke:load+headless+attw/publint·계수 49/57/186·CAP-24/25+구결함 §1~9 봉인). **Next up: GA 게이트(CAP-28 헌장 대조표)**(별도 pass·새 세션 권장). §Needs Review 9건 open(GA 이월·소비자/스펙저자 입력). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W6 ✅ + W7 entry-brief pass ✅**(2026-07-12·opus·콜드리더 통과). 새 세션은 **W7-1 패키징 코어부터** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md)(W7-1~5 execution-grade·8 wave-entry 결정). W7-1~5는 **sonnet 위임 가능**(설계 판단 소진됨·구현만 남음). W7-1(빌드 인프라)→W7-2(headless, 빌드 산출 의존) 순차; W7-3(adapter)·W7-4(MIGRATION/codemod) 병렬 가능. **핵심 정정**: published `@rchemist/listgrid`가 아직 구 `src/` 전체 → W7이 packages/*를 §2 맵으로 처음 published화. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클).
-**Last updated**: 2026-07-12 (**W7-4 ✅** — MIGRATION.md 0.3→0.4 절(§9 42행 전수·빈행0·서브패스 제거·페이지셸 guide 흡수·data-transfer 미이관)+codemod(jscodeshift 기계 10규칙·4 fixture green)+smoke-load.sh 신맵(`.`/schema/state cjs+esm·excel cjs)+package.json files/devDep. sonnet 위임→메인 6게이트 authoritative green(codemod:test·type-check·typecheck:packages·format·lint 0err=베이스라인·smoke:load). §Needs Review +3(descope 확인·§9#29 라벨·guide 배너). 상세 [archive #W7-4](./progress-archive/phase-eg-api-redesign.md#w7-4). 다음=W7-5 wave-end→GA.)
+**Next session policy**: **Phase EG(W1~W7) ✅ 완료**(2026-07-12). 새 세션은 **GA 게이트(CAP-28 헌장 C1~C9 대조표)부터** — cold-start=[phase-eg archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5)+스펙 §8 CAP-28+[헌장](./prd/concept-charter.md)만 읽으면 충분(구 src/·8그룹 map 불요). GA는 검증/대조 pass(위임보다 인라인 판단). **GA 전 선결(사용자/소비자)**: §Needs Review descope 2건 GJCU 확인→CAP-29 편입·P0/P1 publish 외부 승인·spec §9#29 라벨. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·CAP-28을 개별 wave 분산(단일 GA pass)·dts experimentalDts 재시도.
+**Last updated**: 2026-07-12 (**W7-5 ✅ · Phase EG(W1~W7) 완료** — W7 종료 게이트 전건 green 실측: full gate exit 0(test 2236+1todo·lint 0err·format·build)·**E2E 30 passed**·smoke:load(신맵)·check:headless·attw 전 subpath 🟢·publint All good·**계수 49/57/186 PASS**. CAP-24/25 대조+CAP-01~29 빈행0(CAP-28=GA 별도·CAP-29=descope)·구 결함 §1~9 봉인표 작성. 상세 [archive #W7-5+Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5). §Needs Review 9건 open(GA 이월). 다음=GA 게이트(새 세션 권장).)
 
 ## Goal
 
@@ -45,13 +45,13 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC·EG W1~**W6 ✅** · W7 남음) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC ✅ · **EG W1~W7 ✅ 완료** · 다음=GA 게이트) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W6 ✅ + W7 entry ✅ + W7-1/2/3/4 ✅**(2026-07-12). 다음: **W7-5 wave-end**(마지막 wave 봉인→GA 게이트) — 실행 계약 [waves §W7-5 표](./plans/entityform-api-implementation-waves.md))
+## 세션 인계 (Handoff — **Phase EG(공개 API 재설계, W1~W7) ✅ 완료**(2026-07-12). 다음: **GA 게이트(CAP-28 헌장 대조표·별도 pass·새 세션 권장)** — 콜드스타트 계약 [phase-eg archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5))
 
-- **⚠ 다음 = W7-5 wave-end(마지막 wave 봉인·CAP-24/25 대조·구결함 원장 최종봉인·GA 게이트 착수)** — sonnet 위임 가능(문서/대조 중심). **W7-1/2/3/4 ✅**: 패키징 코어(진입점 src/→packages/* §2 맵·peers 26→6)·headless fixture(런타임 React 0)·adapter 함수형 헤더(CAP-24)·**MIGRATION.md+codemod**(§9 42행 전수·빈행0·기계 10규칙 codemod·smoke:load 신맵 green). W7-5 범위: 계수 실측(`count-public-surface.mjs`=49/57/186 무변경 재확인·신 subpath 미계수)·**full gate**(type-check+typecheck:packages+test 2235+lint+format+build)+**E2E 30**+**smoke:load**+**check:headless**+attw/publint 전건 green·구 결함 원장 §1~9 최종 봉인표·CAP-24/25 빈행 0 대조·**§Needs Review 4건 처분/이월**. **CAP-28 GA 대조표(헌장 C1~C9)는 W7 밖 별도 pass — W7-5로 끌어오지 말 것**(waves §W7-5 Do-NOT).
+- **⚠ 다음 = GA 게이트(CAP-28 헌장 C1~C9 대조표·별도 pass)** — Phase EG(W1~W7) 전건 착지(계수 49/57/186·CAP-01~27 소화·구결함 §1~9 봉인·full gate+E2E30+smoke:load+headless+attw/publint green·published `@rchemist/listgrid`=packages/* §2 맵). GA=검증/대조 authoring pass(**인라인 판단·위임 아님**). 범위: 스펙 §8 CAP-28 행 + 헌장 C1~C9 각 항을 신 표면에 대조하는 증명표. **GA 전 선결(critical-path·사용자/소비자 결정)**: §Needs Review descope 2건(#W6-2b TIER3·#W7-4 서브패스 제거)=GJCU 확인→CAP-29 편입 · P0/P1 publish 외부 승인 · spec §9#29 라벨(presets-rcm 감사헬퍼). **§Needs Review 9건 전건 open**(자율 [x] 불가). cold-start: 이 Handoff + [archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5) + 스펙 §8 CAP-28 + [헌장](./prd/concept-charter.md).
 - **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
@@ -80,7 +80,7 @@
 - EA(필드21+공유)·EA-D2(Xref)·EB(주소+Daum)·EC1~3(실브라우저)·EC3-0·EC-R1/EC-F·EF6/EF7 완료. E2E 5→16. [archive](./progress-archive/phase-e-track-tasks.md).
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(**W3 권한·능력 착지 후** role-readonly 실증으로 재개)
 
-#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11) · W1~W6 ✅ · W7 남음
+#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11) · **W1~W7 ✅ 완료(2026-07-12)** → 다음=GA 게이트(별도)
 
 **규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 완료 상세(commit·CAP·검증)=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 
@@ -98,9 +98,9 @@
 - [x] **W7-2 headless fixture** ✅ 2026-07-12 · /schema+/state fixture·React **런타임** 0 tsc+node(cjs/esm) green·check:headless · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2)
 - [x] **W7-3 adapter headers 함수형** ✅ 2026-07-12 · sonnet→검증 · headers 함수형 지연평가(resolveHeaders·5메서드 1지점)·14 tests green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-3)
 - [x] **W7-4 MIGRATION+codemod** ✅ 2026-07-12 · sonnet→검증 · §9 42행 전수(빈행0)+서브패스제거+페이지셸+미이관·codemod 기계10규칙·smoke:load 신맵 green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
-- [ ] **W7-5 wave-end** — CAP-24/25 대조·계수 49/57/186·full gate+E2E30+smoke:load+attw/publint·구결함 원장 최종봉인 → **GA 게이트(CAP-28) 착수** · **← Next up**
+- [x] **W7-5 wave-end** ✅ 2026-07-12 · **Phase EG 종료** · full gate+E2E30+smoke+headless+attw/publint·계수 49/57/186·CAP-24/25+구결함 §1~9 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w7-5)
 
-**Next up**: **W7-5 wave-end**(마지막 wave 봉인·[waves §W7-5](./plans/entityform-api-implementation-waves.md)) — CAP-24(adapter 함수형)·CAP-25(headless·migration) 착지 대조 · 계수 실측(count-public-surface.mjs → /schema 186·root 57·EntityForm 49 무변경·신 subpath 미계수) · **full gate**(type-check+typecheck:packages+test 2235+lint+format+build)+**E2E 30**+**smoke:load**+**check:headless**+check:exports(attw)+check:publint green · 구 결함 원장 §1~9 최종 봉인표 · CAP 빈행 0(CAP-28 GA 대조표는 W7 밖 별도 pass·끌어오지 말 것). **§Needs Review 3건**(W7-4·아래) 처분/이월. 완료 → **GA 게이트(헌장 C1~C9·CAP-28) 착수**(별도).
+**Next up**: **GA 게이트(CAP-28 헌장 C1~C9 대조표)** — Phase EG(W1~W7) 완료 후 **별도 pass·새 세션 권장**. 스펙 §8 CAP-28 행 + [헌장 C1~C9](./prd/concept-charter.md) 대조표 작성·검증(C1 선언=화면·C2 조건부·C3 관계·C4 카탈로그+확장·C5 검증 단일채널·C6 탭/그룹/스텝/엑셀/리비전·C7 주입·C8 어댑터·C9 리스트세트). **GA 전 선결(사용자/소비자 결정)**: §Needs Review descope 2건(#W6-2b TIER3·#W7-4 서브패스 제거) GJCU 확인→CAP-29 편입 · P0/P1 publish 외부 승인 · spec §9#29 라벨(presets-rcm). cold-start = [phase-eg archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5)만 읽으면 충분.
 
 ---
 

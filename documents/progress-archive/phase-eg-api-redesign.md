@@ -332,3 +332,42 @@
 **코드 추적 판정(MIGRATION §2·근거 file:line 문서화)**: `/form/SearchForm`→`/schema`(SearchForm 클래스 존치·헬퍼 3종 미재수출) · `/form/Type`→`/schema`(SelectOption/MinMaxLimit 이관·PageResult 클래스→BackendAdapter 인터페이스 필드명 변경·EntityWithId 폐기) · `/api`→아키텍처 대체(ApiClient/configureApiClient→BackendAdapter+AdapterProvider DI·HTTP 유틸 미이관) · `/misc`→대부분 비공개화(정규식 4/12만·isExternalUrl만 공개·날짜포맷터는 /excel 내부 재구현) · `/qr`·`/api-spec`·`/xref-price`→0.4 대응 무(grep 0) · `/address`→부분(AddressField 이관·KakaoMap 지도뷰 미이관·peer 제거) · 구`/headless`→신 `/schema`+`/state`.
 
 **deviations/review flags(§Needs Review 3건)**: ① guide SUPERSEDED 배너=declared 파일 밖 touch(low·관례상 정당) ② spec §9 #29 라벨=codemod이나 impl=수동/이연(presets-rcm 빈 스캐폴드)→spec 저자 §9 라벨 재조정 or presets 감사헬퍼 출하(low) ③ 서브패스 제거로 다수 0.3 공개 심볼 미이관/축소(/qr·/api-spec·/xref-price 전체·/misc 대부분·KakaoMap·SearchForm 헬퍼·EntityWithId·/api HTTP 유틸)→의도 descope(CAP-29)인지 GJCU gap인지 소비자 확인(low-med).
+
+<a id="w7-5"></a>
+## #W7-5 wave-end 최종 봉인 (2026-07-12 · 마지막 wave · Phase EG 종료)
+
+**결과**: W7(패키징+마이그레이션) 종료 게이트 전건 green — Phase EG(공개 API first-principles 재설계, W1~W7) **완료**. 신규 공개 심볼 0. 다음=GA 게이트(CAP-28 헌장 C1~C9 대조표·별도 pass).
+
+**게이트 증거(메인 authoritative·실측)**:
+- full gate exit 0: `type-check`(tsc --noEmit)·`typecheck:packages`(tsc -b)·**test 2236 pass+1 todo**(174 files)·`lint` 0 err(258 warn=베이스라인)·`format:check`·`build`(dts 실타입).
+- **E2E 30 passed**(playwright·43.5s·독립 실행 exit 0).
+- **smoke:load green**(신 §2 맵 real-Node resolve: `.`/schema/state cjs+esm·excel cjs — W7-4 착지분 재확인).
+- **check:headless green**(/schema+/state tsc+node cjs/esm·React 런타임 0).
+- **check:exports(attw)** 전 subpath 🟢(node10/node16-CJS/node16-ESM/bundler)·**check:publint** All good.
+- **check:surface 실측 = 49/57/186 PASS**(EntityForm 49/55·root 57/120·/schema 186/190) — §10-A W7 행 +0 확정(신 subpath 미계수). count-public-surface.mjs.
+
+**CAP 대조(§8 빈행 0)**: CAP-24(adapter 함수형 헤더=W7-3)·CAP-25(headless=W7-2 + migration=W7-4) 착지 ✅. CAP-01·15=회귀 green(2236u/E2E30). CAP-02~23·26·27=W1~W6 착지. **CAP-28=GA 헌장 대조표(W7 밖 별도 pass·미착수·은닉 아님)**. CAP-29=명시 descope(자동저장·RuleField/XrefPrice/ContentAsset·구현대상 0) — **W7-4 서브패스 제거로 확장 필요**(/qr·/api-spec·/xref-price·/misc 대부분·KakaoMap → §Needs Review#W7-4 descope로 소비자 확인 후 CAP-29 편입).
+
+**구 결함 원장 §1~9 최종 봉인표**(카탈로그 Cross-Cutting §1~9·"신 표면서 불가능한 이유"·재현금지 L8):
+
+| # | 구 결함 | 신 표면서 불가능(증거) |
+|---|---|---|
+| 1 | surface 189≫추정130 | 계수 CI(count-public-surface.mjs) EntityForm 49/55·root 57/120·/schema 186/190 상한 강제 — §10-A 최종 인벤토리 도출·under-scope 불가 |
+| 2 | dead `instanceof EntityForm` 가드 | packages/*/src `instanceof EntityForm` **0건**(grep·이번 실측) — schema-core 순수 클래스, 자기-instanceof 부재 |
+| 3 | 값세터 5중 파편화 | EntityForm 공개 fluent 값세터 **0**(계수 49·L8) — 값 변이=단일 FormMutator/ctx.values seam(setValue/setFetched·명시 시맨틱) |
+| 4 | shallow-Map `clientExtensions` 누수 | packages/*/src `clientExtensions` **0건**(grep·이번 실측) — Map 자체 폐기, onBefore/After 훅으로 대체 |
+| 5 | with*/set* 명명 분열 | L2/L8 — EntityForm fluent set* 0·with/set 동명쌍 0(계수 게이트) |
+| 6 | onInitialize 이중 발화(init+save) | FormRuntime 라이프사이클 onInit 1회(save 재발화 없음)·W2/W4 FormRuntime 테스트(2236u 포함 green) |
+| 7 | client-ext 모델등록·뷰실행(헤드리스 미발화) | CAP-25: onBefore/After{Save,Delete,ListFetch} 8훅을 FormRuntime/Controller가 실행(L7)·check:headless React 0 green — 비-React 소비자 훅 발화 |
+| 8 | 이중 정렬 스킴(listableOrder+viewOrder) | 단일 order 파생(list-columns·W5)·별도 스케일 상수 부재 |
+| 9 | `getTitle()` 기본 `''` | `getTitle(values?)` 단일 해석 진입점(entity-form.ts:923·§3.1 resolution chain)·private getTitlePostfix/appendPostfix 게이트 폐기·W4-1 테스트 |
+
+**§Needs Review 9건(전건 open·비차단·surfacing)**: 소비자/스펙저자/사용자 입력 필요분이라 자율 [x] 불가 — GA로 이월. 소비자(GJCU) 확인: #W6-2b TIER3·#W7-4 descope. 스펙저자: #W7-2 @types/react(check:headless 게이트로 실증됨)·#W7-4 §9#29 라벨. 저순위 follow-up: #W5-3 de-dup·#W5-2 ×3. 관례정당: #W7-4 guide 배너.
+
+## Next Phase Handoff (Phase EG → GA 게이트)
+
+- **Phase EG(W1~W7) ✅ 완료**: 공개 API first-principles 재설계 착지. 계수 49/57/186(임계 55/120/190)·CAP-01~27 소화·구 결함 §1~9 봉인·full gate+E2E30+smoke:load+headless+attw/publint green. published `@rchemist/listgrid`=packages/* §2 맵(구 src/ 오라클 존치).
+- **다음 = GA 게이트(별도 pass·미착수)**: CAP-28 **헌장 C1~C9 대조표** 작성·검증([스펙 §8 CAP-28 행·헌장](../prd/concept-charter.md)). C1 선언=화면·C2 조건부(L5)·C3 관계·C4 카탈로그+확장(§5)·C5 검증 단일채널·C6 탭/그룹/스텝/엑셀/리비전·C7 주입·C8 어댑터·C9 리스트세트. **W7 안으로 끌어오지 않았음**(waves §W7-5 Do-NOT 준수).
+- **GA 전 선결(critical-path 결정·사용자/소비자)**: ① §Needs Review descope 2건(#W6-2b TIER3·#W7-4 서브패스 제거) = GJCU 소비자 확인 → CAP-29 descope 원장 확정 ② P0/P1 publish 외부 승인 대기(0.4.0 GA 배포 전) ③ spec §9#29 라벨(presets-rcm 감사헬퍼 출하 여부).
+- **Do-NOT(계승)**: 구 src/ 삭제 금지(오라클·GA 후속 정리) · 스펙 침묵 판단 발명 금지(§10 게이트 4) · dts=`dts:paths`(experimentalDts 빈타입 재시도 금지) · CAP-28을 개별 wave에 분산 금지(단일 GA pass).
+- **세션 정책**: **새 세션 권장** — GA 게이트는 헌장 대조라는 distinct pass(신선 컨텍스트 이점)·선결 소비자 결정 대기. 재개는 `/progress`(이 archive Handoff + 스펙 §8 CAP-28 + 헌장만 읽으면 충분).

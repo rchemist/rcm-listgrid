@@ -403,7 +403,7 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 
 - 마진 +4 = W5/W6 미분해 세부 타입(필터 operator 유니온·list align/width 헬퍼·DataTransfer 하위 spec 등). W5/W6 entry pass에서 실측이 190 근접 시 위 wave-entry 규칙으로 재산정.
 
-**루트 배럴 실측 57 → 임계값 120 무변경** — 원 projection 49 base + **W5 실측 +8**(list-cell renderer export 4 + filter renderer export 4 — registry 헬퍼 전개 계수; 고급검색 패널 자체는 ViewListGrid 내장·별도 export 아님, W5 entry-brief 결정 3-내장). ⚠️ 원 W5 projection은 +2로 과소추정 — **실측 57이 정본**(count-public-surface.mjs, 2026-07-12). W6 root +0(toolbar seam 재사용). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님).
+**루트 배럴 실측 57 → 임계값 120 무변경** — 원 projection 49 base + **W5 실측 +8**(list-cell renderer export 4 + filter renderer export 4 — registry 헬퍼 전개 계수; 고급검색 패널 자체는 ViewListGrid 내장·별도 export 아님, W5 entry-brief 결정 3-내장). ⚠️ 원 W5 projection은 +2로 과소추정 — **실측 57이 정본**(count-public-surface.mjs, 2026-07-12). W6 root +0(toolbar seam 재사용). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님). **W7 +0 실측 확인**(W7-5 wave-end, 2026-07-12): EntityForm 49·root 57·/schema 186 무변경 — 신 subpath(/schema·/state·/ui-default·/backend-rcm·/next·/excel)는 3-예산 밖 미계수·CAP-24 adapter 타입은 비계수 배럴. count-public-surface.mjs PASS.
 
 ## 11. 구현 wave (요약 — 실행 계약은 [waves 브리프](./entityform-api-implementation-waves.md))
 
