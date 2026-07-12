@@ -80,6 +80,11 @@ describe('localStorage helpers (jsdom-backed)', () => {
     setLocalStorageItem('k', 'plain');
     expect(getLocalStorageObject<string>('k', (v) => v.toUpperCase())).toBe('PLAIN');
   });
+
+  it('getLocalStorageObject returns undefined for an empty-string stored value', () => {
+    setLocalStorageItem('k', '');
+    expect(getLocalStorageObject('k')).toBeUndefined();
+  });
 });
 
 describe('sessionStorage helpers (jsdom-backed)', () => {
@@ -104,5 +109,10 @@ describe('sessionStorage helpers (jsdom-backed)', () => {
 
   it('getSessionStorageObject returns undefined for a missing key', () => {
     expect(getSessionStorageObject('missing')).toBeUndefined();
+  });
+
+  it('getSessionStorageObject returns undefined for an empty-string stored value', () => {
+    setSessionStorageItem('k', '');
+    expect(getSessionStorageObject('k')).toBeUndefined();
   });
 });

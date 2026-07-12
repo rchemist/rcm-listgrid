@@ -156,7 +156,7 @@ export function getSessionStorageObject<T>(
   customParse?: (value: string) => T | undefined,
 ): T | undefined {
   const value = getSessionStorageItem(key);
-  if (value === undefined) return undefined;
-  if (customParse !== undefined) return customParse(value);
+  if (isBlank(value)) return undefined;
+  if (customParse !== undefined) return customParse(value!);
   return parse<T>(value!);
 }
