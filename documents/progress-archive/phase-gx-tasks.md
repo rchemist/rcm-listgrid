@@ -21,3 +21,20 @@
 **deviations**:
 - **①(§Needs Review)** `toJSON`이 `filters.AND`/`filters.OR`를 **항상 방출**(빈 `[]`도)·`NOT`만 omit-when-empty. 사유: 기존 테스트가 presence 하드어서트(`store.test.ts:381 toHaveLength(0)`·`many-to-one-filter.test.tsx:120 toEqual([])`) → Do-NOT(기존 테스트 파손 금지) 우선. risk:low(FilterGroups 타입은 완전 optional·프레임워크는 빈 배열/생략 둘 다 허용·`SearchRequestJacksonTest`는 역직렬화만 검증이라 프레임워크 자체 직렬화의 empty-group 생략 여부는 미확정). GX-2 mock 정렬 시 재확인.
 - **②** `withFilter` condition을 `'NOT'`까지 확장(순수 widening·기존 호출처 무파손·req#3 NOT 그룹 빌드 위함). 리뷰 불요.
+
+<a id="gx-2"></a>
+## #GX-2 apps/sample 백엔드 프레임워크 충실화 (2026-07-13 · sonnet 위임→메인 검증)
+
+**결과**: apps/sample mock 백엔드 + backend-rcm 어댑터 에러 파서를 rcm-backend-framework 0.1.0 응답/에러 계약에 정합(GX-1 client wire의 상대편).
+
+**변경**:
+- `apps/sample/lib/mock-backend/envelope.ts`: `searchEnvelope`→9필드 `SearchResponse`(content/page/pageSize/totalElements/totalPages/sorts([] 최소)/searchRequest/attributes/errors)·`notFound`→RFC7807 ProblemDetail(top-level status/title/detail/type/code/errors/fieldErrors·field/traceId/tenantId는 컨텍스트 없어 omit)·"Spring Page" 주석 정정.
+- `packages/backend-rcm/src/adapter.ts`: 에러 파서를 `detail ?? title ?? message ?? generic`으로(ProblemDetail 메시지 surface·구 `{error:{message}}`는 삼켜졌음). +`adapter.test.ts` 3 케이스(detail/title/fallback).
+- `crud-routes.ts`·`store.ts`: `readFilters`가 GX-1 `FilterGroups{AND,OR,NOT}` 소비(empty `[]`=vacuous no-op 확인). `employee/collabo/search/route.ts`: hand-rolled(filters drop)→공유 `makeSearchHandler`(filters 배선).
+- 신규 `e2e/backend-contract.spec.ts`: 실행 mock route로 404 ProblemDetail + 9필드 SearchResponse shape 고정.
+
+**검증(메인 authoritative)**: type-check·typecheck:packages clean · **full unit 2254 pass**(+3·0회귀) · **full E2E 32/32**(+2 backend-contract·404 ProblemDetail 라이브 실증·기존 30 green=mock이 GX-1 wire 여전히 소비) · lint 0err.
+
+**deviations**:
+- **①** ProblemDetail `field/traceId/tenantId`를 explicit null 아닌 **omit**(프레임워크 조건부 setProperty·`ProblemDetailAdviceTest .field.doesNotExist()` 패턴 일치). risk:none.
+- **②(§Needs Review)** mock filter 매칭이 **5/24 조건타입만**(EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE·GX-2 이전과 동일·이제 주석 명시)·NOT 그룹은 wire 판독하나 매칭 no-op. 사유: 전 호출처 grep=이 5종+AND만 사용·NOT-group row-매칭 시맨틱은 인용 가능 스펙 없음(발명 금지). risk:low(테스트 mock·실사용 경로 전건 green). 실백엔드 필요 조건타입 확장 시 재검토.

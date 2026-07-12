@@ -24,7 +24,12 @@ export interface RcmAdapterOptions {
 /** Row shape coming back over the wire before id-coercion (D2: ids are always strings). */
 type WireRow = { id?: unknown; [key: string]: unknown };
 
-/** Dual-envelope list payload — Spring Page (0.1.0) or legacy (0.0.5). See RCM wire contract. */
+/**
+ * Dual-envelope list payload — the framework's custom `SearchResponse<T>`
+ * (0.1.0, `content`/`totalElements`/`totalPages`; NOT Spring Data Page — no
+ * `pageable`/`number`/`numberOfElements`, see SearchResponse.java:51-61) or
+ * legacy (0.0.5, `list`/`totalCount`/`totalPage`). See RCM wire contract.
+ */
 interface ListPayload {
   content?: WireRow[];
   list?: WireRow[];
@@ -43,7 +48,16 @@ async function parseBackendError(response: Response): Promise<BackendError> {
   }
 
   const bodyObj = (body ?? {}) as Record<string, unknown>;
+  // RFC 7807 ProblemDetail (rcm-backend-framework 0.1.0, top-level fields —
+  // ProblemDetailAdviceTest.java:78-95): `detail` is the human-readable
+  // message (`ProblemDetail.forStatusAndDetail`); `title` mirrors the error
+  // `code` and is the fallback when `detail` is absent (e.g. the generic
+  // 500 SYSTEM.UNEXPECTED path, ProblemDetailAdvice.java:242-247, which sets
+  // no `detail` distinct from `title`). `message` is kept as a last-resort
+  // fallback for non-ProblemDetail bodies (e.g. hand-rolled test doubles).
   const message =
+    (typeof bodyObj.detail === 'string' ? bodyObj.detail : undefined) ??
+    (typeof bodyObj.title === 'string' ? bodyObj.title : undefined) ??
     (typeof bodyObj.message === 'string' ? bodyObj.message : undefined) ??
     `Request failed with status ${response.status}`;
 

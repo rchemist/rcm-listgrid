@@ -224,5 +224,58 @@ describe('createRcmAdapter (ADR-0005 default BackendAdapter — RCM 0.1.0 wire c
         code: 'UNKNOWN',
       });
     });
+
+    // GX-2 (f) — rcm-backend-framework 0.1.0 errors are RFC 7807
+    // ProblemDetail, top-level (no `{error:{message}}` nesting),
+    // ProblemDetailAdviceTest.java:78-95. `detail` carries the
+    // human-readable message; the adapter must surface it instead of
+    // falling back to the generic `Request failed with status N`.
+    it('a ProblemDetail 404 ({status,title,detail,...}) surfaces `detail` as the message, not the generic fallback', async () => {
+      fetchMock.mockResolvedValue(
+        mockResponse(404, {
+          status: 404,
+          title: 'NOT_FOUND',
+          detail: 'college 999 not found',
+          type: 'about:blank',
+          code: 'NOT_FOUND',
+          errors: [],
+          fieldErrors: {},
+        }),
+      );
+      const adapter = createRcmAdapter({ fetch: fetchMock as unknown as typeof fetch });
+
+      await expect(adapter.getOne('/college', '999')).rejects.toMatchObject({
+        code: 'UNKNOWN',
+        message: 'college 999 not found',
+      });
+    });
+
+    it('a ProblemDetail with no `detail` (e.g. 500 SYSTEM.UNEXPECTED) falls back to `title`', async () => {
+      fetchMock.mockResolvedValue(
+        mockResponse(500, {
+          status: 500,
+          title: 'SYSTEM.UNEXPECTED',
+          type: 'about:blank',
+          code: 'SYSTEM.UNEXPECTED',
+          errors: [],
+          fieldErrors: {},
+        }),
+      );
+      const adapter = createRcmAdapter({ fetch: fetchMock as unknown as typeof fetch });
+
+      await expect(adapter.getOne('/college', '1')).rejects.toMatchObject({
+        code: 'UNKNOWN',
+        message: 'SYSTEM.UNEXPECTED',
+      });
+    });
+
+    it('a non-ProblemDetail body without `detail`/`title`/`message` falls back to the generic status message', async () => {
+      fetchMock.mockResolvedValue(mockResponse(404, { foo: 'bar' }));
+      const adapter = createRcmAdapter({ fetch: fetchMock as unknown as typeof fetch });
+
+      await expect(adapter.getOne('/college', '1')).rejects.toMatchObject({
+        message: 'Request failed with status 404',
+      });
+    });
   });
 });

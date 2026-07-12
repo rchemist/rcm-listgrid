@@ -6,10 +6,13 @@
 // re-implementing the same envelope/notFound plumbing per entity.
 //
 // Wire contract recap (RCM 0.1.0):
-//   POST   {url}/search  -> searchEnvelope({content,totalElements,totalPages})
+//   POST   {url}/search  -> searchEnvelope(...) — full 9-field SearchResponse
+//                           (content/page/pageSize/totalElements/totalPages/
+//                           sorts/searchRequest/attributes/errors), see
+//                           envelope.ts.
 //   POST   {url}         -> bare created entity (201)
-//   GET    {url}/{id}    -> bare entity | 404
-//   PUT    {url}/{id}    -> bare updated entity | 404
+//   GET    {url}/{id}    -> bare entity | 404 ProblemDetail
+//   PUT    {url}/{id}    -> bare updated entity | 404 ProblemDetail
 //   DELETE {url}         -> bulk delete, body {ids:string[]} (no per-row DELETE)
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -20,8 +23,21 @@ import { notFound, searchEnvelope } from './envelope';
 // route.ts (EC3) needs the same wire `filters` extraction for its own
 // hand-written handler (its response body needs a toWire() transform
 // makeSearchHandler can't express generically).
+//
+// GX-2 (§5 item 4) — `body.filters` is the GX-1 FilterGroups shape, an
+// operator-keyed map `{AND?, OR?, NOT?}` (SearchForm.toJSON() always emits
+// `AND`/`OR` as arrays, `[]` at minimum; `NOT` only when populated —
+// search-form.ts:264-281). Only `AND`/`OR` are read and applied
+// (matchesFilterGroup, store.ts) — `NOT` is accepted on the wire (present
+// here as a passthrough property on `raw`) but NOT matched against rows: no
+// current caller in this app populates it (grep across apps/sample +
+// packages/react registries turns up only `addAndFilter`), and the
+// framework doesn't document NOT-group row-matching semantics anywhere this
+// mock can cite, so implementing it would be inventing behavior. Empty
+// `AND: []` / `OR: []` are handled gracefully as a no-op (vacuous
+// `Array.every`/`length === 0` in matchesFilterGroup) — not an error.
 export function readFilters(body: Record<string, unknown>): SearchFilters | undefined {
-  const raw = body.filters as { AND?: unknown; OR?: unknown } | undefined;
+  const raw = body.filters as { AND?: unknown; OR?: unknown; NOT?: unknown } | undefined;
   if (!raw || !Array.isArray(raw.AND) || !Array.isArray(raw.OR)) return undefined;
   return raw as SearchFilters;
 }

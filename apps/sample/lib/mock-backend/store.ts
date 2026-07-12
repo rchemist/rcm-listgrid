@@ -33,6 +33,19 @@ export interface SearchFilters {
 // this app actually emits (SearchForm.QueryConditionType has more; unused
 // ones fall through the `default: true` no-op below, same as the old
 // ignore-everything behavior).
+//
+// GX-2 (§5 item 4) — implements 5 of the framework's 24 QueryConditionTypes
+// (QueryConditionType.java:38-81): EQUAL, NOT_EQUAL, IN, NOT_IN, LIKE. These
+// are the only ones any caller in this app actually emits (grepped
+// `queryConditionType:`/`addAndFilter` across apps/sample + packages/react
+// registries — college.ts LIKE, major.ts/xref-*-renderer.tsx EQUAL/
+// NOT_EQUAL/IN/NOT_IN). The remaining 19 (BETWEEN, GREATER_THAN*,
+// LESS_THAN*, IS_NULL, IS_NOT_NULL, date/range variants, …) are
+// UNIMPLEMENTED — they fall through to the `default: true` no-op below
+// (row always matches, same as the pre-EC3 ignore-everything behavior), not
+// silently claimed as supported. `FilterItem.subFilters` (nested
+// `(a OR b) AND c` groups) is likewise not evaluated — GX-1 output can
+// carry it, but no caller here populates it.
 function matchesFilter(row: WithId, filter: FilterItem): boolean {
   const rowValue = row[filter.name];
   let result: boolean;
