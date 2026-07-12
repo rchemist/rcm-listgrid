@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **Next up: RV-R1(reload CRITICAL)→RV-R2(고급검색 HIGH)→R3~R8→GA 게이트(GA-BRIEF+R1/R2/GX-6 선결)**. GX-6 WIP=stash 이연(미결 복원·stash@{0}). §Needs Review open. P0/P1 publish=외부 승인 대기.
+**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **Next up: RV-R1(reload CRITICAL)→RV-R2(고급검색 HIGH)→R3~R8→GA 게이트**. **G-1 GX-6=채택·재설계 구현 완료**(`9095504`·asset-URL context-스코프·전역싱글턴 폐기). §Needs Review open. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **새 세션은 Phase RV(중간점검 개선 트랙)부터** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md)(§4 확정 설계안·§8 원장) 단독 재개 가능. **RV-R1(CRIT reload)·RV-R2(HIGH 고급검색)가 GA 선결.** GA 게이트(CAP-28)는 RV + GA-BRIEF 저작 후. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4·GX-6이 실제 위반 사례)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·GX-6 WIP를 전역 싱글턴 기전 그대로 커밋(채택시 context 스코프 재설계).
-**Last updated**: 2026-07-13 (**중간 점검 코드리뷰 완료** — 7차원 워크플로우 팬아웃(sonnet/opus)+발견별 opus 적대적 검증. 게이트 실측: unit 2373·E2E 32·attw/publint/smoke/headless green, format:check는 GX-3 미포맷 커밋으로 실패→**G-2 수리 완료**(`15d708b`·green 복원). 16 material finding(CONFIRMED 8·PARTIAL 8·REFUTED 0): 🔴CRIT reload() 고아화·🟠HIGH 고급검색 재적용 빈결과·🟡MED×6·⚪LOW×4. **GX-6 미커밋 WIP**(공개 어댑터 assetBaseUrl·발명게이트 저촉)=사용자 결정 stash 이연(stash@{0}). → **Phase RV** 개설·[분석](./analysis/2026-07-13/midpoint-code-review.md). 다음=RV-R1.)
+**Last updated**: 2026-07-13 (**G-1 GX-6 asset-URL 재설계 구현 완료** — 사용자 결정=채택+제대로 재설계. context-스코프 3티어(`BackendAdapter.assetBaseUrl`+`AssetBaseProvider`/`useAssetUrl`+순수 `resolveAssetUrl`), 구 전역 mutable 싱글턴(`setAssetServerBase` 등 4종) 제거. 렌더러 배선(image/file/multiple-asset). 게이트 green: type-check·typecheck:packages·**test 2373**·lint·format·build·surface(root 61/120·/schema 188/190). ADR-0005/MIGRATION 정정·구 stash 폐기. `9095504`·[design](./plans/asset-url-resolution-design.md). **잔여 RV-R1~R12는 실행계획 문서로 대기**(중간점검 findings). 다음=RV-R1.)
 
 ## Goal
 
@@ -119,7 +119,7 @@
 - [ ] **RV-R2 고급검색 재적용 de-dup** 🟠HIGH — **신규 API 불필요**: ViewListGrid이 기존 `SearchForm.withFilter`(name 교체) 재사용(공개표면 무변경) · react/ViewListGrid.tsx:267 · [실행계획 R2](./plans/rv-remediation-execution-plan.md)
 - [ ] **RV-R3~R8** 🟡MED — Xref required(isBlank xref-aware)·validateAll 함수형머지·FieldRenderer allSettled+fail-closed·sessionStorage isBlank·TIER2 방어적 스칼라추출·DataImporter onSubmit catch · [실행계획 R3~R8](./plans/rv-remediation-execution-plan.md)
 - [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined widen)·reset() 타이머클린업·delete() ids guard · [실행계획 R9~R12](./plans/rv-remediation-execution-plan.md)
-- [ ] **G-1 GX-6 처분** 🔴 — WIP stash 이연(stash@{0})·#GX-3 미결 복원(아래)·**capability 결정 대기**(채택시 context 스코프 재설계+ADR-0005/spec 승인+react tsconfig ../utils ref) · [분석 §6/§7](./analysis/2026-07-13/midpoint-code-review.md)
+- [x] **G-1 GX-6 → 채택·재설계 구현 완료** ✅ 2026-07-13 · `9095504` · 사용자 결정=채택+제대로 재설계. context-스코프 3티어(`BackendAdapter.assetBaseUrl`+`AssetBaseProvider`/`useAssetUrl`+순수 `resolveAssetUrl`), **전역 mutable 싱글턴 폐기**. 게이트 green(2373·surface root 61/120·/schema 188/190·typecheck:packages)·구 stash 폐기·ADR-0005/MIGRATION 정정 · [design](./plans/asset-url-resolution-design.md)
 - [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 2파일 수리·format:check green 복원
 - [x] **G-3 #W5-3 risk 등급 정정** ✅ 2026-07-13 · low-med→HIGH(아래 §Needs Review 반영)
 - [x] **GA-BRIEF CAP-28 게이트 브리프 저작** ✅ 2026-07-13 · [ga-gate-charter-brief.md](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거물 고정·매트릭스·게이트절차·Do-NOT·R7 folded-in·순수검증) · opus 저작+앵커 실재검증
@@ -145,7 +145,7 @@
 - [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#GX-1 toJSON empty AND/OR 그룹 방출** — `filters.AND`/`OR`를 빈 `[]`도 항상 wire 방출(기존 테스트 presence 어서트 때문)·NOT만 omit. **GX-2 mock서 vacuous no-op 확인**(실백엔드 수용은 GA 전 실서버 대조 권장) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-1)
 - [ ] **#GX-2 mock filter 5/24 조건타입** — apps/sample mock이 EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE만 매칭·NOT 그룹 no-op(전 실사용 경로 커버·발명 회피). 실백엔드 필요 조건타입 확장 시 재검토 · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-2)
-- [ ] **#GX-3 asset-base 어댑터 배선 미결** → **G-1** — `/utils` seam(`setAssetServerBase`)+전역 폴백 완비하나 런타임 소비자 0. **어댑터에 assetBaseUrl 필드 추가 여부=스펙 결정(미결 유지)**. 2026-07-13: GX-6 WIP(공개 어댑터 필드+전역싱글턴 배선)이 백그라운드 에이전트로 선구현됨→**발명게이트 저촉 판정·stash 이연(stash@{0})**·미결 복원. **채택시 전역싱글턴 폐기→context 스코프 재설계 필수** · risk:low-med · [분석 §6](./analysis/2026-07-13/midpoint-code-review.md)
+- [x] **#GX-3 asset-base 어댑터 배선 → 해소(2026-07-13, `9095504`)** — 사용자 결정: capability 채택+제대로 재설계. `BackendAdapter.assetBaseUrl`(tier i)+context-스코프 `AssetBaseProvider`/`useAssetUrl`+순수 `resolveAssetUrl`(3티어 precedence). 구 전역 싱글턴(GX-6·`setAssetServerBase`) 기각·제거. 렌더러(image/file/multiple-asset) 배선. [design](./plans/asset-url-resolution-design.md)
 - [ ] **#GX-3 isExternalUrl 2카피** — schema-core(private)+utils(public) byte-identical 재구현(zero-dep 하드룰·상호참조 주석) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-3)
 - [x] **#W7-4 서브패스 descope 처분**(사용자 2026-07-12) — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
 - [ ] **#W7-4 spec §9 #29 라벨 재조정** — spec §9는 withCreatedAndUpdatedAtFields를 codemod로 표기하나 impl=수동/이연(presets-rcm 빈 스캐폴드). spec 저자: §9 라벨 정정 or /presets/rcm 감사헬퍼 출하 후 codemod화 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
