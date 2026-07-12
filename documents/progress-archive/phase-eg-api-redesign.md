@@ -201,6 +201,12 @@
 4. Playwright `{name:'검색', exact:true}`(risk:none·test-only): 기본 substring 매칭이 "고급검색" 토글도 매칭(strict 위반) → exact. testing-library getByRole는 기본 exact라 unit 무영향.
 5. 폴백 TextInput `ariaLabel` 대신 `<label htmlFor>/id`(FieldRenderer 관례) — accname 중복 회피·코드품질 선택·스펙 deviation 아님.
 
+## #W5-4 + W5 wave-end (CAP list-track 완료)
+
+**W5-4 페이지 컴포지션 가이드(문서·컴포넌트 아님)** — waves §W5 결정1(스펙 §7 react 표에 페이지-셸 컴포넌트 없음·§9 "호스트 셸 MIGRATION 전용 절"·헌장 C7). 신규 `documents/plans/list-page-composition-guide.md`: ① 원칙(페이지 chrome=호스트 소유·엔진은 ViewListGrid 한 조각) ② 프로바이더 배선(루트 1회·providers.tsx 정준·ListGridProvider 편의형) ③ 정준 리스트 페이지 컴포지션(college/page.tsx 해부 표·useMemo entityForm+store→main→헤더행+새로만들기→ViewListGrid) ④ ViewListGrid 표면 요약(컬럼 파생 CAP-19·columns escape·고급검색 CAP-20·커스텀 렌더러) ⑤ CAP-18/19/20 소비자 접점 대조 ⑥ 한계(재적용 de-dup §Needs Review #W5-3). apps/sample 6 리스트 페이지(college·subject·student·major·professor·collabo)가 이미 이 bare 컴포지션으로 동작 → 신규 컴포넌트 발명 없음(§10 게이트 4). W7 MIGRATION 전용 절이 흡수 예정.
+
+**W5 wave-end 게이트(2026-07-12)**: **CAP-18**(withList/withFilter substrate·W5-1)·**CAP-19**(deriveListFields+registerListCellRenderer·W5-2)·**CAP-20**(deriveFilterFields+registerFilterRenderer·W5-3) 전건 착지 대조(빈 행 0). **계수 47/57/184**(EntityForm/root/schema·임계 55/120/190 전부 내·root W5 +8=list-cell 4+filter 4 레지스트리 export). **full gate+E2E 28** green(last code `2223f35`·W5-4 docs-only·전 리스트 페이지 무회귀). W5(list-track) 완료 → 다음 W6 data-transfer는 entry-brief pass 선행.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

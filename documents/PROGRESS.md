@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1 ✅ · W5-2 ✅ · **W5-3 고급검색+filter 레지스트리 ✅**(2026-07-12). **Next up: W5-4 페이지 컴포지션 가이드(문서)**. **2138 unit/E2E 28**·계수 47/**57**/184(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W4 ✅ · D-pass ✅ · **W5 list-track 완료 ✅**(W5-1~4·2026-07-12·CAP-18/19/20 착지). **Next up: W6 data-transfer(entry-brief pass 선행)**. **2138 unit/E2E 28**·계수 47/**57**/184(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1/2/3 ✅**. 새 세션은 **W5-4부터 실행** — [waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-4 행: **컴포넌트 아님**=페이지 컴포지션 가이드 문서 신설 `documents/plans/list-page-composition-guide.md`·apps/sample 정준 예시·CAP-18/19/20 대조·계수 PASS 재검증)만 읽고 착수. 문서 작업(발명 없음)이라 sonnet 위임 가능. **Do-NOT**: Wrapper급 컴포넌트 export·스펙 §7 밖 표면 발명.
-**Last updated**: 2026-07-12 (**W5-3 고급검색+filter 레지스트리 ✅** `2223f35`. ViewListGrid 내장 고급검색 패널(별도 export 아님 §7)·신규 `filter-renderer-registry`(string 키)·`deriveFilterFields`(deriveListFields 자매)·list-store `setSearchForm` 액션(withPage(0)+fetch·quickSearch 선례·fetch 계약 무변경)·College name.withFilter. **§Needs Review #W5-1 operator=`string` 확정**(스펙 §10-A·QueryConditionType 캐스트는 addAndFilter 지점만). delegate(sonnet)→메인 authoritative full gate+E2E 독립 PASS(**2138**u·+7·**E2E 28**·계수 47/**57**/184). deviation 5(재적용 de-dup 미구현만 §Needs Review·나머지=계수표기/mock 발견/test 기전/a11y). Next=**W5-4**(페이지 컴포지션 가이드 문서).)
+**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 list-track 완료 ✅**(W5-1~4). 새 세션은 **W6 data-transfer 착수 전 entry-brief pass부터** — [waves §W6 행](./plans/entityform-api-implementation-waves.md) + W5~W7 wave-entry 규칙(현 코드 서베이+wave-entry 결정 pass, W5 선례). entry pass=설계 판단 포함 → **상위 티어(opus/fable) 권장**·delegate 아님. entry pass 완료 후 W6 구현은 실행급 브리프로 sonnet 위임 가능. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4).
+**Last updated**: 2026-07-12 (**W5 list-track 완료 ✅** — W5-4 페이지 컴포지션 가이드(`list-page-composition-guide.md`·호스트 셸 컴포지션 문서화·컴포넌트 아님·waves 결정1) + W5 wave-end 게이트: CAP-18(substrate)/19(컬럼 파생+list-cell)/20(고급검색+filter) 전건 착지 대조·계수 47/57/184 PASS(임계 55/120/190)·E2E 28(전 리스트 페이지 무회귀·last code `2223f35`). W5-3까지 delegate(sonnet)→메인 authoritative 검증 완료. Next=**W6 entry-brief pass**(상위 티어 권장).)
 
 ## Goal
 
@@ -45,13 +45,13 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC·EG W1~W4 ✅ · W5~W7 남음) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC·EG W1~W5 ✅ · W6~W7 남음) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1/2/3 ✅**. 다음: **W5-4 실행**(list-track 마지막) — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
+## 세션 인계 (Handoff — **W1~W4 ✅ · D-pass ✅ · W5 list-track 완료 ✅**(W5-1~4). 다음: **W6 entry-brief pass** — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
-- **⚠ 다음 = W5-4 실행**(문서 작업·sonnet 위임 가능): W5-3 ✅(ViewListGrid 내장 고급검색 패널·`filter-renderer-registry`·`deriveFilterFields`·list-store `setSearchForm` 액션·operator=`string` 확정 — [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)). [waves §W5 표](./plans/entityform-api-implementation-waves.md) W5-4 행 = **페이지 컴포지션 가이드(문서·컴포넌트 아님)**: 신규 `documents/plans/list-page-composition-guide.md` — apps/sample 6 리스트 페이지가 이미 bare 컴포지션(main→헤더행+"새로 만들기"→ViewListGrid)으로 동작(waves §W5 결정1) → 그 정준 호스트 페이지 셸 컴포지션을 문서화(W7 MIGRATION 전용 절이 흡수). + **wave-end 게이트**: full gate+E2E·CAP-18/19/20 대조(빈 행 없음 확인)·계수 리포트(EntityForm 47·root 57·/schema 184 — 전부 임계 55/120/190 내, `scripts/count-public-surface.mjs` 실측). **Do-NOT(발명금지)**: Wrapper급 컴포넌트 export 신설·스펙 §7 밖 react 표면 발명(결정1: 페이지 셸=호스트 소유 C7). W5-4 종료=list-track(W5) 완료 → W6 data-transfer는 entry-brief pass 선행.
+- **⚠ 다음 = W6 entry-brief pass**(설계 판단 포함 → **상위 티어 opus/fable 권장·delegate 아님**): W5(list-track) ✅ — W5-1 substrate·W5-2 컬럼 파생+list-cell·W5-3 고급검색+filter·W5-4 [컴포지션 가이드](./plans/list-page-composition-guide.md). CAP-18/19/20 전건 착지·계수 47/57/184·E2E 28. **W6 = data-transfer**(CAP-16·17): [waves §W6 행](./plans/entityform-api-implementation-waves.md)("withDataTransfer·`/excel` subpath·ViewListGrid 툴바 opt-in")은 **계약 수준** → W5처럼 **wave-entry 브리핑 pass 필수**(waves 65행 "W5~W7 규칙"): ① 현 코드 서베이(구 data-transfer/엑셀 표면·`withDataTransfer` :448 구조적 fix 대상 확인) ② wave-entry 결정(스펙 인용 or 비크리티컬 모델 판정·§10 게이트 4) ③ §10-A 계수 갱신(/excel subpath·withDataTransfer). **업로드 backend seam**(§Open Q 재분류): GJCU 관례 확인 후 모델 자동 결정(sample endpoint/BackendAdapter.upload/외부 URL). **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현. entry pass 후 W6 구현은 실행급 브리프로 sonnet 위임.
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -95,11 +95,11 @@
 - [x] **W5-1 필드 substrate** ✅ 2026-07-12 · withList/withFilter+타입2·배럴+2·2124u·47/49/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
 - [x] **W5-2 컬럼 파생+list-cell 레지스트리** ✅ 2026-07-12 · getListConfig 파생·마법폴백폐기·M2O통합·2131u/E2E27·47/53/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [x] **W5-3 고급검색+filter 레지스트리** ✅ 2026-07-12 · `2223f35` · filter-registry·deriveFilterFields·ViewListGrid 패널·setSearchForm·2138u/E2E28·47/57/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
-- [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조 **← Next up**
-- [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
-- [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
+- [x] **W5-4 페이지 컴포지션 가이드(문서)** ✅ 2026-07-12 · `list-page-composition-guide.md`(호스트 셸 컴포지션·컴포넌트 아님) · W5 wave-end: CAP-18/19/20 전건 착지·계수 47/57/184 PASS·E2E28
+- [ ] **W6 data-transfer** — **entry-brief pass 선행**(W5처럼 survey+wave-entry 결정) · CAP-16·17 · withDataTransfer/`/excel` subpath · **← Next up**
+- [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION(페이지 셸 절=이 가이드 흡수)+codemod · CAP-24·25
 
-**Next up**: **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20 대조 + 계수 재검증. 실행 계약=[waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-4 행·**컴포넌트 아님**=호스트 페이지 셸 컴포지션 문서화, W7 MIGRATION 전용 절이 흡수) + §세션 인계 Handoff. Wrapper급 컴포넌트 export 금지·스펙 §7 밖 표면 발명 금지.
+**Next up**: **W6 data-transfer** — 착수 전 **entry-brief pass 선행**(W5 선례처럼: 현 코드 서베이 + wave-entry 결정 pass, waves §W5~W7 규칙). CAP-16(withDataTransfer 구조적 fix)·CAP-17(`/excel` subpath·xlsx optional peer). entry pass는 설계 판단 포함 → 상위 티어(opus/fable) 권장. 실행 계약=[waves §W6 행](./plans/entityform-api-implementation-waves.md) + entry pass 산출.
 
 ---
 
