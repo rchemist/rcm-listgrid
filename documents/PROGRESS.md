@@ -76,7 +76,7 @@
 #### Phase EF ✅ 완료 (2026-07-11 — EF1~5 + 리뷰게이트 R1·R2 + gate 통과, 명령형 라이프사이클 완비 · 1205 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md) · parity map [analysis](./analysis/2026-07-11/ef-gate-parity-map.md)
 
 #### Phase EA/EB/EC ✅ 완료 (2026-07-11) · [archive](./progress-archive/phase-e-track-tasks.md)
-- EA(필드21+공유기반)·EA-D2(Xref)·EB(주소+Daum)·EC1~3(실브라우저 실증)·EC3-0(TAB숨김)·EC-R1/EC-F·EF6/EF7 완료. E2E 5→16. 상세 [archive](./progress-archive/phase-e-track-tasks.md).
+- EA(필드21+공유)·EA-D2(Xref)·EB(주소+Daum)·EC1~3(실브라우저)·EC3-0·EC-R1/EC-F·EF6/EF7 완료. E2E 5→16. [archive](./progress-archive/phase-e-track-tasks.md).
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(**W3 권한·능력 착지 후** role-readonly 실증으로 재개)
 
 #### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11)
@@ -91,8 +91,8 @@
 - [x] **W4 폼 완결** ✅ `3b3518f`..`44edfae` · 6 sub+하드닝(4버그)·CAP-05·07·10·13·23·2103u/E2E24·계수 47/49/182 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D1 async save-gating** (#W4-3a) ✅ 2026-07-12 · dirty-gate+reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정 · 2114u/E2E27 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
-- [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves 브리프 W5 표(W5-1~4)+§12 결정 4건+§10-A 정밀화 · 계수 47/49/182 무변경(투영 47/~51/184) · [brief](./plans/entityform-api-implementation-waves.md)
-- [x] **W5-1 필드 substrate** ✅ 2026-07-12 · withList/withFilter+타입2(additive)·배럴+2·gate·2124u·47/49/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
+- [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves W5 표(W5-1~4)+§12 결정4+§10-A · 계수 47/49/182 무변경 · [brief](./plans/entityform-api-implementation-waves.md)
+- [x] **W5-1 필드 substrate** ✅ 2026-07-12 · withList/withFilter+타입2·배럴+2·2124u·47/49/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
 - [ ] **W5-2 컬럼 파생+list-cell 레지스트리** (react) — ViewListGrid 파생 교체·마법폴백 폐기·**ManyToOne showInList→withList 통합**·sample withList 이행+E2E · §7 · CAP-19 **← Next up**
 - [ ] **W5-3 고급검색+filter 레지스트리** (react) — ViewListGrid 내장 패널·SearchForm.addAndFilter+E2E · §7 · CAP-20
 - [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조
@@ -115,7 +115,7 @@
 
 - EF/EA 페이즈 노트(EF-R2 stash anomaly·EF-gate FIND-ONLY·EA-A fan-out 커밋방식·EA-D reorder)는 [archive](./progress-archive/phase-e-track-tasks.md#progress-notes-본문-이월-2026-07-11--efea-페이즈-완료로-아카이브)로 이월.
 - W1~W3 방법론·검증 노트(W1 tsc+test 이중검증·EG-D 4렌즈·harness 교차리포·W2/W3 착수 규율·W3-1 발명게이트 해소)는 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-11 slim).
-- 2026-07-11 W4-0 계수 재산정 방법론: `scripts/count-public-surface.mjs`의 EntityForm 계수는 public `get*Handlers`(훅당 1, §3.3 "엔진 내부"이나 cross-package라 public 필수)+getReadOnly까지 포함 → 최종 53. 스펙 "44 소비자 멤버"와 기계 계수(53)의 갭을 §10-A 표로 명문화. 계수 **규칙**은 무변경(임계값만 재산정). 대안(get*Handlers 계수 제외 규칙)은 채택 안 함 — cross-package public 불가피·규칙 예외 추가는 invention 리스크. W5/W6는 entry pass에서 §10-A 표 갱신+임계 재검증(waves 규칙 반영).
+- W4-0 계수 재산정 방법론(count-public-surface.mjs: get*Handlers+getReadOnly→53·§10-A 갭 명문화·규칙 무변경·대안 미채택)은 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-12 slim).
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
