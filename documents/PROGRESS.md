@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · Phase EG(W1~W7) 게이트 green이나 **봉인 잠정 재개** — 봉인 후 조사(2026-07-12)서 GA-blocking 갭 발견(SearchForm `withFilter` parity·wire 충실도·유틸·프록시 문서). **Next up: Phase GX(0.4 프레임워크 정합 + parity·GA-blocking)** GX-1~5 → 그 후 GA 게이트(CAP-28). 근거 [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 계수 49/57/186. P0/P1 publish=외부 승인 대기.
+**Status**: active · **Phase GX(0.4 프레임워크 정합·GA-blocking) 진행 — GX-1 ✅**(SearchForm wire=프레임워크 SearchRequest 정합·withFilter 복원·2251u/E2E green). **Next up: GX-2**(mock 백엔드 충실화)→GX-3~5→GA 게이트(CAP-28). 근거 [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 계수 49/57/186. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: Phase EG(W1~W7) 게이트 green이나 **봉인 재개** — 새 세션은 **Phase GX(0.4 프레임워크 정합, GA-blocking)부터**. cold-start=[gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)(결정·프레임워크 계약·GX-1~5 백로그)+[rcm-backend-framework 0.1.0] 계약. **확정 결정(2026-07-12)**: 위젯 descope·유틸 새 `/utils` 전량 이식·SearchForm `withFilter` 완전 부활·GA-blocking·**wire=rcm-backend-framework 0.1.0 기준(GJCU 0.2 아님)**. GX 후 GA 게이트(CAP-28). **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만).
-**Last updated**: 2026-07-12 (**봉인 후 조사 → Phase GX 개설** — 사용자가 descope 처분·SearchForm/프록시 온전성 재조사 지시. 3 검증 워크플로우(적대검증+메인 재확인) 결과: ①위젯 descope OK ②유틸 진짜 삭제→`/utils` 이식 필요 ③프록시 안 깨짐·문서갭만 ④**SearchForm `withFilter`('AND'|'OR',...) 부재=GA 갭·spec/MIGRATION "무변경" 거짓** ⑤테스트 백엔드=**프레임워크 0.1.0 shape 맞음**(0.2 아님)·부분 충실도 갭. 사용자 결정: withFilter 부활·`/utils` 전량·GA-blocking·wire=프레임워크 기준. → **Phase GX GX-1~5** 개설. 근거 [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 다음=GX-1.)
+**Last updated**: 2026-07-12 (**GX-1 ✅** — SearchForm wire를 rcm-backend-framework 0.1.0 SearchRequest에 정합: `withFilter('AND'|'OR'|'NOT',...)`+`withFilterIgnoreDuplicate` 복원(0.3 시맨틱)·`FilterItem.subFilters` 연산자 키맵(중첩)·cacheKey wire 제거·QueryConditionType 12→24·quickSearch dedup 수정. sonnet 위임→메인 authoritative: type-check·typecheck:packages clean·**full unit 2251 pass**(+15 신규·0회귀)·**college E2E 3/3**. §Needs Review +1(empty AND/OR 방출). 상세 [archive #GX-1](./progress-archive/phase-gx-tasks.md#gx-1). 다음=GX-2.)
 
 ## Goal
 
@@ -104,13 +104,13 @@
 
 **규범**: [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)(결정·프레임워크 0.1.0 계약·근거 file:line) · **wire source-of-truth**: `rcm-backend-framework` 0.1.0(`SearchResponse`/`SearchRequest`/`FilterItem`·QueryConditionType 24)·edustack=실사용 레퍼런스. **Do-NOT**: 0.2(GJCU) shape primary 채택(폴백만)·구 src/ 삭제.
 
-- [ ] **GX-1 SearchForm wire 완전 정합** — **← Next up**. `packages/schema-core/src/search/search-form.ts`: `withFilter('AND'|'OR',...items)`+`withFilterIgnoreDuplicate` 복원(결정3·filters[op] push)·`FilterItem.subFilters`→`{[op]:FilterItem[]}` 중첩맵·`filters`에 NOT 키·`cacheKey` wire 제거·QueryConditionType 12→24(프레임워크 enum)·quickSearch de-dup 버그(`__quick__` prefix 미일치). 검증: `SearchRequestJacksonTest` JSON ↔ toJSON 대조 유닛 + college E2E green.
-- [ ] **GX-2 apps/sample 백엔드 프레임워크 충실화** — `apps/sample/lib/mock-backend/envelope.ts`: `searchEnvelope` 9필드 완비(page/pageSize/sorts/attributes/errors)·404→RFC7807 ProblemDetail(+`backend-rcm/adapter.ts` 파서 정합)·"Spring Page" 주석 정정 · `employee/collabo/search/route.ts` filters 배선. 검증: E2E 30 + 어댑터 에러 경로.
+- [x] **GX-1 SearchForm wire 완전 정합** ✅ 2026-07-12 · sonnet→검증 · withFilter/IgnoreDuplicate 복원+FilterItem 중첩맵/NOT+cacheKey 제거+조건타입 24+quickSearch dedup · 2251u·college E2E 3/3 green · [detail](./progress-archive/phase-gx-tasks.md#gx-1)
+- [ ] **GX-2 apps/sample 백엔드 프레임워크 충실화** — **← Next up**. `apps/sample/lib/mock-backend/envelope.ts`: `searchEnvelope` 9필드 완비(page/pageSize/sorts/attributes/errors)·404→RFC7807 ProblemDetail(+`backend-rcm/adapter.ts` 파서 정합)·"Spring Page" 주석 정정 · `employee/collabo/search/route.ts` filters 배선 · **GX-1 deviation① 재확인**(mock이 empty AND/OR 그룹 수용·프레임워크 sparse-map 정합 여부). 검증: E2E 30 + 어댑터 에러 경로.
 - [ ] **GX-3 `/utils` 패키지 + 전량 이식**(결정2) — 새 `packages/utils`(오라클 `src/listgrid/misc/` 기계 이식): 정규식11·날짜포맷터·비교4·URL/스토리지·asset-URL·formatPrice·isEquals/isEqualCollection 배럴(RequestUtil/EntityError 제외). §2 exports+dts+attw+publint+smoke:load. **OQ 해소(2026-07-12)**: ①날짜=**자체구현·런타임 의존 0**(고정포맷은 손수 짜 0.3 바이트동일·상대시간=`Intl.RelativeTimeFormat`·date-fns는 devDep만) ②asset-URL=**BackendAdapter 주입 base 우선 + 전역 `ASSET_SERVER_URL` 폴백**(util은 어댑터 hard import 금지·AdapterProvider가 base 주입, seam GX-3서 설계).
 - [ ] **GX-4 API 프록시 seam 문서화**(§3) — spec §6.2/ADR 애드덤: `RcmAdapterOptions.fetch`+`baseUrl`=프록시 seam 명시+워크드 예제(GJCU shouldSkipProxy 패턴)·MIGRATION `./api` 행에 "serverProxy 자동 승계 아님" 경고. 임의 외부호출(getExternalApiData)은 별도 컴포넌트-parity로 트래킹.
 - [ ] **GX-5 문서 정정 + descope 원장** — spec §9:370+MIGRATION:66 "무변경" 거짓 정정(withFilter 복원 반영)·정규식 "8종"→11종·widgets(QR/KakaoMap/ApiSpec/XrefPrice) CAP-29 descope 명문화·CAP 매트릭스 프록시/조건타입 행. §Needs Review descope 계열 흡수.
 
-**Next up**: **GX-1 SearchForm wire 완전 정합** — 근거·계약 [gap analysis §GX-1](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 이후 GX-2~5 → GA 게이트(CAP-28 헌장 대조·인라인 판단). GX-1/2는 hot-file 아님·병렬 가능하나 GX-1(SearchForm) 먼저(GX-2 mock이 GX-1 wire 검증 대상).
+**Next up**: **GX-2 apps/sample 백엔드 프레임워크 충실화** (GX-1 ✅). 근거 [gap analysis §GX-2](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 이후 GX-3(/utils·OQ 해소됨)~5 → GA 게이트(CAP-28 헌장 대조·인라인 판단).
 
 ---
 
@@ -129,6 +129,7 @@
 - [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
+- [ ] **#GX-1 toJSON empty AND/OR 그룹 방출** — `filters.AND`/`OR`를 빈 `[]`도 항상 wire 방출(기존 테스트 presence 어서트 때문)·NOT만 omit. 프레임워크 sparse-map 정합/실백엔드 수용 GX-2서 재확인 · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-1)
 - [ ] **#W7-4 서브패스 제거 descope 확인** — 0.4가 다수 0.3 공개 심볼 미이관/축소(/qr·/api-spec·/xref-price 전체·/misc 대부분·KakaoMap 지도뷰·SearchForm 헬퍼 3종·EntityWithId·/api HTTP 유틸). 의도 descope(CAP-29)인지 GJCU gap인지 소비자 확인 필요 · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
 - [ ] **#W7-4 spec §9 #29 라벨 재조정** — spec §9는 withCreatedAndUpdatedAtFields를 codemod로 표기하나 impl=수동/이연(presets-rcm 빈 스캐폴드). spec 저자: §9 라벨 정정 or /presets/rcm 감사헬퍼 출하 후 codemod화 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
 - [ ] **#W7-4 guide SUPERSEDED 배너** — list-page-composition-guide.md 상단에 ⛔ SUPERSEDED→MIGRATION §3 포인터 추가(원문 무삭제). 브리핑 declared 4산출물 밖 touch(관례상 정당·정보 흡수 보존) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)

@@ -260,8 +260,10 @@ export { SearchForm } from './search/search-form';
 export type {
   Direction,
   SortSpec,
+  LogicalOperator,
   QueryConditionType,
   FilterItem,
+  FilterGroups,
   SearchFormJSON,
 } from './search/search-form';
 
