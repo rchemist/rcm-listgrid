@@ -355,7 +355,8 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 | `withId`(160)/`withSession`(4)/`getSession`(16) | withId 동일 · session은 useEntityForm/controller 옵션+ctx.session/mutator.getSession() | 수동(선언에서 제거) |
 | `getFetchedEntity`(10) | store.fetchedData / ctx.data | 준-기계적 |
 | `getFetchUrl`(3)/`isAbleFetch` | adapter.getOne 내부화 — 삭제 | 수동(직접 fetch는 adapter 호출) |
-| `withDataTransferConfig`(15) | `withDataTransfer` | 준-기계적 |
+| `withDataTransferConfig`(15) | `withDataTransfer({export?,import?})`(최소 표면) | 준-기계적(codemod) |
+| data-transfer 런타임 DI(Exporter/Importer 주입·`@rchemist/listgrid/excel`) | `@listgrid/excel`: `registerExcelDataTransfer()` 부트스트랩 + ViewListGrid `toolbar` seam 컴포지션(호스트) · import upload=호스트 `onSubmit` prop | 수동(호스트 배선·W6-3 선례) — **미이관**(officecrypto/password·excelDownloadHistory·DataImportSample·ResultView·DynamicDataImporter)은 소비자 요구 시 /excel 확장 |
 | `withCreatedAndUpdatedAtFields`(30)/중복 별칭 2종 | `/presets` 감사필드 헬퍼(addFields({items: auditFields()})) | codemod |
 | `withCheckButtonValidation`(17)/`withCheckButtonLabel`(3) | AsyncValidation(trigger:'button') | 수동 |
 | `withAttributes`(2)/`getAttributes`(18)/`hasAttribute`(1) | `withMeta`(merge)/`getMeta` | 준-기계적 |

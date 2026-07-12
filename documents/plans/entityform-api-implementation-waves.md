@@ -90,7 +90,9 @@
 
 **W5 종료 게이트**: full gate + E2E(16→목표 +2: 컬럼 파생·고급검색) + CAP-18/19/20 대조 + 계수 리포트(/schema 184·root ~51·EntityForm 47 무변경) 커밋. **hot-file**: entity-form.ts/form-store.ts/ViewEntityForm.tsx 미관통(W5=form-field·ViewListGrid·신규 레지스트리 중심); `ViewListGrid.tsx`는 **W5-2→W5-3 순차**(동일 파일). **§10-A**: /schema W5 행 FieldListConfig·FieldFilterConfig(+2→184, 기재됨) · root 신규 registerListCellRenderer·registerFilterRenderer(+2→~51) · EntityForm +0. 임계값 근접 아님 → 재산정 불요, wave-end 실측 재검증.
 
-## W6 — data-transfer (entry-brief pass ✅ 2026-07-12 · CAP-16·17)
+## W6 — data-transfer ✅ 완료 (2026-07-12 · CAP-16·17 · W6-1~4 · E2E 30)
+
+> **W6 wave-end 결과(2026-07-12)**: **CAP-16**(withDataTransfer :448 구조적 fix·W6-1)·**CAP-17**(`/excel` xlsx optional 런타임·W6-2a foundation+2b export/import core·W6-3 실배선 E2E) 전건 착지(빈 행 0). **계수 49/57/186**(임계 55/120/190 전부 내·/excel 신 subpath 미계수). **full gate + E2E 30/30 green**(export .xlsx 다운로드·import fixture→행·메인 독립 관찰). **구 결함 봉인**: :448 copy-paste(공유 대칭 헬퍼로 표현 불가능)·multiselect import(`,` 검사후 `|||` split → 양방향 `|||`). **미이관**(문서화 이연·charter C6 밖): officecrypto/password·excelDownloadHistory·DataImportSample·ResultView·DynamicDataImporter(§3.5·§9). §Needs Review 3(fDate TZ·TIER3 경계·W7 xlsx interop). 다음 W7 패키징서 /excel published exports 배선.
 
 > **entry 근거**: 스펙 §3.5(withDataTransfer/getDataTransfer + W6-entry 타입 확정 DataFieldSpec/DataTransferSpec)·§2(`/excel` subpath = DataExporter/Importer 런타임, xlsx optional peer)·§7(ViewListGrid `toolbar` render-prop = 호스트 컴포지션 seam)·§8 CAP-16/17·§9(withDataTransferConfig→withDataTransfer codemod)·§10-A(W6 /schema +2→186). 현 코드 서베이(2026-07-12 opus) — file:line은 HEAD `848c86f` 기준(착수 시 재확인). **공개 표면은 작다**(EntityForm +2·/schema 타입 +2); 구현은 구 `src/listgrid/transfer/` **3443 LOC** 서브시스템의 *코어 경로* 이식 + 신규 `/excel` 패키지가 phase급 무게. 스펙이 구 rich `withDataTransferConfig`(urls/mode/sampleData/maxCount/description 등)를 **최소 표면**(export.fields/fileName·import.fields)으로 의도적 축소 → W6 = 선언 표면(schema) + /excel 런타임 코어 + 툴바 컴포지션 + sample E2E.
 
