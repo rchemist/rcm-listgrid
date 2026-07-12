@@ -70,16 +70,51 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
         ...(session !== undefined ? { session } : {}),
       };
 
-      const [isHidden, isRequired, isReadOnly] = await Promise.all([
+      // R5 — Promise.allSettled (NOT Promise.all): one throwing predicate must
+      // NOT drop the other two gates to their permissive `false` default, and
+      // the discarded rejected promise must not surface as an unhandled
+      // rejection. On a rejected predicate we KEEP the field's last-known
+      // resolved value (never fall to permissive false — the useState seed is
+      // also the declared-static value, since only the async ValuedBoolean
+      // branch can throw). `required` additionally fails CLOSED (stays
+      // required) so a throwing predicate can never silently disable the `*`
+      // and the required-validation gate. Sibling posture: many-to-one-
+      // renderer.tsx / custom-option-renderer.tsx both `.catch` their async
+      // resolves rather than let them reject.
+      const [hiddenResult, requiredResult, readOnlyResult] = await Promise.allSettled([
         field.isHidden(ctx),
         field.isRequired(ctx),
         field.isReadOnly(ctx),
       ]);
 
       if (!cancelled) {
-        setHidden(isHidden);
-        setRequired(isRequired);
-        setReadOnly(isReadOnly);
+        if (hiddenResult.status === 'fulfilled') setHidden(hiddenResult.value);
+        else
+          console.error(
+            '[@listgrid/react] FieldRenderer isHidden predicate threw',
+            fieldName,
+            hiddenResult.reason,
+          );
+
+        if (readOnlyResult.status === 'fulfilled') setReadOnly(readOnlyResult.value);
+        else
+          console.error(
+            '[@listgrid/react] FieldRenderer isReadOnly predicate threw',
+            fieldName,
+            readOnlyResult.reason,
+          );
+
+        if (requiredResult.status === 'fulfilled') setRequired(requiredResult.value);
+        else {
+          // fail CLOSED — a throwing required predicate must NOT drop the field
+          // to not-required (that would disable the `*` and the required gate).
+          setRequired(true);
+          console.error(
+            '[@listgrid/react] FieldRenderer isRequired predicate threw; failing closed (required)',
+            fieldName,
+            requiredResult.reason,
+          );
+        }
       }
     })();
     return () => {
