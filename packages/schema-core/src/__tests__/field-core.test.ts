@@ -42,6 +42,10 @@ function CollegeForm(): EntityForm {
     });
 }
 
+// R9 — a trivial EntityForm subclass with no overrides, used to assert
+// clone()'s this-preserving contract (spec Law L3: `clone(): this`).
+class CustomEntityForm extends EntityForm {}
+
 describe('EntityForm declaration (charter C1)', () => {
   it('captures fields ordered + form-level config', () => {
     const f = CollegeForm();
@@ -67,6 +71,12 @@ describe('EntityForm declaration (charter C1)', () => {
     const b = a.clone();
     expect(b.getField('name')).not.toBe(a.getField('name'));
     expect(b.getFields().length).toBe(a.getFields().length);
+  });
+
+  it('clone() is this-preserving — a subclass instance clones to the same subclass (spec Law L3, R9)', () => {
+    const custom = new CustomEntityForm('CustomEntityForm', '/custom');
+    const cloned = custom.clone();
+    expect(cloned).toBeInstanceOf(CustomEntityForm);
   });
 });
 

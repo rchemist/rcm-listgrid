@@ -466,7 +466,14 @@ export class EntityForm {
    * `formReadOnly` seed source. Defaults false (unset = editable).
    */
   private formReadOnly = false;
-  private id?: string;
+  /**
+   * Declared record id (spec §3.1, renderType 판별자) — `withId`'s storage.
+   * `undefined` = create-mode (not declared). This field is declared
+   * `| undefined` explicitly (exactOptionalPropertyTypes), same posture as
+   * {@link revisionEntityName}, so `withId(undefined)` can clear a
+   * previously-declared id back to "not declared" (L4 "undefined = clear").
+   */
+  private id: string | undefined = undefined;
 
   private readonly fields: EntityField[] = [];
   private readonly tabs = new Map<string, TabDef>();
@@ -619,8 +626,14 @@ export class EntityForm {
     this.actions.push(action);
     return this;
   }
-  /** Mark this instance as an existing-record (update) form. */
-  withId(id: string): this {
+  /**
+   * Mark this instance as an existing-record (update) form, or clear it
+   * back to create-mode (spec §3.1 `withId` signature row: `(id: string |
+   * undefined): this`). `undefined` CLEARS a previously-set id back to
+   * "not declared" (L4 "undefined = release", `withRevision(undefined)`
+   * precedent) — from that point on `getId()` reports `undefined` again.
+   */
+  withId(id: string | undefined): this {
     this.id = id;
     return this;
   }
@@ -1091,9 +1104,21 @@ export class EntityForm {
     return resolveDataTransferSpec(this.dataTransfer, this.getFields());
   }
 
-  /** Declaration clone (charter C1: `userForm.clone().withId(id)` for the form screen). */
-  clone(includeValue = false): EntityForm {
-    const copy = new EntityForm(this.name, this.url);
+  /**
+   * Declaration clone (charter C1: `userForm.clone().withId(id)` for the form screen).
+   * This-preserving (spec Law L3: `clone(): this`) — constructs via the
+   * RUNTIME constructor (`this.constructor`), not the hardcoded `EntityForm`
+   * class, so a subclass instance's `clone()` returns that same subclass,
+   * not a plain `EntityForm` (same posture as `FormField.clone()` in
+   * ./field/form-field.ts, which is this-preserving via a different
+   * mechanism — Object.create on the live prototype — since FormField has no
+   * fixed 2-arg constructor to replay).
+   */
+  clone(includeValue = false): this {
+    const copy = new (this.constructor as new (name: string, url: string) => this)(
+      this.name,
+      this.url,
+    );
     copy.titleSpec = { ...this.titleSpec };
     copy.capabilities = { ...this.capabilities };
     // propagate escape-hatch meta (spec §3.1, CAP-23) — SHALLOW copy, so
