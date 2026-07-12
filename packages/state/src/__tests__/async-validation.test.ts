@@ -405,18 +405,16 @@ describe('form-store AsyncValidation — R4: validateAll must not clobber a conc
         // R4 bug depends on. Only the FIRST invocation blocks; the second
         // validateAll() call below (post-race) must resolve immediately or
         // it would hang forever.
-        new StringField('slow', 2)
-          .withLabel('Slow')
-          .withValidations(
-            new CustomValidation('slow-check', () => {
-              slowCallCount += 1;
-              if (slowCallCount === 1) {
-                slowStarted();
-                return new Promise<ValidateResult>((res) => (resolveSlowCheck = res));
-              }
-              return Promise.resolve(ValidateResult.success());
-            }),
-          ),
+        new StringField('slow', 2).withLabel('Slow').withValidations(
+          new CustomValidation('slow-check', () => {
+            slowCallCount += 1;
+            if (slowCallCount === 1) {
+              slowStarted();
+              return new Promise<ValidateResult>((res) => (resolveSlowCheck = res));
+            }
+            return Promise.resolve(ValidateResult.success());
+          }),
+        ),
       ],
     });
     const store = createFormStore(form);

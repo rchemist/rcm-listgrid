@@ -114,7 +114,9 @@ function XrefForm(): EntityForm {
       // NOT required by declaration (scenario A base)
       new XrefMappingField('professors', 1, { entityForm: () => new EntityForm('P', '/p') }),
       // required by declaration (scenario B base)
-      new XrefMappingField('staffs', 2, { entityForm: () => new EntityForm('S', '/s') }).withRequired(true),
+      new XrefMappingField('staffs', 2, {
+        entityForm: () => new EntityForm('S', '/s'),
+      }).withRequired(true),
       // prefer variant, NOT required by declaration (scenario A prefer)
       new XrefPreferMappingField('college', 3, { entityForm: () => new EntityForm('C', '/c') }),
     ],

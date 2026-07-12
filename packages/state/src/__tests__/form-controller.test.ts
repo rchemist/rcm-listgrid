@@ -301,7 +301,7 @@ describe('createFormController.save (spec §6.2)', () => {
 });
 
 describe('createFormController.delete (spec §6.2)', () => {
-  it('create-mode, no opts.ids, no bound id: returns { ok: false, reason: \'capability\' } without calling adapter.remove (R12 — no [undefined] built)', async () => {
+  it("create-mode, no opts.ids, no bound id: returns { ok: false, reason: 'capability' } without calling adapter.remove (R12 — no [undefined] built)", async () => {
     const entityForm = WidgetForm();
     const store = createFormStore(entityForm);
     const remove = vi.fn();

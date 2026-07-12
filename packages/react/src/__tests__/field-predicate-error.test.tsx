@@ -58,8 +58,6 @@ describe('R5 — FieldRenderer predicate error fallback', () => {
     // ASSERT 2: the throwing predicate produced no unhandled rejection
     // (pre-R5: Promise.all propagated the 'boom' error out of the fire-and-
     // forget IIFE).
-    expect(
-      seen.some((r) => r instanceof Error && r.message === 'boom'),
-    ).toBe(false);
+    expect(seen.some((r) => r instanceof Error && r.message === 'boom')).toBe(false);
   });
 });
