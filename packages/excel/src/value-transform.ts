@@ -135,6 +135,35 @@ export interface ValueTransformOptions {
 }
 
 /**
+ * TIER 2 passthrough's defensive guard for `exportValue`'s `default` case
+ * (R7, midpoint-code-review.md §4.3). A manyToOne/xref* /address field's
+ * runtime row value can be the nested RELATED-ENTITY OBJECT itself (not yet
+ * flattened to a scalar id/label) when the backend list response embeds the
+ * relation inline — `String({...})` on that shape literally yields the
+ * string `"[object Object]"`. This guard is UNCONDITIONAL (no `FieldType`
+ * branch, no manyToOne-specific check) because `exportValue`'s signature
+ * (`type`, `value`, `options?: { options?: SelectOption[] }`) never receives
+ * the field's `ManyToOneConfig`/`labelField` — `DataFieldSpec`
+ * (`@listgrid/schema-core/data-transfer.ts:18-34`) carries only
+ * `name`/`label`/`type`, no `labelField` (checked; confirmed absent) — so
+ * there is no configured label key reachable here. Deterministic fallback
+ * probe order on the raw object: `name`, then `label`, then `id`, first
+ * present-and-non-nullish value wins; `''` if none match. Non-object,
+ * non-array values (the TIER 2 common case: string/number/boolean/etc.)
+ * are untouched — `String(value)`, identical to the prior behavior. GA still
+ * confirms this against the real GJCU list-endpoint row shape (§9 GA
+ * brief) — a verification step now, not an open runtime decision.
+ */
+function exportTier2Value(value: object): string {
+  if (!Array.isArray(value)) {
+    const obj = value as Record<string, unknown>;
+    const label = obj.name ?? obj.label ?? obj.id;
+    return label === undefined || label === null ? '' : String(label);
+  }
+  return String(value);
+}
+
+/**
  * Export a field's runtime value to its xlsx-cell string representation,
  * keyed off `type` (TIER 1 switch; everything else is TIER 2 passthrough —
  * see file header). `options` carries the field's declared `SelectOption[]`
@@ -180,7 +209,7 @@ export function exportValue(
     case 'markdown':
       return getPlainText(value);
     default:
-      return String(value);
+      return typeof value === 'object' ? exportTier2Value(value) : String(value);
   }
 }
 

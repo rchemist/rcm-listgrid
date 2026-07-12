@@ -181,6 +181,19 @@ describe('TIER 2 — scalar passthrough (every FieldType not in TIER 1/TIER 3)',
   it('import: number passes the value through unchanged', () => {
     expect(importValue('number', 42)).toBe(42);
   });
+
+  it('export: manyToOne row value {id,name} exports the label, not "[object Object]"', () => {
+    expect(exportValue('manyToOne', { id: 7, name: 'Acme Inc' })).toBe('Acme Inc');
+  });
+
+  it('export: manyToOne row value with no name falls back to label then id', () => {
+    expect(exportValue('manyToOne', { id: 7, label: 'Acme Label' })).toBe('Acme Label');
+    expect(exportValue('manyToOne', { id: 7 })).toBe('7');
+  });
+
+  it('export: manyToOne row value already flattened to a scalar id passes through unchanged (regression guard)', () => {
+    expect(exportValue('manyToOne', 7)).toBe('7');
+  });
 });
 
 describe('isAutoDeriveExcluded — TIER 3', () => {
