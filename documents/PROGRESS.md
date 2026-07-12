@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **RV-R1(CRIT reload write-path) ✅ `3c41ebf`. Next up: RV-R2(고급검색 HIGH)→R3~R8(MED)→R9~R12(LOW)→GA 게이트**. **G-1 GX-6=채택·재설계 구현 완료**(`9095504`·asset-URL context-스코프·전역싱글턴 폐기). §Needs Review open. P0/P1 publish=외부 승인 대기.
+**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **RV-R1·R2 ✅(`3c41ebf`·`dcd82b2`). Next up: R3~R8(MED)→R9~R12(LOW)→GA 게이트**. **G-1 GX-6=채택·재설계 구현 완료**(`9095504`·asset-URL context-스코프·전역싱글턴 폐기). §Needs Review open. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **새 세션은 Phase RV(중간점검 개선 트랙)부터** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md)(§4 확정 설계안·§8 원장) 단독 재개 가능. **RV-R1(CRIT reload)·RV-R2(HIGH 고급검색)가 GA 선결.** GA 게이트(CAP-28)는 RV + GA-BRIEF 저작 후. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4·GX-6이 실제 위반 사례)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·GX-6 WIP를 전역 싱글턴 기전 그대로 커밋(채택시 context 스코프 재설계).
-**Last updated**: 2026-07-13 (**RV-R1(CRIT reload write-path) 완료** — `3c41ebf` · FormRuntime.reload()가 throwaway 스토어 replace 대신 `into?`로 기존 스토어에 init 파이프 재실행(비함수 DATA만 얕은 병합·structureVersion bump·re-fetch 실패 시 라이브 데이터 보존) → 액션 클로저·구독 보존, reload 후 조용한 write 유실 해소. 판별 테스트(구코드 FAIL 확인)+full gate green(**test 2374**·type-check·typecheck:packages·build). sonnet 위임→메인 검증(diff verbatim 대조·intent-conformance). 진입 시 /progress:slim 181→169줄. 다음=RV-R2(HIGH 고급검색 de-dup).)
+**Last updated**: 2026-07-13 (**RV-R2(HIGH 고급검색 de-dup) 완료** — `dcd82b2` · ViewListGrid.applyAdvancedSearch가 addAndFilter 스택킹 대신 기존 SearchForm.withFilter('AND',...)로 name 단위 in-place 교체 → 같은 필드 수정 재검색의 AND(old,new)→빈결과 버그 해소, 공개표면 무변경(search-form.ts 미접촉·신규 API 0). 판별 테스트(구코드 length-2 AND FAIL 확인)+full gate green(**test 2375**·type-check·typecheck:packages·check:surface 61/120·188/190 before==after). sonnet 위임→메인 검증(diff verbatim·intent-conformance). #W5-3 §Needs Review 해소. 앞선 RV-R1(CRIT reload) ✅ `3c41ebf`. 다음=RV-R3~R8(MED).)
 
 ## Goal
 
@@ -49,9 +49,9 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — Phase GX(GX-1~5) ✅ 완료 + **2026-07-13 중간 점검 완료 → Phase RV 개설**. 다음: **RV-R2(고급검색 de-dup HIGH)** (RV-R1 ✅ `3c41ebf`) — 콜드스타트 [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md))
+## 세션 인계 (Handoff — Phase GX(GX-1~5) ✅ 완료 + **2026-07-13 중간 점검 완료 → Phase RV 개설**. 다음: **RV-R3~R8(MED)** (RV-R1·R2 ✅) — 콜드스타트 [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md))
 
-- **⚠ 다음 = Phase RV(중간점검 개선 트랙)** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) 단독. **RV-R1(CRIT reload write-path) ✅ `3c41ebf`**. 잔여 GA 선결=**RV-R2(HIGH: 고급검색 재적용 AND 누적→빈결과·ViewListGrid.tsx:267)**. R3~R8(MED)·R9~R12(LOW)·G-1(GX-6 처분 ✅)·GA-BRIEF(✅)는 §Tasks Phase RV 표. **각 R의 확정 설계안(before→after·증명·수용·Do-NOT)=분석 §4·[실행계획](./plans/rv-remediation-execution-plan.md).** Do-NOT: RV-R2서 addAndFilter 스택킹 시맨틱 변경 금지(새 프리미티브 추가)·GX-6 전역싱글턴 기전 커밋 금지.
+- **⚠ 다음 = Phase RV(중간점검 개선 트랙)** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) 단독. **RV-R1(CRIT reload)·RV-R2(HIGH 고급검색 de-dup) ✅ (`3c41ebf`·`dcd82b2`)**. 잔여=**R3~R8(MED)·R9~R12(LOW)**. G-1(GX-6 처분)·GA-BRIEF ✅. **각 R의 확정 설계안(before→after·증명·수용·Do-NOT)=[실행계획](./plans/rv-remediation-execution-plan.md)·분석 §4.** Do-NOT: search-form.ts addAndFilter 시맨틱 변경 금지·GX-6 전역싱글턴 기전 커밋 금지·스펙 §를 인용 못하는 발명 금지.
 - **GA 게이트(CAP-28·후순위)**: Phase GX 완료(GX-1~5·게이트 2368u/E2E32·계수 49/57/188). GA는 RV + GA-BRIEF 저작 후. cold-start: GA-BRIEF + [phase-gx archive](./progress-archive/phase-gx-tasks.md#gx-5) + 스펙 §8 CAP-28 + [헌장](./prd/concept-charter.md).
 - **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
@@ -104,7 +104,7 @@
 **규범(실행 계약)**: **[RV 실행 계획](./plans/rv-remediation-execution-plan.md)** — R1~R12 **무결정(zero-decision)** 스펙(항목별 exact before→after 코드 + 정확한 테스트 + 수용 + Do-NOT). 13 authoring + 13 opus cold-executor 검증(소스 패치 13/13 verbatim 정확·residue closure 반영). **후속 세션은 설계·결정 없이 매칭·치환·실행만.** why=[중간점검 리뷰 §4](./analysis/2026-07-13/midpoint-code-review.md). GA=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md)(CAP-28 순수검증). **GA 착수 = R1·R2·G-1 선결 후.**
 
 - [x] **RV-R1 reload() write-path 고아화** 🔴CRIT ✅ 2026-07-13 · `3c41ebf` · into? 병합으로 액션 클로저 보존(reload 후 write 유실 해소)·판별테스트(구코드 FAIL 확인)+2374 green · [R1](./plans/rv-remediation-execution-plan.md)
-- [ ] **RV-R2 고급검색 재적용 de-dup** 🟠HIGH — **신규 API 불필요**: ViewListGrid이 기존 `SearchForm.withFilter`(name 교체) 재사용(공개표면 무변경) · react/ViewListGrid.tsx:267 · [실행계획 R2](./plans/rv-remediation-execution-plan.md)
+- [x] **RV-R2 고급검색 de-dup** 🟠HIGH ✅ 2026-07-13 · `dcd82b2` · withFilter('AND',...) name 교체(스택킹→빈결과 해소)·surface 무변경(61/120)·2375 green · [R2](./plans/rv-remediation-execution-plan.md)
 - [ ] **RV-R3~R8** 🟡MED — Xref required(isBlank xref-aware)·validateAll 함수형머지·FieldRenderer allSettled+fail-closed·sessionStorage isBlank·TIER2 방어적 스칼라추출·DataImporter onSubmit catch · [실행계획 R3~R8](./plans/rv-remediation-execution-plan.md)
 - [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined widen)·reset() 타이머클린업·delete() ids guard · [실행계획 R9~R12](./plans/rv-remediation-execution-plan.md)
 - [x] **G-1 GX-6 asset-URL → 채택·재설계** ✅ 2026-07-13 · `9095504` · context-스코프 3티어·전역 싱글턴 폐기·게이트 green(2373·surface 61/120·188/190) · [design](./plans/asset-url-resolution-design.md)
@@ -112,7 +112,7 @@
 - [x] **G-3 #W5-3 risk 등급 정정** ✅ 2026-07-13 · low-med→HIGH(아래 §Needs Review 반영)
 - [x] **GA-BRIEF CAP-28 게이트 브리프 저작** ✅ 2026-07-13 · [ga-gate-charter-brief.md](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·게이트절차·순수검증)·opus 저작+앵커검증
 
-**Next up**: **RV-R2(고급검색 de-dup HIGH)** → R3~R8(MED) → R9~R12(LOW) → GA 게이트. (RV-R1 ✅ `3c41ebf`) cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md).
+**Next up**: **RV-R3~R8(MED 6건)** → R9~R12(LOW 4건) → GA 게이트. (RV-R1 ✅ `3c41ebf` · RV-R2 ✅ `dcd82b2`) cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md).
 
 ---
 
@@ -127,7 +127,7 @@
 - [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [ ] **#W7-2 headless @types/react 해석** — `/schema`(+shared chunk 경유 `/state`) `.d.ts`가 ReactNode 조건타입(OptionalReactNode 등) 노출 → headless tsc는 `@types/react`(dev type-only) 필요. **런타임 react peer=0**(계약 충족). 해석: 헤드리스=런타임 React 0·타입레벨 @types/react는 dev 양보(스펙 §2 "React peer 0"=런타임). 스펙 저자 확인 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2-headless-fixture-2026-07-12--cap-25)
 - [ ] **#W6-2b TIER3 uniform 필터 경계** — /excel이 getDataTransfer() 반환 필드에 TIER3 uniform 제외(명시/파생 미구분). M2O/xref/address는 TIER2 passthrough(평면행 값 export)이나 실 GJCU 데이터 미검증 → 소비자 확인(garbage면 TIER3 편입) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
-- [ ] **#W5-3 재적용 de-dup 미구현** → **RV-R2** — 고급검색 매 apply가 `addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적. **risk 정정 low-med→🟠HIGH(2026-07-13 중간점검·G-3)**: 출하 ViewListGrid 통상 "조건수정 후 재검색" 흐름서 `AND(name=ABC,name=XYZ)`→빈결과 재현(에러 없음). 확정 설계=SearchForm.removeAndFilterByName + 패널 교체 · [§4.2](./analysis/2026-07-13/midpoint-code-review.md)
+- [x] **#W5-3 de-dup → RV-R2 해소(2026-07-13, `dcd82b2`)** — 신규 API 대신 기존 `SearchForm.withFilter`(name 교체) 재사용(공개표면 무변경)·addAndFilter 스택킹 빈결과 해소 · [R2](./plans/rv-remediation-execution-plan.md)
 - [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
@@ -145,6 +145,7 @@
 - W1~W3 방법론·검증 노트(W1 tsc+test 이중검증·EG-D 4렌즈·harness 교차리포·W2/W3 착수 규율·W3-1 발명게이트 해소)는 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-11 slim).
 - W4-0 계수 재산정 방법론(count-public-surface.mjs: get*Handlers+getReadOnly→53·§10-A 갭 명문화·규칙 무변경·대안 미채택)은 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-12 slim).
 - W5-3 실행 상세(setSearchForm 배선·operator 캐스트·deriveFilterFields·deviation 5)는 [phase-eg archive #W5-3](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)로 이월(2026-07-12 post-completion slim).
+- RV-R2 검증: 실행계획 R2 수용기준의 root surface baseline "57/120"은 G-1(asset-URL·`9095504`) 이전 수치 — 실제 현재 **61/120**. R2는 surface-neutral(before==after=61). RV track-end check:surface·GA 게이트는 61 기준.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
