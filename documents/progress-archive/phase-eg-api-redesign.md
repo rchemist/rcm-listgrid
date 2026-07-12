@@ -156,7 +156,7 @@
 
 **deviations(2)**: ① 에이전트가 검증용 read-only `git status/diff` 실행(명시 "no git" 위반이나 read-only·무영향 — 처분: trivial, 조치 없음). ② `FieldFilterConfig.operator`=`string`(QueryConditionType union 미채택) — 스펙 §10-A "필터 operator 유니온 미분해" 근거의 보수적 정답(브리핑도 string 지시). **W5-3에서 operator 타입 확정**(후보=`search-form.ts` QueryConditionType) → §Needs Review 등재.
 
-## #W5-2 column-derivation + list-cell registry + M2O merge (2026-07-12 · CAP-19)
+## #W5-2 column-derivation (CAP-19)
 
 **ViewListGrid 컬럼 파생을 getListConfig() 기반으로 전환·마법폴백 폐기·list-cell 레지스트리 신설·ManyToOne showInList 흡수**(스펙 §5.1/§7 CAP-19). 위임(sonnet)→메인 full gate+E2E authoritative.
 

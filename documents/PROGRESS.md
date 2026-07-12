@@ -93,7 +93,7 @@
 - [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
 - [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves W5 표(W5-1~4)+§12 결정4+§10-A · 계수 47/49/182 무변경 · [brief](./plans/entityform-api-implementation-waves.md)
 - [x] **W5-1 필드 substrate** ✅ 2026-07-12 · withList/withFilter+타입2·배럴+2·2124u·47/49/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
-- [x] **W5-2 컬럼 파생+list-cell 레지스트리** ✅ 2026-07-12 · getListConfig 파생·마법폴백 폐기·list-cell 레지스트리·ManyToOne 통합·2131u/E2E27·47/53/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation--list-cell-registry--m2o-merge-2026-07-12--cap-19)
+- [x] **W5-2 컬럼 파생+list-cell 레지스트리** ✅ 2026-07-12 · getListConfig 파생·마법폴백폐기·M2O통합·2131u/E2E27·47/53/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **W5-3 고급검색+filter 레지스트리** (react) — ViewListGrid 내장 패널·SearchForm.addAndFilter+E2E·operator 타입 확정 · §7 · CAP-20 **← Next up**
 - [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
@@ -110,9 +110,9 @@
 - [x] **#W4-3a → DECIDED+구현(D1, 2026-07-12)** — dirty 미확인 async=validateAll 실패→save 차단·스펙 §5.3/§6.2 개정. [D1](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 잔여 9건 처분(2026-07-12)** — 스펙 저자 확정(발명금지 해제): 코드2+문서7·§Open Q 0. [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
 - [ ] **#W5-1 operator 타입** — FieldFilterConfig.operator=`string`(§10-A "operator 유니온 미분해" 근거·브리핑 지시) · risk: low · **W5-3서 확정**(후보=search-form.ts QueryConditionType) · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
-- [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지(college/subject/professor) 외 major.ts/staff.ts에도 withList 추가(M2O/Xref 피커 target 렌더용, 폴백폐기 후 E2E 파손 방지) · risk: low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation--list-cell-registry--m2o-merge-2026-07-12--cap-19)
-- [ ] **#W5-2 EntityField 캐스트** — list-columns.ts가 `(field as FormField).getListConfig()` 구조적 캐스트(EntityField 인터페이스 미선언) · risk: low · **후속: W5-3/W7서 getListConfig/getFilterConfig/getDisplayValue를 EntityField 인터페이스로 이관 검토** · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation--list-cell-registry--m2o-merge-2026-07-12--cap-19)
-- [ ] **#W5-2 픽스처 4파일 withList** — 기존 react 테스트 픽스처(columns prop 없는 ViewListGrid/피커)에 withList 추가(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk: low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation--list-cell-registry--m2o-merge-2026-07-12--cap-19)
+- [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
+- [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
+- [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 
 ## Progress notes
 
