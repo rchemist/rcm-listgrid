@@ -45,7 +45,7 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC ✅ · EG W1~W7 ✅ · GX-1~5 ✅ · **Phase RV 개선 트랙(2026-07-13 중간점검)** · 다음=RV-R1) | — | 이 문서 §Tasks · [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] H·EF·EA/EB/EC·EG(W1~7)·GX(1~5) ✅ · **Phase RV**(중간점검 개선) 진행·다음=RV-R1 | — | §Tasks · [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
@@ -85,31 +85,19 @@
 
 **규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 완료 상세(commit·CAP·검증)=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 
-**완료 W1~W6** (전 commit·CAP·상세 → archive):
+**완료 W1~W7** (전 commit·CAP·상세 → [archive](./progress-archive/phase-eg-api-redesign.md)):
 - **EG1/2** 권한 배선 `a1f3deb`(isPermitted end-to-end) · **EG-D** 설계 pass(ADR-0009+스펙 r2+waves·4렌즈 22건)
 - **W1** 표면정비 `599a3f3..4c04906`(CAP-12) · **W2** 훅+FormRuntime/Controller `005b4a3..ed77ecf`(8훅)
 - **W3** 권한·능력·액션 `4d30159..b4ecda3`(CAP 7종·4버그) · **W4** 폼완결 `3b3518f..44edfae`(CAP-05·07·10·13·23·4버그)
 - **D1** async save-gating(스펙 §5.3/§6.2 개정) · **D2** §Needs Review 9건 처분(2026-07-12·§Open Q 0)
 - **W5** list-track(entry+W5-1~4 · `2223f35` 등)(CAP-18·19·20)·계수 47/57/184·E2E28
 - **W6** data-transfer(entry+W6-1~4 · `@listgrid/excel`)(CAP-16·17)·**full gate+E2E 30/30**·계수 49/57/186
-
-**W7 패키징+마이그레이션 (마지막 wave·CAP-24·25)** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md):
-- [x] **W7 entry-brief pass** ✅ 2026-07-12 · opus · 결정8 소진+**스코프 정정**(published=구 src/→packages/* 전환)·콜드리더 통과 · [detail](./progress-archive/phase-eg-api-redesign.md#w7-entry)
-- [x] **W7-1 패키징 코어** ✅ 2026-07-12 · published 진입점 src/→packages/* §2 맵·peers 26→6·dts:paths · full gate green(49/57/186·attw/publint) · [detail](./progress-archive/phase-eg-api-redesign.md#w7-1)
-- [x] **W7-2 headless fixture** ✅ 2026-07-12 · /schema+/state fixture·React **런타임** 0 tsc+node(cjs/esm) green·check:headless · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2)
-- [x] **W7-3 adapter headers 함수형** ✅ 2026-07-12 · sonnet→검증 · headers 함수형 지연평가(resolveHeaders·5메서드 1지점)·14 tests green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-3)
-- [x] **W7-4 MIGRATION+codemod** ✅ 2026-07-12 · sonnet→검증 · §9 42행 전수(빈행0)+서브패스제거+페이지셸+미이관·codemod 기계10규칙·smoke:load 신맵 green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
-- [x] **W7-5 wave-end** ✅ 2026-07-12 · **Phase EG 종료** · full gate+E2E30+smoke+headless+attw/publint·계수 49/57/186·CAP-24/25+구결함 §1~9 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w7-5)
+- **W7** 패키징+마이그레이션(마지막 wave·CAP-24/25·entry+W7-1~5)·**Phase EG 종료**·full gate+E2E30·계수 49/57/186 · [archive](./progress-archive/phase-eg-api-redesign.md#w7-1)
 
 #### Phase GX — 0.4 프레임워크 정합 + parity (봉인 후 조사 2026-07-12 · **GX-1~5 ✅ 완료 2026-07-13**) → 다음=GA 게이트
 
-**규범**: [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)(결정·프레임워크 0.1.0 계약·근거 file:line) · **wire source-of-truth**: `rcm-backend-framework` 0.1.0(`SearchResponse`/`SearchRequest`/`FilterItem`·QueryConditionType 24)·edustack=실사용 레퍼런스. **Do-NOT**: 0.2(GJCU) shape primary 채택(폴백만)·구 src/ 삭제.
-
-- [x] **GX-1 SearchForm wire 정합** ✅ 2026-07-12 · withFilter/IgnoreDuplicate 복원+FilterItem 중첩맵/조건타입24+cacheKey 제거 · 2251u·E2E green · [detail](./progress-archive/phase-gx-tasks.md#gx-1)
-- [x] **GX-2 mock 백엔드 프레임워크 정합** ✅ 2026-07-13 · SearchResponse 9필드+404 ProblemDetail(어댑터 파서)+filters 배선 · 2254u·E2E 32 · [detail](./progress-archive/phase-gx-tasks.md#gx-2)
-- [x] **GX-3 `/utils` 패키지 + 이식** ✅ 2026-07-13 · misc 복원(zero-dep·regex/date[Intl]/compare/url/storage/asset) · 2368u·attw/publint/smoke·49/57/188 · [detail](./progress-archive/phase-gx-tasks.md#gx-3)
-- [x] **GX-4 프록시 seam 문서화** ✅ 2026-07-13 · [ADR-0005 부록 A](./adr/ADR-0005-backend-adapter-contract.md)(fetch+baseUrl seam·route handler=host 소유)+MIGRATION `./api` 경고+spec §2 포인터
-- [x] **GX-5 문서 정정 + descope** ✅ 2026-07-13 · "무변경" 거짓 정정·/misc→/utils·정규식11·CAP-29 위젯 descope·§10-A /schema 188·#W7-4 처분 · [detail](./progress-archive/phase-gx-tasks.md#gx-5)
+**완료 GX-1~5** (0.4 프레임워크 정합 · 상세 → [archive](./progress-archive/phase-gx-tasks.md) · 규범=[gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)):
+- wire 정합·mock 정합·`/utils` 이식·프록시 seam=[ADR-0005 부록A](./adr/ADR-0005-backend-adapter-contract.md)·문서정정+descope · 2368u·E2E32·49/57/188
 
 #### Phase RV — 중간 점검 개선 트랙 (2026-07-13 리뷰 산출 · GA 선결) · [분석](./analysis/2026-07-13/midpoint-code-review.md)
 
@@ -119,10 +107,10 @@
 - [ ] **RV-R2 고급검색 재적용 de-dup** 🟠HIGH — **신규 API 불필요**: ViewListGrid이 기존 `SearchForm.withFilter`(name 교체) 재사용(공개표면 무변경) · react/ViewListGrid.tsx:267 · [실행계획 R2](./plans/rv-remediation-execution-plan.md)
 - [ ] **RV-R3~R8** 🟡MED — Xref required(isBlank xref-aware)·validateAll 함수형머지·FieldRenderer allSettled+fail-closed·sessionStorage isBlank·TIER2 방어적 스칼라추출·DataImporter onSubmit catch · [실행계획 R3~R8](./plans/rv-remediation-execution-plan.md)
 - [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined widen)·reset() 타이머클린업·delete() ids guard · [실행계획 R9~R12](./plans/rv-remediation-execution-plan.md)
-- [x] **G-1 GX-6 → 채택·재설계 구현 완료** ✅ 2026-07-13 · `9095504` · 사용자 결정=채택+제대로 재설계. context-스코프 3티어(`BackendAdapter.assetBaseUrl`+`AssetBaseProvider`/`useAssetUrl`+순수 `resolveAssetUrl`), **전역 mutable 싱글턴 폐기**. 게이트 green(2373·surface root 61/120·/schema 188/190·typecheck:packages)·구 stash 폐기·ADR-0005/MIGRATION 정정 · [design](./plans/asset-url-resolution-design.md)
+- [x] **G-1 GX-6 asset-URL → 채택·재설계** ✅ 2026-07-13 · `9095504` · context-스코프 3티어·전역 싱글턴 폐기·게이트 green(2373·surface 61/120·188/190) · [design](./plans/asset-url-resolution-design.md)
 - [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 2파일 수리·format:check green 복원
 - [x] **G-3 #W5-3 risk 등급 정정** ✅ 2026-07-13 · low-med→HIGH(아래 §Needs Review 반영)
-- [x] **GA-BRIEF CAP-28 게이트 브리프 저작** ✅ 2026-07-13 · [ga-gate-charter-brief.md](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거물 고정·매트릭스·게이트절차·Do-NOT·R7 folded-in·순수검증) · opus 저작+앵커 실재검증
+- [x] **GA-BRIEF CAP-28 게이트 브리프 저작** ✅ 2026-07-13 · [ga-gate-charter-brief.md](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·게이트절차·순수검증)·opus 저작+앵커검증
 
 **Next up**: **RV-R1(reload CRITICAL)** → RV-R2 → R3~R8 → GA-BRIEF → GA 게이트. cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md).
 
@@ -145,9 +133,9 @@
 - [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#GX-1 toJSON empty AND/OR 그룹 방출** — `filters.AND`/`OR`를 빈 `[]`도 항상 wire 방출(기존 테스트 presence 어서트 때문)·NOT만 omit. **GX-2 mock서 vacuous no-op 확인**(실백엔드 수용은 GA 전 실서버 대조 권장) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-1)
 - [ ] **#GX-2 mock filter 5/24 조건타입** — apps/sample mock이 EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE만 매칭·NOT 그룹 no-op(전 실사용 경로 커버·발명 회피). 실백엔드 필요 조건타입 확장 시 재검토 · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-2)
-- [x] **#GX-3 asset-base 어댑터 배선 → 해소(2026-07-13, `9095504`)** — 사용자 결정: capability 채택+제대로 재설계. `BackendAdapter.assetBaseUrl`(tier i)+context-스코프 `AssetBaseProvider`/`useAssetUrl`+순수 `resolveAssetUrl`(3티어 precedence). 구 전역 싱글턴(GX-6·`setAssetServerBase`) 기각·제거. 렌더러(image/file/multiple-asset) 배선. [design](./plans/asset-url-resolution-design.md)
+- [x] **#GX-3 asset-base 배선 → 해소(2026-07-13, `9095504`)** — 사용자 결정=채택+재설계: context-스코프 3티어(전역 싱글턴 GX-6 기각·제거) · [design](./plans/asset-url-resolution-design.md)
 - [ ] **#GX-3 isExternalUrl 2카피** — schema-core(private)+utils(public) byte-identical 재구현(zero-dep 하드룰·상호참조 주석) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-3)
-- [x] **#W7-4 서브패스 descope 처분**(사용자 2026-07-12) — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
+- [x] **#W7-4 서브패스 descope 처분** — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
 - [ ] **#W7-4 spec §9 #29 라벨 재조정** — spec §9는 withCreatedAndUpdatedAtFields를 codemod로 표기하나 impl=수동/이연(presets-rcm 빈 스캐폴드). spec 저자: §9 라벨 정정 or /presets/rcm 감사헬퍼 출하 후 codemod화 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
 - [ ] **#W7-4 guide SUPERSEDED 배너** — list-page-composition-guide.md 상단에 ⛔ SUPERSEDED→MIGRATION §3 포인터 추가(원문 무삭제). 브리핑 declared 4산출물 밖 touch(관례상 정당·정보 흡수 보존) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
 
