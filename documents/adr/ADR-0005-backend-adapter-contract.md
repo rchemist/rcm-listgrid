@@ -60,3 +60,24 @@ interface BackendAdapter {
 - [ ] `grep -rn "'/search'\|X-EntityForm-Name\|totalElements\|만료된 토큰" src/listgrid/config src/listgrid/form` → backend/rcm 어댑터 파일 밖 0건
 - [ ] backend/rest 어댑터 + json-server급 목업으로 리스트+폼 e2e 시나리오 통과 (examples 또는 테스트 픽스처)
 - [ ] 세션만료가 error code로 판별되고, rcm 어댑터가 구 신호를 code로 번역함을 단위 테스트로 고정
+
+## 부록 A — SSR 프록시 seam (GX-4, 2026-07-13)
+
+**맥락**: 0.3.x `./api`(`ApiClient`+`serverProxy` 플래그)는 "브라우저가 백엔드를 직접 호출하지 않고 전부 백엔드 SSR 프록시 경유"라는 보안 속성을 지탱했다. 단 **프록시 구현체(Next.js route handler·쿠키/세션 포워딩·에러 sanitize)는 항상 host 소유**였고, 라이브러리는 DI seam + `serverProxy` 신호만 제공했다(GJCU `backend-proxy.ts`가 그 host 코드). MIGRATION의 "`./api` 완전 대체" 문구가 "프록시 보안이 0.4에서 자동 승계된다"는 오해를 줄 수 있어 seam을 명문화한다.
+
+**결정 — 0.4의 프록시 seam = `RcmAdapterOptions.{fetch, baseUrl}`**. 전 CRUD(list/getOne/create/update/remove)가 단일 `request()`→단일 `doFetch`를 경유하므로, host가 프록시 라우팅을 재현하는 방법은 둘:
+1. **`baseUrl`을 same-origin 프록시 경로로** (예: `createRcmAdapter({ baseUrl: '/api/proxy/backend' })`) — 가장 단순. `apps/sample`이 same-origin route 배선을 실증.
+2. **`fetch` 주입으로 URL 재작성** — 0.3.x `serverProxy` per-call 시맨틱(일부 경로만 프록시 우회)이 필요하면, 커스텀 `fetch`가 URL 패턴을 보고 same-origin 프록시로 재작성 or 우회한다(GJCU `ProxyInterceptor.shouldSkipProxy`와 구조 동일). 실제 프록시 route handler는 **여전히 host 소유**(0.3과 동일 — 라이브러리는 route handler를 제공하지 않음).
+
+```ts
+// worked example — serverProxy 스타일 라우팅을 fetch 주입으로 재현
+const proxyFetch: typeof fetch = (input, init) => {
+  const url = String(input);
+  const skip = /^https?:\/\//.test(url) || url.startsWith('/api/'); // 이미 절대/프록시 경로면 우회
+  const target = skip ? url : `/api/proxy/backend?path=${encodeURIComponent(url)}`;
+  return fetch(target, init);
+};
+const adapter = createRcmAdapter({ baseUrl: '', fetch: proxyFetch });
+```
+
+**미해결(별도 트래킹)**: `getExternalApiData`/`callExternalHttpRequest` 계열(SMS 발송·캐시 클리어 등 CRUD 밖 임의 백엔드 호출)은 0.4 `BackendAdapter`에 범용 대응이 없다(좁은 `CustomOptionProvider.fetchOptions` seam만 존재). 이는 해당 UI 컴포넌트 이식 여부와 얽힌 **컴포넌트-parity 문제**로, 본 프록시 아키텍처와 분리해 다룬다. **asset-URL** 리졸브도 어댑터 base 주입(`setAssetServerBase`)이 미배선(GX-3 §Needs Review) — `RcmAdapterOptions`에 `assetBaseUrl` 필드 추가 여부는 후속 스펙 결정.

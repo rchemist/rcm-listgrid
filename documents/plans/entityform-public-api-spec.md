@@ -35,6 +35,7 @@
 - **headless 계약**: `/schema`+`/state`만 import → React/UI peer 0으로 빌드(테스트 고정). showcase 사례(§감사 6-2)의 1급화.
 - sideEffects:false·ESM-first(ADR-0001)·`import type` 강제. 공개 심볼 수 CI 계수(§10 게이트 2의 계수 규칙): 루트 ≤120, `/schema` ≤190 (임계값 도출은 §10-A).
 - 멀티테넌트류 요청 컨텍스트(§감사 6-4): `RcmAdapterOptions.headers`를 `Record<string,string> | () => Record<string,string>`로 — 헤더 지연 평가가 1급.
+- **SSR 프록시 seam(GX-4)**: 브라우저→백엔드 직접 호출 차단(0.3.x `serverProxy`)의 재현점은 `RcmAdapterOptions.{baseUrl, fetch}` — `baseUrl`=same-origin 프록시 경로 또는 `fetch` 주입 URL 재작성. 프록시 route handler는 host 소유(0.3과 동일). 상세·워크드 예제=[ADR-0005 부록 A](../adr/ADR-0005-backend-adapter-contract.md).
 
 ## 3. EntityForm — 선언 표면 (전 45 소비자 멤버 — 계수 규칙·기계 계수 도출은 §10 게이트 2 / §10-A)
 
