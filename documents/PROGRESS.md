@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **RV-R1·R2·R3~R8 ✅(~`cdb4aac`). Next up: R9~R12(LOW)→track-end→GA 게이트**. **G-1 GX-6=채택·재설계 구현 완료**(`9095504`·asset-URL context-스코프·전역싱글턴 폐기). §Needs Review open. P0/P1 publish=외부 승인 대기.
+**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **Phase RV(R1~R12) ✅ 완료·트랙엔드 green(2394u/32e2e/full gate). Next up: GA 게이트(CAP-28)—새 세션 권장**. **G-1 GX-6=채택·재설계 구현 완료**(`9095504`·asset-URL context-스코프·전역싱글턴 폐기). §Needs Review open. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **새 세션은 Phase RV(중간점검 개선 트랙)부터** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md)(§4 확정 설계안·§8 원장) 단독 재개 가능. **RV-R1(CRIT reload)·RV-R2(HIGH 고급검색)가 GA 선결.** GA 게이트(CAP-28)는 RV + GA-BRIEF 저작 후. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4·GX-6이 실제 위반 사례)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·GX-6 WIP를 전역 싱글턴 기전 그대로 커밋(채택시 context 스코프 재설계).
-**Last updated**: 2026-07-13 (**RV-R3~R8(MED 6건) 완료** — `0d25490..cdb4aac` · R3 xref-aware isBlank·R4 validateAll 함수형 per-field 병합·R5 FieldRenderer allSettled+required fail-closed·R6 sessionStorage 빈문자열 가드·R7 TIER2 방어적 스칼라추출·R8 DataImporter SUBMIT_ERROR. sonnet 배치위임→메인 검증(6 diff verbatim·항목별 discriminating). full gate green(**test 2386**·type-check·typecheck:packages·check:surface 무변경 61/120·188/190). 2 done_with_deviations→§Needs Review: R4 회귀테스트 마이크로태스크 동기화 보정(slowStartedP)·R7 doc-comment `*/` 조기종료 1-space 보정. 앞선 RV-R1·R2 ✅. 다음=RV-R9~R12(LOW).)
+**Next session policy**: **새 세션은 GA 게이트(CAP-28)부터** — Phase RV(R1~R12) ✅ 완료·트랙엔드 green(2394u/E2E32/full gate). cold-start=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·순수검증) + [헌장](./prd/concept-charter.md) 단독 재개 가능. GA는 코드변경 없는 순수검증 pass. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4·GX-6이 실제 위반 사례)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·GX-6 WIP를 전역 싱글턴 기전 그대로 커밋(채택시 context 스코프 재설계).
+**Last updated**: 2026-07-13 (**Phase RV(중간점검 개선 R1~R12) ✅ 완료 + 트랙엔드 green** — R9~R12(LOW): clone():this·withId(undefined 위드닝, Law L3/L4)·reset() 타이머/touched 정리·delete() ids 조기가드 `56308d8`·`eac7c1c`·`7ffb60d`. RV 전체=CRIT reload+HIGH 고급검색+MED 6+LOW 4, 3c41ebf..7ffb60d, 4 sonnet 배치위임→메인 diff verbatim·항목별 discriminating 검증. **트랙엔드 전 게이트 green**: type-check·typecheck:packages·**test 2394**·lint(0 err)·format:check(테스트4 style 커밋)·build·check:surface(49/55·61/120·188/190 무변경)·**E2E 32**. 미해결 §Needs Review: R4 테스트동기화·R7 doc-comment(+기존 low-risk). 다음=GA 게이트(CAP-28)·새 세션 권장.)
 
 ## Goal
 
@@ -45,13 +45,13 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] H·EF·EA/EB/EC·EG(W1~7)·GX(1~5) ✅ · **Phase RV**(중간점검 개선) 진행·다음=RV-R1 | — | §Tasks · [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] H·EF·EA/EB/EC·EG·GX·**RV(R1~R12) ✅** · 다음=GA 게이트(CAP-28) | — | §Tasks · [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — Phase GX(GX-1~5) ✅ 완료 + **2026-07-13 중간 점검 완료 → Phase RV 개설**. 다음: **RV-R9~R12(LOW)** (RV-R1~R8 ✅) — 콜드스타트 [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md))
+## 세션 인계 (Handoff — **Phase RV(중간점검 개선 R1~R12) ✅ 완료 2026-07-13**·트랙엔드 green. 다음: **GA 게이트(CAP-28)** — 콜드스타트 [GA 게이트 브리프](./plans/ga-gate-charter-brief.md)·**새 세션 권장**)
 
-- **⚠ 다음 = Phase RV(중간점검 개선 트랙)** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) 단독. **RV-R1~R8 ✅ (reload·고급검색·MED 6건, `3c41ebf`..`cdb4aac`)**. 잔여=**R9~R12(LOW)** → RV track-end(full gate+E2E) → GA. G-1(GX-6 처분)·GA-BRIEF ✅. R4·R7 §Needs Review(테스트/doc-comment 보정). **각 R의 확정 설계안(before→after·증명·수용·Do-NOT)=[실행계획](./plans/rv-remediation-execution-plan.md)·분석 §4.** Do-NOT: search-form.ts addAndFilter 시맨틱 변경 금지·GX-6 전역싱글턴 기전 커밋 금지·스펙 §를 인용 못하는 발명 금지.
+- **⚠ 다음 = GA 게이트(CAP-28)** — cold-start=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·순수검증) + [헌장](./prd/concept-charter.md). **Phase RV(R1~R12) ✅ 완료**(reload·고급검색·MED 6건·LOW 4건, `3c41ebf`..`7ffb60d`)·트랙엔드 green(2394u·E2E32·full gate·surface 무변경). GA는 순수검증 pass(코드변경 없음 원칙)—R7 folded-in. **미해결 §Needs Review**: R4 테스트 동기화·R7 doc-comment·기타 low-risk(사용자 ack 대기). Do-NOT: search-form.ts addAndFilter 시맨틱 변경·GX-6 전역싱글턴 커밋·스펙 §를 인용 못하는 발명. **각 R의 확정 설계안(before→after·증명·수용·Do-NOT)=[실행계획](./plans/rv-remediation-execution-plan.md)·분석 §4.** Do-NOT: search-form.ts addAndFilter 시맨틱 변경 금지·GX-6 전역싱글턴 기전 커밋 금지·스펙 §를 인용 못하는 발명 금지.
 - **GA 게이트(CAP-28·후순위)**: Phase GX 완료(GX-1~5·게이트 2368u/E2E32·계수 49/57/188). GA는 RV + GA-BRIEF 저작 후. cold-start: GA-BRIEF + [phase-gx archive](./progress-archive/phase-gx-tasks.md#gx-5) + 스펙 §8 CAP-28 + [헌장](./prd/concept-charter.md).
 - **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
@@ -106,13 +106,15 @@
 - [x] **RV-R1 reload() write-path 고아화** 🔴CRIT ✅ 2026-07-13 · `3c41ebf` · into? 병합으로 액션 클로저 보존(reload 후 write 유실 해소)·판별테스트(구코드 FAIL 확인)+2374 green · [R1](./plans/rv-remediation-execution-plan.md)
 - [x] **RV-R2 고급검색 de-dup** 🟠HIGH ✅ 2026-07-13 · `dcd82b2` · withFilter('AND',...) name 교체(스택킹→빈결과 해소)·surface 무변경(61/120)·2375 green · [R2](./plans/rv-remediation-execution-plan.md)
 - [x] **RV-R3~R8** 🟡MED ✅ 2026-07-13 · `0d25490..cdb4aac` · R3 isBlank·R4 함수형머지·R5 allSettled·R6 storage·R7 TIER2·R8 catch · 2386(2 dev→§NR) · [R3~R8](./plans/rv-remediation-execution-plan.md)
-- [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined widen)·reset() 타이머클린업·delete() ids guard · [실행계획 R9~R12](./plans/rv-remediation-execution-plan.md)
+- [x] **RV-R9~R12** ⚪LOW ✅ 2026-07-13 · `56308d8`·`eac7c1c`·`7ffb60d` · clone():this·withId(undefined)·reset() 타이머클린업·delete() ids guard · 2394 green · [R9~R12](./plans/rv-remediation-execution-plan.md)
+
+**RV track-end ✅ 2026-07-13**: 전 게이트 green — type-check·typecheck:packages·**test 2394**·lint(0 err)·format:check·build·check:surface(49/55·61/120·188/190 무변경)·**E2E 32**. 포맷 정합 `style(tests)` 커밋 포함. Phase RV(R1~R12) 완료 → 다음=GA 게이트(CAP-28).
 - [x] **G-1 GX-6 asset-URL → 채택·재설계** ✅ 2026-07-13 · `9095504` · context-스코프 3티어·전역 싱글턴 폐기·게이트 green(2373·surface 61/120·188/190) · [design](./plans/asset-url-resolution-design.md)
 - [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 2파일 수리·format:check green 복원
 - [x] **G-3 #W5-3 risk 등급 정정** ✅ 2026-07-13 · low-med→HIGH(아래 §Needs Review 반영)
 - [x] **GA-BRIEF CAP-28 게이트 브리프 저작** ✅ 2026-07-13 · [ga-gate-charter-brief.md](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·게이트절차·순수검증)·opus 저작+앵커검증
 
-**Next up**: **RV-R9~R12(LOW 4건)** → RV track-end(full gate+E2E) → GA 게이트. (RV-R1~R8 ✅ `3c41ebf`..`cdb4aac`) cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md).
+**Next up**: **GA 게이트(CAP-28 헌장 대조표)** — cold-start=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md). Phase RV(R1~R12) ✅ 완료·트랙엔드 green. **새 세션 권장**(GA=별도 순수검증 pass).
 
 ---
 
