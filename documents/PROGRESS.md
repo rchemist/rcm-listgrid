@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · **Phase EG(공개 API 재설계, W1~W7) ✅ 완료**(2026-07-12·W7 종료 게이트 전건 green: full gate+E2E30+smoke:load+headless+attw/publint·계수 49/57/186·CAP-24/25+구결함 §1~9 봉인). **Next up: GA 게이트(CAP-28 헌장 대조표)**(별도 pass·새 세션 권장). §Needs Review 9건 open(GA 이월·소비자/스펙저자 입력). P0/P1 publish=외부 승인 대기.
+**Status**: active · Phase EG(W1~W7) 게이트 green이나 **봉인 잠정 재개** — 봉인 후 조사(2026-07-12)서 GA-blocking 갭 발견(SearchForm `withFilter` parity·wire 충실도·유틸·프록시 문서). **Next up: Phase GX(0.4 프레임워크 정합 + parity·GA-blocking)** GX-1~5 → 그 후 GA 게이트(CAP-28). 근거 [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 계수 49/57/186. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **Phase EG(W1~W7) ✅ 완료**(2026-07-12). 새 세션은 **GA 게이트(CAP-28 헌장 C1~C9 대조표)부터** — cold-start=[phase-eg archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5)+스펙 §8 CAP-28+[헌장](./prd/concept-charter.md)만 읽으면 충분(구 src/·8그룹 map 불요). GA는 검증/대조 pass(위임보다 인라인 판단). **GA 전 선결(사용자/소비자)**: §Needs Review descope 2건 GJCU 확인→CAP-29 편입·P0/P1 publish 외부 승인·spec §9#29 라벨. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·CAP-28을 개별 wave 분산(단일 GA pass)·dts experimentalDts 재시도.
-**Last updated**: 2026-07-12 (**W7-5 ✅ · Phase EG(W1~W7) 완료** — W7 종료 게이트 전건 green 실측: full gate exit 0(test 2236+1todo·lint 0err·format·build)·**E2E 30 passed**·smoke:load(신맵)·check:headless·attw 전 subpath 🟢·publint All good·**계수 49/57/186 PASS**. CAP-24/25 대조+CAP-01~29 빈행0(CAP-28=GA 별도·CAP-29=descope)·구 결함 §1~9 봉인표 작성. 상세 [archive #W7-5+Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5). §Needs Review 9건 open(GA 이월). 다음=GA 게이트(새 세션 권장).)
+**Next session policy**: Phase EG(W1~W7) 게이트 green이나 **봉인 재개** — 새 세션은 **Phase GX(0.4 프레임워크 정합, GA-blocking)부터**. cold-start=[gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)(결정·프레임워크 계약·GX-1~5 백로그)+[rcm-backend-framework 0.1.0] 계약. **확정 결정(2026-07-12)**: 위젯 descope·유틸 새 `/utils` 전량 이식·SearchForm `withFilter` 완전 부활·GA-blocking·**wire=rcm-backend-framework 0.1.0 기준(GJCU 0.2 아님)**. GX 후 GA 게이트(CAP-28). **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만).
+**Last updated**: 2026-07-12 (**봉인 후 조사 → Phase GX 개설** — 사용자가 descope 처분·SearchForm/프록시 온전성 재조사 지시. 3 검증 워크플로우(적대검증+메인 재확인) 결과: ①위젯 descope OK ②유틸 진짜 삭제→`/utils` 이식 필요 ③프록시 안 깨짐·문서갭만 ④**SearchForm `withFilter`('AND'|'OR',...) 부재=GA 갭·spec/MIGRATION "무변경" 거짓** ⑤테스트 백엔드=**프레임워크 0.1.0 shape 맞음**(0.2 아님)·부분 충실도 갭. 사용자 결정: withFilter 부활·`/utils` 전량·GA-blocking·wire=프레임워크 기준. → **Phase GX GX-1~5** 개설. 근거 [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 다음=GX-1.)
 
 ## Goal
 
@@ -45,13 +45,13 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC ✅ · **EG W1~W7 ✅ 완료** · 다음=GA 게이트) | — | 이 문서 §Tasks · [E계획](./plans/e-track-field-parity.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC ✅ · EG W1~W7 게이트green · **Phase GX 프레임워크정합 GA-blocking**) | — | 이 문서 §Tasks · [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **Phase EG(공개 API 재설계, W1~W7) ✅ 완료**(2026-07-12). 다음: **GA 게이트(CAP-28 헌장 대조표·별도 pass·새 세션 권장)** — 콜드스타트 계약 [phase-eg archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5))
+## 세션 인계 (Handoff — Phase EG(W1~W7) 게이트 green이나 **봉인 재개**. 다음: **Phase GX — 0.4 프레임워크 정합 + parity(GA-blocking)** GX-1~5 → GA 게이트(CAP-28). 콜드스타트 [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md))
 
-- **⚠ 다음 = GA 게이트(CAP-28 헌장 C1~C9 대조표·별도 pass)** — Phase EG(W1~W7) 전건 착지(계수 49/57/186·CAP-01~27 소화·구결함 §1~9 봉인·full gate+E2E30+smoke:load+headless+attw/publint green·published `@rchemist/listgrid`=packages/* §2 맵). GA=검증/대조 authoring pass(**인라인 판단·위임 아님**). 범위: 스펙 §8 CAP-28 행 + 헌장 C1~C9 각 항을 신 표면에 대조하는 증명표. **GA 전 선결(critical-path·사용자/소비자 결정)**: §Needs Review descope 2건(#W6-2b TIER3·#W7-4 서브패스 제거)=GJCU 확인→CAP-29 편입 · P0/P1 publish 외부 승인 · spec §9#29 라벨(presets-rcm 감사헬퍼). **§Needs Review 9건 전건 open**(자율 [x] 불가). cold-start: 이 Handoff + [archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5) + 스펙 §8 CAP-28 + [헌장](./prd/concept-charter.md).
+- **⚠ 다음 = Phase GX(0.4 프레임워크 정합·GA-blocking)** — 봉인 후 조사(2026-07-12)서 발견한 GA 갭. **확정 결정(사용자)**: 위젯 descope·유틸 새 `/utils` 전량 이식·SearchForm `withFilter('AND'|'OR',...) 완전 부활·GA-blocking·**wire=rcm-backend-framework 0.1.0 기준**(GJCU 0.2는 폴백만·edustack이 실사용 레퍼런스). GX-1~5(§Tasks Phase GX)·실행급 계약+근거=[gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 핵심: SearchForm.toJSON `{filters:{AND,OR}}`는 프레임워크 SearchRequest와 이미 일치 → withFilter 복원 wire 리스크 낮음. GX 후 GA 게이트(CAP-28 헌장 대조·인라인 판단). **§Needs Review 9건 중 descope 계열은 GX-5로 흡수·나머지 GA 이월.**
 - **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
@@ -80,7 +80,7 @@
 - EA(필드21+공유)·EA-D2(Xref)·EB(주소+Daum)·EC1~3(실브라우저)·EC3-0·EC-R1/EC-F·EF6/EF7 완료. E2E 5→16. [archive](./progress-archive/phase-e-track-tasks.md).
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(**W3 권한·능력 착지 후** role-readonly 실증으로 재개)
 
-#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11) · **W1~W7 ✅ 완료(2026-07-12)** → 다음=GA 게이트(별도)
+#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11) · **W1~W7 게이트 green(2026-07-12)** · ⚠ 봉인 후 조사서 GA 갭 발견 → Phase GX로 정합(아래)
 
 **규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 완료 상세(commit·CAP·검증)=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 
@@ -100,7 +100,17 @@
 - [x] **W7-4 MIGRATION+codemod** ✅ 2026-07-12 · sonnet→검증 · §9 42행 전수(빈행0)+서브패스제거+페이지셸+미이관·codemod 기계10규칙·smoke:load 신맵 green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
 - [x] **W7-5 wave-end** ✅ 2026-07-12 · **Phase EG 종료** · full gate+E2E30+smoke+headless+attw/publint·계수 49/57/186·CAP-24/25+구결함 §1~9 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w7-5)
 
-**Next up**: **GA 게이트(CAP-28 헌장 C1~C9 대조표)** — Phase EG(W1~W7) 완료 후 **별도 pass·새 세션 권장**. 스펙 §8 CAP-28 행 + [헌장 C1~C9](./prd/concept-charter.md) 대조표 작성·검증(C1 선언=화면·C2 조건부·C3 관계·C4 카탈로그+확장·C5 검증 단일채널·C6 탭/그룹/스텝/엑셀/리비전·C7 주입·C8 어댑터·C9 리스트세트). **GA 전 선결(사용자/소비자 결정)**: §Needs Review descope 2건(#W6-2b TIER3·#W7-4 서브패스 제거) GJCU 확인→CAP-29 편입 · P0/P1 publish 외부 승인 · spec §9#29 라벨(presets-rcm). cold-start = [phase-eg archive Handoff](./progress-archive/phase-eg-api-redesign.md#w7-5)만 읽으면 충분.
+#### Phase GX — 0.4 프레임워크 정합 + parity (봉인 후 조사 2026-07-12 · **GA-blocking**)
+
+**규범**: [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)(결정·프레임워크 0.1.0 계약·근거 file:line) · **wire source-of-truth**: `rcm-backend-framework` 0.1.0(`SearchResponse`/`SearchRequest`/`FilterItem`·QueryConditionType 24)·edustack=실사용 레퍼런스. **Do-NOT**: 0.2(GJCU) shape primary 채택(폴백만)·구 src/ 삭제.
+
+- [ ] **GX-1 SearchForm wire 완전 정합** — **← Next up**. `packages/schema-core/src/search/search-form.ts`: `withFilter('AND'|'OR',...items)`+`withFilterIgnoreDuplicate` 복원(결정3·filters[op] push)·`FilterItem.subFilters`→`{[op]:FilterItem[]}` 중첩맵·`filters`에 NOT 키·`cacheKey` wire 제거·QueryConditionType 12→24(프레임워크 enum)·quickSearch de-dup 버그(`__quick__` prefix 미일치). 검증: `SearchRequestJacksonTest` JSON ↔ toJSON 대조 유닛 + college E2E green.
+- [ ] **GX-2 apps/sample 백엔드 프레임워크 충실화** — `apps/sample/lib/mock-backend/envelope.ts`: `searchEnvelope` 9필드 완비(page/pageSize/sorts/attributes/errors)·404→RFC7807 ProblemDetail(+`backend-rcm/adapter.ts` 파서 정합)·"Spring Page" 주석 정정 · `employee/collabo/search/route.ts` filters 배선. 검증: E2E 30 + 어댑터 에러 경로.
+- [ ] **GX-3 `/utils` 패키지 + 전량 이식**(결정2) — 새 `packages/utils`(오라클 `src/listgrid/misc/` 기계 이식): 정규식11·날짜포맷터·비교4·URL/스토리지·asset-URL·formatPrice·isEquals/isEqualCollection 배럴(RequestUtil/EntityError 제외). §2 exports+dts+attw+publint+smoke:load. **OQ 2건**(date-fns 런타임 의존·asset-URL env vs adapter)=착수 전 결정.
+- [ ] **GX-4 API 프록시 seam 문서화**(§3) — spec §6.2/ADR 애드덤: `RcmAdapterOptions.fetch`+`baseUrl`=프록시 seam 명시+워크드 예제(GJCU shouldSkipProxy 패턴)·MIGRATION `./api` 행에 "serverProxy 자동 승계 아님" 경고. 임의 외부호출(getExternalApiData)은 별도 컴포넌트-parity로 트래킹.
+- [ ] **GX-5 문서 정정 + descope 원장** — spec §9:370+MIGRATION:66 "무변경" 거짓 정정(withFilter 복원 반영)·정규식 "8종"→11종·widgets(QR/KakaoMap/ApiSpec/XrefPrice) CAP-29 descope 명문화·CAP 매트릭스 프록시/조건타입 행. §Needs Review descope 계열 흡수.
+
+**Next up**: **GX-1 SearchForm wire 완전 정합** — 근거·계약 [gap analysis §GX-1](./analysis/2026-07-12/w7-post-seal-gap-analysis.md). 이후 GX-2~5 → GA 게이트(CAP-28 헌장 대조·인라인 판단). GX-1/2는 hot-file 아님·병렬 가능하나 GX-1(SearchForm) 먼저(GX-2 mock이 GX-1 wire 검증 대상).
 
 ---
 
