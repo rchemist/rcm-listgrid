@@ -77,6 +77,11 @@ node --input-type=module -e "await import('@rchemist/listgrid/schema'); console.
 node -e "require('@rchemist/listgrid/state'); console.log('  ✓ cjs  ./state')"
 node --input-type=module -e "await import('@rchemist/listgrid/state'); console.log('  ✓ esm  ./state')"
 
+# /utils — React-runtime-free, zero-runtime-dependency (GX-3, w7-post-seal-
+# gap-analysis.md §GX-3). No peer/optional dep needed at load time.
+node -e "require('@rchemist/listgrid/utils'); console.log('  ✓ cjs  ./utils')"
+node --input-type=module -e "await import('@rchemist/listgrid/utils'); console.log('  ✓ esm  ./utils')"
+
 # /excel — CJS asserted; ESM intentionally NOT asserted (empirically
 # verified 2026-07-12): the built ESM entry statically imports `saveAs` as a
 # NAMED export from `file-saver`, a CJS-only package with no named ESM

@@ -103,6 +103,16 @@
         "default": "./dist/excel.cjs"
       }
     },
+    "./utils": {
+      "import": {
+        "types": "./dist/utils.d.ts",
+        "default": "./dist/utils.js"
+      },
+      "require": {
+        "types": "./dist/utils.d.cts",
+        "default": "./dist/utils.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css",
     "./styles/tokens.css": "./dist/styles/tokens.css",
     "./styles/primitives.css": "./dist/styles/primitives.css",
@@ -129,6 +139,9 @@
       ],
       "excel": [
         "./dist/excel.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.d.ts"
       ]
     }
   },

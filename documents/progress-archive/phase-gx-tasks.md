@@ -38,3 +38,20 @@
 **deviations**:
 - **①** ProblemDetail `field/traceId/tenantId`를 explicit null 아닌 **omit**(프레임워크 조건부 setProperty·`ProblemDetailAdviceTest .field.doesNotExist()` 패턴 일치). risk:none.
 - **②(§Needs Review)** mock filter 매칭이 **5/24 조건타입만**(EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE·GX-2 이전과 동일·이제 주석 명시)·NOT 그룹은 wire 판독하나 매칭 no-op. 사유: 전 호출처 grep=이 5종+AND만 사용·NOT-group row-매칭 시맨틱은 인용 가능 스펙 없음(발명 금지). risk:low(테스트 mock·실사용 경로 전건 green). 실백엔드 필요 조건타입 확장 시 재검토.
+
+<a id="gx-3"></a>
+## #GX-3 `/utils` 패키지 + 전량 이식 (2026-07-13 · sonnet 위임→메인 검증 · done_with_deviations)
+
+**결과**: 새 `@listgrid/utils`(published `@rchemist/listgrid/utils`) 신설·구 `./misc` 유틸 계층을 0.3 오라클서 이식. **런타임 의존 0**(date-fns devDep만·dist에 date-fns 0 실측)·React-free.
+
+**변경(신규 `packages/utils/*` + 배선)**: package.json(`@listgrid/utils` zero-dep)·tsconfig·src barrel + `regex.ts`(11 상수)·`date.ts`(fDate/fDateTime/fTimestamp/fToNow/formatYearMonth/getCurrent* — **자체구현·date-fns@3.6.0 출력 바이트동일 검증**·fToNow=`Intl.RelativeTimeFormat('ko')`)·`compare.ts`(isNulls[구 비대칭]/isEquals/isEqualsIgnoreCase/isEqualCollection/isEmpty/isPositive/isNegative)·`url.ts`·`storage.ts`(CachedStorageItem wire-compat)·`asset-url.ts`(+주입 seam `setAssetServerBase`+전역 `ASSET_SERVER_URL` 폴백)·`format-price.ts` + 7 test(114). 배선: `tsup.config.ts`(utils entry+dts paths)·root `package.json`(`./utils` exports+typesVersions)·`tsconfig.json`(references)·`scripts/smoke-load.sh`(./utils cjs+esm).
+
+**호스팅 결정**: `isEquals`/`isEqualCollection`을 **utils에 호스팅**(schema-core 배럴 재export 아님) — /schema 계수 188/190(GX-1 +2 후 여유 2)를 넘기지 않으려. schema-core 배럴 무변경(계수 무영향).
+
+**검증(메인 authoritative)**: type-check·typecheck:packages clean · **full unit 2368 pass**(+114·0회귀) · build OK(dist/utils.{js,cjs,d.ts,d.cts}·**date-fns 0**) · attw `/utils` 🟢(4모드) · publint All good · **smoke:load `./utils` cjs+esm** green · **check:surface 49/57/188 PASS**.
+
+**deviations(§Needs Review 2)**:
+- **①** `AdapterProvider`를 `setAssetServerBase`에 배선 안 함 — 0.4 어댑터/`RcmAdapterOptions`에 asset-base 필드 부재({baseUrl,fetch,headers}만)·API host를 asset base로 전용하면 발명(API≠asset host 흔함). 주입 seam+전역 폴백은 완비. risk:low-med(현재 의존 0·미래 호스트가 명시 `setAssetServerBase` 호출 or 전역 폴백 필요). → 어댑터에 assetBaseUrl 필드 추가 여부=스펙 결정.
+- **②** `isExternalUrl`을 utils에 로컬 재구현(schema-core import 안 함) — zero-dep 하드룰·byte-identical 4줄·상호참조 주석. risk:low(물리 2카피).
+
+**계수 정정 기록**: /schema **186→188**(GX-1 `withFilter`/`withFilterIgnoreDuplicate` public 복원 +2·임계 190 미만) — GX-5서 spec §10-A W7 행 반영.

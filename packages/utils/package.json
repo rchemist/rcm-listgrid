@@ -1,0 +1,13 @@
+{
+  "name": "@listgrid/utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Regex/date/compare/URL/storage/asset-URL utilities — zero runtime dependencies, React-free (ported from 0.3.x src/listgrid/misc/, GX-3)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "sideEffects": false
+}

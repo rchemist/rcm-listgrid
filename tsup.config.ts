@@ -19,6 +19,7 @@ export default defineConfig({
     'backend-rcm': 'packages/backend-rcm/src/index.ts',
     next: 'packages/next/src/index.ts',
     excel: 'packages/excel/src/index.ts',
+    utils: 'packages/utils/src/index.ts',
   },
   format: ['esm', 'cjs'],
   // esbuild only code-splits CJS entries when explicitly asked (tsup defaults
@@ -43,6 +44,7 @@ export default defineConfig({
         '@listgrid/next': ['packages/next/src/index.ts'],
         '@listgrid/excel': ['packages/excel/src/index.ts'],
         '@listgrid/presets-rcm': ['packages/presets-rcm/src/index.ts'],
+        '@listgrid/utils': ['packages/utils/src/index.ts'],
       },
     },
   },
