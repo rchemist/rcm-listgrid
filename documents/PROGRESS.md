@@ -92,10 +92,10 @@
 - [x] **D1 async save-gating** (#W4-3a) ✅ 2026-07-12 · dirty-gate+reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정 · 2114u/E2E27 · [detail](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
 - [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves W5 표(W5-1~4)+§12 결정4+§10-A · 계수 47/49/182 무변경 · [brief](./plans/entityform-api-implementation-waves.md)
-- [x] **W5-1 필드 substrate** ✅ 2026-07-12 · withList/withFilter+타입2·배럴+2·2124u·47/49/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
-- [x] **W5-2 컬럼 파생+list-cell 레지스트리** ✅ 2026-07-12 · getListConfig 파생·마법폴백폐기·M2O통합·2131u/E2E27·47/53/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
-- [x] **W5-3 고급검색+filter 레지스트리** ✅ 2026-07-12 · `2223f35` · filter-registry·deriveFilterFields·ViewListGrid 패널·setSearchForm·2138u/E2E28·47/57/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
-- [x] **W5-4 페이지 컴포지션 가이드(문서)** ✅ 2026-07-12 · `list-page-composition-guide.md`(호스트 셸 컴포지션·컴포넌트 아님) · W5 wave-end: CAP-18/19/20 전건 착지·계수 47/57/184 PASS·E2E28
+- [x] **W5-1 substrate** ✅ 2026-07-12 · withList/withFilter+타입2·2124u·CAP-18 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
+- [x] **W5-2 컬럼 파생+list-cell** ✅ 2026-07-12 · getListConfig 파생·M2O통합·2131u·CAP-19 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
+- [x] **W5-3 고급검색+filter** ✅ 2026-07-12 · `2223f35` · deriveFilterFields·패널·setSearchForm·2138u·CAP-20 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
+- [x] **W5-4 컴포지션 가이드+W5 wave-end** ✅ 2026-07-12 · 호스트 셸 문서·CAP-18/19/20 착지·47/57/184·E2E28 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-4--w5-wave-end-cap-list-track-완료)
 - [ ] **W6 data-transfer** — **entry-brief pass 선행**(W5처럼 survey+wave-entry 결정) · CAP-16·17 · withDataTransfer/`/excel` subpath · **← Next up**
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION(페이지 셸 절=이 가이드 흡수)+codemod · CAP-24·25
 
@@ -109,7 +109,7 @@
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
 - [x] **#W4-3a → DECIDED+구현(D1, 2026-07-12)** — dirty 미확인 async=validateAll 실패→save 차단·스펙 §5.3/§6.2 개정. [D1](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 잔여 9건 처분(2026-07-12)** — 스펙 저자 확정(발명금지 해제): 코드2+문서7·§Open Q 0. [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
-- [x] **#W5-1 operator 타입 확정(W5-3서 해소 2026-07-12)** — FieldFilterConfig.operator=**open `string` 유지**(스펙 §10-A·list-config.ts:26). QueryConditionType(12-값 유니온) 캐스트는 addAndFilter 빌드 지점만·부재 시 omit. QueryConditionType 채택 기각. [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
+- [x] **#W5-1 operator 타입 확정** — operator=open `string` 유지(§10-A)·QueryConditionType 캐스트=addAndFilter 지점만·채택 기각 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [ ] **#W5-3 재적용 de-dup 미구현** — 고급검색 매 apply가 `store.searchForm.addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적(단일 apply=정확·E2E green). SearchForm "이름별 제거" 프리미티브가 W5-3 스코프 밖(search-form.ts 미포함) → 브리프 Do-NOT 준수 미구현·flag · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
