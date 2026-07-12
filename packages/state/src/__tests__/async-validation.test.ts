@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AsyncValidation,
+  CustomValidation,
   EntityForm,
   StringField,
   ValidateResult,
@@ -348,6 +349,83 @@ describe('form-store AsyncValidation (W4-3a) — save-gating in validateAll', ()
     expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
     // not dirty -> the async gate is skipped, so the untouched record saves.
     expect(await store.getState().validateAll()).toBe(true);
+  });
+});
+
+// R4 (analysis 2026-07-13/midpoint-code-review.md §4.3, MEDIUM) —
+// validateAll's final write must not clobber a concurrently-resolving
+// AsyncValidation check back to a stale pre-loop snapshot.
+describe('form-store AsyncValidation — R4: validateAll must not clobber a concurrently-resolving async check', () => {
+  it('a change-triggered async check that resolves during validateAll\'s await window ends "valid" (not stuck "checking"), and a later save is not blocked', async () => {
+    let resolveAliasCheck!: (r: ValidateResult) => void;
+    let resolveSlowCheck!: (r: ValidateResult) => void;
+    let slowCallCount = 0;
+    // R4 test-sync (main-session repair, see §Needs Review): validateAll
+    // suspends at its FIRST await ('alias'), so resolveSlowCheck is NOT yet
+    // assigned right after the call returns — the spec's back-to-back
+    // resolveSlowCheck(...) threw "not a function". This promise fires when the
+    // loop reaches 'slow' (assigns the resolver + parks), so the test resolves
+    // the checks inside the real R4 race window instead of before it exists.
+    let slowStarted!: () => void;
+    const slowStartedP = new Promise<void>((res) => (slowStarted = res));
+    const form = new EntityForm('R4EntityForm', '/r4').addFields({
+      items: [
+        new StringField('alias', 1)
+          .withLabel('Alias')
+          .withValidations(
+            new AsyncValidation(
+              () => new Promise<ValidateResult>((res) => (resolveAliasCheck = res)),
+              { debounceMs: 50 },
+            ),
+          ),
+        // 'slow' exists purely to hold validateAll's per-field await loop
+        // open (via a real pending Promise) so 'alias'’s AsyncValidation check
+        // can settle WHILE validateAll is still mid-loop — the exact race the
+        // R4 bug depends on. Only the FIRST invocation blocks; the second
+        // validateAll() call below (post-race) must resolve immediately or
+        // it would hang forever.
+        new StringField('slow', 2)
+          .withLabel('Slow')
+          .withValidations(
+            new CustomValidation('slow-check', () => {
+              slowCallCount += 1;
+              if (slowCallCount === 1) {
+                slowStarted();
+                return new Promise<ValidateResult>((res) => (resolveSlowCheck = res));
+              }
+              return Promise.resolve(ValidateResult.success());
+            }),
+          ),
+      ],
+    });
+    const store = createFormStore(form);
+
+    store.getState().setValue('alias', 'candidate'); // dirty, schedules the 'change'-trigger debounce
+    await vi.advanceTimersByTimeAsync(50); // fires the debounce -> runAsyncValidationNow -> 'checking', now parked awaiting the held check promise
+    expect(store.getState().fields.alias?.asyncState).toBe('checking');
+
+    const validateAllPending = store.getState().validateAll();
+    // validateAll's snapshot (taken synchronously above, before the check
+    // settles) sees 'checking' and gates THIS call — expected, orthogonal to
+    // R4. Wait until its loop reaches 'slow' and parks awaiting the held
+    // CustomValidation (resolveSlowCheck now assigned): it has NOT reached its
+    // final write yet — this is the R4 race window.
+    await slowStartedP;
+
+    resolveAliasCheck(ValidateResult.success()); // the async check settles WHILE validateAll is still mid-loop
+    resolveSlowCheck(ValidateResult.success()); // release validateAll's remaining field so it can reach its final write
+    await validateAllPending;
+
+    // R4 fix: the final write must not clobber the just-settled 'valid' back
+    // to the pre-race 'checking' snapshot.
+    expect(store.getState().fields.alias?.asyncState).toBe('valid');
+
+    // save is not blocked: a fresh validateAll (post-race) reads the settled
+    // 'valid' state and passes cleanly. Pre-fix, asyncState stayed stuck
+    // 'checking' forever (no new trigger ever fires for an already-settled
+    // check), permanently blocking save via asyncGateMessage.
+    expect(await store.getState().validateAll()).toBe(true);
+    expect(store.getState().fields.alias?.errors ?? []).toEqual([]);
   });
 });
 

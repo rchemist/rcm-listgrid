@@ -815,7 +815,7 @@ export function createFormStore(
       async validateAll() {
         const s = get();
         let valid = true;
-        const fields = { ...s.fields };
+        const messagesByField = new Map<string, { message: string }[]>();
         for (const field of sortedFieldDefs(s)) {
           const name = field.getName();
           const errs = await field.validate(buildCtx(s, name), s.meta[name]);
@@ -837,10 +837,31 @@ export function createFormStore(
           ) {
             messages.push({ message: asyncGateMessage(slice.asyncState) });
           }
-          fields[name] = { ...fields[name], errors: messages };
+          messagesByField.set(name, messages);
           if (messages.length > 0) valid = false;
         }
-        set({ fields });
+        // R4 fix (analysis §4.3, MEDIUM): the old `set({ fields })` below
+        // replaced the ENTIRE fields map with the `s.fields` snapshot taken
+        // at the top of this function (only patched with `errors`). If an
+        // in-flight AsyncValidation's own check (runAsyncValidationNow, this
+        // file) resolves DURING this loop's await window, its live
+        // `set((s) => ...)` write (e.g. asyncState 'checking' -> 'valid')
+        // lands on the store — then this function's final non-functional
+        // `set({ fields })` clobbered it straight back to the pre-race
+        // 'checking' snapshot, sticking the tri-state forever (no further
+        // trigger fires for an already-settled check) and permanently
+        // blocking save via asyncGateMessage. Fix: merge functionally,
+        // reading the FRESHEST `cur.fields` inside the updater, and writing
+        // ONLY the computed `errors` key per field — every other key
+        // (asyncState/current/dirty/...) keeps whatever the freshest state
+        // holds, so a concurrent write can never be undone by this commit.
+        set((cur) => {
+          const fields = { ...cur.fields };
+          for (const [name, messages] of messagesByField) {
+            fields[name] = { ...fields[name], errors: messages };
+          }
+          return { fields };
+        });
         return valid;
       },
 
