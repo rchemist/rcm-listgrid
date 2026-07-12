@@ -105,7 +105,7 @@
 
 - [x] **RV-R1 reload() write-path 고아화** 🔴CRIT ✅ 2026-07-13 · `3c41ebf` · into? 병합으로 액션 클로저 보존(reload 후 write 유실 해소)·판별테스트(구코드 FAIL 확인)+2374 green · [R1](./plans/rv-remediation-execution-plan.md)
 - [x] **RV-R2 고급검색 de-dup** 🟠HIGH ✅ 2026-07-13 · `dcd82b2` · withFilter('AND',...) name 교체(스택킹→빈결과 해소)·surface 무변경(61/120)·2375 green · [R2](./plans/rv-remediation-execution-plan.md)
-- [x] **RV-R3~R8** 🟡MED ✅ 2026-07-13 · `0d25490..cdb4aac` · xref-aware isBlank·validateAll 함수형머지·allSettled fail-closed·sessionStorage 가드·TIER2 스칼라추출·DataImporter catch · 2386 green(2 deviation→§NR) · [R3~R8](./plans/rv-remediation-execution-plan.md)
+- [x] **RV-R3~R8** 🟡MED ✅ 2026-07-13 · `0d25490..cdb4aac` · R3 isBlank·R4 함수형머지·R5 allSettled·R6 storage·R7 TIER2·R8 catch · 2386(2 dev→§NR) · [R3~R8](./plans/rv-remediation-execution-plan.md)
 - [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined widen)·reset() 타이머클린업·delete() ids guard · [실행계획 R9~R12](./plans/rv-remediation-execution-plan.md)
 - [x] **G-1 GX-6 asset-URL → 채택·재설계** ✅ 2026-07-13 · `9095504` · context-스코프 3티어·전역 싱글턴 폐기·게이트 green(2373·surface 61/120·188/190) · [design](./plans/asset-url-resolution-design.md)
 - [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 2파일 수리·format:check green 복원
