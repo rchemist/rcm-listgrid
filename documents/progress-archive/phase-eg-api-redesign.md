@@ -234,3 +234,15 @@
 **검증(메인 authoritative)**: full gate 독립 PASS — type-check·typecheck:packages·test **2156**(신 18/18·+18 from 2138)·lint 0err(258 pre-existing warn·legacy)·format·build. 계수 **49/57/186**(EntityForm 47→49·root 57 무변경·/schema 184→186, 전부 임계 55/120/190 내). HEAD 불변(04edb12→logic)·hot-file form-store/ViewEntityForm 미관통.
 
 **deviations(전건 spec-conformant·§Needs Review 불요)**: ① brief 인용 line# stale(neverDelete/submitTransform=HEAD서 제거·W2/W3서 withCapabilities/onBeforeSave로 대체)→withRevision/getRevisionEntityName 동형 패턴 미러(HEAD-relative 재확인 지시대로) ② 복합타입 auto-derive 필터링 미구현=결정5 "W6-2서 확정" 준수(schema는 전 필드 포함·순수 선언·/excel이 export시 제외+warn — 스펙 §3.5 계층 확정 반영) ③ prettier 재포맷(공백만).
+
+## #W6-2a /excel foundation (CAP-17)
+
+✅ 2026-07-12 · sonnet 위임(brief=waves W6-2 착수 노트)→메인 authoritative 검증(full gate 독립 재실행). 신규 `@listgrid/excel` 패키지 foundation(registry DI + 값변환 — React 컴포넌트 없음, 2b 소관).
+
+**변경**: 신규 `packages/excel/`(`package.json`=@listgrid/react shape·xlsx-js-style/file-saver **optional peer**+devDep·`tsconfig.json`=state 클론·ref schema-core) · `registry.ts`(DI seam 이식 구 `transfer/registry.ts` — configureDataTransfer/getDataTransfer·type-only react import·props=`Record<string,unknown>`(no-explicit-any 게이트 회피·2b 정제)) · `value-transform.ts`(exportValue/importValue/isAutoDeriveExcluded/warnAutoDeriveExcluded — 구 `Type.ts:531-620`+helper 이식) · `index.ts`(배럴 5+1type) · `__tests__`(registry 4+value-transform 41=45) · root `tsconfig.json`(+1 ref `./packages/excel`=tsc-b 픽업) · `package-lock.json`(npm i 워크스페이스 링크).
+
+**값변환 tiers(결정5 확정)**: TIER1 transform(select/multiselect(`|||`)/date/datetime(range `~`)/boolean(예/아니오)/html·markdown(strip)) · TIER2 passthrough(String·그 외 전 primitive) · TIER3 auto-derive 제외+warn(subCollection/contentAsset/multipleAsset/file/image/inlineMap/mappedJoin 7종·`export.fields` 명시 시 포함). date fmt=hand-roll 포트(new-engine no-date-fns 선례 datetime-renderer.tsx 따름·구 misc/index.ts:49-65 default fmt만).
+
+**검증(메인 authoritative)**: full gate 독립 PASS — type-check·tsc-b(packages/excel dist 빌드=root ref 작동)·test **2201**(신 45)·lint 0err·format·build. 계수 49/57/186 무변경(/excel=신 subpath·3-예산 밖). vitest 기존 glob으로 packages/excel 테스트 발견(config 무변경).
+
+**deviations(3·§Needs Review 등재)**: ① importValue +optional `options` 3번째 인자(brief는 2-arg이나 select/multiselect label→value=option 필수·round-trip 테스트 불가능 → 기계적 필연·exportValue 대칭·발명 아님) ② multiselect `|||` 양방향(구 Type.ts import 분기 latent bug=`,` 검사후 `|||` split → brief 명시대로 양방향 `|||`·L8 구결함 봉인·round-trip green) ③ fDate/fDateTime = `new Date()` UTC파싱+local getter → 음수-UTC-offset 브라우저서 date-range export 하루 밀림 가능(구 date-fns fDate 동작 계승=회귀 아님·테스트는 TZ=UTC 고정·**실 GJCU 데이터 소비자 검증 필요**). multiselect 런타임값=신엔진 `string[]` ↔ `|||` 문자열 브리징은 export/import CORE(2b) 소관(value-transform 주석 명시).

@@ -44,6 +44,7 @@
         { "path": "./packages/backend-rcm" },
         { "path": "./packages/backend-rest" },
         { "path": "./packages/presets-rcm" },
-        { "path": "./packages/next" }
+        { "path": "./packages/next" },
+        { "path": "./packages/excel" }
     ]
 }
