@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W6 ✅ · **W7 entry-brief pass ✅**(2026-07-12·opus·결정8·스코프 정정 published src/→packages/*·콜드리더 통과). **Next up: W7-1 패키징 코어**(마지막 wave·CAP-24/25·execution-grade→sonnet 위임 가능). **2235 unit/E2E 30**·계수 49/57/186(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W6 ✅ · W7 entry ✅ · **W7-1 패키징 코어 ✅**(2026-07-12·published 진입점 src/→packages/* §2 맵·full gate green). **Next up: W7-2 headless + W7-3 adapter headers**(병렬·CAP-25/24). **2235 unit/E2E 30**·계수 49/57/186(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W6 ✅ + W7 entry-brief pass ✅**(2026-07-12·opus·콜드리더 통과). 새 세션은 **W7-1 패키징 코어부터** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md)(W7-1~5 execution-grade·8 wave-entry 결정). W7-1~5는 **sonnet 위임 가능**(설계 판단 소진됨·구현만 남음). W7-1(빌드 인프라)→W7-2(headless, 빌드 산출 의존) 순차; W7-3(adapter)·W7-4(MIGRATION/codemod) 병렬 가능. **핵심 정정**: published `@rchemist/listgrid`가 아직 구 `src/` 전체 → W7이 packages/*를 §2 맵으로 처음 published화. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클).
-**Last updated**: 2026-07-12 (**W7 entry-brief pass ✅**(opus) — waves §W7 표(W7-1~5)+8 wave-entry 결정+§10-A W7 무변경(schema+0/186). **스코프 정정**: 서베이가 published `@rchemist/listgrid`=아직 구 `src/` 전체(packages/*는 private·빌드인프라 0)임을 확인 → W7=packages/*를 §2 subpath 맵으로 처음 published화. **콜드리더 프로브 통과**(1결함 build:styles→결정8로 fix·presets/backend-rest omit-if-empty·backend-rest 빈스캐폴드 반영). 진입 slim(154→143줄) 선행. 다음=**W7-1 패키징 코어**(sonnet 위임 가능).)
+**Last updated**: 2026-07-12 (**W7-1 패키징 코어 ✅** — published `@rchemist/listgrid` 진입점을 구 `src/`→v0.4 `packages/*` §2 subpath 맵으로 전환(tsup 객체 entry 7·exports 재작성·peers 26→6·styles 현소스 유지). **dts 해소**: 워크스페이스 cross-package 타입에 rollup-plugin-dts parse 실패→experimentalDts(+@microsoft/api-extractor·per-subtree ajv override로 eslint ajv@6 보존). **full gate green**(build/attw🟢/publint/surface 49/57/186/type-check/typecheck:packages/lint 0err/format/**2235u**). 상세 [archive](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). 다음=W7-2 headless+W7-3 adapter(병렬).)
 
 ## Goal
 
@@ -49,9 +49,9 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W6 ✅ + W7 entry-brief pass ✅**(2026-07-12). 다음: **W7-1 패키징 코어**(마지막 wave·sonnet 위임 가능) — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md))
+## 세션 인계 (Handoff — **W1~W6 ✅ + W7 entry ✅ + W7-1 패키징 코어 ✅**(2026-07-12). 다음: **W7-2 headless + W7-3 adapter**(병렬·sonnet 위임 가능) — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md))
 
-- **⚠ 다음 = W7-1 패키징 코어**(entry-brief pass ✅ 2026-07-12 opus → [waves §W7 표](./plans/entityform-api-implementation-waves.md) W7-1~5·execution-grade → **sonnet 위임 가능**): W7 = published `@rchemist/listgrid` 진입점을 구 `src/` 엔진에서 `packages/*`로 전환(§2 subpath 맵)·adapter headers 함수형(CAP-24)·headless fixture(CAP-25)·MIGRATION+codemod. **핵심 서베이 정정**(entry pass): published가 아직 구 src/ 전체(exports 11·tsup entry 12 전부 src/*)·packages/*는 private·빌드인프라 0 → W7이 packages/*를 §2 맵으로 처음 published화. **8 wave-entry 결정**=waves §W7(빌드 tsup 멀티엔트리+splitting·src/ 오라클 존치·CAP-24 코드·headless·codemod 범위·페이지셸·omit-if-empty·styles 현소스). **W6-3 xlsx interop**: dual esm/cjs 빌드로 해소(W7-1 빌드+W7-5 smoke:load 실증). **W7 후 = GA 게이트**(헌장 C1~C9 대조표·CAP-28·별도 pass).
+- **⚠ 다음 = W7-2 headless fixture(CAP-25) + W7-3 adapter headers 함수형(CAP-24)** — 병렬·sonnet 위임 가능. **W7-1 ✅**: published `@rchemist/listgrid` 진입점을 구 `src/`→v0.4 `packages/*` §2 subpath 맵으로 전환 완료(full gate green·2235u·49/57/186). **dts 해소 선례(중요)**: 워크스페이스 cross-package 타입에 tsup 기본 `dts`(rollup-plugin-dts) parse 실패 → `experimentalDts`(+`@microsoft/api-extractor`)로 전환·api-extractor의 ajv@8 vs eslint ajv@6 충돌은 **per-subtree override**(`@microsoft/api-extractor`·`ajv-draft-04`→ajv@8)로 해소([archive #W7-1](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages)). **W7-2 주의**: schema-core가 `import type {ReactNode} from 'react'`(타입만·런타임 0) — headless tsc가 @types/react 요구할 수 있음(fixture서 실증·결정 4 게이트). **W7-3**: `backend-rcm/src/adapter.ts:15,110`(현 정적 `opts.headers??{}` 생성시 캡처)→`Record|()=>Record` 요청시 지연평가. **W7-4가 smoke-load.sh를 신 맵으로 갱신**(현 구 subpath 대상=실패 예상)·**W7-5 smoke:load 실증**. **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -93,13 +93,13 @@
 
 **W7 패키징+마이그레이션 (마지막 wave·CAP-24·25)** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md):
 - [x] **W7 entry-brief pass** ✅ 2026-07-12 · opus · 결정8(빌드기전 tsup 멀티엔트리+splitting·src/ 오라클 존치·CAP-24·headless·codemod 범위·페이지셸·presets/backend-rest omit-if-empty·styles 현소스)·**스코프 정정**(published=구 src/ 전체→packages/* 전환)·콜드리더 1결함(build:styles) fix
-- [ ] **W7-1 패키징 코어** — tsup entry `src/`→`packages/*`·exports §2 맵·peers 재선언·styles 유지·omit-if-empty(backend-rest·presets-rcm) · **← Next up**
-- [ ] **W7-2 headless fixture** — `/schema`+`/state`만·React 0 빌드+실행 green · CAP-25
+- [x] **W7-1 패키징 코어** ✅ 2026-07-12 · tsup entry src/→packages/*(7 subpath)·exports §2 맵·peers 26→6·experimentalDts(+api-extractor·per-subtree ajv override) · **full gate+attw+publint+surface 49/57/186+2235u green** · [detail](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages)
+- [ ] **W7-2 headless fixture** — `/schema`+`/state`만·React 0 빌드+실행 green · CAP-25 · **← Next up**
 - [ ] **W7-3 adapter headers 함수형** — RcmAdapterOptions.headers=`Record|()=>Record` 요청시 지연평가(backend-rcm 단독) · CAP-24
 - [ ] **W7-4 MIGRATION.md + codemod** — §9 전수표+서브패스제거절+페이지셸(guide 흡수)+미이관목록·jscodeshift 기계행만
 - [ ] **W7-5 wave-end** — CAP-24/25 대조·계수 49/57/186·full gate+E2E30+smoke:load+attw/publint·구결함 원장 최종봉인 → **GA 게이트(CAP-28) 착수**
 
-**Next up**: **W7-1 패키징 코어**(실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md)·execution-grade → sonnet 위임 가능). root tsup entry `src/*`→`packages/*/src/index.ts`(심볼 보유분만)·package.json exports를 §2 subpath 맵으로 재작성·peers 신 그래프 재선언·`build:styles` 현 소스 유지(결정 8). 게이트: `npm run build`+attw+publint+`check:surface` 49/57/186 무변경. Do-NOT: src/ 삭제·`@listgrid/*` import 재작성·빈 subpath 발행.
+**Next up**: **W7-2 headless fixture**(CAP-25·[waves §W7-2](./plans/entityform-api-implementation-waves.md)) + **W7-3 adapter headers 함수형**(CAP-24·backend-rcm) — 병렬 가능(sonnet 위임 가능). W7-2: `/schema`+`/state`만 import하는 fixture가 React 미설치로 tsc+node run green(결정 1 청크-누수 게이트·**schema-core `import type ReactNode` 나비효과 확인**). W7-3: `backend-rcm/src/adapter.ts:15,110` headers 정적→`Record|()=>Record` 요청시 지연평가+테스트. 이후 W7-4(MIGRATION+codemod·smoke-load.sh 신맵 갱신)→W7-5(wave-end+smoke:load).
 
 ---
 

@@ -270,3 +270,17 @@
 **검증(메인 authoritative — E2E 독립 관찰)**: full gate PASS·계수 49/57/186 무변경. **E2E 28→30·30/30 green**(독립 재실행 `npm run test:e2e -- e2e/college-excel.spec.ts` → 2 passed: export .xlsx 다운로드·import fixture 업로드→행 출현). 실 export-core.ts 경로를 브라우저(Next 번들)서 실행=진짜 작동 실증.
 
 **deviations**: ① E2E 스펙의 Node-side fixture 생성 코드가 `import * as XLSX`→Node ESM(type:module)서 named export 미노출(CJS 번들 `.default`만)로 실패 → 스펙만 `import XLSX from`(default) fix. **export-core.ts의 `import * as XLSX`는 무영향**(tsup/Next 번들러 처리·구엔진 동일 패턴). **→ W7 published 패키지서 소비자 번들러 xlsx interop 확인 필요**(waves W7 노트). ② College `{}` auto-derive가 `dean`(manyToOne·TIER2 passthrough) 포함 → seed 무값이라 빈 컬럼(무해)·기존 TIER3 경계 §Needs Review에 포함.
+
+## #W7-1 패키징 코어 (2026-07-12 · published 진입점 src/→packages/*)
+
+**결과**: published `@rchemist/listgrid`가 이제 v0.4 `packages/*` 엔진을 §2 subpath 맵으로 번들(구 `src/` 엔진 아님). full gate 전건 green·유효 publishable 패키지(publint/attw).
+
+**변경 파일**:
+- `tsup.config.ts`: entry 객체형 7키(`index`→react·`schema`→schema-core·`state`→state·`ui-default`·`backend-rcm`·`next`·`excel`) — 빈 스캐폴드 backend-rest·presets-rcm omit(결정 7). `external` 26→8(peer 실사용분·charter C7). `dts`→`experimentalDts`(아래).
+- `package.json`: exports 구 11 subpath(`/form/*`·`/api`·`/misc`·`/qr`·`/address`·`/api-spec`·`/xref-price`·구 `/headless`) 제거 → §2 신 맵 7 subpath+styles 6. typesVersions 재작성. **peerDependencies 26→6**(required react·react-dom; optional next·xlsx-js-style·file-saver·react-daum-postcode) — 구 UI peer(@headlessui·react-select·@tabler·sortablejs·qrcode·kakao·sweetalert·date-fns·nuqs·iconify)는 packages/* 미import(C7 호스트 제공)라 제거. `build:styles` 소스=현 `src/listgrid/styles/*.css` 유지(결정 8). devDep `@microsoft/api-extractor`+overrides(아래).
+
+**dts 해소(엔지니어링 노트 — 다음 세션 참조)**: packages/* 엔트리에서 tsup 기본 `dts`(rollup-plugin-dts)가 `@listgrid/*` cross-package 타입을 워크스페이스 경계 너머로 해소 못해 `state/src/index.ts:5:7` parse 실패. → `experimentalDts`(TS API 기반 tsc emit→api-extractor 롤업)로 전환: TSC emit은 성공하나 api-extractor가 `ajv/dist/core` 미해소로 실패(top-level `ajv@6`=eslint 계열 hoist가 api-extractor의 `ajv@8` 잠식). **글로벌 ajv@8 override는 eslint 파손**(eslint `lib/shared/ajv.js`=ajv@6 API). **해법**: per-subtree override `{"@microsoft/api-extractor":{"ajv":"^8.17.1"},"ajv-draft-04":{"ajv":"^8.17.1"}}` — api-extractor 서브트리만 ajv@8·eslint는 ajv@6 유지. **양쪽 green**. dist에 `_tsup-dts-rollup.d.ts/.d.cts`(공유 선언·내부) 동반 방출.
+
+**검증(메인 authoritative)**: `npm run build`(JS+dts) green·dist 7 subpath×(js/cjs/d.ts/d.cts)+styles.css. `check:surface` **49/57/186 PASS**(§10-A W7 schema+0 확정). `check:publint` All good. `check:exports`(attw) 전 subpath 🟢(node10/node16-CJS/node16-ESM/bundler). type-check·typecheck:packages·lint(0 err)·format green. **test 2235 pass**(1 todo). 
+
+**미결(W7 후속)**: ① `smoke:load`는 구 subpath 대상이라 현재 실패 예상 → W7-4가 신 맵으로 갱신 후 W7-5서 실증. ② node 26.4.0서 검증(.nvmrc=22) — CI(22)서 W7-5 재확인. ③ peer 축소는 실사용 import 근거·smoke:load(W7-5 real install)가 최종 검증.

@@ -2,35 +2,34 @@ import { defineConfig } from 'tsup';
 
 /**
  * ADR-0001 — 번들러 기반 dual(ESM+CJS) 산출.
- * 진입점(메인 배럴 + 서브패스 11종)마다 .js(ESM)/.cjs(CJS)/.d.ts(+.d.cts)/sourcemap을 방출한다.
- * peerDependencies + react/jsx-runtime은 절대 번들에 포함하지 않는다(external).
+ * W7-1(2026-07-12) — published `@rchemist/listgrid` 진입점을 구 `src/` 엔진에서
+ * v0.4 `packages/*` 워크스페이스로 전환(스펙 §2 subpath 계약, waves §W7 결정 1).
+ * 각 subpath = 한 내부 패키지의 배럴을 한 tsup 엔트리로. `@listgrid/*` cross-package
+ * import는 워크스페이스 해소→번들→`splitting`이 공유 청크로 dedup(import 재작성 불요).
+ * 빈 스캐폴드(backend-rest·presets-rcm=`export {}`)는 omit-if-empty(결정 7).
+ * 엔트리는 **객체 형식**(index.ts 출력명 충돌 방지 — 출력명=키).
+ * peer + react/jsx-runtime은 절대 번들 금지(external).
  */
 export default defineConfig({
-  entry: [
-    'src/index.ts',
-    'src/qr.ts',
-    'src/address.ts',
-    'src/api-spec.ts',
-    'src/xref-price.ts',
-    'src/excel.ts',
-    'src/adapters/next/index.ts',
-    'src/listgrid/form/SearchForm.ts',
-    'src/listgrid/form/Type.ts',
-    'src/listgrid/api/index.ts',
-    'src/listgrid/misc/index.ts',
-    'src/listgrid/ui/headless.tsx',
-  ],
+  entry: {
+    index: 'packages/react/src/index.ts',
+    schema: 'packages/schema-core/src/index.ts',
+    state: 'packages/state/src/index.ts',
+    'ui-default': 'packages/ui-default/src/index.ts',
+    'backend-rcm': 'packages/backend-rcm/src/index.ts',
+    next: 'packages/next/src/index.ts',
+    excel: 'packages/excel/src/index.ts',
+  },
   format: ['esm', 'cjs'],
   // esbuild only code-splits CJS entries when explicitly asked (tsup defaults
   // splitting to ESM-only); without this every one of the 12 CJS entry
   // bundles inlines its own full copy of shared internals (Config, UIProvider,
   // etc.), which was the single largest contributor to tarball bloat.
   splitting: true,
-  dts: {
-    // tsup's dts rollup step does not fully inherit tsconfig.json's `target`;
-    // without this override it defaults to a stricter useDefineForClassFields
-    // semantics and trips TS2612 on TelephoneNumberField's `validations` field
-    // override, even though `tsc --noEmit -p tsconfig.json` (target es2020) is clean.
+  // W7-1: rollup-plugin-dts(구 `dts`)는 `@listgrid/*` cross-package 타입을
+  // 워크스페이스 경계 너머로 해소하지 못해 packages/* 엔트리에서 parse 실패.
+  // experimentalDts(TS API 기반·project-references 인지)로 전환해 모노레포 dts 롤업.
+  experimentalDts: {
     compilerOptions: {
       target: 'ES2020',
       useDefineForClassFields: false,
@@ -47,25 +46,17 @@ export default defineConfig({
   esbuildOptions(options) {
     options.sourcesContent = false;
   },
+  // W7-1: peer는 v0.4 packages/* 실사용분으로 축소(스펙 §2 peer 열·charter C7
+  // 호스트 제공 위젯이라 @headlessui/react-select/@tabler 등 구 UI peer는 미import).
+  // 서브패스 특정자(react/jsx-runtime·next/navigation)는 명시(esbuild 미와일드).
   external: [
-    '@headlessui/react',
-    '@iconify/react',
-    '@tabler/icons-react',
-    'date-fns',
-    'file-saver',
-    'next',
-    'nuqs',
-    'qrcode.react',
     'react',
-    'react-daum-postcode',
     'react-dom',
-    'react-kakao-maps-sdk',
-    'react-select',
-    'react-sortablejs',
-    'sortablejs',
-    'sweetalert2',
-    'sweetalert2-react-content',
-    'xlsx-js-style',
     'react/jsx-runtime',
+    'next',
+    'next/navigation',
+    'xlsx-js-style',
+    'file-saver',
+    'react-daum-postcode',
   ],
 });

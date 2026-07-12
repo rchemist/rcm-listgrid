@@ -43,104 +43,54 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./schema": {
+      "import": {
+        "types": "./dist/schema.d.ts",
+        "default": "./dist/schema.js"
+      },
+      "require": {
+        "types": "./dist/schema.d.cts",
+        "default": "./dist/schema.cjs"
+      }
+    },
+    "./state": {
+      "import": {
+        "types": "./dist/state.d.ts",
+        "default": "./dist/state.js"
+      },
+      "require": {
+        "types": "./dist/state.d.cts",
+        "default": "./dist/state.cjs"
+      }
+    },
+    "./ui-default": {
+      "import": {
+        "types": "./dist/ui-default.d.ts",
+        "default": "./dist/ui-default.js"
+      },
+      "require": {
+        "types": "./dist/ui-default.d.cts",
+        "default": "./dist/ui-default.cjs"
+      }
+    },
+    "./backend-rcm": {
+      "import": {
+        "types": "./dist/backend-rcm.d.ts",
+        "default": "./dist/backend-rcm.js"
+      },
+      "require": {
+        "types": "./dist/backend-rcm.d.cts",
+        "default": "./dist/backend-rcm.cjs"
+      }
+    },
     "./next": {
       "import": {
-        "types": "./dist/adapters/next/index.d.ts",
-        "default": "./dist/adapters/next/index.js"
+        "types": "./dist/next.d.ts",
+        "default": "./dist/next.js"
       },
       "require": {
-        "types": "./dist/adapters/next/index.d.cts",
-        "default": "./dist/adapters/next/index.cjs"
-      }
-    },
-    "./form/SearchForm": {
-      "import": {
-        "types": "./dist/listgrid/form/SearchForm.d.ts",
-        "default": "./dist/listgrid/form/SearchForm.js"
-      },
-      "require": {
-        "types": "./dist/listgrid/form/SearchForm.d.cts",
-        "default": "./dist/listgrid/form/SearchForm.cjs"
-      }
-    },
-    "./form/Type": {
-      "import": {
-        "types": "./dist/listgrid/form/Type.d.ts",
-        "default": "./dist/listgrid/form/Type.js"
-      },
-      "require": {
-        "types": "./dist/listgrid/form/Type.d.cts",
-        "default": "./dist/listgrid/form/Type.cjs"
-      }
-    },
-    "./api": {
-      "import": {
-        "types": "./dist/listgrid/api/index.d.ts",
-        "default": "./dist/listgrid/api/index.js"
-      },
-      "require": {
-        "types": "./dist/listgrid/api/index.d.cts",
-        "default": "./dist/listgrid/api/index.cjs"
-      }
-    },
-    "./misc": {
-      "import": {
-        "types": "./dist/listgrid/misc/index.d.ts",
-        "default": "./dist/listgrid/misc/index.js"
-      },
-      "require": {
-        "types": "./dist/listgrid/misc/index.d.cts",
-        "default": "./dist/listgrid/misc/index.cjs"
-      }
-    },
-    "./headless": {
-      "import": {
-        "types": "./dist/listgrid/ui/headless.d.ts",
-        "default": "./dist/listgrid/ui/headless.js"
-      },
-      "require": {
-        "types": "./dist/listgrid/ui/headless.d.cts",
-        "default": "./dist/listgrid/ui/headless.cjs"
-      }
-    },
-    "./qr": {
-      "import": {
-        "types": "./dist/qr.d.ts",
-        "default": "./dist/qr.js"
-      },
-      "require": {
-        "types": "./dist/qr.d.cts",
-        "default": "./dist/qr.cjs"
-      }
-    },
-    "./address": {
-      "import": {
-        "types": "./dist/address.d.ts",
-        "default": "./dist/address.js"
-      },
-      "require": {
-        "types": "./dist/address.d.cts",
-        "default": "./dist/address.cjs"
-      }
-    },
-    "./api-spec": {
-      "import": {
-        "types": "./dist/api-spec.d.ts",
-        "default": "./dist/api-spec.js"
-      },
-      "require": {
-        "types": "./dist/api-spec.d.cts",
-        "default": "./dist/api-spec.cjs"
-      }
-    },
-    "./xref-price": {
-      "import": {
-        "types": "./dist/xref-price.d.ts",
-        "default": "./dist/xref-price.js"
-      },
-      "require": {
-        "types": "./dist/xref-price.d.cts",
-        "default": "./dist/xref-price.cjs"
+        "types": "./dist/next.d.cts",
+        "default": "./dist/next.cjs"
       }
     },
     "./excel": {
@@ -162,35 +112,20 @@
   },
   "typesVersions": {
     "*": {
+      "schema": [
+        "./dist/schema.d.ts"
+      ],
+      "state": [
+        "./dist/state.d.ts"
+      ],
+      "ui-default": [
+        "./dist/ui-default.d.ts"
+      ],
+      "backend-rcm": [
+        "./dist/backend-rcm.d.ts"
+      ],
       "next": [
-        "./dist/adapters/next/index.d.ts"
-      ],
-      "form/SearchForm": [
-        "./dist/listgrid/form/SearchForm.d.ts"
-      ],
-      "form/Type": [
-        "./dist/listgrid/form/Type.d.ts"
-      ],
-      "api": [
-        "./dist/listgrid/api/index.d.ts"
-      ],
-      "misc": [
-        "./dist/listgrid/misc/index.d.ts"
-      ],
-      "headless": [
-        "./dist/listgrid/ui/headless.d.ts"
-      ],
-      "qr": [
-        "./dist/qr.d.ts"
-      ],
-      "address": [
-        "./dist/address.d.ts"
-      ],
-      "api-spec": [
-        "./dist/api-spec.d.ts"
-      ],
-      "xref-price": [
-        "./dist/xref-price.d.ts"
+        "./dist/next.d.ts"
       ],
       "excel": [
         "./dist/excel.d.ts"
@@ -244,52 +179,24 @@
     "uuid": "^9.0.0",
     "zustand": "^4.4.0"
   },
+  "overrides": {
+    "@microsoft/api-extractor": {
+      "ajv": "^8.17.1"
+    },
+    "ajv-draft-04": {
+      "ajv": "^8.17.1"
+    }
+  },
   "peerDependencies": {
-    "@headlessui/react": "^2.0.0",
-    "@iconify/react": "^4.0.0 || ^5.0.0",
-    "@tabler/icons-react": "^2.30.0 || ^3.0.0",
-    "date-fns": "^2.0.0 || ^3.0.0 || ^4.0.0",
     "file-saver": "^2.0.5",
     "next": ">=14",
-    "nuqs": ">=2.0.0",
-    "qrcode.react": "^3.0.0",
     "react": ">=18",
     "react-daum-postcode": "^3.0.0",
     "react-dom": ">=18",
-    "react-kakao-maps-sdk": "^1.0.0",
-    "react-select": "^5.0.0",
-    "react-sortablejs": "^6.0.0 || ^7.0.0",
-    "sortablejs": "^1.15.0",
-    "sweetalert2": "^11.0.0",
-    "sweetalert2-react-content": "^5.0.0",
     "xlsx-js-style": "^1.2.0"
   },
   "peerDependenciesMeta": {
-    "@tabler/icons-react": {
-      "optional": false
-    },
-    "@headlessui/react": {
-      "optional": false
-    },
     "next": {
-      "optional": true
-    },
-    "nuqs": {
-      "optional": true
-    },
-    "@iconify/react": {
-      "optional": false
-    },
-    "react-select": {
-      "optional": false
-    },
-    "react-sortablejs": {
-      "optional": false
-    },
-    "qrcode.react": {
-      "optional": true
-    },
-    "react-kakao-maps-sdk": {
       "optional": true
     },
     "react-daum-postcode": {
@@ -300,12 +207,6 @@
     },
     "file-saver": {
       "optional": true
-    },
-    "sweetalert2": {
-      "optional": true
-    },
-    "sweetalert2-react-content": {
-      "optional": true
     }
   },
   "devDependencies": {
@@ -313,6 +214,7 @@
     "@eslint/js": "^10.0.1",
     "@headlessui/react": "^2.2.9",
     "@iconify/react": "^4.1.1",
+    "@microsoft/api-extractor": "^7.58.9",
     "@playwright/test": "^1.61.1",
     "@tabler/icons-react": "^2.30.0",
     "@testing-library/dom": "^10.4.1",
