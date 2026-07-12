@@ -93,10 +93,10 @@
 - **W6** data-transfer(entry+W6-1~4 · `@listgrid/excel`)(CAP-16·17)·**full gate+E2E 30/30**·계수 49/57/186
 
 **W7 패키징+마이그레이션 (마지막 wave·CAP-24·25)** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md):
-- [x] **W7 entry-brief pass** ✅ 2026-07-12 · opus · 결정8(빌드기전 tsup 멀티엔트리+splitting·src/ 오라클 존치·CAP-24·headless·codemod 범위·페이지셸·presets/backend-rest omit-if-empty·styles 현소스)·**스코프 정정**(published=구 src/ 전체→packages/* 전환)·콜드리더 1결함(build:styles) fix
-- [x] **W7-1 패키징 코어** ✅ 2026-07-12 · tsup entry src/→packages/*(7 subpath)·exports §2 맵·peers 26→6·**dts:paths**(experimentalDts 빈타입 결함→`dts`+@listgrid paths 재작성·W7-2가 검출) · full gate+attw+publint+surface 49/57/186 green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages)
-- [x] **W7-2 headless fixture** ✅ 2026-07-12 · /schema+/state fixture·React **런타임** 0 tsc+node(cjs/esm) green·check:headless 스크립트·experimentalDts 빈타입 결함 검출 · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2-headless-fixture-2026-07-12--cap-25)
-- [x] **W7-3 adapter headers 함수형** ✅ 2026-07-12 · sonnet→검증 · headers=`Record|()=>Record` 요청시 지연평가(resolveHeaders·5메서드 1지점)·토큰회전 테스트·14 tests green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-3-adapter-headers-함수형-2026-07-12--cap-24--sonnet-위임메인-검증)
+- [x] **W7 entry-brief pass** ✅ 2026-07-12 · opus · 결정8 소진+**스코프 정정**(published=구 src/→packages/* 전환)·콜드리더 통과 · [detail](./progress-archive/phase-eg-api-redesign.md#w7-entry)
+- [x] **W7-1 패키징 코어** ✅ 2026-07-12 · published 진입점 src/→packages/* §2 맵·peers 26→6·dts:paths · full gate green(49/57/186·attw/publint) · [detail](./progress-archive/phase-eg-api-redesign.md#w7-1)
+- [x] **W7-2 headless fixture** ✅ 2026-07-12 · /schema+/state fixture·React **런타임** 0 tsc+node(cjs/esm) green·check:headless · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2)
+- [x] **W7-3 adapter headers 함수형** ✅ 2026-07-12 · sonnet→검증 · headers 함수형 지연평가(resolveHeaders·5메서드 1지점)·14 tests green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-3)
 - [ ] **W7-4 MIGRATION.md + codemod** — §9 전수표+서브패스제거절+페이지셸(guide 흡수)+미이관목록·jscodeshift 기계행만 · **← Next up**
 - [ ] **W7-5 wave-end** — CAP-24/25 대조·계수 49/57/186·full gate+E2E30+smoke:load+attw/publint·구결함 원장 최종봉인 → **GA 게이트(CAP-28) 착수**
 
@@ -112,7 +112,7 @@
 - [x] **D2 잔여 9건 처분(2026-07-12)** — 스펙 저자 확정(발명금지 해제): 코드2+문서7·§Open Q 0. [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
 - [x] **#W5-1 operator 타입 확정** — operator=open `string` 유지·캐스트=addAndFilter만 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [x] **#W6-2a importValue +options** — label→value=3번째 `options?`(exportValue 대칭) 승인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
-- [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug(`,`검사후`|||`split)→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
+- [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [ ] **#W7-2 headless @types/react 해석** — `/schema`(+shared chunk 경유 `/state`) `.d.ts`가 ReactNode 조건타입(OptionalReactNode 등) 노출 → headless tsc는 `@types/react`(dev type-only) 필요. **런타임 react peer=0**(계약 충족). 해석: 헤드리스=런타임 React 0·타입레벨 @types/react는 dev 양보(스펙 §2 "React peer 0"=런타임). 스펙 저자 확인 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2-headless-fixture-2026-07-12--cap-25)
 - [ ] **#W6-2b TIER3 uniform 필터 경계** — /excel이 getDataTransfer() 반환 필드에 TIER3 uniform 제외(명시/파생 미구분). M2O/xref/address는 TIER2 passthrough(평면행 값 export)이나 실 GJCU 데이터 미검증 → 소비자 확인(garbage면 TIER3 편입) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
 - [ ] **#W5-3 재적용 de-dup 미구현** — 고급검색 매 apply가 `store.searchForm.addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적(단일 apply=정확·E2E green). SearchForm "이름별 제거" 프리미티브가 W5-3 스코프 밖(search-form.ts 미포함) → 브리프 Do-NOT 준수 미구현·flag · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)

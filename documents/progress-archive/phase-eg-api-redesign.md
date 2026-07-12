@@ -271,6 +271,18 @@
 
 **deviations**: ① E2E 스펙의 Node-side fixture 생성 코드가 `import * as XLSX`→Node ESM(type:module)서 named export 미노출(CJS 번들 `.default`만)로 실패 → 스펙만 `import XLSX from`(default) fix. **export-core.ts의 `import * as XLSX`는 무영향**(tsup/Next 번들러 처리·구엔진 동일 패턴). **→ W7 published 패키지서 소비자 번들러 xlsx interop 확인 필요**(waves W7 노트). ② College `{}` auto-derive가 `dean`(manyToOne·TIER2 passthrough) 포함 → seed 무값이라 빈 컬럼(무해)·기존 TIER3 경계 §Needs Review에 포함.
 
+<a id="w7-entry"></a>
+## #W7 entry-brief pass (2026-07-12 · opus · 콜드리더 통과)
+
+**결과**: W7(마지막 wave) 착수 전 entry-brief pass — waves §W7 표(W7-1~5)를 execution-grade로 확정하고 8개 wave-entry 결정을 소진. 콜드리더(신선 에이전트·문서 체인만) 프로브 1결함 검출·fix.
+
+**결정 8건(wave-entry)**: ① 빌드 기전 = tsup 멀티엔트리 + code splitting(공유 청크) ② 구 `src/` = 특성화 오라클로 **존치**(삭제 금지·W7 범위 아님) ③ CAP-24 adapter headers 함수형 = W7-3 ④ headless fixture(CAP-25) = W7-2 상시 회귀 게이트 ⑤ codemod 범위 = §9 codemod/준-기계 행만(수동 행 제외) ⑥ 페이지셸 = list-page-composition-guide를 MIGRATION.md에 흡수 ⑦ presets-rcm·backend-rest(빈 스캐폴드) = exports/entry **omit-if-empty** ⑧ `build:styles` 소스 = 현 `src/listgrid/styles/*.css` 유지.
+
+**스코프 정정(핵심)**: published `@rchemist/listgrid`가 아직 구 `src/` 전체를 번들 중 → W7이 `packages/*`를 스펙 §2 subpath 맵으로 **처음** published화(단순 패키징 정비가 아니라 진입점 전환).
+
+**콜드리더 1결함 fix**: `build:styles` 관련 문서 체인 갭 — 그 자리에서 앵커 수정.
+
+<a id="w7-1"></a>
 ## #W7-1 패키징 코어 (2026-07-12 · published 진입점 src/→packages/*)
 
 **결과**: published `@rchemist/listgrid`가 이제 v0.4 `packages/*` 엔진을 §2 subpath 맵으로 번들(구 `src/` 엔진 아님). full gate 전건 green·유효 publishable 패키지(publint/attw).
@@ -282,6 +294,7 @@
 
 **dts 해소(엔지니어링 노트 — 최종·다음 세션 참조)**: packages/* 엔트리에서 tsup 기본 `dts`(rollup-plugin-dts)가 `@listgrid/*` cross-package 타입을 해소 못해 parse 실패 → **`dts.compilerOptions.paths`로 `@listgrid/* → packages/*/src/index.ts` 매핑**해 해소(최종 채택). **버린 경로(Do-NOT 재시도)**: ① `experimentalDts`(+`@microsoft/api-extractor`)는 per-entry `.d.ts`를 **`export {}` 빈 스텁**으로 방출(내용은 `_tsup-dts-rollup.d.ts`에만·per-entry 재수출 깨짐) — **published 타입 전무**. attw/publint는 "타입 resolve"만 검사·빈 export 미검출이라 **거짓 green**(W7-1 초판 결함). **W7-2 headless fixture의 tsc가 이 결함을 검출**(`dist/schema.d.ts`=`export {}` → `has no exported member 'EntityForm'`). ② api-extractor는 eslint `ajv@6` hoist와 `ajv@8` 충돌(per-subtree override로 봉합했으나 empty-types 결함으로 폐기). **교훈**: dts 검증은 attw/publint로 부족 — **소비자 tsc(headless fixture)가 실 게이트**. 최종 dist: 7 subpath×(js/cjs/d.ts/d.cts)·타입 비어있지 않음(schema.d.ts 1153줄)·rollup-plugin-dts 공유 청크(`entity-form-*.d.ts` 등).
 
+<a id="w7-2"></a>
 ## #W7-2 headless fixture (2026-07-12 · CAP-25)
 
 **결과**: `/schema`+`/state`만 소비하는 fixture가 React **런타임** 0으로 tsc+node(cjs+esm) green. 결정 1 청크-누수 리스크의 상시 회귀 게이트.
@@ -290,6 +303,7 @@
 - **검증**: schema.js/state.js+공유 청크 런타임 react import **0**(실측)·node run react 부재서 green.
 - **@types/react 해석(§Needs Review·비크리티컬)**: `/schema`(및 shared chunk 경유 `/state`) `.d.ts`가 ReactNode 기반 조건 타입(OptionalReactNode/ValuedReactNode/ConditionalReactNodeValue) 노출 → headless tsc는 `@types/react`(dev type-only) 필요. **런타임 peer는 아님**(react 런타임 0=계약 충족). 해석: 헤드리스=런타임 React 0(killer feature)·타입레벨 @types/react는 dev 양보. 스펙 §2 "React peer 0"=런타임 peer 0으로 해석. 스펙 저자 확인 대상.
 
+<a id="w7-3"></a>
 ## #W7-3 adapter headers 함수형 (2026-07-12 · CAP-24 · sonnet 위임→메인 검증)
 
 **결과**: `RcmAdapterOptions.headers`가 함수형 지원+요청시 지연평가. 멀티테넌트 토큰 회전 1급.
