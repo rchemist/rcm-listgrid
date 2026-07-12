@@ -277,6 +277,14 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     if (!(await capAllowed(caps.delete, capCtx('update'))))
       return { ok: false, reason: 'capability' };
 
+    if (deleteOpts?.ids === undefined && entityForm.getId() === undefined) {
+      // create-mode delete with no ids and no bound id — building [undefined]
+      // would call adapter.remove with a bogus id array (R12,
+      // documents/analysis/2026-07-13/midpoint-code-review.md §4.4). Same
+      // silent-block contract as the capability gate above: no adapter call,
+      // no message.
+      return { ok: false, reason: 'capability' };
+    }
     const ids = deleteOpts?.ids ?? [entityForm.getId()!];
 
     for (const handler of entityForm.getBeforeDeleteHandlers()) {

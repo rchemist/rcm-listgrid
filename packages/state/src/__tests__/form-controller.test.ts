@@ -301,6 +301,22 @@ describe('createFormController.save (spec §6.2)', () => {
 });
 
 describe('createFormController.delete (spec §6.2)', () => {
+  it('create-mode, no opts.ids, no bound id: returns { ok: false, reason: \'capability\' } without calling adapter.remove (R12 — no [undefined] built)', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    const remove = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ remove }),
+    });
+
+    const outcome = await controller.delete();
+
+    expect(outcome).toEqual({ ok: false, reason: 'capability' });
+    expect(remove).not.toHaveBeenCalled();
+  });
+
   it('success: calls adapter.remove with [id] and returns { ok: true, result: undefined }', async () => {
     const entityForm = WidgetForm().withId('42');
     const store = createFormStore(entityForm);
