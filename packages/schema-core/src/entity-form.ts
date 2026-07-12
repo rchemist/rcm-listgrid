@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Session } from './auth';
+import { resolveDataTransferSpec } from './data-transfer';
+import type { DataTransferInput, DataTransferSpec } from './data-transfer';
 import type { ConditionalBooleanValue } from './field/conditional';
 import type { EntityField } from './field/entity-field';
 import type { FieldMetaOverride } from './field/field-meta';
@@ -488,6 +490,17 @@ export class EntityForm {
    */
   private revisionEntityName: string | undefined = undefined;
   /**
+   * Declared export/import column config (spec §3.5, CAP-16; W6-1) —
+   * `withDataTransfer`'s storage, the INPUT shape (`fields` optional on
+   * both sides — the auto-derive trigger, see `./data-transfer.ts`).
+   * `undefined` = never declared. Stored verbatim (not resolved) —
+   * resolution (auto-derive against this instance's OWN `getFields()`)
+   * happens at `getDataTransfer()` query time, not here, so a field added/
+   * removed after `withDataTransfer()` is reflected in the next
+   * `getDataTransfer()` call.
+   */
+  private dataTransfer: DataTransferInput | undefined = undefined;
+  /**
    * Imperative lifecycle hooks (EF2): dispatched by the form store after
    * setValue (see @listgrid/state createFormStore). Successor to the 0.3.x
    * `EntityForm.onChanges` array (src/listgrid/config/EntityForm.tsx:94,
@@ -867,6 +880,24 @@ export class EntityForm {
     return this;
   }
 
+  /**
+   * Declare export/import column config (spec §3.5, CAP-16; W6-1) — REPLACES
+   * any previously-declared data-transfer config (L1 `with*` default
+   * semantics, `withTitle`/`withSteps` precedent — set/replace, no merge).
+   * `fields` is optional on both `config.export`/`config.import`: omitted or
+   * an empty array means "auto-derive from this form's declared fields",
+   * resolved at `getDataTransfer()` query time (spec §3.5 "auto-derive").
+   * Minimal surface only (spec §3.5 W6-entry) — the 0.3.x rich
+   * `withDataTransferConfig` (urls/mode/sampleData/maxCount/description) is
+   * NOT revived. Runtime (xlsx generation/parsing, per-type value
+   * transform) is entirely `/excel`'s job (L6 — this is a pure
+   * declaration, no React/runtime here).
+   */
+  withDataTransfer(config: DataTransferInput): this {
+    this.dataTransfer = config;
+    return this;
+  }
+
   // --- queries ---
   /**
    * Resolve the display title (spec §3.1) — ALWAYS a non-empty string (the
@@ -1042,6 +1073,24 @@ export class EntityForm {
     return this.revisionEntityName;
   }
 
+  /**
+   * Resolved export/import column config (spec §3.5, CAP-16; W6-1) —
+   * `withDataTransfer`'s reader pair. SYNCHRONOUS (spec §3.5 — the 0.3.x
+   * `Promise` return existed only because that getter awaited each field's
+   * `isRequired()`; the new `DataFieldSpec` carries no `required`, so there
+   * is nothing left to await here). Returns `undefined` when
+   * `withDataTransfer` was never called; otherwise resolves each declared
+   * side (export/import) independently through the SAME shared helper
+   * (`resolveDataTransferSpec`, `./data-transfer.ts`) — the 0.3.x `:448`
+   * fix: import's fallback reads import's OWN declared `fields` only, never
+   * export's (structurally impossible to conflate, not merely avoided by
+   * convention — see that helper's doc).
+   */
+  getDataTransfer(): DataTransferSpec | undefined {
+    if (this.dataTransfer === undefined) return undefined;
+    return resolveDataTransferSpec(this.dataTransfer, this.getFields());
+  }
+
   /** Declaration clone (charter C1: `userForm.clone().withId(id)` for the form screen). */
   clone(includeValue = false): EntityForm {
     const copy = new EntityForm(this.name, this.url);
@@ -1077,6 +1126,12 @@ export class EntityForm {
     // clone independence (no shared mutable structure to deep-copy, unlike
     // `steps`).
     copy.revisionEntityName = this.revisionEntityName;
+    // propagate declared data-transfer config (spec §3.5, CAP-16; W6-1) —
+    // top-level shallow copy (titleSpec/capabilities precedent above);
+    // resolution (auto-derive) always reads the QUERYING instance's OWN
+    // getFields() at getDataTransfer() call time, never stored resolved, so
+    // no deeper copy is needed for clone independence here.
+    copy.dataTransfer = this.dataTransfer === undefined ? undefined : { ...this.dataTransfer };
     // propagate changeHandlers (0.3.x parity — src/listgrid/config/EntityForm.tsx:94).
     copy.changeHandlers = [...this.changeHandlers];
     // propagate initHandlers (spec §3.3/§4.1, same clone-propagation contract).

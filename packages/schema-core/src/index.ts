@@ -239,6 +239,12 @@ export type { FormRuntime, SaveOutcome, DeleteOutcome } from './form-runtime';
 // @listgrid/react's ViewEntityForm) ---
 export type { FormAction, ActionContext, ActionRender } from './entity-form';
 
+// --- data-transfer declaration surface (spec §3.5, CAP-16; W6-1 —
+// withDataTransfer/getDataTransfer declared on EntityForm above; runtime
+// (xlsx export/import, value transform) is the separate `/excel` package,
+// W6-2 — NOT re-exported here, L6) ---
+export type { DataFieldSpec, DataTransferSpec } from './data-transfer';
+
 // --- onChanges builder catalog (EF2; port of 0.3.x
 // src/listgrid/config/OnChangeEntityForm.ts:76-361 — changeHidden/
 // changeRequired/changeSelectOptions only; derivedValidations is out of

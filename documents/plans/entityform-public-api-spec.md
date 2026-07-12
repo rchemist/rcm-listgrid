@@ -138,7 +138,7 @@ interface DataTransferSpec {
 ```
 
 - **auto-derive(구 getDataFieldsFromFields 계승·순수 schema)**: `export`/`import` 있으나 `fields` 미지정/빈 배열이면 `this.getFields()`를 **선언 순서**로 스냅샷해 `DataFieldSpec[]` 파생; 명시 `fields`는 verbatim. `getDataTransfer()`는 **동기**(구 `Promise`는 `isRequired()` await 때문 — 신 `DataFieldSpec`은 `required` 미보유, import 검증은 /excel 런타임이 필드 질의). :448 fix = export/import **대칭 헬퍼 공유**로 "import 폴백이 export.fields를 검사"가 구조적으로 불가능.
-- **복합 타입 auto-derive 제외 원칙**: 평면 셀 표현이 없는 타입(정확 목록·warn 정책은 W6-2 구현·§Needs Review 소비자 검증)은 auto-derive에서 제외 — 소비자가 `export.fields`에 명시하면 포함. 구 switch(select/multiselect·date/datetime·boolean·html/markdown)는 /excel 런타임 소관(§2 `/excel`, xlsx optional peer).
+- **복합 타입 처리(계층 확정 W6-1)**: schema auto-derive는 **선언 전 필드를 포함**(순수 선언 — getDataTransfer는 평면-셀 표현 판정을 하지 않음). 평면 셀 표현이 없는 타입의 **제외+warn은 `/excel` 값변환 계층(W6-2)**이 export 시점에 수행(정확 목록·warn 정책=W6-2 구현·§Needs Review 소비자 검증). 소비자가 `export.fields`에 명시하면 그대로 전달. 구 switch(select/multiselect·date/datetime·boolean·html/markdown)는 /excel 런타임 소관(§2 `/excel`, xlsx optional peer).
 - **미이관(문서화 이연·charter C6=export/import 코어 밖)**: 비밀번호 export(officecrypto)·excelDownloadHistory 로깅·DataImportSample 템플릿·DataImportResultView·DynamicDataImporter — 소비자 요구 시 /excel 확장(§9 MIGRATION 기재).
 
 ### 3.6 존재하지 않는 것 (설계상 금지)

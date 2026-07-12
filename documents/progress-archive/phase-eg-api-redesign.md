@@ -222,3 +222,15 @@
 - **W2 착수**: 8 sub-task(W2-1~8) hot-file 순차·delegate 기본 sonnet(waves §W2 브리핑 원문)·opus 검증/커밋.
 - **W3 착수**: 5 sub-task(W3-1~5) hot-file 순차·fan-out 금지·delegate 기본 sonnet(waves §W3=브리핑 원문)·opus 검증(full gate+diff 발명감사)/커밋. **W3-1 발명게이트 1건**(sync ConditionalBoolean 해석=async resolver뿐)→[blueprint EG4 sync 근사 GO](../plans/eg-entityform-full-parity.md) 사전판정 바인딩으로 해소(getStaticConditionalBoolean 신설·발명 아님).
 - **W4-0 계수 재산정 방법론(2026-07-11, 본문 이월 2026-07-12 slim)**: `scripts/count-public-surface.mjs`의 EntityForm 계수는 public `get*Handlers`(훅당 1, §3.3 "엔진 내부"이나 cross-package라 public 필수)+getReadOnly까지 포함 → 최종 53. 스펙 "44 소비자 멤버"와 기계 계수(53)의 갭을 §10-A 표로 명문화. 계수 **규칙**은 무변경(임계값만 재산정). 대안(get*Handlers 계수 제외 규칙)은 채택 안 함 — cross-package public 불가피·규칙 예외 추가는 invention 리스크. W5/W6는 entry pass에서 §10-A 표 갱신+임계 재검증(waves 규칙 반영).
+
+## #W6-1 schema surface (CAP-16)
+
+✅ 2026-07-12 · sonnet 위임(brief=waves W6-1 행)→메인 authoritative 검증(full gate 독립 재실행+diff 리뷰). 순수 additive(schema-core·React/런타임 0).
+
+**변경(4파일)**: 신규 `packages/schema-core/src/data-transfer.ts`(타입 `DataFieldSpec{name,label?,type?}`·`DataTransferSpec`(반환·fields 필수)·`DataTransferInput`(입력·fields 옵셔널=auto-derive 트리거·**미배럴**) + 순수함수 `deriveDataFields`/`resolveTransferFields`/`resolveDataTransferSpec`) · `entity-form.ts`(private `dataTransfer` + `withDataTransfer(config):this` 저장(replace 의미) + `getDataTransfer():DataTransferSpec|undefined` **동기**·query-time 파생(this.getFields()) + clone 얕은복사) · `index.ts`(배럴 +2 type-only) · `__tests__/entity-form-data-transfer.test.ts`(18).
+
+**:448 구조적 fix**: `resolveTransferFields(declaredFields, deriveFields)` = export/import 공유 대칭 헬퍼 — 시그니처에 **상대편 fields 도달 경로가 없음** → "import 폴백이 export.fields 검사"가 관례 회피가 아니라 **표현 불가능**. getDataTransfer가 export.fields·import.fields 각각 자기쪽만 닫힌 채 1회씩 호출. 회귀 테스트 3건(`:448 regression` describe — export SET+import EMPTY→import이 선언필드 auto-derive·명시 빈배열·대칭 export쪽).
+
+**검증(메인 authoritative)**: full gate 독립 PASS — type-check·typecheck:packages·test **2156**(신 18/18·+18 from 2138)·lint 0err(258 pre-existing warn·legacy)·format·build. 계수 **49/57/186**(EntityForm 47→49·root 57 무변경·/schema 184→186, 전부 임계 55/120/190 내). HEAD 불변(04edb12→logic)·hot-file form-store/ViewEntityForm 미관통.
+
+**deviations(전건 spec-conformant·§Needs Review 불요)**: ① brief 인용 line# stale(neverDelete/submitTransform=HEAD서 제거·W2/W3서 withCapabilities/onBeforeSave로 대체)→withRevision/getRevisionEntityName 동형 패턴 미러(HEAD-relative 재확인 지시대로) ② 복합타입 auto-derive 필터링 미구현=결정5 "W6-2서 확정" 준수(schema는 전 필드 포함·순수 선언·/excel이 export시 제외+warn — 스펙 §3.5 계층 확정 반영) ③ prettier 재포맷(공백만).
