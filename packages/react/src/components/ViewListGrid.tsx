@@ -1,19 +1,27 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
-import type { Direction, EntityField, EntityForm } from '@listgrid/schema-core';
+import type { Direction, EntityField, EntityForm, QueryConditionType } from '@listgrid/schema-core';
 import type { ListStoreState } from '@listgrid/state';
 import { useUI } from '../providers/ui';
 import { getListCellRenderer } from '../registry/list-cell-renderer-registry';
-import { deriveListFields, getFieldDisplayValue } from './list-columns';
+import { getFilterRenderer } from '../registry/filter-renderer-registry';
+import { deriveFilterFields, deriveListFields, getFieldDisplayValue } from './list-columns';
 
 // ViewListGrid — the list screen (charter C9): fetches on mount, subscribes to
 // the injected ListStoreState, and renders rows/pagination/loading through the
-// host's UIComponents registry (useUI). Deliberately minimal — no header
-// filters/advanced-search/selection/sub-collection (that's the 0.3.x
+// host's UIComponents registry (useUI). Deliberately minimal beyond that —
+// selection/toolbar/sub-collection are EA-D2-0 additions (that's the 0.3.x
 // src/listgrid/components/list/ViewListGrid.tsx surface this replaces, not
 // this V0.4 slice). Row-selection navigation is the page's job (`onRowClick`);
 // a "New" button is NOT part of this component (the page owns create nav).
+//
+// The advanced-search panel (spec §7 CAP-20; W5-3) is EMBEDDED here (no
+// separate exported component — W5-3 wave-entry decision 3-내장): it derives
+// its inputs from `withFilter()`-declared fields (`deriveFilterFields`,
+// list-columns.ts) and, on apply, folds non-empty values into the store's
+// `SearchForm` via the EXISTING `addAndFilter`/`setSearchForm` pipe — no
+// change to the list-fetch contract.
 //
 // NOTE (body-row interactivity vs. registry Table.Tr): @listgrid/ui-default's
 // TableRowProps is `{ children?: ReactNode }` only — it does not type or
@@ -230,6 +238,46 @@ export function ViewListGrid({
 
   const effectiveCheckedIds = selection?.enabled ? checkedIds : [];
 
+  // Advanced-search panel (spec §7 CAP-20; W5-3) — derived from `withFilter()`
+  // declarations, same tri-state (truthy/false/undeclared) as the column
+  // derivation above. Empty derivation => no toggle, no panel (nothing to
+  // search on).
+  const filterFields = useMemo(() => deriveFilterFields(entityForm), [entityForm]);
+  const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+  const [filterValues, setFilterValues] = useState<Record<string, unknown>>({});
+
+  function setFilterValue(name: string, value: unknown): void {
+    setFilterValues((prev) => ({ ...prev, [name]: value }));
+  }
+
+  // Apply: fold every NON-EMPTY filter value into the store's current
+  // SearchForm via the existing `addAndFilter` (no schema-core API change),
+  // then hand the result to `setSearchForm` (page-reset + refetch, same pipe
+  // quickSearch/setSort already use). `config.operator` (spec §5.1's open
+  // `string`) is cast to `QueryConditionType` ONLY when present — omitted
+  // entirely otherwise (exactOptionalPropertyTypes forbids `queryConditionType:
+  // undefined`; no default operator is invented).
+  //
+  // NOTE (deviation, see §Report): this starts from `store.getState()
+  // .searchForm` — the CURRENT accumulated AND-filters — so re-applying with
+  // DIFFERENT values across two searches stacks a second `name`-keyed AND
+  // clause rather than replacing the first (SearchForm has no "remove by
+  // name" primitive in its W5-3 scope — see the brief's re-apply de-dup
+  // Do-NOT). A single apply (this task's acceptance bar) is unaffected.
+  function applyAdvancedSearch(): void {
+    let next = store.getState().searchForm;
+    for (const { field, config } of filterFields) {
+      const value = filterValues[field.getName()];
+      if (value === undefined || value === null || value === '') continue;
+      next = next.addAndFilter({
+        name: field.getName(),
+        value,
+        ...(config.operator ? { queryConditionType: config.operator as QueryConditionType } : {}),
+      });
+    }
+    void store.getState().setSearchForm(next);
+  }
+
   return (
     <div data-list-grid={entityForm.name} style={{ position: 'relative' }}>
       <LoadingOverlay visible={loading} />
@@ -244,6 +292,46 @@ export function ViewListGrid({
             void store.getState().quickSearch([quickSearchField], value);
           }}
         />
+      )}
+
+      {filterFields.length > 0 && (
+        <div data-advanced-search={entityForm.name}>
+          <Button type="button" onClick={() => setAdvancedSearchOpen((open) => !open)}>
+            고급검색
+          </Button>
+          {advancedSearchOpen && (
+            <div data-advanced-search-panel>
+              {filterFields.map(({ field, config }) => {
+                const label = config.label ?? field.getLabel();
+                const headerText = typeof label === 'string' ? label : field.getName();
+                const filterId = `filter-${field.getName()}`;
+                const value = filterValues[field.getName()];
+                const FilterInput = getFilterRenderer(field.type);
+                return (
+                  <div key={field.getName()} data-filter-field={field.getName()}>
+                    <label htmlFor={filterId}>{headerText}</label>
+                    {FilterInput ? (
+                      <FilterInput
+                        field={field}
+                        value={value}
+                        onChange={(v) => setFilterValue(field.getName(), v)}
+                      />
+                    ) : (
+                      <TextInput
+                        id={filterId}
+                        value={typeof value === 'string' ? value : ''}
+                        onChange={(v) => setFilterValue(field.getName(), v)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+              <Button type="button" onClick={applyAdvancedSearch}>
+                검색
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       <Table>

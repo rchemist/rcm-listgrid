@@ -78,3 +78,23 @@ test('College dean ManyToOne picker selects a professor and saves', async ({ pag
   await expect(page).toHaveURL(/\/college$/);
   await expect(page.getByText('관계테스트대학')).toBeVisible();
 });
+
+// V0.4c — advanced-search panel (spec §7 CAP-20; W5-3): College's `name`
+// field declares `.withFilter({label:'대학명', operator:'LIKE'})`
+// (college.ts) — the panel derives a labeled input from it, and applying it
+// AND-filters through the SAME list-store pipe (mock backend's
+// matchesFilterGroup already honors AND + LIKE, store.ts).
+test('College advanced-search panel filters the list by name (withFilter, CAP-20)', async ({
+  page,
+}) => {
+  await page.goto('/college');
+  await expect(page.getByText('공과대학')).toBeVisible();
+  await expect(page.getByText('인문대학')).toBeVisible();
+
+  await page.getByRole('button', { name: '고급검색' }).click();
+  await page.getByLabel('대학명').fill('공과');
+  await page.getByRole('button', { name: '검색', exact: true }).click();
+
+  await expect(page.getByText('공과대학')).toBeVisible();
+  await expect(page.getByText('인문대학')).not.toBeVisible();
+});

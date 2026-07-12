@@ -5,13 +5,14 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { BackendAdapter, FieldType, PageResult } from '@listgrid/schema-core';
+import type { BackendAdapter, FieldType, PageResult, SearchForm } from '@listgrid/schema-core';
 import { EntityForm, StringField } from '@listgrid/schema-core';
 import { createListStore } from '@listgrid/state';
 import { defaultUIComponents } from '@listgrid/ui-default';
 import { UIProvider } from '../providers/ui';
 import { ViewListGrid } from '../components/ViewListGrid';
 import { registerListCellRenderer } from '../registry/list-cell-renderer-registry';
+import { registerFilterRenderer } from '../registry/filter-renderer-registry';
 
 // withList() (spec §5.1; W5-2) — the magic "first ~4 non-hidden fields"
 // fallback this test file exercised pre-W5-2 is abolished; `name` needs an
@@ -61,6 +62,58 @@ function rowsAdapter(rows: Record<string, unknown>[]): BackendAdapter {
       throw new Error('not used in this test');
     }),
   };
+}
+
+/** Same shape as `rowsAdapter`, but ALSO records every `SearchForm` passed to
+ * `adapter.list` — the advanced-search suite below asserts on the filters a
+ * "검색" apply actually sends, not just the resulting rows. Server-side
+ * filtering is out of scope for this double (it always returns ALL `rows`
+ * regardless of `search` — ViewListGrid itself only builds/dispatches the
+ * SearchForm; a real backend applying it is the mock-backend's job, covered
+ * by e2e/college.spec.ts). */
+function rowsAdapterWithCalls(rows: Record<string, unknown>[]): {
+  adapter: BackendAdapter;
+  listCalls: SearchForm[];
+} {
+  const listCalls: SearchForm[] = [];
+  const adapter: BackendAdapter = {
+    list: vi.fn(async (_url: string, search: SearchForm): Promise<PageResult> => {
+      listCalls.push(search);
+      return { content: rows, totalElements: rows.length, totalPages: 1 };
+    }),
+    getOne: vi.fn(async () => {
+      throw new Error('not used in this test');
+    }),
+    create: vi.fn(async () => {
+      throw new Error('not used in this test');
+    }),
+    update: vi.fn(async () => {
+      throw new Error('not used in this test');
+    }),
+    remove: vi.fn(async () => {
+      throw new Error('not used in this test');
+    }),
+  };
+  return { adapter, listCalls };
+}
+
+/** `name` opts into BOTH the list column AND the advanced-search panel, with
+ * a filter label override + a LIKE operator (exercises
+ * FieldFilterConfig.operator passthrough); `code` opts into the panel only,
+ * plain (`withFilter()`, no config — no queryConditionType should ever be
+ * sent for it). The panel derivation (`deriveFilterFields`) is independent of
+ * the column derivation (`deriveListFields`) — `code` proves a filter-only
+ * field never becomes a column. */
+function filterForm(): EntityForm {
+  return new EntityForm('WidgetEntityForm', '/widget').addFields({
+    items: [
+      new StringField('name', 100)
+        .withLabel('Name')
+        .withList()
+        .withFilter({ label: 'Name Filter', operator: 'LIKE' }),
+      new StringField('code', 200).withLabel('Code').withFilter(),
+    ],
+  });
 }
 
 /** `late` declares BOTH an order override (config.order 1, well ahead of its
@@ -387,5 +440,126 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
     );
 
     expect(await screen.findByTestId('marker-cell')).toHaveTextContent('SHOUT!');
+  });
+});
+
+// Advanced-search panel (spec §7 CAP-20; W5-3) — embedded in ViewListGrid (no
+// separate exported component), derived from withFilter()-truthy fields.
+describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
+  it('0 withFilter()-truthy fields renders no toggle and no panel', async () => {
+    const entityForm = collegeForm(); // no field declares withFilter()
+    const adapter = mockAdapter();
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await screen.findByText('Engineering');
+    expect(screen.queryByRole('button', { name: '고급검색' })).not.toBeInTheDocument();
+  });
+
+  it('toggling the "고급검색" button reveals a labeled input per withFilter() field', async () => {
+    const entityForm = filterForm();
+    const adapter = mockAdapter();
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+
+    expect(screen.queryByLabelText('Name Filter')).not.toBeInTheDocument(); // panel closed
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+
+    expect(screen.getByLabelText('Name Filter')).toBeInTheDocument(); // config.label override
+    expect(screen.getByLabelText('Code')).toBeInTheDocument(); // falls back to field.getLabel()
+  });
+
+  it('applying a non-empty value AND-filters via addAndFilter with the configured operator, and refetches', async () => {
+    const entityForm = filterForm();
+    const { adapter, listCalls } = rowsAdapterWithCalls([
+      { id: '1', name: 'Engineering', code: 'ENG' },
+    ]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    fireEvent.change(screen.getByLabelText('Name Filter'), { target: { value: 'Eng' } });
+    // 'code' is left EMPTY — must NOT contribute an AND filter.
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'name', value: 'Eng', queryConditionType: 'LIKE' },
+    ]);
+    // page-reset precedent (same as quickSearch/withPageSize).
+    expect(listCalls[1]?.page).toBe(0);
+  });
+
+  it("omits queryConditionType entirely for a withFilter() field with no configured operator (never 'queryConditionType: undefined')", async () => {
+    const entityForm = filterForm();
+    const { adapter, listCalls } = rowsAdapterWithCalls([
+      { id: '1', name: 'Engineering', code: 'ENG' },
+    ]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    fireEvent.change(screen.getByLabelText('Code'), { target: { value: 'ENG' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    const sentFilter = listCalls[1]?.toJSON().filters.AND[0];
+    expect(sentFilter).toEqual({ name: 'code', value: 'ENG' });
+    expect(sentFilter && 'queryConditionType' in sentFilter).toBe(false);
+  });
+
+  it('a registered getFilterRenderer(field.type) component takes priority over the TextInput fallback', async () => {
+    const fictionalType = 'w53-test-filter-marker-field';
+    registerFilterRenderer(fictionalType, ({ value, onChange }) => (
+      <input
+        aria-label="Marker Filter"
+        data-testid="marker-filter-input"
+        value={typeof value === 'string' ? value : ''}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    ));
+
+    const field = new StringField('marker', 100).withLabel('Marker').withFilter();
+    field.type = fictionalType as FieldType;
+    const entityForm = new EntityForm('MarkerEntityForm', '/marker').addFields({ items: [field] });
+    const adapter = mockAdapter();
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+
+    expect(screen.getByTestId('marker-filter-input')).toBeInTheDocument();
   });
 });

@@ -67,6 +67,14 @@ export {
   type ListCellRendererComponentProps,
 } from './registry/list-cell-renderer-registry';
 
+// --- FilterRenderer registry (spec §7 EG24, CAP-20; W5-3) ---
+export {
+  registerFilterRenderer,
+  getFilterRenderer,
+  type FilterRendererComponent,
+  type FilterRendererComponentProps,
+} from './registry/filter-renderer-registry';
+
 // --- components ---
 export { FieldRenderer } from './components/FieldRenderer';
 export type { FieldRendererProps } from './components/FieldRenderer';

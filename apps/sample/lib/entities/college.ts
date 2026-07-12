@@ -25,11 +25,15 @@ export function CollegeEntityForm(): EntityForm {
         // magic "first ~4 non-hidden fields" fallback it used to fall back
         // to is abolished). `label`/`sortable` on `name` and `align`/`width`
         // on `englishName` exercise the FieldListConfig overrides, not just
-        // opt-in.
+        // opt-in. `withFilter` (spec §5.1/§7, CAP-20; W5-3) opts `name` into
+        // the advanced-search panel — `operator: 'LIKE'` (a valid
+        // QueryConditionType) exercises the FieldFilterConfig.operator
+        // passthrough into the panel's `addAndFilter` call.
         new StringField('name', 100)
           .withRequired(true)
           .withLabel('명칭')
-          .withList({ label: '대학명', sortable: true }),
+          .withList({ label: '대학명', sortable: true })
+          .withFilter({ label: '대학명', operator: 'LIKE' }),
         new StringField('englishName', 110)
           .withRequired(true)
           .withLabel('영문명')

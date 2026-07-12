@@ -27,6 +27,15 @@ export interface ListStoreState<T = Record<string, unknown>> {
   setPageSize(pageSize: number): Promise<void>;
   setSort(field: string, direction: Direction): Promise<void>;
   quickSearch(fields: string[], value: string): Promise<void>;
+  /**
+   * Replace the store's `searchForm` wholesale (spec §7 CAP-20; W5-3) — the
+   * advanced-search panel's apply action: it folds the panel's field values
+   * into a NEW `SearchForm` via `.addAndFilter()` (schema-core, unchanged)
+   * and hands the result here. Resets to page 0 (same page-reset precedent
+   * as `quickSearch`/`withPageSize` — a changed filter set invalidates
+   * whatever page the user was on) then refetches through the same pipe.
+   */
+  setSearchForm(next: SearchForm): Promise<void>;
 }
 
 export interface CreateListStoreOptions {
@@ -156,6 +165,10 @@ export function createListStore<T = Record<string, unknown>>(
     },
     async quickSearch(fields, value) {
       set({ searchForm: get().searchForm.quickSearch(fields, value) });
+      await get().fetch();
+    },
+    async setSearchForm(next) {
+      set({ searchForm: next.withPage(0) });
       await get().fetch();
     },
   }));

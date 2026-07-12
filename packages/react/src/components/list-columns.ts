@@ -1,4 +1,10 @@
-import type { EntityField, EntityForm, FieldListConfig, FormField } from '@listgrid/schema-core';
+import type {
+  EntityField,
+  EntityForm,
+  FieldFilterConfig,
+  FieldListConfig,
+  FormField,
+} from '@listgrid/schema-core';
 
 // List-column derivation (spec §5.1/§7, CAP-19; W5-2) — the SINGLE source of
 // truth for "which fields participate in a list", shared by ViewListGrid's
@@ -8,6 +14,10 @@ import type { EntityField, EntityForm, FieldListConfig, FormField } from '@listg
 // with one `getListConfig()`-driven derivation. Pure data — no JSX; each
 // consumer decides how to turn a derived field into a rendered
 // column/header/cell.
+//
+// deriveFilterFields (spec §5.1/§7, CAP-20; W5-3) is the sibling derivation
+// for the advanced-search panel embedded in ViewListGrid — same shape, same
+// truthy/false/undeclared tri-state, driven by `getFilterConfig()` instead.
 
 /**
  * Every concrete field extends `FormField` (schema-core's field hierarchy —
@@ -22,6 +32,15 @@ import type { EntityField, EntityForm, FieldListConfig, FormField } from '@listg
  */
 function listConfigOf(field: EntityField): FieldListConfig | false | undefined {
   return (field as FormField).getListConfig();
+}
+
+/**
+ * Same structural-narrowing rationale as {@link listConfigOf}, over
+ * `getFilterConfig()` (spec §5.1; W5-1) instead — every field is a `FormField`
+ * under the hood, and `EntityField` doesn't (yet) re-declare the method.
+ */
+function filterConfigOf(field: EntityField): FieldFilterConfig | false | undefined {
+  return (field as FormField).getFilterConfig();
 }
 
 /**
@@ -72,4 +91,32 @@ export function deriveListFields(entityForm: EntityForm): DerivedListField[] {
  */
 export function deriveListFieldNames(entityForm: EntityForm): string[] {
   return deriveListFields(entityForm).map(({ field }) => field.getName());
+}
+
+export interface DerivedFilterField {
+  field: EntityField;
+  config: FieldFilterConfig;
+}
+
+/**
+ * Fields participating in the advanced-search panel (spec §7, CAP-20; W5-3):
+ * `getFilterConfig()` truthy (an object; `false` = explicit exclude,
+ * `undefined` = never declared — same tri-state as {@link deriveListFields}).
+ * Sub-collections never participate (child grids, not scalar filter inputs).
+ * Sorted by `config.order ?? field.getOrder()` — a STABLE sort over
+ * `entityForm.getFields()` (itself already order-sorted), so ties keep
+ * declaration order. No magic fallback: 0 truthy declarations yields `[]`
+ * (ViewListGrid renders no toggle/panel at all in that case).
+ */
+export function deriveFilterFields(entityForm: EntityForm): DerivedFilterField[] {
+  const candidates: DerivedFilterField[] = [];
+  for (const field of entityForm.getFields()) {
+    if (field.type === 'subCollection') continue;
+    const config = filterConfigOf(field);
+    if (config === undefined || config === false) continue;
+    candidates.push({ field, config });
+  }
+  return candidates.sort(
+    (a, b) => (a.config.order ?? a.field.getOrder()) - (b.config.order ?? b.field.getOrder()),
+  );
 }
