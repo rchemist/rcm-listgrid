@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1 ✅ · **W5-2 컬럼파생+list-cell 레지스트리 ✅**(2026-07-12). **Next up: W5-3 고급검색+filter 레지스트리**(react). **2131 unit/E2E 27**·계수 47/**53**/184(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1 ✅ · W5-2 ✅ · **W5-3 고급검색+filter 레지스트리 ✅**(2026-07-12). **Next up: W5-4 페이지 컴포지션 가이드(문서)**. **2138 unit/E2E 28**·계수 47/**57**/184(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1 ✅ · W5-2 ✅**. 새 세션은 **W5-3부터 실행** — [waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-3 행: ViewListGrid 고급검색 패널 내장·filter-renderer-registry 신설·getFilterConfig 파생·SearchForm.addAndFilter·operator 타입 확정·E2E)만 읽고 착수. sonnet 위임 가능(실행급 브리프). ViewListGrid.tsx는 W5-2→W5-3 순차(동일 파일).
-**Last updated**: 2026-07-12 (**W5-2 컬럼 파생+list-cell 레지스트리 ✅**. ViewListGrid 마법폴백→getListConfig() 파생·신규 `list-cell-renderer-registry`+`list-columns` 공유파생·ManyToOne showInList→withList 흡수·xref duck-typed 일원화·sample(college/subject/professor+major/staff) withList 이행. delegate(sonnet)→메인 authoritative full gate+E2E 독립 PASS(**2131**u·+7·**E2E 27**·계수 47/**53**/184). deviation 3(major/staff 확대·EntityField 캐스트·픽스처4 — 전건 risk:low·§Needs Review). Next=**W5-3**(고급검색+filter 레지스트리).)
+**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1/2/3 ✅**. 새 세션은 **W5-4부터 실행** — [waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-4 행: **컴포넌트 아님**=페이지 컴포지션 가이드 문서 신설 `documents/plans/list-page-composition-guide.md`·apps/sample 정준 예시·CAP-18/19/20 대조·계수 PASS 재검증)만 읽고 착수. 문서 작업(발명 없음)이라 sonnet 위임 가능. **Do-NOT**: Wrapper급 컴포넌트 export·스펙 §7 밖 표면 발명.
+**Last updated**: 2026-07-12 (**W5-3 고급검색+filter 레지스트리 ✅** `2223f35`. ViewListGrid 내장 고급검색 패널(별도 export 아님 §7)·신규 `filter-renderer-registry`(string 키)·`deriveFilterFields`(deriveListFields 자매)·list-store `setSearchForm` 액션(withPage(0)+fetch·quickSearch 선례·fetch 계약 무변경)·College name.withFilter. **§Needs Review #W5-1 operator=`string` 확정**(스펙 §10-A·QueryConditionType 캐스트는 addAndFilter 지점만). delegate(sonnet)→메인 authoritative full gate+E2E 독립 PASS(**2138**u·+7·**E2E 28**·계수 47/**57**/184). deviation 5(재적용 de-dup 미구현만 §Needs Review·나머지=계수표기/mock 발견/test 기전/a11y). Next=**W5-4**(페이지 컴포지션 가이드 문서).)
 
 ## Goal
 
@@ -49,9 +49,9 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1 ✅ · W5-2 ✅**. 다음: **W5-3 실행** — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
+## 세션 인계 (Handoff — **W1~W4 ✅ · D-pass ✅ · W5 entry-brief ✅ · W5-1/2/3 ✅**. 다음: **W5-4 실행**(list-track 마지막) — 전체 인계는 [W4 Handoff](./progress-archive/phase-eg-api-redesign.md#w4-페이즈-완료-인계-handoff--w5-list-track))
 
-- **⚠ 다음 = W5-3 실행**(sonnet 위임 가능): W5-2 ✅(마법폴백→getListConfig() 파생·list-cell 레지스트리·ManyToOne 통합·`list-columns.ts` 공유 파생 신설). [waves §W5 표](./plans/entityform-api-implementation-waves.md) W5-3 행 = **ViewListGrid 고급검색 패널 내장**(동일 파일·W5-2 뒤 순차) + **filter-renderer 레지스트리**(신규 `registry/filter-renderer-registry.tsx`·`field-renderer-registry.tsx:28` 패턴 복제·`react/src/index.ts` registerFilterRenderer+1) + **filter 파생**(`list-columns.ts` deriveListFields 자매로 `deriveFilterFields`=getFilterConfig() truthy 수집·정렬 → 필터 입력 `getFilterRenderer(type)` 폴백 → `SearchForm.addAndFilter`(op=FieldFilterConfig.operator) → `setSearchForm`+fetch, W2-6 list-store 파이프 `list-store.ts:71-143` 무변경 재사용) + E2E(고급검색으로 College name 필터). **operator 타입 확정**(§Needs Review #W5-1: FieldFilterConfig.operator=string→search-form.ts QueryConditionType 채택 여부 — 스펙 § 인용 가능할 때만·아니면 §Open Questions). **W5-2 재사용**: `list-columns.ts` 공유 파생 패턴·`getListCellRenderer` 레지스트리 형·`(field as FormField)` 캐스트(§Needs Review #W5-2 — 이참에 EntityField 인터페이스로 getListConfig/getFilterConfig 이관 검토). **Do-NOT(발명금지)**: ManyToOne 합성필터 자동주입(결정2·스펙 미명세)·별도 export 컴포넌트(ViewListGrid 내장 §7)·list-store fetch 계약 변경. 착수 전 file:line 재확인.
+- **⚠ 다음 = W5-4 실행**(문서 작업·sonnet 위임 가능): W5-3 ✅(ViewListGrid 내장 고급검색 패널·`filter-renderer-registry`·`deriveFilterFields`·list-store `setSearchForm` 액션·operator=`string` 확정 — [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)). [waves §W5 표](./plans/entityform-api-implementation-waves.md) W5-4 행 = **페이지 컴포지션 가이드(문서·컴포넌트 아님)**: 신규 `documents/plans/list-page-composition-guide.md` — apps/sample 6 리스트 페이지가 이미 bare 컴포지션(main→헤더행+"새로 만들기"→ViewListGrid)으로 동작(waves §W5 결정1) → 그 정준 호스트 페이지 셸 컴포지션을 문서화(W7 MIGRATION 전용 절이 흡수). + **wave-end 게이트**: full gate+E2E·CAP-18/19/20 대조(빈 행 없음 확인)·계수 리포트(EntityForm 47·root 57·/schema 184 — 전부 임계 55/120/190 내, `scripts/count-public-surface.mjs` 실측). **Do-NOT(발명금지)**: Wrapper급 컴포넌트 export 신설·스펙 §7 밖 react 표면 발명(결정1: 페이지 셸=호스트 소유 C7). W5-4 종료=list-track(W5) 완료 → W6 data-transfer는 entry-brief pass 선행.
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -94,12 +94,12 @@
 - [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves W5 표(W5-1~4)+§12 결정4+§10-A · 계수 47/49/182 무변경 · [brief](./plans/entityform-api-implementation-waves.md)
 - [x] **W5-1 필드 substrate** ✅ 2026-07-12 · withList/withFilter+타입2·배럴+2·2124u·47/49/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
 - [x] **W5-2 컬럼 파생+list-cell 레지스트리** ✅ 2026-07-12 · getListConfig 파생·마법폴백폐기·M2O통합·2131u/E2E27·47/53/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
-- [ ] **W5-3 고급검색+filter 레지스트리** (react) — ViewListGrid 내장 패널·SearchForm.addAndFilter+E2E·operator 타입 확정 · §7 · CAP-20 **← Next up**
-- [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조
+- [x] **W5-3 고급검색+filter 레지스트리** ✅ 2026-07-12 · `2223f35` · filter-registry·deriveFilterFields·ViewListGrid 패널·setSearchForm·2138u/E2E28·47/57/184 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
+- [ ] **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20·계수 대조 **← Next up**
 - [ ] **W6 data-transfer** — entry pass 선행 · CAP-16·17
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION+codemod · CAP-24·25
 
-**Next up**: **W5-3 고급검색+filter 레지스트리**(react·ViewListGrid 내장). 실행 계약=[waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-3 행) + §세션 인계 Handoff(파일·file:line·Do-NOT). 착수 전 file:line 재확인.
+**Next up**: **W5-4 페이지 컴포지션 가이드(문서)** + wave-end CAP-18/19/20 대조 + 계수 재검증. 실행 계약=[waves §W5 표](./plans/entityform-api-implementation-waves.md)(W5-4 행·**컴포넌트 아님**=호스트 페이지 셸 컴포지션 문서화, W7 MIGRATION 전용 절이 흡수) + §세션 인계 Handoff. Wrapper급 컴포넌트 export 금지·스펙 §7 밖 표면 발명 금지.
 
 ---
 
@@ -109,7 +109,8 @@
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
 - [x] **#W4-3a → DECIDED+구현(D1, 2026-07-12)** — dirty 미확인 async=validateAll 실패→save 차단·스펙 §5.3/§6.2 개정. [D1](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 잔여 9건 처분(2026-07-12)** — 스펙 저자 확정(발명금지 해제): 코드2+문서7·§Open Q 0. [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
-- [ ] **#W5-1 operator 타입** — FieldFilterConfig.operator=`string`(§10-A "operator 유니온 미분해" 근거·브리핑 지시) · risk: low · **W5-3서 확정**(후보=search-form.ts QueryConditionType) · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
+- [x] **#W5-1 operator 타입 확정(W5-3서 해소 2026-07-12)** — FieldFilterConfig.operator=**open `string` 유지**(스펙 §10-A·list-config.ts:26). QueryConditionType(12-값 유니온) 캐스트는 addAndFilter 빌드 지점만·부재 시 omit. QueryConditionType 채택 기각. [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
+- [ ] **#W5-3 재적용 de-dup 미구현** — 고급검색 매 apply가 `store.searchForm.addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적(단일 apply=정확·E2E green). SearchForm "이름별 제거" 프리미티브가 W5-3 스코프 밖(search-form.ts 미포함) → 브리프 Do-NOT 준수 미구현·flag · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
@@ -119,8 +120,7 @@
 - EF/EA 페이즈 노트(EF-R2 stash anomaly·EF-gate FIND-ONLY·EA-A fan-out 커밋방식·EA-D reorder)는 [archive](./progress-archive/phase-e-track-tasks.md#progress-notes-본문-이월-2026-07-11--efea-페이즈-완료로-아카이브)로 이월.
 - W1~W3 방법론·검증 노트(W1 tsc+test 이중검증·EG-D 4렌즈·harness 교차리포·W2/W3 착수 규율·W3-1 발명게이트 해소)는 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-11 slim).
 - W4-0 계수 재산정 방법론(count-public-surface.mjs: get*Handlers+getReadOnly→53·§10-A 갭 명문화·규칙 무변경·대안 미채택)은 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-12 slim).
-
-- **W5-3 착수 정찰(2026-07-12, W5-2 종료 시)**: ① list-store에 `setSearchForm` 액션 **부재**(현 액션=setPage/setPageSize/setSort/quickSearch) → W5-3가 `setSearchForm(next: SearchForm)`(set+fetch) 신설(waves "setSearchForm+fetch"의 실제 배선). ② `FilterItem.queryConditionType?`는 **옵셔널**(QueryConditionType 12-값 유니온·search-form.ts:14) → operator(string)를 FilterItem 빌드 시 캐스트, 미설정 시 omit(백엔드 기본·기본 operator 발명 금지·전역 Do-NOT ③ 조건대입). ③ **§Needs Review #W5-1 operator 확정 = `string` 유지**(스펙 §10-A "operator 유니온 미분해")·QueryConditionType 캐스트는 FilterItem 구축 지점. ④ `deriveFilterFields`=`list-columns.ts` deriveListFields 자매(동일 `(field as FormField)` 캐스트 재사용·EntityField 인터페이스 정리는 파킹). ⑤ 패널=ViewListGrid 내장(useUI TextInput/Button 가용)·`getFilterRenderer(type)` 폴백 기본입력. ⑥ sample: College.name에 withFilter 선언 + 고급검색 E2E.
+- W5-3 실행 상세(setSearchForm 배선·operator 캐스트·deriveFilterFields·deviation 5)는 [phase-eg archive #W5-3](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)로 이월(2026-07-12 post-completion slim).
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 

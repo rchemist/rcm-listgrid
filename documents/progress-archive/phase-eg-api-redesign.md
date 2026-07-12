@@ -177,6 +177,30 @@
 2. **`(field as FormField).getListConfig()` 구조적 캐스트**(list-columns.ts). `EntityField` 인터페이스(getFields() 반환형)가 getListConfig/getDisplayValue 미선언(W5-1이 FormField 클래스에만 추가) → frozen 파일 미관통 위해 캐스트+존재체크. 전 concrete field가 FormField extends라 런타임 안전. **후속 정리 후보: W5-3(동일 getFilterConfig 패턴)/W7에서 EntityField 인터페이스에 선언 이관**. **→ §Needs Review**.
 3. **기존 픽스처 4파일 withList 추가**(view-list-grid·xref-prefer-mapping·xref-mapping·many-to-one-filter test). columns prop 없는 ViewListGrid/피커 픽스처 → 폴백 폐기 시 파손. 팀규약 "기존 테스트 수정 허용·기대값 변경은 스펙 §인용"(§5.1 폐기)·행동 약화 아님. **→ §Needs Review**.
 
+## #W5-3 advanced-search (CAP-20)
+
+**ViewListGrid 내장 고급검색 패널 + filter-renderer 레지스트리 + withFilter 파생 + list-store setSearchForm 액션**(스펙 §5.1/§7 CAP-20). 위임(sonnet)→메인 full gate+E2E authoritative. logic 커밋 `2223f35`.
+
+**변경(9파일)**:
+- 신규 `packages/react/src/registry/filter-renderer-registry.tsx`: `Map<string, FilterRendererComponent>` + `registerFilterRenderer(type, comp)`/`getFilterRenderer(type)` — `list-cell-renderer-registry.tsx`(W5-2) 형 복제, string 키(§7 열린 타입). props `{field, value, onChange}`(controlled 필터 입력·row 컨텍스트 없음).
+- `list-columns.ts`: `deriveFilterFields(entityForm)`=`deriveListFields` 자매(`filterConfigOf=(field as FormField).getFilterConfig()` truthy 수집·sub-collection 제외·`config.order ?? field.getOrder()` 안정정렬·0-truthy→[]) + `DerivedFilterField {field, config}` + `filterConfigOf` 헬퍼(listConfigOf 동형 캐스트).
+- `ViewListGrid.tsx`: 고급검색 패널 내장(별도 export 아님·§7 결정 3-내장). `deriveFilterFields` 0건→토글/패널 미렌더. 토글 Button "고급검색"→패널; 필드별 `getFilterRenderer(field.type)` 폴백 useUI `TextInput`(label htmlFor 연결); apply Button "검색"→비어있지 않은 값만 `store.searchForm.addAndFilter({name, value, ...(operator?{queryConditionType: operator as QueryConditionType}:{})})` 폴딩→`setSearchForm`. operator=FieldFilterConfig.operator(open string, §10-A) 있을 때만 캐스트·없으면 omit(발명 기본 금지·exactOptional 조건대입).
+- `list-store.ts`: `setSearchForm(next: SearchForm): Promise<void>` 액션 신설 — `set({searchForm: next.withPage(0)}); await get().fetch()`(quickSearch page-reset 선례·**fetch 계약 무변경**·기존 액션 무변경). ListStoreState 인터페이스 +1.
+- `react/src/index.ts`: 배럴 +4(registerFilterRenderer·getFilterRenderer·FilterRendererComponent·FilterRendererComponentProps) — list-cell 블록 병렬(W5-2와 동형).
+- apps/sample `college.ts`: `name.withFilter({label:'대학명', operator:'LIKE'})` — operator passthrough 실증('LIKE'=유효 QueryConditionType).
+- 테스트: 신규 `list-columns.test.ts` +2(deriveFilterFields order/label/false·undeclared 제외·subCollection 제외) · `view-list-grid.test.tsx` +5(빈-파생 무패널·토글 라벨입력·apply AND-필터+operator+page-reset·operator 부재 시 queryConditionType 키 부재 단언·등록 렌더러 우선) = **2138**(+7) · `e2e/college.spec.ts` +1(고급검색 토글→대학명='공과'→검색→공과대학 visible·인문대학 not).
+
+**검증(메인 authoritative)**: full gate 독립 PASS — type-check·test **2138**·lint 0err·format·build. 계수 **47/57/184**(EntityForm 무변경·root 53→57[+4]·/schema 184 무변경, 전부 임계 55/120/190 내). **E2E 28/28 green**(신규 college 고급검색 #14 포함·타 리스트 페이지 무회귀). HEAD 불변(ef7070b→logic)·manifest 9파일 정확 일치·entity-form/form-store/ViewEntityForm 미관통.
+
+**§Needs Review #W5-1 operator 타입 확정(해소)**: FieldFilterConfig.operator=**open `string` 유지**(스펙 §10-A "operator 유니온 미분해"·list-config.ts:26 주석). FilterItem.queryConditionType(12-값 UPPERCASE 유니온) 캐스트는 addAndFilter 빌드 지점에서만·operator 부재 시 omit. QueryConditionType 채택(후보) 기각 — 스펙이 open 유지 결정.
+
+**deviations(재확인 후 §Needs Review)**:
+1. **재적용(re-apply) de-dup 미구현**(risk: low-med — 브리프가 미리 표시한 fork). `applyAdvancedSearch`는 매 클릭 `store.searchForm.addAndFilter` 폴딩 → 단일 apply(태스크 수용 기준·E2E 유일 시나리오)는 정확하나, 같은 필드에 다른 값으로 재검색 시 AND 절 2개 누적(둘 다 매칭 강제→0행 가능). SearchForm에 "이름별 제거" 프리미티브가 W5-3 파일 스코프 밖(search-form.ts 미포함) → 브리프 Do-NOT("search-form.ts API 확장 금지·단일 apply 정확+재적용 flag") 준수해 미구현·flag. **→ §Needs Review**.
+2. root 계수 +4(브리프 개념표기 "+1"): 배럴이 4 심볼(register/get + 2 타입) 리터럴 export — W5-2 registerListCellRenderer 블록과 동형(그것도 +4). count 스크립트는 named export 리터럴 계수·waves "+1/+2"는 API 개념 약칭. 57/120 대폭 여유·임계 무위험(정보성·intent-drift 아님).
+3. mock-backend AND-필터: `apps/sample/lib/mock-backend/store.ts` `matchesFilterGroup`가 이미 `AND.every(...)`+`LIKE`(대소문자 무시 substring) 구현(Major XrefMapping IN/NOT_IN용 선재) → W5-3 무변경. E2E로 실증(발견·departure 아님).
+4. Playwright `{name:'검색', exact:true}`(risk:none·test-only): 기본 substring 매칭이 "고급검색" 토글도 매칭(strict 위반) → exact. testing-library getByRole는 기본 exact라 unit 무영향.
+5. 폴백 TextInput `ariaLabel` 대신 `<label htmlFor>/id`(FieldRenderer 관례) — accname 중복 회피·코드품질 선택·스펙 deviation 아님.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:
