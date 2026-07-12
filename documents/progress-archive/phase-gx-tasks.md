@@ -55,3 +55,22 @@
 - **②** `isExternalUrl`을 utils에 로컬 재구현(schema-core import 안 함) — zero-dep 하드룰·byte-identical 4줄·상호참조 주석. risk:low(물리 2카피).
 
 **계수 정정 기록**: /schema **186→188**(GX-1 `withFilter`/`withFilterIgnoreDuplicate` public 복원 +2·임계 190 미만) — GX-5서 spec §10-A W7 행 반영.
+
+<a id="gx-5"></a>
+## #GX-5 문서 정정 + descope 원장 (2026-07-13 · 인라인)
+
+**결과**: 봉인 후 조사서 드러난 문서 결함 정정 + descope 원장 확정. 문서 전용(빌드/테스트 무관).
+- **"무변경" 거짓 정정**: `MIGRATION.md:66`+`spec §9:371` SearchForm 행 → "빌더 시그니처 무변경 + wire 정합(GX-1)"(withFilter 복원·FilterItem 연산자키맵·조건타입24·cacheKey 제거 명시).
+- **`/misc` 행 현행화**: `MIGRATION.md` /misc 서브패스 제거 행을 "대부분 미이관"→"`@rchemist/listgrid/utils` 재이관(GX-3)"으로·정규식 8종→11종 정정.
+- **CAP-29 위젯 descope**: spec §8 CAP-29에 QrField/KakaoMap 지도뷰/ViewApiSpecification/XrefPriceMappingField 명문화(사용자 확정·zero-usage)·`/misc`는 descope 아님(복원) 주기.
+- **GX 정합 note**: CAP 매트릭스 뒤에 GX-1~5 정합 항목 기록(새 CAP ID 미생성 — GX는 정합, 신규 설계 능력 아님).
+- **§10-A 계수**: /schema 186→188(GX-1 +2·GX 행 추가)·W7 실측 라인에 GX-1 실측 반영·/utils 미계수 명시.
+- **§Needs Review**: #W7-4 서브패스 제거 descope 처분(사용자 확정→CAP-29/utils/withFilter).
+
+## Next Phase Handoff (Phase GX → GA 게이트)
+
+- **Phase GX(GX-1~5) ✅ 완료(2026-07-13)**: 봉인 후 조사서 발견한 GA-blocking 갭 전건 정합. **wire 계약=rcm-backend-framework 0.1.0**(SearchForm SearchRequest·mock SearchResponse/ProblemDetail·edustack 실사용 레퍼런스)·`/utils` 패키지(구 misc 복원)·프록시 seam 문서화(ADR-0005 부록 A)·"무변경" 거짓 정정. **계수 49/57/188**(임계 55/120/190). 게이트: 2368u·E2E 32·smoke:load(. /schema /state /utils /excel)·attw/publint·check:headless.
+- **다음 = GA 게이트(CAP-28 헌장 C1~C9 대조표·별도 pass·미착수)** — cold-start=[phase-eg archive Handoff](./phase-eg-api-redesign.md#w7-5)+스펙 §8 CAP-28+[헌장](../prd/concept-charter.md). GA=검증/대조 authoring(인라인 판단).
+- **GA 전 잔여(§Needs Review open)**: ①asset-base 어댑터 배선(assetBaseUrl 필드 추가 여부·GX-3) ②mock 5/24 조건타입(실백엔드 필요시 확장) ③GX-1 empty AND/OR 방출(실서버 대조 권장) ④spec §9#29 라벨(presets-rcm 감사헬퍼) ⑤isExternalUrl 2카피 · **소비자/외부 승인**: P0/P1 publish 외부 승인.
+- **Do-NOT(계승)**: 0.2(GJCU) shape primary 채택 금지(폴백만)·구 src/ 삭제 금지·스펙 침묵 판단 발명 금지·dts experimentalDts 재시도 금지.
+- **세션 정책**: **새 세션 권장**(GA=distinct 대조 pass·신선 컨텍스트). 재개=`/progress`.

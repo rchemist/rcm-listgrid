@@ -324,7 +324,9 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 | CAP-26 | 훅 내 메타 토글(구 name-키 sugar 774+118) | InitContext.setMeta + mutator.setMeta(검증 consumer-1) |
 | CAP-27 | 폼 읽기전용 변형·M2O 전파(구 setReadOnly 26) | EntityForm.withReadOnly + store.formReadOnly(검증 consumer-7/coverage-4) |
 | CAP-28 | 헌장 C1~C9 | C1 선언=화면(withList 파생) · C2 조건부(L5) · C3 관계(현행 M2O/SubColl) · C4 카탈로그+확장(§5) · C5 검증(AsyncValidation 포함 단일 채널) · C6 탭/그룹/스텝/엑셀/리비전(§3) · C7 주입(§2/7) · C8 어댑터(§6.2) · C9 리스트 세트(CAP-18~20) |
-| CAP-29 | **명시 descope** | 자동저장(이탈 복구, C6) — 0.4 GA 밖, 로드맵 후속(§Backlog 유지). RuleField/XrefPrice/ContentAsset — EA-D/EA-C 결정 유지(dead) |
+| CAP-29 | **명시 descope** | 자동저장(이탈 복구, C6) — 0.4 GA 밖, 로드맵 후속(§Backlog 유지). RuleField/XrefPrice/ContentAsset — EA-D/EA-C 결정 유지(dead). **W7 서브패스 제거 위젯(사용자 확정 2026-07-12·감사 zero-usage)**: `QrField`(구 `/qr`)·`KakaoMap` 주소 지도뷰(구 `/address`·AddressField 선언은 이식됨)·`ViewApiSpecification`(구 `/api-spec`)·`XrefPriceMappingField`(구 `/xref-price`) — 필요 시 `type:'custom'`+`registerFieldRenderer`로 host 구현(MIGRATION §2 참조). **주의(descope 아님·복원됨)**: 구 `/misc` 유틸 계층은 `/utils`로 재이관(GX-3)이라 descope 아님. |
+
+**Phase GX — 프레임워크 정합(봉인 후 조사 2026-07-13·CAP 밖·[gap analysis](../analysis/2026-07-12/w7-post-seal-gap-analysis.md))**: CAP-01~29는 설계 능력 매트릭스이므로 새 ID를 만들지 않고 GX 정합 항목을 여기 기록한다 — **GX-1** SearchForm wire=rcm-backend-framework 0.1.0 `SearchRequest`(withFilter 복원·FilterItem 연산자키맵·QueryConditionType 24·cacheKey 제거) · **GX-2** apps/sample mock=프레임워크 `SearchResponse` 9필드+RFC7807 ProblemDetail · **GX-3** `/utils` 패키지(구 `/misc` 복원) · **GX-4** SSR 프록시 seam=`RcmAdapterOptions.{baseUrl,fetch}`([ADR-0005 부록 A]) · **GX-5** 문서 정정+본 원장. wire 계약 source-of-truth=rcm-backend-framework 0.1.0(edustack 실사용 레퍼런스).
 
 ## 9. 마이그레이션 표 (0.3 실사용 116멤버 전수 — 그룹 압축)
 
@@ -368,7 +370,7 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 | `withOverrideRenderListItem`(30)/`withOverrideRender`(5)/`withDisplayFunc`(10)/`useChip`(3)/`withCardIcon`/`withLineBreak`(5) | list-cell 레지스트리/ViewListGrid columns override/getDisplayValue | 수동(렌더 소관 — react 계층) |
 | `withLayout`(17) | 동일(필드) — `withFieldToLayout`(6)은 삭제(필드별로) | 준-기계적 |
 | `withSortable`(6)/`withFilterable`(5) | withList({sortable})/withFilter() | codemod |
-| SearchForm군: withFilter(20)/withSort(5)/withPage(16)/withPageSize(25)/quickSearch | SearchForm 존치(wire format, 불변 빌더) | 무변경 |
+| SearchForm군: withFilter(20)/withSort(5)/withPage(16)/withPageSize(25)/withFilterIgnoreDuplicate/quickSearch | SearchForm 존치(불변 빌더)·wire=rcm-backend-framework 0.1.0 SearchRequest(GX-1) | 빌더 시그니처 무변경·wire 정합(GX-1: FilterItem 연산자키맵/조건타입24/cacheKey 제거) |
 | `ListGrid`+`withSearchForm`(37)/`getSearchForm`(1) | createListStore({initialSearch}) | 수동 |
 | `ViewEntityFormWrapper`(249)/`ViewListGridWrapper`(138) | ViewEntityForm/ViewListGrid+호스트 페이지 셸(W5에 페이지 컴포지션 포함) | 수동 — MIGRATION 최대 항목, 전용 절 필수 |
 | `withMaskedValue`/`withSaveValue`/`withParentId`/`withMenuUrl`/기타 ≤2회 34종 | 필드별 대응(M2O 옵션/serializeValue/…) — MIGRATION 부록 전수표 | 수동 |
@@ -392,7 +394,7 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 - + **엔진 내부 `get*Handlers` ×8**(§3.3 — 배럴 비공개이나 public 메서드라 기계 계수됨; 훅당 1 자동 파생).
 - = 53. 마진 +2 = wave 내 with*/get* 비대칭 중간상태 흡수. **W4 궤적**: 41(현재)→W4-2 steps +2→W4-4 revision +2→W4-5 meta +2 = 47, 이후 §3.2 질의(hasField/getTab/hasTab/getTabFields)+§3.5 = 53.
 
-**`/schema` 배럴 최종 ≈ 186 → 임계값 190 (+4 마진)**
+**`/schema` 배럴 최종 = 188 → 임계값 190 (+2 마진)**
 
 | wave | 신규 배럴 타입 | Δ | 누계 |
 |---|---|---|---|
@@ -401,10 +403,11 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 | W5 | `FieldListConfig` · `FieldFilterConfig`(§5.1) | +2 | 184 |
 | W6 | `DataFieldSpec` · `DataTransferSpec`(§3.5 W6-entry 확정) | +2 | 186 |
 | W7 | 패키징 — schema 타입 0 | 0 | 186 |
+| GX-1 | `SearchForm.withFilter` · `withFilterIgnoreDuplicate` 복원(rcm-backend-framework 정합) + `FilterGroups`/`LogicalOperator` 타입 | +2 | **188** |
 
 - 마진 +4 = W5/W6 미분해 세부 타입(필터 operator 유니온·list align/width 헬퍼·DataTransfer 하위 spec 등). W5/W6 entry pass에서 실측이 190 근접 시 위 wave-entry 규칙으로 재산정.
 
-**루트 배럴 실측 57 → 임계값 120 무변경** — 원 projection 49 base + **W5 실측 +8**(list-cell renderer export 4 + filter renderer export 4 — registry 헬퍼 전개 계수; 고급검색 패널 자체는 ViewListGrid 내장·별도 export 아님, W5 entry-brief 결정 3-내장). ⚠️ 원 W5 projection은 +2로 과소추정 — **실측 57이 정본**(count-public-surface.mjs, 2026-07-12). W6 root +0(toolbar seam 재사용). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님). **W7 +0 실측 확인**(W7-5 wave-end, 2026-07-12): EntityForm 49·root 57·/schema 186 무변경 — 신 subpath(/schema·/state·/ui-default·/backend-rcm·/next·/excel)는 3-예산 밖 미계수·CAP-24 adapter 타입은 비계수 배럴. count-public-surface.mjs PASS.
+**루트 배럴 실측 57 → 임계값 120 무변경** — 원 projection 49 base + **W5 실측 +8**(list-cell renderer export 4 + filter renderer export 4 — registry 헬퍼 전개 계수; 고급검색 패널 자체는 ViewListGrid 내장·별도 export 아님, W5 entry-brief 결정 3-내장). ⚠️ 원 W5 projection은 +2로 과소추정 — **실측 57이 정본**(count-public-surface.mjs, 2026-07-12). W6 root +0(toolbar seam 재사용). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님). **W7 +0 실측 확인**(W7-5 wave-end, 2026-07-12): EntityForm 49·root 57·/schema 186 — 신 subpath(/schema·/state·/ui-default·/backend-rcm·/next·/excel·**/utils**[GX-3])는 3-예산 밖 미계수. **GX-1 실측(2026-07-13): /schema 186→188**(withFilter/withFilterIgnoreDuplicate 복원 +2·임계 190 미만·EntityForm 49·root 57 무변경). count-public-surface.mjs PASS(49/57/188).
 
 ## 11. 구현 wave (요약 — 실행 계약은 [waves 브리프](./entityform-api-implementation-waves.md))
 
