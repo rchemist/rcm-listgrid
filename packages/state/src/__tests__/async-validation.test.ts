@@ -228,6 +228,27 @@ describe("form-store AsyncValidation (W4-3) — 'change' trigger debounce", () =
     expect(check).toHaveBeenCalledTimes(1);
     expect(store.getState().fields.alias?.asyncState).toBe('invalid');
   });
+
+  it('reset() during a pending change-trigger debounce cancels the timer — no stale check resurrects on the reset field (R11)', async () => {
+    const check = vi.fn(async () => ValidateResult.fail('중복된 값입니다'));
+    const store = createFormStore(ChangeForm(check, 300));
+
+    store.getState().setValue('alias', 'x'); // schedules a 300ms debounced check
+    store.getState().reset(); // reset happens WITHIN the debounce window
+
+    expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
+    expect(store.getState().fields.alias?.errors).toBeUndefined();
+
+    // without the R11 fix, this advance fires the stale timer: 'checking'
+    // flashes on the reset field, then a wasted network check resolves it
+    // to 'invalid' with a stale error — on a field the user never touched
+    // again after reset.
+    await vi.advanceTimersByTimeAsync(1000);
+
+    expect(check).not.toHaveBeenCalled();
+    expect(store.getState().fields.alias?.asyncState).toBe('unchecked');
+    expect(store.getState().fields.alias?.errors).toBeUndefined();
+  });
 });
 
 // W4-3a (D1) — async SAVE-GATING (spec §5.3/§6.2, resolving the W4-3

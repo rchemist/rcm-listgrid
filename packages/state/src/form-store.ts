@@ -880,6 +880,22 @@ export function createFormStore(
       },
 
       reset() {
+        // R11 (analysis §4.4): resetValue() below synchronously reverts each
+        // slice's asyncState to 'unchecked' and drops its errors, but a
+        // pending validate-on-change trailing debounce (validationTimers) or
+        // 'change'-trigger AsyncValidation debounce (asyncValidationTimers)
+        // is a closure-captured setTimeout that doesn't know the field was
+        // just reset — left alone it still fires later and resurrects a
+        // 'checking' badge / stale error on the just-reset field. Same
+        // clearTimeout+delete cleanup addField/removeField already do for a
+        // single replaced/removed name (EF-R2), applied here to every
+        // pending timer since reset() touches every field at once.
+        for (const timer of validationTimers.values()) clearTimeout(timer);
+        validationTimers.clear();
+        for (const timer of asyncValidationTimers.values()) clearTimeout(timer);
+        asyncValidationTimers.clear();
+        touchedFields.clear();
+
         set((s) => {
           const fields: Record<string, FieldValueSlice> = {};
           for (const [name, slice] of Object.entries(s.fields)) {
