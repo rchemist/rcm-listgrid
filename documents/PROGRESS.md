@@ -120,6 +120,8 @@
 - W1~W3 방법론·검증 노트(W1 tsc+test 이중검증·EG-D 4렌즈·harness 교차리포·W2/W3 착수 규율·W3-1 발명게이트 해소)는 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-11 slim).
 - W4-0 계수 재산정 방법론(count-public-surface.mjs: get*Handlers+getReadOnly→53·§10-A 갭 명문화·규칙 무변경·대안 미채택)은 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-12 slim).
 
+- **W5-3 착수 정찰(2026-07-12, W5-2 종료 시)**: ① list-store에 `setSearchForm` 액션 **부재**(현 액션=setPage/setPageSize/setSort/quickSearch) → W5-3가 `setSearchForm(next: SearchForm)`(set+fetch) 신설(waves "setSearchForm+fetch"의 실제 배선). ② `FilterItem.queryConditionType?`는 **옵셔널**(QueryConditionType 12-값 유니온·search-form.ts:14) → operator(string)를 FilterItem 빌드 시 캐스트, 미설정 시 omit(백엔드 기본·기본 operator 발명 금지·전역 Do-NOT ③ 조건대입). ③ **§Needs Review #W5-1 operator 확정 = `string` 유지**(스펙 §10-A "operator 유니온 미분해")·QueryConditionType 캐스트는 FilterItem 구축 지점. ④ `deriveFilterFields`=`list-columns.ts` deriveListFields 자매(동일 `(field as FormField)` 캐스트 재사용·EntityField 인터페이스 정리는 파킹). ⑤ 패널=ViewListGrid 내장(useUI TextInput/Button 가용)·`getFilterRenderer(type)` 폴백 기본입력. ⑥ sample: College.name에 withFilter 선언 + 고급검색 E2E.
+
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
 - 마이그레이션 how-to는 [리빙 문서](./plans/migration-0.3-to-0.4.md)로 P0-10에서 착수 — 각 페이즈가 호환성 변경을 발생 커밋에서 누적, P7에서 `docs/MIGRATION.md`+codemod로 승격.
