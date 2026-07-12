@@ -54,7 +54,7 @@ function formatToken(d: Date, token: string, len: number): string {
     default:
       throw new RangeError(
         `@listgrid/utils date formatter: unsupported format token "${token.repeat(len)}" ` +
-          '(supported: y, M, d, H, m, s, p, and \'single-quoted\' literals)',
+          "(supported: y, M, d, H, m, s, p, and 'single-quoted' literals)",
       );
   }
 }

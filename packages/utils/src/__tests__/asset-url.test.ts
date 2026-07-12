@@ -53,9 +53,7 @@ describe('asset URL helpers', () => {
   it('removeAssetServerPrefix strips the configured server + prefix', () => {
     configureAssetServerUrl('https://assets.example.com');
     configureAssetPrefix('/files/');
-    expect(removeAssetServerPrefix('https://assets.example.com/files/photo.jpg')).toBe(
-      'photo.jpg',
-    );
+    expect(removeAssetServerPrefix('https://assets.example.com/files/photo.jpg')).toBe('photo.jpg');
   });
 
   it('removeAssetServerPrefix URL-encodes non-separator segments', () => {
@@ -169,8 +167,7 @@ describe('ASSET_SERVER_URL fallback behavior (P0-9 parity)', () => {
   });
 
   it('does not warn when only the injected base is configured', async () => {
-    const { getAccessableAssetUrl, setAssetServerBase, configureAssetPrefix } =
-      await freshModule();
+    const { getAccessableAssetUrl, setAssetServerBase, configureAssetPrefix } = await freshModule();
     configureAssetPrefix('/static-resource/');
 
     setAssetServerBase('https://injected.example.com');
