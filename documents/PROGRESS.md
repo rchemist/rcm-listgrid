@@ -113,16 +113,16 @@
 
 #### Phase RV — 중간 점검 개선 트랙 (2026-07-13 리뷰 산출 · GA 선결) · [분석](./analysis/2026-07-13/midpoint-code-review.md)
 
-**규범**: [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) §4 확정 설계안(항목별 before→after·증명·수용·Do-NOT)+§8 원장. 7차원 팬아웃+opus 검증(CONFIRMED 8·REFUTED 0). **GA 게이트는 R1·R2·G-1·GA-BRIEF 선결 후 착수.** 상세는 분석 §참조(본문 중복 금지).
+**규범(실행 계약)**: **[RV 실행 계획](./plans/rv-remediation-execution-plan.md)** — R1~R12 **무결정(zero-decision)** 스펙(항목별 exact before→after 코드 + 정확한 테스트 + 수용 + Do-NOT). 13 authoring + 13 opus cold-executor 검증(소스 패치 13/13 verbatim 정확·residue closure 반영). **후속 세션은 설계·결정 없이 매칭·치환·실행만.** why=[중간점검 리뷰 §4](./analysis/2026-07-13/midpoint-code-review.md). GA=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md)(CAP-28 순수검증). **GA 착수 = R1·R2·G-1 선결 후.**
 
-- [ ] **RV-R1 reload() write-path 고아화** 🔴CRIT — initialize를 기존 스토어에 재실행(`into` 옵션·액션 클로저 교체 금지) · state/{form-controller.ts:341,initialize-form-store.ts} · 증명=reload후 편집 재렌더 테스트 · [§4.1](./analysis/2026-07-13/midpoint-code-review.md)
-- [ ] **RV-R2 고급검색 재적용 de-dup** 🟠HIGH — `SearchForm.removeAndFilterByName`(공개+1·/schema 189/190) + ViewListGrid 교체 · schema-core/search/search-form.ts·react/ViewListGrid.tsx:267 · [§4.2]
-- [ ] **RV-R3~R8** 🟡MED — Xref required 오버라이드·validateAll 함수형머지·FieldRenderer try/catch+allSettled·sessionStorage isBlank·TIER2 객체export(GA GJCU 검증)·DataImporter onSubmit catch · [§4.3]
-- [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined)·reset() 타이머클린업·delete() ids guard · [§4.4]
-- [ ] **G-1 GX-6 처분** 🔴 — WIP stash 이연(stash@{0})·#GX-3 미결 복원(아래)·**capability 결정 대기**(채택시 context 스코프 재설계+ADR-0005/spec 승인+react tsconfig ../utils ref) · [§6/§7]
-- [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 커밋 수리·format:check green 복원
-- [ ] **G-3 #W5-3 risk 등급 정정** ✅(아래 §Needs Review 반영) low-med→HIGH
-- [ ] **GA-BRIEF CAP-28 실행급 브리프 저작** 🟡 — per-C 증거파일·pass/fail·커버리지 매트릭스·Do-NOT·R7 GJCU 행형태 검증 편입(fable/opus) · 신규 documents/plans/ga-gate-charter-brief.md · [§5]
+- [ ] **RV-R1 reload() write-path 고아화** 🔴CRIT — initialize에 `into?` 추가해 기존 스토어에 재실행(액션 클로저 교체 금지) · state/{initialize-form-store.ts,form-controller.ts:341} · 무결정 스펙=[실행계획 R1](./plans/rv-remediation-execution-plan.md)
+- [ ] **RV-R2 고급검색 재적용 de-dup** 🟠HIGH — **신규 API 불필요**: ViewListGrid이 기존 `SearchForm.withFilter`(name 교체) 재사용(공개표면 무변경) · react/ViewListGrid.tsx:267 · [실행계획 R2](./plans/rv-remediation-execution-plan.md)
+- [ ] **RV-R3~R8** 🟡MED — Xref required(isBlank xref-aware)·validateAll 함수형머지·FieldRenderer allSettled+fail-closed·sessionStorage isBlank·TIER2 방어적 스칼라추출·DataImporter onSubmit catch · [실행계획 R3~R8](./plans/rv-remediation-execution-plan.md)
+- [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined widen)·reset() 타이머클린업·delete() ids guard · [실행계획 R9~R12](./plans/rv-remediation-execution-plan.md)
+- [ ] **G-1 GX-6 처분** 🔴 — WIP stash 이연(stash@{0})·#GX-3 미결 복원(아래)·**capability 결정 대기**(채택시 context 스코프 재설계+ADR-0005/spec 승인+react tsconfig ../utils ref) · [분석 §6/§7](./analysis/2026-07-13/midpoint-code-review.md)
+- [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 2파일 수리·format:check green 복원
+- [x] **G-3 #W5-3 risk 등급 정정** ✅ 2026-07-13 · low-med→HIGH(아래 §Needs Review 반영)
+- [x] **GA-BRIEF CAP-28 게이트 브리프 저작** ✅ 2026-07-13 · [ga-gate-charter-brief.md](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거물 고정·매트릭스·게이트절차·Do-NOT·R7 folded-in·순수검증) · opus 저작+앵커 실재검증
 
 **Next up**: **RV-R1(reload CRITICAL)** → RV-R2 → R3~R8 → GA-BRIEF → GA 게이트. cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md).
 

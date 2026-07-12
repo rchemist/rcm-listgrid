@@ -72,7 +72,7 @@ A1(sonnet) + opus 검증. **CAP-01~29 커버리지**: CAP-02~27 전부 구현 �
 
 ## 4. 코드 정확성 (질문 ②) — 확정 개선 설계안
 
-각 항목은 후속 세션이 그대로 실행 가능하도록 before→after·증명·수용·Do-NOT을 명시한다. 심각도는 **opus 검증 후 보정값**.
+각 항목은 후속 세션이 그대로 실행 가능하도록 before→after·증명·수용·Do-NOT을 명시한다. 심각도는 **opus 검증 후 보정값**. **⇒ 무결정(zero-decision) 실행 계약(항목별 exact before→after 코드 + 정확한 테스트)은 [rv-remediation-execution-plan.md](../../plans/rv-remediation-execution-plan.md)로 분리 저작**(13 authoring + 13 opus cold-executor 검증·residue closure 반영). 아래 §4는 근거·요약, 실제 패치는 실행 계획이 authority.
 
 ### 4.1 🔴 R1 — CRITICAL: `reload()`가 스토어 write-path를 고아화
 
@@ -233,7 +233,9 @@ A1(sonnet) + opus 검증. **CAP-01~29 커버리지**: CAP-02~27 전부 구현 �
 | **G-1** | GX-6 처분(§7 결정 반영) + `#GX-3` Needs Review 라인 정정 | 🔴 GOV | (결정 의존) | — | **GA 선결** |
 | **G-2** | `date.ts` format 수리(`prettier --write`) — HEAD 게이트 위반 해소 | 🟠 GATE | utils/date.ts | format:check green | **즉시** |
 | **G-3** | `#W5-3` risk 등급 low-med→high 정정 | 🟠 DOC | PROGRESS.md:128 | — | 즉시 |
-| **GA-BRIEF** | CAP-28 GA 게이트 실행급 브리프 저작(per-C 증거파일·pass/fail·매트릭스·Do-NOT·R7 GJCU 검증 편입) | 🟡 SPEC | 신규 documents/plans/ga-gate-charter-brief.md | 콜드리더 프로브 | **GA 선결** |
+| **GA-BRIEF** ✅ | CAP-28 GA 게이트 실행급 브리프 **저작 완료** → [ga-gate-charter-brief.md](../../plans/ga-gate-charter-brief.md)(per-C C1~C9 증거물 고정·매트릭스·게이트절차·Do-NOT·R7 folded-in) | 🟡 SPEC | documents/plans/ga-gate-charter-brief.md | opus 저작+앵커검증 | GA 선결(브리프는 완료) |
+
+> **후속 실행 계약**: R1~R12의 **무결정 exact 패치+테스트** = [rv-remediation-execution-plan.md](../../plans/rv-remediation-execution-plan.md)(13 authoring + 13 opus cold-executor 검증). GA-BRIEF = [ga-gate-charter-brief.md](../../plans/ga-gate-charter-brief.md). 이 두 문서만으로 후속 opus/sonnet 세션이 **설계·결정 없이** 실행한다.
 
 **게이트 재확인 사항**: R2가 SearchForm 공개 메서드 추가(+1) → `count-public-surface.mjs` /schema 189/190 확인. R1~R8 착지 후 full gate + E2E 재실행.
 
