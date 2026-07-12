@@ -11,8 +11,14 @@ export interface RcmAdapterOptions {
   baseUrl?: string;
   /** Injectable fetch (tests, non-global runtimes). Defaults to global fetch. */
   fetch?: typeof fetch;
-  /** Extra headers merged into every request (e.g. Authorization). */
-  headers?: Record<string, string>;
+  /**
+   * Extra headers merged into every request (e.g. Authorization).
+   * Accepts a plain object (static) or a thunk resolved per-request — the
+   * latter makes multi-tenant/token-rotating header values first-class
+   * (spec §2, CAP-24): each request calls the thunk fresh, so a header
+   * value can change between calls without recreating the adapter.
+   */
+  headers?: Record<string, string> | (() => Record<string, string>);
 }
 
 /** Row shape coming back over the wire before id-coercion (D2: ids are always strings). */
@@ -107,14 +113,17 @@ function coerceRow<T>(row: WireRow): T {
 export function createRcmAdapter(opts: RcmAdapterOptions = {}): BackendAdapter {
   const baseUrl = opts.baseUrl ?? '';
   const doFetch = opts.fetch ?? fetch;
-  const extraHeaders = opts.headers ?? {};
+  // Resolved at each call site (not captured once) so a functional `headers`
+  // option is re-evaluated per request — CAP-24 lazy header evaluation.
+  const resolveHeaders = (): Record<string, string> =>
+    typeof opts.headers === 'function' ? opts.headers() : (opts.headers ?? {});
 
   async function request(path: string, init: RequestInit): Promise<Response> {
     const response = await doFetch(`${baseUrl}${path}`, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
-        ...extraHeaders,
+        ...resolveHeaders(),
         ...(init.headers ?? {}),
       },
     });

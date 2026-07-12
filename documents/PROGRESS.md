@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W6 ✅ · W7 entry ✅ · **W7-1 패키징 코어 ✅**(2026-07-12·published 진입점 src/→packages/* §2 맵·full gate green). **Next up: W7-2 headless + W7-3 adapter headers**(병렬·CAP-25/24). **2235 unit/E2E 30**·계수 49/57/186(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W6 ✅ · W7 entry ✅ · **W7-1/2/3 ✅**(2026-07-12·패키징 코어+headless+adapter 함수형·dts:paths·full gate green·2236u). **Next up: W7-4 MIGRATION+codemod**(→W7-5 wave-end→GA). 계수 49/57/186(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W6 ✅ + W7 entry-brief pass ✅**(2026-07-12·opus·콜드리더 통과). 새 세션은 **W7-1 패키징 코어부터** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md)(W7-1~5 execution-grade·8 wave-entry 결정). W7-1~5는 **sonnet 위임 가능**(설계 판단 소진됨·구현만 남음). W7-1(빌드 인프라)→W7-2(headless, 빌드 산출 의존) 순차; W7-3(adapter)·W7-4(MIGRATION/codemod) 병렬 가능. **핵심 정정**: published `@rchemist/listgrid`가 아직 구 `src/` 전체 → W7이 packages/*를 §2 맵으로 처음 published화. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클).
-**Last updated**: 2026-07-12 (**W7-1 패키징 코어 ✅** — published `@rchemist/listgrid` 진입점을 구 `src/`→v0.4 `packages/*` §2 subpath 맵으로 전환(tsup 객체 entry 7·exports 재작성·peers 26→6·styles 현소스 유지). **dts 해소**: 워크스페이스 cross-package 타입에 rollup-plugin-dts parse 실패→experimentalDts(+@microsoft/api-extractor·per-subtree ajv override로 eslint ajv@6 보존). **full gate green**(build/attw🟢/publint/surface 49/57/186/type-check/typecheck:packages/lint 0err/format/**2235u**). 상세 [archive](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). 다음=W7-2 headless+W7-3 adapter(병렬).)
+**Last updated**: 2026-07-12 (**W7-1/2/3 ✅** — W7-1 패키징 코어(published 진입점 src/→packages/* §2 맵·peers 26→6)·W7-2 headless fixture(런타임 React 0 실증·check:headless)·W7-3 adapter headers 함수형(CAP-24·sonnet→검증). **dts 최종=`dts:paths`**(experimentalDts+api-extractor는 **빈 타입(`export{}`) 결함**으로 폐기→W7-2 headless tsc가 검출·attw/publint 거짓green 교훈). full gate 전건 green(build/dts 실타입/attw🟢/publint/surface 49/57/186/lint 0err/format/**2236u**/check:headless). 상세 [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md). §Needs Review +1(@types/react 해석). 다음=W7-4 MIGRATION+codemod.)
 
 ## Goal
 
@@ -49,9 +49,10 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W6 ✅ + W7 entry ✅ + W7-1 패키징 코어 ✅**(2026-07-12). 다음: **W7-2 headless + W7-3 adapter**(병렬·sonnet 위임 가능) — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md))
+## 세션 인계 (Handoff — **W1~W6 ✅ + W7 entry ✅ + W7-1/2/3 ✅**(2026-07-12). 다음: **W7-4 MIGRATION+codemod**(sonnet 위임 가능) → W7-5 wave-end → GA — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md))
 
-- **⚠ 다음 = W7-2 headless fixture(CAP-25) + W7-3 adapter headers 함수형(CAP-24)** — 병렬·sonnet 위임 가능. **W7-1 ✅**: published `@rchemist/listgrid` 진입점을 구 `src/`→v0.4 `packages/*` §2 subpath 맵으로 전환 완료(full gate green·2235u·49/57/186). **dts 해소 선례(중요)**: 워크스페이스 cross-package 타입에 tsup 기본 `dts`(rollup-plugin-dts) parse 실패 → `experimentalDts`(+`@microsoft/api-extractor`)로 전환·api-extractor의 ajv@8 vs eslint ajv@6 충돌은 **per-subtree override**(`@microsoft/api-extractor`·`ajv-draft-04`→ajv@8)로 해소([archive #W7-1](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages)). **W7-2 주의**: schema-core가 `import type {ReactNode} from 'react'`(타입만·런타임 0) — headless tsc가 @types/react 요구할 수 있음(fixture서 실증·결정 4 게이트). **W7-3**: `backend-rcm/src/adapter.ts:15,110`(현 정적 `opts.headers??{}` 생성시 캡처)→`Record|()=>Record` 요청시 지연평가. **W7-4가 smoke-load.sh를 신 맵으로 갱신**(현 구 subpath 대상=실패 예상)·**W7-5 smoke:load 실증**. **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
+- **⚠ 다음 = W7-4 MIGRATION.md + codemod(CAP-25 migration)** — sonnet 위임 가능. **W7-1/2/3 ✅**: 패키징 코어(published 진입점 구 src/→v0.4 packages/* §2 맵·peers 26→6)·headless fixture(런타임 React 0 실증)·adapter headers 함수형(CAP-24) 전건 착지·full gate green(2236u·49/57/186·check:headless). W7-4 범위: `docs/MIGRATION.md`(§9 116멤버 전수표+**서브패스 제거절**[구 /form/*·/api·/misc·/qr·/address·/api-spec·/xref-price·구/headless→신 대응]+**페이지셸 절**[list-page-composition-guide 흡수]+**data-transfer 미이관목록**)+`scripts/codemod/`(jscodeshift·§9 codemod/준-기계 행만·"수동"행 제외)+**`scripts/smoke-load.sh` 신 맵 갱신**(현 구 subpath[./misc·./headless] 대상=실패 → 신 subpath로). W7-5 wave-end서 smoke:load+check:headless 게이트.
+- **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -93,13 +94,13 @@
 
 **W7 패키징+마이그레이션 (마지막 wave·CAP-24·25)** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md):
 - [x] **W7 entry-brief pass** ✅ 2026-07-12 · opus · 결정8(빌드기전 tsup 멀티엔트리+splitting·src/ 오라클 존치·CAP-24·headless·codemod 범위·페이지셸·presets/backend-rest omit-if-empty·styles 현소스)·**스코프 정정**(published=구 src/ 전체→packages/* 전환)·콜드리더 1결함(build:styles) fix
-- [x] **W7-1 패키징 코어** ✅ 2026-07-12 · tsup entry src/→packages/*(7 subpath)·exports §2 맵·peers 26→6·experimentalDts(+api-extractor·per-subtree ajv override) · **full gate+attw+publint+surface 49/57/186+2235u green** · [detail](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages)
-- [ ] **W7-2 headless fixture** — `/schema`+`/state`만·React 0 빌드+실행 green · CAP-25 · **← Next up**
-- [ ] **W7-3 adapter headers 함수형** — RcmAdapterOptions.headers=`Record|()=>Record` 요청시 지연평가(backend-rcm 단독) · CAP-24
-- [ ] **W7-4 MIGRATION.md + codemod** — §9 전수표+서브패스제거절+페이지셸(guide 흡수)+미이관목록·jscodeshift 기계행만
+- [x] **W7-1 패키징 코어** ✅ 2026-07-12 · tsup entry src/→packages/*(7 subpath)·exports §2 맵·peers 26→6·**dts:paths**(experimentalDts 빈타입 결함→`dts`+@listgrid paths 재작성·W7-2가 검출) · full gate+attw+publint+surface 49/57/186 green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages)
+- [x] **W7-2 headless fixture** ✅ 2026-07-12 · /schema+/state fixture·React **런타임** 0 tsc+node(cjs/esm) green·check:headless 스크립트·experimentalDts 빈타입 결함 검출 · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2-headless-fixture-2026-07-12--cap-25)
+- [x] **W7-3 adapter headers 함수형** ✅ 2026-07-12 · sonnet→검증 · headers=`Record|()=>Record` 요청시 지연평가(resolveHeaders·5메서드 1지점)·토큰회전 테스트·14 tests green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-3-adapter-headers-함수형-2026-07-12--cap-24--sonnet-위임메인-검증)
+- [ ] **W7-4 MIGRATION.md + codemod** — §9 전수표+서브패스제거절+페이지셸(guide 흡수)+미이관목록·jscodeshift 기계행만 · **← Next up**
 - [ ] **W7-5 wave-end** — CAP-24/25 대조·계수 49/57/186·full gate+E2E30+smoke:load+attw/publint·구결함 원장 최종봉인 → **GA 게이트(CAP-28) 착수**
 
-**Next up**: **W7-2 headless fixture**(CAP-25·[waves §W7-2](./plans/entityform-api-implementation-waves.md)) + **W7-3 adapter headers 함수형**(CAP-24·backend-rcm) — 병렬 가능(sonnet 위임 가능). W7-2: `/schema`+`/state`만 import하는 fixture가 React 미설치로 tsc+node run green(결정 1 청크-누수 게이트·**schema-core `import type ReactNode` 나비효과 확인**). W7-3: `backend-rcm/src/adapter.ts:15,110` headers 정적→`Record|()=>Record` 요청시 지연평가+테스트. 이후 W7-4(MIGRATION+codemod·smoke-load.sh 신맵 갱신)→W7-5(wave-end+smoke:load).
+**Next up**: **W7-4 MIGRATION.md + codemod**(CAP-25 migration·[waves §W7-4](./plans/entityform-api-implementation-waves.md)) — sonnet 위임 가능. `docs/MIGRATION.md`(§9 116멤버 전수표+서브패스 제거절[구 /form/*·/api·/misc·/qr·/address·/api-spec·/xref-price·구/headless→신 대응]+페이지셸 절[list-page-composition-guide 흡수]+data-transfer 미이관목록)+`scripts/codemod/`(jscodeshift·§9 codemod/준-기계 행만)+`scripts/smoke-load.sh` 신 맵 갱신(현 구 subpath 대상=실패). 이후 W7-5(wave-end: full gate+E2E30+smoke:load+check:headless·구결함 최종봉인→GA 게이트).
 
 ---
 
@@ -112,7 +113,7 @@
 - [x] **#W5-1 operator 타입 확정** — operator=open `string` 유지·캐스트=addAndFilter만 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [x] **#W6-2a importValue +options** — label→value=3번째 `options?`(exportValue 대칭) 승인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug(`,`검사후`|||`split)→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
-- [ ] **#W6-2a fDate TZ 민감성** — date-range export가 음수-UTC-offset 브라우저서 하루 밀림 가능(new Date UTC파싱+local getter·구 date-fns fDate 계승=회귀 아님·테스트 TZ=UTC). **실 GJCU 데이터 소비자 검증 필요** · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
+- [ ] **#W7-2 headless @types/react 해석** — `/schema`(+shared chunk 경유 `/state`) `.d.ts`가 ReactNode 조건타입(OptionalReactNode 등) 노출 → headless tsc는 `@types/react`(dev type-only) 필요. **런타임 react peer=0**(계약 충족). 해석: 헤드리스=런타임 React 0·타입레벨 @types/react는 dev 양보(스펙 §2 "React peer 0"=런타임). 스펙 저자 확인 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2-headless-fixture-2026-07-12--cap-25)
 - [ ] **#W6-2b TIER3 uniform 필터 경계** — /excel이 getDataTransfer() 반환 필드에 TIER3 uniform 제외(명시/파생 미구분). M2O/xref/address는 TIER2 passthrough(평면행 값 export)이나 실 GJCU 데이터 미검증 → 소비자 확인(garbage면 TIER3 편입) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
 - [ ] **#W5-3 재적용 de-dup 미구현** — 고급검색 매 apply가 `store.searchForm.addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적(단일 apply=정확·E2E green). SearchForm "이름별 제거" 프리미티브가 W5-3 스코프 밖(search-form.ts 미포함) → 브리프 Do-NOT 준수 미구현·flag · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)

@@ -159,6 +159,28 @@ describe('createRcmAdapter (ADR-0005 default BackendAdapter — RCM 0.1.0 wire c
     expect((init.headers as Record<string, string>).Authorization).toBe('Bearer token123');
   });
 
+  it('accepts a functional headers option and re-evaluates it per request (CAP-24 lazy header evaluation)', async () => {
+    fetchMock.mockResolvedValue(mockResponse(200, { id: '1' }));
+    let currentToken = 'token-A';
+    const adapter = createRcmAdapter({
+      headers: () => ({ Authorization: `Bearer ${currentToken}` }),
+      fetch: fetchMock as unknown as typeof fetch,
+    });
+
+    await adapter.getOne('/college', '1');
+    const [, initFirst] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect((initFirst.headers as Record<string, string>).Authorization).toBe('Bearer token-A');
+
+    currentToken = 'token-B';
+    await adapter.getOne('/college', '1');
+    const [, initSecond] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect((initSecond.headers as Record<string, string>).Authorization).toBe('Bearer token-B');
+
+    expect((initFirst.headers as Record<string, string>).Authorization).not.toBe(
+      (initSecond.headers as Record<string, string>).Authorization,
+    );
+  });
+
   describe('error mapping', () => {
     it('a 403 response throws a BackendError with code FORBIDDEN', async () => {
       fetchMock.mockResolvedValue(mockResponse(403, { message: '접근 권한이 없습니다.' }));

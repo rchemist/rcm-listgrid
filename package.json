@@ -158,6 +158,7 @@
     "check:publint": "publint",
     "check:surface": "node scripts/count-public-surface.mjs",
     "smoke:load": "bash scripts/smoke-load.sh",
+    "check:headless": "bash scripts/headless-check.sh",
     "prepublishOnly": "npm run clean && npm run type-check && npm test && npm run build",
     "lint": "eslint 'src/**/*.{ts,tsx}' 'packages/*/src/**/*.{ts,tsx}' 'apps/*/app/**/*.{ts,tsx}' 'apps/*/lib/**/*.{ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'packages/*/src/**/*.{ts,tsx}' 'apps/*/app/**/*.{ts,tsx}' 'apps/*/lib/**/*.{ts,tsx}' --fix",
@@ -178,14 +179,6 @@
     "tailwind-merge": "^2.5.4",
     "uuid": "^9.0.0",
     "zustand": "^4.4.0"
-  },
-  "overrides": {
-    "@microsoft/api-extractor": {
-      "ajv": "^8.17.1"
-    },
-    "ajv-draft-04": {
-      "ajv": "^8.17.1"
-    }
   },
   "peerDependencies": {
     "file-saver": "^2.0.5",
@@ -214,7 +207,6 @@
     "@eslint/js": "^10.0.1",
     "@headlessui/react": "^2.2.9",
     "@iconify/react": "^4.1.1",
-    "@microsoft/api-extractor": "^7.58.9",
     "@playwright/test": "^1.61.1",
     "@tabler/icons-react": "^2.30.0",
     "@testing-library/dom": "^10.4.1",

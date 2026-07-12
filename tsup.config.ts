@@ -26,13 +26,24 @@ export default defineConfig({
   // bundles inlines its own full copy of shared internals (Config, UIProvider,
   // etc.), which was the single largest contributor to tarball bloat.
   splitting: true,
-  // W7-1: rollup-plugin-dts(구 `dts`)는 `@listgrid/*` cross-package 타입을
-  // 워크스페이스 경계 너머로 해소하지 못해 packages/* 엔트리에서 parse 실패.
-  // experimentalDts(TS API 기반·project-references 인지)로 전환해 모노레포 dts 롤업.
-  experimentalDts: {
+  // W7-1: `@listgrid/*` cross-package 타입을 dts 롤업이 해소하도록 paths 매핑
+  // (rollup-plugin-dts는 워크스페이스 심링크 대신 tsconfig paths로 소스 해소).
+  dts: {
     compilerOptions: {
       target: 'ES2020',
       useDefineForClassFields: false,
+      baseUrl: '.',
+      paths: {
+        '@listgrid/schema-core': ['packages/schema-core/src/index.ts'],
+        '@listgrid/state': ['packages/state/src/index.ts'],
+        '@listgrid/react': ['packages/react/src/index.ts'],
+        '@listgrid/ui-default': ['packages/ui-default/src/index.ts'],
+        '@listgrid/backend-rcm': ['packages/backend-rcm/src/index.ts'],
+        '@listgrid/backend-rest': ['packages/backend-rest/src/index.ts'],
+        '@listgrid/next': ['packages/next/src/index.ts'],
+        '@listgrid/excel': ['packages/excel/src/index.ts'],
+        '@listgrid/presets-rcm': ['packages/presets-rcm/src/index.ts'],
+      },
     },
   },
   sourcemap: true,

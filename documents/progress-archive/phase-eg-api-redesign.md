@@ -277,9 +277,25 @@
 
 **변경 파일**:
 - `tsup.config.ts`: entry 객체형 7키(`index`→react·`schema`→schema-core·`state`→state·`ui-default`·`backend-rcm`·`next`·`excel`) — 빈 스캐폴드 backend-rest·presets-rcm omit(결정 7). `external` 26→8(peer 실사용분·charter C7). `dts`→`experimentalDts`(아래).
-- `package.json`: exports 구 11 subpath(`/form/*`·`/api`·`/misc`·`/qr`·`/address`·`/api-spec`·`/xref-price`·구 `/headless`) 제거 → §2 신 맵 7 subpath+styles 6. typesVersions 재작성. **peerDependencies 26→6**(required react·react-dom; optional next·xlsx-js-style·file-saver·react-daum-postcode) — 구 UI peer(@headlessui·react-select·@tabler·sortablejs·qrcode·kakao·sweetalert·date-fns·nuqs·iconify)는 packages/* 미import(C7 호스트 제공)라 제거. `build:styles` 소스=현 `src/listgrid/styles/*.css` 유지(결정 8). devDep `@microsoft/api-extractor`+overrides(아래).
+- `package.json`: exports 구 11 subpath(`/form/*`·`/api`·`/misc`·`/qr`·`/address`·`/api-spec`·`/xref-price`·구 `/headless`) 제거 → §2 신 맵 7 subpath+styles 6. typesVersions 재작성. **peerDependencies 26→6**(required react·react-dom; optional next·xlsx-js-style·file-saver·react-daum-postcode) — 구 UI peer(@headlessui·react-select·@tabler·sortablejs·qrcode·kakao·sweetalert·date-fns·nuqs·iconify)는 packages/* 미import(C7 호스트 제공)라 제거. `build:styles` 소스=현 `src/listgrid/styles/*.css` 유지(결정 8).
+- `tsconfig.json`: `exclude`에 `tests/headless` 추가(headless fixture는 published 이름 self-import이라 메인 프로그램서 제외·W7-2 격리 tsconfig서만 컴파일).
 
-**dts 해소(엔지니어링 노트 — 다음 세션 참조)**: packages/* 엔트리에서 tsup 기본 `dts`(rollup-plugin-dts)가 `@listgrid/*` cross-package 타입을 워크스페이스 경계 너머로 해소 못해 `state/src/index.ts:5:7` parse 실패. → `experimentalDts`(TS API 기반 tsc emit→api-extractor 롤업)로 전환: TSC emit은 성공하나 api-extractor가 `ajv/dist/core` 미해소로 실패(top-level `ajv@6`=eslint 계열 hoist가 api-extractor의 `ajv@8` 잠식). **글로벌 ajv@8 override는 eslint 파손**(eslint `lib/shared/ajv.js`=ajv@6 API). **해법**: per-subtree override `{"@microsoft/api-extractor":{"ajv":"^8.17.1"},"ajv-draft-04":{"ajv":"^8.17.1"}}` — api-extractor 서브트리만 ajv@8·eslint는 ajv@6 유지. **양쪽 green**. dist에 `_tsup-dts-rollup.d.ts/.d.cts`(공유 선언·내부) 동반 방출.
+**dts 해소(엔지니어링 노트 — 최종·다음 세션 참조)**: packages/* 엔트리에서 tsup 기본 `dts`(rollup-plugin-dts)가 `@listgrid/*` cross-package 타입을 해소 못해 parse 실패 → **`dts.compilerOptions.paths`로 `@listgrid/* → packages/*/src/index.ts` 매핑**해 해소(최종 채택). **버린 경로(Do-NOT 재시도)**: ① `experimentalDts`(+`@microsoft/api-extractor`)는 per-entry `.d.ts`를 **`export {}` 빈 스텁**으로 방출(내용은 `_tsup-dts-rollup.d.ts`에만·per-entry 재수출 깨짐) — **published 타입 전무**. attw/publint는 "타입 resolve"만 검사·빈 export 미검출이라 **거짓 green**(W7-1 초판 결함). **W7-2 headless fixture의 tsc가 이 결함을 검출**(`dist/schema.d.ts`=`export {}` → `has no exported member 'EntityForm'`). ② api-extractor는 eslint `ajv@6` hoist와 `ajv@8` 충돌(per-subtree override로 봉합했으나 empty-types 결함으로 폐기). **교훈**: dts 검증은 attw/publint로 부족 — **소비자 tsc(headless fixture)가 실 게이트**. 최종 dist: 7 subpath×(js/cjs/d.ts/d.cts)·타입 비어있지 않음(schema.d.ts 1153줄)·rollup-plugin-dts 공유 청크(`entity-form-*.d.ts` 등).
+
+## #W7-2 headless fixture (2026-07-12 · CAP-25)
+
+**결과**: `/schema`+`/state`만 소비하는 fixture가 React **런타임** 0으로 tsc+node(cjs+esm) green. 결정 1 청크-누수 리스크의 상시 회귀 게이트.
+
+- 신규 `tests/headless/consumer.ts`(EntityForm+StringField+createFormStore·타입 소스)·`scripts/headless-check.sh`(pack→react 미설치 temp 프로젝트 install→tsc+node cjs/esm)·`package.json` `check:headless` 스크립트.
+- **검증**: schema.js/state.js+공유 청크 런타임 react import **0**(실측)·node run react 부재서 green.
+- **@types/react 해석(§Needs Review·비크리티컬)**: `/schema`(및 shared chunk 경유 `/state`) `.d.ts`가 ReactNode 기반 조건 타입(OptionalReactNode/ValuedReactNode/ConditionalReactNodeValue) 노출 → headless tsc는 `@types/react`(dev type-only) 필요. **런타임 peer는 아님**(react 런타임 0=계약 충족). 해석: 헤드리스=런타임 React 0(killer feature)·타입레벨 @types/react는 dev 양보. 스펙 §2 "React peer 0"=런타임 peer 0으로 해석. 스펙 저자 확인 대상.
+
+## #W7-3 adapter headers 함수형 (2026-07-12 · CAP-24 · sonnet 위임→메인 검증)
+
+**결과**: `RcmAdapterOptions.headers`가 함수형 지원+요청시 지연평가. 멀티테넌트 토큰 회전 1급.
+
+- `packages/backend-rcm/src/adapter.ts:21`(타입 `Record<string,string> | (() => Record<string,string>)`)·`:118-119`(`resolveHeaders()`=`typeof opts.headers==='function'?opts.headers():(opts.headers??{})`)·`:126`(요청 조립서 `...resolveHeaders()` — 5 메서드 전부 단일 `request()` 경유라 1지점). backend-rest 빈 스캐폴드=미변경(결정 3).
+- **검증(메인)**: `adapter.test.ts:162` 함수형 헤더 요청마다 재평가(token-A→token-B) + 정적 헤더 무회귀 · backend-rcm 14 tests green · tsc -b 0 · 계수 미영향(비계수 배럴).
 
 **검증(메인 authoritative)**: `npm run build`(JS+dts) green·dist 7 subpath×(js/cjs/d.ts/d.cts)+styles.css. `check:surface` **49/57/186 PASS**(§10-A W7 schema+0 확정). `check:publint` All good. `check:exports`(attw) 전 subpath 🟢(node10/node16-CJS/node16-ESM/bundler). type-check·typecheck:packages·lint(0 err)·format green. **test 2235 pass**(1 todo). 
 
