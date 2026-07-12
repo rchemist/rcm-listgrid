@@ -1570,8 +1570,7 @@ AFTER:
    * back to create-mode (spec §3.1 `withId` signature row: `(id: string |
    * undefined): this`). `undefined` CLEARS a previously-set id back to
    * "not declared" (L4 "undefined = release", `withRevision(undefined)`
-   * precedent) — from that point on `getId()` reports `undefined` again
-   * and `mode()` reports `'create'`.
+   * precedent) — from that point on `getId()` reports `undefined` again.
    */
   withId(id: string | undefined): this {
     this.id = id;
