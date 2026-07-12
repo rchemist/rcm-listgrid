@@ -62,6 +62,15 @@ export interface InitializeFormStoreOptions {
   initialData?: Record<string, unknown>;
   /** EF5 — passthrough to createFormStore's opt-in validate-on-change (default OFF). */
   validateOnChange?: CreateFormStoreOptions['validateOnChange'];
+  /**
+   * R1 (analysis §4.1) — reload target. When provided, the freshly-built form
+   * state is written INTO this EXISTING store (its DATA slices are replaced via
+   * a shallow merge that PRESERVES every action closure) instead of a brand-new
+   * store being returned. This keeps the live store's actions — and therefore
+   * its subscribers (the mounted field renderers) — authoritative across a
+   * `controller.reload()`. `result.store` is then this same instance.
+   */
+  into?: StoreApi<FormStoreState>;
 }
 
 export interface InitializeFormStoreResult {
@@ -203,8 +212,14 @@ export async function initializeFormStore(
     try {
       data = (await adapter.getOne(ef.url, id)) as Record<string, unknown>;
     } catch (e) {
-      // c. fetch error: skip bind/hooks entirely, return a usable-but-empty store.
-      return { store: createFormStore(ef, storeOpts), entityForm: ef, error: toBackendError(e) };
+      // c. fetch error: skip bind/hooks entirely.
+      const error = toBackendError(e);
+      // R1 (analysis §4.1): on a RELOAD re-fetch failure (into given) leave the
+      // live store's current data intact — do NOT overwrite it with an empty
+      // store; just surface the error. The fresh-init path (no `into`) still
+      // returns a usable-but-empty store (0.3.x parity).
+      if (options.into !== undefined) return { store: options.into, entityForm: ef, error };
+      return { store: createFormStore(ef, storeOpts), entityForm: ef, error };
     }
   }
 
@@ -249,7 +264,29 @@ export async function initializeFormStore(
   // every onInit handler's accumulated setMeta calls (spec §4.1).
   if (data !== undefined) storeOpts.fetchedData = data;
   storeOpts.initialMeta = initialMeta;
-  const store = createFormStore(ef, storeOpts);
 
+  // R1 (analysis §4.1): reload path — write the freshly-built state INTO the
+  // existing store rather than returning a throwaway one. Build the fresh state
+  // with createFormStore (identical seed logic — no duplicated slice building),
+  // then copy ONLY its non-function DATA properties onto `into` via a shallow
+  // merge (replace: false). `into`'s own action closures — which capture
+  // `into`'s set/get — are LEFT UNTOUCHED, so its subscribers stay wired.
+  // structureVersion is bumped monotonically off `into`'s current value so
+  // ViewEntityForm always re-derives its tabs/groups against the reloaded
+  // fieldDefs (a plain copy of the fresh store's baseline 0 could equal the
+  // current value and skip the re-derive).
+  const into = options.into;
+  if (into !== undefined) {
+    const built = createFormStore(ef, storeOpts).getState();
+    const dataState: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(built)) {
+      if (typeof value !== 'function') dataState[key] = value;
+    }
+    dataState.structureVersion = into.getState().structureVersion + 1;
+    into.setState(dataState as Partial<FormStoreState>, false);
+    return { store: into, entityForm: ef };
+  }
+
+  const store = createFormStore(ef, storeOpts);
   return { store, entityForm: ef };
 }

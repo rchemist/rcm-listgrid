@@ -332,13 +332,15 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
   async function reload(): Promise<void> {
     const id = entityForm.getId();
     if (id === undefined) return; // create mode: nothing to re-fetch (spec §6.2 FormRuntime.reload doc)
-    const initOpts: InitializeFormStoreOptions = { entityForm, id, adapter };
+    // R1 (analysis §4.1): re-run the init pipe INTO the existing store (`into`)
+    // so its action closures — and therefore its live subscribers (the mounted
+    // field renderers) — stay authoritative. The prior
+    // `store.setState(fresh.store.getState(), true)` replaced those closures
+    // with a throwaway store's (which captured the throwaway's set/get),
+    // orphaning EVERY write after the first reload (silent data loss).
+    const initOpts: InitializeFormStoreOptions = { entityForm, id, adapter, into: store };
     if (session !== undefined) initOpts.session = session;
-    const fresh = await initializeFormStore(initOpts);
-    // reflect the freshly-built store (fetch -> BIND -> onInit -> build) into
-    // the SAME store instance the caller's subscribers already hold (zustand
-    // `replace: true` — spec §6.2 suggested implementation).
-    store.setState(fresh.store.getState(), true);
+    await initializeFormStore(initOpts);
   }
 
   async function validate(): Promise<boolean> {

@@ -668,4 +668,46 @@ describe('createFormController.validate / reload (spec §6.2)', () => {
     expect(getOne).toHaveBeenCalledTimes(1);
     expect(store.getState().getValue('name')).toBe('fresh');
   });
+
+  it('reload() keeps the ORIGINAL store authoritative: post-reload edits notify its subscribers, reflect in getValue, and a save-error surfaces on it', async () => {
+    const entityForm = WidgetForm().withId('42');
+    const store = createFormStore(entityForm, { fetchedData: { name: 'stale' } });
+    store.getState().hydrate({ name: 'stale' });
+    const getOne = vi.fn(async () => ({ name: 'fresh' }));
+    const update = vi.fn(async () => {
+      const err: BackendError = { code: 'UNKNOWN', message: 'saved elsewhere' };
+      throw err;
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ getOne, update }),
+    });
+
+    await controller.reload();
+
+    // subscribe to the SAME store AFTER reload — pre-fix, reload() replaced
+    // the store's action closures with a throwaway store's, so a write after
+    // reload lands on the throwaway store and this subscriber never fires.
+    const seen: unknown[] = [];
+    const unsub = store.subscribe((s) => {
+      seen.push(s.fields.name?.current);
+    });
+    store.getState().setValue('name', 'edited');
+    expect(seen).toContain('edited');
+    expect(store.getState().getValue('name')).toBe('edited');
+    unsub();
+
+    const outcome = await controller.save();
+    expect(outcome).toEqual({
+      ok: false,
+      reason: 'error',
+      error: { code: 'UNKNOWN', message: 'saved elsewhere' },
+    });
+    expect(store.getState().messages).toContainEqual({
+      key: 'save-error',
+      severity: 'error',
+      text: 'saved elsewhere',
+    });
+  });
 });
