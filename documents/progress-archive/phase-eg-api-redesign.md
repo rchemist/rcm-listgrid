@@ -258,3 +258,15 @@
 **결정5 TIER3 필터 uniform 확정(W6-2b)**: `getDataTransfer()`가 명시/파생 discriminator 미보유(schema 순수 선언) → /excel이 반환 필드 전체에 **uniform** TIER3 필터. flat cell 무의미(String=garbage)라 명시여도 제외가 정답(스칼라 평탄화가 소비자 경로). spec §3.5·waves W6-2 노트 동반 개정(구 "명시 시 포함" 폐기).
 
 **검증(메인 authoritative)**: full gate 독립 PASS — tsc-b(packages/excel dist)·test **2235**(신 34·excel 79 누계)·lint 0err·format·build. 계수 49/57/186 무변경. deviation 1(결정5 uniform 해석·문서 개정으로 해소).
+
+## #W6-3 toolbar + sample + E2E (CAP-16/17 UI)
+
+✅ 2026-07-12 · sonnet 위임(survey+구현+E2E)→메인 authoritative 검증(**E2E 독립 재실행 관찰**). /excel 런타임을 apps/sample College에 실배선해 export/import "작동" 실증.
+
+**변경**: `apps/sample/app/providers.tsx`(+`registerExcelDataTransfer()` 모듈스코프·registerDefaultRenderers 선례) · `lib/entities/college.ts`(+`.withDataTransfer({export:{},import:{}})` auto-derive) · `app/college/page.tsx`(**toolbar render-prop** Export/Import 버튼+getDataTransfer() 모달·신규 ViewListGrid prop 없음·decision4/C7) · 신규 `app/api/college/excel-upload/route.ts`(POST bulk-create·collegeStore().create·decision6 호스트 소유) · 신규 `e2e/college-excel.spec.ts`(export+import) · `apps/sample/package.json`(+@listgrid/excel·xlsx-js-style·file-saver·zustand)+lock.
+
+**배선**: export=`useStore(store,s=>s.rows)` 현 페이지 행→`Exporter rows={rows}`(클라 100%·백엔드 불요) · import=`Importer onSubmit={handleImportSubmit}`→`fetch('/api/college/excel-upload',POST)`→`store.getState().fetch()` 재조회→모달 닫기(decision6).
+
+**검증(메인 authoritative — E2E 독립 관찰)**: full gate PASS·계수 49/57/186 무변경. **E2E 28→30·30/30 green**(독립 재실행 `npm run test:e2e -- e2e/college-excel.spec.ts` → 2 passed: export .xlsx 다운로드·import fixture 업로드→행 출현). 실 export-core.ts 경로를 브라우저(Next 번들)서 실행=진짜 작동 실증.
+
+**deviations**: ① E2E 스펙의 Node-side fixture 생성 코드가 `import * as XLSX`→Node ESM(type:module)서 named export 미노출(CJS 번들 `.default`만)로 실패 → 스펙만 `import XLSX from`(default) fix. **export-core.ts의 `import * as XLSX`는 무영향**(tsup/Next 번들러 처리·구엔진 동일 패턴). **→ W7 published 패키지서 소비자 번들러 xlsx interop 확인 필요**(waves W7 노트). ② College `{}` auto-derive가 `dean`(manyToOne·TIER2 passthrough) 포함 → seed 무값이라 빈 컬럼(무해)·기존 TIER3 경계 §Needs Review에 포함.

@@ -67,7 +67,7 @@
 **규칙**: W5~W7은 규모(구 list 생태계 ~10.3k LOC)와 선행 의존 때문에 지금 태스크 분해하면 스펙-드리프트가 생긴다. 각 wave 착수 시 **entry 브리핑 pass**(스펙 §5.1·§7·§2·§3.5 + [8그룹 map](../analysis/2026-07-11/eg-group-capability-maps.md)의 해당 그룹 인용)로 이 문서에 W3/W4급 태스크 표를 **먼저 추가·커밋**한 뒤 실행한다. 스펙에 없는 판단이 필요하면 스펙 개정이 선행(§10 게이트 4). **계수 임계값 재검증(필수)**: entry pass는 그 wave의 신규 `/schema`·EntityForm·root 심볼을 스펙 §10-A 인벤토리 표에 추가하고, 합계가 임계값(EntityForm 55·root 120·`/schema` 190)에 근접/초과하면 같은 entry 커밋에서 표 근거와 함께 임계값을 재산정한다(2026-07-11 W4 착수 전 1차 재산정 완료 — §10-A).
 
 - **W6 data-transfer** (CAP-16·17): withDataTransfer 표면(schema) → `/excel` subpath(DataExporter/Importer, xlsx optional) → ViewListGrid 툴바 opt-in. :448 대칭 코드 공유로 구조적 fix. 참조 map: `DATA TRANSFER/EXCEL`.
-- **W7 패키징+마이그레이션** (CAP-24·25): `@rchemist/listgrid` subpath exports 맵·peers 재선언·headless fixture(React 0 빌드 테스트)·MIGRATION.md 0.3→0.4 전수표(스펙 §9 확장)+codemod 스크립트·adapter headers 함수형.
+- **W7 패키징+마이그레이션** (CAP-24·25): `@rchemist/listgrid` subpath exports 맵(**신규 `/excel`=`@listgrid/excel` 배선** — tsup entry+root package.json exports+xlsx-js-style/file-saver optional peer 재선언)·peers 재선언·headless fixture(React 0 빌드 테스트)·MIGRATION.md 0.3→0.4 전수표(스펙 §9 확장·**data-transfer=withDataTransferConfig→withDataTransfer codemod + 미이관 목록**)+codemod 스크립트·adapter headers 함수형. **W6-3 발견(확인 필요)**: `@listgrid/excel` published 시 `import * as XLSX from 'xlsx-js-style'`가 소비자 번들러/Node ESM interop에 걸릴 수 있음(W6-3 E2E Node-side서 default-import 필요했음·번들 소비는 무영향) — published dual-format(esm/cjs) 빌드로 해소 확인.
 
 ## W5 — list-track (entry-brief pass ✅ 2026-07-12 · CAP-18·19·20)
 

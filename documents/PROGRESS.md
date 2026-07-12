@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W5 ✅ · W6 entry-brief ✅ · W6-1 ✅ · **W6-2 /excel 완료 ✅**(2a foundation+2b export/import core·2026-07-12). **Next up: W6-3 툴바+sample+E2E**. **2235 unit/E2E 28**·계수 49/57/186(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W5 ✅ · W6 entry-brief ✅ · W6-1 ✅ · W6-2 ✅ · **W6-3 sample+E2E ✅**(2026-07-12·export/import 실작동 실증). **Next up: W6-4 wave-end**(마지막). **2235 unit/E2E 30**·계수 49/57/186(임계 55/120/190). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W5 ✅ · W6 entry-brief pass ✅**(2026-07-12 opus). 새 세션은 **W6-1 schema 표면부터** — [waves W6 표](./plans/entityform-api-implementation-waves.md#w6--data-transfer-entry-brief-pass--2026-07-12--cap-1617)(W6-1~4 실행급 명세·결정7건 확정)는 이미 실행급 → **sonnet 위임 가능**(entry pass 완료로 설계 판단 소진). 읽는 순서: waves W6 표 → 스펙 §3.5(DataFieldSpec/DataTransferSpec)·§2(/excel). **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·런타임/값변환 schema 유입(L6)·구 rich config 부활.
-**Last updated**: 2026-07-12 (**W6-2 /excel 완료 ✅**(2b) — sonnet 위임→메인 authoritative 검증(full gate 독립+로직 리뷰). export-core(구 ExcelProvider 이식·aoa/text-format/XLSX.write/FileSaver)+import-core(구 DataImporter 이식·XLSX.read/`[name]` 매칭/importValue/blank-drop)+thin 모달(useUI C7)+registerExcelDataTransfer. 결정6 import=**호스트 `onSubmit` prop**·결정5 TIER3 uniform 필터 확정(spec §3.5+waves 동반 개정·구 "명시 시 포함" 폐기). 34 test(2201→2235·excel 79)·계수 49/57/186 무변경. §Needs Review +1(TIER3 경계). Next=**W6-3 툴바+sample+E2E**(export 하드게이트).)
+**Last updated**: 2026-07-12 (**W6-3 sample+E2E ✅** — sonnet 위임→메인 **E2E 독립 관찰 검증**. apps/sample College에 /excel 실배선: registerExcelDataTransfer 부트스트랩·withDataTransfer 선언·ViewListGrid toolbar seam으로 Export/Import(getDataTransfer 모달)·excel-upload 라우트(onSubmit POST). **E2E 28→30 green**(독립 재실행: export .xlsx 다운로드·import fixture→행 출현 — 실 export-core 브라우저 경로 실행=진짜 작동). full gate·계수 49/57/186 무변경. W7 노트: /excel published xlsx interop 확인. Next=**W6-4 wave-end**(W6 마지막).)
 
 ## Goal
 
@@ -100,11 +100,11 @@
 - [x] **W6-1 schema 표면** ✅ 2026-07-12 · sonnet→검증 · withDataTransfer/get(동기)+타입2+:448 대칭헬퍼fix · 2156test·49/57/186 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-1-schema-surface-cap-16)
 - [x] **W6-2a /excel foundation** ✅ 2026-07-12 · @listgrid/excel scaffold+registry+값변환 · 2201test·49/57/186 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [x] **W6-2b export/import core** ✅ 2026-07-12 · sonnet→검증 · export/import core+모달+register(onSubmit 호스트) · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
-- [ ] **W6-3 툴바+sample+E2E** — toolbar seam 재사용·College withDataTransfer·excel-upload 라우트·E2E export(하드)+import · **← Next up**
-- [ ] **W6-4 wave-end** — CAP-16/17 대조·계수 실측(186/49/57)·§9 codemod+이연목록
+- [x] **W6-3 툴바+sample+E2E** ✅ 2026-07-12 · College toolbar Export/Import+upload 라우트 · **E2E 28→30 green** · [detail](./progress-archive/phase-eg-api-redesign.md#w6-3-toolbar--sample--e2e-cap-1617)
+- [ ] **W6-4 wave-end** — CAP-16/17 대조·계수 실측(49/57/186)·§9 codemod+이연목록·구결함 봉인표 · **← Next up**
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION(페이지 셸 절=이 가이드 흡수)+codemod · CAP-24·25
 
-**Next up**: **W6-3 툴바+sample+E2E** — /excel 런타임을 실제 배선해 "작동" 실증. ① `apps/sample` College 리스트페이지가 `withDataTransfer` 선언 + ViewListGrid `toolbar` render-prop(:82)로 Export/Import 버튼+DataTransferModals를 `getDataTransfer()`(registry) 먹여 렌더 + `registerExcelDataTransfer()` 부트스트랩 ② sample 백엔드 `app/api/college/excel-upload/route.ts`(import POST 수신·호스트 소유 C7·DataImporter `onSubmit` 배선) ③ **E2E export(하드게이트)**: College 리스트 Export→xlsx 다운로드(클라 100%·백엔드 불요) + E2E import: xlsx 업로드→POST→행 반영. 실행 계약=[waves W6-3 행](./plans/entityform-api-implementation-waves.md). Do-NOT: ViewListGrid 신규 prop 금지(toolbar seam만·§7/C7)·packages/react 배럴 data-transfer export 금지(root +0)·페이지 셸 컴포넌트 발명 금지(W5-4 가이드).
+**Next up**: **W6-4 wave-end** (W6 마지막) — ① **CAP-16/17 대조**(withDataTransfer :448 fix·/excel xlsx optional 전건 착지·빈행 0) ② **계수 실측 리포트**(count-public-surface.mjs=49/57/186·/excel 미계수) ③ **스펙 §9 마이그레이션**(withDataTransferConfig→withDataTransfer codemod 행 + 미이관 목록 확정) ④ **구 결함 봉인 증거**(:448 bug·multiselect `|||` import bug) ⑤ full gate + E2E 30 재확인 커밋. 실행 계약=[waves W6 종료 게이트](./plans/entityform-api-implementation-waves.md). 문서 중심 → 상위 티어 인라인 or sonnet 위임 가능.
 
 ---
 

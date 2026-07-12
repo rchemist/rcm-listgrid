@@ -10,13 +10,17 @@
   },
   "dependencies": {
     "@listgrid/backend-rcm": "*",
+    "@listgrid/excel": "*",
     "@listgrid/next": "*",
     "@listgrid/react": "*",
     "@listgrid/schema-core": "*",
     "@listgrid/state": "*",
     "@listgrid/ui-default": "*",
+    "file-saver": "^2.0.5",
     "next": "^15.0.0",
     "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "react-dom": "^19.2.1",
+    "xlsx-js-style": "^1.2.0",
+    "zustand": "^4.5.7"
   }
 }
