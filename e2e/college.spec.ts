@@ -13,6 +13,12 @@ test('College CRUD round-trips through the new engine', async ({ page }) => {
   await expect(page.getByText('공과대학')).toBeVisible();
   await expect(page.getByText('인문대학')).toBeVisible();
 
+  // --- withList-driven column derivation (spec §5.1/§7; W5-2): `name`'s
+  // `label: '대학명'` override actually reaches the rendered header (the
+  // magic "first ~4 non-hidden fields" fallback this replaces would have
+  // used the field's OWN declared label '명칭', not this override). ---
+  await expect(page.getByRole('columnheader', { name: '대학명' })).toBeVisible();
+
   // --- create: required validation fires on blank save ---
   await page.getByRole('button', { name: '새로 만들기' }).click();
   await expect(page).toHaveURL(/\/college\/new$/);

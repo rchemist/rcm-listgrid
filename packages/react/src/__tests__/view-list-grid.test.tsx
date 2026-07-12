@@ -5,17 +5,22 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { BackendAdapter, PageResult } from '@listgrid/schema-core';
+import type { BackendAdapter, FieldType, PageResult } from '@listgrid/schema-core';
 import { EntityForm, StringField } from '@listgrid/schema-core';
 import { createListStore } from '@listgrid/state';
 import { defaultUIComponents } from '@listgrid/ui-default';
 import { UIProvider } from '../providers/ui';
 import { ViewListGrid } from '../components/ViewListGrid';
+import { registerListCellRenderer } from '../registry/list-cell-renderer-registry';
 
+// withList() (spec §5.1; W5-2) — the magic "first ~4 non-hidden fields"
+// fallback this test file exercised pre-W5-2 is abolished; `name` needs an
+// explicit opt-in for every existing assertion below (row-text/click/
+// selection/toolbar) to keep rendering it as a column.
 function collegeForm(): EntityForm {
   return new EntityForm('CollegeEntityForm', '/college').addFields({
     items: [
-      new StringField('name', 100).withRequired(true).withLabel('Name'),
+      new StringField('name', 100).withRequired(true).withLabel('Name').withList(),
       new StringField('englishName', 110).withLabel('English Name'),
     ],
   });
@@ -28,11 +33,18 @@ const COLLEGES: Record<string, unknown>[] = [
 ];
 
 function mockAdapter(): BackendAdapter {
+  return rowsAdapter(COLLEGES);
+}
+
+/** A BackendAdapter double serving the given fixed row set (mockAdapter()'s
+ * shape, parameterized — the column-derivation tests below each need their
+ * own row shape). */
+function rowsAdapter(rows: Record<string, unknown>[]): BackendAdapter {
   return {
     list: vi.fn(
       async (): Promise<PageResult<Record<string, unknown>>> => ({
-        content: COLLEGES,
-        totalElements: COLLEGES.length,
+        content: rows,
+        totalElements: rows.length,
         totalPages: 1,
       }),
     ),
@@ -49,6 +61,25 @@ function mockAdapter(): BackendAdapter {
       throw new Error('not used in this test');
     }),
   };
+}
+
+/** `late` declares BOTH an order override (config.order 1, well ahead of its
+ * own declared order 500) and label/align/width/sortable — proves the
+ * override, not a coincidence of the field's own order. `early` opts in
+ * plain (`withList()`, no config) — sorts by ITS OWN declared order (100)
+ * since it has no override. `excluded` (`withList(false)`) and `undeclared`
+ * (never called) must never appear. */
+function derivationForm(): EntityForm {
+  return new EntityForm('WidgetEntityForm', '/widget').addFields({
+    items: [
+      new StringField('late', 500)
+        .withLabel('Late Field')
+        .withList({ order: 1, label: 'Late Header', align: 'right', width: 80, sortable: true }),
+      new StringField('early', 100).withLabel('Early Field').withList(),
+      new StringField('excluded', 200).withLabel('Excluded Field').withList(false),
+      new StringField('undeclared', 300).withLabel('Undeclared Field'),
+    ],
+  });
 }
 
 describe('ViewListGrid (JSDOM render)', () => {
@@ -229,5 +260,132 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(await screen.findByText('SHOUT')).toBeInTheDocument();
     expect(await screen.findByText('ENGINEERING!')).toBeInTheDocument();
     expect(screen.getByText('MEDICINE!')).toBeInTheDocument();
+  });
+});
+
+// Column derivation (spec §5.1/§7, CAP-19; W5-2) — getListConfig()-driven,
+// magic "first ~4 non-hidden fields" fallback ABOLISHED.
+describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
+  it("collects only withList()-truthy fields, sorted by config.order over the field's own declared order, applying label/align/width overrides — excludes withList(false) and undeclared fields", async () => {
+    const entityForm = derivationForm();
+    const adapter = rowsAdapter([
+      { id: '1', late: 'L1', early: 'E1', excluded: 'X1', undeclared: 'U1' },
+    ]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await screen.findByText('L1');
+
+    // 'late' (config.order 1) sorts BEFORE 'early' (its own declared order
+    // 100, no override) despite 'late' declaring order 500 on the field
+    // itself — proves config.order actually overrides, not coincides.
+    const headers = screen.getAllByRole('columnheader');
+    expect(headers.map((h) => h.textContent)).toEqual(['Late Header', 'Early Field']);
+    expect(headers[0]).toHaveStyle({ textAlign: 'right', width: '80px' });
+
+    expect(screen.queryByText('X1')).not.toBeInTheDocument(); // withList(false)
+    expect(screen.queryByText('U1')).not.toBeInTheDocument(); // never declared
+  });
+
+  it('0 withList()-truthy fields (and no explicit columns prop) renders an EMPTY column set + a dev console.warn naming the entityForm', async () => {
+    const entityForm = new EntityForm('BareEntityForm', '/bare').addFields({
+      items: [new StringField('name', 100).withLabel('Name')],
+    });
+    const adapter = rowsAdapter([{ id: '1', name: 'Row1' }]);
+    const store = createListStore({ url: entityForm.url, adapter });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+
+    expect(screen.queryAllByRole('columnheader')).toHaveLength(0);
+    expect(screen.queryByText('Row1')).not.toBeInTheDocument(); // no columns => no cells
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('BareEntityForm'));
+
+    warnSpy.mockRestore();
+  });
+
+  it('the explicit columns prop bypasses derivation entirely, even for a field with no withList() declared', async () => {
+    const entityForm = derivationForm(); // 'late'/'early' are withList()-truthy
+    const adapter = rowsAdapter([{ id: '1', late: 'L1', early: 'E1', undeclared: 'U1' }]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} columns={['undeclared']} />
+      </UIProvider>,
+    );
+
+    await screen.findByText('U1');
+    expect(screen.queryByText('L1')).not.toBeInTheDocument();
+    expect(screen.queryByText('E1')).not.toBeInTheDocument();
+  });
+
+  it("a sortable derived column's header click calls store.setSort, toggling ASC then DESC", async () => {
+    const entityForm = derivationForm(); // 'late' declares sortable: true
+    const adapter = rowsAdapter([{ id: '1', late: 'L1', early: 'E1' }]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await screen.findByText('L1');
+    const header = screen.getByRole('columnheader', { name: 'Late Header' });
+    expect(header).toHaveAttribute('aria-sort', 'none');
+    // 'early' has no sortable override — plain header, no click affordance.
+    expect(screen.getByRole('columnheader', { name: 'Early Field' })).not.toHaveAttribute(
+      'aria-sort',
+    );
+
+    fireEvent.click(header);
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(store.getState().searchForm.sorts).toEqual([{ field: 'late', direction: 'ASC' }]);
+    expect(screen.getByRole('columnheader', { name: 'Late Header' })).toHaveAttribute(
+      'aria-sort',
+      'ascending',
+    );
+
+    fireEvent.click(screen.getByRole('columnheader', { name: 'Late Header' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(store.getState().searchForm.sorts).toEqual([{ field: 'late', direction: 'DESC' }]);
+  });
+
+  it('a registered getListCellRenderer(field.type) component takes priority over the raw-value fallback', async () => {
+    // a fictional field.type (mutated post-construction — FormField.type is a
+    // plain public property) keeps this registration from ever colliding
+    // with a REAL type (e.g. 'text') other tests in this file/run depend on
+    // rendering as plain text — the registry has no unregister API (spec §7
+    // "string 키" — module-scope Map, same shape as field-renderer-registry).
+    const fictionalType = 'w52-test-marker-field';
+    registerListCellRenderer(fictionalType, ({ value }) => (
+      <strong data-testid="marker-cell">{String(value).toUpperCase()}!</strong>
+    ));
+
+    const field = new StringField('marker', 100).withLabel('Marker').withList();
+    field.type = fictionalType as FieldType;
+    const entityForm = new EntityForm('MarkerEntityForm', '/marker').addFields({ items: [field] });
+    const adapter = rowsAdapter([{ id: '1', marker: 'shout' }]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    expect(await screen.findByTestId('marker-cell')).toHaveTextContent('SHOUT!');
   });
 });

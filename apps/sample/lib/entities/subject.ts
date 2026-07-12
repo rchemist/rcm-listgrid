@@ -21,7 +21,15 @@ export const subjectFetchUrl = '/subject';
 export function SubjectEntityForm(): EntityForm {
   return new EntityForm('SubjectEntityForm', subjectFetchUrl).withTitle('과목').addFields({
     items: [
-      new StringField('name', 100).withRequired(true).withLabel('과목명'),
+      // withList (spec §5.1; W5-2) — Subject's own list page passes no
+      // explicit `columns` prop, so it relies on this derivation (the magic
+      // "first ~4 non-hidden fields" fallback it used to fall back to is
+      // abolished). sortable/label/width/align spread across name/code/
+      // credits exercises the FieldListConfig overrides, not just opt-in.
+      new StringField('name', 100)
+        .withRequired(true)
+        .withLabel('과목명')
+        .withList({ sortable: true }),
       new StringField('code', 110)
         .withRequired(true)
         .withLabel('과목코드')
@@ -31,7 +39,8 @@ export function SubjectEntityForm(): EntityForm {
             /^[A-Z]{2,4}\d{3,4}$/,
             '과목코드 형식이 올바르지 않습니다 (예: CS201)',
           ),
-        ),
+        )
+        .withList({ label: '과목코드', width: 120 }),
       new NumberField('credits', 120)
         .withLabel('학점')
         .withValidations(
@@ -40,8 +49,9 @@ export function SubjectEntityForm(): EntityForm {
             { min: 1, max: 6 },
             '학점은 1~6 사이여야 합니다',
           ),
-        ),
-      new EmailField('contactEmail', 130).withLabel('담당자 이메일'),
+        )
+        .withList({ align: 'right' }),
+      new EmailField('contactEmail', 130).withLabel('담당자 이메일').withList(),
       new PhoneNumberField('contactPhone', 135).withLabel('담당자 연락처'),
       new SelectField('category', 140, [
         { value: 'MAJOR', label: '전공' },

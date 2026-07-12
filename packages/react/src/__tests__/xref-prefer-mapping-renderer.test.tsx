@@ -30,9 +30,13 @@ import { XrefPreferMappingRenderer } from '../registry/xref-prefer-mapping-rende
 // manyToOne/boolean renderers registered.
 registerDefaultRenderers();
 
+// withList() (spec §5.1; W5-2) — the display grid's default columns now come
+// from XrefPreferMappingRenderer's shared `deriveListFieldNames` derivation
+// (list-columns.ts), not the old duck-typed `showInList` fallback; `name`
+// needs an explicit opt-in for the row-name assertions below to render.
 function collegeForm(): EntityForm {
   return new EntityForm('CollegeEntityForm', '/college').addFields({
-    items: [new StringField('name', 1).withLabel('Name')],
+    items: [new StringField('name', 1).withLabel('Name').withList()],
   });
 }
 

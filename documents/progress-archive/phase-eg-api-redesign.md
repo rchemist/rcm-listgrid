@@ -156,6 +156,27 @@
 
 **deviations(2)**: ① 에이전트가 검증용 read-only `git status/diff` 실행(명시 "no git" 위반이나 read-only·무영향 — 처분: trivial, 조치 없음). ② `FieldFilterConfig.operator`=`string`(QueryConditionType union 미채택) — 스펙 §10-A "필터 operator 유니온 미분해" 근거의 보수적 정답(브리핑도 string 지시). **W5-3에서 operator 타입 확정**(후보=`search-form.ts` QueryConditionType) → §Needs Review 등재.
 
+## #W5-2 column-derivation + list-cell registry + M2O merge (2026-07-12 · CAP-19)
+
+**ViewListGrid 컬럼 파생을 getListConfig() 기반으로 전환·마법폴백 폐기·list-cell 레지스트리 신설·ManyToOne showInList 흡수**(스펙 §5.1/§7 CAP-19). 위임(sonnet)→메인 full gate+E2E authoritative.
+
+**변경(17파일)**:
+- 신규 `packages/react/src/registry/list-cell-renderer-registry.tsx`: `Map<string, ListCellRendererComponent>` + `registerListCellRenderer(type, comp)`/`getListCellRenderer(type)` — `field-renderer-registry.tsx:28-38` 패턴 복제, string 키(§7 열린 타입). props `{value, row, field?}`.
+- 신규 `packages/react/src/components/list-columns.ts`(내부 헬퍼·배럴 미노출): `deriveListFields(entityForm)`=getListConfig() truthy 필드 수집(sub-collection 제외·`config.order ?? field.getOrder()` 안정정렬·0-truthy→[]) + `deriveListFieldNames` + `getFieldDisplayValue`(§5.2 seam 방어적 조회). ViewListGrid·xref 양쪽이 import(단일 소스, 두 duck-typed 소비처 일원화).
+- `ViewListGrid.tsx`: `hasShowInList`/`deriveDefaultColumnNames`(마법폴백) 제거 → `deriveColumns()`(0-truthy=빈 컬럼+`console.warn` 스펙인용 메시지). 셀 체인 `getListCellRenderer(type)`→`getDisplayValue`→`String`. align/width→inline style, sortable 헤더→raw `<th onClick=store.setSort(name, toggle)>`+`aria-sort`(ui-default `Table.Th/Td`가 children/colSpan만 포워딩 → 스타일/sortable 컬럼만 raw 엘리먼트, 무스타일 컬럼은 byte-identical `Table.Th/Td` 유지). `columns` prop escape hatch 유지(non-empty=파생 미실행).
+- `many-to-one-field.ts`: `showInList = false` 필드 제거 · `useListField(): this`→`this.withList()` 위임(공개 메서드명 유지, 스펙 §5.1 "useListField 대체").
+- `xref-prefer-mapping-renderer.tsx`: 자체 `defaultColumnNames`(duck-typed showInList) 제거 → `deriveListFieldNames(target)` 공유.
+- `react/src/index.ts`: 배럴 +4(registerListCellRenderer·getListCellRenderer·ListCellRendererComponent·ListCellRendererComponentProps) — field-renderer 블록 병렬.
+- apps/sample 이행: `college/subject/professor`(explicit columns 없이 폴백 의존 → withList 선언 필수)+`major/staff`(ManyToOne 피커 target으로 렌더 → deviation 1). College `name.withList({label:'대학명', sortable})`·`englishName.withList({align,width})`·`active.withList({align:'center'})`로 FieldListConfig 오버라이드 실증.
+- 테스트: schema-core +2(useListField⟹getListConfig truthy) · react +5(order/label/align/width 파생·false 제외·0-truthy+warn·columns escape·sortable click ASC↔DESC·registry 우선순위) = **2131**(+7) · e2e/college.spec.ts +1 assertion(withList label '대학명' columnheader — 폴백은 '명칭' 표시했을 것, 판별적).
+
+**검증(메인 authoritative)**: full gate 독립 PASS — type-check·typecheck:packages·test **2131**·lint 0err·format·build. 계수 **47/53/184**(EntityForm 무변경·root 49→53[+4]·/schema 184 무변경, 전부 임계 내). **E2E 27/27 green**(college/subject/major XrefMapping/collabo M2O/professor 포함). HEAD 불변·manifest 17파일 선언과 정확 일치·ViewEntityForm/entity-form/form-store 미관통 확인.
+
+**deviations(3·전건 risk:low·E2E로 실증)**:
+1. **major.ts+staff.ts withList 추가**(브리핑 directive 8은 college/subject/professor 3개만 명시). MajorEntityForm=parentMajor 자기참조 M2O 피커 target·StaffEntityForm=Collabo.staff M2O+Major.staffs Xref 피커 target(둘 다 columns prop 없음) → 폴백 폐기 후 withList 없으면 major/collabo E2E 파손. directive 8 "unless needed" 여지 충족. **→ §Needs Review**.
+2. **`(field as FormField).getListConfig()` 구조적 캐스트**(list-columns.ts). `EntityField` 인터페이스(getFields() 반환형)가 getListConfig/getDisplayValue 미선언(W5-1이 FormField 클래스에만 추가) → frozen 파일 미관통 위해 캐스트+존재체크. 전 concrete field가 FormField extends라 런타임 안전. **후속 정리 후보: W5-3(동일 getFilterConfig 패턴)/W7에서 EntityField 인터페이스에 선언 이관**. **→ §Needs Review**.
+3. **기존 픽스처 4파일 withList 추가**(view-list-grid·xref-prefer-mapping·xref-mapping·many-to-one-filter test). columns prop 없는 ViewListGrid/피커 픽스처 → 폴백 폐기 시 파손. 팀규약 "기존 테스트 수정 허용·기대값 변경은 스펙 §인용"(§5.1 폐기)·행동 약화 아님. **→ §Needs Review**.
+
 ## #EG1+EG2 권한 배선 (2026-07-11, `a1f3deb`)
 
 **LIVE 보안갭 fix** — 재설계(W1~)와 무관하게 유지되는 실배선. `isPermitted`를 end-to-end로 연결:

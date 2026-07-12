@@ -59,6 +59,14 @@ export {
 } from './registry/field-renderer-registry';
 export { registerDefaultRenderers } from './registry/default-renderers';
 
+// --- ListCellRenderer registry (spec §7 EG23, CAP-19; W5-2) ---
+export {
+  registerListCellRenderer,
+  getListCellRenderer,
+  type ListCellRendererComponent,
+  type ListCellRendererComponentProps,
+} from './registry/list-cell-renderer-registry';
+
 // --- components ---
 export { FieldRenderer } from './components/FieldRenderer';
 export type { FieldRendererProps } from './components/FieldRenderer';

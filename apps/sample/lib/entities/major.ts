@@ -158,7 +158,15 @@ export function MajorEntityForm(currentId?: string): EntityForm {
     .addFields({
       tab: { id: 'main', label: '기본정보', order: 0 },
       items: [
-        new StringField('name', 100).withRequired(true).withLabel('학과명'),
+        // withList (spec §5.1; W5-2) — Major's OWN list page passes an
+        // explicit `columns` prop (unaffected), but MajorEntityForm is ALSO
+        // rendered implicit-columns as the `parentMajor` self-referencing
+        // ManyToOne PICKER target (many-to-one-renderer.tsx, no `columns`
+        // prop) — major.spec.ts Scenario a/e open that picker and read row
+        // names. The magic fallback that used to backstop it is abolished,
+        // so `name` needs an explicit opt-in (deviation from waves' literal
+        // "college/subject/professor" list — see the W5-2 report).
+        new StringField('name', 100).withRequired(true).withLabel('학과명').withList(),
         new SelectField('type', 200, MajorTypes)
           .withLabel('유형')
           .withRequired(true)

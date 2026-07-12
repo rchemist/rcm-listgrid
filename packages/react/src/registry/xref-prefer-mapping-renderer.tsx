@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { StoreApi } from 'zustand';
 import type {
-  EntityField,
   EntityForm,
   FilterItem,
   XrefPreferMappingField,
@@ -19,6 +18,7 @@ import { useAdapter } from '../providers/adapter';
 import { useFieldValue, useFormStore } from '../providers/form-store';
 import { ViewListGrid, type ViewListGridColumn } from '../components/ViewListGrid';
 import { ViewEntityForm } from '../components/ViewEntityForm';
+import { deriveListFieldNames } from '../components/list-columns';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
 
 // XrefPreferMappingRenderer (EA-D2-1, ea-d2-xref-major-briefing.md §1/§3/§4/§5).
@@ -201,21 +201,14 @@ export function XrefPreferMappingRenderer({ field, name, readOnly }: FieldRender
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mappedKey, target, adapter, xf]);
 
-  function defaultColumnNames(entityForm: EntityForm): string[] {
-    const fields = entityForm.getFields().filter((f: EntityField) => f.type !== 'subCollection');
-    const marked = fields.filter(
-      (f: EntityField) => 'showInList' in f && (f as { showInList?: boolean }).showInList === true,
-    );
-    if (marked.length > 0) return marked.map((f: EntityField) => f.getName());
-    return fields
-      .filter((f: EntityField) => f.hidden !== true)
-      .slice(0, 4)
-      .map((f: EntityField) => f.getName());
-  }
-
   const columns: ViewListGridColumn[] = useMemo(
     () => [
-      ...defaultColumnNames(target),
+      // getListConfig()-driven derivation (spec §5.1/§7; W5-2) — the SAME
+      // shared helper ViewListGrid's own implicit-columns branch uses
+      // (list-columns.ts), replacing this renderer's own independently
+      // duck-typed `'showInList' in field` check (the consolidation this
+      // task performs).
+      ...deriveListFieldNames(target),
       {
         name: 'preferred',
         label: preferredLabel,

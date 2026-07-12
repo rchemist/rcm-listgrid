@@ -15,9 +15,14 @@ import { AdapterProvider } from '../providers/adapter';
 import { FormStoreProvider } from '../providers/form-store';
 import { ManyToOneRenderer } from '../registry/many-to-one-renderer';
 
+// withList() (spec §5.1; W5-2) — ManyToOneRenderer's picker is a plain
+// ViewListGrid with no explicit `columns` prop, so it now derives from
+// getListConfig(); `name` needs an explicit opt-in for the picker-row
+// assertions ('Kim'/'Lee') below to render (the old magic fallback is
+// abolished).
 function professorForm(): EntityForm {
   return new EntityForm('ProfessorEntityForm', '/professor').addFields({
-    items: [new StringField('name', 1).withRequired(true).withLabel('Name')],
+    items: [new StringField('name', 1).withRequired(true).withLabel('Name').withList()],
   });
 }
 

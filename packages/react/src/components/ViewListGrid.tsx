@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
-import type { EntityForm } from '@listgrid/schema-core';
+import type { Direction, EntityField, EntityForm } from '@listgrid/schema-core';
 import type { ListStoreState } from '@listgrid/state';
 import { useUI } from '../providers/ui';
+import { getListCellRenderer } from '../registry/list-cell-renderer-registry';
+import { deriveListFields, getFieldDisplayValue } from './list-columns';
 
 // ViewListGrid — the list screen (charter C9): fetches on mount, subscribes to
 // the injected ListStoreState, and renders rows/pagination/loading through the
@@ -72,31 +74,6 @@ export interface ViewListGridProps {
   toolbar?: (ctx: { checkedIds: string[] }) => ReactNode;
 }
 
-function hasShowInList(field: unknown): field is { showInList: boolean } {
-  return (
-    typeof field === 'object' &&
-    field !== null &&
-    'showInList' in field &&
-    typeof (field as { showInList?: unknown }).showInList === 'boolean'
-  );
-}
-
-/** Default column NAMES (no explicit `columns` prop): fields marked
- * showInList; else the first ~4 non-hidden fields (static `hidden === true`
- * check only — the full conditional/async predicate needs a
- * FieldEvalContext this sync derivation doesn't have). */
-function deriveDefaultColumnNames(entityForm: EntityForm): string[] {
-  // sub-collections are never list columns (they're child grids, not scalars).
-  const fields = entityForm.getFields().filter((f) => f.type !== 'subCollection');
-  const marked = fields.filter((f) => hasShowInList(f) && f.showInList);
-  if (marked.length > 0) return marked.map((f) => f.getName());
-
-  return fields
-    .filter((f) => f.hidden !== true)
-    .slice(0, 4)
-    .map((f) => f.getName());
-}
-
 function resolveHeader(entityForm: EntityForm, name: string): string {
   const field = entityForm.getField(name);
   if (!field) return name;
@@ -108,12 +85,65 @@ interface ResolvedColumn {
   name: string;
   header: string;
   cell: (row: Record<string, unknown>) => ReactNode;
+  /** Derived-column-only (spec §5.1 `FieldListConfig`) — never set for the
+   *  explicit `columns` prop escape hatch, whose cells/headers keep their
+   *  pre-W5-2 behavior unchanged (directive: "leave escape-hatch cells
+   *  as-is"). */
+  align?: 'left' | 'center' | 'right' | undefined;
+  width?: number | string | undefined;
+  sortable?: boolean | undefined;
 }
 
-/** Resolve the `columns` union prop (or the default-derivation fallback)
+/** Cell resolution order for a DERIVED column (spec §5.2): a registered
+ * `getListCellRenderer(field.type)` component, else `field.getDisplayValue`
+ * if the field defines one (no field does yet — a later wave's seam;
+ * `getFieldDisplayValue` degrades gracefully), else the pre-W5-2 bare
+ * `String(value ?? '')`. */
+function renderDerivedCell(field: EntityField, row: Record<string, unknown>): ReactNode {
+  const value = row[field.getName()];
+  const CellRenderer = getListCellRenderer(field.type);
+  if (CellRenderer) return <CellRenderer value={value} row={row} field={field} />;
+  const displayValue = getFieldDisplayValue(field, value);
+  if (displayValue !== undefined) return displayValue;
+  return String(value ?? '');
+}
+
+/** The no-explicit-`columns` derivation (spec §5.1/§7, CAP-19; W5-2):
+ * fields declared via `withList()` (list-columns.ts's shared
+ * `deriveListFields` — ALSO used by `XrefPreferMappingRenderer`, single
+ * source of truth replacing the two independently duck-typed
+ * `'showInList' in field` consumers this task consolidates). Magic fallback
+ * ABOLISHED (spec §5.1): 0 truthy declarations renders an EMPTY column set
+ * + a dev warning — the old "first ~4 non-hidden fields" auto-adoption is
+ * gone, not a silent behavior. */
+function deriveColumns(entityForm: EntityForm): ResolvedColumn[] {
+  const derived = deriveListFields(entityForm);
+  if (derived.length === 0) {
+    console.warn(
+      `[@listgrid/react] ViewListGrid: entityForm "${entityForm.name}" has no fields declared via withList() — rendering an empty column set (spec §5.1: the "first non-hidden fields" magic fallback is abolished).`,
+    );
+    return [];
+  }
+  return derived.map(({ field, config }) => {
+    const name = field.getName();
+    const label = config.label ?? field.getLabel();
+    return {
+      name,
+      header: typeof label === 'string' ? label : name,
+      align: config.align,
+      width: config.width,
+      sortable: config.sortable === true,
+      cell: (row: Record<string, unknown>) => renderDerivedCell(field, row),
+    };
+  });
+}
+
+/** Resolve the `columns` union prop (or the `deriveColumns` derivation)
  * into a uniform render shape — string members keep today's behavior
  * (header via `resolveHeader`, cell = `String(row[name])`); object members
- * render their own `label`/`render(row)` (EA-D2-0 decision ③). */
+ * render their own `label`/`render(row)` (EA-D2-0 decision ③). The explicit
+ * `columns` prop is an escape hatch: when given (non-empty) it WINS —
+ * derivation never runs (spec §7 `columns?`). */
 function resolveColumns(entityForm: EntityForm, explicit?: ViewListGridColumn[]): ResolvedColumn[] {
   if (explicit && explicit.length > 0) {
     return explicit.map((col) =>
@@ -126,11 +156,29 @@ function resolveColumns(entityForm: EntityForm, explicit?: ViewListGridColumn[])
         : { name: col.name, header: col.label, cell: col.render },
     );
   }
-  return deriveDefaultColumnNames(entityForm).map((name) => ({
-    name,
-    header: resolveHeader(entityForm, name),
-    cell: (row: Record<string, unknown>) => String(row[name] ?? ''),
-  }));
+  return deriveColumns(entityForm);
+}
+
+/** Inline style for a derived column's align/width (spec §5.1
+ * `FieldListConfig`) — `undefined` when neither is set, so callers keep
+ * using the unstyled `Table.Th`/`Table.Td` primitives (byte-identical
+ * markup) for every column that doesn't declare either. */
+function cellStyle(column: ResolvedColumn): CSSProperties | undefined {
+  if (column.align === undefined && column.width === undefined) return undefined;
+  const style: CSSProperties = {};
+  if (column.align !== undefined) style.textAlign = column.align;
+  if (column.width !== undefined) style.width = column.width;
+  return style;
+}
+
+function ariaSortFor(direction: Direction | undefined): 'ascending' | 'descending' | 'none' {
+  if (direction === 'ASC') return 'ascending';
+  if (direction === 'DESC') return 'descending';
+  return 'none';
+}
+
+function nextSortDirection(current: Direction | undefined): Direction {
+  return current === 'ASC' ? 'DESC' : 'ASC';
 }
 
 export function ViewListGrid({
@@ -202,9 +250,41 @@ export function ViewListGrid({
         <Table.Thead>
           <Table.Tr>
             {selection?.enabled && <Table.Th />}
-            {resolvedColumns.map((c) => (
-              <Table.Th key={c.name}>{c.header}</Table.Th>
-            ))}
+            {resolvedColumns.map((c) => {
+              const style = cellStyle(c);
+              // sortable headers need an onClick, and a styled (align/width)
+              // header needs a `style` — `Table.Th` (ui-default) only
+              // forwards `children`/`colSpan` (the identical prop-dropping
+              // trap the file-header comment documents for `Table.Tr`), so
+              // either case renders a raw `<th>` (byte-identical markup to
+              // what `Table.Th` itself emits) to actually reach the DOM.
+              if (c.sortable) {
+                const currentDirection = searchForm.sorts.find(
+                  (s) => s.field === c.name,
+                )?.direction;
+                return (
+                  <th
+                    key={c.name}
+                    role="columnheader"
+                    aria-sort={ariaSortFor(currentDirection)}
+                    onClick={() =>
+                      void store.getState().setSort(c.name, nextSortDirection(currentDirection))
+                    }
+                    style={style}
+                  >
+                    {c.header}
+                  </th>
+                );
+              }
+              if (style !== undefined) {
+                return (
+                  <th key={c.name} style={style}>
+                    {c.header}
+                  </th>
+                );
+              }
+              return <Table.Th key={c.name}>{c.header}</Table.Th>;
+            })}
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -238,9 +318,16 @@ export function ViewListGrid({
                     </span>
                   </Table.Td>
                 )}
-                {resolvedColumns.map((c) => (
-                  <Table.Td key={c.name}>{c.cell(row)}</Table.Td>
-                ))}
+                {resolvedColumns.map((c) => {
+                  const style = cellStyle(c);
+                  return style !== undefined ? (
+                    <td key={c.name} style={style}>
+                      {c.cell(row)}
+                    </td>
+                  ) : (
+                    <Table.Td key={c.name}>{c.cell(row)}</Table.Td>
+                  );
+                })}
               </tr>
             );
           })}

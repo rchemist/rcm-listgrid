@@ -42,7 +42,6 @@ export interface ManyToOneConfig {
 /** Searchable reference to another entity (0.3.x ManyToOneField, type 'manyToOne'). */
 export class ManyToOneField<TValue = unknown> extends FormField<TValue> {
   config: ManyToOneConfig;
-  showInList = false;
 
   constructor(name: string, order: number, config: ManyToOneConfig) {
     super(name, order, 'manyToOne');
@@ -60,10 +59,14 @@ export class ManyToOneField<TValue = unknown> extends FormField<TValue> {
     return this.config.labelField ?? 'name';
   }
 
-  /** Show this reference as a column in the parent's list grid. */
+  /**
+   * Show this reference as a column in the parent's list grid. Delegates to
+   * the base `FormField.withList()` (spec §5.1; W5-2) — ManyToOne no longer
+   * carries its own `showInList` boolean; it participates in list
+   * derivation exactly like every other field, via `getListConfig()`.
+   */
   useListField(): this {
-    this.showInList = true;
-    return this;
+    return this.withList();
   }
 
   /**

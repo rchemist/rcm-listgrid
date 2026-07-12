@@ -20,8 +20,20 @@ export function CollegeEntityForm(): EntityForm {
     .withTitle('단과대학')
     .addFields({
       items: [
-        new StringField('name', 100).withRequired(true).withLabel('명칭'),
-        new StringField('englishName', 110).withRequired(true).withLabel('영문명'),
+        // withList (spec §5.1; W5-2) — College's own list page passes no
+        // explicit `columns` prop, so it relies on this derivation (the
+        // magic "first ~4 non-hidden fields" fallback it used to fall back
+        // to is abolished). `label`/`sortable` on `name` and `align`/`width`
+        // on `englishName` exercise the FieldListConfig overrides, not just
+        // opt-in.
+        new StringField('name', 100)
+          .withRequired(true)
+          .withLabel('명칭')
+          .withList({ label: '대학명', sortable: true }),
+        new StringField('englishName', 110)
+          .withRequired(true)
+          .withLabel('영문명')
+          .withList({ align: 'left', width: 220 }),
         // dean — a ManyToOne reference to Professor via a LAZY thunk (decision
         // D1). Selecting opens a Modal ViewListGrid picker; save flattens to
         // deanId (charter C3).
@@ -29,7 +41,10 @@ export function CollegeEntityForm(): EntityForm {
           entityForm: () => ProfessorEntityForm(),
           labelField: 'name',
         }).withLabel('학장'),
-        new BooleanField('active', 120).withLabel('사용여부').withDefaultValue(true),
+        new BooleanField('active', 120)
+          .withLabel('사용여부')
+          .withDefaultValue(true)
+          .withList({ align: 'center' }),
       ],
     })
     .addFields({

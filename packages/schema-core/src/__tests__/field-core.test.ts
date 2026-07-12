@@ -161,11 +161,34 @@ describe('ManyToOne lazy thunk (decision D1 — no eager recursion)', () => {
   it('resolves the target form only when called', () => {
     const dean = CollegeForm().getField('dean') as ManyToOneField;
     expect(dean.type).toBe('manyToOne');
-    expect(dean.showInList).toBe(true);
+    // useListField() now delegates to withList() (spec §5.1; W5-2 —
+    // ManyToOne's own `showInList` boolean is gone, replaced by the shared
+    // getListConfig() tri-state every field carries).
+    expect(dean.getListConfig()).toEqual({});
     expect(dean.getIdField()).toBe('id');
     expect(dean.getLabelField()).toBe('name');
     const target = dean.getEntityForm();
     expect(target.name).toBe('ProfessorEntityForm');
+  });
+});
+
+describe('ManyToOne.useListField() delegates to withList() (spec §5.1; W5-2)', () => {
+  it('useListField() ⟹ getListConfig() truthy (an object, the withList() default {})', () => {
+    const dean = new ManyToOneField('dean', 1, {
+      entityForm: () => new EntityForm('ProfessorEntityForm', '/professor'),
+    }).useListField();
+
+    expect(dean.getListConfig()).toEqual({});
+    expect(dean.getListConfig()).not.toBe(false);
+    expect(dean.getListConfig()).not.toBeUndefined();
+  });
+
+  it('never calling useListField()/withList() leaves getListConfig() undeclared (undefined)', () => {
+    const dean = new ManyToOneField('dean', 1, {
+      entityForm: () => new EntityForm('ProfessorEntityForm', '/professor'),
+    });
+
+    expect(dean.getListConfig()).toBeUndefined();
   });
 });
 

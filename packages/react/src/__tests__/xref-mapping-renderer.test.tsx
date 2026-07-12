@@ -20,9 +20,14 @@ import { AdapterProvider } from '../providers/adapter';
 import { FormStoreProvider } from '../providers/form-store';
 import { XrefMappingRenderer } from '../registry/xref-mapping-renderer';
 
+// withList() (spec §5.1; W5-2) — both the display AND picker grids here are
+// plain ViewListGrids with no explicit `columns` prop, so they now derive
+// from getListConfig(); `name` needs an explicit opt-in for the row-name
+// assertions below to render (the old duck-typed-showInList magic fallback
+// is abolished).
 function professorForm(): EntityForm {
   return new EntityForm('ProfessorEntityForm', '/professor').addFields({
-    items: [new StringField('name', 1).withLabel('Name')],
+    items: [new StringField('name', 1).withLabel('Name').withList()],
   });
 }
 

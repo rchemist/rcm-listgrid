@@ -14,7 +14,15 @@ export const staffFetchUrl = '/staff';
 export function StaffEntityForm(): EntityForm {
   return new EntityForm('StaffEntityForm', staffFetchUrl).withTitle('교직원').addFields({
     items: [
-      new StringField('name', 100).withRequired(true).withLabel('이름'),
+      // withList (spec §5.1; W5-2) — StaffEntityForm has no list page of its
+      // own, but it IS rendered implicit-columns as the Collabo.staff
+      // ManyToOne picker AND the Major.staffs XrefMapping picker (both no
+      // `columns` prop) — collabo.spec.ts Scenario 2/3 and major.spec.ts
+      // Scenario d open these and read row names. The magic fallback that
+      // used to backstop them is abolished, so `name` needs an explicit
+      // opt-in (deviation from waves' literal "college/subject/professor"
+      // list — see the W5-2 report).
+      new StringField('name', 100).withRequired(true).withLabel('이름').withList(),
       new StringField('email', 110).withLabel('이메일'),
       new ManyToOneField('organization', 120, {
         entityForm: () => OrgEntityForm(),
