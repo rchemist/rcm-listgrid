@@ -314,3 +314,21 @@
 **검증(메인 authoritative)**: `npm run build`(JS+dts) green·dist 7 subpath×(js/cjs/d.ts/d.cts)+styles.css. `check:surface` **49/57/186 PASS**(§10-A W7 schema+0 확정). `check:publint` All good. `check:exports`(attw) 전 subpath 🟢(node10/node16-CJS/node16-ESM/bundler). type-check·typecheck:packages·lint(0 err)·format green. **test 2235 pass**(1 todo). 
 
 **미결(W7 후속)**: ① `smoke:load`는 구 subpath 대상이라 현재 실패 예상 → W7-4가 신 맵으로 갱신 후 W7-5서 실증. ② node 26.4.0서 검증(.nvmrc=22) — CI(22)서 W7-5 재확인. ③ peer 축소는 실사용 import 근거·smoke:load(W7-5 real install)가 최종 검증.
+
+<a id="w7-4"></a>
+## #W7-4 MIGRATION.md + codemod (2026-07-12 · CAP-25 migration · sonnet 위임→메인 검증)
+
+**결과**: 0.3→0.4 마이그레이션 문서+기계적 codemod 착지. sonnet 위임, 메인 authoritative 검증(6 게이트 green). 신규 공개 심볼 0(문서/스크립트/package.json files·devDep만).
+
+**변경 파일**:
+- `docs/MIGRATION.md`: 기존 0.2→0.3 문서에 최상단 `## v0.3.x → v0.4.0` 절 신설(기존 내용 보존). 4개 하위절 — **①§9 전수 대응표**(spec §9 line 332–373 **42행 1:1 전수**·빈 행 0·`#42 기타 34종`은 27행 부표로 전개·방식 라벨 무변경/codemod/준-기계/수동 보존) **②서브패스 제거 절**(제거 9 subpath 각 신 대응을 코드 추적 `file:line` 근거로 문서화) **③페이지 셸 컴포지션**(`list-page-composition-guide.md` 전문 흡수 3.0~3.6·CAP-18/19/20 대조·§Needs Review 3.6 연동) **④data-transfer 미이관 목록**(5기능·charter C6).
+- `scripts/codemod/v0.4.cjs`(jscodeshift·기계 10규칙만: useListField/withListConfig→withList·withPlaceHolder→withPlaceholder·addCollections→addFields+fieldGroup→group·getName/getUrl→.name/.url·withShouldReload 제거·removeField/removeTabs→withoutField/withoutTab·withSortable/withFilterable→withList/withFilter·withCreateStep→withSteps·withFieldToLayout 제거·withDataTransferConfig→withDataTransfer[export/import 보존·타 키 TODO 주석]) + `run-tests.cjs`(jscodeshift testUtils.applyTransform 실행·바이트 대조) + `__fixtures__/*.{before,after}.ts`(4쌍: basic/data-transfer/removal/remove-tabs-array·standalone `declare …:any`라 tsc 무영향).
+- `scripts/smoke-load.sh`: 신 맵 재작성 — peers 26→6(required react/react-dom·optional next/xlsx-js-style/file-saver/react-daum-postcode)·assert `.`(cjs+esm)·`/schema`(cjs+esm)·`/state`(cjs+esm)·`/excel`(cjs). **실측 정정 2건(스크립트 주석)**: 루트 `.` ESM `import` 이제 성공(react-sortablejs peer 제거)→assert 편입 · `/excel` ESM은 file-saver CJS-only interop 실패(실행 확인)→CJS만 assert.
+- `package.json`: `files`에 `docs/MIGRATION.md`·`scripts/codemod` 추가 · devDep `jscodeshift@^17.3.0`+`@types/jscodeshift` · script `codemod:test`. (+`package-lock.json` devDep 부수 변경.)
+- `documents/plans/list-page-composition-guide.md`: 상단 `⛔ SUPERSEDED`→MIGRATION §3 포인터(원문 무삭제·team-conv 상류 폐기 스탬프 관례). **브리핑 declared 4산출물 밖 touch**(§Needs Review 기록).
+
+**검증(메인 authoritative — 위임 verification은 advisory)**: `codemod:test` 4/4 PASS(jscodeshift 실행·바이트대조) · `type-check`(tsc --noEmit·scripts/ 는 include 밖·fixture=any 무영향) · `typecheck:packages`(tsc -b) · `format:check`(scripts/·docs/ glob 밖) · `lint` 0 err·258 warn=**베이스라인 무변**(stash 대조·codemod .cjs는 lint 스코프 밖) · **`smoke:load` green**(build→npm pack→temp install→real Node resolve: `.`/`/schema`/`/state` cjs+esm·`/excel` cjs). **full 2235u/E2E30은 W7-4 무관(src/packages 무변경)→W7-5 wave-end 게이트**.
+
+**코드 추적 판정(MIGRATION §2·근거 file:line 문서화)**: `/form/SearchForm`→`/schema`(SearchForm 클래스 존치·헬퍼 3종 미재수출) · `/form/Type`→`/schema`(SelectOption/MinMaxLimit 이관·PageResult 클래스→BackendAdapter 인터페이스 필드명 변경·EntityWithId 폐기) · `/api`→아키텍처 대체(ApiClient/configureApiClient→BackendAdapter+AdapterProvider DI·HTTP 유틸 미이관) · `/misc`→대부분 비공개화(정규식 4/12만·isExternalUrl만 공개·날짜포맷터는 /excel 내부 재구현) · `/qr`·`/api-spec`·`/xref-price`→0.4 대응 무(grep 0) · `/address`→부분(AddressField 이관·KakaoMap 지도뷰 미이관·peer 제거) · 구`/headless`→신 `/schema`+`/state`.
+
+**deviations/review flags(§Needs Review 3건)**: ① guide SUPERSEDED 배너=declared 파일 밖 touch(low·관례상 정당) ② spec §9 #29 라벨=codemod이나 impl=수동/이연(presets-rcm 빈 스캐폴드)→spec 저자 §9 라벨 재조정 or presets 감사헬퍼 출하(low) ③ 서브패스 제거로 다수 0.3 공개 심볼 미이관/축소(/qr·/api-spec·/xref-price 전체·/misc 대부분·KakaoMap·SearchForm 헬퍼·EntityWithId·/api HTTP 유틸)→의도 descope(CAP-29)인지 GJCU gap인지 소비자 확인(low-med).

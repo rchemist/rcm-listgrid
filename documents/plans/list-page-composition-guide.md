@@ -1,5 +1,7 @@
 # 리스트 페이지 컴포지션 가이드 (host page-shell)
 
+> ⛔ **SUPERSEDED (W7-4, 2026-07-12)**: 이 문서는 [`docs/MIGRATION.md` §3 "페이지 셸 컴포지션 (호스트 소유)"](../../docs/MIGRATION.md#3-페이지-셸-컴포지션-호스트-소유)로 **전문 흡수**됐다(waves §W7 결정6 — 정보 손실 없음, 이하 원문은 참고용으로 유지). 신규 변경은 MIGRATION.md 쪽에 반영할 것 — 이 파일은 갱신되지 않는다.
+>
 > **상태**: 리빙 문서 (W5-4, 2026-07-12) · **규범 근거**: [스펙 §7·§9](./entityform-public-api-spec.md) · [waves §W5 결정 1](./entityform-api-implementation-waves.md) · 헌장 C1/C7 · CAP-18/19/20
 > **归属**: 이 문서는 W7 패키징의 `docs/MIGRATION.md` **전용 절**(호스트 페이지 셸)로 흡수될 예정이다(waves §W5 결정 1). 그 전까지 소비자·마이그레이션 참조용 리빙 문서로 유지한다.
 

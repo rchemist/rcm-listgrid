@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W6 ✅ · W7 entry ✅ · **W7-1/2/3 ✅**(2026-07-12·패키징 코어+headless+adapter 함수형·dts:paths·full gate green·2236u). **Next up: W7-4 MIGRATION+codemod**(→W7-5 wave-end→GA). 계수 49/57/186(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W6 ✅ · W7 entry ✅ · **W7-1/2/3/4 ✅**(2026-07-12·패키징+headless+adapter 함수형+MIGRATION/codemod·smoke:load 신맵 green). **Next up: W7-5 wave-end**(마지막 wave 봉인→GA 게이트). 계수 49/57/186(임계 55/120/190). §Needs Review 4건 open. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W6 ✅ + W7 entry-brief pass ✅**(2026-07-12·opus·콜드리더 통과). 새 세션은 **W7-1 패키징 코어부터** — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md)(W7-1~5 execution-grade·8 wave-entry 결정). W7-1~5는 **sonnet 위임 가능**(설계 판단 소진됨·구현만 남음). W7-1(빌드 인프라)→W7-2(headless, 빌드 산출 의존) 순차; W7-3(adapter)·W7-4(MIGRATION/codemod) 병렬 가능. **핵심 정정**: published `@rchemist/listgrid`가 아직 구 `src/` 전체 → W7이 packages/*를 §2 맵으로 처음 published화. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클).
-**Last updated**: 2026-07-12 (**W7-1/2/3 ✅** — W7-1 패키징 코어(published 진입점 src/→packages/* §2 맵·peers 26→6)·W7-2 headless fixture(런타임 React 0 실증·check:headless)·W7-3 adapter headers 함수형(CAP-24·sonnet→검증). **dts 최종=`dts:paths`**(experimentalDts+api-extractor는 **빈 타입(`export{}`) 결함**으로 폐기→W7-2 headless tsc가 검출·attw/publint 거짓green 교훈). full gate 전건 green(build/dts 실타입/attw🟢/publint/surface 49/57/186/lint 0err/format/**2236u**/check:headless). 상세 [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md). §Needs Review +1(@types/react 해석). 다음=W7-4 MIGRATION+codemod.)
+**Last updated**: 2026-07-12 (**W7-4 ✅** — MIGRATION.md 0.3→0.4 절(§9 42행 전수·빈행0·서브패스 제거·페이지셸 guide 흡수·data-transfer 미이관)+codemod(jscodeshift 기계 10규칙·4 fixture green)+smoke-load.sh 신맵(`.`/schema/state cjs+esm·excel cjs)+package.json files/devDep. sonnet 위임→메인 6게이트 authoritative green(codemod:test·type-check·typecheck:packages·format·lint 0err=베이스라인·smoke:load). §Needs Review +3(descope 확인·§9#29 라벨·guide 배너). 상세 [archive #W7-4](./progress-archive/phase-eg-api-redesign.md#w7-4). 다음=W7-5 wave-end→GA.)
 
 ## Goal
 
@@ -49,9 +49,9 @@
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **W1~W6 ✅ + W7 entry ✅ + W7-1/2/3 ✅**(2026-07-12). 다음: **W7-4 MIGRATION+codemod**(sonnet 위임 가능) → W7-5 wave-end → GA — 실행 계약 [waves §W7 표](./plans/entityform-api-implementation-waves.md))
+## 세션 인계 (Handoff — **W1~W6 ✅ + W7 entry ✅ + W7-1/2/3/4 ✅**(2026-07-12). 다음: **W7-5 wave-end**(마지막 wave 봉인→GA 게이트) — 실행 계약 [waves §W7-5 표](./plans/entityform-api-implementation-waves.md))
 
-- **⚠ 다음 = W7-4 MIGRATION.md + codemod(CAP-25 migration)** — sonnet 위임 가능. **W7-1/2/3 ✅**: 패키징 코어(published 진입점 구 src/→v0.4 packages/* §2 맵·peers 26→6)·headless fixture(런타임 React 0 실증)·adapter headers 함수형(CAP-24) 전건 착지·full gate green(2236u·49/57/186·check:headless). W7-4 범위: `docs/MIGRATION.md`(§9 116멤버 전수표+**서브패스 제거절**[구 /form/*·/api·/misc·/qr·/address·/api-spec·/xref-price·구/headless→신 대응]+**페이지셸 절**[list-page-composition-guide 흡수]+**data-transfer 미이관목록**)+`scripts/codemod/`(jscodeshift·§9 codemod/준-기계 행만·"수동"행 제외)+**`scripts/smoke-load.sh` 신 맵 갱신**(현 구 subpath[./misc·./headless] 대상=실패 → 신 subpath로). W7-5 wave-end서 smoke:load+check:headless 게이트.
+- **⚠ 다음 = W7-5 wave-end(마지막 wave 봉인·CAP-24/25 대조·구결함 원장 최종봉인·GA 게이트 착수)** — sonnet 위임 가능(문서/대조 중심). **W7-1/2/3/4 ✅**: 패키징 코어(진입점 src/→packages/* §2 맵·peers 26→6)·headless fixture(런타임 React 0)·adapter 함수형 헤더(CAP-24)·**MIGRATION.md+codemod**(§9 42행 전수·빈행0·기계 10규칙 codemod·smoke:load 신맵 green). W7-5 범위: 계수 실측(`count-public-surface.mjs`=49/57/186 무변경 재확인·신 subpath 미계수)·**full gate**(type-check+typecheck:packages+test 2235+lint+format+build)+**E2E 30**+**smoke:load**+**check:headless**+attw/publint 전건 green·구 결함 원장 §1~9 최종 봉인표·CAP-24/25 빈행 0 대조·**§Needs Review 4건 처분/이월**. **CAP-28 GA 대조표(헌장 C1~C9)는 W7 밖 별도 pass — W7-5로 끌어오지 말 것**(waves §W7-5 Do-NOT).
 - **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
@@ -97,10 +97,10 @@
 - [x] **W7-1 패키징 코어** ✅ 2026-07-12 · published 진입점 src/→packages/* §2 맵·peers 26→6·dts:paths · full gate green(49/57/186·attw/publint) · [detail](./progress-archive/phase-eg-api-redesign.md#w7-1)
 - [x] **W7-2 headless fixture** ✅ 2026-07-12 · /schema+/state fixture·React **런타임** 0 tsc+node(cjs/esm) green·check:headless · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2)
 - [x] **W7-3 adapter headers 함수형** ✅ 2026-07-12 · sonnet→검증 · headers 함수형 지연평가(resolveHeaders·5메서드 1지점)·14 tests green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-3)
-- [ ] **W7-4 MIGRATION.md + codemod** — §9 전수표+서브패스제거절+페이지셸(guide 흡수)+미이관목록·jscodeshift 기계행만 · **← Next up**
-- [ ] **W7-5 wave-end** — CAP-24/25 대조·계수 49/57/186·full gate+E2E30+smoke:load+attw/publint·구결함 원장 최종봉인 → **GA 게이트(CAP-28) 착수**
+- [x] **W7-4 MIGRATION+codemod** ✅ 2026-07-12 · sonnet→검증 · §9 42행 전수(빈행0)+서브패스제거+페이지셸+미이관·codemod 기계10규칙·smoke:load 신맵 green · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
+- [ ] **W7-5 wave-end** — CAP-24/25 대조·계수 49/57/186·full gate+E2E30+smoke:load+attw/publint·구결함 원장 최종봉인 → **GA 게이트(CAP-28) 착수** · **← Next up**
 
-**Next up**: **W7-4 MIGRATION.md + codemod**(CAP-25 migration·[waves §W7-4](./plans/entityform-api-implementation-waves.md)) — sonnet 위임 가능. `docs/MIGRATION.md`(§9 116멤버 전수표+서브패스 제거절[구 /form/*·/api·/misc·/qr·/address·/api-spec·/xref-price·구/headless→신 대응]+페이지셸 절[list-page-composition-guide 흡수]+data-transfer 미이관목록)+`scripts/codemod/`(jscodeshift·§9 codemod/준-기계 행만)+`scripts/smoke-load.sh` 신 맵 갱신(현 구 subpath 대상=실패). 이후 W7-5(wave-end: full gate+E2E30+smoke:load+check:headless·구결함 최종봉인→GA 게이트).
+**Next up**: **W7-5 wave-end**(마지막 wave 봉인·[waves §W7-5](./plans/entityform-api-implementation-waves.md)) — CAP-24(adapter 함수형)·CAP-25(headless·migration) 착지 대조 · 계수 실측(count-public-surface.mjs → /schema 186·root 57·EntityForm 49 무변경·신 subpath 미계수) · **full gate**(type-check+typecheck:packages+test 2235+lint+format+build)+**E2E 30**+**smoke:load**+**check:headless**+check:exports(attw)+check:publint green · 구 결함 원장 §1~9 최종 봉인표 · CAP 빈행 0(CAP-28 GA 대조표는 W7 밖 별도 pass·끌어오지 말 것). **§Needs Review 3건**(W7-4·아래) 처분/이월. 완료 → **GA 게이트(헌장 C1~C9·CAP-28) 착수**(별도).
 
 ---
 
@@ -119,6 +119,9 @@
 - [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
+- [ ] **#W7-4 서브패스 제거 descope 확인** — 0.4가 다수 0.3 공개 심볼 미이관/축소(/qr·/api-spec·/xref-price 전체·/misc 대부분·KakaoMap 지도뷰·SearchForm 헬퍼 3종·EntityWithId·/api HTTP 유틸). 의도 descope(CAP-29)인지 GJCU gap인지 소비자 확인 필요 · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
+- [ ] **#W7-4 spec §9 #29 라벨 재조정** — spec §9는 withCreatedAndUpdatedAtFields를 codemod로 표기하나 impl=수동/이연(presets-rcm 빈 스캐폴드). spec 저자: §9 라벨 정정 or /presets/rcm 감사헬퍼 출하 후 codemod화 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
+- [ ] **#W7-4 guide SUPERSEDED 배너** — list-page-composition-guide.md 상단에 ⛔ SUPERSEDED→MIGRATION §3 포인터 추가(원문 무삭제). 브리핑 declared 4산출물 밖 touch(관례상 정당·정보 흡수 보존) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
 
 ## Progress notes
 
