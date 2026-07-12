@@ -41,6 +41,7 @@ export interface DataImporterProps {
 const NO_FIELD_MATCH_ERROR = '업로드 대상 필드가 일치하지 않습니다.';
 const NO_DATA_ERROR = '데이터가 존재하지 않습니다.';
 const PARSE_ERROR = '엑셀 파일을 읽는 중 오류가 발생했습니다. 파일 형식(xlsx)을 확인하세요.';
+const SUBMIT_ERROR = '데이터 제출 중 오류가 발생했습니다. 잠시 후 다시 시도하세요.';
 
 export function DataImporter({ entityForm, onSubmit, onClose }: DataImporterProps) {
   const { Modal, Button } = useUI();
@@ -92,6 +93,8 @@ export function DataImporter({ entityForm, onSubmit, onClose }: DataImporterProp
     setSubmitting(true);
     try {
       await onSubmit(rows);
+    } catch {
+      setError(SUBMIT_ERROR);
     } finally {
       setSubmitting(false);
     }

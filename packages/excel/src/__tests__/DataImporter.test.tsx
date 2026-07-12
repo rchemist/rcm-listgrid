@@ -131,4 +131,26 @@ describe('DataImporter', () => {
     expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled();
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  it('shows an error and re-enables Submit when onSubmit rejects, without an unhandled rejection', async () => {
+    currentBuffer = bufferFromAoa([
+      ['Name\n[name]', 'Status\n[status]', 'Active\n[active]'],
+      ['Acme College', 'Active', '예'],
+    ]);
+    const onSubmit = vi.fn().mockRejectedValue(new Error('network down'));
+    renderImporter(onSubmit);
+
+    selectFile();
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        '데이터 제출 중 오류가 발생했습니다. 잠시 후 다시 시도하세요.',
+      ),
+    );
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled();
+  });
 });
