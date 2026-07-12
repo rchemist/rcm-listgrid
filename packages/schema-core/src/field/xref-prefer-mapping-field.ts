@@ -1,12 +1,6 @@
 import type { EntityForm } from '../entity-form';
 import type { FilterItem } from '../search/search-form';
-import { CustomValidation } from '../validations/custom-validation';
-import { ValidateResult } from '../validation';
-import { requiredMessage } from '../util/korean';
-import { getCurrentValue } from './value';
 import { FormField } from './form-field';
-import type { RequiredType } from './conditional';
-import type { FieldValue } from './types';
 
 // XrefPreferMappingField (EA-D2-1, ea-d2-xref-major-briefing.md §1/§4/§5) —
 // NEW FieldType `'xrefPreferMapping'` (types.ts). Transplant of 0.3.x
@@ -45,17 +39,17 @@ export interface XrefPreferMappingConfig {
   preferredLabel?: string;
 }
 
-const REQUIRED_VALIDATION_ID = 'xref-prefer-mapping-required';
-
 /**
  * Preferred-flagged mapping xref (0.3.x `XrefPreferMappingField`, type
  * `'xrefPreferMapping'`).
  *
- * REQUIRED POSTURE: identical mechanism/rationale to `XrefMappingField`
- * (see that class's doc) — `{mapped}` is a non-array object, so the
- * generic `isBlank` required-blank check can never see it as blank;
- * `withRequired()` attaches a `CustomValidation` on `mapped?.length`
- * instead. This IS the field's documented required mechanism.
+ * REQUIRED POSTURE (R3): identical mechanism to `XrefMappingField` — the
+ * generic required-blank path drives requiredness, with `isBlank`
+ * (`./value.ts`, guarded by `fieldType`) treating the `{mapped}` envelope as
+ * blank iff it has no rows. The generic path honors the EF1 store override
+ * (`override?.required ?? isRequired`), so runtime `setMeta({required})` is
+ * authoritative in both directions; no field-local `CustomValidation` is
+ * attached.
  */
 export class XrefPreferMappingField extends FormField<XrefPreferMappingValue> {
   config: XrefPreferMappingConfig;
@@ -77,28 +71,4 @@ export class XrefPreferMappingField extends FormField<XrefPreferMappingValue> {
     this.config = { ...this.config, preferredLabel };
     return this;
   }
-
-  override withRequired(required?: RequiredType): this {
-    super.withRequired(required);
-    if (!(this.validations ?? []).some((v) => v.id === REQUIRED_VALIDATION_ID)) {
-      this.validations = [...(this.validations ?? []), buildRequiredValidation(this)];
-    }
-    return this;
-  }
-}
-
-function buildRequiredValidation(field: XrefPreferMappingField): CustomValidation {
-  return new CustomValidation(REQUIRED_VALIDATION_ID, async (ctx, value) => {
-    const required = await field.isRequired(ctx);
-    if (!required) return ValidateResult.success();
-
-    const current = getCurrentValue(value as FieldValue<XrefPreferMappingValue>, ctx.renderType);
-    const mapped = current?.mapped;
-    if (mapped === undefined || mapped.length === 0) {
-      const label =
-        typeof field.getLabel() === 'string' ? String(field.getLabel()) : field.getName();
-      return ValidateResult.fail(requiredMessage(label));
-    }
-    return ValidateResult.success();
-  });
 }

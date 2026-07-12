@@ -1,12 +1,6 @@
 import type { EntityForm } from '../entity-form';
 import type { FilterItem } from '../search/search-form';
-import { CustomValidation } from '../validations/custom-validation';
-import { ValidateResult } from '../validation';
-import { requiredMessage } from '../util/korean';
-import { getCurrentValue } from './value';
 import { FormField } from './form-field';
-import type { RequiredType } from './conditional';
-import type { FieldValue } from './types';
 
 // XrefMappingField (EA-D2-1 — plain view only, ea-d2-xref-major-briefing.md
 // §1/§2/§4). Transplant of 0.3.x
@@ -65,27 +59,22 @@ export interface XrefMappingConfig {
   excludeId?: string;
 }
 
-const REQUIRED_VALIDATION_ID = 'xref-mapping-required';
-
 /**
  * Mapped/deleted id-list xref (0.3.x `XrefMappingField`, `supportPriority`
  * dropped — type `'xrefMapping'`).
  *
- * REQUIRED POSTURE (documented mechanism, EA-D2-1 decision — see the
- * `withRequired` override below): the generic required-blank check
- * (`form-field.ts` `validate()` → `isBlank(ctx.value, ctx.renderType)`,
- * `./value.ts`) can NEVER fire for this field. `isBlank` only special-cases
- * `Array`/`undefined`/`null`/`''`; `{mapped, deleted}` is always a non-null,
- * non-array OBJECT once the renderer has touched it — including the
- * "nothing mapped" state `{mapped: [], deleted: [...]}` — so `isBlank`
- * reports `false` (not blank) unconditionally (the same InlineMap-lesson
- * pitfall `inline-map-field.ts` documents for its own value shapes). The
- * envelope is deliberately ALWAYS kept as an object — `deleted` must survive
- * even when `mapped` empties out (the save wire needs it to tell the backend
- * which mappings to sever) — so the renderer never writes `undefined` to
- * "unblank" the field. `withRequired()` therefore attaches a `CustomValidation`
- * that inspects `mapped?.length` directly; THIS is the field's required
- * mechanism, not a generic-blank byproduct.
+ * REQUIRED POSTURE (R3): requiredness uses the SAME generic required-blank
+ * path as every other field (`form-field.ts` `validate()` →
+ * `isBlank(ctx.value, ctx.renderType, this.type)`). `isBlank` is xref-aware
+ * (`./value.ts`, guarded by `fieldType`): the `{mapped, deleted}` envelope —
+ * deliberately kept as a non-null object so `deleted` survives an emptied
+ * `mapped` (the save wire needs it to tell the backend which mappings to
+ * sever) — counts as blank iff it has no `mapped` rows. Because the generic
+ * path already honors the EF1 store override (`override?.required ??
+ * isRequired`), `setMeta({required})` is authoritative for this field in BOTH
+ * directions at runtime; no field-local `CustomValidation` is attached (an
+ * earlier design did, but it read declaration-only `isRequired` and so could
+ * neither enable nor relax requiredness from a runtime override).
  */
 export class XrefMappingField extends FormField<XrefMappingValue> {
   config: XrefMappingConfig;
@@ -102,37 +91,4 @@ export class XrefMappingField extends FormField<XrefMappingValue> {
   getExcludeId(): string | undefined {
     return this.config.excludeId;
   }
-
-  /**
-   * Same `withRequired` call as every other field (FormField base) PLUS the
-   * `mapped?.length` `CustomValidation` this field's blank-envelope shape
-   * needs (class doc above). Idempotent — calling `withRequired` more than
-   * once does not stack duplicate validations (checked by id).
-   */
-  override withRequired(required?: RequiredType): this {
-    super.withRequired(required);
-    if (!(this.validations ?? []).some((v) => v.id === REQUIRED_VALIDATION_ID)) {
-      this.validations = [...(this.validations ?? []), buildRequiredValidation(this)];
-    }
-    return this;
-  }
-}
-
-function buildRequiredValidation(field: XrefMappingField): CustomValidation {
-  return new CustomValidation(REQUIRED_VALIDATION_ID, async (ctx, value) => {
-    // Respects a conditional `required` (a function/preset, not just a
-    // static `true`) the same way the generic required-blank check would —
-    // this validation only fails when the field is CURRENTLY required.
-    const required = await field.isRequired(ctx);
-    if (!required) return ValidateResult.success();
-
-    const current = getCurrentValue(value as FieldValue<XrefMappingValue>, ctx.renderType);
-    const mapped = current?.mapped;
-    if (mapped === undefined || mapped.length === 0) {
-      const label =
-        typeof field.getLabel() === 'string' ? String(field.getLabel()) : field.getName();
-      return ValidateResult.fail(requiredMessage(label));
-    }
-    return ValidateResult.success();
-  });
 }

@@ -77,11 +77,10 @@ describe('XrefPreferMappingField required posture — CustomValidation on mapped
     expect(await f.validate(ctx({ current: { mapped: [] } }))).toEqual([]);
   });
 
-  it('withRequired is idempotent', () => {
-    const f = new XrefPreferMappingField('college', 10, { entityForm: target })
-      .withRequired(true)
-      .withRequired(true);
-    expect(f.validations).toHaveLength(1);
+  it('withRequired sets the required flag and attaches NO field validation (required is enforced by the generic isBlank path)', () => {
+    const f = new XrefPreferMappingField('college', 10, { entityForm: target }).withRequired(true);
+    expect(f.required).toBe(true);
+    expect(f.validations).toBeUndefined();
   });
 });
 

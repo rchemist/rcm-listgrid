@@ -4,6 +4,8 @@ import {
   EntityForm,
   StringField,
   ValidateResult,
+  XrefMappingField,
+  XrefPreferMappingField,
   type FieldEvalContext,
   type Validation,
 } from '@listgrid/schema-core';
@@ -103,5 +105,49 @@ describe('form-store meta override (EF1)', () => {
     expect(valid).toBe(false);
     expect(store.getState().fields.name.errors?.length).toBeGreaterThan(0);
     expect(store.getState().fields.code.errors ?? []).toHaveLength(0);
+  });
+});
+
+function XrefForm(): EntityForm {
+  return new EntityForm('MajorEntityForm', '/major').addFields({
+    items: [
+      // NOT required by declaration (scenario A base)
+      new XrefMappingField('professors', 1, { entityForm: () => new EntityForm('P', '/p') }),
+      // required by declaration (scenario B base)
+      new XrefMappingField('staffs', 2, { entityForm: () => new EntityForm('S', '/s') }).withRequired(true),
+      // prefer variant, NOT required by declaration (scenario A prefer)
+      new XrefPreferMappingField('college', 3, { entityForm: () => new EntityForm('C', '/c') }),
+    ],
+  });
+}
+
+describe('R3 — EF1 required override on xref fields', () => {
+  it('A: setMeta({required:true}) on a declared-not-required xref BLOCKS save when mapped is empty', async () => {
+    const store = createFormStore(XrefForm());
+    store.getState().setValue('professors', { mapped: [], deleted: [] });
+    // declared-not-required + override absent -> valid
+    expect(await store.getState().validateField('professors')).toBe(true);
+    store.getState().setMeta('professors', { required: true });
+    expect(await store.getState().validateField('professors')).toBe(false);
+    expect(store.getState().fields.professors.errors?.length).toBeGreaterThan(0);
+  });
+
+  it('B: setMeta({required:false}) on a declared-required xref ALLOWS save when mapped is empty', async () => {
+    const store = createFormStore(XrefForm());
+    store.getState().setValue('staffs', { mapped: [], deleted: [] });
+    // declared-required + empty mapped -> invalid before override
+    expect(await store.getState().validateField('staffs')).toBe(false);
+    store.getState().setMeta('staffs', { required: false });
+    expect(await store.getState().validateField('staffs')).toBe(true);
+    expect(store.getState().fields.staffs.errors ?? []).toHaveLength(0);
+  });
+
+  it('A (prefer): setMeta({required:true}) blocks an empty xrefPreferMapping', async () => {
+    const store = createFormStore(XrefForm());
+    store.getState().setValue('college', { mapped: [] });
+    expect(await store.getState().validateField('college')).toBe(true);
+    store.getState().setMeta('college', { required: true });
+    expect(await store.getState().validateField('college')).toBe(false);
+    expect(store.getState().fields.college.errors?.length).toBeGreaterThan(0);
   });
 });

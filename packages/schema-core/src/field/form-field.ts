@@ -150,7 +150,7 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
 
     const required = override?.required ?? (await this.isRequired(ctx));
     if (required) {
-      if (isBlank(ctx.value, ctx.renderType)) {
+      if (isBlank(ctx.value, ctx.renderType, this.type)) {
         const label =
           typeof this.getLabel() === 'string' ? String(this.getLabel()) : this.getName();
         return [ValidateResult.fail(requiredMessage(label))];

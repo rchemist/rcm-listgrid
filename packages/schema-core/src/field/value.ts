@@ -1,5 +1,5 @@
 import { isEqualCollection, isEquals } from '../util/compare';
-import type { FieldValue, FieldValueSlice, RenderType } from './types';
+import type { FieldType, FieldValue, FieldValueSlice, RenderType } from './types';
 
 // Pure value-slice operations — the runtime value lives in the form store
 // (ADR-0002 §Decision 1), so these are FREE FUNCTIONS over a FieldValueSlice
@@ -24,9 +24,30 @@ export function getCurrentValue<T>(
   return renderType === 'create' ? slice.default : slice.fetched;
 }
 
-/** Transplant of FormField.isBlank:531-539 — empty array / undefined / null / ''. */
-export function isBlank(slice: FieldValue | undefined, renderType: RenderType = 'create'): boolean {
+/**
+ * Transplant of FormField.isBlank:531-539 — empty array / undefined / null / ''.
+ *
+ * R3 (xref runtime-required fix): `fieldType` GUARDS an xref-only branch — for
+ * the `xrefMapping`/`xrefPreferMapping` envelope (`{mapped, deleted?}` /
+ * `{mapped}`, deliberately kept as a non-null object so `deleted` survives an
+ * emptied `mapped`, hence never blank under the generic object check below)
+ * blank means "no mapped rows". This lets the generic required-blank path
+ * (`form-field.ts` `validate()`, which already reads `override?.required`)
+ * govern xref requiredness like every other field, so the EF1 store override
+ * (`setMeta({required})`) is authoritative in BOTH directions. Omitting
+ * `fieldType` (every non-xref caller) leaves the original behavior untouched.
+ */
+export function isBlank(
+  slice: FieldValue | undefined,
+  renderType: RenderType = 'create',
+  fieldType?: FieldType,
+): boolean {
   const value = getCurrentValue(slice, renderType);
+  if (fieldType === 'xrefMapping' || fieldType === 'xrefPreferMapping') {
+    if (value === undefined || value === null) return true;
+    const mapped = (value as { mapped?: unknown[] }).mapped;
+    return mapped === undefined || mapped.length === 0;
+  }
   if (Array.isArray(value)) {
     return value.length === 0;
   }
