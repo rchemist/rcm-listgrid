@@ -7,7 +7,7 @@
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **W1~W6 ✅**(W6 data-transfer 완료 2026-07-12·CAP-16/17·E2E 30). 새 세션은 **W7 패키징+마이그레이션 착수 전 entry-brief pass부터**(W5~W7 규칙·W5/W6 선례) — [waves §W7 행](./plans/entityform-api-implementation-waves.md) + 현 코드 서베이(published tsup/exports·`@listgrid/excel` 배선·headless fixture). entry pass=설계 판단 포함(published exports 맵·MIGRATION 구조) → **상위 티어(opus/fable) 권장**·delegate 아님. entry pass 후 W7 구현은 실행급 브리프로 sonnet 위임 가능. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4).
-**Last updated**: 2026-07-12 (**W6 data-transfer 완료 ✅**(W6-4 wave-end) — CAP-16(withDataTransfer :448 fix)·CAP-17(/excel xlsx optional 런타임) 전건 착지·빈행 0. **full gate + E2E 30/30 green**(메인 독립 재실행). 계수 49/57/186 무변경(/excel 미계수). 구 결함 봉인: :448 copy-paste(공유 대칭 헬퍼)·multiselect import(`,`→`|||`). §9 마이그레이션 data-transfer 행 확장(codemod+런타임 DI+미이관). W6-1~4 전부 sonnet 위임→메인 authoritative 검증. Next=**W7 패키징+마이그레이션**(마지막 wave·entry-brief pass 선행·상위 티어 권장).)
+**Last updated**: 2026-07-12 (**W6 data-transfer 완료 ✅** — CAP-16/17 전건 착지·**full gate+E2E 30/30 green**(메인 독립 재실행)·계수 49/57/186. 구 결함 봉인(:448·multiselect). W6-1~4 sonnet 위임→메인 검증. 다음=**W7 패키징+마이그레이션**(마지막 wave·entry-brief pass 선행·상위 티어 권장). 상세=§Tasks 완료 W1~W6 + [archive](./progress-archive/phase-eg-api-redesign.md).)
 
 ## Goal
 
@@ -51,7 +51,7 @@
 
 ## 세션 인계 (Handoff — **W1~W6 ✅**(W6 data-transfer 완료 2026-07-12). 다음: **W7 entry-brief pass**(마지막 wave) — W6 상세는 [phase-eg archive #W6-1~3](./progress-archive/phase-eg-api-redesign.md))
 
-- **⚠ 다음 = W7 entry-brief pass**(설계 판단 포함 → **상위 티어 opus/fable 권장·delegate 아님**): W6(data-transfer) ✅ — W6-1 schema 표면(withDataTransfer/getDataTransfer+DataFieldSpec/DataTransferSpec·**:448 구조적 fix**)·W6-2a `@listgrid/excel` foundation(registry+값변환 tiers)·W6-2b export/import core(구 ExcelProvider/DataImporter 이식)·W6-3 sample 실배선+**E2E 30 실작동**. CAP-16/17 착지·계수 49/57/186. **W7 = 패키징+마이그레이션**(CAP-24·25·**마지막**): [waves §W7 행](./plans/entityform-api-implementation-waves.md)("published subpath exports·**신규 /excel 배선**·peers 재선언·headless fixture·MIGRATION+codemod")은 **계약 수준** → W5/W6처럼 **wave-entry 브리핑 pass 필수**: ① 현 코드 서베이(published tsup.config.ts entry·root package.json exports/peers·`@listgrid/excel` 소비 경로·headless 빌드 테스트 인프라) ② wave-entry 결정(published exports 맵·MIGRATION 구조·codemod 범위·§10 게이트 4) ③ **W6-3 발견 확인**: /excel published `import * as XLSX` interop(dual esm/cjs로 해소). **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현. entry pass 후 W7 구현은 실행급 브리프로 sonnet 위임. **W7 후 = GA 게이트**(헌장 C1~C9 대조표·CAP-28).
+- **⚠ 다음 = W7 entry-brief pass**(마지막 wave·설계 판단 포함 → **상위 티어 opus/fable 권장·delegate 아님**): W7=패키징+마이그레이션(CAP-24·25)은 **계약 수준**(waves L70) → W5/W6처럼 **wave-entry 브리핑 pass 필수** — ① 현 코드 서베이(published tsup.config.ts entry·root package.json exports/peers·`@listgrid/excel` 소비 경로·headless 빌드 인프라) ② wave-entry 결정(published exports 맵·MIGRATION 구조·codemod 범위·§10 게이트 4) → waves 문서에 W7 태스크 표 추가·커밋 후 실행. **W6-3 발견 확인 필수**: /excel published `import * as XLSX from 'xlsx-js-style'` interop(dual esm/cjs 빌드로 해소 확인). entry pass 후 W7 구현은 실행급 브리프로 sonnet 위임 가능. **W7 후 = GA 게이트**(헌장 C1~C9 대조표·CAP-28).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
 - **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
@@ -79,32 +79,21 @@
 - EA(필드21+공유)·EA-D2(Xref)·EB(주소+Daum)·EC1~3(실브라우저)·EC3-0·EC-R1/EC-F·EF6/EF7 완료. E2E 5→16. [archive](./progress-archive/phase-e-track-tasks.md).
 - [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(**W3 권한·능력 착지 후** role-readonly 실증으로 재개)
 
-#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11)
+#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11) · W1~W6 ✅ · W7 남음
 
-**규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 구 blueprint는 체크리스트로 강등.
+**규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 완료 상세(commit·CAP·검증)=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 
-- [x] **EG1+EG2** 권한 배선 ✅ `a1f3deb` · isPermitted end-to-end(FieldRenderer 하드게이트·EF1 우회불가) · +10(1876)·16 E2E · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [x] **EG-D 재설계 설계 pass** ✅ 2026-07-11 · ADR-0009+스펙 r2+waves 브리프 · 4렌즈 검증 22건 반영 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [x] **W1 표면 정비** ✅ 2026-07-11 · `599a3f3`..`4c04906` · 개명·without*·배럴·계수 CI · full gate·E2E 16·CAP-12일부 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [x] **W2 훅+컨트롤러** ✅ 2026-07-11 · `005b4a3`..`ed77ecf` · 8훅+FormRuntime/Controller · E2E 16·1936u·계수 37/49/175 · [detail](./progress-archive/phase-eg-api-redesign.md#w2)
-- [x] **W3 권한·능력·액션** ✅ `4d30159`..`b4ecda3` · 6 sub+W3-6 하드닝·CAP 7종·2003u·E2E 19·4버그 fix · [detail](./progress-archive/phase-eg-api-redesign.md#w3)
-- [x] **W4 폼 완결** ✅ `3b3518f`..`44edfae` · 6 sub+하드닝(4버그)·CAP-05·07·10·13·23·2103u/E2E24·계수 47/49/182 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [x] **D1 async save-gating** (#W4-3a) ✅ 2026-07-12 · dirty-gate+reset-on-edit+stale-guard·스펙 §5.3/§6.2 개정 · 2114u/E2E27 · [detail](./progress-archive/phase-eg-api-redesign.md)
-- [x] **D2 §Needs Review 9건 처분** ✅ 2026-07-12 · 코드2+문서7·§Open Q 0 · 2117u/E2E27 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
-- [x] **W5 entry-brief pass** ✅ 2026-07-12 · waves W5 표(W5-1~4)+§12 결정4+§10-A · 계수 47/49/182 무변경 · [brief](./plans/entityform-api-implementation-waves.md)
-- [x] **W5-1 substrate** ✅ 2026-07-12 · withList/withFilter+타입2·2124u·CAP-18 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-1-substrate-2026-07-12--cap-18)
-- [x] **W5-2 컬럼 파생+list-cell** ✅ 2026-07-12 · getListConfig 파생·M2O통합·2131u·CAP-19 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
-- [x] **W5-3 고급검색+filter** ✅ 2026-07-12 · `2223f35` · deriveFilterFields·패널·setSearchForm·2138u·CAP-20 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
-- [x] **W5-4 컴포지션 가이드+W5 wave-end** ✅ 2026-07-12 · 호스트 셸 문서·CAP-18/19/20 착지·47/57/184·E2E28 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-4--w5-wave-end-cap-list-track-완료)
-- [x] **W6 entry-brief pass** ✅ 2026-07-12 · opus · 결정7건·스펙 §3.5 개정+§10-A W6·콜드리더 통과 · [brief](./plans/entityform-api-implementation-waves.md#w6--data-transfer-entry-brief-pass--2026-07-12--cap-1617)
-- [x] **W6-1 schema 표면** ✅ 2026-07-12 · sonnet→검증 · withDataTransfer/get(동기)+타입2+:448 대칭헬퍼fix · 2156test·49/57/186 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-1-schema-surface-cap-16)
-- [x] **W6-2a /excel foundation** ✅ 2026-07-12 · @listgrid/excel scaffold+registry+값변환 · 2201test·49/57/186 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
-- [x] **W6-2b export/import core** ✅ 2026-07-12 · sonnet→검증 · export/import core+모달+register(onSubmit 호스트) · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
-- [x] **W6-3 툴바+sample+E2E** ✅ 2026-07-12 · College toolbar Export/Import+upload 라우트 · **E2E 28→30 green** · [detail](./progress-archive/phase-eg-api-redesign.md#w6-3-toolbar--sample--e2e-cap-1617)
-- [x] **W6-4 wave-end** ✅ 2026-07-12 · CAP-16/17 전건 착지·계수 49/57/186·**full gate+E2E 30/30**·구결함 봉인(:448·multiselect)·§9 codemod+미이관 확정 · [wave-end](./plans/entityform-api-implementation-waves.md)
+**완료 W1~W6** (전 commit·CAP·상세 → archive):
+- **EG1/2** 권한 배선 `a1f3deb`(isPermitted end-to-end) · **EG-D** 설계 pass(ADR-0009+스펙 r2+waves·4렌즈 22건)
+- **W1** 표면정비 `599a3f3..4c04906`(CAP-12) · **W2** 훅+FormRuntime/Controller `005b4a3..ed77ecf`(8훅)
+- **W3** 권한·능력·액션 `4d30159..b4ecda3`(CAP 7종·4버그) · **W4** 폼완결 `3b3518f..44edfae`(CAP-05·07·10·13·23·4버그)
+- **D1** async save-gating(스펙 §5.3/§6.2 개정) · **D2** §Needs Review 9건 처분(2026-07-12·§Open Q 0)
+- **W5** list-track(entry+W5-1~4 · `2223f35` 등)(CAP-18·19·20)·계수 47/57/184·E2E28
+- **W6** data-transfer(entry+W6-1~4 · `@listgrid/excel`)(CAP-16·17)·**full gate+E2E 30/30**·계수 49/57/186
+
 - [ ] **W7 패키징+마이그레이션** — subpath exports(**신규 /excel 배선**)·headless fixture·MIGRATION(페이지 셸+data-transfer codemod+미이관)+codemod·xlsx interop 확인 · CAP-24·25 · **← Next up**(entry-brief pass 선행)
 
-**Next up**: **W7 패키징+마이그레이션** (W1~W7 마지막 wave·CAP-24·25) — W5~W7 규칙대로 **entry-brief pass 선행**(현 코드 서베이+wave-entry 결정, W5/W6 선례). 범위: `@rchemist/listgrid` published subpath exports 맵(**신규 `/excel`=@listgrid/excel 배선**: tsup entry+root package.json exports+xlsx-js-style/file-saver optional peer 재선언)·peers 재선언·**headless fixture**(/schema+/state만 React 0 빌드 테스트)·**MIGRATION.md** 0.3→0.4 전수표(스펙 §9 확장·페이지 셸 절=list-page-composition-guide 흡수·data-transfer codemod+미이관 목록)+codemod 스크립트·adapter headers 함수형. **W6-3 발견 확인**: /excel published `import * as XLSX` interop(dual esm/cjs 빌드로 해소). entry pass=설계 판단 포함 → **상위 티어(opus/fable) 권장**. 실행 계약=[waves §W7 행](./plans/entityform-api-implementation-waves.md). Do-NOT: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4).
+**Next up**: **W7 패키징+마이그레이션**(마지막 wave·CAP-24·25) — **entry-brief pass 선행**(설계 판단 포함 → **상위 티어 opus/fable 권장·delegate 아님**). Pass 산출물=waves 문서 W7 태스크 표(현 코드 서베이 → wave-entry 결정 → 커밋 후 실행). 서베이 대상: published tsup entry·root package.json exports/peers·`@listgrid/excel` 배선·headless 빌드 인프라. 전 범위(exports 맵/peers/headless fixture/MIGRATION+codemod/xlsx interop)=[waves §W7](./plans/entityform-api-implementation-waves.md) L70. Do-NOT: 스펙 § 미인용 설계 판단 구현(§10 게이트 4).
 
 ---
 
@@ -114,9 +103,9 @@
 - [x] **브랜치 전략 확정(2026-07-10)** — main=0.3.x 유지, `p0-hotfixes`/`v0.4` 분리. 플립(0.3→release, v0.4→main)은 전작업+검증 완료 후.
 - [x] **#W4-3a → DECIDED+구현(D1, 2026-07-12)** — dirty 미확인 async=validateAll 실패→save 차단·스펙 §5.3/§6.2 개정. [D1](./progress-archive/phase-eg-api-redesign.md)
 - [x] **D2 잔여 9건 처분(2026-07-12)** — 스펙 저자 확정(발명금지 해제): 코드2+문서7·§Open Q 0. [dispositions](./progress-archive/needs-review-dispositions-2026-07-12.md)
-- [x] **#W5-1 operator 타입 확정** — operator=open `string` 유지(§10-A)·QueryConditionType 캐스트=addAndFilter 지점만·채택 기각 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
-- [x] **#W6-2a importValue +options** — label→value=option 필수 → 3번째 `options?`(exportValue 대칭). 승인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
-- [x] **#W6-2a multiselect `|||` 양방향** — 구 Type.ts import bug(`,` 검사후 `|||` split)→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
+- [x] **#W5-1 operator 타입 확정** — operator=open `string` 유지·캐스트=addAndFilter만 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
+- [x] **#W6-2a importValue +options** — label→value=3번째 `options?`(exportValue 대칭) 승인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
+- [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug(`,`검사후`|||`split)→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [ ] **#W6-2a fDate TZ 민감성** — date-range export가 음수-UTC-offset 브라우저서 하루 밀림 가능(new Date UTC파싱+local getter·구 date-fns fDate 계승=회귀 아님·테스트 TZ=UTC). **실 GJCU 데이터 소비자 검증 필요** · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [ ] **#W6-2b TIER3 uniform 필터 경계** — /excel이 getDataTransfer() 반환 필드에 TIER3 uniform 제외(명시/파생 미구분). M2O/xref/address는 TIER2 passthrough(평면행 값 export)이나 실 GJCU 데이터 미검증 → 소비자 확인(garbage면 TIER3 편입) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
 - [ ] **#W5-3 재적용 de-dup 미구현** — 고급검색 매 apply가 `store.searchForm.addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적(단일 apply=정확·E2E green). SearchForm "이름별 제거" 프리미티브가 W5-3 스코프 밖(search-form.ts 미포함) → 브리프 Do-NOT 준수 미구현·flag · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
