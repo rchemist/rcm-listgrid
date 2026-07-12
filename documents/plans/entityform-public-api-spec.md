@@ -29,7 +29,7 @@
 | `/ui-default` | ui-default | 참조 프리미티브 17종 + `defaultUIComponents` | react |
 | `/backend-rcm` `/backend-rest` | backend-* | BackendAdapter 구현 | (없음) |
 | `/next` | next | NextRouterProvider | next, react |
-| `/excel` | (신설) | DataExporter/Importer 런타임 | xlsx(optional) |
+| `/excel` | (신설) | DataExporter/Importer 런타임 | xlsx-js-style·file-saver (둘 다 optional) |
 | `/presets` `/presets/rcm` | presets-* | 제네릭/도메인 필드 프리셋(감사필드 헬퍼 등) | (없음) |
 
 - **headless 계약**: `/schema`+`/state`만 import → React/UI peer 0으로 빌드(테스트 고정). showcase 사례(§감사 6-2)의 1급화.
@@ -120,6 +120,26 @@ type ActionRender = (ctx: ActionContext) => ReactNode
 ### 3.5 데이터 전송 (2)
 
 `withDataTransfer({ export?: { fields?: DataFieldSpec[]; fileName? }, import?: { fields?: DataFieldSpec[] } }): this` / `getDataTransfer()`. import 폴백은 **import.fields를 검사**(구 :448 copy-paste 구조 불가 — export/import 대칭 코드 공유). 런타임은 `/excel`.
+
+**W6 entry-brief 확정 (2026-07-12 opus — 위 시그니처의 `DataFieldSpec`·반환형 명세)**:
+
+```ts
+// /schema — 선언 전용(L6: schema-core React/런타임 0). 값 변환 로직은 /excel 런타임이 type로 파생.
+interface DataFieldSpec {
+  name: string
+  label?: string | undefined      // 미지정 시 필드 getLabel()에서 파생
+  type?: FieldType | undefined     // 미지정 시 선언 필드의 type에서 파생 — /excel 값변환 스위치의 키
+}
+// getDataTransfer() 반환형(해석 완료 — auto-derive 반영, fields 항상 존재)
+interface DataTransferSpec {
+  export?: { fields: DataFieldSpec[]; fileName?: string | undefined } | undefined
+  import?: { fields: DataFieldSpec[] } | undefined
+}
+```
+
+- **auto-derive(구 getDataFieldsFromFields 계승·순수 schema)**: `export`/`import` 있으나 `fields` 미지정/빈 배열이면 `this.getFields()`를 **선언 순서**로 스냅샷해 `DataFieldSpec[]` 파생; 명시 `fields`는 verbatim. `getDataTransfer()`는 **동기**(구 `Promise`는 `isRequired()` await 때문 — 신 `DataFieldSpec`은 `required` 미보유, import 검증은 /excel 런타임이 필드 질의). :448 fix = export/import **대칭 헬퍼 공유**로 "import 폴백이 export.fields를 검사"가 구조적으로 불가능.
+- **복합 타입 auto-derive 제외 원칙**: 평면 셀 표현이 없는 타입(정확 목록·warn 정책은 W6-2 구현·§Needs Review 소비자 검증)은 auto-derive에서 제외 — 소비자가 `export.fields`에 명시하면 포함. 구 switch(select/multiselect·date/datetime·boolean·html/markdown)는 /excel 런타임 소관(§2 `/excel`, xlsx optional peer).
+- **미이관(문서화 이연·charter C6=export/import 코어 밖)**: 비밀번호 export(officecrypto)·excelDownloadHistory 로깅·DataImportSample 템플릿·DataImportResultView·DynamicDataImporter — 소비자 요구 시 /excel 확장(§9 MIGRATION 기재).
 
 ### 3.6 존재하지 않는 것 (설계상 금지)
 
@@ -377,12 +397,12 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 | ~W3(현재) | — | — | 180 |
 | W4 | `StepDef`(§3.2) · `AsyncValidation`(§5.3) | +2 | 182 |
 | W5 | `FieldListConfig` · `FieldFilterConfig`(§5.1) | +2 | 184 |
-| W6 | `DataFieldSpec`(§3.5) · DataTransfer 반환형 | +2 | 186 |
+| W6 | `DataFieldSpec` · `DataTransferSpec`(§3.5 W6-entry 확정) | +2 | 186 |
 | W7 | 패키징 — schema 타입 0 | 0 | 186 |
 
 - 마진 +4 = W5/W6 미분해 세부 타입(필터 operator 유니온·list align/width 헬퍼·DataTransfer 하위 spec 등). W5/W6 entry pass에서 실측이 190 근접 시 위 wave-entry 규칙으로 재산정.
 
-**루트 배럴 최종 ≈ 51 → 임계값 120 무변경** — 현 49(ViewListGrid/ViewListGridProps 이미 포함) + W5 신규 `registerListCellRenderer`·`registerFilterRenderer` +2(고급검색 패널은 ViewListGrid 내장 — 별도 export 아님, W5 entry-brief 결정 3-내장). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님).
+**루트 배럴 실측 57 → 임계값 120 무변경** — 원 projection 49 base + **W5 실측 +8**(list-cell renderer export 4 + filter renderer export 4 — registry 헬퍼 전개 계수; 고급검색 패널 자체는 ViewListGrid 내장·별도 export 아님, W5 entry-brief 결정 3-내장). ⚠️ 원 W5 projection은 +2로 과소추정 — **실측 57이 정본**(count-public-surface.mjs, 2026-07-12). W6 root +0(toolbar seam 재사용). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님).
 
 ## 11. 구현 wave (요약 — 실행 계약은 [waves 브리프](./entityform-api-implementation-waves.md))
 

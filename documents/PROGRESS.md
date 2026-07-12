@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · W1~W4 ✅ · D-pass ✅ · **W5 list-track 완료 ✅**(W5-1~4·2026-07-12·CAP-18/19/20 착지). **Next up: W6 data-transfer(entry-brief pass 선행)**. **2138 unit/E2E 28**·계수 47/**57**/184(임계 55/120/190). P0/P1 publish=외부 승인 대기.
+**Status**: active · W1~W4 ✅ · D-pass ✅ · W5 list-track ✅ · **W6 entry-brief pass ✅**(2026-07-12·결정7·스펙 §3.5 개정). **Next up: W6-1 schema 표면**(W6-1~4 분해). **2138 unit/E2E 28**·계수 47/57/184(임계 55/120/190·W6 목표 49/57/186). P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **W1~W4 ✅ · D-pass ✅ · W5 list-track 완료 ✅**(W5-1~4). 새 세션은 **W6 data-transfer 착수 전 entry-brief pass부터** — [waves §W6 행](./plans/entityform-api-implementation-waves.md) + W5~W7 wave-entry 규칙(현 코드 서베이+wave-entry 결정 pass, W5 선례). entry pass=설계 판단 포함 → **상위 티어(opus/fable) 권장**·delegate 아님. entry pass 완료 후 W6 구현은 실행급 브리프로 sonnet 위임 가능. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4).
-**Last updated**: 2026-07-12 (**W5 list-track 완료 ✅** — W5-4 페이지 컴포지션 가이드(`list-page-composition-guide.md`·호스트 셸 컴포지션 문서화·컴포넌트 아님·waves 결정1) + W5 wave-end 게이트: CAP-18(substrate)/19(컬럼 파생+list-cell)/20(고급검색+filter) 전건 착지 대조·계수 47/57/184 PASS(임계 55/120/190)·E2E 28(전 리스트 페이지 무회귀·last code `2223f35`). W5-3까지 delegate(sonnet)→메인 authoritative 검증 완료. Next=**W6 entry-brief pass**(상위 티어 권장).)
+**Next session policy**: **W1~W5 ✅ · W6 entry-brief pass ✅**(2026-07-12 opus). 새 세션은 **W6-1 schema 표면부터** — [waves W6 표](./plans/entityform-api-implementation-waves.md#w6--data-transfer-entry-brief-pass--2026-07-12--cap-1617)(W6-1~4 실행급 명세·결정7건 확정)는 이미 실행급 → **sonnet 위임 가능**(entry pass 완료로 설계 판단 소진). 읽는 순서: waves W6 표 → 스펙 §3.5(DataFieldSpec/DataTransferSpec)·§2(/excel). **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·런타임/값변환 schema 유입(L6)·구 rich config 부활.
+**Last updated**: 2026-07-12 (**W6 entry-brief pass ✅** — data-transfer wave 착수 브리핑: 현 코드 서베이(withDataTransfer 미존재·구 transfer/ 3443 LOC·신엔진 excel 전무·toolbar seam) + 결정 7건(§3.5 타입확정 DataFieldSpec/DataTransferSpec·:448 구조적 fix·/excel 신패키지·toolbar 재사용·복합타입 제외·import 호스트공급·미이관 이연) → 스펙 §3.5 개정+§10-A W6 정밀화 + waves W6-1~4 실행급 태스크표. 계수 목표 49/57/186(임계 55/120/190). Next=**W6-1**(sonnet 위임 가능).)
 
 ## Goal
 
@@ -96,10 +96,14 @@
 - [x] **W5-2 컬럼 파생+list-cell** ✅ 2026-07-12 · getListConfig 파생·M2O통합·2131u·CAP-19 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [x] **W5-3 고급검색+filter** ✅ 2026-07-12 · `2223f35` · deriveFilterFields·패널·setSearchForm·2138u·CAP-20 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [x] **W5-4 컴포지션 가이드+W5 wave-end** ✅ 2026-07-12 · 호스트 셸 문서·CAP-18/19/20 착지·47/57/184·E2E28 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-4--w5-wave-end-cap-list-track-완료)
-- [ ] **W6 data-transfer** — **entry-brief pass 선행**(W5처럼 survey+wave-entry 결정) · CAP-16·17 · withDataTransfer/`/excel` subpath · **← Next up**
+- [x] **W6 entry-brief pass** ✅ 2026-07-12 · opus · 결정7건(§3.5 타입확정·:448 fix·/excel패키지·toolbar seam·복합타입제외·import 호스트공급·미이관이연) · 스펙 §3.5 개정·§10-A W6 · [brief](./plans/entityform-api-implementation-waves.md#w6--data-transfer-entry-brief-pass--2026-07-12--cap-1617)
+- [ ] **W6-1 schema 표면** — withDataTransfer/getDataTransfer + DataFieldSpec/DataTransferSpec + :448 구조적 fix · /schema 186·EntityForm 49 · [waves W6표](./plans/entityform-api-implementation-waves.md) · **← Next up**
+- [ ] **W6-2 `/excel` 런타임** — `@listgrid/excel` DataExporter/Importer/registry·xlsx+file-saver optional peer·값변환 스위치(복합타입 제외+warn) · CAP-17
+- [ ] **W6-3 툴바+sample+E2E** — toolbar seam 재사용·College withDataTransfer·excel-upload 라우트·E2E export(하드)+import
+- [ ] **W6-4 wave-end** — CAP-16/17 대조·계수 실측(186/49/57)·§9 codemod+이연목록
 - [ ] **W7 패키징+마이그레이션** — subpath exports·headless fixture·MIGRATION(페이지 셸 절=이 가이드 흡수)+codemod · CAP-24·25
 
-**Next up**: **W6 data-transfer** — 착수 전 **entry-brief pass 선행**(W5 선례처럼: 현 코드 서베이 + wave-entry 결정 pass, waves §W5~W7 규칙). CAP-16(withDataTransfer 구조적 fix)·CAP-17(`/excel` subpath·xlsx optional peer). entry pass는 설계 판단 포함 → 상위 티어(opus/fable) 권장. 실행 계약=[waves §W6 행](./plans/entityform-api-implementation-waves.md) + entry pass 산출.
+**Next up**: **W6-1 schema 표면** — withDataTransfer/getDataTransfer + DataFieldSpec/DataTransferSpec 타입 + :448 대칭-헬퍼 구조적 fix. 순수 additive(schema-core·React 0). 실행 계약=[waves W6 표](./plans/entityform-api-implementation-waves.md#w6--data-transfer-entry-brief-pass--2026-07-12--cap-1617)(실행급 → sonnet 위임 가능). Do-NOT: 런타임/값변환 schema 금지(L6)·구 rich config 부활 금지.
 
 ---
 
