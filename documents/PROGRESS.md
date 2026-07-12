@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · **Phase GX(0.4 프레임워크 정합·GA-blocking) ✅ 완료**(GX-1~5·2026-07-13·SearchForm+mock+`/utils`+프록시 문서+문서정정·wire=rcm-backend-framework 0.1.0·2368u/E2E 32 green·계수 49/57/188). **Next up: GA 게이트(CAP-28 헌장 대조표)**(별도 pass·새 세션 권장). §Needs Review open(GA 잔여·소비자/스펙 입력). P0/P1 publish=외부 승인 대기.
+**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **Next up: RV-R1(reload CRITICAL)→RV-R2(고급검색 HIGH)→R3~R8→GA 게이트(GA-BRIEF+R1/R2/GX-6 선결)**. GX-6 WIP=stash 이연(미결 복원·stash@{0}). §Needs Review open. P0/P1 publish=외부 승인 대기.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: Phase EG(W1~W7) 게이트 green이나 **봉인 재개** — 새 세션은 **Phase GX(0.4 프레임워크 정합, GA-blocking)부터**. cold-start=[gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)(결정·프레임워크 계약·GX-1~5 백로그)+[rcm-backend-framework 0.1.0] 계약. **확정 결정(2026-07-12)**: 위젯 descope·유틸 새 `/utils` 전량 이식·SearchForm `withFilter` 완전 부활·GA-blocking·**wire=rcm-backend-framework 0.1.0 기준(GJCU 0.2 아님)**. GX 후 GA 게이트(CAP-28). **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만).
-**Last updated**: 2026-07-13 (**GX-4/5 ✅ · Phase GX(GX-1~5) 완료** — GX-4: SSR 프록시 seam 문서화([ADR-0005 부록 A]·`RcmAdapterOptions.{baseUrl,fetch}`·MIGRATION `./api` 경고). GX-5: "무변경" 거짓 정정(SearchForm)·`/misc` 행→`/utils`(GX-3)·정규식 11종·CAP-29 위젯 descope+GX 정합 note·§10-A /schema 186→188·#W7-4 descope 처분. Phase GX=봉인 후 GA-blocking 갭 전건 정합(wire=rcm-backend-framework 0.1.0). 상세 [archive #GX-5+Handoff](./progress-archive/phase-gx-tasks.md#gx-5). 다음=GA 게이트(CAP-28·새 세션 권장).)
+**Next session policy**: **새 세션은 Phase RV(중간점검 개선 트랙)부터** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md)(§4 확정 설계안·§8 원장) 단독 재개 가능. **RV-R1(CRIT reload)·RV-R2(HIGH 고급검색)가 GA 선결.** GA 게이트(CAP-28)는 RV + GA-BRIEF 저작 후. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4·GX-6이 실제 위반 사례)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·GX-6 WIP를 전역 싱글턴 기전 그대로 커밋(채택시 context 스코프 재설계).
+**Last updated**: 2026-07-13 (**중간 점검 코드리뷰 완료** — 7차원 워크플로우 팬아웃(sonnet/opus)+발견별 opus 적대적 검증. 게이트 실측: unit 2373·E2E 32·attw/publint/smoke/headless green, format:check는 GX-3 미포맷 커밋으로 실패→**G-2 수리 완료**(`15d708b`·green 복원). 16 material finding(CONFIRMED 8·PARTIAL 8·REFUTED 0): 🔴CRIT reload() 고아화·🟠HIGH 고급검색 재적용 빈결과·🟡MED×6·⚪LOW×4. **GX-6 미커밋 WIP**(공개 어댑터 assetBaseUrl·발명게이트 저촉)=사용자 결정 stash 이연(stash@{0}). → **Phase RV** 개설·[분석](./analysis/2026-07-13/midpoint-code-review.md). 다음=RV-R1.)
 
 ## Goal
 
@@ -45,13 +45,14 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC ✅ · EG W1~W7 ✅ · **Phase GX 프레임워크정합 GX-1~5 ✅** · 다음=GA 게이트) | — | 이 문서 §Tasks · [gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] 진행 중 (H·EF·EA/EB/EC ✅ · EG W1~W7 ✅ · GX-1~5 ✅ · **Phase RV 개선 트랙(2026-07-13 중간점검)** · 다음=RV-R1) | — | 이 문서 §Tasks · [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — Phase EG(W1~W7)+**Phase GX(프레임워크 정합 GX-1~5) ✅ 완료**(2026-07-13). 다음: **GA 게이트(CAP-28 헌장 대조표·별도 pass·새 세션 권장)** — 콜드스타트 [phase-gx archive Handoff](./progress-archive/phase-gx-tasks.md#gx-5))
+## 세션 인계 (Handoff — Phase GX(GX-1~5) ✅ 완료 + **2026-07-13 중간 점검 완료 → Phase RV 개설**. 다음: **RV-R1(reload CRITICAL)** — 콜드스타트 [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md))
 
-- **⚠ 다음 = GA 게이트(CAP-28 헌장 C1~C9 대조표·별도 pass)** — Phase GX(봉인 후 GA-blocking 갭 정합) 완료: GX-1 SearchForm wire=rcm-backend-framework 0.1.0 `SearchRequest`(withFilter 복원)·GX-2 mock=`SearchResponse`/ProblemDetail·GX-3 `/utils` 패키지(구 misc 복원·zero-dep)·GX-4 프록시 seam 문서·GX-5 문서 정정. 게이트 2368u·E2E 32·smoke:load·attw/publint·계수 49/57/188. GA=검증/대조 authoring(**인라인 판단**). **GA 전 잔여(§Needs Review·소비자/스펙 입력)**: asset-base 어댑터 배선(assetBaseUrl 필드?)·mock 조건타입 확장·GX-1 empty AND/OR 실서버 대조·spec §9#29 라벨·P0/P1 publish 외부 승인. cold-start: 이 Handoff + [phase-gx archive](./progress-archive/phase-gx-tasks.md#gx-5) + 스펙 §8 CAP-28 + [헌장](./prd/concept-charter.md).
+- **⚠ 다음 = Phase RV(중간점검 개선 트랙)** — cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) 단독. **RV-R1(CRIT: `reload()`가 스토어 write-path 고아화 — reload 후 폼 무응답·조용한 데이터유실·form-controller.ts:341)**·**RV-R2(HIGH: 고급검색 재적용 AND 누적→빈결과·ViewListGrid.tsx:267)**가 GA 선결. R3~R8(MED)·R9~R12(LOW)·G-1(GX-6 처분)·GA-BRIEF(CAP-28 실행급 브리프)는 §Tasks Phase RV 표. **각 R의 확정 설계안(before→after·증명·수용·Do-NOT)=분석 §4.** Do-NOT: RV-R1서 액션 클로저 교체 금지·RV-R2서 addAndFilter 스택킹 시맨틱 변경 금지(새 프리미티브 추가)·GX-6 전역싱글턴 기전 커밋 금지.
+- **GA 게이트(CAP-28·후순위)**: Phase GX 완료(GX-1~5·게이트 2368u/E2E32·계수 49/57/188). GA는 RV + GA-BRIEF 저작 후. cold-start: GA-BRIEF + [phase-gx archive](./progress-archive/phase-gx-tasks.md#gx-5) + 스펙 §8 CAP-28 + [헌장](./prd/concept-charter.md).
 - **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
 - **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
 - **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
@@ -110,7 +111,20 @@
 - [x] **GX-4 프록시 seam 문서화** ✅ 2026-07-13 · [ADR-0005 부록 A](./adr/ADR-0005-backend-adapter-contract.md)(fetch+baseUrl seam·route handler=host 소유)+MIGRATION `./api` 경고+spec §2 포인터
 - [x] **GX-5 문서 정정 + descope** ✅ 2026-07-13 · "무변경" 거짓 정정·/misc→/utils·정규식11·CAP-29 위젯 descope·§10-A /schema 188·#W7-4 처분 · [detail](./progress-archive/phase-gx-tasks.md#gx-5)
 
-**Next up**: **GA 게이트(CAP-28 헌장 C1~C9 대조표)** — Phase EG+GX 완료 후 별도 pass(새 세션 권장·인라인 판단). cold-start=[phase-gx archive Handoff](./progress-archive/phase-gx-tasks.md#gx-5)+스펙 §8 CAP-28+[헌장](./prd/concept-charter.md). GA 전 잔여=§Needs Review open(asset-base 배선·mock 조건타입·spec §9#29)+P0/P1 publish 외부 승인.
+#### Phase RV — 중간 점검 개선 트랙 (2026-07-13 리뷰 산출 · GA 선결) · [분석](./analysis/2026-07-13/midpoint-code-review.md)
+
+**규범**: [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) §4 확정 설계안(항목별 before→after·증명·수용·Do-NOT)+§8 원장. 7차원 팬아웃+opus 검증(CONFIRMED 8·REFUTED 0). **GA 게이트는 R1·R2·G-1·GA-BRIEF 선결 후 착수.** 상세는 분석 §참조(본문 중복 금지).
+
+- [ ] **RV-R1 reload() write-path 고아화** 🔴CRIT — initialize를 기존 스토어에 재실행(`into` 옵션·액션 클로저 교체 금지) · state/{form-controller.ts:341,initialize-form-store.ts} · 증명=reload후 편집 재렌더 테스트 · [§4.1](./analysis/2026-07-13/midpoint-code-review.md)
+- [ ] **RV-R2 고급검색 재적용 de-dup** 🟠HIGH — `SearchForm.removeAndFilterByName`(공개+1·/schema 189/190) + ViewListGrid 교체 · schema-core/search/search-form.ts·react/ViewListGrid.tsx:267 · [§4.2]
+- [ ] **RV-R3~R8** 🟡MED — Xref required 오버라이드·validateAll 함수형머지·FieldRenderer try/catch+allSettled·sessionStorage isBlank·TIER2 객체export(GA GJCU 검증)·DataImporter onSubmit catch · [§4.3]
+- [ ] **RV-R9~R12** ⚪LOW — clone():this·withId(undefined)·reset() 타이머클린업·delete() ids guard · [§4.4]
+- [ ] **G-1 GX-6 처분** 🔴 — WIP stash 이연(stash@{0})·#GX-3 미결 복원(아래)·**capability 결정 대기**(채택시 context 스코프 재설계+ADR-0005/spec 승인+react tsconfig ../utils ref) · [§6/§7]
+- [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 커밋 수리·format:check green 복원
+- [ ] **G-3 #W5-3 risk 등급 정정** ✅(아래 §Needs Review 반영) low-med→HIGH
+- [ ] **GA-BRIEF CAP-28 실행급 브리프 저작** 🟡 — per-C 증거파일·pass/fail·커버리지 매트릭스·Do-NOT·R7 GJCU 행형태 검증 편입(fable/opus) · 신규 documents/plans/ga-gate-charter-brief.md · [§5]
+
+**Next up**: **RV-R1(reload CRITICAL)** → RV-R2 → R3~R8 → GA-BRIEF → GA 게이트. cold-start=[중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md).
 
 ---
 
@@ -125,13 +139,13 @@
 - [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [ ] **#W7-2 headless @types/react 해석** — `/schema`(+shared chunk 경유 `/state`) `.d.ts`가 ReactNode 조건타입(OptionalReactNode 등) 노출 → headless tsc는 `@types/react`(dev type-only) 필요. **런타임 react peer=0**(계약 충족). 해석: 헤드리스=런타임 React 0·타입레벨 @types/react는 dev 양보(스펙 §2 "React peer 0"=런타임). 스펙 저자 확인 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2-headless-fixture-2026-07-12--cap-25)
 - [ ] **#W6-2b TIER3 uniform 필터 경계** — /excel이 getDataTransfer() 반환 필드에 TIER3 uniform 제외(명시/파생 미구분). M2O/xref/address는 TIER2 passthrough(평면행 값 export)이나 실 GJCU 데이터 미검증 → 소비자 확인(garbage면 TIER3 편입) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
-- [ ] **#W5-3 재적용 de-dup 미구현** — 고급검색 매 apply가 `store.searchForm.addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적(단일 apply=정확·E2E green). SearchForm "이름별 제거" 프리미티브가 W5-3 스코프 밖(search-form.ts 미포함) → 브리프 Do-NOT 준수 미구현·flag · risk:low-med · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
+- [ ] **#W5-3 재적용 de-dup 미구현** → **RV-R2** — 고급검색 매 apply가 `addAndFilter` 폴딩 → 같은 필드 재검색 시 AND 절 누적. **risk 정정 low-med→🟠HIGH(2026-07-13 중간점검·G-3)**: 출하 ViewListGrid 통상 "조건수정 후 재검색" 흐름서 `AND(name=ABC,name=XYZ)`→빈결과 재현(에러 없음). 확정 설계=SearchForm.removeAndFilterByName + 패널 교체 · [§4.2](./analysis/2026-07-13/midpoint-code-review.md)
 - [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
 - [ ] **#GX-1 toJSON empty AND/OR 그룹 방출** — `filters.AND`/`OR`를 빈 `[]`도 항상 wire 방출(기존 테스트 presence 어서트 때문)·NOT만 omit. **GX-2 mock서 vacuous no-op 확인**(실백엔드 수용은 GA 전 실서버 대조 권장) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-1)
 - [ ] **#GX-2 mock filter 5/24 조건타입** — apps/sample mock이 EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE만 매칭·NOT 그룹 no-op(전 실사용 경로 커버·발명 회피). 실백엔드 필요 조건타입 확장 시 재검토 · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-2)
-- [ ] **#GX-3 asset-base 어댑터 배선 미결** — `/utils` asset-URL 주입 seam(`setAssetServerBase`)+전역 폴백 완비하나 아무도 호출 안 함(0.4 어댑터에 asset-base 필드 부재). **어댑터에 assetBaseUrl 필드 추가 여부=스펙 결정** · risk:low-med · [detail](./progress-archive/phase-gx-tasks.md#gx-3)
+- [ ] **#GX-3 asset-base 어댑터 배선 미결** → **G-1** — `/utils` seam(`setAssetServerBase`)+전역 폴백 완비하나 런타임 소비자 0. **어댑터에 assetBaseUrl 필드 추가 여부=스펙 결정(미결 유지)**. 2026-07-13: GX-6 WIP(공개 어댑터 필드+전역싱글턴 배선)이 백그라운드 에이전트로 선구현됨→**발명게이트 저촉 판정·stash 이연(stash@{0})**·미결 복원. **채택시 전역싱글턴 폐기→context 스코프 재설계 필수** · risk:low-med · [분석 §6](./analysis/2026-07-13/midpoint-code-review.md)
 - [ ] **#GX-3 isExternalUrl 2카피** — schema-core(private)+utils(public) byte-identical 재구현(zero-dep 하드룰·상호참조 주석) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-3)
 - [x] **#W7-4 서브패스 descope 처분**(사용자 2026-07-12) — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
 - [ ] **#W7-4 spec §9 #29 라벨 재조정** — spec §9는 withCreatedAndUpdatedAtFields를 codemod로 표기하나 impl=수동/이연(presets-rcm 빈 스캐폴드). spec 저자: §9 라벨 정정 or /presets/rcm 감사헬퍼 출하 후 codemod화 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
