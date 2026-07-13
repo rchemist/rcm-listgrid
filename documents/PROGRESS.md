@@ -6,8 +6,8 @@
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **GA 게이트 실행 완료** — 남은 봉인 게이트는 **소비자/외부 입력 2건**(R7 실 GJCU-shape·publish 승인)뿐, 코드 변경 없음. cold-start=[GA 결과](./analysis/2026-07-13/ga-gate-result.md) + §Open Questions HOLD 2건. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·R7 실페이로드 확인 없이 형태 추정.
-**Last updated**: 2026-07-13 (**GA 게이트 ✅ + R7 실결함 수정(RV-R13)** — 사용자 지시로 R7을 edustack(0.3.x 권위 소비자) 실 백엔드 대조 검증(9-agent 팬아웃+opus 적대검증): manyToOne list-row=`{id,title}`(labelField='title')·gjcu/apps-sample=`{id,name}`. **RV-R7 가드 `name→label→id`가 title 놓쳐 raw id export하는 실결함 발견**(apps/sample이 'name'써서 통과테스트가 가림). 수정=`/excel`이 field labelField 스레드(sonnet 위임→판별검증→pre-fix FAIL 확인). 전 게이트 green: test 2394→**2399**·E2E32·surface 무변경·attw/publint. xref=raw 바인딩無+CAP-29 descope(low-risk)·address=flat 무관. 코드축 **GA-READY**. 다음=0.4.0-alpha.0 publish(next).)
+**Next session policy**: **코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next)** — 활성=**Phase GA-L(GA `latest` 봉인 트랙)**. bare `/progress`로 재개 → GA-L1(needs-review 처분)+GA-L2(alpha 소아킹) 착수, GA-L3/L4(flip·0.4.0 latest 배포)는 **사용자 GA-latest go 결정** 대기(크리티컬 패스). cold-start=이 §Handoff + §Tasks Phase GA-L. **Do-NOT**: §Handoff 계승 목록.
+**Last updated**: 2026-07-13 10:53 (`/progress:next` 재정렬 — 코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next). 완료 페이즈(H~GA) 1줄 슬림·EG W1~W7 블록 아카이브 이관·매트릭스 P0/트랙 reconcile. 활성=**Phase GA-L(GA `latest` 봉인 트랙)**: GA-L1 needs-review 처분·GA-L2 alpha 소아킹·GA-L3 v0.4→main flip·GA-L4 0.4.0 latest 배포. **Next up=GA-L1**. GA-L3/L4=사용자 GA-latest go 결정(크리티컬 패스) 대기.)
 
 ## Goal
 
@@ -40,71 +40,50 @@
 
 | 페이즈/트랙 | 브랜치 | 상태 | 릴리스 | 상세 |
 |---|---|---|---|---|
-| P0 실버그 핫픽스 | `p0-hotfixes` | 🟡 코드완료(publish/전환 승인 대기) | 0.3.26 | [archive](./progress-archive/phase-foundation-P0-P2.md) |
+| P0 실버그 핫픽스 | main | ✅ 배포됨(main ff-merge `853660b`·`v0.3.26`) | 0.3.26 | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | P1 워크스페이스+패키징 | v0.4 | ✅ 0.4.0-alpha.0 배포됨(dist-tag `next`·2026-07-13) | 0.4.0-alpha.0 | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] H·EF·EA/EB/EC·EG·GX·RV ✅·**GA 게이트(CAP-28) 실행 완료** — 봉인 HOLD 2건(소비자/외부) | — | §Tasks · [GA 결과](./analysis/2026-07-13/ga-gate-result.md) |
+| **하드닝/확장 트랙** | v0.4 | H·EF·EA/EB/EC·EG·GX·RV·**GA 게이트 ✅ + R7 수정(RV-R13)** → **코드축 GA-READY** | 0.4.0-alpha.0 | §Tasks · [GA 결과](./analysis/2026-07-13/ga-gate-result.md) |
+| **[~] GA-latest 봉인 트랙 (GA-L)** | v0.4→main | 활성 — alpha 소아킹 + needs-review 처분 + flip + 0.4.0 `latest` 배포 | 0.4.0 | §Tasks Phase GA-L |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **GA 게이트(CAP-28) 실행 완료 2026-07-13**·헌장 C1~C9 전건 present·전 게이트 green. 남은 봉인=**소비자/외부 입력 2건**)
+## 세션 인계 (Handoff — **코드축 GA-READY + `0.4.0-alpha.0` 배포됨(next) 2026-07-13**. 활성 = GA-latest 봉인 트랙)
 
-- **✅ GA 게이트 실행 완료** — [결과 매트릭스](./analysis/2026-07-13/ga-gate-result.md): 헌장 C1~C9 전건 `present`(C6 일부 descoped-ok CAP-29)·빈 행 0·요건1/2/3 충족. 전 게이트 green(2394u·E2E32·surface 49/55·61/120·188/190·attw/publint/headless zero-React/codemod 4/4). cold-start=GA 결과 + [헌장](./prd/concept-charter.md) + [브리프](./plans/ga-gate-charter-brief.md).
-- **⚠ 최종 GA 봉인 = HOLD 2건(코드 아님·§Open Questions)**: ① **R7 GJCU-shape unverified** — 실 GJCU/edustack list-endpoint 페이로드 부재(리포는 mock만)·manyToOne/xref/address 컬럼 평면 vs 중첩 판정 불가·Do-NOT: 추정 금지(실페이로드 확인 시 중첩이면 `/excel` TIER2 후속·평면이면 무해). ② **P0/P1 publish 외부 승인**. → 사용자/외부 입력 대기.
-- **Do-NOT(계승)**: 스펙 §를 인용 못하는 설계 판단 발명 금지(§10 게이트 4)·구 src/ 삭제 금지(오라클)·**dts `experimentalDts`+api-extractor 재시도 금지**(빈 스텁 방출→소비자 tsc `check:headless`가 실 게이트, [선례](./progress-archive/phase-eg-api-redesign.md#w7-1))·0.2(GJCU) shape primary 채택 금지(폴백만)·`search-form.ts` addAndFilter 시맨틱 변경 금지·GX-6 전역싱글턴 기전 커밋 금지(G-1 context-스코프로 재설계 완료).
-- **이미 SOUND(유지·재작성 금지)**: store 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·FormMutator seam·EF1-7 파이프라인·필드24+주소+Xref·권한 배선. 재설계는 공개 표면 — 엔진 재작성 아님. 규범 docs: [스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md).
-- **작업 규율**: 완료=logic 커밋→PROGRESS 커밋→push(전부 push). active-session marker=이 PROGRESS. 완료 페이즈 상세=[progress-archive](./progress-archive/)(RV=phase-rv-tasks.md·EG·GX·E-track).
+- **현 상태**: 헌장 C1~C9 전건 `present`([GA 결과](./analysis/2026-07-13/ga-gate-result.md))·전 게이트 green(**2399u·E2E32**·surface 49/55·61/120·188/190·attw/publint/headless zero-React). R7 실결함(edustack manyToOne `{id,title}`을 raw id로 export)=수정 완료(RV-R13·`/excel` labelField 스레드). `@rchemist/listgrid@0.4.0-alpha.0` = npm dist-tag `next`(opt-in)·`latest=0.3.26` 무영향. **코드 잔여 작업 0.**
+- **다음(Phase GA-L)** = GA `latest` 봉인 트랙. **먼저 열 것**: §Tasks Phase GA-L(GA-L1~L4). 대부분 gated: alpha 소아킹(시간·edustack 엑셀 export 실검증 가치)·GA-latest go 결정·spec-author/소비자 ack. **크리티컬 패스 결정(사용자)**: 0.4.0 `latest` 배포 GO 여부 + 시점(밀스톤).
+- **GA-latest 릴리스 기전**(GA-L4): root `package.json` 0.3.26→0.4.0 + CHANGELOG `## [0.4.0]` top 섹션(`scripts/check-release-docs.mjs` 게이트=top==version) + `v0.4.0` 태그 push→`publish.yml`(Node24·prepublishOnly clean+type-check+test+build→`npm publish --provenance` dist-tag `latest`). **선결=`v0.4`→`main` 플립**(브랜치 전략: 전작업+검증 후·GA-L3).
+- **Do-NOT(계승)**: 스펙 §를 인용 못하는 설계 판단 발명 금지(§10 게이트 4)·구 src/ 삭제 금지(오라클)·**dts `experimentalDts`+api-extractor 재시도 금지**([선례](./progress-archive/phase-eg-api-redesign.md#w7-1)·소비자 tsc `check:headless`가 실 게이트)·0.2(GJCU) shape primary 채택 금지(폴백만)·R7 실페이로드 확인 없이 형태 추정 금지·**mock이 실 소비자 형태 가릴 수 있음**(R7 교훈: apps/sample `name`이 edustack `title` 결함 은폐)·`search-form.ts` addAndFilter 시맨틱 변경 금지.
+- **이미 SOUND(유지·재작성 금지)**: store 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·FormMutator seam·EF1-7·필드24+주소+Xref·권한 배선. 재설계는 공개 표면 — 엔진 재작성 아님. 규범=[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)·[헌장](./prd/concept-charter.md).
+- **작업 규율**: **publish/commit/push 전부 자율 판단·즉시 실행·후 보고**(Push:auto·묻지 말 것). 완료=logic 커밋→PROGRESS 커밋→push. active-session marker=이 PROGRESS. 완료 페이즈 상세=[progress-archive](./progress-archive/)(RV=phase-rv-tasks.md·EG·GX·E-track).
 
 ---
 
 ## Tasks
 
-완료: H·E-트랙·EG(공개 API 재설계 W1~W7)·GX(프레임워크 정합)·RV(중간점검 개선)·**GA 게이트(헌장 C1~C9 대조·실행 완료)**. **현 상태 = GA 실행 완료 → 최종 봉인 HOLD 2건(소비자/외부 입력·§Handoff·§Open Questions).** 페이즈 상세 → [progress-archive](./progress-archive/).
+완료: H·E-트랙·EG(공개 API 재설계 W1~W7)·GX(프레임워크 정합)·RV(중간점검 개선)·**GA 게이트(헌장 C1~C9)·R7 수정(RV-R13)**. **현 상태 = 코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next). 활성 = Phase GA-L(GA `latest` 봉인 트랙, 아래).** 완료 페이즈 상세 → [progress-archive](./progress-archive/).
 
-### H — 하드닝 ✅ 완료 (전 5태스크 — 게이트·CI·SubColl·H1 캐시·H2 a11y) · [archive](./progress-archive/phase-hardening-H.md)
+#### 완료 페이즈 (상세=archive · 시간순)
+- **H** 하드닝 ✅ (게이트·CI·SubColl·H1 캐시·H2 a11y) · [archive](./progress-archive/phase-hardening-H.md)
+- **E-트랙** 필드 대량 이식+동작 실증+주소 ✅ (EF 명령형 라이프사이클·EA 필드21+Xref·EB Daum주소·EC 실브라우저·E2E→16) · [archive](./progress-archive/phase-e-track-tasks.md) · [계획](./plans/e-track-field-parity.md)
+- **EG** EntityForm 공개 API first-principles 재설계 ✅ (PIVOT 2026-07-11·W1~W7 게이트 green·계수 49/57/186) · [archive](./progress-archive/phase-eg-api-redesign.md) · 규범=[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29)+[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)
+- **GX** 0.4 프레임워크 정합+parity ✅ (2026-07-13·wire/mock 정합·`/utils` 이식·2368u·49/57/188) · [archive](./progress-archive/phase-gx-tasks.md)
+- **RV** 중간점검 개선 ✅ (2026-07-13·R1~R12+G-1~3+GA-BRIEF·`3c41ebf`..`7ffb60d`) · [archive](./progress-archive/phase-rv-tasks.md)
+- **GA 게이트(CAP-28)** 헌장 C1~C9 대조 ✅ + **RV-R13 R7 실결함 수정** (2026-07-13·`ccc6520`·edustack 대조→manyToOne labelField 수정·2399u/E2E32) · [결과](./analysis/2026-07-13/ga-gate-result.md)
 
-### E — 확장 (사용자 확정 2026-07-11: 전 필드 이식 + 동작 실증 + Daum 주소) · [계획](./plans/e-track-field-parity.md)
+#### Phase GA-L — GA `latest` 봉인 트랙 (활성 · 2026-07-13~)
 
-- [x] **E·Email/Phone** Email/Phone 필드클래스(내장 검증, C4 "클래스1+렌더러1" 패턴 실증, Subject E2E) · `20f5156`
+코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next). GA `latest` 봉인까지 잔여 작업. **GA-L3/L4는 사용자 GA-latest go 결정(크리티컬 패스) 대기.**
 
-**핵심**: 신 엔진은 선언적 라이프사이클(dependsOn cascade)만 있고 **명령형(onInitialize/onChanges/META 반응성)이 전무** → 필드 렌더만 이식하면 동작이 조용히 no-op. **Phase EF(기반) 먼저 → EA(필드 대량) → EB(주소) → EC(폼+E2E).** 근거·상세 [계획](./plans/e-track-field-parity.md) + [원자료](./analysis/2026-07-11/e-track-understand-workflow.md).
+- [ ] **GA-L1** low-risk §Needs Review 10건 일괄 처분 — model-decidable(문서/코멘트 정정 예: #RV-R7 doc·#W7-4 guide 배너)은 처리, spec-author/소비자 확인 필요(#W7-2·#W6-2b·#GX-1·#GX-2 등)는 일괄 질의. GA 비차단이나 봉인 전 정리.
+- [ ] **GA-L2** alpha 소아킹 — `0.4.0-alpha.0` 실 소비자(edustack 등) 피드백 수렴. **R7 수정 실검증 가치**: edustack manyToOne 컬럼 엑셀 export가 title로 나오는지 확인(외부/시간 gated).
+- [ ] **GA-L3** `v0.4`→`main` 플립 (브랜치 전략: 전작업+검증 완료 후). GA-latest go 결정 시 실행. **선결**=GA-L1 정리 + alpha 무회귀.
+- [ ] **GA-L4** 0.4.0 GA `latest` 배포 — root 0.3.26→0.4.0 + CHANGELOG `## [0.4.0]` + `v0.4.0` 태그 push→publish.yml(latest). After GA-L1~L3. 자율 배포(Push:auto).
+- [ ] **EC4** (기존 이연) GraduationReview(custom onSave·role readonly·옵션 pruning) — GA-latest 독립 후순위 잔여.
 
-#### Phase EF ✅ 완료 (2026-07-11 — EF1~5 + 리뷰게이트 R1·R2 + gate 통과, 명령형 라이프사이클 완비 · 1205 unit+5 E2E) · [archive](./progress-archive/phase-e-track-tasks.md) · parity map [analysis](./analysis/2026-07-11/ef-gate-parity-map.md)
-
-#### Phase EA/EB/EC ✅ 완료 (2026-07-11) · [archive](./progress-archive/phase-e-track-tasks.md)
-- EA(필드21+공유)·EA-D2(Xref)·EB(주소+Daum)·EC1~3(실브라우저)·EC3-0·EC-R1/EC-F·EF6/EF7 완료. E2E 5→16. [archive](./progress-archive/phase-e-track-tasks.md).
-- [ ] **EC4** GraduationReview(custom onSave·role readonly·옵션 pruning) — 후순위(**W3 권한·능력 착지 후** role-readonly 실증으로 재개)
-
-#### Phase EG — EntityForm 공개 API **first-principles 재설계** (PIVOT 2026-07-11) · **W1~W7 게이트 green(2026-07-12)** · ⚠ 봉인 후 조사서 GA 갭 발견 → Phase GX로 정합(아래)
-
-**규범**: [ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)+[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29) · **실행 계약**: [waves 브리프](./plans/entityform-api-implementation-waves.md). 완료 상세(commit·CAP·검증)=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
-
-**완료 W1~W7** (전 commit·CAP·상세 → [archive](./progress-archive/phase-eg-api-redesign.md)):
-- **EG1/2** 권한 배선 `a1f3deb`(isPermitted end-to-end) · **EG-D** 설계 pass(ADR-0009+스펙 r2+waves·4렌즈 22건)
-- **W1** 표면정비 `599a3f3..4c04906`(CAP-12) · **W2** 훅+FormRuntime/Controller `005b4a3..ed77ecf`(8훅)
-- **W3** 권한·능력·액션 `4d30159..b4ecda3`(CAP 7종·4버그) · **W4** 폼완결 `3b3518f..44edfae`(CAP-05·07·10·13·23·4버그)
-- **D1** async save-gating(스펙 §5.3/§6.2 개정) · **D2** §Needs Review 9건 처분(2026-07-12·§Open Q 0)
-- **W5** list-track(entry+W5-1~4 · `2223f35` 등)(CAP-18·19·20)·계수 47/57/184·E2E28
-- **W6** data-transfer(entry+W6-1~4 · `@listgrid/excel`)(CAP-16·17)·**full gate+E2E 30/30**·계수 49/57/186
-- **W7** 패키징+마이그레이션(마지막 wave·CAP-24/25·entry+W7-1~5)·**Phase EG 종료**·full gate+E2E30·계수 49/57/186 · [archive](./progress-archive/phase-eg-api-redesign.md#w7-1)
-
-#### Phase GX — 0.4 프레임워크 정합 + parity (봉인 후 조사 2026-07-12 · **GX-1~5 ✅ 완료 2026-07-13**) → 다음=GA 게이트
-
-**완료 GX-1~5** (0.4 프레임워크 정합 · 상세 → [archive](./progress-archive/phase-gx-tasks.md) · 규범=[gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)):
-- wire 정합·mock 정합·`/utils` 이식·프록시 seam=[ADR-0005 부록A](./adr/ADR-0005-backend-adapter-contract.md)·문서정정+descope · 2368u·E2E32·49/57/188
-
-#### Phase RV — 중간 점검 개선 트랙 ✅ 완료 (2026-07-13 · CRIT reload+HIGH 고급검색+MED 6+LOW 4 + G-1~3·GA-BRIEF) · [archive](./progress-archive/phase-rv-tasks.md)
-
-- [x] **RV-R1~R12 + G-1~3 + GA-BRIEF ✅** 2026-07-13 · `3c41ebf`..`7ffb60d` · 무결정 실행계획→sonnet 위임·판별검증 · 트랙엔드 green(2394u·E2E32·surface 무변경) · [archive](./progress-archive/phase-rv-tasks.md)
-
-#### Phase GA — 헌장 C1~C9 대조 게이트 (CAP-28) ✅ 실행 완료 (2026-07-13 · 순수검증 pass) · [결과](./analysis/2026-07-13/ga-gate-result.md)
-
-- [x] **GA 게이트 실행 (헌장 C1~C9·요건1/2/3)** ✅ 2026-07-13 · 전건 `present`(빈 행 0)·전 게이트 green·엔진 anchor 실재 · [결과](./analysis/2026-07-13/ga-gate-result.md)
-- [x] **RV-R13 R7 실 백엔드 검증 + labelField 수정** ✅ 2026-07-13 · edustack(0.3.x) 실 대조=manyToOne `{id,title}`(labelField='title')·RV-R7 가드 name→label→id가 title 놓쳐 raw id export하는 **실결함 발견→수정**(9-agent 팬아웃+opus 적대검증). `/excel`이 labelField 스레드(sonnet 위임→판별검증·surface 무변경·2399u·E2E32) · [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
-
-**Next up**: **alpha 소아킹 → GA `latest` 봉인** — 0.4.0-alpha.0 배포 완료(next). GA latest 전 선결: ① v0.4→main 플립 ② low-risk §Needs Review ack ③ alpha 소비자 피드백. 코드축 GA-READY(잔여 코드 작업 0).
+**Next up**: **GA-L1** (low-risk §Needs Review 처분) — 병행 GA-L2(alpha 소아킹). GA-L3/L4는 사용자 GA-latest go 결정 대기.
 
 ---
 
