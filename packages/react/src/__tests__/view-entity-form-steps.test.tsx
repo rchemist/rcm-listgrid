@@ -293,6 +293,7 @@ describe('create-mode wizard — Save failure navigates back to the invalid step
     const fieldWrapper = aInputAgain.closest('[data-field-name="a"]');
     expect(fieldWrapper).not.toBeNull();
     expect(fieldWrapper?.querySelector('[role="alert"]')).toBeInTheDocument();
+    await waitFor(() => expect(document.activeElement).toBe(aInputAgain));
   });
 
   it('non-wizard forms are unaffected: Save failure still just focuses/errors in place (no step index exists)', async () => {

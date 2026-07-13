@@ -551,18 +551,28 @@ function ViewEntityFormInner({
   // unaffected — Do-NOT regress the existing path) or when no invalid
   // field/owning step is found (defensive — should not happen the instant
   // validateAll() has just reported failure).
-  function jumpToInvalidStep(): void {
-    if (!wizardActive) return;
+  function jumpToInvalidStep(): boolean {
+    if (!wizardActive) return false;
     const state = store.getState();
     const invalidFields = Object.values(state.fieldDefs)
       .filter((f) => (state.fields[f.getName()]?.errors?.length ?? 0) > 0)
       .sort((a, b) => a.getOrder() - b.getOrder());
     const firstInvalid = invalidFields[0];
-    if (!firstInvalid) return;
+    if (!firstInvalid) return false;
     const targetIndex = visibleSteps.findIndex((s) => s.fields.includes(firstInvalid.getName()));
     if (targetIndex !== -1 && targetIndex !== clampedStepIndex) {
       setStepIndex(targetIndex);
+      return true;
     }
+    return false;
+  }
+
+  function restoreInvalidFieldFocus(): void {
+    if (jumpToInvalidStep()) {
+      requestAnimationFrame(focusFirstInvalidField);
+      return;
+    }
+    focusFirstInvalidField();
   }
 
   // Save rewire (W3-3 briefing §설계 결정 2 — deviation: onSave repurpose) —
@@ -572,25 +582,23 @@ function ViewEntityFormInner({
   // callback (e.g. host navigation), a11y focus-first-invalid is preserved
   // on the ok:false branch. controller absent: legacy path unchanged
   // (validateAll → onSave(data) as the save transport itself). W4-6 FIX #1
-  // — jumpToInvalidStep() runs BEFORE focusFirstInvalidField() on both
-  // failure branches, so a wizard whose failing field lives off the current
-  // step navigates there first (see that fn's doc above).
+  // — restoreInvalidFieldFocus() moves to an off-step invalid field and waits
+  // one animation frame for that field to mount before focusing it. An
+  // invalid field already on the current step is focused synchronously.
   async function runBuiltinSave(): Promise<void> {
     if (controller) {
       const outcome = await controller.save();
       if (outcome.ok) {
         await onSave?.(store.getState().toSaveData());
       } else {
-        jumpToInvalidStep();
-        focusFirstInvalidField();
+        restoreInvalidFieldFocus();
       }
     } else {
       const valid = await store.getState().validateAll();
       if (valid) {
         await onSave?.(store.getState().toSaveData());
       } else {
-        jumpToInvalidStep();
-        focusFirstInvalidField();
+        restoreInvalidFieldFocus();
       }
     }
   }
