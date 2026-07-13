@@ -155,10 +155,15 @@ function verifyImplementedAnchors() {
     if (
       ts.isCallExpression(node) &&
       ts.isIdentifier(node.expression) &&
-      (node.expression.text === 'proof' || node.expression.text === 'diagnosticProof')
+      (node.expression.text === 'proof' ||
+        node.expression.text === 'diagnosticProof' ||
+        node.expression.text === 'structureProof')
     ) {
+      const structure = node.expression.text === 'structureProof';
       verify(
-        'e2e/entityform-proof-identity.spec.ts',
+        structure
+          ? 'e2e/entityform-proof-structure.spec.ts'
+          : 'e2e/entityform-proof-identity.spec.ts',
         resolveString(node.arguments[2]),
         node.expression.text === 'diagnosticProof'
           ? 'apps/sample/lib/entities/entityform-proof.ts#EntityFormIdentityDiagnostics'

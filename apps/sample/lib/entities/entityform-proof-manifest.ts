@@ -38,6 +38,7 @@ const plannedIntegration = (id: `P-${string}`): EntityFormIntegrationProof => ({
 });
 
 const identityTestFile = 'e2e/entityform-proof-identity.spec.ts' as const;
+const structureTestFile = 'e2e/entityform-proof-structure.spec.ts' as const;
 const identityAnchor = 'apps/sample/lib/entities/entityform-proof.ts#EntityFormProofCase';
 const diagnosticsAnchor =
   'apps/sample/lib/entities/entityform-proof.ts#EntityFormIdentityDiagnostics';
@@ -68,6 +69,21 @@ const diagnosticProof = (
   sampleCase,
   sampleAnchor: diagnosticsAnchor,
   e2eFile: identityTestFile,
+  testTitle,
+  assertion,
+});
+
+const structureProof = (
+  id: `EFS-${string}`,
+  memberKebab: string,
+  testTitle: string,
+  assertion: string,
+): EntityFormProofBranch => ({
+  id,
+  status: 'implemented',
+  sampleCase: `${memberKebab}--${id.toLowerCase()}`,
+  sampleAnchor: identityAnchor,
+  e2eFile: structureTestFile,
   testTitle,
   assertion,
 });
@@ -144,12 +160,216 @@ export const entityFormProofManifest = {
     { member: 'onAfterDelete', kind: 'setting', branches: [] },
     { member: 'onBeforeListFetch', kind: 'setting', branches: [] },
     { member: 'onAfterListFetch', kind: 'setting', branches: [] },
-    { member: 'addFields', kind: 'setting', branches: [] },
-    { member: 'withoutField', kind: 'setting', branches: [] },
-    { member: 'withoutTab', kind: 'setting', branches: [] },
-    { member: 'withTab', kind: 'setting', branches: [] },
-    { member: 'withGroup', kind: 'setting', branches: [] },
-    { member: 'withSteps', kind: 'setting', branches: [] },
+    {
+      member: 'addFields',
+      kind: 'setting',
+      branches: [
+        structureProof(
+          'EFS-14a',
+          'add-fields',
+          '[EFS-14a] addFields — default tab and group render their fields',
+          'default tab/group field DOM',
+        ),
+        structureProof(
+          'EFS-14b',
+          'add-fields',
+          '[EFS-14b] addFields — explicit tab and group render their labels',
+          'explicit tab/group label DOM',
+        ),
+        structureProof(
+          'EFS-14c',
+          'add-fields',
+          '[EFS-14c] addFields — label and order control tab DOM order',
+          'tab labels and ordered buttons',
+        ),
+        structureProof(
+          'EFS-14d',
+          'add-fields',
+          '[EFS-14d] addFields — hidden tab is absent from the tab bar',
+          'hidden tab/field absent',
+        ),
+        structureProof(
+          'EFS-14e',
+          'add-fields',
+          '[EFS-14e] addFields — tab requiredPermissions uses the ADMIN session',
+          'allowed/denied tab DOM',
+        ),
+        structureProof(
+          'EFS-14f',
+          'add-fields',
+          '[EFS-14f] addFields — group requiredPermissions gates legend and field',
+          'allowed/denied group DOM',
+        ),
+      ],
+    },
+    {
+      member: 'withoutField',
+      kind: 'setting',
+      branches: [
+        structureProof(
+          'EFS-15a',
+          'without-field',
+          '[EFS-15a] withoutField — existing field is absent from DOM and payload',
+          'removed field absent from POST payload',
+        ),
+        structureProof(
+          'EFS-15b',
+          'without-field',
+          '[EFS-15b] withoutField — missing field removal is a no-op',
+          'remaining fields save normally',
+        ),
+      ],
+    },
+    {
+      member: 'withoutTab',
+      kind: 'setting',
+      branches: [
+        structureProof(
+          'EFS-16a',
+          'without-tab',
+          '[EFS-16a] withoutTab — tab fields disappear from DOM and payload',
+          'removed tab field absent from POST payload',
+        ),
+        structureProof(
+          'EFS-16b',
+          'without-tab',
+          '[EFS-16b] withoutTab — missing tab removal is a no-op',
+          'remaining default tab saves normally',
+        ),
+      ],
+    },
+    {
+      member: 'withTab',
+      kind: 'setting',
+      branches: [
+        structureProof(
+          'EFS-17a',
+          'with-tab',
+          '[EFS-17a] withTab — label patch replaces the rendered tab label',
+          'patched tab label DOM',
+        ),
+        structureProof(
+          'EFS-17b',
+          'with-tab',
+          '[EFS-17b] withTab — order patch reorders tab buttons',
+          'patched order DOM',
+        ),
+        structureProof(
+          'EFS-17c',
+          'with-tab',
+          '[EFS-17c] withTab — static hidden patch removes the tab',
+          'static hidden tab absent',
+        ),
+        structureProof(
+          'EFS-17d',
+          'with-tab',
+          '[EFS-17d] withTab — conditional hidden resolves by render type',
+          'create hidden/update visible',
+        ),
+        structureProof(
+          'EFS-17e',
+          'with-tab',
+          '[EFS-17e] withTab — requiredPermissions hides a denied tab',
+          'permission denied tab absent',
+        ),
+        structureProof(
+          'EFS-17f',
+          'with-tab',
+          '[EFS-17f] withTab — repeated patches preserve earlier keys',
+          'label/order/hidden patch composition',
+        ),
+      ],
+    },
+    {
+      member: 'withGroup',
+      kind: 'setting',
+      branches: [
+        structureProof(
+          'EFS-18a',
+          'with-group',
+          '[EFS-18a] withGroup — label patch replaces the group legend',
+          'patched legend DOM',
+        ),
+        structureProof(
+          'EFS-18b',
+          'with-group',
+          '[EFS-18b] withGroup — order patch reorders group panels',
+          'group fieldset DOM order',
+        ),
+        structureProof(
+          'EFS-18c',
+          'with-group',
+          '[EFS-18c] withGroup — open controls initial collapse',
+          'collapsed then expanded field DOM',
+        ),
+        structureProof(
+          'EFS-18d',
+          'with-group',
+          '[EFS-18d] withGroup — requiredPermissions gates group content',
+          'allowed/denied group DOM',
+        ),
+        structureProof(
+          'EFS-18e',
+          'with-group',
+          '[EFS-18e] withGroup — repeated patches preserve label and order',
+          'group patch composition',
+        ),
+        structureProof(
+          'EFS-18f',
+          'with-group',
+          '[EFS-18f] withGroup — groupId is global and tabId is not a lookup key',
+          'wrong tabId still patches global group',
+        ),
+      ],
+    },
+    {
+      member: 'withSteps',
+      kind: 'setting',
+      branches: [
+        structureProof(
+          'EFS-19a',
+          'with-steps',
+          '[EFS-19a] withSteps — second declaration replaces the first',
+          'old step absent and replacement visible',
+        ),
+        structureProof(
+          'EFS-19b',
+          'with-steps',
+          '[EFS-19b] withSteps — order sorts the rendered indicator',
+          'indicator order DOM',
+        ),
+        structureProof(
+          'EFS-19c',
+          'with-steps',
+          '[EFS-19c] withSteps — description renders on its owning step',
+          'step description DOM',
+        ),
+        structureProof(
+          'EFS-19d',
+          'with-steps',
+          '[EFS-19d] withSteps — conditional hidden excludes its step',
+          'conditional hidden step absent',
+        ),
+        structureProof(
+          'EFS-19e',
+          'with-steps',
+          '[EFS-19e] withSteps — partially hidden steps leave visible navigation',
+          'visible subset retains navigation',
+        ),
+        structureProof(
+          'EFS-19f',
+          'with-steps',
+          '[EFS-19f] withSteps — all hidden steps degrade to a stable empty wizard',
+          'empty wizard does not crash',
+        ),
+        structureProof(
+          'EFS-19g',
+          'with-steps',
+          '[EFS-19g] withSteps — values survive forward and backward navigation',
+          'cross-step value retention',
+        ),
+      ],
+    },
     {
       member: 'withMeta',
       kind: 'setting',
@@ -349,8 +569,26 @@ export const entityFormProofManifest = {
       assertion: 'fetched row가 clone().withId() 뒤 onInit override와 dirty DOM으로 관찰',
     },
     plannedIntegration('P-04'),
-    plannedIntegration('P-05'),
-    plannedIntegration('P-06'),
+    {
+      id: 'P-05',
+      members: ['withTab', 'withGroup'],
+      status: 'implemented',
+      sampleCase: 'with-tab--p-05',
+      sampleAnchor: identityAnchor,
+      e2eFile: structureTestFile,
+      testTitle: '[P-05] withTab/withGroup × hidden/permission — patches do not resurrect gates',
+      assertion: 'hidden/permission gate가 후속 patch 뒤에도 DOM에서 유지',
+    },
+    {
+      id: 'P-06',
+      members: ['withSteps'],
+      status: 'implemented',
+      sampleCase: 'with-steps--p-06',
+      sampleAnchor: identityAnchor,
+      e2eFile: structureTestFile,
+      testTitle: '[P-06] withSteps × validation — invalid owner step restores field and focus',
+      assertion: '마지막 step 저장 실패가 첫 invalid field의 step·오류·focus를 복원',
+    },
     plannedIntegration('P-07'),
     plannedIntegration('P-08'),
     plannedIntegration('P-09'),
