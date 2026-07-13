@@ -5,7 +5,7 @@
 // the derivation functions directly.
 
 import { describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EntityForm, StringField, type Session } from '@listgrid/schema-core';
 import { createFormStore } from '@listgrid/state';
 import { defaultUIComponents } from '@listgrid/ui-default';
@@ -92,6 +92,37 @@ describe('CAP-02 — FieldGroupDef.requiredPermissions filters the group panel',
     renderForm(GroupPermissionForm(), { roles: ['HR'] });
     expect(await screen.findByText('Secret')).toBeInTheDocument();
     expect(screen.getByLabelText(/^Salary/)).toBeInTheDocument();
+  });
+});
+
+describe('FieldGroupDef.open controls the initial collapsible group state', () => {
+  function CollapsibleGroupForm(open: boolean): EntityForm {
+    return new EntityForm('GroupOpenEntityForm', '/group-open')
+      .addFields({
+        items: [new StringField('name', 1).withLabel('Name')],
+        group: { id: 'collapsible', label: 'Collapsible', order: 0 },
+      })
+      .withGroup('ignored-tab', 'collapsible', { open });
+  }
+
+  it('open:false starts collapsed and the legend control reveals the fields', async () => {
+    renderForm(CollapsibleGroupForm(false));
+    const toggle = await screen.findByRole('button', { name: 'Collapsible' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByLabelText(/^Name/)).not.toBeVisible();
+
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByLabelText(/^Name/)).toBeVisible();
+  });
+
+  it('open:true starts expanded', async () => {
+    renderForm(CollapsibleGroupForm(true));
+    expect(await screen.findByRole('button', { name: 'Collapsible' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(screen.getByLabelText(/^Name/)).toBeVisible();
   });
 });
 

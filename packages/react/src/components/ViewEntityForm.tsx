@@ -190,6 +190,45 @@ function deriveGroupFields(fields: EntityField[], tabId: string, groupId: string
   );
 }
 
+function FieldGroupPanel({
+  group,
+  fields,
+  saving,
+}: {
+  group: FieldGroupDef;
+  fields: EntityField[];
+  saving: boolean;
+}) {
+  const collapsible = group.open !== undefined;
+  const [open, setOpen] = useState(group.open ?? true);
+
+  return (
+    <fieldset data-field-group={group.id} disabled={saving}>
+      {(group.label || collapsible) && (
+        <legend>
+          {collapsible ? (
+            <button
+              type="button"
+              aria-expanded={open}
+              aria-controls={`field-group-${group.id}`}
+              onClick={() => setOpen((value) => !value)}
+            >
+              {group.label ?? group.id}
+            </button>
+          ) : (
+            group.label
+          )}
+        </legend>
+      )}
+      <div id={`field-group-${group.id}`} hidden={collapsible && !open}>
+        {fields.map((field) => (
+          <FieldRenderer key={field.getName()} field={field} />
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
 // CAP-03 (W3-1) hasVisibleContent — old-engine semantics (group-capability-
 // map:403-406): a field counts as "visible" here iff the session is
 // permitted for it AND it isn't STATICALLY hidden (an async-hidden field
@@ -848,12 +887,12 @@ function ViewEntityFormInner({
       )}
 
       {groups.map((group) => (
-        <fieldset key={group.id} disabled={saving}>
-          {group.label && <legend>{group.label}</legend>}
-          {deriveGroupFields(fields, activeTabId, group.id).map((field) => (
-            <FieldRenderer key={field.getName()} field={field} />
-          ))}
-        </fieldset>
+        <FieldGroupPanel
+          key={group.id}
+          group={group}
+          fields={deriveGroupFields(fields, activeTabId, group.id)}
+          saving={saving}
+        />
       ))}
 
       {/* create-mode wizard (spec §3.2, C6; W4-2) — replaces the tab bar/groups
