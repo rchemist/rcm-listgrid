@@ -1,6 +1,6 @@
 {
   "name": "@rchemist/listgrid",
-  "version": "0.3.26",
+  "version": "0.4.0-alpha.0",
   "private": false,
   "type": "module",
   "description": "Framework-free React CRUD UI engine — primitive-based design system, data-attr theming, and a full list/form renderer for RCM-framework-style entity backends.",

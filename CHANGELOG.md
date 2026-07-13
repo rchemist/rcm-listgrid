@@ -2,6 +2,25 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.4.0-alpha.0] - 2026-07-13
+
+**0.4 재기초(re-foundation) 첫 프리릴리스** — dist-tag `next` (opt-in). `npm i @rchemist/listgrid@next`.
+0.3.x 유지보수 라인(`latest`)에는 영향 없음. API는 GA 전까지 변동 가능(alpha).
+
+0.3.x의 검증된 로직을 특성화 테스트 오라클 아래 **이식**하여 4계층 모노레포로 신축한 재기초 릴리스.
+공개 표면(EntityForm 공개 API)은 first-principles 재설계했으나 엔진 동작은 이식(재작성 아님).
+헌장 C1~C9 보존은 GA 게이트에서 실 소비자(edustack) 데이터로 대조 검증됨.
+
+### 주요 변경 (0.3.x → 0.4)
+
+- **헤드리스 코어**: `@rchemist/listgrid/schema` · `/state` 서브패스가 **React 런타임 의존 0** — 프리미티브/라우터/HTTP/세션/메시지는 전부 호스트 주입(charter C7).
+- **서브패스 패키징**: 코어 배럴 + `./schema` · `./state` · `./excel`(엑셀 왕복) · `./utils` · `./next` opt-in 서브패스. peer 26→코어 필수 6 + leaf subpath opt-in(#7 3분류 선례).
+- **EntityForm 공개 API 재설계**: 체이너블 `withXxx` 선언 → 리스트+폼 동시 파생 · 명령형 라이프사이클(onInitialize/onChanges) · 훅 + FormRuntime/Controller · 조건부 정책(ALWAYS/HIDDEN/VIEW_ONLY/…)·권한(`withRequiredPermissions`).
+- **BackendAdapter 계약**: CRUD URL조립·응답해석·오류의미를 어댑터 뒤로 격리(RCM 1급 기본). ProblemDetail(RFC7807)·SearchResponse 표준화.
+- **관계 1급**: ManyToOne(검색+팝업) · SubCollection(격리 자식 폼) · 40+ 필드 타입(입력·셀·필터·엑셀·검증 5문맥) · 주소(composite→flat).
+
+마이그레이션 how-to: `docs/MIGRATION.md` + codemod. 상세 설계 근거: ADR-0008/0009 · 개념 헌장.
+
 ## [0.3.26] - 2026-07-10
 
 0.4 재기초에 앞서 **확정 버그 9건 + 안전 기본값**을 고친 하드닝 릴리스. 여기서
