@@ -97,6 +97,15 @@ export function EntityFormProofCase(caseId: string, id?: string): EntityForm {
       return form.withTitle('Init fetched clone').onInit((ctx) => {
         if (ctx.data) ctx.values.set('note', 'onInit fetched override');
       });
+    case 'with-group--efs-18c':
+      return form
+        .withTitle('Collapsible group proof')
+        .addFields({
+          items: [new StringField('collapsed', 50).withLabel('Collapsed field')],
+          tab: { id: 'default' },
+          group: { id: 'collapsible', label: 'Collapsible group', order: 1 },
+        })
+        .withGroup('ignored-tab', 'collapsible', { open: false });
     default:
       return form.withTitle(`EntityForm proof — ${caseId}`);
   }
