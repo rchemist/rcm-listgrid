@@ -4,6 +4,7 @@ import {
   StringField,
   TextareaField,
   getCurrentValue,
+  type DataFieldSpec,
   type SelectOption,
 } from '@listgrid/schema-core';
 
@@ -41,6 +42,51 @@ function BaseProofForm(): EntityForm {
       new TextareaField('note', 40, 3).withLabel('Note').withList(),
     ],
   });
+}
+
+function ExplicitTransferFields(): DataFieldSpec[] {
+  return [
+    { name: 'id', label: 'ID', type: 'text' },
+    { name: 'name', label: 'Name', type: 'text' },
+    { name: 'status', label: 'Status', type: 'select' },
+    { name: 'category', label: 'Category', type: 'select' },
+    { name: 'note', label: 'Note', type: 'textarea' },
+  ];
+}
+
+function DataTransferProofForm(
+  mode: 'auto' | 'explicit' | 'file-name' | 'replace' | 'independent' | 'field-mutation',
+): EntityForm {
+  if (mode === 'auto') {
+    return BaseProofForm().withDataTransfer({ export: {}, import: {} });
+  }
+  if (mode === 'explicit') {
+    return BaseProofForm().withDataTransfer({
+      export: { fields: ExplicitTransferFields() },
+      import: { fields: ExplicitTransferFields() },
+    });
+  }
+  if (mode === 'file-name') {
+    return BaseProofForm().withDataTransfer({
+      export: { fields: ExplicitTransferFields(), fileName: 'EntityForm Proof' },
+      import: { fields: ExplicitTransferFields() },
+    });
+  }
+  if (mode === 'replace') {
+    return BaseProofForm()
+      .withDataTransfer({ export: { fields: [{ name: 'id', label: 'Old ID', type: 'text' }] } })
+      .withDataTransfer({ import: { fields: [{ name: 'name', label: 'Replacement Name' }] } });
+  }
+  if (mode === 'independent') {
+    return BaseProofForm().withDataTransfer({
+      export: { fields: [{ name: 'id', label: 'Export ID', type: 'text' }] },
+      import: {},
+    });
+  }
+  return BaseProofForm()
+    .withDataTransfer({ export: {}, import: {} })
+    .addFields({ items: [new StringField('late', 50).withLabel('Late field').withList()] })
+    .withoutField('note');
 }
 
 function AddFieldsStructureForm(): EntityForm {
@@ -708,6 +754,18 @@ export function EntityFormProofCase(caseId: string, id?: string): EntityForm {
     case 'with-revision--efs-21d':
     case 'with-revision--p-10':
       return RevisionLifecycleForm(true).withId(id);
+    case 'with-data-transfer--efs-22a':
+      return DataTransferProofForm('auto').withId(id);
+    case 'with-data-transfer--efs-22b':
+      return DataTransferProofForm('explicit').withId(id);
+    case 'with-data-transfer--efs-22c':
+      return DataTransferProofForm('file-name').withId(id);
+    case 'with-data-transfer--efs-22d':
+      return DataTransferProofForm('replace').withId(id);
+    case 'with-data-transfer--efs-22e':
+      return DataTransferProofForm('independent').withId(id);
+    case 'with-data-transfer--p-11':
+      return DataTransferProofForm('field-mutation').withId(id);
     case 'validation--p-14':
       return BaseProofForm().withTitle('plural validation proof').withId(id);
     default:

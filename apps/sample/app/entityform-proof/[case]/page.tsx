@@ -7,7 +7,11 @@ export default async function EntityFormProofCasePage({
   params: Promise<{ case: string }>;
 }) {
   const { case: caseId } = await params;
-  if (caseId.startsWith('on-before-list-fetch--') || caseId.startsWith('on-after-list-fetch--')) {
+  if (
+    caseId.startsWith('on-before-list-fetch--') ||
+    caseId.startsWith('on-after-list-fetch--') ||
+    caseId.startsWith('with-data-transfer--')
+  ) {
     return <EntityFormProofList caseId={caseId} />;
   }
   return <EntityFormProofClient caseId={caseId} />;

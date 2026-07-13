@@ -263,3 +263,30 @@ capabilities/actions/list lifecycle 증명 — 2026-07-13
 - EFSP-5 data transfer는 버튼 존재나 mock workbook으로 끝내지 않고 실제 xlsx 셀과 import 후 SQLite row를 관찰한다.
 - action/list proof의 Auth session, request AND+OR, after-hook row threading을 transfer 편의를 위해 우회하거나 복제하지 않는다.
 - manifest 157 anchors와 176 E2E 기준선을 closure 중 회귀시키지 않는다.
+
+## EFSP-5
+
+data transfer와 전수 closure — 2026-07-13
+
+### Reuse review
+
+- **Extend**: `apps/sample/lib/entities/entityform-proof.ts`의 단일 proof factory에 transfer case만 추가한다.
+- **Extend**: `apps/sample/app/entityform-proof/EntityFormProofList.tsx`의 기존 `ViewListGrid.toolbar`에 College 샘플과 같은 Excel 모달 배선을 추가한다.
+- **Reuse**: `@listgrid/excel`의 `getDataTransfer()`/Exporter/Importer와 `POST /api/entityform-proof/excel-upload`의 SQLite `upsertMany` transaction을 그대로 사용한다.
+- **Reuse**: `e2e/college-excel.spec.ts`의 실제 browser download·Node workbook fixture 패턴을 proof 전용 E2E에서 확장한다.
+
+### Term binding / concrete readback
+
+| 토큰 | 결박 | 이 task의 구체 계약 |
+|---|---|---|
+| EFS-22 / `withDataTransfer` | `spec:entityform-sample-proof-plan.md §3/§4` · `disk:packages/schema-core/src/data-transfer.ts` | export/import 자동 파생, 명시 fields, fileName, 재호출 replace, 양방향 독립 해석을 실제 모달과 workbook으로 관찰한다. |
+| 자동 파생 시점 | `spec:entityform-public-api-spec.md §3.5` · `disk:packages/schema-core/src/entity-form.ts#getDataTransfer` | `fields` 생략/빈 배열은 `getDataTransfer()` 호출 시점의 `getFields()` 선언 순서를 사용하며 고정 snapshot을 저장하지 않는다. |
+| workbook 계약 | `spec:entityform-sample-proof-plan.md §3 Route/page 배선` · `disk:packages/excel/src/export-core.ts` | 실제 다운로드한 `EntityForm Proof` sheet에서 열 순서 `id,name,status,category,note`와 seed 셀을 읽는다. |
+| import persistence | `disk:apps/sample/app/api/entityform-proof/excel-upload/route.ts` · `disk:apps/sample/lib/mock-backend/sqlite.ts` | 실제 xlsx 파싱 결과를 bulk route로 보내고 transaction 후 list refetch와 backend GET에서 같은 row를 확인한다. |
+| P-11 | `spec:entityform-sample-proof-plan.md §4 필수 pairwise` | `withDataTransfer({export:{},import:{}})` 뒤 field add/remove가 export/import 양쪽의 최종 fields에 반영되어 stale snapshot이 없음을 증명한다. |
+
+### Do-NOT
+
+- 다운로드 버튼이나 모달 존재만으로 export를 완료 처리하지 않고 실제 파일의 sheet·header·data cell을 읽는다.
+- import UI의 성공만으로 persistence를 주장하지 않고 list refetch와 SQLite-backed item GET을 함께 관찰한다.
+- proof 편의를 위해 새 transfer registry, 별도 상태 엔진, 전용 mock adapter를 만들지 않는다.

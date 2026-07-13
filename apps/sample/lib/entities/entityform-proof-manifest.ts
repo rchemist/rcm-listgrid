@@ -41,6 +41,7 @@ const identityTestFile = 'e2e/entityform-proof-identity.spec.ts' as const;
 const structureTestFile = 'e2e/entityform-proof-structure.spec.ts' as const;
 const lifecycleTestFile = 'e2e/entityform-proof-lifecycle.spec.ts' as const;
 const actionsListTestFile = 'e2e/entityform-proof-actions-list.spec.ts' as const;
+const transferTestFile = 'e2e/entityform-proof-transfer.spec.ts' as const;
 const identityAnchor = 'apps/sample/lib/entities/entityform-proof.ts#EntityFormProofCase';
 const diagnosticsAnchor =
   'apps/sample/lib/entities/entityform-proof.ts#EntityFormIdentityDiagnostics';
@@ -116,6 +117,21 @@ const actionsListProof = (
   sampleCase: `${memberKebab}--${id.toLowerCase()}`,
   sampleAnchor: identityAnchor,
   e2eFile: actionsListTestFile,
+  testTitle,
+  assertion,
+});
+
+const transferProof = (
+  id: `EFS-${string}`,
+  memberKebab: string,
+  testTitle: string,
+  assertion: string,
+): EntityFormProofBranch => ({
+  id,
+  status: 'implemented',
+  sampleCase: `${memberKebab}--${id.toLowerCase()}`,
+  sampleAnchor: identityAnchor,
+  e2eFile: transferTestFile,
   testTitle,
   assertion,
 });
@@ -834,7 +850,42 @@ export const entityFormProofManifest = {
         ),
       ],
     },
-    { member: 'withDataTransfer', kind: 'setting', branches: [] },
+    {
+      member: 'withDataTransfer',
+      kind: 'setting',
+      branches: [
+        transferProof(
+          'EFS-22a',
+          'with-data-transfer',
+          '[EFS-22a] withDataTransfer — export/import omitted fields auto-derive at query time',
+          'export/import diagnostics와 checklist가 현재 선언 fields를 사용',
+        ),
+        transferProof(
+          'EFS-22b',
+          'with-data-transfer',
+          '[EFS-22b] withDataTransfer — explicit fields drive export and import verbatim',
+          'id/name/status/category/note 명시 순서가 양쪽에 유지',
+        ),
+        transferProof(
+          'EFS-22c',
+          'with-data-transfer',
+          '[EFS-22c] withDataTransfer — fileName names a real workbook that round-trips into SQLite',
+          'EntityForm Proof.xlsx sheet/cell을 수정 import하고 SQLite row 확인',
+        ),
+        transferProof(
+          'EFS-22d',
+          'with-data-transfer',
+          '[EFS-22d] withDataTransfer — repeated calls replace the complete prior config',
+          '두 번째 import-only 설정 뒤 이전 Export UI가 없음',
+        ),
+        transferProof(
+          'EFS-22e',
+          'with-data-transfer',
+          '[EFS-22e] withDataTransfer — export and import resolve only their own declarations',
+          'export explicit id와 import auto-derived fields가 교차 오염 없음',
+        ),
+      ],
+    },
     {
       member: 'getTitle',
       kind: 'query',
@@ -1096,7 +1147,17 @@ export const entityFormProofManifest = {
         '[P-10] withRevision × create/update/delete — every transport receives the exact name',
       assertion: 'POST/PUT/DELETE 세 body에 exact revisionEntityName',
     },
-    plannedIntegration('P-11'),
+    {
+      id: 'P-11',
+      members: ['withDataTransfer', 'addFields', 'withoutField'],
+      status: 'implemented',
+      sampleCase: 'with-data-transfer--p-11',
+      sampleAnchor: identityAnchor,
+      e2eFile: transferTestFile,
+      testTitle:
+        '[P-11] withDataTransfer × field add/remove — auto-derived fields use the live form',
+      assertion: '설정 뒤 add late/remove note가 실제 export header와 import SQLite row에 반영',
+    },
     {
       id: 'P-12',
       members: ['clone'],
