@@ -12,7 +12,7 @@
 // edit-triggered recompile. This is the same pattern used for dev-mode
 // Prisma-client singletons.
 
-import type { FilterGroups, FilterItem } from '@listgrid/schema-core';
+import type { FilterGroups, FilterItem, SortSpec } from '@listgrid/schema-core';
 
 export type WithId = { id: string; [key: string]: unknown };
 
@@ -292,6 +292,56 @@ export function matchesFilterGroup(row: WithId, filters?: SearchFilters): boolea
   return andOk && orOk && notOk;
 }
 
+// TB-2 (tb-matching-semantics.md §5, SortBuilder.java:55-90) — `req.sorts()`
+// applied in LIST ORDER as successive JPA `Order`s: first sort is primary,
+// each subsequent sort only breaks ties left by the ones before it
+// (multi-key priority = declaration order, not a separate weight field —
+// listgrid only ever emits `NormalSortInfo`-shaped {field,direction}, no
+// `type`/`nullsFirst` on the wire, recon §2). `nullsFirst` defaults to false
+// (NULLS LAST) DBMS-independently (:90) — direction-independent, so both ASC
+// and DESC push null/undefined sort values to the end.
+
+/**
+ * Single-key row comparator: nulls-last (direction-independent, SortBuilder
+ * default) computed first, then `compareOrdered` (store.ts, reused verbatim
+ * — no duplicate comparison logic) supplies the ordering for the non-null
+ * pair, negated for DESC. Non-comparable non-null operands (compareOrdered
+ * -> undefined, e.g. mismatched types) fall back to "equal" (0) so the
+ * stable sort below leaves their relative order untouched — this mirrors
+ * FilterDispatcher's non-Comparable guard producing no ordering signal
+ * rather than an invented one.
+ */
+function compareBySort(a: WithId, b: WithId, sort: SortSpec): number {
+  const av = a[sort.field];
+  const bv = b[sort.field];
+  const aNull = av === null || av === undefined;
+  const bNull = bv === null || bv === undefined;
+  if (aNull && bNull) return 0;
+  if (aNull) return 1;
+  if (bNull) return -1;
+  const cmp = compareOrdered(av, bv) ?? 0;
+  return sort.direction === 'DESC' ? -cmp : cmp;
+}
+
+/**
+ * Multi-key sort over `sorts` (list order = priority). Returns a NEW array
+ * (never mutates `rows`) via `Array.prototype.sort`, which is stable per
+ * spec (ES2019+/Node >=11) — ties (all keys compare equal, including the
+ * "both null" and "non-comparable" 0-cases above) keep their original
+ * relative order, satisfying the stable-sort requirement without a manual
+ * index tiebreaker. Empty/absent `sorts` -> filtered order unchanged.
+ */
+function sortRows<T extends WithId>(rows: T[], sorts?: SortSpec[]): T[] {
+  if (!sorts || sorts.length === 0) return rows;
+  return [...rows].sort((a, b) => {
+    for (const sort of sorts) {
+      const cmp = compareBySort(a, b, sort);
+      if (cmp !== 0) return cmp;
+    }
+    return 0;
+  });
+}
+
 function nextId(rows: WithId[]): string {
   const max = rows.reduce((acc, row) => {
     const n = Number(row.id);
@@ -311,14 +361,16 @@ export class EntityStore<T extends WithId> {
     page = 0,
     pageSize = 20,
     filters?: SearchFilters,
+    sorts?: SortSpec[],
   ): { content: T[]; totalElements: number; totalPages: number } {
     const filtered = filters
       ? this.rows.filter((row) => matchesFilterGroup(row, filters))
       : this.rows;
-    const totalElements = filtered.length;
+    const sorted = sortRows(filtered, sorts);
+    const totalElements = sorted.length;
     const totalPages = Math.max(1, Math.ceil(totalElements / Math.max(pageSize, 1)));
     const start = page * pageSize;
-    const content = filtered.slice(start, start + pageSize);
+    const content = sorted.slice(start, start + pageSize);
     return { content, totalElements, totalPages };
   }
 

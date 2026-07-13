@@ -16,6 +16,7 @@
 //   DELETE {url}         -> bulk delete, body {ids:string[]} (no per-row DELETE)
 
 import { NextRequest, NextResponse } from 'next/server';
+import type { SortSpec } from '@listgrid/schema-core';
 import type { EntityStore, SearchFilters, WithId } from './store';
 import { notFound, searchEnvelope } from './envelope';
 
@@ -47,6 +48,16 @@ export function readFilters(body: Record<string, unknown>): SearchFilters | unde
   return raw as SearchFilters;
 }
 
+// TB-2 (tb-matching-semantics.md §5) — `body.sorts` is `SortSpec[]`
+// (`{field, direction}` only — search-form.ts:27-30, no framework
+// `type`/`nullsFirst` on the wire). Exported alongside `readFilters` for the
+// same reason: major/search/route.ts's hand-written handler needs the
+// identical wire extraction.
+export function readSorts(body: Record<string, unknown>): SortSpec[] | undefined {
+  const raw = body.sorts;
+  return Array.isArray(raw) && raw.length > 0 ? (raw as SortSpec[]) : undefined;
+}
+
 export function makeSearchHandler<T extends WithId>(getStore: () => EntityStore<T>) {
   return async function POST(request: NextRequest) {
     const body = await request.json().catch(() => ({}) as Record<string, unknown>);
@@ -54,7 +65,8 @@ export function makeSearchHandler<T extends WithId>(getStore: () => EntityStore<
     const pageSize = typeof body.pageSize === 'number' ? body.pageSize : 20;
 
     // EC3 — apply the wire `filters` (see store.ts matchesFilterGroup doc).
-    const result = getStore().search(page, pageSize, readFilters(body));
+    // TB-2 — apply the wire `sorts` (see store.ts sortRows doc).
+    const result = getStore().search(page, pageSize, readFilters(body), readSorts(body));
     return searchEnvelope(result, body);
   };
 }

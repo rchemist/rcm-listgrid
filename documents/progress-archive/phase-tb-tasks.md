@@ -26,3 +26,19 @@
 **커버 매트릭스**: TB-C1(24 조건타입+no-op 명시)·TB-C2(AND/OR/NOT+nested subFilters+빈그룹 관용) 충족.
 
 **Deviation(§Needs Review 등재)**: delegate가 `vitest.config.ts`를 스코프 펜스 밖으로 판단·미수정→needs_decision. 메인 세션이 recon §0 의도 근거로 include 확장(옵션 a)·in-commit 해소. risk:low(behavioral=apps 유닛이 CI 게이트 진입·의도된 것).
+
+## TB-2 정렬 실적용 + quickSearch/페이지네이션 검증 — ✅ 2026-07-13
+
+**Delegate**: sonnet general-purpose (`a99b2da4574726150`)·status=`done`(무deviation). Engine=claude.
+
+**핵심 재프레이밍(TB-0/브리핑 시 발견)**: listgrid는 framework `searchTerm` 경로를 **안 씀**(grep 0). `SearchForm.quickSearch()` (`search-form.ts:178-199`)가 각 필드를 `filters.OR`에 LIKE로 pre-expand → quickSearch 필터링은 **TB-1의 OR-group matcher가 이미 완전 처리**. 따라서 TB-2 실작업 = **정렬 적용**(신규) + quickSearch/pagination **검증 테스트**(신규 구현 없음). tb-matching-semantics.md §4를 이 사실로 정정.
+
+**구현 (changed files)**:
+- `store.ts` — `compareBySort`/`sortRows` 추가. `search()`에 `sorts?: SortSpec[]` 파라미터, 필터 후·페이지네이션 전 적용. 다중키(선언순 우선·tie→다음키·full tie→0 stable), per-key `compareOrdered`**재사용**(중복 없음), **nulls-last**(ASC/DESC 무관·SortBuilder DBMS무관 기본), 빈/부재 sorts→무재정렬. non-comparable non-null→0(tied·안전 기본·인라인 문서화).
+- `crud-routes.ts` — `readSorts(body)` export·`makeSearchHandler`가 전달.
+- `app/api/major/search/route.ts`·`app/api/org/search/route.ts` — `readSorts` 전달(org/search는 filters 미판독 유지).
+- `sort-engine.test.ts` (신규·15 tests) — 정렬(단일 ASC/DESC·numeric-not-lexical·chronological·다중키·nulls-last ASC+DESC·stable·sort-before-paginate)·quickSearch OR-group narrowing 회귀·pagination(0-base·totals·last short page).
+
+**Authoritative verify (메인·tracked config)**: apps/sample 유닛 44 green·`npm test` 전량 **188 files / 2443 passed**(2428+15·무회귀)·apps tsc/eslint/prettier clean. build=무영향(packages 무변경) 스킵.
+
+**커버 매트릭스**: TB-C3(정렬 실적용 NORMAL·ASC/DESC·다중키+quickSearch)·TB-C4(0-base 페이지네이션) 충족.

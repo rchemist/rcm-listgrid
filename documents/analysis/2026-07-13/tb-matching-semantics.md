@@ -54,9 +54,11 @@
 
 framework는 JPA(JSON 컬럼·관계 서브쿼리)에서 실구현하나, apps/sample mock store는 **평면 in-memory row**(JSON 경로·엔티티 관계 없음). 따라서 두 타입은 mock에서 **의미 있는 술어를 만들 수 없음** → `default: true` 유지가 아니라 **명시적 no-op(항상 TRUE)로 문서화**하고 계약 테스트로 "오늘 동작"을 고정한다(향후 관계형 fixture 도입 시 재검토). 이는 **발명이 아니라 데이터모델 한계의 명시**(recon §6.8 준수).
 
-## 4. quickSearch — `SearchRequestPlanner.buildQuickSearch:188-203` (TB-2)
+## 4. quickSearch — ⚠️ listgrid는 framework `searchTerm` 경로를 **안 씀** (TB-2 정정)
 
-`searchTerm` 비었거나 `quickSearchFields` 비면 no-op. else: 각 필드에 `cb.like(cb.lower(field), "%"+term.toLowerCase()+"%")` → 전 필드를 **OR** 결합. ⇒ mock: quickSearchFields 중 하나라도 term substring(ci) 포함 시 매칭. filters와는 top-level `operator`(default AND)로 결합(`combine():218`).
+- **framework 경로**(참고): `SearchRequestPlanner.buildQuickSearch:188-203` = `searchTerm`+`quickSearchFields`로 필드별 `cb.like(lower(field), %term%)` OR 결합, filters와 top-level operator(default AND) 결합.
+- **listgrid 실제**(TB-0 검증): `searchTerm`이 **전 패키지에 부재**(grep 0). `SearchForm.quickSearch(fields, value)` (`search-form.ts:178-199`)는 각 필드를 **`filters.OR`에 `{name:field, value, queryConditionType:'LIKE'}`로 pre-expand**(clear-first: prior quickSearchFields 기준 OR 정리 후 재삽입). `quickSearchFields` 배열은 wire 에코되나 **정보성**(클라 clear-first 추적용).
+- **⇒ mock 함의(TB-2)**: quickSearch 필터링은 **이미 TB-1의 OR-group+LIKE로 완전 처리됨**. mock에 별도 quickSearch 경로/`searchTerm` 처리 추가 **금지**(listgrid 미방출 → dead code·발명). TB-2 quickSearch = OR-group LIKE narrowing **검증 테스트**만.
 
 ## 5. 정렬 — `SortBuilder.java` (TB-2)
 

@@ -4,7 +4,7 @@
 // AND the parentMajor self-ref M2O picker both read through this endpoint.
 import { NextRequest } from 'next/server';
 import { majorStore, toWire } from '../../../../lib/mock-backend/major';
-import { readFilters } from '../../../../lib/mock-backend/crud-routes';
+import { readFilters, readSorts } from '../../../../lib/mock-backend/crud-routes';
 import { searchEnvelope } from '../../../../lib/mock-backend/envelope';
 
 export async function POST(request: NextRequest) {
@@ -12,6 +12,6 @@ export async function POST(request: NextRequest) {
   const page = typeof body.page === 'number' ? body.page : 0;
   const pageSize = typeof body.pageSize === 'number' ? body.pageSize : 20;
 
-  const result = majorStore().search(page, pageSize, readFilters(body));
+  const result = majorStore().search(page, pageSize, readFilters(body), readSorts(body));
   return searchEnvelope({ ...result, content: result.content.map(toWire) }, body);
 }
