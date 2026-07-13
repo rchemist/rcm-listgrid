@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · EF-SP EntityForm 설정 전수·영속 CRUD 샘플 증명 대기
-**Next up**: #EFSP-0 스펙 query 복구 + SQLite proof lab/AST 게이트
-**Last updated**: 2026-07-13 21:11
+**Status**: active · EFSP-1 identity/read/meta/clone/query 증명 대기
+**Next up**: #EFSP-1 identity/read/meta/clone/query 증명
+**Last updated**: 2026-07-13 21:32
 **Push**: auto
 **Engine**: claude/codex 중립
-**Next session policy**: 새 세션 권장. `$harness:progress`는 EFSP-0부터 즉시 실행한다.
+**Next session policy**: 현재 세션 계속. EFSP-0 proof 기반을 재사용해 EFSP-1 branch를 채운다.
 
 ## Goal
 
@@ -58,18 +58,18 @@
 
 ## 세션 인계 (Handoff)
 
-- **현재 활성 task**: `[ ] #EFSP-0` — query 4개 복구, 53-member gate, SQLite proof hub와 restart E2E를 만든다.
-- **왜 먼저인가**: 기존 71 E2E는 C1~C9 대표 흐름이며 EntityForm 설정 전수 원장이 아니다.
+- **현재 활성 task**: `[ ] #EFSP-1` — identity/read/meta/clone/query의 EFS/P branch를 sample+E2E로 증명한다.
+- **완료 기반**: EFSP-0에서 query 4개, 53-member gate, SQLite proof hub와 restart/production Chromium CRUD를 봉인했다.
 - **Do NOT**: 기존 E2E 이름만 manifest에 연결하지 말고 해당 assertion이 같은 원자 동작을 실제 관찰하는지 확인한다.
 - **Do NOT**: getter diagnostics만으로 설정 동작을 증명하지 않는다. 설정은 DOM·request·response까지 단언한다.
-- **Hot 파일**: `packages/schema-core/src/entity-form.ts` — 현재 49와 스펙 누락 query 4개의 권위 원본.
+- **Hot 파일**: `packages/schema-core/src/entity-form.ts` — 현재 53-member 권위 원본; AST manifest exact gate가 봉인한다.
 - **Hot 파일**: `documents/plans/entityform-sample-proof-plan.md` — EFS-01~24/P-01~14·SQLite 실행 계약.
 - **Hot 파일**: `apps/sample/lib/mock-backend/store.ts` — API를 유지하고 공용 SQLite backing으로 확장할 대상.
 - **Invariant**: id가 있을 때만 update, readOnly와 capability는 다른 계약, hook은 등록 순서대로 엔진이 실행한다.
 - **Invariant**: manifest 행은 sample/e2e anchor와 관찰 assertion이 모두 있어야 green이다.
 - **Invariant**: `cd apps/sample && npm run dev`→`/entityform-proof`에서 모든 case/CRUD/reset을 직접 실행할 수 있다.
 - **미룬 결정**: GA-L3/L4는 EF-SP closure 후에도 사용자 `GA-latest go`가 필요하다(OQ-GA-L).
-- **첫 확인**: `git status -sb`, `node -v`, `npm run check:surface` baseline 49/61/188, plan K-EFSP-1~5.
+- **첫 확인**: `git status -sb`, `npm run check:entityform-sample-proof`, `npm run check:surface` baseline 53/61/188.
 
 ---
 
@@ -78,10 +78,7 @@
 **계획**: [entityform-sample-proof-plan.md](./plans/entityform-sample-proof-plan.md)
 **완료 판정**: EntityForm 53/53 manifest + EFS-01~24 + P-01~14 빈 행 0 + restart SQLite CRUD + full gate green.
 
-- [ ] **#EFSP-0 스펙 query 복구 + SQLite proof lab/AST 게이트**
-  - Files: EntityForm+unit, spec, manifest/entity, SQLite store/routes/hub, persistence runner, package/Next config/CI.
-  - Verify: 4 query red→green, AST 53 exact, baseline, restart E2E, production `next start` Chromium CRUD.
-  - IDs: P-13. EFS-24 inventory scaffold; 행동 완료는 EFSP-1 소유.
+- [x] **#EFSP-0 query+SQLite proof** ✅ 2026-07-13 · commit `4c5de9a` · 2512u/72e2e/restart/prod green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-0)
 - [ ] **#EFSP-1 identity/read/meta/clone/query 증명**
   - Files: proof entity/pages, `e2e/entityform-proof-identity.spec.ts`, manifest.
   - Verify: identity spec + AST gate. IDs EFS-01/03/05/20/23/24, P-01/02/03/12.
