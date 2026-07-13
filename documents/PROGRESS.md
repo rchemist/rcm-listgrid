@@ -1,7 +1,7 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY**. 다음=0.4.0-alpha.0 publish(next).
+**Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY** · **`0.4.0-alpha.0` 배포됨(dist-tag `next`·`1ebbc4d`·latest=0.3.26 무영향)**. 다음=alpha 소아킹→GA latest.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
@@ -41,7 +41,7 @@
 | 페이즈/트랙 | 브랜치 | 상태 | 릴리스 | 상세 |
 |---|---|---|---|---|
 | P0 실버그 핫픽스 | `p0-hotfixes` | 🟡 코드완료(publish/전환 승인 대기) | 0.3.26 | [archive](./progress-archive/phase-foundation-P0-P2.md) |
-| P1 워크스페이스+패키징 | v0.4 | 🟡 코드완료(alpha.0 승인 대기) | alpha.0 | [archive](./progress-archive/phase-foundation-P0-P2.md) |
+| P1 워크스페이스+패키징 | v0.4 | ✅ 0.4.0-alpha.0 배포됨(dist-tag `next`·2026-07-13) | 0.4.0-alpha.0 | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
@@ -104,7 +104,7 @@
 - [x] **GA 게이트 실행 (헌장 C1~C9·요건1/2/3)** ✅ 2026-07-13 · 전건 `present`(빈 행 0)·전 게이트 green·엔진 anchor 실재 · [결과](./analysis/2026-07-13/ga-gate-result.md)
 - [x] **RV-R13 R7 실 백엔드 검증 + labelField 수정** ✅ 2026-07-13 · edustack(0.3.x) 실 대조=manyToOne `{id,title}`(labelField='title')·RV-R7 가드 name→label→id가 title 놓쳐 raw id export하는 **실결함 발견→수정**(9-agent 팬아웃+opus 적대검증). `/excel`이 labelField 스레드(sonnet 위임→판별검증·surface 무변경·2399u·E2E32) · [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
 
-**Next up**: **0.4.0-alpha.0 publish(dist-tag `next`) + 최종 GA 봉인** — R7 해소로 코드축 GA-READY. publish=모델 판단(alpha 선출하→소아킹→GA latest). 잔여=low-risk §Needs Review ack(GA 비차단).
+**Next up**: **alpha 소아킹 → GA `latest` 봉인** — 0.4.0-alpha.0 배포 완료(next). GA latest 전 선결: ① v0.4→main 플립 ② low-risk §Needs Review ack ③ alpha 소비자 피드백. 코드축 GA-READY(잔여 코드 작업 0).
 
 ---
 
@@ -150,7 +150,7 @@
 ## Open Questions
 
 - [x] **GA 봉인 HOLD ① R7 GJCU-shape → 해소(2026-07-13, RV-R13)** — edustack 실 대조로 manyToOne=`{id,title}` 확인·RV-R7 가드 실결함 발견→`/excel` labelField 스레드 수정. xref=실 소비자 raw 바인딩無(flat sibling)+CAP-29 descope=low-risk 한계 문서화·address=flat 무관. [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
-- [ ] **publish = 모델 판단(사용자 자율 위임)** — 로드맵대로 **0.4.0-alpha.0(dist-tag `next`) 선출하**(코드축 GA-READY·surface 안정) → 소아킹 후 GA `latest`. 외부 승인 대기 아님(header 배포 자율). 게이트(CHANGELOG==version·full gate) 선행.
+- [x] **publish 0.4.0-alpha.0 → 배포 완료(2026-07-13, `1ebbc4d`·tag `v0.4.0-alpha.0`)** — dist-tag `next`(opt-in). CI publish.yml green(prepublishOnly type-check+test+build+publish --provenance). **npm 확인**: `next=0.4.0-alpha.0`·`latest=0.3.26` 무변경(0.3.x 무영향). 다음=alpha 소아킹 → GA `latest`(v0.4→main 플립 후).
 - [x] **릴리스 기전 확정(2026-07-10)** — `v*` 태그 push→`publish.yml` 자동배포(dist-tag `-alpha`→next/`0.2.x`→legacy-0.2/else latest). 게이트 선행.
 - [x] **0.3.26 실배포 완료(2026-07-11)** — 소비자 무회귀 확인 → main ff-merge `853660b` → `v0.3.26` 태그 → publish.yml latest 자동배포. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md).
 - [x] **0.4.0-alpha.N → W2 착지 후 보류(모델 결정 2026-07-11)** — 현 표면은 W1이 즉시 대개명할 표면(폐기 예정 이름에 소비자 통합 방지). W2 완료 시 자동 재개.
