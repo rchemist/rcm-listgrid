@@ -153,3 +153,34 @@
 **Authoritative verify (메인·전량)**: type-check clean(`tsc --noEmit`)·vitest **2495 passed**(2478+17·무회귀·1 todo)·lint **0 errors**(262 pre-existing warnings·backend-rest 무관)·prettier clean(test 파일 `--write` 1회 후 재검 green)·build green(backend-rest는 tsup entry 미포함=published bundle 무영향=의도). 어댑터 CRUD 라운드트립 실증(injected fetch seam·17 assert).
 
 **커버 매트릭스**: TB-C11(stretch·`backend/rest` 레퍼런스 어댑터+제네릭 REST mock·ADR-0005 §Decision-5) 충족.
+
+## TB-9 GA-L2 종결 (#GX-1/#GX-2/#W6-2b 신 테스트 종결 + 재판정) — ✅ 2026-07-13
+
+**Spec**: [recon §8](../analysis/2026-07-13/test-backend-recon.md) GA-L2 해소 매핑 + [ga-l2-closure.md](../analysis/2026-07-13/ga-l2-closure.md)(처분 근거·§1 매핑/§2 실동작/§3 재판정). GA-L1서 GA-L2에 재앵커된 #GX-1/#GX-2/#W6-2b를 충실 테스트 백엔드+기존 excel 유닛+**실 export 관찰**로 종결.
+
+**종결 매핑**(상세=[ga-l2-closure.md §1](../analysis/2026-07-13/ga-l2-closure.md)):
+- #GX-2(mock 5/24 조건타입?) → TB-1 filter-engine.test.ts 24종 전건(framework 계약 상한=오라클). CLOSED.
+- #GX-1(빈 AND/OR vacuous?) → TB-1 빈그룹 관용 + TB-6 backend-contract 빈 AND/OR=no-filter 등가. CLOSED.
+- #W6-2b(M2O/xref/address TIER2 garbage?) → M2O 충실(labelField·value-transform.test.ts:185-211+R7)·**address 충실**(평면 sibling·신규 export-core.test.ts 관찰)·**xref만 진짜 손실**(한계 문서화·실트래픽 0). CLOSED.
+
+**실행·관찰 (추정 아님·이 태스크 핵심 교훈)**: address를 xref와 동일 "data-loss"로 오판한 초안을 **실 export 관찰**로 정정. buildExportAoa 하니스(적대적 검증 워크플로우) → address body=`['Kim','','Seoul','Gangnam','123 Main','Apt 5','06236']`: composite `address` 빈셀+5 sibling(state/city/address1/address2/postalCode) 충실 → **address=무손실**(composite 빈 컬럼=vestige). xref=`{mapped,deleted}`→빈셀·carrier 無·silent(TIER-3 아님→warn 無)=**유일 진짜 손실**. 적대적 검증(opus)이 두 주장 CONFIRMED.
+
+**구현 (changed files·TEST+DOC ONLY·product source 무변경)**:
+- `packages/excel/src/__tests__/value-transform.test.ts` — address 방어 케이스 실 셰이프(`{state,city,address1,address2,postalCode}`)+NOT-data-loss 코멘트.
+- `packages/excel/src/__tests__/export-core.test.ts` — 신규 통합 테스트(applyFullAddressFields→buildExportAoa faithful siblings 관찰 lock·composite 빈셀·resolved.fields 7항목 순서).
+- `documents/analysis/2026-07-13/ga-l2-closure.md` — 종결 처분 기록.
+
+**정정 이력 (2회 오류 → 관찰로 확정·사용자 지적)**: ① `{zonecode,roadAddress}`=Daum 위젯 콜백 키(address-renderer.tsx:44-49)이지 저장/export되는 Address 멤버(state/city/address1/address2/postalCode) 아님. ② address를 xref와 동일 data-loss로 프레이밍. 둘 다 **실 export 미관찰·추정**에서 비롯 → 실행·관찰+적대적 검증으로 정정. **교훈=composite 필드 export 동작은 추정 말고 buildExportAoa로 관찰**. citation `§6.6`(recon 미존재)→recon:38(§3)/:76(§6#6) 정정.
+
+**Authoritative verify (메인·전량)**: type-check·vitest **2497**(2495+2·무회귀·1 todo)·lint 0 errors·prettier·build green.
+
+**커버 매트릭스**: TB-C10(GA-L2 해소·#GX-1/#GX-2/#W6-2b 신 테스트 종결) 충족. → **Phase TB 전 커버리지(TB-C1~11) 완료.**
+
+## Next Phase Handoff (Phase TB → GA-L / GA-latest)
+
+- **Phase TB ✅ 완료(TB-0~9·TB-C1~11 전 커버리지)**: framework-0.1.0 충실 테스트 백엔드 구축 + listgrid 백엔드 full-set 실증. vitest 2478→**2497**·Playwright 70 green. **부수: GA-L2 CLOSED**([closure](../analysis/2026-07-13/ga-l2-closure.md)).
+- **다음 = Phase GA-L(downstream·사용자 게이트)**: GA-L1/L2 ✅. **GA-L3(`v0.4`→`main` 플립)·GA-L4(0.4.0 `latest` 배포)=사용자 "GA-latest go" 결정(크리티컬 패스) 대기**. 무인 세션은 이 결정 없이 독립 코드 작업 없음(운영 모드 중단 조건 ②). 릴리스 기전=PROGRESS §Handoff.
+- **도입/재사용 패턴(Patterns)**: ① mock-backend 승격(옵션 A·`apps/sample/lib/mock-backend` store.ts/crud-routes.ts=framework-0.1.0 충실 오라클) ② route-level 계약 e2e(`backend-contract.spec`/`entity-contract.spec` — 무 UI 엔티티도 `/api` 라우트로 계약 증명) ③ `makeCollectionHandlers` 통합(collection route 균일화) ④ `backend-rest` 레퍼런스 어댑터(`createRcmAdapter` 구조 미러·injected fetch seam) ⑤ **composite export 관찰 검증**(buildExportAoa 하니스+적대적 워크플로우로 address/xref 실동작 확정).
+- **Do-NOT(계승)**: ① composite 필드(address/xref/M2O) export 동작은 **추정 금지·`buildExportAoa`로 관찰**(TB-9 교훈: address를 xref와 동일 data-loss로 오판→사용자 지적→관찰 정정). ② `{zonecode,roadAddress}`는 **Daum 위젯 콜백 키**(`address-renderer.tsx:44-49`)이지 저장/export Address 멤버(state/city/address1/address2/postalCode) 아님. ③ xref/address 실트래픽 fidelity 과투자 금지(edustack 사용 0·recon:38/:76). ④ #GX-1/#GX-2/#W6-2b(M2O·address)는 신 테스트로 이미 증명(재테스트 금지·인용). ⑤ framework에 없는 조건타입 시맨틱 발명 금지(JSON_CONTAINS/EXISTS=문서화 no-op).
+- **후속(§Backlog·비차단)**: xref export silent data-loss(TIER-3 아님→warn 無)=미래 xref-export 소비자 함정·GA 후 완화 검토.
+- **세션 정책**: **새 세션 권장(선택)** — 잔여는 사용자 GA-latest go 결정 대기라 코드 작업 없음. 재개는 `/progress`(이 archive + PROGRESS §Handoff + [GA-L2 closure](../analysis/2026-07-13/ga-l2-closure.md)만 읽으면 충분).

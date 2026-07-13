@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import * as XLSX from 'xlsx-js-style';
 import {
+  applyFullAddressFields,
   BooleanField,
   EntityForm,
   FileField,
@@ -120,6 +121,51 @@ describe('buildExportAoa — manyToOne labelField (R7 / edustack shape)', () => 
     const aoa = buildExportAoa(form, fields, rows);
 
     expect(aoa[1]).toEqual(['Cert #1', 'Course A']);
+  });
+});
+
+describe('buildExportAoa — composite AddressField (GA-L2 #W6-2b: faithful via flat siblings)', () => {
+  // `applyFullAddressFields` declares a VIRTUAL composite `address` field
+  // (exceptOnSave, address-field.ts:56) + 5 flat sibling StringFields that
+  // actually carry the data (state/city/address1/address2/postalCode). Real
+  // backend rows are flat-scalar (no nested `address` key — recon:40), so on
+  // export the composite column comes out EMPTY (a redundant vestige) while the
+  // sibling columns carry the real values FAITHFULLY. This locks that address
+  // export is NOT lossy — the empty composite cell is not data-loss.
+  it('emits an empty composite `address` column but carries the real data faithfully in the flat sibling columns', () => {
+    const form = applyFullAddressFields(
+      new EntityForm('StudentForm', '/student').addFields({
+        items: [new StringField('name', 100).withLabel('Name')],
+      }),
+    ).withDataTransfer({ export: {} });
+
+    const resolved = resolveExportConfig(form);
+    // composite `address` + its 5 flat siblings all auto-derive (none is TIER-3,
+    // so filterFlatFields drops nothing and no warn fires).
+    expect(resolved.fields.map((f) => f.name)).toEqual([
+      'name',
+      'address',
+      'state',
+      'city',
+      'address1',
+      'address2',
+      'postalCode',
+    ]);
+
+    // A real (flat-scalar) row — no nested `address` key.
+    const aoa = buildExportAoa(form, resolved.fields, [
+      {
+        name: 'Kim',
+        state: 'Seoul',
+        city: 'Gangnam',
+        address1: '123 Main',
+        address2: 'Apt 5',
+        postalCode: '06236',
+      },
+    ]);
+
+    // composite `address` cell (index 1) is empty; every flat sibling is faithful.
+    expect(aoa[1]).toEqual(['Kim', '', 'Seoul', 'Gangnam', '123 Main', 'Apt 5', '06236']);
   });
 });
 

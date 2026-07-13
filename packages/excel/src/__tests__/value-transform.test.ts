@@ -213,6 +213,30 @@ describe('TIER 2 — scalar passthrough (every FieldType not in TIER 1/TIER 3)',
   it('export: xref {mapped,deleted} envelope has no name/label/id -> empty cell (documented data-loss, not corruption)', () => {
     expect(exportValue('xrefMapping', { mapped: [1, 2], deleted: [] })).toBe('');
   });
+
+  // GA-L2 closure (#W6-2b) — address is NOT a fidelity limitation (unlike xref
+  // above). The composite AddressField is `exceptOnSave`/virtual
+  // (schema-core address-field.ts:56): its own store slot is never saved and
+  // real backend rows carry no nested `address` key, so `row['address']` is
+  // undefined -> empty cell. The actual address data is carried FAITHFULLY by
+  // 5 flat sibling text columns (state/city/address1/address2/postalCode) —
+  // observed in export-core.test.ts ("applyFullAddressFields ... faithful
+  // siblings"). This defensive case only guards the never-in-practice
+  // nested-object shape: its real members (state/city/address1/address2/
+  // postalCode — NOT the Daum widget keys zonecode/roadAddress) lack
+  // name/label/id, so it yields '' (a redundant vestige), never "[object
+  // Object]". So the empty cell here is redundancy, not data-loss.
+  it('export: address composite object (defensive) -> empty cell; the real data rides the flat sibling columns, so this is NOT data-loss', () => {
+    expect(
+      exportValue('address', {
+        state: 'Seoul',
+        city: 'Gangnam',
+        address1: '123 Main',
+        address2: 'Apt 5',
+        postalCode: '06236',
+      }),
+    ).toBe('');
+  });
 });
 
 describe('isAutoDeriveExcluded — TIER 3', () => {
