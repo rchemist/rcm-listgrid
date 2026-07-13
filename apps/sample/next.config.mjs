@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverExternalPackages: ['better-sqlite3'],
   // The @listgrid/* workspace packages ship TS/TSX source (main → src/index.ts),
   // so Next must transpile them rather than treating them as prebuilt deps.
   transpilePackages: [

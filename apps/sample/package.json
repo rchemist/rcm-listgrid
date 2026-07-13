@@ -16,11 +16,16 @@
     "@listgrid/schema-core": "*",
     "@listgrid/state": "*",
     "@listgrid/ui-default": "*",
+    "better-sqlite3": "^12.11.1",
     "file-saver": "^2.0.5",
     "next": "^15.0.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
+    "server-only": "^0.0.1",
     "xlsx-js-style": "^1.2.0",
     "zustand": "^4.5.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13"
   }
 }

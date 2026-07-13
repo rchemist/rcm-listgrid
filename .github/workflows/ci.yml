@@ -34,6 +34,9 @@ jobs:
       - name: Public surface count
         run: npm run check:surface
 
+      - name: EntityForm sample proof inventory
+        run: npm run check:entityform-sample-proof
+
       - name: Lint
         run: npm run lint
 
@@ -90,3 +93,9 @@ jobs:
 
       - name: E2E (Playwright — College / Subject / Professor)
         run: npm run test:e2e
+
+      - name: EntityForm proof persistence (real Next restarts)
+        run: npm run test:e2e:persistence
+
+      - name: EntityForm proof production smoke (next start + Chromium)
+        run: npm run test:sample-production-smoke

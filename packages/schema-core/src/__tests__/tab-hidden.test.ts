@@ -258,3 +258,38 @@ describe('EntityForm.withGroup', () => {
     expect(form.withGroup('main', 'basic', { label: 'X' })).toBe(form);
   });
 });
+
+describe('EntityForm structure query surface (EFSP-0, spec §3.2)', () => {
+  function QueryForm(): EntityForm {
+    return new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new StringField('late', 20)],
+        tab: { id: 'secondary', order: 20 },
+      })
+      .addFields({
+        items: [new StringField('early', 10), new StringField('middle', 15)],
+        tab: { id: 'main', order: 10 },
+      });
+  }
+
+  it('hasField reports found and missing field names', () => {
+    const form = QueryForm();
+    expect(form.hasField('early')).toBe(true);
+    expect(form.hasField('missing')).toBe(false);
+  });
+
+  it('getTab and hasTab report found and missing tab ids', () => {
+    const form = QueryForm();
+    expect(form.getTab('main')).toMatchObject({ id: 'main', order: 10 });
+    expect(form.getTab('missing')).toBeUndefined();
+    expect(form.hasTab('secondary')).toBe(true);
+    expect(form.hasTab('missing')).toBe(false);
+  });
+
+  it('getTabFields keeps the global getFields order and returns [] for a missing tab', () => {
+    const form = QueryForm();
+    expect(form.getFields().map((field) => field.getName())).toEqual(['early', 'middle', 'late']);
+    expect(form.getTabFields('main').map((field) => field.getName())).toEqual(['early', 'middle']);
+    expect(form.getTabFields('missing')).toEqual([]);
+  });
+});

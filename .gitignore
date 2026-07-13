@@ -3,6 +3,10 @@ node_modules/
 
 # build output
 dist/
+apps/sample/.data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
 .next/
 .turbo/
 *.tsbuildinfo

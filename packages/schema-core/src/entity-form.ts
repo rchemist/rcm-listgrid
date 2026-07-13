@@ -1018,8 +1018,17 @@ export class EntityForm {
   getField(name: string): EntityField | undefined {
     return this.fields.find((f) => f.getName() === name);
   }
+  hasField(name: string): boolean {
+    return this.getField(name) !== undefined;
+  }
   getTabs(): TabDef[] {
     return [...this.tabs.values()].sort((a, b) => a.order - b.order);
+  }
+  getTab(tabId: string): TabDef | undefined {
+    return this.tabs.get(tabId);
+  }
+  hasTab(tabId: string): boolean {
+    return this.getTab(tabId) !== undefined;
   }
   getFieldGroups(tabId?: string): FieldGroupDef[] {
     const groupIds = new Set(
@@ -1036,6 +1045,10 @@ export class EntityForm {
     return this.getFields().filter(
       (f) => f.getTabId() === tabId && (f.getFieldGroupId() || DEFAULT_GROUP) === groupId,
     );
+  }
+  /** Fields under a tab, preserving the global declared field order. */
+  getTabFields(tabId: string): EntityField[] {
+    return this.getFields().filter((field) => field.getTabId() === tabId);
   }
   /**
    * Declared wizard steps (spec §3.2, C6; W4-2), order-sorted ascending

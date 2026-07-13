@@ -52,7 +52,7 @@
 | `getRenderType` | `(): RenderType` | `'update'` iff id 설정 |
 | `withTitle` | `(title: string \| { text?: string \| undefined; fromField?: string \| undefined }): this` | ReactNode 없음(→react slots.title). **#W4-1b(2026-07-12)**: 재호출=**replace**(L1 기본·title은 스칼라·withCapabilities/withMeta의 merge와 의도적으로 다름) |
 | `getTitle` | `(values?: Record<string, unknown>): string` | **항상 해석된 문자열**: text → fromField의 values값 → `name` 필드 값 → id → **`this.name`**(엔티티 이름·생성자 보장 non-empty). 구 `''` 반환 금지. **#W4-1a(2026-07-12)**: 최종 폴백은 renderType별 카피("새 X"/"X 수정")를 **발명하지 않고** this.name — 대면 카피는 소비자 소관(withTitle/slots.title) |
-| `withReadOnly` | `(readOnly?: boolean \| undefined): this` | **폼 전체 읽기전용 선언**(기본 true, undefined=해제). 선언에 실리므로 M2O 자식 폼 임베드에 그대로 전파(gjcu `UserEntityForm(true)` 변형 패턴 1:1). 의미론: store `formReadOnly` seed → 전 필드 effective readOnly OR + **Save 어포던스 숨김**(**#W3-5b(2026-07-12): 빌트인 Save + `replaces:'save'` 커스텀 액션 둘 다** — 교체 액션도 Save 슬롯을 점유하므로 숨긴다. Delete·`replaces:'delete'`·일반 커스텀 액션은 무관, §6.1 Save 전용). **데이터 쓰기 차단이 목적이면 `withCapabilities({update:false})`** — withReadOnly는 표시/편집 어포던스 계약(의도 명시, 검증 coverage-4) |
+| `withReadOnly` | `(readOnly?: boolean \| undefined): this` | **폼 전체 읽기전용 선언**(기본 true). ~~`undefined`=해제~~ ⛔ **SUPERSEDED by EF-SP K-EFSP-4 (2026-07-13)** — default parameter 계약상 무인자와 명시적 `undefined`는 모두 `true`, 해제는 `withReadOnly(false)`. 선언에 실리므로 M2O 자식 폼 임베드에 그대로 전파(gjcu `UserEntityForm(true)` 변형 패턴 1:1). 의미론: store `formReadOnly` seed → 전 필드 effective readOnly OR + **Save 어포던스 숨김**(**#W3-5b(2026-07-12): 빌트인 Save + `replaces:'save'` 커스텀 액션 둘 다** — 교체 액션도 Save 슬롯을 점유하므로 숨긴다. Delete·`replaces:'delete'`·일반 커스텀 액션은 무관, §6.1 Save 전용). **데이터 쓰기 차단이 목적이면 `withCapabilities({update:false})`** — withReadOnly는 표시/편집 어포던스 계약(의도 명시, 검증 coverage-4) |
 | `getReadOnly` | `(): boolean` | withReadOnly 리더 쌍(W3-5 with/get 쌍 보완 — 선언된 formReadOnly seed 질의). §3.6 리스트 순수질의와 무관 |
 | `withMeta` | `(patch: Record<string, unknown>): this` | **유일한** escape hatch(구 attribute bag 9종 대체). **shallow-merge**(replace 아님 — 프리셋/래퍼 다중 호출 시 last-write-wins 클로버 방지, 검증 dx-6). 키에 `undefined` 대입=키 제거(L4) |
 | `getMeta` | `(): Record<string, unknown>` | 기본 `{}` |
@@ -63,7 +63,7 @@
 
 | 멤버 | 시그니처 | 비고 |
 |---|---|---|
-| `addFields` | `({ items: EntityField[]; tab?: TabInput; group?: GroupInput }): this` | `fieldGroup`→`group` 개명. TabInput/GroupInput은 `{id, label?, order?, hidden?, requiredPermissions?}` — **탭/그룹 권한 선언(EG3)이 여기 승차** |
+| `addFields` | `({ items: EntityField[]; tab?: TabInput; group?: GroupInput }): this` | `fieldGroup`→`group` 개명. `TabInput={id,label?,order?,hidden?,requiredPermissions?}`, `GroupInput={id,label?,order?,requiredPermissions?}`. ~~GroupInput.hidden/open~~ ⛔ **SUPERSEDED by EF-SP K-EFSP-5 (2026-07-13)** — `open`은 `withGroup` patch에만 존재. **탭/그룹 권한 선언(EG3)이 여기 승차** |
 | `withoutField` | `(name: string): this` | 선언 시점 구조 제거(공유 추상 폼 변형 — 구 removeField 13). 런타임 제거는 mutator.removeField — **동명 충돌 없음(L1 without* 군)** |
 | `withoutTab` | `(tabId: string): this` | 탭 **구조 제거**(구 removeTab/removeTabs 3 — 의미론 보존, hide 다운그레이드 아님. 검증 coverage-2). 숨김만 원하면 withTab(id,{hidden}) |
 | `withTab` | `(tabId: string, patch: { label?; order?; hidden?: ConditionalBooleanValue; requiredPermissions?: string[] }): this` | 선언 후 탭 조정. `hidden`은 조건부 허용(C2) |
@@ -72,7 +72,7 @@
 | `getSteps` | `(): StepDef[]` | 선언 그대로(hidden 필터링은 렌더 시 조건 해석) |
 | `getFields` / `getField` / `hasField` | 질의 3 | 현행 유지(order 정렬) |
 | `getTabs` / `getTab` / `hasTab` / `getFieldGroups` / `getGroupFields` / `getTabFields` | 질의 6 | getTabFields(tabId) 신설 유지(위저드 조합 실사용 5) |
-| `clone` | `(includeValues?: boolean): this` | **`this` 반환(L3** — 서브클래스 변형 보존, 검증 dx-5**)**. 깊은 복제 — 공유 참조 0(훅 배열·steps·meta 포함), 구 shallow-Map 누수 구조 불가 |
+| `clone` | `(includeValues?: boolean): this` | **`this` 반환(L3** — 서브클래스 변형 보존, 검증 dx-5**)**. 훅 배열·steps·actions와 meta 최상위 객체는 독립. ~~meta 포함 공유 참조 0~~ ⛔ **SUPERSEDED by W4-6 FIX #2 / EF-SP K-EFSP-3 (2026-07-13)** — 임의 nested meta 값은 immutable-by-convention으로 원본/clone이 reference를 공유한다. |
 
 **위저드 hidden 해석 (D2 #W4-2a·#W4-6a 확정 2026-07-12)**:
 - **#W4-6a — step-hidden vs 필드-hidden 분기는 의도**: step 가시성은 `actionRenderType`(id-based·"create 위저드=NEW 레코드 여부"·W3-6 Fix#3)로, 그 step **내부 필드** 가시성은 store `renderType`으로 해석한다. 둘은 다른 관심사(스텝=위저드/CRUD 모드, 필드=폼 렌더 모드)이므로 분기 유지가 정확 — 통일하지 않는다. prefill(id 없이 fetchedData/initialData로 store renderType='update')+renderType-keyed 필드-hidden의 좁은 발산은 각 관심사 내에서 일관되므로 수용.
@@ -407,7 +407,7 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 
 - 마진 +4 = W5/W6 미분해 세부 타입(필터 operator 유니온·list align/width 헬퍼·DataTransfer 하위 spec 등). W5/W6 entry pass에서 실측이 190 근접 시 위 wave-entry 규칙으로 재산정.
 
-**루트 배럴 실측 57 → 임계값 120 무변경** — 원 projection 49 base + **W5 실측 +8**(list-cell renderer export 4 + filter renderer export 4 — registry 헬퍼 전개 계수; 고급검색 패널 자체는 ViewListGrid 내장·별도 export 아님, W5 entry-brief 결정 3-내장). ⚠️ 원 W5 projection은 +2로 과소추정 — **실측 57이 정본**(count-public-surface.mjs, 2026-07-12). W6 root +0(toolbar seam 재사용). 대폭 여유이나 성장 상한으로 유지(축소 목적 아님). **W7 +0 실측 확인**(W7-5 wave-end, 2026-07-12): EntityForm 49·root 57·/schema 186 — 신 subpath(/schema·/state·/ui-default·/backend-rcm·/next·/excel·**/utils**[GX-3])는 3-예산 밖 미계수. **GX-1 실측(2026-07-13): /schema 186→188**(withFilter/withFilterIgnoreDuplicate 복원 +2·임계 190 미만·EntityForm 49·root 57 무변경). count-public-surface.mjs PASS(49/57/188).
+**루트 배럴 실측 61 → 임계값 120 무변경** — ~~57이 정본~~ ⛔ **SUPERSEDED by EF-SP K-EFSP-5 (2026-07-13)**. 원 projection 49 base + W5 list/filter renderer 계열 이후 후속 공개 재수출을 포함한 현재 기계 실측이 61이다. W6 toolbar seam은 root +0이며 대폭 여유이나 성장 상한은 유지한다. **EF-SP 진입 실측(2026-07-13)**: EntityForm 49→query 복구 후 53·root 61·/schema 188, 모두 `count-public-surface.mjs` PASS.
 
 ## 11. 구현 wave (요약 — 실행 계약은 [waves 브리프](./entityform-api-implementation-waves.md))
 

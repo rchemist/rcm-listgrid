@@ -1,10 +1,6 @@
-// Generic in-memory fixture store for the mock rcm backend (apps/sample P1
-// scaffold — documents/prd/sample-site-spec.md).
-//
-// Resets on every process restart (`npm run dev -w apps/sample` again) —
-// persistence across restarts is explicitly out of scope for P1. Within a
-// running dev server, CRUD must round-trip: a create/update/delete has to
-// be visible to a subsequent search.
+// Generic fixture store for the sample RCM backend. Direct one-argument
+// construction remains in-memory for unit fixtures; route singletons use the
+// optional SQLite persistence seam supplied by getOrCreateStore().
 //
 // The store is cached on `globalThis` (not just a module-level variable)
 // because Next.js dev-mode Fast Refresh can re-evaluate route modules; a
@@ -13,6 +9,7 @@
 // Prisma-client singletons.
 
 import type { FilterGroups, FilterItem, SortSpec } from '@listgrid/schema-core';
+import { sqliteEntityPersistence } from './sqlite';
 
 export type WithId = { id: string; [key: string]: unknown };
 
@@ -24,6 +21,12 @@ export type WithId = { id: string; [key: string]: unknown };
  * since crud-routes.ts / major/search/route.ts already import `SearchFilters`.
  */
 export type SearchFilters = FilterGroups;
+
+export interface EntityStorePersistence<T extends WithId> {
+  snapshot(): T[];
+  transaction<R>(mutate: (rows: T[]) => R): R;
+  reset(seed: T[]): T[];
+}
 
 // TB-1 (documents/analysis/2026-07-13/tb-matching-semantics.md — the
 // row-matching contract this module reproduces, extracted from
@@ -353,8 +356,19 @@ function nextId(rows: WithId[]): string {
 export class EntityStore<T extends WithId> {
   private rows: T[];
 
-  constructor(seed: T[]) {
+  constructor(
+    seed: T[],
+    private readonly persistence?: EntityStorePersistence<T>,
+  ) {
     this.rows = [...seed];
+  }
+
+  private snapshot(): T[] {
+    return this.persistence?.snapshot() ?? this.rows;
+  }
+
+  private mutate<R>(operation: (rows: T[]) => R): R {
+    return this.persistence ? this.persistence.transaction(operation) : operation(this.rows);
   }
 
   search(
@@ -363,9 +377,8 @@ export class EntityStore<T extends WithId> {
     filters?: SearchFilters,
     sorts?: SortSpec[],
   ): { content: T[]; totalElements: number; totalPages: number } {
-    const filtered = filters
-      ? this.rows.filter((row) => matchesFilterGroup(row, filters))
-      : this.rows;
+    const rows = this.snapshot();
+    const filtered = filters ? rows.filter((row) => matchesFilterGroup(row, filters)) : rows;
     const sorted = sortRows(filtered, sorts);
     const totalElements = sorted.length;
     const totalPages = Math.max(1, Math.ceil(totalElements / Math.max(pageSize, 1)));
@@ -375,30 +388,62 @@ export class EntityStore<T extends WithId> {
   }
 
   findById(id: string): T | undefined {
-    return this.rows.find((row) => row.id === id);
+    return this.snapshot().find((row) => row.id === id);
   }
 
   create(data: Partial<T>): T {
-    const id = nextId(this.rows);
-    const row = { ...data, id } as T;
-    this.rows.push(row);
-    return row;
+    return this.mutate((rows) => {
+      const id = nextId(rows);
+      const row = { ...data, id } as T;
+      rows.push(row);
+      return row;
+    });
   }
 
   update(id: string, data: Partial<T>): T | undefined {
-    const idx = this.rows.findIndex((row) => row.id === id);
-    if (idx === -1) return undefined;
-    const existing = this.rows[idx] as T;
-    const updated = { ...existing, ...data, id } as T;
-    this.rows[idx] = updated;
-    return updated;
+    return this.mutate((rows) => {
+      const idx = rows.findIndex((row) => row.id === id);
+      if (idx === -1) return undefined;
+      const existing = rows[idx] as T;
+      const updated = { ...existing, ...data, id } as T;
+      rows[idx] = updated;
+      return updated;
+    });
   }
 
   remove(id: string): T | undefined {
-    const idx = this.rows.findIndex((row) => row.id === id);
-    if (idx === -1) return undefined;
-    const [removed] = this.rows.splice(idx, 1);
-    return removed;
+    return this.mutate((rows) => {
+      const idx = rows.findIndex((row) => row.id === id);
+      if (idx === -1) return undefined;
+      const [removed] = rows.splice(idx, 1);
+      return removed;
+    });
+  }
+
+  upsertMany(input: Partial<T>[]): T[] {
+    return this.mutate((rows) =>
+      input.map((data) => {
+        const requestedId = data.id === undefined ? undefined : String(data.id);
+        const idx =
+          requestedId === undefined ? -1 : rows.findIndex((row) => row.id === requestedId);
+        if (idx >= 0) {
+          const updated = { ...(rows[idx] as T), ...data, id: requestedId } as T;
+          rows[idx] = updated;
+          return updated;
+        }
+        const id =
+          requestedId && !rows.some((row) => row.id === requestedId) ? requestedId : nextId(rows);
+        const created = { ...data, id } as T;
+        rows.push(created);
+        return created;
+      }),
+    );
+  }
+
+  reset(seed: T[]): T[] {
+    if (this.persistence) return this.persistence.reset(seed);
+    this.rows.splice(0, this.rows.length, ...seed);
+    return [...this.rows];
   }
 }
 
@@ -414,14 +459,16 @@ function registry(): StoreRegistry {
 }
 
 /**
- * Get (or lazily create) the singleton in-memory store for `entityName`.
- * More entities can be wired up later by calling this with a different name
- * and seed — P1 only needs `employee`.
+ * Get (or lazily create) the route singleton for `entityName`. Vitest keeps
+ * the historic in-memory behavior; the Next server uses SQLite as authority.
  */
 export function getOrCreateStore<T extends WithId>(entityName: string, seed: T[]): EntityStore<T> {
   const reg = registry();
   if (!reg.has(entityName)) {
-    reg.set(entityName, new EntityStore<WithId>(seed));
+    const persistence = process.env.VITEST
+      ? undefined
+      : sqliteEntityPersistence<WithId>(entityName, seed);
+    reg.set(entityName, new EntityStore<WithId>(seed, persistence));
   }
   return reg.get(entityName) as unknown as EntityStore<T>;
 }

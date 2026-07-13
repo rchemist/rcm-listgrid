@@ -31,6 +31,14 @@ export default function HomePage() {
       </section>
 
       <section style={{ margin: '2rem 0' }}>
+        <h2>proof labs</h2>
+        <p>
+          <a href="/entityform-proof">EntityForm proof lab</a> — 53-member inventory and persistent
+          CRUD.
+        </p>
+      </section>
+
+      <section style={{ margin: '2rem 0' }}>
         <h2>mock API — employee search</h2>
         <p>
           Fetched client-side from <code>POST /api/employee/search</code> (in-memory fixture store,
