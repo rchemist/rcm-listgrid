@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
 import type {
@@ -338,11 +338,11 @@ function ViewEntityFormInner({
   const { Button } = useUI();
   const tabIndex = useStore(store, (s) => s.tabIndex);
   const messages = useStore(store, (s) => s.messages);
-  // action-in-flight marker (W3-3 briefing Do-NOT: no new form-store slice —
-  // this is local view state, not persisted/shared). Replaces the removed
-  // store `saving` WRITE (setSaving is no longer called from this view; the
-  // store's `saving` slice is form-store's own concern, read-only if ever
-  // needed — Save's in-flight indicator is now `runningActionId === 'save'`).
+  const globalErrors = useStore(store, (s) => s.globalErrors);
+  const saving = useStore(store, (s) => s.saving);
+  // action-in-flight marker covers non-save custom/delete actions. Save also
+  // drives the shared store.saving flag from FormController so every field
+  // renderer is locked for the full validation + request lifecycle.
   const [runningActionId, setRunningActionId] = useState<string | undefined>(undefined);
   // W3-6 Fix#1 — async-resolved function-conditional (ValuedBoolean)
   // visible/enabled per action id; literal/OptionalBoolean never populate
@@ -772,6 +772,7 @@ function ViewEntityFormInner({
     // sync-exact / function async fnFlags).
     const enabledResolved = resolveEnabled(action);
 
+    const actionDisabled = !enabledResolved || runningActionId !== undefined || saving;
     let node: ReactNode;
     if (action.render) {
       if (!actionCtx) {
@@ -784,6 +785,12 @@ function ViewEntityFormInner({
         return null;
       }
       node = action.render(actionCtx);
+      if (actionDisabled && isValidElement(node)) {
+        node = cloneElement(
+          node as ReactElement<{ disabled?: boolean; 'aria-disabled'?: boolean }>,
+          { disabled: true, 'aria-disabled': true },
+        );
+      }
     } else if (action.label === undefined) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn(
@@ -797,7 +804,7 @@ function ViewEntityFormInner({
         <Button
           type="button"
           {...(action.variant !== undefined ? { variant: action.variant } : {})}
-          disabled={!enabledResolved || runningActionId === action.id}
+          disabled={actionDisabled}
           onClick={() => void runAction(action)}
         >
           {action.label}
@@ -806,7 +813,12 @@ function ViewEntityFormInner({
     }
 
     return (
-      <span key={action.id} className={action.className}>
+      <span
+        key={action.id}
+        className={action.className}
+        aria-disabled={actionDisabled || undefined}
+        inert={actionDisabled ? true : undefined}
+      >
         {node}
       </span>
     );
@@ -826,7 +838,7 @@ function ViewEntityFormInner({
               type="button"
               role="tab"
               aria-selected={tab.id === activeTabId}
-              disabled={tab.id === activeTabId}
+              disabled={saving || tab.id === activeTabId}
               onClick={() => store.getState().setTabIndex(tab.id)}
             >
               {tab.label ?? tab.id}
@@ -836,7 +848,7 @@ function ViewEntityFormInner({
       )}
 
       {groups.map((group) => (
-        <fieldset key={group.id}>
+        <fieldset key={group.id} disabled={saving}>
           {group.label && <legend>{group.label}</legend>}
           {deriveGroupFields(fields, activeTabId, group.id).map((field) => (
             <FieldRenderer key={field.getName()} field={field} />
@@ -863,7 +875,7 @@ function ViewEntityFormInner({
       )}
 
       {wizardActive && currentStep && (
-        <fieldset key={currentStep.id} data-step={currentStep.id}>
+        <fieldset key={currentStep.id} data-step={currentStep.id} disabled={saving}>
           <legend>{currentStep.label}</legend>
           {currentStep.description && <p>{currentStep.description}</p>}
           {stepFields.map((field) => (
@@ -882,6 +894,14 @@ function ViewEntityFormInner({
         </ul>
       )}
 
+      {globalErrors.length > 0 && (
+        <ul role="alert" data-global-errors="">
+          {globalErrors.map((message, index) => (
+            <li key={`${index}:${message}`}>{message}</li>
+          ))}
+        </ul>
+      )}
+
       {slots?.actions !== undefined ? (
         resolveSlot(slots.actions, actionCtx)
       ) : wizardActive && !isLastStep ? (
@@ -889,11 +909,11 @@ function ViewEntityFormInner({
         // custom actions (spec §3.2 — "마지막 step에서 기존 Save 어포던스").
         <div data-form-actions="" data-wizard-nav="">
           {clampedStepIndex > 0 && (
-            <Button type="button" onClick={goToPrevStep}>
+            <Button type="button" onClick={goToPrevStep} disabled={saving}>
               이전
             </Button>
           )}
-          <Button type="button" onClick={goToNextStep}>
+          <Button type="button" onClick={goToNextStep} disabled={saving}>
             다음
           </Button>
         </div>
@@ -905,7 +925,7 @@ function ViewEntityFormInner({
         // validation gating).
         <div data-form-actions="">
           {wizardActive && clampedStepIndex > 0 && (
-            <Button type="button" onClick={goToPrevStep}>
+            <Button type="button" onClick={goToPrevStep} disabled={saving}>
               이전
             </Button>
           )}

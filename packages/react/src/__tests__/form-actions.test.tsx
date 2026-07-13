@@ -151,6 +151,21 @@ describe('ViewEntityForm action bar — render custom node (spec §3.4; W3-3)', 
     expect(custom).toBeInTheDocument();
     expect(custom.closest('button')).toBeNull();
   });
+
+  it('enabled:false disables a custom rendered button and blocks its click', async () => {
+    const onClick = vi.fn();
+    const entityForm = WidgetForm().addAction({
+      id: 'custom-disabled',
+      enabled: false,
+      render: () => <button onClick={onClick}>Custom disabled</button>,
+    });
+    renderForm(entityForm, { controller: fakeController() });
+
+    const button = await screen.findByRole('button', { name: 'Custom disabled' });
+    expect(button).toBeDisabled();
+    fireEvent.click(button);
+    expect(onClick).not.toHaveBeenCalled();
+  });
 });
 
 describe('ViewEntityForm built-in Delete — update-mode-only (spec §3.4 §설계 결정 1; W3-3)', () => {
@@ -213,6 +228,19 @@ describe('ViewEntityForm built-in Delete — confirm gate (spec §7 messages reg
 });
 
 describe('ViewEntityForm built-in Save rewire — controller.save (spec §3.4 §설계 결정 2; W3-3)', () => {
+  it('locks fields, tabs, and actions while the shared store saving flag is true', async () => {
+    const entityForm = WidgetForm().addAction({ id: 'other', label: 'Other' });
+    const store = createFormStore(entityForm);
+    renderForm(entityForm, { controller: fakeController(), store });
+
+    const input = await screen.findByLabelText(/^Name/);
+    store.getState().setSaving(true);
+
+    await waitFor(() => expect(input).toHaveAttribute('readonly'));
+    expect(screen.getByRole('button', { name: /^Save$/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Other' })).toBeDisabled();
+  });
+
   it('clicking Save calls controller.save(); on success, onSave is called with the post-save snapshot', async () => {
     const controller = fakeController();
     const onSave = vi.fn();

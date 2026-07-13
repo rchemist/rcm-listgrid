@@ -18,21 +18,8 @@
 # proves this independently — see tests/headless/) — this script installs
 # NO react-dependent peer for those two and still expects them to load.
 #
-# Note on the root `.` barrel and `react-daum-postcode`: unlike `./schema`/
-# `./state`, root `.` (@listgrid/react) re-exports `registerDefaultRenderers`
-# statically, which statically imports the address field renderer, which
-# statically imports `react-daum-postcode` at module top level. Even though
-# root package.json marks `react-daum-postcode` OPTIONAL (a host that never
-# uses AddressField shouldn't need it installed), Node's CJS/ESM loader has
-# no lazy-import concept for a static `import`/`require` graph — the whole
-# reachable graph is evaluated at load time regardless of whether the host's
-# OWN code ever calls `registerDefaultRenderers()`. Empirically verified
-# (2026-07-12): `require('@rchemist/listgrid')` WITHOUT react-daum-postcode
-# installed throws `Cannot find module 'react-daum-postcode'`. This script
-# therefore installs it for the root-barrel assertion — see the root-barrel
-# smoke block below for the precise repro this documents (a pre-existing
-# W7-1 peer-classification gap, not something this task's scope permits
-# fixing — see docs/MIGRATION.md §2 `./address` row).
+# The root barrel must load without optional feature peers. Address lookup is
+# dynamically imported only when its picker opens; Excel lives on `/excel`.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
@@ -50,12 +37,10 @@ trap cleanup EXIT
 
 cd "$TMP"
 npm init -y >/dev/null 2>&1
-# Install the tarball + the peers the entrypoints asserted below actually
-# need at MODULE-LOAD time (not just at call time — see the root-barrel note
-# above for why react-daum-postcode is here despite being "optional").
+# Install only required root peers first. This intentionally omits every
+# optional peer and proves the root package honours peerDependenciesMeta.
 npm i "$TARBALL" \
   react react-dom \
-  next xlsx-js-style file-saver react-daum-postcode \
   --legacy-peer-deps >/dev/null 2>&1
 
 echo "[smoke] loading published exports…"
@@ -82,15 +67,10 @@ node --input-type=module -e "await import('@rchemist/listgrid/state'); console.l
 node -e "require('@rchemist/listgrid/utils'); console.log('  ✓ cjs  ./utils')"
 node --input-type=module -e "await import('@rchemist/listgrid/utils'); console.log('  ✓ esm  ./utils')"
 
-# /excel — CJS asserted; ESM intentionally NOT asserted (empirically
-# verified 2026-07-12): the built ESM entry statically imports `saveAs` as a
-# NAMED export from `file-saver`, a CJS-only package with no named ESM
-# exports — Node's CJS→ESM interop only synthesizes a default export for
-# such packages, so `node --input-type=module -e "import('.../excel')"`
-# throws `SyntaxError: Named export 'saveAs' not found`. Same category of
-# gap the pre-W7 react-sortablejs caveat on the root barrel used to document
-# (a CJS-only peer breaking Node's native ESM interop; works fine under a
-# bundler like webpack/Next.js, which is how every real consumer loads it).
+# /excel — opt-in peers are installed only for this subpath. Both published
+# module formats are runtime assertions, including native Node ESM interop.
+npm i xlsx-js-style file-saver --legacy-peer-deps >/dev/null 2>&1
 node -e "require('@rchemist/listgrid/excel'); console.log('  ✓ cjs  ./excel')"
+node --input-type=module -e "await import('@rchemist/listgrid/excel'); console.log('  ✓ esm  ./excel')"
 
 echo "[smoke] OK — published exports resolve and load"

@@ -49,6 +49,29 @@ test('College CRUD round-trips through the new engine', async ({ page }) => {
   await expect(page.getByLabel(/영문명/)).toHaveValue('Test College (updated)');
 });
 
+test('College save locks all form input until the request settles', async ({ page }) => {
+  await page.route('**/api/college', async (route) => {
+    if (route.request().method() === 'POST') {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+    await route.continue();
+  });
+
+  await page.goto('/college/new');
+  const name = page.getByLabel(/명칭/);
+  const englishName = page.getByLabel(/영문명/);
+  const save = page.getByRole('button', { name: 'Save' });
+  await name.fill('저장잠금대학');
+  await englishName.fill('Save Lock College');
+
+  await save.click();
+  await expect(name).toHaveAttribute('readonly');
+  await expect(englishName).toHaveAttribute('readonly');
+  await expect(save).toBeDisabled();
+
+  await expect(page).toHaveURL(/\/college$/);
+});
+
 // V0.4b — the ManyToOne popup (charter C3): the keystone that proves the whole
 // provider+modal+list stack, since the picker IS a ViewListGrid of the
 // referenced entity opened in a Modal.

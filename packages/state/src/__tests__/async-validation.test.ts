@@ -50,6 +50,59 @@ afterEach(() => {
 });
 
 describe("form-store AsyncValidation (W4-3) — 'button' trigger tri-state", () => {
+  it('drops an older same-value result when two checks resolve out of order', async () => {
+    const resolvers: Array<(result: ValidateResult) => void> = [];
+    const store = createFormStore(
+      ButtonForm(
+        () =>
+          new Promise<ValidateResult>((resolve) => {
+            resolvers.push(resolve);
+          }),
+      ),
+    );
+    store.getState().setValue('alias', 'same-value');
+
+    const older = store.getState().runAsyncValidation('alias');
+    const newer = store.getState().runAsyncValidation('alias');
+    resolvers[1]!(ValidateResult.success());
+    await newer;
+    expect(store.getState().fields.alias?.asyncState).toBe('valid');
+
+    resolvers[0]!(ValidateResult.fail('stale older failure'));
+    await older;
+    expect(store.getState().fields.alias?.asyncState).toBe('valid');
+    expect(store.getState().fields.alias?.errors).toEqual([]);
+  });
+
+  it('drops an older validateField result after the field value changes', async () => {
+    let resolveOlder!: (result: ValidateResult) => void;
+    let calls = 0;
+    const validation = new CustomValidation('slow', () => {
+      calls += 1;
+      if (calls === 1) {
+        return new Promise<ValidateResult>((resolve) => {
+          resolveOlder = resolve;
+        });
+      }
+      return Promise.resolve(ValidateResult.success());
+    });
+    const form = new EntityForm('FieldRace', '/field-race').addFields({
+      items: [new StringField('alias', 1).withValidations(validation)],
+    });
+    const store = createFormStore(form);
+    store.getState().setValue('alias', 'old-bad');
+    const older = store.getState().validateField('alias');
+    await vi.waitFor(() => expect(resolveOlder).toBeTypeOf('function'));
+
+    store.getState().setValue('alias', 'new-good');
+    await expect(store.getState().validateField('alias')).resolves.toBe(true);
+    resolveOlder(ValidateResult.fail('stale old error'));
+    await expect(older).resolves.toBe(false);
+
+    expect(store.getState().getValue('alias')).toBe('new-good');
+    expect(store.getState().fields.alias?.errors).toEqual([]);
+  });
+
   it('starts unchecked before any trigger', () => {
     const store = createFormStore(ButtonForm(async () => ValidateResult.success()));
     expect(store.getState().fields.alias?.asyncState).toBe('unchecked');

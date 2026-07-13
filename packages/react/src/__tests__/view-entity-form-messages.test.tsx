@@ -66,4 +66,14 @@ describe('ViewEntityForm — messages banner (W2-3)', () => {
     store.getState().clearMessages({ includePersistent: true });
     await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   });
+
+  it('renders multiple global validation errors in their own form-level channel', async () => {
+    const { store } = renderForm(widgetForm());
+    store.getState().setGlobalErrors(['First form error', 'Second form error']);
+
+    const banner = await screen.findByRole('alert');
+    expect(banner).toHaveAttribute('data-global-errors');
+    expect(screen.getByText('First form error')).toBeInTheDocument();
+    expect(screen.getByText('Second form error')).toBeInTheDocument();
+  });
 });

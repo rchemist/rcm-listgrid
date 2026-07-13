@@ -80,9 +80,11 @@ async function parseBackendError(response: Response): Promise<BackendError> {
   }
 
   const fieldErrors = extractFieldErrors(bodyObj);
+  const globalErrors = extractGlobalErrors(bodyObj);
 
   const error: BackendError = { code, message };
   if (fieldErrors !== undefined) error.fieldErrors = fieldErrors;
+  if (globalErrors !== undefined) error.globalErrors = globalErrors;
   return error;
 }
 
@@ -105,15 +107,37 @@ function extractFieldErrors(body: Record<string, unknown>): Record<string, strin
   return result;
 }
 
+function extractGlobalErrors(body: Record<string, unknown>): string[] | undefined {
+  // `errors` is rcm ProblemDetail's plural form-level list; accept the two
+  // explicit aliases as well for custom adapters/test doubles.
+  const raw = body.globalErrors ?? body.globalError ?? body.errors;
+  if (raw === undefined || raw === null) return undefined;
+  const values = Array.isArray(raw) ? raw : [raw];
+  const messages = values
+    .map((value) => {
+      if (typeof value === 'string') return value;
+      if (value !== null && typeof value === 'object') {
+        const record = value as Record<string, unknown>;
+        const message = record.message ?? record.detail;
+        if (typeof message === 'string') return message;
+      }
+      return undefined;
+    })
+    .filter((value): value is string => value !== undefined);
+  return messages.length > 0 ? messages : undefined;
+}
+
 class BackendAdapterError extends Error implements BackendError {
   code: BackendErrorCode;
   fieldErrors?: Record<string, string[]>;
+  globalErrors?: string[];
 
   constructor(err: BackendError) {
     super(err.message);
     this.name = 'BackendAdapterError';
     this.code = err.code;
     if (err.fieldErrors !== undefined) this.fieldErrors = err.fieldErrors;
+    if (err.globalErrors !== undefined) this.globalErrors = err.globalErrors;
   }
 }
 

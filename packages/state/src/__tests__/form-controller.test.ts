@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  CustomValidation,
   EntityForm,
   StringField,
+  ValidateResult,
   type BackendAdapter,
   type BackendError,
   type FieldEvalContext,
@@ -40,6 +42,69 @@ function fakeAdapter(overrides: Partial<BackendAdapter> = {}): BackendAdapter {
 }
 
 describe('createFormController.save (spec §6.2)', () => {
+  it('sets saving synchronously, coalesces duplicate save calls, and always unlocks after settle', async () => {
+    let resolveCreate!: (value: Record<string, unknown>) => void;
+    const create = vi.fn(
+      () =>
+        new Promise<Record<string, unknown>>((resolve) => {
+          resolveCreate = resolve;
+        }),
+    );
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const first = controller.save();
+    const second = controller.save();
+    expect(store.getState().saving).toBe(true);
+    expect(first).toBe(second);
+
+    await vi.waitFor(() => expect(resolveCreate).toBeTypeOf('function'));
+    resolveCreate({ id: '1', name: 'Widget A' });
+    await expect(first).resolves.toEqual({
+      ok: true,
+      result: { id: '1', name: 'Widget A' },
+    });
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(store.getState().saving).toBe(false);
+  });
+
+  it('never sends a value changed while validation is in flight', async () => {
+    let resolveValidation!: (result: ValidateResult) => void;
+    const validation = new CustomValidation(
+      'slow',
+      () =>
+        new Promise<ValidateResult>((resolve) => {
+          resolveValidation = resolve;
+        }),
+    );
+    const entityForm = new EntityForm('RaceForm', '/race').addFields({
+      items: [new StringField('name', 1).withValidations(validation)],
+    });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'old-valid');
+    const create = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    const pending = controller.save();
+    expect(store.getState().saving).toBe(true);
+    await vi.waitFor(() => expect(resolveValidation).toBeTypeOf('function'));
+    store.getState().setValue('name', 'new-unvalidated');
+    resolveValidation(ValidateResult.success());
+
+    await expect(pending).resolves.toEqual({ ok: false, reason: 'validation' });
+    expect(create).not.toHaveBeenCalled();
+    expect(store.getState().saving).toBe(false);
+  });
   it('success: validates, builds the payload, calls adapter.create, and returns { ok: true, result }', async () => {
     const entityForm = WidgetForm();
     const store = createFormStore(entityForm);
@@ -148,7 +213,39 @@ describe('createFormController.save (spec §6.2)', () => {
     expect(store.getState().fields.name?.errors).toEqual([{ message: 'too short' }]);
   });
 
-  it('an unmatched fieldErrors key (no declared field of that name) becomes a banner message instead', async () => {
+  it('maps multiple field errors and multiple global validation errors independently', async () => {
+    const entityForm = WidgetForm().withId('1');
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const error: BackendError = {
+      code: 'VALIDATION',
+      message: 'Validation failed',
+      fieldErrors: { name: ['too short', 'reserved'] },
+      globalErrors: ['date range is invalid', 'form combination is not allowed'],
+    };
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({
+        update: vi.fn(async () => {
+          throw error;
+        }),
+      }),
+    });
+
+    await controller.save();
+
+    expect(store.getState().fields.name?.errors).toEqual([
+      { message: 'too short' },
+      { message: 'reserved' },
+    ]);
+    expect(store.getState().globalErrors).toEqual([
+      'date range is invalid',
+      'form combination is not allowed',
+    ]);
+  });
+
+  it('an unmatched fieldErrors key becomes a global validation error', async () => {
     const entityForm = WidgetForm().withId('1');
     const store = createFormStore(entityForm);
     store.getState().setValue('name', 'Widget A');
@@ -168,13 +265,7 @@ describe('createFormController.save (spec §6.2)', () => {
 
     await controller.save();
 
-    expect(store.getState().messages).toContainEqual(
-      expect.objectContaining({
-        key: 'nonField',
-        severity: 'error',
-        text: 'server-side check failed',
-      }),
-    );
+    expect(store.getState().globalErrors).toEqual(['server-side check failed']);
   });
 
   it('suppress-generic: error.message is NOT banner-ed when fieldErrors is present', async () => {
@@ -683,6 +774,28 @@ describe('createFormController.validate / reload (spec §6.2)', () => {
 
     expect(getOne).toHaveBeenCalledTimes(1);
     expect(store.getState().getValue('name')).toBe('fresh');
+  });
+
+  it('reload() replaces the fetched baseline used by fields added later at runtime', async () => {
+    const entityForm = WidgetForm().withId('42');
+    const store = createFormStore(entityForm, {
+      fetchedData: { name: 'old-name', late: 'old-value' },
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({
+        getOne: vi.fn(async () => ({ name: 'fresh-name', late: 'fresh-value' })),
+      }),
+    });
+
+    store.getState().setValue('name', 'local-edit');
+    await controller.reload();
+    expect(store.getState().getValue('name')).toBe('fresh-name');
+    expect(store.getState().isDirty()).toBe(false);
+
+    store.getState().addField(new StringField('late', 2));
+    expect(store.getState().getValue('late')).toBe('fresh-value');
   });
 
   it('reload() keeps the ORIGINAL store authoritative: post-reload edits notify its subscribers, reflect in getValue, and a save-error surfaces on it', async () => {

@@ -216,6 +216,26 @@ describe('createRcmAdapter (ADR-0005 default BackendAdapter — RCM 0.1.0 wire c
       });
     });
 
+    it('preserves multiple globalErrors alongside multiple fieldErrors', async () => {
+      fetchMock.mockResolvedValue(
+        mockResponse(422, {
+          message: '입력 값이 올바르지 않습니다.',
+          fieldErrors: { name: ['필수 값입니다.', '사용할 수 없는 이름입니다.'] },
+          errors: [
+            '시작일은 종료일보다 빨라야 합니다.',
+            { message: '폼 조합이 올바르지 않습니다.' },
+          ],
+        }),
+      );
+      const adapter = createRcmAdapter({ fetch: fetchMock as unknown as typeof fetch });
+
+      await expect(adapter.create('/college', {})).rejects.toMatchObject({
+        code: 'VALIDATION',
+        fieldErrors: { name: ['필수 값입니다.', '사용할 수 없는 이름입니다.'] },
+        globalErrors: ['시작일은 종료일보다 빨라야 합니다.', '폼 조합이 올바르지 않습니다.'],
+      });
+    });
+
     it('a 500 with no recognizable body throws a BackendError with code UNKNOWN', async () => {
       fetchMock.mockResolvedValue(mockResponse(500, {}));
       const adapter = createRcmAdapter({ fetch: fetchMock as unknown as typeof fetch });

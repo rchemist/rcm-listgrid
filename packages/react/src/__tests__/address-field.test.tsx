@@ -111,7 +111,7 @@ describe('AddressFieldRenderer — Daum picker onComplete fan-out (mocked react-
 
     fireEvent.click(screen.getByRole('button', { name: '주소 찾기' }));
     const dialog = await screen.findByRole('dialog');
-    const complete = within(dialog).getByRole('button', { name: 'mock-daum-complete' });
+    const complete = await within(dialog).findByRole('button', { name: 'mock-daum-complete' });
     fireEvent.click(complete);
 
     await waitFor(() => {
@@ -139,7 +139,7 @@ describe('AddressFieldRenderer — Daum picker onComplete fan-out (mocked react-
 
     fireEvent.click(screen.getByRole('button', { name: '주소 찾기' }));
     const dialog = await screen.findByRole('dialog');
-    fireEvent.click(within(dialog).getByRole('button', { name: 'mock-daum-complete' }));
+    fireEvent.click(await within(dialog).findByRole('button', { name: 'mock-daum-complete' }));
 
     await waitFor(() => expect(document.activeElement?.id).toBe('address2'));
   });

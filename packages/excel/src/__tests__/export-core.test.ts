@@ -17,7 +17,8 @@ import {
   resolveExportConfig,
 } from '../export-core';
 
-vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
+const mockedSaveAs = vi.hoisted(() => vi.fn());
+vi.mock('file-saver', () => ({ saveAs: mockedSaveAs, default: { saveAs: mockedSaveAs } }));
 
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },

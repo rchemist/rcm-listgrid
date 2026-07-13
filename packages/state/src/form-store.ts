@@ -113,9 +113,9 @@ function asyncGateMessage(state: FieldValueSlice['asyncState']): string {
  * (`FormStoreState.messages`). This is NOT a field-error store — field
  * validation errors live on their own field's slice (`state.fields[name].
  * errors`), untouched by this type. `messages` is the single form-level
- * banner channel server entity errors (EG5), the old `alertMessages` (EG17),
- * and a `cancel` reason all land on (W2-5 wires those writers; this type +
- * the store actions below are the channel they write through).
+ * banner channel operational errors, the old `alertMessages` (EG17), and a
+ * `cancel` reason land on. Form-wide validation errors use `globalErrors`;
+ * field validation errors remain on each field slice.
  */
 export interface FormMessage {
   key: string;
@@ -129,6 +129,12 @@ export interface FormMessage {
 
 export interface FormStoreState {
   fields: Record<string, FieldValueSlice>;
+  /**
+   * The latest record fetched from the backend. This is store DATA rather
+   * than a createFormStore closure so controller.reload() can replace it on
+   * the existing store instance. Runtime addField() uses this baseline.
+   */
+  fetchedData?: Record<string, unknown>;
   /**
    * Per-field imperative meta overrides (EF1). When a key is set on a field's
    * entry it WINS over that field's declared/predicate-resolved meta —
@@ -182,12 +188,13 @@ export interface FormStoreState {
   formReadOnly: boolean;
   /**
    * W2-3 (spec §6.1) — the form-level banner channel. Replaces the old
-   * inert `formErrors: string[]` (never written by anything — confirmed
-   * dead). Field-level validation errors are NOT stored here (see
-   * FormMessage doc) — this array is exclusively the banner ViewEntityForm
-   * renders below the field groups.
+   * inert `formErrors: string[]`. Validation errors do NOT live here:
+   * field-level errors use `fields[name].errors`, while form-wide validation
+   * errors use `globalErrors`. This array is for operational UI messages.
    */
   messages: FormMessage[];
+  /** Form-wide validation errors. Kept separate from field slice errors and operational messages. */
+  globalErrors: string[];
 
   // --- actions ---
   /**
@@ -243,6 +250,10 @@ export interface FormStoreState {
    * action safe to call unconditionally too.
    */
   setFieldErrors(name: string, messages: string[]): void;
+  /** Replace the form-wide validation error list. */
+  setGlobalErrors(messages: string[]): void;
+  /** Clear every form-wide validation error. */
+  clearGlobalErrors(): void;
   /** validate every field; returns whether the whole form is valid. */
   validateAll(): Promise<boolean>;
   /**
@@ -332,7 +343,7 @@ export interface CreateFormStoreOptions {
    * off each field) — it is retained ONLY for the EF4 late-added-field
    * rebind (a field registered by addField AFTER the store is built, e.g.
    * from an onChanges handler, still needs to pull its fetched value from
-   * the same record — see the `fetchedData` closure var below) and to mark
+   * the same record — see the store `fetchedData` state below) and to mark
    * the store's initial `renderType` 'update' (0.3.x parity: a record was
    * loaded, so this is an edit, even if the caller never set an `id`, e.g.
    * host-preloaded `initialData`).
@@ -498,8 +509,20 @@ export function createFormStore(
     // configured independently (EF5's store-level debounceMs vs. this
     // AsyncValidation instance's own debounceMs).
     const asyncValidationTimers = new Map<string, ReturnType<typeof setTimeout>>();
+    // A value comparison alone is insufficient: two checks for the same
+    // value may resolve out of order. Generations make only the newest run
+    // authoritative, and are also bumped by edits/removal/reset.
+    const validationGenerations = new Map<string, number>();
+    const asyncValidationGenerations = new Map<string, number>();
+
+    function bumpGeneration(map: Map<string, number>, name: string): number {
+      const next = (map.get(name) ?? 0) + 1;
+      map.set(name, next);
+      return next;
+    }
 
     async function runAsyncValidationNow(name: string, validation: AsyncValidation): Promise<void> {
+      const generation = bumpGeneration(asyncValidationGenerations, name);
       set((s) => ({
         fields: { ...s.fields, [name]: { ...s.fields[name], asyncState: 'checking' } },
       }));
@@ -514,7 +537,11 @@ export function createFormStore(
       // already-edited duplicate as 'valid'), reopening the save-gating bypass
       // that D1 closes. Drop it: the newer write (reset-on-edit's 'unchecked'
       // in writeValue, or a newer check) owns the tri-state now.
-      if (!Object.is(getCurrentValue(get().fields[name], get().renderType), value)) return;
+      if (
+        asyncValidationGenerations.get(name) !== generation ||
+        !Object.is(getCurrentValue(get().fields[name], get().renderType), value)
+      )
+        return;
       set((s) => ({
         fields: {
           ...s.fields,
@@ -539,17 +566,6 @@ export function createFormStore(
       asyncValidationTimers.set(name, timer);
     }
 
-    // EF4 — the last hydrated/provided data payload, retained so a field
-    // registered AFTER init (a post-init addField, e.g. from an onChanges
-    // handler) can still rebind its fetched value (0.3.x EntityForm.tsx:
-    // 268-302 late-added-field parity). Seeded from opts.fetchedData (EF7 —
-    // the init pipe's already-bound record) and/or overwritten by a later
-    // explicit hydrate() call; init-time additions (fields an
-    // onFetchData/onInitialize handler added) never hit THIS path — the
-    // init pipe's own REBIND step (initialize-form-store.ts) already bound
-    // them onto the EntityForm clone before createFormStore ever ran.
-    let fetchedData: Record<string, unknown> | undefined = opts.fetchedData;
-
     function dispatchOnChanges(changedField: string): void {
       for (const handler of entityForm.getChangeHandlers()) {
         const result = handler(mutator, changedField);
@@ -563,6 +579,8 @@ export function createFormStore(
     }
 
     function writeValue(name: string, value: unknown): void {
+      bumpGeneration(validationGenerations, name);
+      bumpGeneration(asyncValidationGenerations, name);
       set((s) => {
         const prev = s.fields[name] ?? {};
         const next: FieldValueSlice = { ...prev, current: value };
@@ -652,6 +670,7 @@ export function createFormStore(
 
     return {
       fields: initialFields,
+      ...(opts.fetchedData !== undefined ? { fetchedData: opts.fetchedData } : {}),
       meta: opts.initialMeta ?? {},
       fieldDefs: initialFieldDefs,
       structureVersion: 0,
@@ -669,6 +688,7 @@ export function createFormStore(
       saving: false,
       formReadOnly: entityForm.getReadOnly(),
       messages: [],
+      globalErrors: [],
 
       getValue(name) {
         return getCurrentValue(get().fields[name], get().renderType);
@@ -679,7 +699,10 @@ export function createFormStore(
       },
 
       hydrate(data) {
-        fetchedData = data;
+        for (const name of Object.keys(get().fieldDefs)) {
+          bumpGeneration(validationGenerations, name);
+          bumpGeneration(asyncValidationGenerations, name);
+        }
         set((s) => {
           const fields = { ...s.fields };
           for (const field of sortedFieldDefs(s)) {
@@ -697,7 +720,12 @@ export function createFormStore(
             };
             fields[name] = next;
           }
-          return { fields, renderType: 'update' as RenderType, initialized: true };
+          return {
+            fields,
+            fetchedData: data,
+            renderType: 'update' as RenderType,
+            initialized: true,
+          };
         });
       },
 
@@ -718,8 +746,8 @@ export function createFormStore(
           if (!field.form) field.form = { tabId: 'default', fieldGroupId: 'default' };
 
           let slice = seedSlice(field);
-          if (fetchedData !== undefined) {
-            const value = resolveFetchedValue(fetchedData, name);
+          if (s.fetchedData !== undefined) {
+            const value = resolveFetchedValue(s.fetchedData, name);
             // late-added-field rebind (0.3.x EntityForm.tsx:268-302 parity) —
             // only when the hydrated record actually has a value for this name.
             if (value !== undefined) {
@@ -741,6 +769,7 @@ export function createFormStore(
           if (existingTimer !== undefined) clearTimeout(existingTimer);
           validationTimers.delete(name);
           touchedFields.delete(name);
+          bumpGeneration(validationGenerations, name);
 
           // W4-3 (EF-R2 parity): same stale-timer hazard for a 'change'-
           // trigger AsyncValidation — a pending debounce for the REPLACED
@@ -748,6 +777,7 @@ export function createFormStore(
           const existingAsyncTimer = asyncValidationTimers.get(name);
           if (existingAsyncTimer !== undefined) clearTimeout(existingAsyncTimer);
           asyncValidationTimers.delete(name);
+          bumpGeneration(asyncValidationGenerations, name);
 
           return {
             fieldDefs: { ...s.fieldDefs, [name]: field },
@@ -777,11 +807,13 @@ export function createFormStore(
           if (existingTimer !== undefined) clearTimeout(existingTimer);
           validationTimers.delete(name);
           touchedFields.delete(name);
+          bumpGeneration(validationGenerations, name);
 
           // W4-3 (EF-R2 parity) — see addField's matching comment.
           const existingAsyncTimer = asyncValidationTimers.get(name);
           if (existingAsyncTimer !== undefined) clearTimeout(existingAsyncTimer);
           asyncValidationTimers.delete(name);
+          bumpGeneration(asyncValidationGenerations, name);
 
           return { fieldDefs, fields, meta, structureVersion: s.structureVersion + 1 };
         });
@@ -790,7 +822,17 @@ export function createFormStore(
       async validateField(name) {
         const field = get().fieldDefs[name];
         if (!field) return true;
-        const errs = await field.validate(buildCtx(get(), name), get().meta[name]);
+        const state = get();
+        const value = getCurrentValue(state.fields[name], state.renderType);
+        const generation = bumpGeneration(validationGenerations, name);
+        const errs = await field.validate(buildCtx(state, name), state.meta[name]);
+        if (
+          validationGenerations.get(name) !== generation ||
+          get().fieldDefs[name] !== field ||
+          !Object.is(getCurrentValue(get().fields[name], get().renderType), value)
+        ) {
+          return false;
+        }
         set((s) => ({
           fields: {
             ...s.fields,
@@ -812,13 +854,31 @@ export function createFormStore(
         });
       },
 
+      setGlobalErrors(messages) {
+        set({ globalErrors: [...messages] });
+      },
+
+      clearGlobalErrors() {
+        set({ globalErrors: [] });
+      },
+
       async validateAll() {
         const s = get();
         let valid = true;
         const messagesByField = new Map<string, { message: string }[]>();
         for (const field of sortedFieldDefs(s)) {
           const name = field.getName();
+          const value = getCurrentValue(s.fields[name], s.renderType);
+          const generation = bumpGeneration(validationGenerations, name);
           const errs = await field.validate(buildCtx(s, name), s.meta[name]);
+          if (
+            validationGenerations.get(name) !== generation ||
+            get().fieldDefs[name] !== field ||
+            !Object.is(getCurrentValue(get().fields[name], get().renderType), value)
+          ) {
+            valid = false;
+            continue;
+          }
           const messages = errs.map((e) => ({ message: e.message }));
           // W4-3a (D1, spec §5.3/§6.2): async save-gating. A field declaring an
           // AsyncValidation whose value is DIRTY but has not resolved to
@@ -896,12 +956,17 @@ export function createFormStore(
         asyncValidationTimers.clear();
         touchedFields.clear();
 
+        for (const name of Object.keys(get().fieldDefs)) {
+          bumpGeneration(validationGenerations, name);
+          bumpGeneration(asyncValidationGenerations, name);
+        }
+
         set((s) => {
           const fields: Record<string, FieldValueSlice> = {};
           for (const [name, slice] of Object.entries(s.fields)) {
             fields[name] = resetValue(slice, s.renderType);
           }
-          return { fields };
+          return { fields, globalErrors: [] };
         });
       },
 

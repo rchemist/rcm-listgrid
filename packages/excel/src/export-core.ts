@@ -13,7 +13,7 @@
 // minimal `DataFieldSpec`/`DataTransferInput` surface, spec §3.5, so there is
 // nothing left to gate it on).
 import * as XLSX from 'xlsx-js-style';
-import { saveAs } from 'file-saver';
+import FileSaver from 'file-saver';
 import type { DataFieldSpec, EntityForm, FieldType } from '@listgrid/schema-core';
 import { exportValue } from './value-transform';
 import type { ValueTransformOptions } from './value-transform';
@@ -159,5 +159,5 @@ export function downloadExportWorkbook(ws: XLSX.WorkSheet, fileName: string): vo
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   });
   const finalName = fileName.toLowerCase().endsWith('.xlsx') ? fileName : `${fileName}.xlsx`;
-  saveAs(blob, finalName);
+  FileSaver.saveAs(blob, finalName);
 }

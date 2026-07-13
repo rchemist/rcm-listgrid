@@ -45,12 +45,14 @@ function coerceRow<T>(row: WireRow): T {
 class BackendAdapterError extends Error implements BackendError {
   code: BackendErrorCode;
   fieldErrors?: Record<string, string[]>;
+  globalErrors?: string[];
 
   constructor(err: BackendError) {
     super(err.message);
     this.name = 'BackendAdapterError';
     this.code = err.code;
     if (err.fieldErrors !== undefined) this.fieldErrors = err.fieldErrors;
+    if (err.globalErrors !== undefined) this.globalErrors = err.globalErrors;
   }
 }
 

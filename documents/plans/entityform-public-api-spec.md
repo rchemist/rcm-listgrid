@@ -246,7 +246,7 @@ class AsyncValidation extends ValidationItem {
 
 | 변경 | 내용 |
 |---|---|
-| `formErrors: string[]` → `messages: FormMessage[]` | `FormMessage {key, severity: 'error'\|'warning'\|'info', text, field?, persistent?}` + 액션 `addMessage/removeMessage(key)/clearMessages({includePersistent?})`. **폼 배너 단일 채널**: 서버 entity 에러(EG5)+구 alertMessages(EG17)+cancel reason 전부 여기. 구 inert `formErrors` 해소 |
+| 검증 오류 채널 분리 | 필드 오류=`fields[name].errors[]`, 폼 전체 검증 오류=`globalErrors[]` + `setGlobalErrors/clearGlobalErrors`. 둘은 동시에 복수로 존재 가능. `messages: FormMessage[]`는 알림·취소·비검증 운영 오류 채널 |
 | `formReadOnly: boolean` 신설 | EntityForm.withReadOnly 선언의 seed. FieldRenderer가 effective readOnly에 OR, 빌트인 Save 어포던스 숨김. **controller.save는 하드 게이트하지 않음**(쓰기 차단은 capabilities 소관 — §3.1 의도 명시) |
 | `fetchedData?: Readonly<Record<string,unknown>>` 노출 | 구 getFetchedEntity 실사용 10 대응 — EntityField로 모델링 안 된 프로퍼티 접근 |
 | casing | `FieldMetaOverride.readonly`→`readOnly`(L2) |
@@ -275,7 +275,7 @@ function createFormController(opts: {
 }): FormRuntime
 ```
 
-**save 플로우(정준)**: capability(create|update) 해석 → (skip 아니면) validateAll(첫 invalid 필드 정보 포함 — sync ValidationItem 채널 **+ W4-3a async save-gate**: dirty이며 `asyncState!=='valid'`인 AsyncValidation 필드=invalid, §5.3) → store.toSaveData() → `onBeforeSave` 순차(cancel 가능·data 변형) → revision 주입(설정 시) → adapter.create/update → **실패**: `BackendError.fieldErrors`→필드 slice errors(**name-키** — 구 label-키 버그 금지)+미매핑분은 messages(severity:'error'), generic 메시지는 fieldErrors 존재 시 억제(suppress-generic) → **성공**: 비persistent messages clear(clear-on-success) → `onAfterSave` 순차 → outcome.
+**save 플로우(정준)**: capability(create|update) 해석 → `saving=true`로 입력·액션 잠금 → 저장 스냅샷 고정 → (skip 아니면) validateAll(sync ValidationItem + W4-3a async save-gate) → 검증 스냅샷과 현재 값이 다르면 저장 차단 → `onBeforeSave` 순차(cancel 가능·data 변형) → revision 주입 → adapter.create/update → **실패**: `BackendError.fieldErrors[]`→필드 slice errors, `globalErrors[]`→폼 전체 오류(둘 동시 복수 허용), 미매핑 field error도 global로 승격, 구체 오류가 있으면 generic 억제 → **성공**: 비persistent messages와 globalErrors clear → `onAfterSave` 순차 → 모든 종료 경로에서 `saving=false` → outcome.
 **delete 플로우**: capability(delete) → `onBeforeDelete`(cancel) → adapter.remove(url, ids, revision?) → 성공 시 `onAfterDelete`.
 ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controller를 호출**(L7). 호스트 소유 저장(C7)도 여전히 가능 — controller는 편의 오케스트레이터지 강제 아님.
 

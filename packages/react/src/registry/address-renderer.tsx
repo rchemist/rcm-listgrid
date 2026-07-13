@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentType } from 'react';
 import { addressSiblingNames } from '@listgrid/schema-core';
-import DaumPostcode from 'react-daum-postcode';
 import { useUI } from '../providers/ui';
 import { useFieldMeta, useFieldValue, useFormField, useFormStore } from '../providers/form-store';
 import type { FieldRendererComponentProps } from './field-renderer-registry';
@@ -14,14 +14,9 @@ import type { FieldRendererComponentProps } from './field-renderer-registry';
 // DIRECTLY (ADR-sanctioned exception — root `package.json` already carries it as a peer for
 // exactly this precedent) rather than the 0.3.x hand-rolled `loadPostcode` script loader.
 //
-// `react-daum-postcode` is a REQUIRED peer of `@listgrid/react` (package.json), not optional:
-// this module `import`s it statically at the top level, and this module is itself statically
-// wired into the renderer graph by `registerDefaultRenderers` (registry/default-renderers.tsx) —
-// so any consumer that registers the default renderers pulls this import unconditionally,
-// whether or not their forms use an AddressField. There is no lazy-loading here; marking the
-// peer optional while the import graph is static would just move the missing-dependency failure
-// from install-time (clear peer-dep warning) to first-render-time (a confusing bare
-// module-not-found).
+// `react-daum-postcode` is an OPTIONAL peer. The picker is dynamically imported only when the
+// modal opens, so root-package consumers that never use AddressField do not need it installed.
+// A missing peer is reported inside the modal instead of breaking root module evaluation.
 //
 // This is the ONLY renderer this composite field owns: the 5 flat siblings
 // (state/city/address1/address2/postalCode) `applyFullAddressFields` declares are all marked
@@ -47,6 +42,10 @@ interface DaumPostcodeResult {
   sido: string;
   sigungu: string;
 }
+
+type DaumPostcodeComponent = ComponentType<{
+  onComplete: (data: DaumPostcodeResult) => void;
+}>;
 
 export function AddressFieldRenderer({ name, readOnly }: FieldRendererComponentProps) {
   const { TextInput, Button, Modal } = useUI();
@@ -85,6 +84,8 @@ export function AddressFieldRenderer({ name, readOnly }: FieldRendererComponentP
   const address1Required = address1Meta.required ?? address1DeclaredRequired;
 
   const [open, setOpen] = useState(false);
+  const [Postcode, setPostcode] = useState<DaumPostcodeComponent>();
+  const [postcodeLoadError, setPostcodeLoadError] = useState<string>();
   // Set right before setOpen(false) inside handleComplete only — NOT on every close (e.g. the
   // user dismissing the picker without completing) — so address2 only steals focus after an
   // actual selection, never on a bare cancel.
@@ -96,6 +97,30 @@ export function AddressFieldRenderer({ name, readOnly }: FieldRendererComponentP
       document.getElementById(names.address2)?.focus();
     }
   }, [open, names.address2]);
+
+  // react-daum-postcode is an optional peer. Load it only when the address
+  // picker is actually opened so importing the root package does not require
+  // an address dependency for applications that never use this field.
+  useEffect(() => {
+    if (!open || Postcode !== undefined || postcodeLoadError !== undefined) return;
+    let cancelled = false;
+    void import('react-daum-postcode')
+      .then((module) => {
+        if (!cancelled) {
+          setPostcode(() => module.default as unknown as DaumPostcodeComponent);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPostcodeLoadError(
+            '주소 검색을 사용하려면 react-daum-postcode 패키지를 설치해 주세요.',
+          );
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, Postcode, postcodeLoadError]);
 
   function handleComplete(data: DaumPostcodeResult): void {
     const s = store.getState();
@@ -169,7 +194,9 @@ export function AddressFieldRenderer({ name, readOnly }: FieldRendererComponentP
       </div>
 
       <Modal open={open} onClose={() => setOpen(false)} title="주소 검색">
-        {open && <DaumPostcode onComplete={handleComplete} />}
+        {open && Postcode && <Postcode onComplete={handleComplete} />}
+        {open && !Postcode && !postcodeLoadError && <span role="status">주소 검색 로딩 중…</span>}
+        {open && postcodeLoadError && <span role="alert">{postcodeLoadError}</span>}
       </Modal>
     </div>
   );

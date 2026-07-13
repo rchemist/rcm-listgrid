@@ -22,16 +22,23 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
-      include: ['src/listgrid/**/*.{ts,tsx}'],
+      include: [
+        'src/listgrid/**/*.{ts,tsx}',
+        'packages/*/src/**/*.{ts,tsx}',
+        // App library code runs under Vitest. Next app/ pages are exercised
+        // by Playwright + `next build`; including unexecuted route TSX here
+        // makes the V8 uncovered-file parser exclude them with parse errors.
+        'apps/*/lib/**/*.{ts,tsx}',
+      ],
       exclude: ['**/*.test.{ts,tsx}', '**/__tests__/**', 'src/_stubs/**'],
-      // Baseline (v0.3 Task C, 525 tests 추가): 16.9% statements / 14.98%
-      // branches / 17.97% funcs / 16.81% lines. Floors sit just below baseline
-      // so CI catches regressions.
+      // Baseline (v0.4 post-review hardening, 2508 tests): 45.27% statements /
+      // 39.60% branches / 48.01% funcs / 44.89% lines. Floors sit just below
+      // baseline so CI catches regressions across every package source tree.
       thresholds: {
-        statements: 16,
-        branches: 14,
-        functions: 17,
-        lines: 16,
+        statements: 45,
+        branches: 39,
+        functions: 47,
+        lines: 44,
       },
     },
   },

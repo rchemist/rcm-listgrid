@@ -23,6 +23,23 @@ describe('FormStoreState.messages — seed', () => {
   });
 });
 
+describe('FormStoreState.globalErrors — form-wide validation channel', () => {
+  it('is independent from messages and supports multiple errors', () => {
+    const store = createFormStore(WidgetForm());
+    store.getState().addMessage({ key: 'notice', severity: 'info', text: 'Notice' });
+    store.getState().setGlobalErrors(['First', 'Second']);
+
+    expect(store.getState().globalErrors).toEqual(['First', 'Second']);
+    expect(store.getState().messages).toEqual([
+      { key: 'notice', severity: 'info', text: 'Notice' },
+    ]);
+
+    store.getState().clearGlobalErrors();
+    expect(store.getState().globalErrors).toEqual([]);
+    expect(store.getState().messages).toHaveLength(1);
+  });
+});
+
 describe('store.addMessage', () => {
   it('appends a message', () => {
     const store = createFormStore(WidgetForm());

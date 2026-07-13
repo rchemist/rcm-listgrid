@@ -35,7 +35,8 @@ import type { FormStoreState } from './form-store';
 // Save flow order (spec §6.2 EXACTLY, revision step now wired — W4-4):
 //   1. capability create|update gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
 //      => { ok: false, reason: 'capability' }, silent (no adapter call/message)
-//   2. validateAll() (unless opts.skipValidation) — fail =>
+//   2. set saving=true, capture an immutable value/payload snapshot, then
+//      validateAll() (unless opts.skipValidation) — fail =>
 //      { ok: false, reason: 'validation' }.
 //      Runs the SYNC ValidationItem channel AND the W4-3a async save-gate
 //      (spec §5.3/§6.2): a field declaring an AsyncValidation whose value is
@@ -44,7 +45,9 @@ import type { FormStoreState } from './form-store';
 //      No network here — validateAll reads the stored tri-state (the check
 //      runs only via store.runAsyncValidation). An untouched update-form
 //      field (not dirty) is exempt — its persisted value is already confirmed.
-//   3. toSaveData()
+//      A headless write that changes the snapshot during validation is also
+//      rejected instead of sending unvalidated data.
+//   3. use the captured toSaveData() payload
 //   4. onBeforeSave handlers, sequential; setData threads the payload;
 //      cancel() stops the flow; a THROWING handler is logged + SKIPPED
 //      (spec §4.2 — does not propagate, does not cancel)
@@ -56,13 +59,15 @@ import type { FormStoreState } from './form-store';
 //      honest undefined, entity-form.ts).
 //   6. adapter.update (renderType 'update') | adapter.create (else)
 //   7. failure => map BackendError.fieldErrors onto field slices (keyed by
-//      NAME) / an unmatched key onto a banner message; error.message is
-//      suppressed when fieldErrors is present (suppress-generic); otherwise
-//      addMessage({key:'save-error', ...}) — return
+//      NAME), and BackendError.globalErrors plus unmatched field keys onto
+//      the plural form-wide validation channel. Specific errors suppress the
+//      generic error.message; non-validation failures use messages — return
 //      { ok: false, reason: 'error', error }. (onBeforeSave cancel =>
 //      { ok: false, reason: 'cancelled', cancelled? } — step 4.)
-//   8. success => clearMessages() (clear-on-success) -> onAfterSave handlers,
-//      sequential, same per-handler try/catch -> { ok: true, result }
+//   8. success => clearMessages()/clearGlobalErrors() -> onAfterSave handlers,
+//      sequential, same per-handler try/catch -> { ok: true, result }.
+//      Every exit path settles through finally and restores saving=false;
+//      overlapping save() calls share the same in-flight promise.
 //
 // Delete flow order (spec §6.2):
 //   1. capability delete gate (spec §3.4/§6.2, CAP-06; W3-2) — denied
@@ -101,6 +106,21 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
       values[name] = getCurrentValue(slice, s.renderType);
     }
     return values;
+  }
+
+  function sameValues(
+    left: Readonly<Record<string, unknown>>,
+    right: Readonly<Record<string, unknown>>,
+  ): boolean {
+    const leftKeys = Object.keys(left);
+    const rightKeys = Object.keys(right);
+    return (
+      leftKeys.length === rightKeys.length &&
+      leftKeys.every(
+        (key) =>
+          Object.prototype.hasOwnProperty.call(right, key) && Object.is(left[key], right[key]),
+      )
+    );
   }
 
   // Capability resolver (spec §3.4/§6.2, CAP-06; W3-2) — encapsulates the
@@ -156,21 +176,31 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     };
   }
 
-  // spec §6.2 step 7 — field-name-keyed error mapping + suppress-generic.
+  // Field and global validation errors are independent plural channels.
+  // A backend may return both in the same response. The generic `message`
+  // remains a fallback only, avoiding a duplicate "Validation failed"
+  // banner when specific errors were supplied.
   function applySaveError(error: BackendError): void {
     const fieldErrors = error.fieldErrors;
+    const globalErrors = [...(error.globalErrors ?? [])];
+    let mappedFieldError = false;
     if (fieldErrors !== undefined && Object.keys(fieldErrors).length > 0) {
       const fieldDefs = store.getState().fieldDefs;
       for (const [name, messages] of Object.entries(fieldErrors)) {
         if (name in fieldDefs) {
           store.getState().setFieldErrors(name, messages);
+          mappedFieldError = true;
         } else {
-          store.getState().addMessage({ key: name, severity: 'error', text: messages.join(', ') });
+          globalErrors.push(...messages);
         }
       }
-      // suppress-generic (spec §6.2): error.message is NOT also banner-ed
-      // when fieldErrors is present.
-    } else {
+    }
+
+    if (globalErrors.length > 0) {
+      store.getState().setGlobalErrors(globalErrors);
+    } else if (error.code === 'VALIDATION' && !mappedFieldError) {
+      store.getState().setGlobalErrors([error.message]);
+    } else if (!mappedFieldError) {
       store.getState().addMessage({ key: 'save-error', severity: 'error', text: error.message });
     }
   }
@@ -182,7 +212,9 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     store.getState().addMessage({ key: 'delete-error', severity: 'error', text: error.message });
   }
 
-  async function save(saveOpts?: { skipValidation?: boolean }): Promise<SaveOutcome> {
+  let activeSave: Promise<SaveOutcome> | undefined;
+
+  async function performSave(saveOpts?: { skipValidation?: boolean }): Promise<SaveOutcome> {
     const renderType = entityForm.getRenderType();
 
     // spec §6.2 step 1 (CAP-06; W3-2) — capability-denied is a SILENT block:
@@ -196,12 +228,21 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     if (!(await capAllowed(relevantCap, capCtx(renderType))))
       return { ok: false, reason: 'capability' };
 
+    store.getState().clearGlobalErrors();
+    const validatedValues = snapshotValues();
+    let data = store.getState().toSaveData();
+
     if (!saveOpts?.skipValidation) {
       const valid = await store.getState().validateAll();
       if (!valid) return { ok: false, reason: 'validation' };
+      // The UI is locked while saving, but headless callers may still write
+      // directly to the store. Never send a value different from the one the
+      // validation run inspected.
+      if (!sameValues(validatedValues, snapshotValues())) {
+        store.getState().setGlobalErrors(['검증 중 입력값이 변경되었습니다. 다시 저장해 주세요.']);
+        return { ok: false, reason: 'validation' };
+      }
     }
-
-    let data = store.getState().toSaveData();
 
     for (const handler of entityForm.getBeforeSaveHandlers()) {
       let cancelled: string | undefined;
@@ -211,7 +252,7 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
         setData(next) {
           data = next;
         },
-        values: snapshotValues(),
+        values: validatedValues,
         renderType,
         session,
         cancel(reason) {
@@ -257,6 +298,7 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     }
 
     store.getState().clearMessages();
+    store.getState().clearGlobalErrors();
     for (const handler of entityForm.getAfterSaveHandlers()) {
       const ctx: AfterSaveContext = { result, data, renderType, session, mutator: buildMutator() };
       try {
@@ -267,6 +309,17 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     }
 
     return { ok: true, result };
+  }
+
+  function save(saveOpts?: { skipValidation?: boolean }): Promise<SaveOutcome> {
+    if (activeSave !== undefined) return activeSave;
+    store.getState().setSaving(true);
+    const pending = performSave(saveOpts).finally(() => {
+      activeSave = undefined;
+      store.getState().setSaving(false);
+    });
+    activeSave = pending;
+    return pending;
   }
 
   async function del(deleteOpts?: { ids?: string[] }): Promise<DeleteOutcome> {

@@ -11,7 +11,8 @@ import { UIProvider } from '@listgrid/react';
 import { defaultUIComponents } from '@listgrid/ui-default';
 import { DataExporter } from '../DataExporter';
 
-vi.mock('file-saver', () => ({ saveAs: vi.fn() }));
+const mockedSaveAs = vi.hoisted(() => vi.fn());
+vi.mock('file-saver', () => ({ saveAs: mockedSaveAs, default: { saveAs: mockedSaveAs } }));
 
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Active' },

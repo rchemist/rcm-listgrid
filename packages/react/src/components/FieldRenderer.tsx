@@ -53,6 +53,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   // into effReadOnly below regardless of the field's own declared/meta
   // readOnly, independent of the permission hard-gate (effHidden).
   const formReadOnly = useStore(store, (s) => s.formReadOnly);
+  const saving = useStore(store, (s) => s.saving);
 
   const [hidden, setHidden] = useState(false);
   const [required, setRequired] = useState(false);
@@ -137,7 +138,9 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
   // un-hide a field the session isn't permitted for.
   const effHidden = !permitted || (metaOverride.hidden ?? hidden);
   const effRequired = metaOverride.required ?? required;
-  const effReadOnly = formReadOnly || (metaOverride.readOnly ?? readOnly);
+  // A save owns an immutable input snapshot. Lock every renderer until the
+  // controller settles so the user cannot create a validate/send race.
+  const effReadOnly = saving || formReadOnly || (metaOverride.readOnly ?? readOnly);
 
   if (effHidden) return null;
 
@@ -184,7 +187,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
           <button
             type="button"
             onClick={() => void store.getState().runAsyncValidation(fieldName)}
-            disabled={effReadOnly || slice.asyncState === 'checking'}
+            disabled={saving || effReadOnly || slice.asyncState === 'checking'}
           >
             {asyncValidation.buttonLabel}
           </button>

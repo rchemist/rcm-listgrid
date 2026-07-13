@@ -20,6 +20,8 @@ export interface BackendError {
   message: string;
   /** per-field validation messages (charter C5 server errors → field channel). */
   fieldErrors?: Record<string, string[]>;
+  /** form-wide validation messages, independent of fieldErrors; both may coexist. */
+  globalErrors?: string[];
 }
 
 export interface BackendAdapter {
