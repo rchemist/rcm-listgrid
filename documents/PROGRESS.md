@@ -2,12 +2,12 @@
 
 **Created**: 2026-07-10
 **Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY** · **`0.4.0-alpha.0` 배포됨(dist-tag `next`·`1ebbc4d`·latest=0.3.26 무영향)** · GA-L1 완료. **Phase TB 완료(TB-0~9·TB-C1~11 전 커버리지)·GA-L2 CLOSED**([closure](./analysis/2026-07-13/ga-l2-closure.md)). **활성 코드 작업 없음** — downstream = Phase GA-L(GA-L3/L4=사용자 GA-latest go 대기·크리티컬 패스).
-**운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
+**운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. 2026-07-13 Codex run은 RCM key/marker 없음.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **Phase TB 완료(TB-0~9·GA-L2 CLOSED)**. **활성 코드 작업 없음** → downstream = **Phase GA-L**. bare `/progress`로 재개 → **GA-L3(v0.4→main 플립)·GA-L4(0.4.0 latest 배포)=사용자 "GA-latest go" 결정 대기(크리티컬 패스)** — 무인 세션은 이 결정 없이는 독립 작업 없음→정지(§Open Questions 참조). cold-start=이 §Handoff + [TB archive](./progress-archive/phase-tb-tasks.md) + [GA-L2 closure](./analysis/2026-07-13/ga-l2-closure.md). **Do-NOT**: §Handoff 계승 + [recon §6](./analysis/2026-07-13/test-backend-recon.md).
-**Last updated**: 2026-07-13 (**TB-9 완료 → Phase TB 종료(TB-0~9·GA-L2 CLOSED)** — #GX-1/#GX-2/#W6-2b를 충실 테스트 백엔드+excel 유닛+**실 export 관찰**로 종결. **핵심 정정(사용자 지적)**: address를 xref와 동일 data-loss로 오판한 초안을 buildExportAoa 관찰로 정정 → **address=5 평면 sibling으로 무손실**(composite 빈 컬럼=vestige)·**xref만 진짜 손실**(carrier無·silent·실트래픽0=한계문서화). 교훈=composite export는 추정 말고 관찰. **5게이트 green·vitest 2497**. **활성 코드 작업 0 → downstream=GA-L(사용자 GA-latest go 대기).**)
+**Last updated**: 2026-07-13 (GA-L3/L4 크리티컬 패스의 사용자 `GA-latest go` 결정을 OQ-GA-L로 영속화. RCM unavailable, 독립 작업 없음.)
 
 ## Goal
 
@@ -130,6 +130,7 @@
 
 ## Open Questions
 
+- [ ] **OQ-GA-L — GA `latest` 진행 승인**: `v0.4`→`main` 플립(GA-L3) 후 `0.4.0`을 npm `latest`로 배포(GA-L4)할지 사용자 결정 필요. 승인 문구: `GA-latest go`.
 - [x] **OQ-TB1** 조건타입 시맨틱 → TB-0 해소 · 24종 구현·2종 문서화 no-op · [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
 - [x] **OQ-TB2** NOT/nested+bulk-delete → TB-0 해소 · TB-4 in-scope · [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
 - [x] **OQ-TB3** `backend/rest` 어댑터 → TB-8 stretch(코어 RCM 경로 후). [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
