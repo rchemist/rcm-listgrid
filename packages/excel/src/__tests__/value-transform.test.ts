@@ -194,6 +194,25 @@ describe('TIER 2 — scalar passthrough (every FieldType not in TIER 1/TIER 3)',
   it('export: manyToOne row value already flattened to a scalar id passes through unchanged (regression guard)', () => {
     expect(exportValue('manyToOne', 7)).toBe('7');
   });
+
+  it('export: manyToOne with a custom labelField probes that key first (edustack {id,title} shape)', () => {
+    expect(exportValue('manyToOne', { id: 482, title: 'Course A' }, { labelField: 'title' })).toBe(
+      'Course A',
+    );
+  });
+
+  it('export: manyToOne {id,title} WITHOUT a labelField mis-falls to id (documents the pre-fix defect)', () => {
+    expect(exportValue('manyToOne', { id: 482, title: 'Course A' })).toBe('482');
+  });
+
+  it('export: labelField key absent/nullish falls back to name->label->id', () => {
+    expect(exportValue('manyToOne', { id: 7, name: 'Acme' }, { labelField: 'title' })).toBe('Acme');
+    expect(exportValue('manyToOne', { id: 7, title: null }, { labelField: 'title' })).toBe('7');
+  });
+
+  it('export: xref {mapped,deleted} envelope has no name/label/id -> empty cell (documented data-loss, not corruption)', () => {
+    expect(exportValue('xrefMapping', { mapped: [1, 2], deleted: [] })).toBe('');
+  });
 });
 
 describe('isAutoDeriveExcluded — TIER 3', () => {

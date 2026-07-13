@@ -63,3 +63,22 @@ export function getFieldSelectOptions(
   const withOptions = field as unknown as { options?: SelectOption[] };
   return withOptions.options;
 }
+
+/**
+ * The configured `labelField` for a `manyToOne` field (the key on the nested
+ * related-entity object whose value the grid displays — `ManyToOneField.
+ * getLabelField()`, default `'name'`). `DataFieldSpec` carries no `labelField`
+ * (pure name/label/type projection), so — exactly like `getFieldSelectOptions`
+ * — this looks the concrete `EntityField` back up on `entityForm` by name and
+ * duck-types its `getLabelField()` accessor (only `ManyToOneField` defines it).
+ * Returns `undefined` for any field that has no such accessor.
+ */
+export function getFieldManyToOneLabelField(
+  entityForm: EntityForm,
+  name: string,
+): string | undefined {
+  const field = entityForm.getField(name);
+  if (!field) return undefined;
+  const withLabel = field as unknown as { getLabelField?: () => string };
+  return typeof withLabel.getLabelField === 'function' ? withLabel.getLabelField() : undefined;
+}

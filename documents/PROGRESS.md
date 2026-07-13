@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · Phase RV(R1~R12) ✅ · **GA 게이트(CAP-28) 실행 완료 2026-07-13**: 헌장 C1~C9 전건 present·전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2394u/E2E32/surface 49·61·188). **최종 봉인=HOLD**: R7 GJCU-shape unverified + P0/P1 publish 외부승인(§Open Questions). 코드축 GA-ready·코드변경 잔여 0.
+**Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY**. 다음=0.4.0-alpha.0 publish(next).
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **GA 게이트 실행 완료** — 남은 봉인 게이트는 **소비자/외부 입력 2건**(R7 실 GJCU-shape·publish 승인)뿐, 코드 변경 없음. cold-start=[GA 결과](./analysis/2026-07-13/ga-gate-result.md) + §Open Questions HOLD 2건. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·R7 실페이로드 확인 없이 형태 추정.
-**Last updated**: 2026-07-13 (**GA 게이트(CAP-28) 실행 완료** — 헌장 C1~C9 전건 present(빈 행 0)·요건1/2/3 충족·전 게이트 green: type-check·test 2394·lint(0err)·build·format:check·**E2E 32**·surface 49/55·61/120·188/190·attw/publint/headless(zero-React)/codemod 4/4. [결과 매트릭스](./analysis/2026-07-13/ga-gate-result.md). **최종 봉인 HOLD 2건**(코드 아님·§Open Questions): R7 GJCU-shape unverified(실 페이로드 부재·Do-NOT #5)·P0/P1 publish 외부승인. Phase RV 아카이브 이관(phase-rv-tasks.md).)
+**Last updated**: 2026-07-13 (**GA 게이트 ✅ + R7 실결함 수정(RV-R13)** — 사용자 지시로 R7을 edustack(0.3.x 권위 소비자) 실 백엔드 대조 검증(9-agent 팬아웃+opus 적대검증): manyToOne list-row=`{id,title}`(labelField='title')·gjcu/apps-sample=`{id,name}`. **RV-R7 가드 `name→label→id`가 title 놓쳐 raw id export하는 실결함 발견**(apps/sample이 'name'써서 통과테스트가 가림). 수정=`/excel`이 field labelField 스레드(sonnet 위임→판별검증→pre-fix FAIL 확인). 전 게이트 green: test 2394→**2399**·E2E32·surface 무변경·attw/publint. xref=raw 바인딩無+CAP-29 descope(low-risk)·address=flat 무관. 코드축 **GA-READY**. 다음=0.4.0-alpha.0 publish(next).)
 
 ## Goal
 
@@ -101,9 +101,10 @@
 
 #### Phase GA — 헌장 C1~C9 대조 게이트 (CAP-28) ✅ 실행 완료 (2026-07-13 · 순수검증 pass) · [결과](./analysis/2026-07-13/ga-gate-result.md)
 
-- [x] **GA 게이트 실행 (헌장 C1~C9·요건1/2/3)** ✅ 2026-07-13 · 전건 `present`(빈 행 0)·전 게이트 green(2394u·E2E32·49·61·188·headless zero-React)·엔진 anchor 실재 · 코드변경 0 · [결과](./analysis/2026-07-13/ga-gate-result.md)
+- [x] **GA 게이트 실행 (헌장 C1~C9·요건1/2/3)** ✅ 2026-07-13 · 전건 `present`(빈 행 0)·전 게이트 green·엔진 anchor 실재 · [결과](./analysis/2026-07-13/ga-gate-result.md)
+- [x] **RV-R13 R7 실 백엔드 검증 + labelField 수정** ✅ 2026-07-13 · edustack(0.3.x) 실 대조=manyToOne `{id,title}`(labelField='title')·RV-R7 가드 name→label→id가 title 놓쳐 raw id export하는 **실결함 발견→수정**(9-agent 팬아웃+opus 적대검증). `/excel`이 labelField 스레드(sonnet 위임→판별검증·surface 무변경·2399u·E2E32) · [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
 
-**Next up**: **최종 GA 봉인 = HOLD 2건**(§Open Questions, 코드 아님) — ① R7 GJCU-shape 실 페이로드 확인(소비자/외부) ② P0/P1 publish 외부 승인. 둘 다 사용자/외부 입력 대기 → 독립 코드 작업 없음.
+**Next up**: **0.4.0-alpha.0 publish(dist-tag `next`) + 최종 GA 봉인** — R7 해소로 코드축 GA-READY. publish=모델 판단(alpha 선출하→소아킹→GA latest). 잔여=low-risk §Needs Review ack(GA 비차단).
 
 ---
 
@@ -148,8 +149,8 @@
 
 ## Open Questions
 
-- [ ] **GA 봉인 HOLD ① R7 GJCU-shape 실 페이로드 확인** (소비자/외부 데이터·2026-07-13 GA 게이트 산출) — 실 GJCU/edustack list-endpoint 응답에서 manyToOne/xref/address 컬럼이 **평면 스칼라 vs 중첩 관계객체**인지 확인 필요. 리포엔 mock만 존재 → 추정 금지(Do-NOT #5). 중첩이면 `/excel` TIER2(`value-transform.ts:138-163`) 후속 태스크, 평면이면 무해. [근거](./analysis/2026-07-13/ga-gate-result.md#3-요건-3--gjcu급-실-엔티티-재현--r7-gjcu-shape-34)
-- [ ] **GA 봉인 HOLD ② P0/P1 publish 외부 승인** — 0.3.26 배포됨. 0.4.0-alpha/GA publish는 외부 승인 몫(코드축은 GA-ready). 승인 시 게이트(CHANGELOG==version·full gate) 선행 후 자율 배포.
+- [x] **GA 봉인 HOLD ① R7 GJCU-shape → 해소(2026-07-13, RV-R13)** — edustack 실 대조로 manyToOne=`{id,title}` 확인·RV-R7 가드 실결함 발견→`/excel` labelField 스레드 수정. xref=실 소비자 raw 바인딩無(flat sibling)+CAP-29 descope=low-risk 한계 문서화·address=flat 무관. [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
+- [ ] **publish = 모델 판단(사용자 자율 위임)** — 로드맵대로 **0.4.0-alpha.0(dist-tag `next`) 선출하**(코드축 GA-READY·surface 안정) → 소아킹 후 GA `latest`. 외부 승인 대기 아님(header 배포 자율). 게이트(CHANGELOG==version·full gate) 선행.
 - [x] **릴리스 기전 확정(2026-07-10)** — `v*` 태그 push→`publish.yml` 자동배포(dist-tag `-alpha`→next/`0.2.x`→legacy-0.2/else latest). 게이트 선행.
 - [x] **0.3.26 실배포 완료(2026-07-11)** — 소비자 무회귀 확인 → main ff-merge `853660b` → `v0.3.26` 태그 → publish.yml latest 자동배포. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md).
 - [x] **0.4.0-alpha.N → W2 착지 후 보류(모델 결정 2026-07-11)** — 현 표면은 W1이 즉시 대개명할 표면(폐기 예정 이름에 소비자 통합 방지). W2 완료 시 자동 재개.

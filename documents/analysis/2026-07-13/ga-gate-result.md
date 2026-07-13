@@ -14,7 +14,7 @@
 |---|---|---|---|
 | type-check | `npm run type-check` | tsc --noEmit clean | 0 |
 | typecheck:packages | `npm run typecheck:packages` | clean | 0 |
-| **test (특성화 P2 포함 = 요건1)** | `npm run test` | **2394 passed \| 1 todo · 186 files** (16.6s) | 0 |
+| **test (특성화 P2 포함 = 요건1)** | `npm run test` | **2399 passed \| 1 todo · 186 files** (R7 수정 +5) | 0 |
 | lint | `npm run lint` | **0 errors** · 262 warnings(허용) | 0 |
 | build | `npm run build` | tsup + build:styles OK | 0 |
 | format:check | `npm run format:check` | "All matched files use Prettier code style!" | 0 |
@@ -50,19 +50,24 @@ verdict ∈ {present, partial, missing, descoped-ok} — 판단이 아니라 매
 
 ---
 
-## 3. 요건 3 — GJCU급 실 엔티티 재현 + R7 GJCU-shape (§3.4)
+## 3. 요건 3 — GJCU급 실 엔티티 재현 + R7 GJCU-shape (§3.4) → ✅ 검증 완료 + 수정
 
 - **재현(folded-in)**: apps/sample GJCU급 엔티티(college/professor/collabo)가 리스트+폼+관계+엑셀을 실제 구동 → §1 E2E green이 곧 요건3 충족. ✅
-- **R7 GJCU-shape 확인 → ⚠ unverified**: 실 GJCU/edustack list-endpoint 페이로드가 리포에 부재(grep: real payload fixture 0건 — apps/sample은 mock만). manyToOne/xref/address 컬럼의 **평면 스칼라 vs 중첩 관계객체** 판정 불가. 근거: `packages/excel/src/value-transform.ts:138-163` TIER2 방어적 스칼라 가드(R7 착지)는 중첩객체를 크래시 없이 처리하나 **무결성 손상 여부는 실 페이로드 형태에 종속**. **Do-NOT #5 준수**: "평면일 것" 추정 금지 → 'R7-nested / unverified' + **R7 후속 유지**. 인라인 수정 없음.
+- **R7 GJCU-shape 검증(2026-07-13, 실 백엔드 대조 — 9-agent 팬아웃+opus 적대검증)**: 사용자 지시대로 **edustack(0.3.x base, 권위 소비자)** + gjcu-academic-backend(0.2.x 참조) + rcm-framework 실 코드 대조. 결과 = **실 list-row 형태별 판정**:
+  - **manyToOne → nested-object**. edustack 8개 컬럼 전부 `{id, title}`(`CourseRefView(Long id, String title)`, labelField=`title`)·gjcu/apps-sample은 `{id, name}`(labelField=`name`). **R7 가드(RV-R7)가 `name→label→id` 하드코딩이라 edustack의 `title`을 놓쳐 raw id(PK)를 export하는 실결함 발견**(`[object Object]` 아님·silent wrong-value). apps/sample mock이 `name`을 써서 전 통과 테스트가 이 결함을 **가림**.
+  - **xref → nested `{mapped,deleted}`**(name/label/id 없음). 단 실 소비자는 raw xref를 리스트 컬럼으로 바인딩 안 함(flat `*Name` 형제 필드 사용)·`XrefPriceMappingField`는 CAP-29 descope·edustack은 xref 전무 → **실 리스크 낮음**(문서화된 한계).
+  - **address → flat**. 가상 composite(flat 형제 스칼라)·객체로 export 도달 불가 → R7 무관.
+- **수정(RV-R13, `<commit>` 이 pass에서)**: `/excel` 익스포트가 필드의 `labelField`를 스레드하도록 수정(`bridgeExportValue`→`getFieldManyToOneLabelField`→`exportValue`→`exportTier2Value`가 labelField 우선 프로브·기존 name/label/id는 폴백). 공개표면 무변경(49/55·61/120·188/190)·**판별테스트**(pre-fix가 `482`를 export→FAIL 확인)·엔드투엔드 커버리지 갭 폐쇄(M2O label='title' export→title). test 2394→**2399**·E2E32.
 
 ---
 
-## 4. GA 판정
+## 4. GA 판정 — ✅ 코드축 GA-READY (봉인 잔여 = publish 판단 1건)
 
-**요건 2(헌장 C1~C9 대조표) 충족** — 9 C행 전부 `present`(C6 일부 descoped-ok), 빈 행 0. **요건 1(P2 특성화 동일 통과)·§3 게이트 전건 green.** **요건 3 재현 충족**.
+**요건 1·2·3 전건 충족** — 9 C행 전부 `present`(C6 일부 descoped-ok), 빈 행 0. **P2 특성화 동일 통과·§3 게이트 전건 green.** **R7 GJCU-shape = 검증 완료 → 실결함 발견 → 수정(RV-R13)** — 브리프 §5의 'unverified' 잔여 해소.
 
-**단, 최종 GA 봉인은 보류(HOLD)** — 브리프 §5 판정 규칙("하나라도 unverified → 봉인 보류 + 후속 유지"):
-1. **R7 GJCU-shape unverified** — 실 GJCU/edustack 페이로드로 manyToOne/xref/address 컬럼 형태 확인 필요(소비자/외부 데이터 = 세션 밖). 중첩객체면 `/excel` TIER2 후속 태스크, 평면이면 무해.
-2. **P0/P1 publish = 외부 승인 대기** — 0.3.26 배포됨, 0.4.0-alpha/GA publish는 외부 승인 몫.
+**코드/구현 축 GA-READY** — 헌장 대조 present·전 게이트 green(2399u·E2E32·surface 무변경)·R7 실결함 수정 완료. 봉인 전 잔여:
+1. ~~R7 GJCU-shape unverified~~ → **해소**(edustack 실 대조·labelField 수정·RV-R13).
+2. **publish** — 모델 판단(사용자 자율 위임). 판정: 로드맵대로 **0.4.0-alpha.0(dist-tag `next`, opt-in) 선출하** → 소아킹 후 GA `latest`. (외부 승인 대기 아님.)
+3. **잔여 low-risk §Needs Review**(#RV-R4 테스트동기화·#W7-2·#W6-2b 등) — GA 비차단(descope/low-risk)·사용자 ack 대기.
 
-**정리**: 코드/구현 축은 GA-ready(헌장 대조 present·전 게이트 green). 봉인 전 잔여 = **소비자/외부 확인 2건**(R7 실페이로드·publish 승인) — 코드 변경 아님. 이 2건은 §Open Questions에 등재, 사용자/외부 입력 대기.
+**결론**: 헌장 C1~C9 보존이 실 소비자(edustack) 데이터로 검증됨. R7이 실제로 결함을 잡아냈고(가드 불충분) 즉시 수정 → GA 게이트가 판정만이 아니라 **실 결함 1건을 잡아 고친** 값진 pass가 됨.

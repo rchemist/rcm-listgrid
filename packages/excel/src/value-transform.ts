@@ -132,6 +132,10 @@ export interface ValueTransformOption {
 
 export interface ValueTransformOptions {
   options?: ValueTransformOption[] | undefined;
+  /** For `manyToOne`: the nested object key holding the display label
+   *  (`ManyToOneField.labelField`, default `'name'`). Probed FIRST by
+   *  `exportTier2Value` before the `name`/`label`/`id` fallbacks. */
+  labelField?: string | undefined;
 }
 
 /**
@@ -141,23 +145,29 @@ export interface ValueTransformOptions {
  * flattened to a scalar id/label) when the backend list response embeds the
  * relation inline — `String({...})` on that shape literally yields the
  * string `"[object Object]"`. This guard is UNCONDITIONAL (no `FieldType`
- * branch, no manyToOne-specific check) because `exportValue`'s signature
- * (`type`, `value`, `options?: { options?: SelectOption[] }`) never receives
- * the field's `ManyToOneConfig`/`labelField` — `DataFieldSpec`
- * (`@listgrid/schema-core/data-transfer.ts:18-34`) carries only
- * `name`/`label`/`type`, no `labelField` (checked; confirmed absent) — so
- * there is no configured label key reachable here. Deterministic fallback
+ * branch, no manyToOne-specific check) — `DataFieldSpec`
+ * (`@listgrid/schema-core/data-transfer.ts:18-34`) itself carries only
+ * `name`/`label`/`type`, no `labelField` (checked; confirmed absent), so the
+ * per-field `labelField` cannot be read off `DataFieldSpec` directly. Fallback
  * probe order on the raw object: `name`, then `label`, then `id`, first
  * present-and-non-nullish value wins; `''` if none match. Non-object,
  * non-array values (the TIER 2 common case: string/number/boolean/etc.)
- * are untouched — `String(value)`, identical to the prior behavior. GA still
- * confirms this against the real GJCU list-endpoint row shape (§9 GA
- * brief) — a verification step now, not an open runtime decision.
+ * are untouched — `String(value)`, identical to the prior behavior. The
+ * caller (`bridgeExportValue`, export-core.ts) now threads the field's
+ * configured `labelField` (resolved via `getFieldManyToOneLabelField`) in as
+ * `options.labelField`, and that key is probed FIRST here; the `name`/
+ * `label`/`id` order remains as the fallback when no `labelField` is
+ * supplied or its key is absent/nullish on the object. This was prompted by
+ * a GA finding: edustack's manyToOne columns nest the related entity as
+ * `{ id, title }` (`labelField: 'title'`), which the old fixed
+ * name→label→id probe missed entirely, silently mis-exporting the raw
+ * numeric id instead of the displayed title.
  */
-function exportTier2Value(value: object): string {
+function exportTier2Value(value: object, labelField?: string): string {
   if (!Array.isArray(value)) {
     const obj = value as Record<string, unknown>;
-    const label = obj.name ?? obj.label ?? obj.id;
+    const preferred = labelField !== undefined ? obj[labelField] : undefined;
+    const label = preferred ?? obj.name ?? obj.label ?? obj.id;
     return label === undefined || label === null ? '' : String(label);
   }
   return String(value);
@@ -209,7 +219,9 @@ export function exportValue(
     case 'markdown':
       return getPlainText(value);
     default:
-      return typeof value === 'object' ? exportTier2Value(value) : String(value);
+      return typeof value === 'object'
+        ? exportTier2Value(value, options?.labelField)
+        : String(value);
   }
 }
 

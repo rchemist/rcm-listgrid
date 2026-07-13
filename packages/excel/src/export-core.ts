@@ -16,7 +16,12 @@ import * as XLSX from 'xlsx-js-style';
 import { saveAs } from 'file-saver';
 import type { DataFieldSpec, EntityForm, FieldType } from '@listgrid/schema-core';
 import { exportValue } from './value-transform';
-import { filterFlatFields, getFieldSelectOptions } from './field-resolution';
+import type { ValueTransformOptions } from './value-transform';
+import {
+  filterFlatFields,
+  getFieldSelectOptions,
+  getFieldManyToOneLabelField,
+} from './field-resolution';
 
 /** Field types the old engine forces to Excel "text" format so leading zeros
  *  / option codes aren't mangled by Excel's general-number auto-detection
@@ -56,13 +61,25 @@ export function resolveExportConfig(
  * Bridge a `multiselect` field's runtime `string[]` value to the `'|||'`-
  * joined wire string `exportValue`'s TIER 1 switch expects (value-transform.ts
  * doc: "bridging that array to/from this string encoding is the export/
- * import CORE's job (W6-2b)"), then run the per-type transform.
+ * import CORE's job (W6-2b)"), then run the per-type transform. Also threads
+ * a `manyToOne` field's configured `labelField` (resolved via
+ * `getFieldManyToOneLabelField`) so the TIER 2 default probes the correct
+ * nested-object key instead of falling back to the raw id.
  */
 function bridgeExportValue(entityForm: EntityForm, spec: DataFieldSpec, raw: unknown): string {
   const type = spec.type ?? 'text';
   const value = type === 'multiselect' && Array.isArray(raw) ? raw.join('|||') : raw;
   const options = getFieldSelectOptions(entityForm, spec.name);
-  return exportValue(type, value, options !== undefined ? { options } : undefined);
+  const labelField =
+    type === 'manyToOne' ? getFieldManyToOneLabelField(entityForm, spec.name) : undefined;
+  const opts: ValueTransformOptions | undefined =
+    options !== undefined || labelField !== undefined
+      ? {
+          ...(options !== undefined ? { options } : {}),
+          ...(labelField !== undefined ? { labelField } : {}),
+        }
+      : undefined;
+  return exportValue(type, value, opts);
 }
 
 /**

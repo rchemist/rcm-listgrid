@@ -4,6 +4,7 @@ import {
   BooleanField,
   EntityForm,
   FileField,
+  ManyToOneField,
   MultiSelectField,
   SelectField,
   StringField,
@@ -93,6 +94,32 @@ describe('buildExportAoa', () => {
     const form = collegeForm();
     const aoa = buildExportAoa(form, [{ name: 'name' }], [{ name: 'x' }]);
     expect(aoa[0]).toEqual(['name\n[name]']);
+  });
+});
+
+describe('buildExportAoa — manyToOne labelField (R7 / edustack shape)', () => {
+  it('exports the nested object under its configured labelField, not the raw id', () => {
+    const courseForm = new EntityForm('CourseForm', '/course').addFields({
+      items: [new StringField('title', 100).withLabel('Title')],
+    });
+    const form = new EntityForm('IssuanceForm', '/issuance').addFields({
+      items: [
+        new StringField('name', 100).withLabel('Name'),
+        new ManyToOneField('lmsCourse', 200, {
+          entityForm: () => courseForm,
+          labelField: 'title',
+        }).withLabel('Course'),
+      ],
+    });
+    const fields = [
+      { name: 'name', label: 'Name', type: 'text' as const },
+      { name: 'lmsCourse', label: 'Course', type: 'manyToOne' as const },
+    ];
+    const rows = [{ name: 'Cert #1', lmsCourse: { id: 482, title: 'Course A' } }];
+
+    const aoa = buildExportAoa(form, fields, rows);
+
+    expect(aoa[1]).toEqual(['Cert #1', 'Course A']);
   });
 });
 
