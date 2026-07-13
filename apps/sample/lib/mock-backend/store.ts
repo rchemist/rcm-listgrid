@@ -12,76 +12,284 @@
 // edit-triggered recompile. This is the same pattern used for dev-mode
 // Prisma-client singletons.
 
-import type { FilterItem } from '@listgrid/schema-core';
+import type { FilterGroups, FilterItem } from '@listgrid/schema-core';
 
 export type WithId = { id: string; [key: string]: unknown };
 
-/** The exact `filters` shape SearchForm.toJSON() puts on the wire. */
-export interface SearchFilters {
-  AND: FilterItem[];
-  OR: FilterItem[];
+/**
+ * The exact `filters` shape SearchForm.toJSON() puts on the wire — alias for
+ * schema-core's `FilterGroups` (sparse operator-keyed map `{AND?,OR?,NOT?}`,
+ * search-form.ts:83-87 / framework `LinkedHashMap<LogicalOperator,
+ * List<FilterItem>>`, FilterItem.java:52). Kept as a store.ts-local name
+ * since crud-routes.ts / major/search/route.ts already import `SearchFilters`.
+ */
+export type SearchFilters = FilterGroups;
+
+// TB-1 (documents/analysis/2026-07-13/tb-matching-semantics.md — the
+// row-matching contract this module reproduces, extracted from
+// rcm-backend-framework 0.1.0 FilterDispatcher.java/SearchRequestPlanner.java
+// with file:line citations). Supersedes the GX-2/EC3 5-of-24 partial
+// implementation (previously: EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE only, the
+// remaining 19 types a `default: true` no-op, NOT-group + subFilters
+// accepted on the wire but never evaluated).
+//
+// Value-comparison helpers (§2 "값 비교 규칙"): the framework re-types wire
+// strings via `ValueCoercer.coerce(value, fieldType)` before comparing; this
+// mock has no field-type metadata, so it inspects the actual JS value on the
+// row + filter and picks numeric / chronological / lexical ordering
+// (compareOrdered below). Non-comparable pairs return `undefined`, which
+// every ordering case treats as FALSE — mirroring FilterDispatcher.compare/
+// betweenPredicate's `instanceof Comparable` guard (`cb.disjunction()` on
+// failure, FilterDispatcher.java:196-198,206-209).
+
+/** true when `v` is a number, or a non-blank string that parses to a finite number. */
+function isNumericValue(v: unknown): boolean {
+  if (typeof v === 'number') return Number.isFinite(v);
+  if (typeof v === 'string' && v.trim() !== '') return Number.isFinite(Number(v));
+  return false;
 }
 
-// EC3 — real filter application (previously EVERY mock search handler
-// ignored `body.filters` entirely and just paginated all rows; harmless for
-// every entity ported so far since none of their e2e scenarios depended on
-// server-side filtering, but Major's XrefMapping IN/NOT_IN display+picker
-// queries and the staffs async domain filter (assistant=true) both NEED the
-// backend to actually narrow rows — otherwise every professor/staff would
-// show in both the display grid and the picker regardless of mapped state).
-// Minimal condition-type coverage — only what an audited filter channel in
-// this app actually emits (SearchForm.QueryConditionType has more; unused
-// ones fall through the `default: true` no-op below, same as the old
-// ignore-everything behavior).
-//
-// GX-2 (§5 item 4) — implements 5 of the framework's 24 QueryConditionTypes
-// (QueryConditionType.java:38-81): EQUAL, NOT_EQUAL, IN, NOT_IN, LIKE. These
-// are the only ones any caller in this app actually emits (grepped
-// `queryConditionType:`/`addAndFilter` across apps/sample + packages/react
-// registries — college.ts LIKE, major.ts/xref-*-renderer.tsx EQUAL/
-// NOT_EQUAL/IN/NOT_IN). The remaining 19 (BETWEEN, GREATER_THAN*,
-// LESS_THAN*, IS_NULL, IS_NOT_NULL, date/range variants, …) are
-// UNIMPLEMENTED — they fall through to the `default: true` no-op below
-// (row always matches, same as the pre-EC3 ignore-everything behavior), not
-// silently claimed as supported. `FilterItem.subFilters` (nested
-// `(a OR b) AND c` groups) is likewise not evaluated — GX-1 output can
-// carry it, but no caller here populates it.
-function matchesFilter(row: WithId, filter: FilterItem): boolean {
-  const rowValue = row[filter.name];
+/** Epoch ms for a Date instance or a Date.parse-able string; undefined otherwise. */
+function toEpoch(v: unknown): number | undefined {
+  if (v instanceof Date) return v.getTime();
+  if (typeof v === 'string' && v.trim() !== '') {
+    const t = Date.parse(v);
+    return Number.isFinite(t) ? t : undefined;
+  }
+  return undefined;
+}
+
+/**
+ * Type-aware ordering comparator (tb-matching-semantics.md §2 값 비교 규칙):
+ * numeric when both sides are numeric/numeric-coercible, chronological when
+ * both are Date/ISO-date-like strings, lexical when both are plain strings.
+ * Returns `undefined` ("not comparable") for null/undefined operands or
+ * mismatched shapes.
+ */
+function compareOrdered(a: unknown, b: unknown): number | undefined {
+  if (a === null || a === undefined || b === null || b === undefined) return undefined;
+  if (isNumericValue(a) && isNumericValue(b)) {
+    const na = Number(a);
+    const nb = Number(b);
+    return na < nb ? -1 : na > nb ? 1 : 0;
+  }
+  if (typeof a !== 'number' && typeof b !== 'number') {
+    const da = toEpoch(a);
+    const db = toEpoch(b);
+    if (da !== undefined && db !== undefined) {
+      return da < db ? -1 : da > db ? 1 : 0;
+    }
+  }
+  if (typeof a === 'string' && typeof b === 'string') {
+    return a < b ? -1 : a > b ? 1 : 0;
+  }
+  return undefined;
+}
+
+/**
+ * BETWEEN/IN_RANGE/DATE_BETWEEN shared range test — `from <= expr <= to`
+ * (FilterDispatcher.betweenPredicate:200-210). Non-comparable operands (on
+ * either bound) → false, same `cb.disjunction()` fallback as the two-arg
+ * ordering ops; NOT_IN_RANGE negates this result (FilterDispatcher.java:
+ * 147-151 `cb.not(betweenPredicate(...))`), so a non-comparable NOT_IN_RANGE
+ * comes out TRUE — that falls out naturally from `!isBetween(...)` below.
+ */
+function isBetween(rowValue: unknown, low: unknown, high: unknown): boolean {
+  const cmpLow = compareOrdered(rowValue, low);
+  const cmpHigh = compareOrdered(rowValue, high);
+  return cmpLow !== undefined && cmpHigh !== undefined && cmpLow >= 0 && cmpHigh <= 0;
+}
+
+/** null/undefined/'' — the framework's shared IS_BLANK/NULL_OR_BLANK predicate. */
+function isBlank(v: unknown): boolean {
+  return v === null || v === undefined || v === '';
+}
+
+/**
+ * `FilterItem.subFilters` present with >=1 operator key (Java
+ * `hasSubFilters()` = `subFilters != null && !subFilters.isEmpty()` — map
+ * key count, NOT array length; `{AND:[]}` still counts and degenerates to
+ * vacuous TRUE via combineGroup, FilterItem.java:97-99).
+ */
+function hasNestedGroup(group: FilterGroups | undefined): group is FilterGroups {
+  return !!group && Object.keys(group).length > 0;
+}
+
+/**
+ * `SearchRequestPlanner.combineGroup(op, inner)` (:176-186) — one
+ * LogicalOperator bucket's members combined: an empty bucket is vacuously
+ * TRUE (`cb.conjunction()`, :177-179) *before* the operator switch, so this
+ * applies identically to empty AND/OR/**NOT**. Otherwise AND=every item
+ * matches, OR=some item matches, NOT=`!every` (negation of the member
+ * conjunction — NOT per-item negation, that's the separate `item.not`).
+ */
+function combineGroup(row: WithId, op: 'AND' | 'OR' | 'NOT', items: FilterItem[]): boolean {
+  if (items.length === 0) return true;
+  if (op === 'AND') return items.every((item) => matchesFilter(row, item));
+  if (op === 'OR') return items.some((item) => matchesFilter(row, item));
+  return !items.every((item) => matchesFilter(row, item));
+}
+
+/**
+ * FilterItem → row predicate. All 24 `QueryConditionType`s
+ * (tb-matching-semantics.md §2, FilterDispatcher.buildBase:99-179).
+ */
+export function matchesFilter(row: WithId, item: FilterItem): boolean {
+  // subFilters ⇒ recurse as a nested group, ignoring this item's own
+  // name/value/queryConditionType entirely (SearchRequestPlanner.
+  // buildFilters:146 `hasSubFilters() ? buildSubFilter(...) :
+  // FilterDispatcher.build(...)` — either/or). item.not still negates the
+  // recursive result (FilterDispatcher.build:70 wraps whichever base
+  // predicate was built, sub-tree or leaf).
+  if (hasNestedGroup(item.subFilters)) {
+    const nested = matchesFilterGroup(row, item.subFilters);
+    return item.not ? !nested : nested;
+  }
+
+  const rowValue = row[item.name];
+  const type = item.queryConditionType ?? 'EQUAL';
   let result: boolean;
-  switch (filter.queryConditionType ?? 'EQUAL') {
+
+  switch (type) {
     case 'EQUAL':
-      result = String(rowValue) === String(filter.value);
+      result = String(rowValue) === String(item.value);
       break;
     case 'NOT_EQUAL':
-      result = String(rowValue) !== String(filter.value);
+      result = String(rowValue) !== String(item.value);
       break;
     case 'IN':
+      // values empty -> FALSE (FilterDispatcher.java:107-109 cb.disjunction()).
       result =
-        Array.isArray(filter.values) && filter.values.some((v) => String(v) === String(rowValue));
+        Array.isArray(item.values) &&
+        item.values.length > 0 &&
+        item.values.some((v) => String(v) === String(rowValue));
       break;
     case 'NOT_IN':
-      result = !(
-        Array.isArray(filter.values) && filter.values.some((v) => String(v) === String(rowValue))
-      );
+      // values empty -> TRUE (FilterDispatcher.java:117-120 cb.conjunction()).
+      result =
+        !Array.isArray(item.values) ||
+        item.values.length === 0 ||
+        !item.values.some((v) => String(v) === String(rowValue));
       break;
     case 'LIKE':
+      // value == null -> matches all (framework likePattern:226-229 "%").
       result =
-        typeof rowValue === 'string' && typeof filter.value === 'string'
-          ? rowValue.toLowerCase().includes(filter.value.toLowerCase())
-          : false;
+        item.value == null
+          ? true
+          : typeof rowValue === 'string' &&
+            rowValue.toLowerCase().includes(String(item.value).toLowerCase());
       break;
-    default:
+    case 'NOT_LIKE': {
+      const likeMatches =
+        item.value == null
+          ? true
+          : typeof rowValue === 'string' &&
+            rowValue.toLowerCase().includes(String(item.value).toLowerCase());
+      result = !likeMatches;
+      break;
+    }
+    case 'GREATER_THAN': {
+      const cmp = compareOrdered(rowValue, item.value);
+      result = cmp !== undefined && cmp > 0;
+      break;
+    }
+    case 'GREATER_THAN_EQUAL': {
+      const cmp = compareOrdered(rowValue, item.value);
+      result = cmp !== undefined && cmp >= 0;
+      break;
+    }
+    case 'LESS_THAN': {
+      const cmp = compareOrdered(rowValue, item.value);
+      result = cmp !== undefined && cmp < 0;
+      break;
+    }
+    case 'LESS_THAN_EQUAL': {
+      const cmp = compareOrdered(rowValue, item.value);
+      result = cmp !== undefined && cmp <= 0;
+      break;
+    }
+    case 'BETWEEN':
+    case 'IN_RANGE':
+      // values.length<2 -> FALSE (FilterDispatcher.java:141-144 cb.disjunction()).
+      result =
+        Array.isArray(item.values) &&
+        item.values.length >= 2 &&
+        isBetween(rowValue, item.values[0], item.values[1]);
+      break;
+    case 'NOT_IN_RANGE':
+      // values.length<2 -> TRUE (FilterDispatcher.java:147-150 cb.conjunction()).
+      result =
+        !Array.isArray(item.values) ||
+        item.values.length < 2 ||
+        !isBetween(rowValue, item.values[0], item.values[1]);
+      break;
+    case 'IS_NULL':
+      result = rowValue === null || rowValue === undefined;
+      break;
+    case 'IS_NOT_NULL':
+      result = rowValue !== null && rowValue !== undefined;
+      break;
+    case 'IS_BLANK':
+    case 'NULL_OR_BLANK': // = IS_BLANK (FilterDispatcher.java:163-166).
+      result = isBlank(rowValue);
+      break;
+    case 'IS_NOT_BLANK':
+      result = !isBlank(rowValue);
+      break;
+    case 'NULL_OR_EQUAL':
+      result =
+        rowValue === null || rowValue === undefined || String(rowValue) === String(item.value);
+      break;
+    case 'DATE_BEFORE': {
+      const cmp = compareOrdered(rowValue, item.value);
+      result = cmp !== undefined && cmp < 0;
+      break;
+    }
+    case 'DATE_AFTER': {
+      const cmp = compareOrdered(rowValue, item.value);
+      result = cmp !== undefined && cmp > 0;
+      break;
+    }
+    case 'DATE_BETWEEN':
+      // values.length<2 -> FALSE (FilterDispatcher.java:171-174 cb.disjunction()).
+      result =
+        Array.isArray(item.values) &&
+        item.values.length >= 2 &&
+        isBetween(rowValue, item.values[0], item.values[1]);
+      break;
+    case 'JSON_CONTAINS':
+    case 'EXISTS':
+      // Documented no-op (tb-matching-semantics.md §3): the framework
+      // resolves these against a JSON column / relational subquery
+      // (FilterDispatcher.jsonContains:256-266, existsSubQuery:272-283) —
+      // this store's rows are flat in-memory objects with no JSON path and
+      // no relation to subquery against, so no faithful predicate is
+      // possible. Explicit always-TRUE, locked by filter-engine.test.ts —
+      // NOT an invented semantic, a cited data-model limitation.
       result = true;
+      break;
+    default: {
+      const exhaustiveCheck: never = type;
+      throw new Error(`unreachable queryConditionType: ${String(exhaustiveCheck)}`);
+    }
   }
-  return filter.not ? !result : result;
+
+  return item.not ? !result : result;
 }
 
-function matchesFilterGroup(row: WithId, filters?: SearchFilters): boolean {
+/**
+ * `filters` (top-level) or `FilterItem.subFilters` (nested) → row predicate.
+ * `andOk ∧ orOk ∧ notOk`; each group evaluated only if its key is present —
+ * a missing key doesn't constrain (mirrors buildFilters/buildSubFilter only
+ * folding present LogicalOperator map entries into the group `cb.and`,
+ * SearchRequestPlanner.java:143-154/161-173).
+ */
+export function matchesFilterGroup(row: WithId, filters?: SearchFilters): boolean {
   if (!filters) return true;
-  const andOk = filters.AND.every((f) => matchesFilter(row, f));
-  const orOk = filters.OR.length === 0 || filters.OR.some((f) => matchesFilter(row, f));
-  return andOk && orOk;
+  const andOk = filters.AND ? combineGroup(row, 'AND', filters.AND) : true;
+  const orOk = filters.OR ? combineGroup(row, 'OR', filters.OR) : true;
+  const notOk = filters.NOT ? combineGroup(row, 'NOT', filters.NOT) : true;
+  return andOk && orOk && notOk;
 }
 
 function nextId(rows: WithId[]): string {

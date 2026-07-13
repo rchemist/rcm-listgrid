@@ -24,21 +24,26 @@ import { notFound, searchEnvelope } from './envelope';
 // hand-written handler (its response body needs a toWire() transform
 // makeSearchHandler can't express generically).
 //
-// GX-2 (§5 item 4) — `body.filters` is the GX-1 FilterGroups shape, an
+// TB-1 correction (tb-matching-semantics.md — this doc's header carries the
+// full correction note): the previous comment here claimed "the framework
+// doesn't document NOT-group row-matching semantics anywhere this mock can
+// cite, so implementing it would be inventing behavior." That was WRONG.
+// `SearchRequestPlanner.combineGroup:184` defines it explicitly —
+// `NOT -> cb.not(cb.and(arr))` (negation of the member AND). matchesFilterGroup
+// (store.ts) now implements exactly that, plus item-level `subFilters`
+// recursion. `body.filters` is the GX-1 FilterGroups shape, a sparse
 // operator-keyed map `{AND?, OR?, NOT?}` (SearchForm.toJSON() always emits
 // `AND`/`OR` as arrays, `[]` at minimum; `NOT` only when populated —
-// search-form.ts:264-281). Only `AND`/`OR` are read and applied
-// (matchesFilterGroup, store.ts) — `NOT` is accepted on the wire (present
-// here as a passthrough property on `raw`) but NOT matched against rows: no
-// current caller in this app populates it (grep across apps/sample +
-// packages/react registries turns up only `addAndFilter`), and the
-// framework doesn't document NOT-group row-matching semantics anywhere this
-// mock can cite, so implementing it would be inventing behavior. Empty
-// `AND: []` / `OR: []` are handled gracefully as a no-op (vacuous
-// `Array.every`/`length === 0` in matchesFilterGroup) — not an error.
+// search-form.ts:264-281) — any subset of the three keys may be present, and
+// each, when present, applies (missing keys don't constrain; empty arrays
+// are vacuously TRUE — matchesFilterGroup/combineGroup in store.ts).
 export function readFilters(body: Record<string, unknown>): SearchFilters | undefined {
   const raw = body.filters as { AND?: unknown; OR?: unknown; NOT?: unknown } | undefined;
-  if (!raw || !Array.isArray(raw.AND) || !Array.isArray(raw.OR)) return undefined;
+  if (!raw) return undefined;
+  const hasAnd = Array.isArray(raw.AND);
+  const hasOr = Array.isArray(raw.OR);
+  const hasNot = Array.isArray(raw.NOT);
+  if (!hasAnd && !hasOr && !hasNot) return undefined;
   return raw as SearchFilters;
 }
 

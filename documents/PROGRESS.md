@@ -7,7 +7,7 @@
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **활성=Phase TB(백엔드 테스트 full set)** — 사용자 지시(2026-07-13)로 GA-L 위에 신설. **TB-0 완료(계약 확정)·구축(TB-1~9) 진행 중**. bare `/progress`로 재개 → **TB-1**(mock 필터 엔진). cold-start=이 §Handoff + [recon](./analysis/2026-07-13/test-backend-recon.md) + [tb0-확정](./analysis/2026-07-13/tb0-contract-confirmation.md) + §Tasks Phase TB. GA-L(latest 봉인)=downstream(GA-L2가 TB로 해소·GA-L3/L4=사용자 GA-latest go 대기). **Do-NOT**: §Handoff 계승 + [recon §6](./analysis/2026-07-13/test-backend-recon.md).
-**Last updated**: 2026-07-13 (**TB-0 완료** — 리컨 인용 스팟체크 PASS·OQ-TB0(a)=고급검색 런타임 operator 선택 UI 無(config.operator 정적, ViewListGrid.tsx:278-345)·OQ-TB0(b)=R7 in-code 확정+RV-R13 수정완료→캡처 불요·OQ-TB1~3 기본값 확정·§2 계약 권위 확정→[tb0-contract-confirmation](./analysis/2026-07-13/tb0-contract-confirmation.md). **Next up=TB-1(mock 필터 엔진).**)
+**Last updated**: 2026-07-13 (**TB-1 완료** — mock 필터 엔진: 24 조건타입 전건(FilterDispatcher 인용)+NOT 그룹+nested subFilters+빈그룹 관용+타입인지 비교, delegate(sonnet)+메인 authoritative 검증. framework 0.1.0 매칭/정렬 계약을 [tb-matching-semantics.md](./analysis/2026-07-13/tb-matching-semantics.md)로 규범화. vitest.config include에 apps/** 추가(유닛이 npm test/CI 진입). filter-engine.test.ts 29 green·전량 2428 무회귀·apps tsc/eslint/prettier clean. **Next up=TB-2.**)
 
 ## Goal
 
@@ -80,7 +80,7 @@
 **목표**: edustack/gjcu 분석 → 이 리포에 프레임워크-0.1.0 충실 테스트 백엔드 구축 → listgrid 백엔드 테스트 full set → apps/sample에서 listgrid **모든 API** 실증. 부수: GA-L2 실백엔드 gated 항목이 **구축으로 해소**. **규범 참조 = [test-backend-recon.md](./analysis/2026-07-13/test-backend-recon.md)**(§2 wire 계약·§5 커버리지 매트릭스 TB-C1~11·§6 Do-NOT·§7 OQ). 아키텍처 결정=**옵션 A**(apps/sample mock 승격·§0). **TB-0 완료(계약 확정 [detail](./analysis/2026-07-13/tb0-contract-confirmation.md))·구축(TB-1~9) 진행 중.**
 
 - [x] **TB-0** 리컨 소화+계약 확정 ✅ 2026-07-13 · 인용 스팟체크 PASS·OQ-TB0(a)=고급검색 런타임 operator UI 無(config.operator 정적)·(b)=R7 in-code 확정·캡처 불요·OQ-TB1~3 기본값 확정·§2 계약 확정 · [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
-- [ ] **TB-1** [TB-C1/C2] mock 필터 엔진 완성 — 24 조건타입 시맨틱(OQ-TB1 처분)+NOT 그룹+nested subFilters+빈 AND/OR 관용. Files: `apps/sample/lib/mock-backend/store.ts`(matchesFilter/Group)·`crud-routes.ts`(readFilters). Proof: 신규 `filter-engine.test.ts`(24종 각·NOT·nested·빈그룹). Do-NOT: framework 없는 시맨틱 발명 금지(JSON_CONTAINS/EXISTS=문서화 no-op·recon §6.8).
+- [x] **TB-1** mock 필터 엔진 ✅ 2026-07-13 · 24 조건타입 전건(FilterDispatcher 인용)+NOT 그룹+nested subFilters+빈그룹 관용·JSON_CONTAINS/EXISTS no-op·타입인지 비교 · filter-engine.test.ts 29 green·전량 2428 무회귀 · [detail](./progress-archive/phase-tb-tasks.md)
 - [ ] **TB-2** [TB-C3/C4] 정렬 실적용+quickSearch+페이지네이션 — sorts(NORMAL·ASC/DESC·다중키) store.search 적용·quickSearchFields(LIKE-OR)·0-base 검증. Files: `store.ts`. Proof: route-level 테스트. Do-NOT: SortInfo PRIORITY 자동추론 금지(type 명시).
 - [ ] **TB-3** [TB-C5] 에러 route 방출 — 400 VALIDATION.FAILED/401 TOKEN/403 FORBIDDEN/409 DUPLICATE/422 UNPROCESSABLE/500 SYSTEM.UNEXPECTED ProblemDetail(triggerable)→adapter BackendErrorCode+fieldErrors 매핑 검증. Files: `envelope.ts`·`crud-routes.ts`. Proof: route-level+adapter round-trip. Do-NOT: §2 고정 코드셋 밖 발명 금지.
 - [ ] **TB-4** [TB-C6] CRUD 균일화+bulk delete+revision passthrough — per-id/bulk 불일치 해소(전 엔티티 bulk DELETE {url} body {ids})·revisionEntityName passthrough·수작성 엔티티 팩토리 통합. **선결=OQ-TB2**(bulk-select-delete UI 실재 확인). Files: employee/org/staff/collabo/major routes·crud-routes.ts. Proof: 멀티행 bulk delete e2e+revision 테스트. Do-NOT: 낙관락 재현 금지(recon §6.2).
@@ -90,7 +90,7 @@
 - [ ] **TB-8** [TB-C11·stretch] `backend/rest` 레퍼런스 어댑터+제네릭 REST mock (ADR-0005 수용#3·현 빈 스캐폴드). After 코어. OQ-TB3.
 - [ ] **TB-9** [TB-C10] GA-L2 종결 — 신 테스트로 #GX-1(빈 AND/OR 관용)·#GX-2(24종)·#W6-2b(M2O passthrough·xref/address 한계 문서화) 종결·GA-L2 재판정.
 
-**Next up**: **TB-1** (mock 필터 엔진). TB-0 완료(계약 확정). 팬아웃 가능: TB-1/TB-2/TB-3=독립 mock 모듈(병렬)·TB-6은 TB-1~5 후.
+**Next up**: **TB-2** (정렬 실적용+quickSearch+페이지네이션). TB-0/TB-1 완료. **정정**: TB-1/2/3은 `store.ts`/`crud-routes.ts` 공유(파일 겹침) → **순차 위임**(병렬 worktree 충돌 회피). TB-6은 TB-1~5 후.
 
 #### Phase GA-L — GA `latest` 봉인 트랙 (downstream · TB가 GA-L2 해소)
 
@@ -120,6 +120,7 @@
 - [x] **#GX-3 asset-base 배선 → 해소(2026-07-13, `9095504`)** — 사용자 결정=채택+재설계: context-스코프 3티어(전역 싱글턴 GX-6 기각·제거) · [design](./plans/asset-url-resolution-design.md)
 - [x] **#W7-4 서브패스 descope 처분** — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
 - [ ] **#W6-2b / #GX-1 / #GX-2 → GA-L2 재앵커** — 실백엔드/실소비자 데이터 gated(TIER2 passthrough garbage 여부·빈 AND/OR wire 수용·조건타입 커버). alpha 소아킹서 edustack/GJCU 실 대조 · risk:low · [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
+- [ ] **#TB-1 vitest include 확장(in-commit 해소)** — delegate가 apps/** 미커버 config 갭 발견(needs_decision)→메인 세션이 recon §0 의도로 `apps/**/*.test.{ts,tsx}` 추가. behavioral=apps 유닛이 CI 게이트 진입(의도) · risk:low · [detail](./progress-archive/phase-tb-tasks.md)
 
 ## Progress notes
 
@@ -128,6 +129,7 @@
 - W4-0 계수 재산정 방법론(count-public-surface.mjs: get*Handlers+getReadOnly→53·§10-A 갭 명문화·규칙 무변경·대안 미채택)은 [phase-eg archive §Progress notes](./progress-archive/phase-eg-api-redesign.md)로 이월(2026-07-12 slim).
 - W5-3 실행 상세(setSearchForm 배선·operator 캐스트·deriveFilterFields·deviation 5)는 [phase-eg archive #W5-3](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)로 이월(2026-07-12 post-completion slim).
 - RV-R2 검증: 실행계획 R2 수용기준의 root surface baseline "57/120"은 G-1(asset-URL·`9095504`) 이전 수치 — 실제 현재 **61/120**. R2는 surface-neutral(before==after=61). RV track-end check:surface·GA 게이트는 61 기준.
+- **Phase TB 실행 정정(2026-07-13)**: recon이 "TB-1/2/3=독립 mock 모듈(병렬)"이라 했으나 실제 파일 겹침(`store.ts`=TB-1 필터+TB-2 정렬, `crud-routes.ts`=TB-1 readFilters+TB-3 에러) → **순차 위임**(병렬 worktree 머지 충돌 회피). TB-1은 delegate(sonnet)로 완료. 값비교 타입인지·JSON_CONTAINS/EXISTS no-op는 framework 데이터모델 한계로 확정(발명 아님·인용).
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 

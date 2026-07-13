@@ -12,12 +12,13 @@ export default defineConfig({
       // (transplant-faithfulness suites live beside the code they cover).
       'packages/**/*.test.{ts,tsx}',
       'packages/**/__tests__/**/*.{test,spec}.{ts,tsx}',
+      // Phase TB — apps/sample mock-backend unit suites (filter/sort engine
+      // fidelity to rcm-backend-framework 0.1.0). `*.test.` only, so the
+      // Playwright e2e (`e2e/*.spec.ts`) is never picked up here.
+      'apps/**/*.test.{ts,tsx}',
     ],
     setupFiles: ['src/test-setup.ts'],
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-    ],
+    exclude: ['**/node_modules/**', '**/dist/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
