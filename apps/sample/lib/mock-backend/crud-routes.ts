@@ -133,13 +133,18 @@ export function makeSearchHandler<T extends WithId>(getStore: () => EntityStore<
   };
 }
 
-export function makeCollectionHandlers<T extends WithId>(getStore: () => EntityStore<T>) {
+export function makeCollectionHandlers<T extends WithId>(
+  getStore: () => EntityStore<T>,
+  options?: { validateCreate?: (body: Record<string, unknown>) => NextResponse | undefined },
+) {
   return {
     async POST(request: NextRequest) {
       const mockError = mockErrorResponse(request);
       if (mockError) return mockError;
 
       const body = await request.json().catch(() => ({}) as Record<string, unknown>);
+      const validation = options?.validateCreate?.(body);
+      if (validation) return validation;
       const created = getStore().create(body);
       return NextResponse.json(created, { status: 201 });
     },

@@ -1,35 +1,37 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useStore } from 'zustand';
+import type { StoreApi } from 'zustand/vanilla';
 import { useEntityForm, ViewEntityForm } from '@listgrid/react';
+import type { FormStoreState } from '@listgrid/state';
+import type { EntityForm } from '@listgrid/schema-core';
 import {
   EntityFormIdentityDiagnostics,
   EntityFormProofCase,
 } from '../../lib/entities/entityform-proof';
 import { rcmAdapter } from '../../lib/adapter';
 
-export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: string }) {
-  const router = useRouter();
-  const entityFormDecl = useMemo(
-    () =>
-      EntityFormProofCase(caseId)
-        .clone()
-        .withId(id)
-        .onAfterDelete(() => router.push('/entityform-proof/list')),
-    [caseId, id, router],
-  );
-  const { store, entityForm, controller, loading, error } = useEntityForm({
-    entityForm: entityFormDecl,
-    adapter: rcmAdapter,
-    ...(id !== undefined ? { id } : {}),
-  });
-
-  if (loading || !store || !entityForm) return <p>불러오는 중…</p>;
-  if (error) return <p role="alert">{error.message}</p>;
+function ProofDiagnostics({
+  caseId,
+  entityForm,
+  store,
+  lifecycleVersion,
+}: {
+  caseId: string;
+  entityForm: EntityForm;
+  store: StoreApi<FormStoreState>;
+  lifecycleVersion: number;
+}) {
+  useStore(store, (state) => state.saving);
+  useStore(store, (state) => state.structureVersion);
+  useStore(store, (state) => state.messages.length);
+  useStore(store, (state) => state.globalErrors.length);
 
   const diagnostics = {
     caseId,
+    lifecycleVersion,
     member: 'baseline',
     name: entityForm.name,
     url: entityForm.url,
@@ -69,6 +71,31 @@ export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: str
     clone: EntityFormIdentityDiagnostics(),
   };
 
+  return <pre data-proof-diagnostics>{JSON.stringify(diagnostics)}</pre>;
+}
+
+export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: string }) {
+  const router = useRouter();
+  const [lifecycleVersion, setLifecycleVersion] = useState(0);
+  const staysForLifecycleProof =
+    caseId.startsWith('on-') ||
+    caseId.startsWith('with-revision--') ||
+    caseId.startsWith('validation--');
+  const entityFormDecl = useMemo(() => {
+    const form = EntityFormProofCase(caseId).clone().withId(id);
+    return staysForLifecycleProof
+      ? form.onAfterDelete(() => setLifecycleVersion((value) => value + 1))
+      : form.onAfterDelete(() => router.push('/entityform-proof/list'));
+  }, [caseId, id, router, staysForLifecycleProof]);
+  const { store, entityForm, controller, loading, error } = useEntityForm({
+    entityForm: entityFormDecl,
+    adapter: rcmAdapter,
+    ...(id !== undefined ? { id } : {}),
+  });
+
+  if (loading || !store || !entityForm) return <p>불러오는 중…</p>;
+  if (error) return <p role="alert">{error.message}</p>;
+
   return (
     <main
       data-proof-case={caseId}
@@ -77,12 +104,20 @@ export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: str
       <p>
         <a href="/entityform-proof">← proof hub</a>
       </p>
-      <pre data-proof-diagnostics>{JSON.stringify(diagnostics)}</pre>
+      <ProofDiagnostics
+        caseId={caseId}
+        entityForm={entityForm}
+        store={store}
+        lifecycleVersion={lifecycleVersion}
+      />
       <ViewEntityForm
         entityForm={entityForm}
         store={store}
         controller={controller}
-        onSave={() => router.push('/entityform-proof/list')}
+        onSave={() => {
+          if (staysForLifecycleProof) setLifecycleVersion((value) => value + 1);
+          else router.push('/entityform-proof/list');
+        }}
       />
     </main>
   );

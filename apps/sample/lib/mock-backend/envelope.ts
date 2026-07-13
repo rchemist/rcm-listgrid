@@ -95,6 +95,7 @@ export function validationFailed(
   fieldErrors: Record<string, string[]>,
   message = 'Validation failed',
   code = 'VALIDATION.FAILED',
+  globalErrors: string[] = [],
 ) {
   return NextResponse.json(
     {
@@ -103,7 +104,7 @@ export function validationFailed(
       detail: message,
       type: 'about:blank',
       code,
-      errors: [],
+      errors: globalErrors,
       fieldErrors,
     },
     { status: 400 },

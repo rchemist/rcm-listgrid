@@ -39,6 +39,7 @@ const plannedIntegration = (id: `P-${string}`): EntityFormIntegrationProof => ({
 
 const identityTestFile = 'e2e/entityform-proof-identity.spec.ts' as const;
 const structureTestFile = 'e2e/entityform-proof-structure.spec.ts' as const;
+const lifecycleTestFile = 'e2e/entityform-proof-lifecycle.spec.ts' as const;
 const identityAnchor = 'apps/sample/lib/entities/entityform-proof.ts#EntityFormProofCase';
 const diagnosticsAnchor =
   'apps/sample/lib/entities/entityform-proof.ts#EntityFormIdentityDiagnostics';
@@ -84,6 +85,21 @@ const structureProof = (
   sampleCase: `${memberKebab}--${id.toLowerCase()}`,
   sampleAnchor: identityAnchor,
   e2eFile: structureTestFile,
+  testTitle,
+  assertion,
+});
+
+const lifecycleProof = (
+  id: `EFS-${string}`,
+  memberKebab: string,
+  testTitle: string,
+  assertion: string,
+): EntityFormProofBranch => ({
+  id,
+  status: 'implemented',
+  sampleCase: `${memberKebab}--${id.toLowerCase()}`,
+  sampleAnchor: identityAnchor,
+  e2eFile: lifecycleTestFile,
   testTitle,
   assertion,
 });
@@ -152,12 +168,222 @@ export const entityFormProofManifest = {
         proof('EFS-05c', 'id-clear', idTest, 'string then undefined returns to POST'),
       ],
     },
-    { member: 'onChange', kind: 'setting', branches: [] },
-    { member: 'onInit', kind: 'setting', branches: [] },
-    { member: 'onBeforeSave', kind: 'setting', branches: [] },
-    { member: 'onAfterSave', kind: 'setting', branches: [] },
-    { member: 'onBeforeDelete', kind: 'setting', branches: [] },
-    { member: 'onAfterDelete', kind: 'setting', branches: [] },
+    {
+      member: 'onChange',
+      kind: 'setting',
+      branches: [
+        lifecycleProof(
+          'EFS-06a',
+          'on-change',
+          '[EFS-06a] onChange — handlers run in registration order',
+          'ordered trace',
+        ),
+        lifecycleProof(
+          'EFS-06b',
+          'on-change',
+          '[EFS-06b] onChange — handler writes a derived field value',
+          'derived note DOM',
+        ),
+        lifecycleProof(
+          'EFS-06c',
+          'on-change',
+          '[EFS-06c] onChange — handler writes reactive field meta',
+          'readonly note DOM',
+        ),
+        lifecycleProof(
+          'EFS-06d',
+          'on-change',
+          '[EFS-06d] onChange — handler adds a dynamic field',
+          'dynamic field DOM',
+        ),
+        lifecycleProof(
+          'EFS-06e',
+          'on-change',
+          '[EFS-06e] onChange — nested writes do not duplicate the source cascade',
+          'single source cascade trace',
+        ),
+      ],
+    },
+    {
+      member: 'onInit',
+      kind: 'setting',
+      branches: [
+        lifecycleProof(
+          'EFS-07a',
+          'on-init',
+          '[EFS-07a] onInit — create runs without fetched data',
+          'create empty-data trace',
+        ),
+        lifecycleProof(
+          'EFS-07b',
+          'on-init',
+          '[EFS-07b] onInit — update runs with fetched data',
+          'update data trace',
+        ),
+        lifecycleProof(
+          'EFS-07c',
+          'on-init',
+          '[EFS-07c] onInit — values.set overrides fetched data and marks dirty',
+          'override dirty DOM',
+        ),
+        lifecycleProof(
+          'EFS-07d',
+          'on-init',
+          '[EFS-07d] onInit — values.setFetched establishes a clean baseline',
+          'clean baseline DOM',
+        ),
+        lifecycleProof(
+          'EFS-07e',
+          'on-init',
+          '[EFS-07e] onInit — setMeta reaches first paint',
+          'readonly first paint',
+        ),
+        lifecycleProof(
+          'EFS-07f',
+          'on-init',
+          '[EFS-07f] onInit — form structure mutation reaches first paint',
+          'added field first paint',
+        ),
+        lifecycleProof(
+          'EFS-07g',
+          'on-init',
+          '[EFS-07g] onInit — handlers run in registration order',
+          'ordered init trace',
+        ),
+      ],
+    },
+    {
+      member: 'onBeforeSave',
+      kind: 'setting',
+      branches: [
+        lifecycleProof(
+          'EFS-08a',
+          'on-before-save',
+          '[EFS-08a] onBeforeSave — setData threads into the request body',
+          'transformed POST body',
+        ),
+        lifecycleProof(
+          'EFS-08b',
+          'on-before-save',
+          '[EFS-08b] onBeforeSave — values is the validated snapshot',
+          'snapshot trace',
+        ),
+        lifecycleProof(
+          'EFS-08c',
+          'on-before-save',
+          '[EFS-08c] onBeforeSave — cancel with reason blocks request and shows message',
+          'message and no request',
+        ),
+        lifecycleProof(
+          'EFS-08d',
+          'on-before-save',
+          '[EFS-08d] onBeforeSave — cancel without reason blocks request silently',
+          'silent no request',
+        ),
+        lifecycleProof(
+          'EFS-08e',
+          'on-before-save',
+          '[EFS-08e] onBeforeSave — thrown handler is skipped and later handler saves',
+          'throw skip POST',
+        ),
+        lifecycleProof(
+          'EFS-08f',
+          'on-before-save',
+          '[EFS-08f] onBeforeSave — handlers run in registration order',
+          'ordered transform trace',
+        ),
+      ],
+    },
+    {
+      member: 'onAfterSave',
+      kind: 'setting',
+      branches: [
+        lifecycleProof(
+          'EFS-09a',
+          'on-after-save',
+          '[EFS-09a] onAfterSave — handlers run only after adapter success',
+          'success response then trace',
+        ),
+        lifecycleProof(
+          'EFS-09b',
+          'on-after-save',
+          '[EFS-09b] onAfterSave — handlers run in registration order',
+          'ordered after trace',
+        ),
+        lifecycleProof(
+          'EFS-09c',
+          'on-after-save',
+          '[EFS-09c] onAfterSave — thrown handler is skipped',
+          'throw skip trace',
+        ),
+        lifecycleProof(
+          'EFS-09d',
+          'on-after-save',
+          '[EFS-09d] onAfterSave — result and mutator reach later handlers',
+          'result id and note DOM',
+        ),
+      ],
+    },
+    {
+      member: 'onBeforeDelete',
+      kind: 'setting',
+      branches: [
+        lifecycleProof(
+          'EFS-10a',
+          'on-before-delete',
+          '[EFS-10a] onBeforeDelete — context carries exact ids',
+          'exact id trace',
+        ),
+        lifecycleProof(
+          'EFS-10b',
+          'on-before-delete',
+          '[EFS-10b] onBeforeDelete — cancel with reason blocks adapter and shows message',
+          'message and no DELETE',
+        ),
+        lifecycleProof(
+          'EFS-10c',
+          'on-before-delete',
+          '[EFS-10c] onBeforeDelete — cancel without reason blocks adapter silently',
+          'silent no DELETE',
+        ),
+        lifecycleProof(
+          'EFS-10d',
+          'on-before-delete',
+          '[EFS-10d] onBeforeDelete — thrown handler is skipped and delete continues',
+          'throw skip DELETE',
+        ),
+        lifecycleProof(
+          'EFS-10e',
+          'on-before-delete',
+          '[EFS-10e] onBeforeDelete — successful hooks precede the adapter request',
+          'trace and 204',
+        ),
+      ],
+    },
+    {
+      member: 'onAfterDelete',
+      kind: 'setting',
+      branches: [
+        lifecycleProof(
+          'EFS-11a',
+          'on-after-delete',
+          '[EFS-11a] onAfterDelete — handlers run only after adapter success',
+          '204 then trace',
+        ),
+        lifecycleProof(
+          'EFS-11b',
+          'on-after-delete',
+          '[EFS-11b] onAfterDelete — handlers run in registration order',
+          'ordered delete trace',
+        ),
+        lifecycleProof(
+          'EFS-11c',
+          'on-after-delete',
+          '[EFS-11c] onAfterDelete — thrown handler is skipped',
+          'throw skip trace',
+        ),
+      ],
+    },
     { member: 'onBeforeListFetch', kind: 'setting', branches: [] },
     { member: 'onAfterListFetch', kind: 'setting', branches: [] },
     {
@@ -380,7 +606,42 @@ export const entityFormProofManifest = {
         proof('EFS-20d', 'meta', cloneTest, 'clone top-level meta isolation'),
       ],
     },
-    { member: 'withRevision', kind: 'setting', branches: [] },
+    {
+      member: 'withRevision',
+      kind: 'setting',
+      branches: [
+        lifecycleProof(
+          'EFS-21a',
+          'with-revision',
+          '[EFS-21a] withRevision — undefined omits revision from create payload',
+          'create body omission',
+        ),
+        lifecycleProof(
+          'EFS-21b',
+          'with-revision',
+          '[EFS-21b] withRevision — create injects exact revisionEntityName',
+          'create body revision',
+        ),
+        lifecycleProof(
+          'EFS-21c',
+          'with-revision',
+          '[EFS-21c] withRevision — update injects exact revisionEntityName',
+          'update body revision',
+        ),
+        lifecycleProof(
+          'EFS-21d',
+          'with-revision',
+          '[EFS-21d] withRevision — delete injects exact revisionEntityName',
+          'delete body revision',
+        ),
+        lifecycleProof(
+          'EFS-21e',
+          'with-revision',
+          '[EFS-21e] withRevision — undefined clears a previous revision',
+          'cleared body omission',
+        ),
+      ],
+    },
     { member: 'withDataTransfer', kind: 'setting', branches: [] },
     {
       member: 'getTitle',
@@ -568,7 +829,17 @@ export const entityFormProofManifest = {
       testTitle: '[P-03] fetched data plus clone with id runs onInit and marks the override dirty',
       assertion: 'fetched row가 clone().withId() 뒤 onInit override와 dirty DOM으로 관찰',
     },
-    plannedIntegration('P-04'),
+    {
+      id: 'P-04',
+      members: ['onChange'],
+      status: 'implemented',
+      sampleCase: 'on-change--p-04',
+      sampleAnchor: identityAnchor,
+      e2eFile: lifecycleTestFile,
+      testTitle:
+        '[P-04] onChange × dynamic meta/field — one edit updates both without duplicate cascade',
+      assertion: '한 입력이 meta/field DOM을 갱신하고 source cascade는 한 번만 실행',
+    },
     {
       id: 'P-05',
       members: ['withTab', 'withGroup'],
@@ -589,10 +860,40 @@ export const entityFormProofManifest = {
       testTitle: '[P-06] withSteps × validation — invalid owner step restores field and focus',
       assertion: '마지막 step 저장 실패가 첫 invalid field의 step·오류·focus를 복원',
     },
-    plannedIntegration('P-07'),
-    plannedIntegration('P-08'),
+    {
+      id: 'P-07',
+      members: ['onBeforeSave', 'onAfterSave'],
+      status: 'implemented',
+      sampleCase: 'on-before-save--p-07',
+      sampleAnchor: identityAnchor,
+      e2eFile: lifecycleTestFile,
+      testTitle:
+        '[P-07] before/after save × cancel/throw/order — transformed request precedes success hooks',
+      assertion: 'before transform POST 뒤 after success trace 순서',
+    },
+    {
+      id: 'P-08',
+      members: ['onBeforeDelete', 'onAfterDelete'],
+      status: 'implemented',
+      sampleCase: 'on-before-delete--p-08',
+      sampleAnchor: identityAnchor,
+      e2eFile: lifecycleTestFile,
+      testTitle:
+        '[P-08] before/after delete × confirm/cancel/throw — dismiss skips hooks and request',
+      assertion: 'confirm dismiss는 무실행, accept는 before→DELETE→after',
+    },
     plannedIntegration('P-09'),
-    plannedIntegration('P-10'),
+    {
+      id: 'P-10',
+      members: ['withRevision'],
+      status: 'implemented',
+      sampleCase: 'with-revision--p-10',
+      sampleAnchor: identityAnchor,
+      e2eFile: lifecycleTestFile,
+      testTitle:
+        '[P-10] withRevision × create/update/delete — every transport receives the exact name',
+      assertion: 'POST/PUT/DELETE 세 body에 exact revisionEntityName',
+    },
     plannedIntegration('P-11'),
     {
       id: 'P-12',
@@ -615,6 +916,15 @@ export const entityFormProofManifest = {
       assertion:
         'Chromium create/update와 HTTP read/delete가 동일 SQLite DB의 세 차례 Next 기동 사이에 유지됨',
     },
-    plannedIntegration('P-14'),
+    {
+      id: 'P-14',
+      members: ['onBeforeSave'],
+      status: 'implemented',
+      sampleCase: 'validation--p-14',
+      sampleAnchor: identityAnchor,
+      e2eFile: lifecycleTestFile,
+      testTitle: '[P-14] backend validation × plural UI — field and global errors stay separate',
+      assertion: 'field 2/global 2 오류가 분리 렌더되고 SQLite row count 불변',
+    },
   ],
 } as const satisfies EntityFormProofManifest;

@@ -226,6 +226,157 @@ function WithStepsValidationForm(): EntityForm {
     ]);
 }
 
+function TracedLifecycleForm(title: string): { form: EntityForm; trace: string[] } {
+  const trace: string[] = [];
+  return {
+    form: BaseProofForm().withTitle(title).withMeta({ lifecycleTrace: trace }),
+    trace,
+  };
+}
+
+function OnChangeLifecycleForm(): EntityForm {
+  const { form, trace } = TracedLifecycleForm('onChange lifecycle proof');
+  return form
+    .onChange((mutator, changedField) => {
+      if (changedField !== 'name') return;
+      trace.push('change:first');
+      mutator.setValue('note', `changed:${String(mutator.getValue('name'))}`);
+      mutator.setMeta('note', { readOnly: true });
+      mutator.addField(new StringField('dynamic', 50).withLabel('Dynamic field'));
+    })
+    .onChange((_mutator, changedField) => {
+      if (changedField === 'name') trace.push('change:second');
+    });
+}
+
+function OnInitLifecycleForm(): EntityForm {
+  const { form, trace } = TracedLifecycleForm('onInit lifecycle proof');
+  return form
+    .onInit((ctx) => {
+      trace.push(`init:first:${ctx.data ? 'data' : 'empty'}`);
+      if (ctx.data) ctx.values.set('note', 'init data override');
+      else ctx.values.setFetched('name', 'init clean baseline');
+      ctx.setMeta('category', { readOnly: true });
+      ctx.form.addFields({
+        items: [new StringField('initAdded', 50).withLabel('Init added field')],
+      });
+    })
+    .onInit(() => trace.push('init:second'));
+}
+
+function BeforeSaveLifecycleForm(mode: 'transform' | 'cancel-reason' | 'cancel-empty' | 'throw') {
+  const { form, trace } = TracedLifecycleForm(`onBeforeSave ${mode} proof`);
+  if (mode === 'cancel-reason') {
+    return form.onBeforeSave((ctx) => {
+      trace.push('before:cancel-reason');
+      ctx.cancel('save cancelled by proof');
+    });
+  }
+  if (mode === 'cancel-empty') {
+    return form.onBeforeSave((ctx) => {
+      trace.push('before:cancel-empty');
+      ctx.cancel();
+    });
+  }
+  if (mode === 'throw') {
+    return form
+      .onBeforeSave(() => {
+        trace.push('before:throw');
+        throw new Error('before-save proof throw');
+      })
+      .onBeforeSave((ctx) => {
+        trace.push('before:after-throw');
+        ctx.setData({ ...ctx.data, note: 'after throw' });
+      });
+  }
+  return form
+    .onBeforeSave((ctx) => {
+      trace.push(`before:first:${String(ctx.values.name)}:${ctx.renderType}`);
+      ctx.setData({ ...ctx.data, note: 'first' });
+    })
+    .onBeforeSave((ctx) => {
+      trace.push(`before:second:${String(ctx.data.note)}`);
+      ctx.setData({ ...ctx.data, note: `${String(ctx.data.note)}-second` });
+    });
+}
+
+function AfterSaveLifecycleForm(): EntityForm {
+  const { form, trace } = TracedLifecycleForm('onAfterSave lifecycle proof');
+  return form
+    .onAfterSave((ctx) => {
+      const result = ctx.result as { id?: string };
+      trace.push(`after:first:${result.id ?? 'missing'}:${ctx.renderType}`);
+      ctx.mutator.setValue('note', `saved:${result.id ?? 'missing'}`);
+    })
+    .onAfterSave(() => {
+      trace.push('after:throw');
+      throw new Error('after-save proof throw');
+    })
+    .onAfterSave((ctx) => trace.push(`after:last:${String(ctx.mutator.getValue('note'))}`));
+}
+
+function SavePairLifecycleForm(): EntityForm {
+  const { form, trace } = TracedLifecycleForm('save pairwise lifecycle proof');
+  return form
+    .onBeforeSave((ctx) => {
+      trace.push('pair:before');
+      ctx.setData({ ...ctx.data, note: 'pair transformed' });
+    })
+    .onAfterSave((ctx) => trace.push(`pair:after:${String(ctx.data.note)}`));
+}
+
+function BeforeDeleteLifecycleForm(mode: 'observe' | 'cancel-reason' | 'cancel-empty' | 'throw') {
+  const { form, trace } = TracedLifecycleForm(`onBeforeDelete ${mode} proof`);
+  if (mode === 'cancel-reason') {
+    return form.onBeforeDelete((ctx) => {
+      trace.push(`delete:cancel-reason:${ctx.ids.join(',')}`);
+      ctx.cancel('delete cancelled by proof');
+    });
+  }
+  if (mode === 'cancel-empty') {
+    return form.onBeforeDelete((ctx) => {
+      trace.push(`delete:cancel-empty:${ctx.ids.join(',')}`);
+      ctx.cancel();
+    });
+  }
+  if (mode === 'throw') {
+    return form
+      .onBeforeDelete(() => {
+        trace.push('delete:throw');
+        throw new Error('before-delete proof throw');
+      })
+      .onBeforeDelete((ctx) => trace.push(`delete:after-throw:${ctx.ids.join(',')}`));
+  }
+  return form
+    .onBeforeDelete((ctx) => trace.push(`delete:first:${ctx.ids.join(',')}`))
+    .onBeforeDelete(() => trace.push('delete:second'));
+}
+
+function AfterDeleteLifecycleForm(): EntityForm {
+  const { form, trace } = TracedLifecycleForm('onAfterDelete lifecycle proof');
+  return form
+    .onAfterDelete((ctx) => trace.push(`deleted:first:${ctx.ids.join(',')}`))
+    .onAfterDelete(() => {
+      trace.push('deleted:throw');
+      throw new Error('after-delete proof throw');
+    })
+    .onAfterDelete(() => trace.push('deleted:last'));
+}
+
+function DeletePairLifecycleForm(): EntityForm {
+  const { form, trace } = TracedLifecycleForm('delete pairwise lifecycle proof');
+  return form
+    .onBeforeDelete((ctx) => trace.push(`pair:before-delete:${ctx.ids.join(',')}`))
+    .onAfterDelete((ctx) => trace.push(`pair:after-delete:${ctx.ids.join(',')}`));
+}
+
+function RevisionLifecycleForm(enabled: boolean): EntityForm {
+  const form = BaseProofForm().withTitle('revision lifecycle proof');
+  return enabled
+    ? form.withRevision('EntityFormProofRevision')
+    : form.withRevision('stale-revision').withRevision(undefined);
+}
+
 export function EntityFormProofCase(caseId: string, id?: string): EntityForm {
   const form = BaseProofForm().withId(id);
   switch (caseId) {
@@ -327,6 +478,64 @@ export function EntityFormProofCase(caseId: string, id?: string): EntityForm {
       return WithStepsStructureForm(true).withId(id);
     case 'with-steps--p-06':
       return WithStepsValidationForm().withId(id);
+    case 'on-change--efs-06a':
+    case 'on-change--efs-06b':
+    case 'on-change--efs-06c':
+    case 'on-change--efs-06d':
+    case 'on-change--efs-06e':
+    case 'on-change--p-04':
+      return OnChangeLifecycleForm().withId(id);
+    case 'on-init--efs-07a':
+    case 'on-init--efs-07b':
+    case 'on-init--efs-07c':
+    case 'on-init--efs-07d':
+    case 'on-init--efs-07e':
+    case 'on-init--efs-07f':
+    case 'on-init--efs-07g':
+      return OnInitLifecycleForm().withId(id);
+    case 'on-before-save--efs-08a':
+    case 'on-before-save--efs-08b':
+    case 'on-before-save--efs-08f':
+      return BeforeSaveLifecycleForm('transform').withId(id);
+    case 'on-before-save--p-07':
+      return SavePairLifecycleForm().withId(id);
+    case 'on-before-save--efs-08c':
+      return BeforeSaveLifecycleForm('cancel-reason').withId(id);
+    case 'on-before-save--efs-08d':
+      return BeforeSaveLifecycleForm('cancel-empty').withId(id);
+    case 'on-before-save--efs-08e':
+      return BeforeSaveLifecycleForm('throw').withId(id);
+    case 'on-after-save--efs-09a':
+    case 'on-after-save--efs-09b':
+    case 'on-after-save--efs-09c':
+    case 'on-after-save--efs-09d':
+      return AfterSaveLifecycleForm().withId(id);
+    case 'on-before-delete--efs-10a':
+      return BeforeDeleteLifecycleForm('observe').withId(id);
+    case 'on-before-delete--efs-10b':
+      return BeforeDeleteLifecycleForm('cancel-reason').withId(id);
+    case 'on-before-delete--efs-10c':
+      return BeforeDeleteLifecycleForm('cancel-empty').withId(id);
+    case 'on-before-delete--efs-10d':
+      return BeforeDeleteLifecycleForm('throw').withId(id);
+    case 'on-before-delete--efs-10e':
+      return BeforeDeleteLifecycleForm('observe').withId(id);
+    case 'on-before-delete--p-08':
+      return DeletePairLifecycleForm().withId(id);
+    case 'on-after-delete--efs-11a':
+    case 'on-after-delete--efs-11b':
+    case 'on-after-delete--efs-11c':
+      return AfterDeleteLifecycleForm().withId(id);
+    case 'with-revision--efs-21a':
+    case 'with-revision--efs-21e':
+      return RevisionLifecycleForm(false).withId(id);
+    case 'with-revision--efs-21b':
+    case 'with-revision--efs-21c':
+    case 'with-revision--efs-21d':
+    case 'with-revision--p-10':
+      return RevisionLifecycleForm(true).withId(id);
+    case 'validation--p-14':
+      return BaseProofForm().withTitle('plural validation proof').withId(id);
     default:
       return form.withTitle(`EntityForm proof — ${caseId}`);
   }
