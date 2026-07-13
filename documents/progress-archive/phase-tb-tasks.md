@@ -59,3 +59,25 @@
 **Note(deviation 아님·개선)**: delegate가 global fetch monkey-patch 대신 어댑터의 주입형 `fetch` 옵션(설계된 test seam·기존 backend-rcm 테스트 패턴) 사용 — 증명 동일·글로벌 변이 위험 제거. 스코프 내·intent 무drift → §Needs Review 미등재.
 
 **커버 매트릭스**: TB-C5(400/401/403/404/409/422/500 방출→BackendErrorCode 매핑) 충족.
+
+## TB-4 CRUD 균일화 + bulk delete + revision passthrough — ✅ 2026-07-13
+
+**Delegate**: sonnet general-purpose (`a5a47aa3cb6ae6ef0`)·status=`done_with_deviations`(2 minor). Engine=claude.
+
+**실결함 수정**: adapter.remove=bulk-only(`DELETE {url}` body `{ids, revisionEntityName?}`·backend-rcm adapter.ts)인데 employee/collabo/org/staff/major는 collection DELETE 부재(hand-written POST-only) → bulk delete 실패. 균일화.
+
+**구현 (changed files·apps/sample only)**:
+- `crud-routes.ts` `makeCollectionHandlers.DELETE` — `body.revisionEntityName` 판독·passthrough(감사 store 없음→응답 에코, 조건부). 낙관락/stale 거부 없음(recon §6.2).
+- `employee/collabo/org/staff/route.ts` — **consolidated**(hand-written POST=plain create passthrough → `export const {POST,DELETE} = makeCollectionHandlers(store)`, college/prof/univ 패턴 정합).
+- `major/route.ts` — **added-DELETE only**(POST는 toWire/fromWire 브리지 유지·DELETE는 변환 불필요 → `makeCollectionHandlers(majorStore).DELETE` 재사용).
+- `bulk-delete.test.ts` (신규·8 tests) — 5 결함엔티티 멀티행 bulk delete + revisionEntityName passthrough(있음/없음) + no-optimistic-lock(재삭제 no-throw) + college 무회귀.
+
+**Authoritative verify (메인)**: apps/sample 유닛 67 green·`npm test` 전량 **190 files / 2466 passed**(2458+8·무회귀)·apps tsc/eslint/prettier clean.
+
+**Deviations**:
+1. DELETE 응답 shape `T[]`→`{removed:T[], revisionEntityName?}`(배열은 sibling 키 불가). adapter.remove=Promise<void>(body 미파싱)·기존 테스트 무파싱 확인→무영향. **단 framework bulk DELETE=204 no-body**(recon §2) → mock의 200+body는 pre-existing 비충실(TB-4 이전부터 json(removed) 반환). → **§Needs Review 등재**(TB-6 계약 스위트서 204 fidelity 재판정).
+2. read-only `git diff`/`status` 셀프리뷰 실행(브리프 "no git" 대비). 무mutation·benign — §Needs Review 미등재.
+
+**Discovery**: collabo/major = `.withCapabilities({delete:false})`(GJCU parity·UI delete 버튼 없음) → 이 두 엔티티 Playwright delete e2e 부재 근거. Playwright bulk-delete e2e=TB-7로 이연(route-level 8 테스트가 계약 증명).
+
+**커버 매트릭스**: TB-C6(CRUD 균일화+bulk delete 멀티행+revisionEntityName passthrough) 충족.

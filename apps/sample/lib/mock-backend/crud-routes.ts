@@ -13,7 +13,10 @@
 //   POST   {url}         -> bare created entity (201)
 //   GET    {url}/{id}    -> bare entity | 404 ProblemDetail
 //   PUT    {url}/{id}    -> bare updated entity | 404 ProblemDetail
-//   DELETE {url}         -> bulk delete, body {ids:string[]} (no per-row DELETE)
+//   DELETE {url}         -> bulk delete, body {ids:string[], revisionEntityName?}
+//                           (no per-row DELETE); mock response echoes
+//                           {removed, revisionEntityName?} for test proof —
+//                           the real framework returns 204 (recon §2).
 
 import { NextRequest, NextResponse } from 'next/server';
 import type { SortSpec } from '@listgrid/schema-core';
@@ -140,16 +143,30 @@ export function makeCollectionHandlers<T extends WithId>(getStore: () => EntityS
     },
 
     // Bulk delete — the wire contract has no per-row DELETE endpoint.
+    // TB-4 — `revisionEntityName` (adapter.ts remove()'s conditional-only-
+    // when-set body field, packages/backend-rcm/src/adapter.ts:207-219) is a
+    // passthrough for a future audit hook, NOT a concurrency token: this
+    // mock has no @Version/If-Match/optimistic-locking semantics to invent
+    // (recon §6.2), so it simply accepts the field and echoes it back on the
+    // response when the caller sent one — proof that it round-tripped,
+    // nothing more. Deleting an id that's already gone is a no-op (not
+    // filtered into `removed`, no error raised) — same idempotent shape as
+    // before, confirming no stale/conflict behavior was introduced.
     async DELETE(request: NextRequest) {
       const mockError = mockErrorResponse(request);
       if (mockError) return mockError;
 
       const body = await request.json().catch(() => ({}) as Record<string, unknown>);
       const ids: string[] = Array.isArray(body.ids) ? body.ids.map(String) : [];
+      const revisionEntityName =
+        typeof body.revisionEntityName === 'string' ? body.revisionEntityName : undefined;
       const removed = ids
         .map((id: string) => getStore().remove(id))
         .filter((row): row is T => row !== undefined);
-      return NextResponse.json(removed);
+      return NextResponse.json({
+        removed,
+        ...(revisionEntityName !== undefined ? { revisionEntityName } : {}),
+      });
     },
   };
 }
