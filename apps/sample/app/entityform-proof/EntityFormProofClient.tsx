@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from 'zustand';
 import type { StoreApi } from 'zustand/vanilla';
-import { useEntityForm, ViewEntityForm } from '@listgrid/react';
+import { useEntityForm, useSession, ViewEntityForm } from '@listgrid/react';
 import type { FormStoreState } from '@listgrid/state';
 import type { EntityForm } from '@listgrid/schema-core';
 import {
@@ -76,6 +76,7 @@ function ProofDiagnostics({
 
 export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: string }) {
   const router = useRouter();
+  const session = useSession();
   const [lifecycleVersion, setLifecycleVersion] = useState(0);
   const staysForLifecycleProof =
     caseId.startsWith('on-') ||
@@ -90,6 +91,7 @@ export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: str
   const { store, entityForm, controller, loading, error } = useEntityForm({
     entityForm: entityFormDecl,
     adapter: rcmAdapter,
+    ...(session !== undefined ? { session } : {}),
     ...(id !== undefined ? { id } : {}),
   });
 
