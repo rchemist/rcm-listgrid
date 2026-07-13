@@ -7,7 +7,7 @@
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
 **Next session policy**: **활성=Phase TB(백엔드 테스트 full set)** — 사용자 지시(2026-07-13)로 GA-L 위에 신설. **TB-0 완료(계약 확정)·구축(TB-1~9) 진행 중**. bare `/progress`로 재개 → **TB-1**(mock 필터 엔진). cold-start=이 §Handoff + [recon](./analysis/2026-07-13/test-backend-recon.md) + [tb0-확정](./analysis/2026-07-13/tb0-contract-confirmation.md) + §Tasks Phase TB. GA-L(latest 봉인)=downstream(GA-L2가 TB로 해소·GA-L3/L4=사용자 GA-latest go 대기). **Do-NOT**: §Handoff 계승 + [recon §6](./analysis/2026-07-13/test-backend-recon.md).
-**Last updated**: 2026-07-13 (**TB-2 완료** — 정렬 실적용(다중키·ASC/DESC·nulls-last·compareOrdered 재사용)+quickSearch/pagination 검증. **발견**: listgrid는 framework `searchTerm` 미사용→quickSearch=OR-group LIKE(TB-1 기처리)→TB-2 실작업=정렬만. delegate(sonnet done). sort-engine.test.ts 15 green·전량 2443 무회귀·apps tsc/eslint/prettier clean. **Next up=TB-3(에러 route).**)
+**Last updated**: 2026-07-13 (**TB-3 완료** — 에러 route: envelope 6 ProblemDetail 팩토리+`x-mock-error` 헤더 트리거, route→adapter 라운드트립 7매핑 전건 검증(createRcmAdapter 주입 fetch seam). **계약 확정**: 401/403=Spring-Security bare(AUTH.* 코드 발명 금지)·어댑터가 status로 매핑. delegate(sonnet done). error-routes.test.ts 15 green·전량 2458 무회귀·apps tsc/eslint/prettier clean. **Next up=TB-4(CRUD/bulk delete).** core mock 엔진(필터·정렬·에러) 3종 완료.)
 
 ## Goal
 
@@ -82,7 +82,7 @@
 - [x] **TB-0** 리컨 소화+계약 확정 ✅ 2026-07-13 · 인용 스팟체크 PASS·OQ-TB0(a)=고급검색 런타임 operator UI 無(config.operator 정적)·(b)=R7 in-code 확정·캡처 불요·OQ-TB1~3 기본값 확정·§2 계약 확정 · [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
 - [x] **TB-1** mock 필터 엔진 ✅ 2026-07-13 · 24 조건타입 전건(FilterDispatcher 인용)+NOT 그룹+nested subFilters+빈그룹 관용·JSON_CONTAINS/EXISTS no-op·타입인지 비교 · filter-engine.test.ts 29 green·전량 2428 무회귀 · [detail](./progress-archive/phase-tb-tasks.md)
 - [x] **TB-2** 정렬+quickSearch+페이지네이션 ✅ 2026-07-13 · sorts 실적용(다중키·ASC/DESC·nulls-last·compareOrdered 재사용)·quickSearch=OR-group LIKE(TB-1 기처리·searchTerm 미사용 확인)·0-base 검증 · sort-engine.test.ts 15 green·전량 2443 · [detail](./progress-archive/phase-tb-tasks.md)
-- [ ] **TB-3** [TB-C5] 에러 route 방출 — 400 VALIDATION.FAILED/401 TOKEN/403 FORBIDDEN/409 DUPLICATE/422 UNPROCESSABLE/500 SYSTEM.UNEXPECTED ProblemDetail(triggerable)→adapter BackendErrorCode+fieldErrors 매핑 검증. Files: `envelope.ts`·`crud-routes.ts`. Proof: route-level+adapter round-trip. Do-NOT: §2 고정 코드셋 밖 발명 금지.
+- [x] **TB-3** 에러 route 방출 ✅ 2026-07-13 · envelope 6팩토리(400 VALIDATION.FAILED/409 DUPLICATE/422 UNPROCESSABLE/500 SYSTEM.UNEXPECTED/401 TOKEN_EXPIRED/403)·`x-mock-error` 헤더 트리거·route→adapter 라운드트립 7매핑 전건(400/422→VALIDATION·409/500/404→UNKNOWN·401→TOKEN_EXPIRED·403→FORBIDDEN) · error-routes.test.ts 15 green·전량 2458 · [detail](./progress-archive/phase-tb-tasks.md)
 - [ ] **TB-4** [TB-C6] CRUD 균일화+bulk delete+revision passthrough — per-id/bulk 불일치 해소(전 엔티티 bulk DELETE {url} body {ids})·revisionEntityName passthrough·수작성 엔티티 팩토리 통합. **선결=OQ-TB2**(bulk-select-delete UI 실재 확인). Files: employee/org/staff/collabo/major routes·crud-routes.ts. Proof: 멀티행 bulk delete e2e+revision 테스트. Do-NOT: 낙관락 재현 금지(recon §6.2).
 - [ ] **TB-5** [TB-C7] M2O/참조 round-trip — GET 중첩`{id,title}`→라벨→save flatten `<name>Id`(RV-R13 회귀류)+bare-id→참조해석 getOne. Files: major toWire/fromWire·store fixtures. Proof: RV-R13 회귀(PUT body가 flatten id·중첩객체 아님 단언)+참조해석 테스트.
 - [ ] **TB-6** [TB-C8/C10] full-set route 계약 스위트 — `e2e/backend-contract.spec.ts`(현 college 2사실)→포괄 스위트(5메서드×대표엔티티×wire 변형). GA-L2 항목 종결 테스트. Proof: 스위트 green.
@@ -90,7 +90,7 @@
 - [ ] **TB-8** [TB-C11·stretch] `backend/rest` 레퍼런스 어댑터+제네릭 REST mock (ADR-0005 수용#3·현 빈 스캐폴드). After 코어. OQ-TB3.
 - [ ] **TB-9** [TB-C10] GA-L2 종결 — 신 테스트로 #GX-1(빈 AND/OR 관용)·#GX-2(24종)·#W6-2b(M2O passthrough·xref/address 한계 문서화) 종결·GA-L2 재판정.
 
-**Next up**: **TB-3** (에러 route 방출 400/401/403/409/422/500 ProblemDetail). TB-0/TB-1/TB-2 완료. TB-3 파일=`envelope.ts`(notFound 있음·에러 팩토리 확장)+`crud-routes.ts`. TB-6은 TB-1~5 후.
+**Next up**: **TB-4** (CRUD 균일화+bulk delete+revision passthrough). TB-0~3 완료(core mock 엔진=필터/정렬/에러). **선결 없음**(OQ-TB2 bulk-select-delete UI 실재=TB-0서 확인·adapter.remove bulk-only). TB-6은 TB-1~5 후.
 
 #### Phase GA-L — GA `latest` 봉인 트랙 (downstream · TB가 GA-L2 해소)
 

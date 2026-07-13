@@ -18,7 +18,61 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { SortSpec } from '@listgrid/schema-core';
 import type { EntityStore, SearchFilters, WithId } from './store';
-import { notFound, searchEnvelope } from './envelope';
+import {
+  duplicate,
+  forbidden,
+  notFound,
+  searchEnvelope,
+  systemError,
+  unauthorized,
+  unprocessable,
+  validationFailed,
+} from './envelope';
+
+// TB-3 — test-only error-injection trigger. NOT part of the real wire
+// contract (rcm-backend-framework never reads a request header to pick its
+// error path). A request carrying the reserved `x-mock-error` header
+// short-circuits the generic handler below and returns the matching
+// ProblemDetail instead of touching the store — this lets route- and
+// adapter-level tests reproduce every framework error status
+// (error-routes.test.ts) without a bespoke fixture/store-corruption trick
+// per case.
+//
+// Chosen over a body-field marker (e.g. `__mockError`) because a header can
+// never collide with real entity data: create/update payloads are plain
+// JSON objects mirroring entity shape, so a body field is at least
+// theoretically reachable by a real (if malformed) payload, whereas no
+// entity round-trips through HTTP headers. The natural 404 path (`notFound`
+// from an actual missing id) is untouched — this only intercepts requests
+// that explicitly opt in via the header.
+const MOCK_ERROR_HEADER = 'x-mock-error';
+
+/**
+ * Recognized values (case-insensitive) map 1:1 to the ProblemDetail
+ * factories in envelope.ts. VALIDATION uses a fixed field name — good
+ * enough for the "fieldErrors round-trips" proof; no wire contract depends
+ * on the exact field. Unrecognized/absent header -> undefined, so ordinary
+ * traffic is completely unaffected.
+ */
+export function mockErrorResponse(request: NextRequest): NextResponse | undefined {
+  const marker = request.headers.get(MOCK_ERROR_HEADER)?.toUpperCase();
+  switch (marker) {
+    case 'VALIDATION':
+      return validationFailed({ name: ['must not be blank'] });
+    case 'DUPLICATE':
+      return duplicate();
+    case 'UNPROCESSABLE':
+      return unprocessable();
+    case 'SYSTEM':
+      return systemError();
+    case 'UNAUTHORIZED':
+      return unauthorized();
+    case 'FORBIDDEN':
+      return forbidden();
+    default:
+      return undefined;
+  }
+}
 
 // Exported (not just used internally by makeSearchHandler) — major/search/
 // route.ts (EC3) needs the same wire `filters` extraction for its own
@@ -60,6 +114,9 @@ export function readSorts(body: Record<string, unknown>): SortSpec[] | undefined
 
 export function makeSearchHandler<T extends WithId>(getStore: () => EntityStore<T>) {
   return async function POST(request: NextRequest) {
+    const mockError = mockErrorResponse(request);
+    if (mockError) return mockError;
+
     const body = await request.json().catch(() => ({}) as Record<string, unknown>);
     const page = typeof body.page === 'number' ? body.page : 0;
     const pageSize = typeof body.pageSize === 'number' ? body.pageSize : 20;
@@ -74,6 +131,9 @@ export function makeSearchHandler<T extends WithId>(getStore: () => EntityStore<
 export function makeCollectionHandlers<T extends WithId>(getStore: () => EntityStore<T>) {
   return {
     async POST(request: NextRequest) {
+      const mockError = mockErrorResponse(request);
+      if (mockError) return mockError;
+
       const body = await request.json().catch(() => ({}) as Record<string, unknown>);
       const created = getStore().create(body);
       return NextResponse.json(created, { status: 201 });
@@ -81,6 +141,9 @@ export function makeCollectionHandlers<T extends WithId>(getStore: () => EntityS
 
     // Bulk delete — the wire contract has no per-row DELETE endpoint.
     async DELETE(request: NextRequest) {
+      const mockError = mockErrorResponse(request);
+      if (mockError) return mockError;
+
       const body = await request.json().catch(() => ({}) as Record<string, unknown>);
       const ids: string[] = Array.isArray(body.ids) ? body.ids.map(String) : [];
       const removed = ids
@@ -98,7 +161,10 @@ export function makeItemHandlers<T extends WithId>(
   type RouteContext = { params: Promise<{ id: string }> };
 
   return {
-    async GET(_request: NextRequest, { params }: RouteContext) {
+    async GET(request: NextRequest, { params }: RouteContext) {
+      const mockError = mockErrorResponse(request);
+      if (mockError) return mockError;
+
       const { id } = await params;
       const row = getStore().findById(id);
       if (!row) return notFound(`${entityName} ${id} not found`);
@@ -106,6 +172,9 @@ export function makeItemHandlers<T extends WithId>(
     },
 
     async PUT(request: NextRequest, { params }: RouteContext) {
+      const mockError = mockErrorResponse(request);
+      if (mockError) return mockError;
+
       const { id } = await params;
       const body = await request.json().catch(() => ({}) as Record<string, unknown>);
       const updated = getStore().update(id, body);

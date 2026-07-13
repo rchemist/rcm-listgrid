@@ -78,3 +78,133 @@ export function notFound(message: string, code = 'NOT_FOUND') {
     { status: 404 },
   );
 }
+
+// TB-3 — the rest of the framework's ProblemDetail error set (CrudErrorType
+// .java:37-43 + ProblemDetailAdvice.java), same field shape as notFound()
+// above (title=code, type='about:blank', errors:[], fieldErrors default {}).
+// 401/403 are documented exceptions: bare Spring-Security statuses, NOT
+// web-advice ProblemDetail from this registry — see unauthorized()/
+// forbidden() below for the distinction.
+
+/**
+ * VALIDATION.FAILED -> 400. The one ProblemDetail case that carries a
+ * populated `fieldErrors` (applyServiceErrors, ProblemDetailAdvice.java:
+ * 288-302) — callers pass the per-field messages to reproduce.
+ */
+export function validationFailed(
+  fieldErrors: Record<string, string[]>,
+  message = 'Validation failed',
+  code = 'VALIDATION.FAILED',
+) {
+  return NextResponse.json(
+    {
+      status: 400,
+      title: code,
+      detail: message,
+      type: 'about:blank',
+      code,
+      errors: [],
+      fieldErrors,
+    },
+    { status: 400 },
+  );
+}
+
+/** CRUD.DUPLICATE -> 409. */
+export function duplicate(message = 'Duplicate entity', code = 'CRUD.DUPLICATE') {
+  return NextResponse.json(
+    {
+      status: 409,
+      title: code,
+      detail: message,
+      type: 'about:blank',
+      code,
+      errors: [],
+      fieldErrors: {},
+    },
+    { status: 409 },
+  );
+}
+
+/** CRUD.UNPROCESSABLE -> 422. */
+export function unprocessable(message = 'Unprocessable entity', code = 'CRUD.UNPROCESSABLE') {
+  return NextResponse.json(
+    {
+      status: 422,
+      title: code,
+      detail: message,
+      type: 'about:blank',
+      code,
+      errors: [],
+      fieldErrors: {},
+    },
+    { status: 422 },
+  );
+}
+
+/**
+ * SYSTEM.UNEXPECTED -> 500. ProblemDetailAdvice HIDES the real exception
+ * message on this path (ProblemDetailAdvice.java:242-247) — `detail` is
+ * therefore a fixed generic string here too, never a caller-supplied
+ * message that could leak internals.
+ */
+export function systemError() {
+  const code = 'SYSTEM.UNEXPECTED';
+  return NextResponse.json(
+    {
+      status: 500,
+      title: code,
+      detail: 'Internal server error',
+      type: 'about:blank',
+      code,
+      errors: [],
+      fieldErrors: {},
+    },
+    { status: 500 },
+  );
+}
+
+/**
+ * Bare Spring-Security `HttpStatusEntryPoint(UNAUTHORIZED)` — 401. NOT a
+ * web-advice ProblemDetail; the framework has no `AUTH.TOKEN` code in the
+ * CrudErrorType registry. `code: 'TOKEN_EXPIRED'` is included so this body
+ * exercises the adapter's `isTokenExpired()` body-shape path in addition to
+ * the (already sufficient) `status === 401` path — matching what a real
+ * token-expiry response commonly carries.
+ */
+export function unauthorized() {
+  return NextResponse.json(
+    {
+      status: 401,
+      title: 'UNAUTHORIZED',
+      detail: 'Authentication required',
+      type: 'about:blank',
+      code: 'TOKEN_EXPIRED',
+      errors: [],
+      fieldErrors: {},
+    },
+    { status: 401 },
+  );
+}
+
+/**
+ * Bare Spring-Security access-denied — 403. NOT a web-advice ProblemDetail;
+ * the framework has no `AUTH.FORBIDDEN` code either — the adapter keys on
+ * `status === 403` alone. `code: 'ACCESS_DENIED'` is a short honest label
+ * for this mock, not a claimed framework namespace.
+ */
+export function forbidden() {
+  const code = 'ACCESS_DENIED';
+  return NextResponse.json(
+    {
+      status: 403,
+      title: code,
+      detail: 'Access denied',
+      type: 'about:blank',
+      code,
+      errors: [],
+      fieldErrors: {},
+    },
+    { status: 403 },
+  );
+}
