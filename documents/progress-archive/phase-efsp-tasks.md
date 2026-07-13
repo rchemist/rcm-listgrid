@@ -163,3 +163,51 @@ field/tab/group/step 구조 증명 — 2026-07-13
 - EFSP-3 lifecycle은 diagnostics count나 mock spy로 끝내지 않고 실제 HTTP body/미호출/message/화면을 함께 관찰한다.
 - lifecycle 결함은 red E2E 커밋 전 controller/renderer를 수정하지 않는다.
 - 구조 proof case·group disclosure·wizard focus 회귀를 lifecycle 편의를 위해 우회하지 않는다.
+
+## EFSP-3
+
+form lifecycle/revision 증명 — 2026-07-13
+
+### Reuse review
+
+- **Extend**: `apps/sample/lib/entities/entityform-proof.ts`의 단일 proof factory와 기존 client diagnostics 구독에 lifecycle case만 추가한다.
+- **Reuse**: `ViewEntityForm`→form controller→`rcmAdapter`→generic SQLite route의 실제 create/update/delete 경계를 그대로 관찰한다.
+- **Extend**: `makeCollectionHandlers`의 선택적 create validation seam과 기존 RFC 7807 envelope에 복수 field/global 오류 fixture만 추가한다.
+
+### Term binding / readback
+
+| 토큰 | 결박 | 이 task의 관찰 |
+|---|---|---|
+| EFS-06/07 | `spec:entityform-sample-proof-plan.md §4` · `disk:packages/state/src/form-controller.ts` | onChange/onInit 등록 순서, 값·meta·구조 변경, fetched baseline을 실제 렌더와 diagnostics로 대조한다. |
+| EFS-08~11 | `spec:entityform-sample-proof-plan.md §4` · `disk:packages/state/src/form-controller.ts` | save/delete 전후 hook의 cancel·throw·순서·context를 실제 HTTP body/미호출/message/후속 handler로 관찰한다. |
+| EFS-21 | `disk:packages/schema-core/src/entity-form.ts#withRevision` · adapter CRUD 경로 | undefined/exact/clear와 create/update/delete payload의 `revisionEntityName`을 request에서 확인한다. |
+| P-04/07/08/10/14 | `spec:entityform-sample-proof-plan.md §4 필수 pairwise` | dynamic write, before/after CRUD, revision 전 transport, backend 복수 field/global validation을 한 실제 흐름에서 봉인한다. |
+
+### Do-NOT
+
+- lifecycle diagnostics count나 mock spy만으로 완료 처리하지 않고 HTTP request·미호출·message·렌더 결과를 함께 단언한다.
+- cancel/throw/order를 한 분기로 축약하거나 before/after 경계를 adapter 성공 이전으로 옮기지 않는다.
+- backend field 오류와 global 오류를 한 문자열/채널로 합치지 않는다.
+
+### Result
+
+- **Lifecycle matrix**: EFS-06~11/21의 원자 branch 35개와 P-04/07/08/10/14를 40개 독립 Chromium 시나리오와 manifest anchor에 연결했다.
+- **Runtime proof**: onChange/onInit의 값·meta·구조 변화, save/delete cancel·throw·순서, revision create/update/delete payload를 실제 controller/adapter/SQLite 경로에서 관찰했다.
+- **Plural validation**: proof API가 field 오류 2개와 global 오류 2개를 RFC 7807 응답으로 반환하고 UI가 서로 분리해 모두 표시하며 저장 row 수를 유지한다.
+- **Type correction**: production build가 `trace.push()` 숫자 반환 lifecycle handler를 잡았고 `051763a`에서 모든 handler가 명시적으로 void를 반환하도록 수정했다.
+- **Manifest/gate**: EFS-06~11/21과 P-04/07/08/10/14를 implemented로 전환해 anchor가 90→130으로 늘었고 static 53-member inventory와 synthetic discriminator를 유지했다.
+
+### Verification evidence
+
+- `npm run check:entityform-sample-proof` → 53/53, P 14/14, implemented anchors 130, synthetic red 2종 PASS.
+- `npm run type-check` → green; `npm --prefix apps/sample run build` → type validation + 44/44 static pages production build green.
+- `npm test -- --reporter=dot` → 192 files, 2514 passed, 1 todo.
+- `npm run test:e2e -- e2e/entityform-proof-lifecycle.spec.ts` → Chromium 40/40 green.
+- `npm run test:e2e` → Chromium 149/149 green.
+- `npm run lint` → 0 errors, 기존 warnings 262; `npm run format:check`와 `git diff --check` green.
+
+### Do-NOT carried forward
+
+- EFSP-4 capability/action은 diagnostics나 callback mock으로 끝내지 않고 실제 버튼 상태·실행 결과·권한 분기를 관찰한다.
+- list lifecycle은 form lifecycle과 혼합하지 않고 실제 search request body와 응답 rows의 전후 관계를 단언한다.
+- lifecycle proof route·validation seam·SQLite 경로를 action/list 편의를 위해 복제하거나 우회하지 않는다.

@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · EFSP-3 form lifecycle/revision 증명 중
-**Next up**: #EFSP-3 form lifecycle/revision 증명
-**Last updated**: 2026-07-13 22:02
+**Status**: active · EFSP-4 capabilities/actions/list lifecycle 증명 중
+**Next up**: #EFSP-4 capabilities/actions/list lifecycle 증명
+**Last updated**: 2026-07-13 22:18
 **Push**: auto
 **Engine**: claude/codex 중립
-**Next session policy**: 현재 세션 계속. EFSP-2 구조 증명을 회귀 유지하며 EFSP-3 lifecycle branch를 채운다.
+**Next session policy**: EFSP-3 lifecycle 증명을 회귀 유지하며 EFSP-4 action/list branch를 채운다.
 
 ## Goal
 
@@ -17,7 +17,7 @@
 
 - 브랜치: `v0.4`. `main`은 0.3.x 유지보수이며 GA-L3 전까지 0.4 부분 반영 금지.
 - 현재 배포: npm `next=0.4.0-alpha.0`, `latest=0.3.26`.
-- 최신 게이트: 2509 unit, 71 E2E, Next 43 pages, coverage 45.30/39.64/48.01/44.92.
+- 최신 게이트: 2514 unit, 149 E2E, Next 44 pages, coverage 45.30/39.64/48.01/44.92.
 - 공개 표면 기준선: 구현 EntityForm 49/55, root 61/120, `/schema` 188/190.
 - 스펙 §3.2 누락: `hasField`, `getTab`, `hasTab`, `getTabFields`; 복구 후 EntityForm 목표 53/55.
 - 현재 sample backend는 `globalThis` 메모리 store라 서버 재시작 시 초기화된다. EFSP-0에서 공용 SQLite로 교체한다.
@@ -58,14 +58,14 @@
 
 ## 세션 인계 (Handoff)
 
-- **현재 활성 task**: `[~] #EFSP-3` — create/update/delete lifecycle과 revision·plural validation을 실제 요청으로 증명한다.
-- **완료 기반**: EFSP-2에서 EFS-14~19와 P-05/06을 31개 DOM/payload 시나리오로 봉인했다.
-- **Do NOT**: hook 호출 횟수 mock으로 완료 처리하지 말고 실제 adapter 요청·message·후속 화면을 관찰한다.
-- **Do NOT**: cancel/throw/order branch를 합치거나 backend field/global 복수 오류 채널을 섞지 않는다.
+- **현재 활성 task**: `[~] #EFSP-4` — capability·action·list lifecycle을 실제 DOM/search request/rows로 증명한다.
+- **완료 기반**: EFSP-3에서 EFS-06~11/21과 P-04/07/08/10/14를 40개 lifecycle 시나리오로 봉인했다.
+- **Do NOT**: capability/action을 diagnostics나 mock callback 횟수만으로 완료 처리하지 말고 실제 버튼 상태·실행 결과를 관찰한다.
+- **Do NOT**: list lifecycle을 form CRUD hook과 합치거나 search request·응답 rows 관찰을 생략하지 않는다.
 - **Hot 파일**: `packages/schema-core/src/entity-form.ts` — 현재 53-member 권위 원본; AST manifest exact gate가 봉인한다.
 - **Hot 파일**: `documents/plans/entityform-sample-proof-plan.md` — EFS-01~24/P-01~14·SQLite 실행 계약.
-- **Hot 파일**: `packages/state/src/form-controller.ts` — lifecycle 실행 순서의 권위 구현; 결함이면 red E2E 뒤 최소 수정한다.
-- **Invariant**: id가 있을 때만 update, readOnly와 capability는 다른 계약, hook은 등록 순서대로 엔진이 실행한다.
+- **Hot 파일**: `packages/schema-core/src/entity-form.ts`와 action/list runtime — capability·action·list callback 계약의 권위 구현; 결함이면 red E2E 뒤 최소 수정한다.
+- **Invariant**: id가 있을 때만 update, readOnly와 capability는 다른 계약, action/list hook은 등록 순서와 실제 transport 경계를 보존한다.
 - **Invariant**: manifest 행은 sample/e2e anchor와 관찰 assertion이 모두 있어야 green이다.
 - **Invariant**: `cd apps/sample && npm run dev`→`/entityform-proof`에서 모든 case/CRUD/reset을 직접 실행할 수 있다.
 - **미룬 결정**: GA-L3/L4는 EF-SP closure 후에도 사용자 `GA-latest go`가 필요하다(OQ-GA-L).
@@ -81,10 +81,8 @@
 - [x] **#EFSP-0 query+SQLite proof** ✅ 2026-07-13 · commit `4c5de9a` · 2512u/72e2e/restart/prod green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-0)
 - [x] **#EFSP-1 identity/read/meta/clone/query 증명** ✅ 2026-07-13 · commit `1c7f6b9` · 59 anchors/78e2e/44 pages green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-1)
 - [x] **#EFSP-2 field/tab/group/step 구조 증명** ✅ 2026-07-13 · `2a6089c` · 31 structure/109e2e + 2 fixes green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-2)
-- [~] **#EFSP-3 form lifecycle/revision 증명**
-  - Files: proof entity/pages, `e2e/entityform-proof-lifecycle.spec.ts`, manifest.
-  - Verify: lifecycle CRUD/hook order + field/global plural validation. IDs EFS-06~11/21, P-04/07/08/10/14.
-- [ ] **#EFSP-4 capabilities/actions/list lifecycle 증명**
+- [x] **#EFSP-3 form lifecycle/revision 증명** ✅ 2026-07-13 · `ee4ddb7` + `051763a` · 40 lifecycle/149e2e/130 anchors green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-3)
+- [~] **#EFSP-4 capabilities/actions/list lifecycle 증명**
   - Files: proof list/action cases, `e2e/entityform-proof-actions-list.spec.ts`, manifest.
   - Verify: action/list spec의 DOM·search request·rows. IDs EFS-02/04/12/13, P-09.
 - [ ] **#EFSP-5 data transfer와 전수 closure**
