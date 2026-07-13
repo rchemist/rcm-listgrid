@@ -101,3 +101,20 @@
 **Note**: 발명 없음·source defect 미발견(toWire/fromWire/serializeValue 전부 인용 계약대로 동작). RV-R13 회귀 가드 = B(a)/B(b)/D.
 
 **커버 매트릭스**: TB-C7(M2O round-trip: GET 중첩{id,title}→라벨→save flatten `<name>Id` + bare-id 참조해석) 충족.
+
+## TB-6 full-set route 계약 스위트 + bulk DELETE 204 fidelity — ✅ 2026-07-13
+
+**Delegate**: sonnet general-purpose agent (`ae49b6ef5548d6de4`)·status=`done`(무deviation). Engine=claude. 브리프=execution-grade(204 결정 + recon §2 계약 + isolation 제약 명시).
+
+**메인 세션 DECIDED (#TB-4 재판정)**: bulk `DELETE {url}` 응답 `200+{removed,revisionEntityName?}` → **204 no-body**(framework recon §2 충실). 근거: client adapter `remove()`(`packages/backend-rcm/src/adapter.ts:207-219`)가 `request(...)` 호출만 하고 **응답 body 미파싱** → 204 no-body가 client 완전 호환(메인 직접 확인). 이 결정으로 **#TB-4 §Needs Review(bulk DELETE fidelity) 해소**.
+
+**구현 (changed files)**:
+- `crud-routes.ts` `makeCollectionHandlers.DELETE` — `return new NextResponse(null,{status:204})`. `body.ids` 판독+`getStore().remove(id)`(이미 삭제된 id=quiet no-op·409/에러 없음·recon §6.2)·`revisionEntityName`=accept-and-ignore(no echo·wire surface 없음)·`mockErrorResponse` 단락 유지. 파일헤더 wire-recap + 핸들러 주석 204로 갱신. `major/route.ts`=makeCollectionHandlers.DELETE 재수출→204 자동 상속(무변경).
+- `bulk-delete.test.ts` — 8 tests **state-based 재작성**: `status===204` + `expect(await res.text()).toBe('')` + `store().findById(id)===undefined`(각 엔티티 `employeeStore`/`collaboStore`/`orgStore`/`staffStore`/`majorStore`/`collegeStore` accessor). revisionEntityName=accept-and-ignore·no-optimistic-lock(재삭제 204 no-op)·college regression 의도 보존. 동일 8 count·`.removed` assertion 0.
+- `e2e/backend-contract.spec.ts` — **2→15 tests**(원 2 verbatim 유지). `test.describe` 그룹: ① college 5-메서드(POST create 201·GET bare·PUT bare·**DELETE 204 no-body + GET 404 = fidelity lock**) ② major 중첩 M2O wire transform(POST/GET/search content 전부 nested `college:{id,name}`·no flat collegeId·TB-5 round-trip over 실 HTTP·DELETE 204) ③ filter/sort/GX-1(**빈 AND/OR vacuous = no-filter 등가**·LIKE narrowing·DESC sort·전부 count-agnostic·throwaway rows finally cleanup) ④ error injection(`x-mock-error` VALIDATION→400 fieldErrors·SYSTEM→500). SUFFIX=`Date.now()` 이름 충돌 회피·seed row(college 1-6·major 1/2) 무변경·절대 count 단언 없음.
+
+**Authoritative verify (메인·전량)**: vitest **191 files / 2478 passed**(무회귀·bulk-delete 재작성=동일 8 count)·**full Playwright 45 passed**(contract 15 + 전 UI e2e — 특히 `college-delete.spec.ts` UI delete flow 포함 = 204 변경이 adapter.remove UI 경로 무영향 실증)·`tsc -p apps/sample`·eslint·prettier(3 files) clean.
+
+**커버 매트릭스**: TB-C8(full-set route 계약 5메서드×대표엔티티×wire 변형) 충족. TB-C10 부분 진전(#GX-1 빈 AND/OR over wire = GX-1 등가 테스트로 lock) — GA-L2 최종 종결은 TB-9.
+
+**#TB-4 §Needs Review 해소**: 204 no-body 정렬(framework-faithful)·client 무영향 실증.

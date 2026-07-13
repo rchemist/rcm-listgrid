@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY** · **`0.4.0-alpha.0` 배포됨(dist-tag `next`·`1ebbc4d`·latest=0.3.26 무영향)** · GA-L1 완료. **활성 = Phase TB(백엔드 테스트 full set·TB-0~5 완료·TB-6~9 진행 중)**. GA-L(latest 봉인)=downstream.
+**Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY** · **`0.4.0-alpha.0` 배포됨(dist-tag `next`·`1ebbc4d`·latest=0.3.26 무영향)** · GA-L1 완료. **활성 = Phase TB(백엔드 테스트 full set·TB-0~6 완료·TB-7~9 진행 중)**. GA-L(latest 봉인)=downstream.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **활성=Phase TB(백엔드 테스트 full set)**. **TB-0~5 완료·TB-6~9 진행 중**. bare `/progress`로 재개 → **TB-6**(route 계약 스위트·bulk DELETE 204 fidelity 재판정). cold-start=이 §Handoff + [recon](./analysis/2026-07-13/test-backend-recon.md) + §Tasks Phase TB + [TB archive](./progress-archive/phase-tb-tasks.md). GA-L(latest 봉인)=downstream(GA-L2가 TB로 해소·GA-L3/L4=사용자 GA-latest go 대기). **Do-NOT**: §Handoff 계승 + [recon §6](./analysis/2026-07-13/test-backend-recon.md).
-**Last updated**: 2026-07-13 (**TB-5 완료** — M2O/참조 round-trip 테스트(mock-backend toWire/fromWire·무source변경): 참조해석(bare id→중첩)+serializeValue flatten(`<name>Id`·R7 labelField-agnostic 가드)+fromWire 계약+풀 클로저 멱등. delegate(sonnet·done·무deviation). m2o-roundtrip.test.ts 12 green·전량 2478 무회귀. **Next up=TB-6(route 계약 스위트·bulk DELETE 204 fidelity 재판정).**)
+**Next session policy**: **활성=Phase TB(백엔드 테스트 full set)**. **TB-0~6 완료·TB-7~9 진행 중**. bare `/progress`로 재개 → **TB-7**(전용 e2e 갭 폐쇄). cold-start=이 §Handoff + [recon](./analysis/2026-07-13/test-backend-recon.md) + §Tasks Phase TB + [TB archive](./progress-archive/phase-tb-tasks.md). GA-L(latest 봉인)=downstream(GA-L2가 TB로 해소·GA-L3/L4=사용자 GA-latest go 대기). **Do-NOT**: §Handoff 계승 + [recon §6](./analysis/2026-07-13/test-backend-recon.md).
+**Last updated**: 2026-07-13 (**TB-6 완료** — full-set route 계약 스위트 + bulk DELETE 204 fidelity: DELETE 200+{removed}→204 no-body(framework recon §2 충실·client adapter body 미파싱→호환·#TB-4 §Needs Review 해소). backend-contract.spec.ts 2→15·bulk-delete.test.ts state-based 재작성. delegate(sonnet·done). vitest 2478 무회귀·**full Playwright 45 green**(UI delete flow 포함=204 UI-safe 실증). **Next up=TB-7(전용 e2e 갭 폐쇄).**)
 
 ## Goal
 
@@ -46,7 +46,7 @@
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
 | **하드닝/확장 트랙** | v0.4 | H·EF·EA/EB/EC·EG·GX·RV·**GA 게이트 ✅ + R7 수정(RV-R13)** → **코드축 GA-READY** | 0.4.0-alpha.0 | §Tasks · [GA 결과](./analysis/2026-07-13/ga-gate-result.md) |
-| **[~] 백엔드 테스트 Full Set (TB)** | v0.4 | 활성 — TB-0~5 완료·TB-6~9 진행. framework-0.1.0 충실 테스트 백엔드+전 API 실증(TB-0~9) | — | §Tasks Phase TB · [recon](./analysis/2026-07-13/test-backend-recon.md) |
+| **[~] 백엔드 테스트 Full Set (TB)** | v0.4 | 활성 — TB-0~6 완료·TB-7~9 진행. framework-0.1.0 충실 테스트 백엔드+전 API 실증(TB-0~9) | — | §Tasks Phase TB · [recon](./analysis/2026-07-13/test-backend-recon.md) |
 | GA-latest 봉인 트랙 (GA-L) | v0.4→main | downstream — GA-L1 ✅ · GA-L2=TB로 해소 · GA-L3/L4=사용자 GA-latest go 대기 | 0.4.0 | §Tasks Phase GA-L |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
@@ -54,7 +54,7 @@
 ## 세션 인계 (Handoff — **코드축 GA-READY + `0.4.0-alpha.0` 배포됨(next). 활성 = Phase TB(백엔드 테스트 full set) 2026-07-13**)
 
 - **현 상태**: 헌장 C1~C9 전건 `present`([GA 결과](./analysis/2026-07-13/ga-gate-result.md))·전 게이트 green(**2399u·E2E32**·surface 49/55·61/120·188/190·attw/publint/headless zero-React). R7 실결함(edustack manyToOne `{id,title}`을 raw id로 export)=수정 완료(RV-R13·`/excel` labelField 스레드). `@rchemist/listgrid@0.4.0-alpha.0` = npm dist-tag `next`(opt-in)·`latest=0.3.26` 무영향. **코드 잔여 작업 0.**
-- **다음(Phase TB — 활성·6/10 완료)** = 백엔드 테스트 Full Set(사용자 지시 2026-07-13). **TB-0~5 완료**(commit `cc40196`~): 계약 확정([tb0](./analysis/2026-07-13/tb0-contract-confirmation.md))·필터 엔진(24 조건타입+NOT+nested subFilters)·정렬/quickSearch/pagination·에러 route(6 팩토리+7 매핑)·CRUD 균일화+bulk delete 실결함 수정+revision passthrough·M2O 라운드트립(참조해석+flatten 멱등·R7 labelField-agnostic 가드). 규범=[recon](./analysis/2026-07-13/test-backend-recon.md)+[매칭/정렬 계약](./analysis/2026-07-13/tb-matching-semantics.md). **Next up=TB-6(route 계약 스위트)~TB-9**. **위임 규율**: source-edit=sonnet delegate(brief=execution-grade·framework 인용)·메인이 authoritative 검증+commit. TB-1/2/3 파일겹침(store/crud-routes)→**순차**(병렬 아님). 전량 **2478 green**. 아키텍처=옵션 A(apps/sample mock 승격). **핵심**: framework 0.1.0 매칭 계약=citable(FilterDispatcher/SearchRequestPlanner·NOT=`!(and)`)·M2O=중첩`{id,title}`(save→`<name>Id`)·excel/upload=백엔드 API 아님·**bulk DELETE 204 fidelity=§Needs Review(TB-6 재판정)**.
+- **다음(Phase TB — 활성·7/10 완료)** = 백엔드 테스트 Full Set(사용자 지시 2026-07-13). **TB-0~6 완료**(commit `cc40196`~): 계약 확정([tb0](./analysis/2026-07-13/tb0-contract-confirmation.md))·필터 엔진(24 조건타입+NOT+nested subFilters)·정렬/quickSearch/pagination·에러 route(6 팩토리+7 매핑)·CRUD 균일화+bulk delete 실결함 수정+revision passthrough·M2O 라운드트립(참조해석+flatten 멱등·R7 labelField-agnostic 가드)·route 계약 스위트(backend-contract.spec 2→15)+bulk DELETE 204 fidelity(#TB-4 해소). 규범=[recon](./analysis/2026-07-13/test-backend-recon.md)+[매칭/정렬 계약](./analysis/2026-07-13/tb-matching-semantics.md). **Next up=TB-7(전용 e2e 갭)~TB-9**. **위임 규율**: source-edit=sonnet delegate(brief=execution-grade·framework 인용)·메인이 authoritative 검증+commit. Playwright는 메인이 full 회귀 실행(204류 UI 경로 검증 필수). 전량 vitest **2478**·**Playwright 45 green**. 아키텍처=옵션 A(apps/sample mock 승격). **핵심**: framework 0.1.0 매칭 계약=citable(FilterDispatcher/SearchRequestPlanner·NOT=`!(and)`)·M2O=중첩`{id,title}`(save→`<name>Id`)·excel/upload=백엔드 API 아님·**bulk DELETE=204 no-body(TB-6 해소·client adapter body 미파싱)**.
 - **GA-L(downstream)**: GA-L1 ✅. **GA-L2=Phase TB로 해소**(충실 백엔드=오라클·TB-9 종결). GA-L3(v0.4→main flip)+GA-L4(0.4.0 `latest` 배포)=사용자 **GA-latest go 결정**(크리티컬 패스) 대기. 릴리스 기전=아래.
 - **GA-latest 릴리스 기전**(GA-L4): root `package.json` 0.3.26→0.4.0 + CHANGELOG `## [0.4.0]` top 섹션(`scripts/check-release-docs.mjs` 게이트=top==version) + `v0.4.0` 태그 push→`publish.yml`(Node24·prepublishOnly clean+type-check+test+build→`npm publish --provenance` dist-tag `latest`). **선결=`v0.4`→`main` 플립**(브랜치 전략: 전작업+검증 후·GA-L3).
 - **Do-NOT(계승)**: 스펙 §를 인용 못하는 설계 판단 발명 금지(§10 게이트 4)·구 src/ 삭제 금지(오라클)·**dts `experimentalDts`+api-extractor 재시도 금지**([선례](./progress-archive/phase-eg-api-redesign.md#w7-1)·소비자 tsc `check:headless`가 실 게이트)·0.2(GJCU) shape primary 채택 금지(폴백만)·R7 실페이로드 확인 없이 형태 추정 금지·**mock이 실 소비자 형태 가릴 수 있음**(R7 교훈: apps/sample `name`이 edustack `title` 결함 은폐)·`search-form.ts` addAndFilter 시맨틱 변경 금지.
@@ -85,12 +85,12 @@
 - [x] **TB-3** 에러 route 방출 ✅ 2026-07-13 · envelope 6팩토리(400 VALIDATION.FAILED/409 DUPLICATE/422 UNPROCESSABLE/500 SYSTEM.UNEXPECTED/401 TOKEN_EXPIRED/403)·`x-mock-error` 헤더 트리거·route→adapter 라운드트립 7매핑 전건(400/422→VALIDATION·409/500/404→UNKNOWN·401→TOKEN_EXPIRED·403→FORBIDDEN) · error-routes.test.ts 15 green·전량 2458 · [detail](./progress-archive/phase-tb-tasks.md)
 - [x] **TB-4** CRUD 균일화+bulk delete+revision passthrough ✅ 2026-07-13 · employee/collabo/org/staff=makeCollectionHandlers 통합·major=DELETE 추가·revisionEntityName passthrough(낙관락無)·5 결함엔티티 멀티행 bulk delete 수정 · bulk-delete.test.ts 8 green·전량 2466 · [detail](./progress-archive/phase-tb-tasks.md)
 - [x] **TB-5** M2O/참조 round-trip ✅ 2026-07-13 · toWire 참조해석(bare id→중첩)+serializeValue flatten(`<name>Id`·R7 labelField-agnostic 가드)+fromWire 계약(중첩 바디 미판독)+풀 클로저 멱등 · delegate(sonnet·done) · m2o-roundtrip.test.ts 12 green·전량 2478 무회귀 · [detail](./progress-archive/phase-tb-tasks.md)
-- [ ] **TB-6** [TB-C8/C10] full-set route 계약 스위트 — `e2e/backend-contract.spec.ts`(현 college 2사실)→포괄 스위트(5메서드×대표엔티티×wire 변형). GA-L2 항목 종결 테스트. Proof: 스위트 green.
+- [x] **TB-6** full-set route 계약 스위트 + bulk DELETE 204 fidelity ✅ 2026-07-13 · DELETE 200+{removed}→**204 no-body**(framework 충실·client adapter body 미파싱 확인·#TB-4 해소)·backend-contract.spec.ts 2→15(college 5메서드·major 중첩 M2O wire·GX-1/filter/sort·error injection)·bulk-delete.test.ts state-based 재작성 · vitest 2478·**Playwright 45 green** · [detail](./progress-archive/phase-tb-tasks.md)
 - [ ] **TB-7** [TB-C9] 전용 e2e 갭 폐쇄 — professor/university/employee/org/staff(list/search/create/edit/delete). Proof: e2e green.
 - [ ] **TB-8** [TB-C11·stretch] `backend/rest` 레퍼런스 어댑터+제네릭 REST mock (ADR-0005 수용#3·현 빈 스캐폴드). After 코어. OQ-TB3.
 - [ ] **TB-9** [TB-C10] GA-L2 종결 — 신 테스트로 #GX-1(빈 AND/OR 관용)·#GX-2(24종)·#W6-2b(M2O passthrough·xref/address 한계 문서화) 종결·GA-L2 재판정.
 
-**Next up**: **TB-6** (full-set route 계약 스위트). TB-0~5 완료. TB-6=`e2e/backend-contract.spec.ts`(현 college 2사실)→포괄 스위트(5메서드×대표엔티티×wire 변형)·**bulk DELETE 204 fidelity 재판정**(#TB-4 §Needs Review). GA-L2 항목 종결 테스트. Proof=스위트 green.
+**Next up**: **TB-7** (전용 e2e 갭 폐쇄). TB-0~6 완료. TB-7=professor/university/employee/org/staff 전용 Playwright e2e(list/search/create/edit/delete) 갭 폐쇄(현재 피커/xref 부수 도달만). Proof=e2e green. TB-8(REST stretch)·TB-9(GA-L2 종결)은 이후.
 
 #### Phase GA-L — GA `latest` 봉인 트랙 (downstream · TB가 GA-L2 해소)
 
@@ -121,7 +121,7 @@
 - [x] **#W7-4 서브패스 descope 처분** — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
 - [ ] **#W6-2b / #GX-1 / #GX-2 → GA-L2 재앵커** — 실백엔드/실소비자 데이터 gated(TIER2 passthrough garbage 여부·빈 AND/OR wire 수용·조건타입 커버). alpha 소아킹서 edustack/GJCU 실 대조 · risk:low · [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
 - [ ] **#TB-1 vitest include 확장(in-commit 해소)** — delegate가 apps/** 미커버 config 갭 발견(needs_decision)→메인 세션이 recon §0 의도로 `apps/**/*.test.{ts,tsx}` 추가. behavioral=apps 유닛이 CI 게이트 진입(의도) · risk:low · [detail](./progress-archive/phase-tb-tasks.md)
-- [ ] **#TB-4 bulk DELETE 응답 fidelity** — framework=204 no-body인데 mock=200+`{removed,revisionEntityName?}`(pre-existing 200+json(removed) + TB-4 shape 변경). adapter는 body 미파싱(무영향). **TB-6서 204 fidelity 재판정**(계약 스위트 wire 변형) · risk:low · [detail](./progress-archive/phase-tb-tasks.md)
+- [x] **#TB-4 bulk DELETE 응답 fidelity → 해소(TB-6, 2026-07-13)** — 재판정=**204 no-body 정렬**(framework recon §2 충실). client `adapter.remove()` body 미파싱→호환·full Playwright 45 green(UI delete flow 포함)으로 UI 무영향 실증. backend-contract.spec가 204 fidelity lock · [detail](./progress-archive/phase-tb-tasks.md)
 
 ## Progress notes
 
