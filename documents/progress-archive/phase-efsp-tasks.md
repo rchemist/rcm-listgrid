@@ -290,3 +290,33 @@ data transfer와 전수 closure — 2026-07-13
 - 다운로드 버튼이나 모달 존재만으로 export를 완료 처리하지 않고 실제 파일의 sheet·header·data cell을 읽는다.
 - import UI의 성공만으로 persistence를 주장하지 않고 list refetch와 SQLite-backed item GET을 함께 관찰한다.
 - proof 편의를 위해 새 transfer registry, 별도 상태 엔진, 전용 mock adapter를 만들지 않는다.
+
+### Red evidence
+
+- selector 중복을 `td` 관찰로 교정한 뒤 `npx playwright test e2e/entityform-proof-transfer.spec.ts --project=chromium` → 5/6 green, EFS-22c만 sheet 이름 expected `EntityForm Proof`, received `Sheet1`로 RED.
+
+### Result
+
+- **Transfer matrix**: EFS-22a~e와 P-11을 자동 파생·명시 fields·fileName·replace·양방향 독립·설정 뒤 field add/remove의 6개 Chromium 시나리오에 연결했다.
+- **실제 xlsx↔SQLite**: 다운로드 Blob을 Node에서 다시 열어 `EntityForm Proof` sheet의 `id,name,status,category,note` header와 seed cells를 확인하고, 같은 workbook을 수정·Import한 뒤 list refetch와 item GET에서 id=88 row를 확인했다.
+- **Sheet red→green**: `ea7d7d9`가 `Sheet1` 고정 실패를 red로 고정했고 `3bd1bee`가 fileName의 확장자·금지문자·31자 제한을 정규화한 sheet 이름으로 수정했다.
+- **P-11**: transfer 설정 뒤 `late` field 추가와 `note` 제거가 export header와 import SQLite row 양쪽에 반영되어 query-time 파생을 봉인했다.
+- **Closure**: manifest는 53/53, P 14/14, implemented anchors 163이며 빈 branch와 planned integration이 0이다. sample 명세에 proof lab 상시 게이트·수동 시나리오·persistence 명령을 고정했다.
+
+### Verification evidence
+
+- `npx playwright test e2e/entityform-proof-transfer.spec.ts --project=chromium` → 6/6 green.
+- `npm run test:e2e` → Chromium 182/182 green.
+- `npm run test:e2e:persistence` → id=2 create/update 재기동 유지, delete 404, empty namespace 유지 PASS.
+- `npm test -- --reporter=dot` → 192 files, 2515 passed, 1 todo.
+- `npm run type-check && npm run typecheck:packages` → green.
+- `npm run check:entityform-sample-proof` → 53/53, P 14/14, implemented anchors 163, synthetic red 2종 PASS.
+- `npm run check:surface` → EntityForm 53/55, root 61/120, `/schema` 188/190.
+- `npm --prefix apps/sample run build` → type validation + 44/44 static pages production build green.
+- `npm run lint -- --quiet` → 0 errors; 변경 파일 신규 warning 0. `npm run format:check`와 `git diff --check` green.
+
+### Do-NOT carried forward
+
+- EFSP-6 감사에서 workbook cell·SQLite GET 증거를 버튼/diagnostics로 축약하지 않는다.
+- 테스트를 맞추기 위해 공개 API나 transfer 설정 표면을 넓히지 않는다.
+- EFSP-6 full gate는 공유 `.next`를 쓰는 Next 명령을 병렬 실행하지 않는다.

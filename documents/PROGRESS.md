@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · EFSP-5 data transfer와 전수 closure 진행 중
-**Next up**: #EFSP-5 data transfer와 전수 closure
-**Last updated**: 2026-07-13 22:51
+**Status**: active · EFSP-6 최종 적대 감사와 GA 재봉인 진행 중
+**Next up**: #EFSP-6 최종 적대 감사와 GA 재봉인
+**Last updated**: 2026-07-13 23:04
 **Push**: auto
 **Engine**: claude/codex 중립
-**Next session policy**: EFSP-4 action/list 기준선을 유지하며 EFSP-5 실제 xlsx↔SQLite와 전수 closure를 채운다.
+**Next session policy**: EFSP-5의 182 E2E·163 anchors 기준선을 유지하며 EFSP-6 full gate와 결과 문서를 봉인한다.
 
 ## Goal
 
@@ -17,10 +17,9 @@
 
 - 브랜치: `v0.4`. `main`은 0.3.x 유지보수이며 GA-L3 전까지 0.4 부분 반영 금지.
 - 현재 배포: npm `next=0.4.0-alpha.0`, `latest=0.3.26`.
-- 최신 게이트: 2514 unit, 176 E2E, Next 44 pages, coverage 45.30/39.64/48.01/44.92.
-- 공개 표면 기준선: 구현 EntityForm 49/55, root 61/120, `/schema` 188/190.
-- 스펙 §3.2 누락: `hasField`, `getTab`, `hasTab`, `getTabFields`; 복구 후 EntityForm 목표 53/55.
-- 현재 sample backend는 `globalThis` 메모리 store라 서버 재시작 시 초기화된다. EFSP-0에서 공용 SQLite로 교체한다.
+- 최신 게이트: 2515 unit, 182 E2E, Next 44 pages, coverage 45.30/39.64/48.01/44.92.
+- 공개 표면 기준선: EntityForm 53/55, root 61/120, `/schema` 188/190.
+- proof backend는 격리 SQLite transaction을 권위 저장소로 사용하며 create/update/delete가 process restart 뒤에도 유지된다.
 - 규범: [EntityForm 스펙](./plans/entityform-public-api-spec.md),
   [EF-SP 실행계획](./plans/entityform-sample-proof-plan.md), [sample 명세](./prd/sample-site-spec.md).
 
@@ -58,18 +57,18 @@
 
 ## 세션 인계 (Handoff)
 
-- **현재 활성 task**: `[~] #EFSP-5` — EFS-22/P-11 실제 xlsx↔SQLite 왕복과 전수 빈 행 closure를 증명한다.
-- **완료 기반**: EFSP-4에서 EFS-02/04/12/13과 P-09를 27개 action/list 시나리오, 전체 176 E2E, 157 anchors로 봉인했다.
-- **Do NOT**: transfer 버튼 존재나 mock workbook만으로 완료 처리하지 말고 다운로드 xlsx 셀과 import 후 SQLite row를 관찰한다.
-- **Do NOT**: auto-derived field snapshot을 고정하거나 action/list Auth·search·rows 경계를 transfer 편의로 우회하지 않는다.
+- **현재 활성 task**: `[~] #EFSP-6` — 전체 계약을 적대 감사하고 GA full gate와 결과 문서를 재봉인한다.
+- **완료 기반**: EFSP-5에서 EFS-22/P-11을 실제 xlsx sheet/cell→SQLite item GET으로 증명해 182 E2E, 163 anchors, 빈 행 0을 달성했다.
+- **Do NOT**: full gate를 부분 실행으로 축약하거나 Next build/dev 명령을 같은 `.next`에서 병렬 실행하지 않는다.
+- **Do NOT**: 테스트를 맞추려고 공개 API/transfer 설정 표면을 넓히지 않는다. 결함이면 red E2E를 먼저 남긴다.
 - **Hot 파일**: `packages/schema-core/src/entity-form.ts` — 현재 53-member 권위 원본; AST manifest exact gate가 봉인한다.
 - **Hot 파일**: `documents/plans/entityform-sample-proof-plan.md` — EFS-01~24/P-01~14·SQLite 실행 계약.
-- **Hot 파일**: `packages/schema-core/src/data-transfer.ts`, `packages/excel`, proof list/route — EFS-22/P-11 xlsx derivation·parse·SQLite import 경계.
+- **Hot 파일**: `documents/analysis/2026-07-13/entityform-sample-proof-result.md` — EFSP-6 full gate와 SQLite 실측의 최종 결과 원장.
 - **Invariant**: id가 있을 때만 update, readOnly와 capability는 다른 계약, action/list hook은 등록 순서와 실제 transport 경계를 보존한다.
 - **Invariant**: manifest 행은 sample/e2e anchor와 관찰 assertion이 모두 있어야 green이다.
 - **Invariant**: `cd apps/sample && npm run dev`→`/entityform-proof`에서 모든 case/CRUD/reset을 직접 실행할 수 있다.
 - **미룬 결정**: GA-L3/L4는 EF-SP closure 후에도 사용자 `GA-latest go`가 필요하다(OQ-GA-L).
-- **첫 확인**: `git status -sb`, `npm run check:entityform-sample-proof`, `npm run check:surface` baseline 53/61/188.
+- **첫 확인**: `git status -sb`, plan §EFSP-6 명령 전건, 결과 문서의 53/53·EFS/P 빈 행 0·SQLite 증거 대조.
 
 ---
 
@@ -83,10 +82,8 @@
 - [x] **#EFSP-2 field/tab/group/step 구조 증명** ✅ 2026-07-13 · `2a6089c` · 31 structure/109e2e + 2 fixes green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-2)
 - [x] **#EFSP-3 form lifecycle/revision 증명** ✅ 2026-07-13 · `ee4ddb7` + `051763a` · 40 lifecycle/149e2e/130 anchors green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-3)
 - [x] **#EFSP-4 capabilities/actions/list lifecycle 증명** ✅ 2026-07-13 · `db90afe`+`24da750` · 27 action/list·176 E2E green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-4)
-- [~] **#EFSP-5 data transfer와 전수 closure**
-  - Files: transfer cases/spec, manifest, sample-site spec.
-  - Verify: 실제 xlsx→SQLite 왕복 + AST 53/53 + EFS/P 빈 행 0. IDs EFS-22/P-11.
-- [ ] **#EFSP-6 최종 적대 감사와 GA 재봉인**
+- [x] **#EFSP-5 data transfer와 전수 closure** ✅ 2026-07-13 · `ea7d7d9`+`3bd1bee` · 6 transfer/182 E2E/163 anchors green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-5)
+- [~] **#EFSP-6 최종 적대 감사와 GA 재봉인**
   - Files: 결과 문서/PROGRESS; 결함 발견 시 source+red E2E 별도 commit.
   - Verify: unit/coverage/lint/format/build/Next/E2E/surface/attw/publint/smoke/headless 전 게이트.
 

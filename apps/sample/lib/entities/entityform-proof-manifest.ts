@@ -26,17 +26,6 @@ export interface EntityFormProofManifest {
   integrations: readonly EntityFormIntegrationProof[];
 }
 
-const plannedIntegration = (id: `P-${string}`): EntityFormIntegrationProof => ({
-  id,
-  members: [],
-  status: 'planned',
-  sampleCase: 'baseline',
-  sampleAnchor: 'apps/sample/lib/entities/entityform-proof.ts#EntityFormProofCase',
-  e2eFile: 'e2e/entityform-proof-identity.spec.ts',
-  testTitle: `[${id}] planned`,
-  assertion: '후속 EFSP owner task에서 DOM/request/response 관찰로 교체',
-});
-
 const identityTestFile = 'e2e/entityform-proof-identity.spec.ts' as const;
 const structureTestFile = 'e2e/entityform-proof-structure.spec.ts' as const;
 const lifecycleTestFile = 'e2e/entityform-proof-lifecycle.spec.ts' as const;

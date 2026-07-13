@@ -14,7 +14,7 @@
 
 - Next.js(App Router) + `@rchemist/listgrid` **workspace 참조** (npm 배포본이 아니라 로컬 패키지 — 이식 중 즉시 검증 루프).
 - **목업 백엔드 내장**: Next route handlers가 rcm-backend-framework 0.1.0 envelope(POST {url}/search, bare-entity GET 등)로 fixture 데이터를 서빙 — `backend-rcm` 어댑터의 살아있는 통합 테스트를 겸한다. **외부 의존 0**: `npm run dev -w apps/sample` 단독 기동.
-- fixture는 메모리 저장(재기동 시 리셋) — CRUD 왕복이 실제로 반영되어야 한다(읽기 전용 금지).
+- 기본 도메인 fixture는 메모리 저장(재기동 시 리셋)이다. `/entityform-proof`만 전수 API 증명과 재시작 검증을 위해 격리 SQLite를 권위 저장소로 사용한다.
 
 ## 도메인 모델 (관계 3종 전부 커버 — C3 시연)
 
@@ -52,9 +52,32 @@
 | P6 | /extensibility 6종 + 어댑터 스위치 |
 | P7 (GA) | 헌장 C1~C9 대조표의 시연 열이 전부 이 앱의 페이지를 가리킴 |
 
+## EntityForm proof lab 상시 게이트
+
+`/entityform-proof`는 EntityForm 공개 instance member 53개와 EFS-01~24 원자 branch, P-01~14 pairwise 상호작용의 상시 실행 증명이다. hub의 각 implemented 행은 실제 sample case와 Playwright 제목을 가리키며, `npm run check:entityform-sample-proof`가 AST inventory 53/53과 EFS/P 빈 행 0을 검사한다.
+
+수동 합격 시나리오:
+
+1. hub에서 branch별 링크를 모두 열 수 있고 create/list/update/delete/transfer case가 설명과 함께 보인다.
+2. 새 row를 만들고 list에서 검색한 뒤 detail을 열어 수정한다. 새로고침해도 수정값이 유지된다.
+3. dev 서버를 종료하고 같은 명령으로 다시 실행한다. 만든 row와 수정값이 유지된다.
+4. row를 삭제하고 다시 서버를 재시작한다. 삭제된 row가 seed로 부활하지 않는다.
+5. “Proof 데이터 초기화”를 누르면 seed 한 행으로 돌아가고 브라우저 CRUD를 다시 반복할 수 있다.
+6. validation case에서 한 필드의 오류 2개와 form global 오류 2개가 각각의 plural UI에 동시에 보인다.
+7. `withDataTransfer` fileName case에서 `EntityForm Proof.xlsx`를 내려받아 `EntityForm Proof` sheet의 `id,name,status,category,note` 열을 확인하고, 수정한 파일을 Import해 list와 detail API에서 같은 SQLite row를 확인한다.
+
+재시작 영속성 자동 게이트는 저장소 루트에서 다음 명령을 그대로 실행한다.
+
+```bash
+npm run test:e2e:persistence
+```
+
+runner는 격리 임시 DB와 같은 DB 경로를 사용하는 dev server를 세 차례 기동해 create/update 유지, delete 후 404, 삭제 row 미부활을 Chromium과 HTTP로 관찰한다. 개발 기본 DB에는 접근하지 않는다.
+
 ## 수용 기준
 
 - [ ] `npm run dev -w apps/sample` 단독 기동, 외부 서비스 의존 0
 - [ ] CRUD 왕복(생성→리스트 반영→수정→삭제)이 3 엔티티 전부에서 동작
 - [ ] E1~E6 각각 독립 페이지/토글로 시연 가능
 - [ ] getting-started의 코드 블록이 이 앱의 실제 코드와 일치(복붙 검증)
+- [ ] EntityForm proof lab의 53/53 inventory, EFS/P 빈 행 0, 실제 xlsx↔SQLite 왕복, 재시작 영속성 gate가 green
