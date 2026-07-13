@@ -81,3 +81,23 @@
 **Discovery**: collabo/major = `.withCapabilities({delete:false})`(GJCU parity·UI delete 버튼 없음) → 이 두 엔티티 Playwright delete e2e 부재 근거. Playwright bulk-delete e2e=TB-7로 이연(route-level 8 테스트가 계약 증명).
 
 **커버 매트릭스**: TB-C6(CRUD 균일화+bulk delete 멀티행+revisionEntityName passthrough) 충족.
+
+## TB-5 M2O/참조 round-trip — ✅ 2026-07-13
+
+**Delegate**: sonnet general-purpose agent (`aa4aa79fdde6e240d`)·status=`done`(무deviation). Engine=claude. 브리프=execution-grade(recon §3 R7·TB-C7·many-to-one-field.ts:79-84 serializeValue 계약·major.ts toWire/fromWire shape 인용).
+
+**Search-first(중복 회피)**: 클라이언트 store flatten(`toSaveData`→`<name>Id`)은 `packages/state/src/__tests__/store.test.ts:96`에 기존 커버 → 재테스트 금지. TB-5 신규 = **mock-backend layer**(`major.ts` toWire/fromWire·grep 확인 ZERO 커버) + field-level serializeValue 계약을 그 경계에서.
+
+**구현 (changed files·TEST-ONLY·무source변경)**:
+- `apps/sample/lib/mock-backend/m2o-roundtrip.test.ts` (신규·12 tests) — 4 그룹:
+  - **A 참조해석**(toWire 5): collegeId '1'→중첩`{id:'1',name:'공과대학'}`·self-ref parentMajorId→부모 중첩·dangling id('99999')→undefined·absent→undefined·wire에 flat `collegeId`/`parentMajorId` 키 부재(중첩만 방출).
+  - **B save flatten/RV-R13 guard**(serializeValue 4): 중첩`{id,name}`→`{collegeId:'1'}`(`'college' in result`=false·string id)·**labelField-agnostic**(`{id,title}`+labelField:'title'→여전히 `{collegeId:'1'}`, idField-keyed = R7 클래스 가드·apps/sample name-fixture가 못 잡는 브랜치 명시 구성)·raw non-object('1')→base `{college:'1'}`·undefined→`{college:undefined}`.
+  - **C fromWire 계약**(2): flat collegeId/parentMajorId 판독·**중첩 `{college:{id,name}}` 바디는 참조로 미판독**(collegeId=undefined → wire가 flatten을 요구함을 증명·RV-R13 쓰기측 실패모드).
+  - **D 풀 라운드트립 클로저**(1): create→toWire(중첩)→serializeValue(`{collegeId:'1'}`)→PUT바디(**flat·`putBody.college`=undefined 단언**)→fromWire→update→toWire 멱등(무drift).
+- 로컬 헬퍼만(신 모듈 아님): `dummyEntityForm`(throwing thunk=serializeValue가 thunk 미호출 증명)·`ctx={} as FieldEvalContext`(override가 `_ctx` 무시)·`collegeField(labelField)`.
+
+**Authoritative verify (메인·tracked config)**: 신 파일 12 green·`npm test` 전량 **191 files / 2478 passed**(2466+12·무회귀)·`tsc -p apps/sample`·eslint·prettier clean. build=무영향(packages 무변경) 스킵.
+
+**Note**: 발명 없음·source defect 미발견(toWire/fromWire/serializeValue 전부 인용 계약대로 동작). RV-R13 회귀 가드 = B(a)/B(b)/D.
+
+**커버 매트릭스**: TB-C7(M2O round-trip: GET 중첩{id,title}→라벨→save flatten `<name>Id` + bare-id 참조해석) 충족.
