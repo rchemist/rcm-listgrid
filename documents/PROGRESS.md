@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY** · **`0.4.0-alpha.0` 배포됨(dist-tag `next`·`1ebbc4d`·latest=0.3.26 무영향)**. 다음=alpha 소아킹→GA latest.
+**Status**: active · **GA 게이트(CAP-28) ✅ + R7 실결함 수정(RV-R13) 2026-07-13**: 헌장 C1~C9 전건 present·edustack 실 대조로 R7 검증→manyToOne labelField 실결함 발견→수정. 전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2399u/E2E32/surface 49·61·188 무변경). **코드축 GA-READY** · **`0.4.0-alpha.0` 배포됨(dist-tag `next`·`1ebbc4d`·latest=0.3.26 무영향)** · **GA-L1(needs-review 일괄 처분) 완료 2026-07-13**. 잔여=GA-L2 소아킹(외부/시간 gated)→GA latest.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next)** — 활성=**Phase GA-L(GA `latest` 봉인 트랙)**. bare `/progress`로 재개 → GA-L1(needs-review 처분)+GA-L2(alpha 소아킹) 착수, GA-L3/L4(flip·0.4.0 latest 배포)는 **사용자 GA-latest go 결정** 대기(크리티컬 패스). cold-start=이 §Handoff + §Tasks Phase GA-L. **Do-NOT**: §Handoff 계승 목록.
-**Last updated**: 2026-07-13 10:53 (`/progress:next` 재정렬 — 코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next). 완료 페이즈(H~GA) 1줄 슬림·EG W1~W7 블록 아카이브 이관·매트릭스 P0/트랙 reconcile. 활성=**Phase GA-L(GA `latest` 봉인 트랙)**: GA-L1 needs-review 처분·GA-L2 alpha 소아킹·GA-L3 v0.4→main flip·GA-L4 0.4.0 latest 배포. **Next up=GA-L1**. GA-L3/L4=사용자 GA-latest go 결정(크리티컬 패스) 대기.)
+**Next session policy**: **코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next)·GA-L1 완료** — 활성=**Phase GA-L**, 미착수 잔여(GA-L2 소아킹·GA-L3 flip·GA-L4 latest 배포) **전건 gated**(외부/시간·사용자 크리티컬 패스). bare `/progress`로 재개해도 자율 진행 불가 — 사용자 신호(실 소비자 피드백 or GA-latest go) 대기. cold-start=이 §Handoff + §Tasks Phase GA-L. **Do-NOT**: §Handoff 계승 목록.
+**Last updated**: 2026-07-13 (GA-L1 완료 — low-risk §Needs Review 일괄 처분. model-decidable 9건 확정(#RV-R7 코멘트+#W7-4 §9 라벨 정정 적용·build green·#W7-4 배너/#GX-3 상호참조 실측·#W5-2 ×3 배송수용·#W7-2/#RV-R4 검증수용)·실백엔드 gated 3건(#W6-2b/#GX-1/#GX-2)→GA-L2 재앵커. [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md). **잔여 전건 gated → 세션 정지.**)
 
 ## Goal
 
@@ -46,14 +46,14 @@
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
 | **하드닝/확장 트랙** | v0.4 | H·EF·EA/EB/EC·EG·GX·RV·**GA 게이트 ✅ + R7 수정(RV-R13)** → **코드축 GA-READY** | 0.4.0-alpha.0 | §Tasks · [GA 결과](./analysis/2026-07-13/ga-gate-result.md) |
-| **[~] GA-latest 봉인 트랙 (GA-L)** | v0.4→main | 활성 — alpha 소아킹 + needs-review 처분 + flip + 0.4.0 `latest` 배포 | 0.4.0 | §Tasks Phase GA-L |
+| **[~] GA-latest 봉인 트랙 (GA-L)** | v0.4→main | 활성 — GA-L1 needs-review 처분 ✅(2026-07-13) · 잔여(소아킹·flip·latest 배포) 전건 gated | 0.4.0 | §Tasks Phase GA-L |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
 ## 세션 인계 (Handoff — **코드축 GA-READY + `0.4.0-alpha.0` 배포됨(next) 2026-07-13**. 활성 = GA-latest 봉인 트랙)
 
 - **현 상태**: 헌장 C1~C9 전건 `present`([GA 결과](./analysis/2026-07-13/ga-gate-result.md))·전 게이트 green(**2399u·E2E32**·surface 49/55·61/120·188/190·attw/publint/headless zero-React). R7 실결함(edustack manyToOne `{id,title}`을 raw id로 export)=수정 완료(RV-R13·`/excel` labelField 스레드). `@rchemist/listgrid@0.4.0-alpha.0` = npm dist-tag `next`(opt-in)·`latest=0.3.26` 무영향. **코드 잔여 작업 0.**
-- **다음(Phase GA-L)** = GA `latest` 봉인 트랙. **먼저 열 것**: §Tasks Phase GA-L(GA-L1~L4). 대부분 gated: alpha 소아킹(시간·edustack 엑셀 export 실검증 가치)·GA-latest go 결정·spec-author/소비자 ack. **크리티컬 패스 결정(사용자)**: 0.4.0 `latest` 배포 GO 여부 + 시점(밀스톤).
+- **다음(Phase GA-L)** = GA `latest` 봉인 트랙. **GA-L1(needs-review 일괄 처분) 완료 2026-07-13** ([dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)). 미착수 잔여 **전건 gated**: GA-L2 alpha 소아킹(시간·실 소비자 데이터 — R7/#W6-2b/#GX-1/#GX-2 실검증)·GA-L3 flip·GA-L4 latest 배포. **크리티컬 패스 결정(사용자)**: 0.4.0 `latest` 배포 GO 여부 + 시점. 자율 진행 여지 소진 → 사용자 신호 대기.
 - **GA-latest 릴리스 기전**(GA-L4): root `package.json` 0.3.26→0.4.0 + CHANGELOG `## [0.4.0]` top 섹션(`scripts/check-release-docs.mjs` 게이트=top==version) + `v0.4.0` 태그 push→`publish.yml`(Node24·prepublishOnly clean+type-check+test+build→`npm publish --provenance` dist-tag `latest`). **선결=`v0.4`→`main` 플립**(브랜치 전략: 전작업+검증 후·GA-L3).
 - **Do-NOT(계승)**: 스펙 §를 인용 못하는 설계 판단 발명 금지(§10 게이트 4)·구 src/ 삭제 금지(오라클)·**dts `experimentalDts`+api-extractor 재시도 금지**([선례](./progress-archive/phase-eg-api-redesign.md#w7-1)·소비자 tsc `check:headless`가 실 게이트)·0.2(GJCU) shape primary 채택 금지(폴백만)·R7 실페이로드 확인 없이 형태 추정 금지·**mock이 실 소비자 형태 가릴 수 있음**(R7 교훈: apps/sample `name`이 edustack `title` 결함 은폐)·`search-form.ts` addAndFilter 시맨틱 변경 금지.
 - **이미 SOUND(유지·재작성 금지)**: store 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·FormMutator seam·EF1-7·필드24+주소+Xref·권한 배선. 재설계는 공개 표면 — 엔진 재작성 아님. 규범=[스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)·[헌장](./prd/concept-charter.md).
@@ -77,13 +77,13 @@
 
 코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next). GA `latest` 봉인까지 잔여 작업. **GA-L3/L4는 사용자 GA-latest go 결정(크리티컬 패스) 대기.**
 
-- [ ] **GA-L1** low-risk §Needs Review 10건 일괄 처분 — model-decidable(문서/코멘트 정정 예: #RV-R7 doc·#W7-4 guide 배너)은 처리, spec-author/소비자 확인 필요(#W7-2·#W6-2b·#GX-1·#GX-2 등)는 일괄 질의. GA 비차단이나 봉인 전 정리.
-- [ ] **GA-L2** alpha 소아킹 — `0.4.0-alpha.0` 실 소비자(edustack 등) 피드백 수렴. **R7 수정 실검증 가치**: edustack manyToOne 컬럼 엑셀 export가 title로 나오는지 확인(외부/시간 gated).
+- [x] **GA-L1** low-risk §Needs Review 일괄 처분 — ✅ 2026-07-13 · model-decidable 9건 확정(#RV-R7 코멘트·#W7-4 §9 라벨 정정·build green·#W7-4 배너/#GX-3 상호참조 실측·#W5-2 ×3 배송수용·#W7-2/#RV-R4 검증수용) · 확인필요 3건(#W6-2b/#GX-1/#GX-2)=실백엔드 gated→GA-L2 재앵커 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
+- [ ] **GA-L2** alpha 소아킹 (외부/시간 gated) — `0.4.0-alpha.0` 실 소비자(edustack 등) 피드백 수렴. **실검증 목록**: ① R7 수정=edustack manyToOne 엑셀 export가 title로 나오는지 ② #W6-2b M2O/xref/address TIER2 passthrough가 실 데이터서 garbage 아닌지 ③ #GX-1 빈 AND/OR wire를 실백엔드가 no-op 수용하는지 ④ #GX-2 실백엔드 필요 조건타입이 mock 5종 초과인지. [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
 - [ ] **GA-L3** `v0.4`→`main` 플립 (브랜치 전략: 전작업+검증 완료 후). GA-latest go 결정 시 실행. **선결**=GA-L1 정리 + alpha 무회귀.
 - [ ] **GA-L4** 0.4.0 GA `latest` 배포 — root 0.3.26→0.4.0 + CHANGELOG `## [0.4.0]` + `v0.4.0` 태그 push→publish.yml(latest). After GA-L1~L3. 자율 배포(Push:auto).
 - [ ] **EC4** (기존 이연) GraduationReview(custom onSave·role readonly·옵션 pruning) — GA-latest 독립 후순위 잔여.
 
-**Next up**: **GA-L1** (low-risk §Needs Review 처분) — 병행 GA-L2(alpha 소아킹). GA-L3/L4는 사용자 GA-latest go 결정 대기.
+**Next up**: **GA-L2** (alpha 소아킹) — GA-L1 완료(2026-07-13). GA-L2는 외부/시간 gated(실 소비자 피드백), GA-L3/L4는 사용자 GA-latest go 결정(크리티컬 패스) 대기 → **미착수 잔여 전건 gated: 자율 진행 불가, 사용자 신호 대기.**
 
 ---
 
@@ -96,21 +96,11 @@
 - [x] **#W5-1 operator 타입 확정** — operator=open `string` 유지·캐스트=addAndFilter만 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [x] **#W6-2a importValue +options** — label→value=3번째 `options?`(exportValue 대칭) 승인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
-- [ ] **#W7-2 headless @types/react 해석** — `/schema`(+shared chunk 경유 `/state`) `.d.ts`가 ReactNode 조건타입(OptionalReactNode 등) 노출 → headless tsc는 `@types/react`(dev type-only) 필요. **런타임 react peer=0**(계약 충족). 해석: 헤드리스=런타임 React 0·타입레벨 @types/react는 dev 양보(스펙 §2 "React peer 0"=런타임). 스펙 저자 확인 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-2-headless-fixture-2026-07-12--cap-25)
-- [ ] **#W6-2b TIER3 uniform 필터 경계** — /excel이 getDataTransfer() 반환 필드에 TIER3 uniform 제외(명시/파생 미구분). M2O/xref/address는 TIER2 passthrough(평면행 값 export)이나 실 GJCU 데이터 미검증 → 소비자 확인(garbage면 TIER3 편입) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2b-excel-exportimport-core-cap-17)
+- [x] **GA-L1 배치 처분(9항목) 2026-07-13** — model-decidable 전건 확정(build green): #W7-4 배너·#GX-3 상호참조=이미 반영(실측)·#RV-R7 코멘트 정정·#W7-4 §9 라벨 정정·#W5-2 ×3 배송수용·#W7-2 peer0=런타임·#RV-R4 검증수정. [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
 - [x] **#W5-3 de-dup → RV-R2 해소(2026-07-13, `dcd82b2`)** — 신규 API 대신 기존 `SearchForm.withFilter`(name 교체) 재사용(공개표면 무변경)·addAndFilter 스택킹 빈결과 해소 · [R2](./plans/rv-remediation-execution-plan.md)
-- [ ] **#W5-2 major/staff withList 확대** — 브리핑 3페이지 외 major/staff에도 withList(M2O/Xref 피커 target·폴백폐기 후 E2E 파손 방지) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
-- [ ] **#W5-2 EntityField 캐스트** — list-columns.ts `(field as FormField).getListConfig()`(인터페이스 미선언·후속 W5-3/W7서 EntityField 이관 검토) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
-- [ ] **#W5-2 픽스처 4파일 withList** — react 테스트 픽스처(columns prop 없는 피커)에 withList(폴백폐기 대응·§5.1 인용·행동약화 아님) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w5-2-column-derivation-cap-19)
-- [ ] **#GX-1 toJSON empty AND/OR 그룹 방출** — `filters.AND`/`OR`를 빈 `[]`도 항상 wire 방출(기존 테스트 presence 어서트 때문)·NOT만 omit. **GX-2 mock서 vacuous no-op 확인**(실백엔드 수용은 GA 전 실서버 대조 권장) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-1)
-- [ ] **#GX-2 mock filter 5/24 조건타입** — apps/sample mock이 EQUAL/NOT_EQUAL/IN/NOT_IN/LIKE만 매칭·NOT 그룹 no-op(전 실사용 경로 커버·발명 회피). 실백엔드 필요 조건타입 확장 시 재검토 · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-2)
 - [x] **#GX-3 asset-base 배선 → 해소(2026-07-13, `9095504`)** — 사용자 결정=채택+재설계: context-스코프 3티어(전역 싱글턴 GX-6 기각·제거) · [design](./plans/asset-url-resolution-design.md)
-- [ ] **#GX-3 isExternalUrl 2카피** — schema-core(private)+utils(public) byte-identical 재구현(zero-dep 하드룰·상호참조 주석) · risk:low · [detail](./progress-archive/phase-gx-tasks.md#gx-3)
-- [ ] **#RV-R4 회귀 테스트 마이크로태스크 동기화 보정** — 실행계획 R4 테스트가 validateAll 루프가 'slow'에 park하기 전에 `resolveSlowCheck`를 호출(async fn이 첫 await='alias'에서 suspend)→"not a function". 메인 세션이 `slowStartedP`(slow 진입 시 fire) await 추가(최소·R4 Do-NOT 전부 보존). discriminating 확인(구소스 revert→ASSERT2 'checking' FAIL). 스펙 저자: 테스트 동기화 방식 확정 · risk:low · `f0d331c` · [R4](./plans/rv-remediation-execution-plan.md)
-- [ ] **#RV-R7 doc-comment `*/` 조기종료 보정** — 실행계획 R7 exactAfter JSDoc "manyToOne/xref*/address"가 `*/`로 코멘트 조기종료→oxc PARSE_ERROR. 1-space 보정("xref* /address"·의미무변경)로 컴파일·45/45 green. 스펙 저자: 문구 정정(또는 xref/address로) · risk:low · `5190ef3` · [R7](./plans/rv-remediation-execution-plan.md)
 - [x] **#W7-4 서브패스 descope 처분** — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
-- [ ] **#W7-4 spec §9 #29 라벨 재조정** — spec §9는 withCreatedAndUpdatedAtFields를 codemod로 표기하나 impl=수동/이연(presets-rcm 빈 스캐폴드). spec 저자: §9 라벨 정정 or /presets/rcm 감사헬퍼 출하 후 codemod화 · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
-- [ ] **#W7-4 guide SUPERSEDED 배너** — list-page-composition-guide.md 상단에 ⛔ SUPERSEDED→MIGRATION §3 포인터 추가(원문 무삭제). 브리핑 declared 4산출물 밖 touch(관례상 정당·정보 흡수 보존) · risk:low · [detail](./progress-archive/phase-eg-api-redesign.md#w7-4)
+- [ ] **#W6-2b / #GX-1 / #GX-2 → GA-L2 재앵커** — 실백엔드/실소비자 데이터 gated(TIER2 passthrough garbage 여부·빈 AND/OR wire 수용·조건타입 커버). alpha 소아킹서 edustack/GJCU 실 대조 · risk:low · [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
 
 ## Progress notes
 
@@ -125,6 +115,7 @@
 - 마이그레이션 how-to는 [리빙 문서](./plans/migration-0.3-to-0.4.md)로 P0-10에서 착수 — 각 페이즈가 호환성 변경을 발생 커밋에서 누적, P7에서 `docs/MIGRATION.md`+codemod로 승격.
 - **P3-1 스카우트 발견 (필드 이식 시 처리)**: PhoneNumber/TelephoneNumber `validate()` 본문 동일(파라미터화 통합 후보) · `RegexFormularValidation.ts` 파일명 오타(클래스=`RegexFormulaValidation`, 이식 시 정정) · `Validation.tsx`→`.ts`(JSX 0) · `getConditionalReactNode`(React.isValidElement)는 렌더러 계층으로 이관 · SearchForm `quickSearchFields` 중복 사이드채널 · `EQUAL_IGNORECASE`/`NOT_LIKE`는 셀렉트 미노출(의도 확인).
 - react-daum-postcode를 required peer로 전환(EB-R1) — 주소 미사용 소비자용 subpath opt-in 분리(#7 이슈 3분류 선례)는 P5 패키징에서 검토.
+- **GA-L1 처분 후속(저위험·GA 후)**: ① `EntityField` 인터페이스에 `getListConfig`/`getFilterConfig`/`getDisplayValue` 선언 이관(현 list-columns.ts `(field as FormField)` 캐스트 제거·#W5-2) · ② `presets-rcm` `auditFields()` 헬퍼 출하 후 `withCreatedAndUpdatedAtFields`→codemod화(spec §9 #29·현 수동/이연).
 
 ## Open Questions
 

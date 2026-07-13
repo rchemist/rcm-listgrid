@@ -140,7 +140,7 @@ export interface ValueTransformOptions {
 
 /**
  * TIER 2 passthrough's defensive guard for `exportValue`'s `default` case
- * (R7, midpoint-code-review.md §4.3). A manyToOne/xref* /address field's
+ * (R7, midpoint-code-review.md §4.3). A manyToOne/xref/address field's
  * runtime row value can be the nested RELATED-ENTITY OBJECT itself (not yet
  * flattened to a scalar id/label) when the backend list response embeds the
  * relation inline — `String({...})` on that shape literally yields the
