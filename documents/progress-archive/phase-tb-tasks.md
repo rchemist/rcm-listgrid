@@ -118,3 +118,20 @@
 **커버 매트릭스**: TB-C8(full-set route 계약 5메서드×대표엔티티×wire 변형) 충족. TB-C10 부분 진전(#GX-1 빈 AND/OR over wire = GX-1 등가 테스트로 lock) — GA-L2 최종 종결은 TB-9.
 
 **#TB-4 §Needs Review 해소**: 204 no-body 정렬(framework-faithful)·client 무영향 실증.
+
+## TB-7 전용 e2e 갭 폐쇄 (route-contract) — ✅ 2026-07-13
+
+**Delegate**: sonnet general-purpose agent (`af702bfffcb9c1c5c`)·status=`done_with_deviations`(1 substantive). Engine=claude.
+
+**스코핑 결정 (메인 세션·model-decidable·현실 강제)**: `employee`/`org`/`staff`/`university`=**무 UI 페이지**(picker/xref-only·recon §4 설계·페이지 신축=out-of-scope invention)·`professor`=페이지有이나 SubColl e2e만. → 5 엔티티 "전용 e2e(list/search/create/edit/delete)"=**route-level 계약 e2e**(5 엔티티 전부 `/api/<e>` 라우트 완비)·backend-contract.spec 패턴 확장. UI e2e/페이지 신축 금지(발명).
+
+**구현 (changed files·TEST-ONLY)**:
+- `e2e/entity-contract.spec.ts` (신규·25 tests = 5 엔티티 × 5 메서드) — DRY 파라미터 테이블(`ENTITIES[]`). 각 엔티티 `test.describe`: ① create `POST /api/<e>` 201 bare(minted id·sentField 에코) ② getOne `GET /{id}` 200 bare(no envelope) ③ search `POST /search` 9-field SearchResponse + created row membership(count-agnostic) ④ update `PUT /{id}` 200 partial-merge(untouchedField 생존) ⑤ bulk DELETE `DELETE /` 204 no-body + GET 404. SUFFIX=`Date.now()` 격리·throwaway self-cleanup(⑤가 삭제)·seed row(org 1-3·staff 1-3·univ 1-4·prof 1-8·emp 1-5) 무변경.
+
+**Deviation(§Needs Review 등재)**: `staff.organization`=폼상 중첩 M2O picker이나 staff 라우트=**generic verbatim store**(major `college`식 toWire/fromWire 변환 無)→`GET /api/staff/{id}`가 중첩 `{id,name}` 그대로 에코(flatten/resolve 안 함). 실 fidelity 갭이나 out-of-scope=무패치·spec가 verbatim passthrough 명시 단언. **완화**: staff=폼 無(picker-only)→create/update wire가 실 listgrid 트래픽에서 미발생→실질 무영향·risk:low.
+
+**비-deviation(정보)**: org/university=단일필드→update의 untouched-field 단언 생략(브리프 "where the entity has one" 허용·employee/staff/professor는 email 생존 단언有). org/search 라우트가 sorts 판독·filters 미판독(pre-existing TB-2 결정·이 spec는 membership/shape만 검사라 무관).
+
+**Authoritative verify (메인·전량)**: **full Playwright 70 passed**(기존 45 + TB-7 25·무간섭)·`tsc -p apps/sample`·eslint·prettier clean·vitest 2478 무영향(e2e는 vitest 미포함).
+
+**커버 매트릭스**: TB-C9(전용 e2e 갭 폐쇄 professor/university/employee/org/staff) 충족.
