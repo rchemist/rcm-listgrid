@@ -82,8 +82,8 @@
 
 코드축 GA-READY·`0.4.0-alpha.0` 배포됨(next). **GA-L2는 Phase TB로 해소**(충실 테스트 백엔드=실백엔드 오라클). **GA-L3/L4는 사용자 GA-latest go 결정(크리티컬 패스) 대기.**
 
-- [x] **GA-L1** low-risk §Needs Review 일괄 처분 — ✅ 2026-07-13 · model-decidable 9건 확정(#RV-R7 코멘트·#W7-4 §9 라벨 정정·build green·#W7-4 배너/#GX-3 상호참조 실측·#W5-2 ×3 배송수용·#W7-2/#RV-R4 검증수용) · 확인필요 3건(#W6-2b/#GX-1/#GX-2)=실백엔드 gated→GA-L2 재앵커 · [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
-- [x] **GA-L2** 실백엔드 검증 — ✅ 2026-07-13 · **Phase TB로 종결**(충실 테스트 백엔드+excel 유닛+실 export 관찰=오라클). TB-9가 #GX-1/#GX-2/#W6-2b 신 테스트 종결→CLOSED. 범위=edustack-specific(gjcu는 bespoke pre-flatten excel로 /excel 우회). alpha 소아킹=보완적(비전제). [closure](./analysis/2026-07-13/ga-l2-closure.md)
+- [x] **GA-L1** low-risk Needs Review 처분 — ✅ 2026-07-13 · 9건 확정·3건 GA-L2 재앵커 · [detail](./progress-archive/needs-review-dispositions-2026-07-13.md)
+- [x] **GA-L2** 실백엔드 검증 — ✅ 2026-07-13 · Phase TB로 #GX-1/#GX-2/#W6-2b 종결 · [closure](./analysis/2026-07-13/ga-l2-closure.md)
 - [ ] **GA-L3** `v0.4`→`main` 플립 (브랜치 전략: 전작업+검증 완료 후). GA-latest go 결정 시 실행. **선결**=GA-L1 정리 + alpha 무회귀.
 - [ ] **GA-L4** 0.4.0 GA `latest` 배포 — root 0.3.26→0.4.0 + CHANGELOG `## [0.4.0]` + `v0.4.0` 태그 push→publish.yml(latest). After GA-L1~L3. 자율 배포(Push:auto).
 - [ ] **EC4** (기존 이연) GraduationReview(custom onSave·role readonly·옵션 pruning) — GA-latest 독립 후순위 잔여.
@@ -101,13 +101,13 @@
 - [x] **#W5-1 operator 타입 확정** — operator=open `string` 유지·캐스트=addAndFilter만 · [detail](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)
 - [x] **#W6-2a importValue +options** — label→value=3번째 `options?`(exportValue 대칭) 승인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
 - [x] **#W6-2a multiselect `|||` 양방향** — 구 import bug→양방향 `|||`·L8 봉인 · [detail](./progress-archive/phase-eg-api-redesign.md#w6-2a-excel-foundation-cap-17)
-- [x] **GA-L1 배치 처분(9항목) 2026-07-13** — model-decidable 전건 확정(build green): #W7-4 배너·#GX-3 상호참조=이미 반영(실측)·#RV-R7 코멘트 정정·#W7-4 §9 라벨 정정·#W5-2 ×3 배송수용·#W7-2 peer0=런타임·#RV-R4 검증수정. [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
-- [x] **#W5-3 de-dup → RV-R2 해소(2026-07-13, `dcd82b2`)** — 신규 API 대신 기존 `SearchForm.withFilter`(name 교체) 재사용(공개표면 무변경)·addAndFilter 스택킹 빈결과 해소 · [R2](./plans/rv-remediation-execution-plan.md)
-- [x] **#GX-3 asset-base 배선 → 해소(2026-07-13, `9095504`)** — 사용자 결정=채택+재설계: context-스코프 3티어(전역 싱글턴 GX-6 기각·제거) · [design](./plans/asset-url-resolution-design.md)
+- [x] **GA-L1 배치 처분(9항목)** — ✅ 2026-07-13 · build green · [dispositions](./progress-archive/needs-review-dispositions-2026-07-13.md)
+- [x] **#W5-3 de-dup → RV-R2 해소** — ✅ 2026-07-13 · `dcd82b2` · 기존 `SearchForm.withFilter` 재사용 · [R2](./plans/rv-remediation-execution-plan.md)
+- [x] **#GX-3 asset-base 배선** — ✅ 2026-07-13 · `9095504` · context 스코프 3티어 채택 · [design](./plans/asset-url-resolution-design.md)
 - [x] **#W7-4 서브패스 descope 처분** — 위젯 4종=CAP-29·`/misc`=`/utils`(GX-3)·`withFilter`=복원(GX-1) · [detail](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)
-- [x] **#W6-2b / #GX-1 / #GX-2 → GA-L2로 종결(TB-9, 2026-07-13)** — 충실 테스트 백엔드+excel 유닛+**실 export 관찰**로 처분: #GX-2=24종(TB-1)·#GX-1=빈AND/OR vacuous(TB-1+TB-6)·#W6-2b=M2O 충실+**address 무손실(sibling)**+**xref만 손실(한계문서화·실트래픽0)**. 초안이 address를 xref와 동일 data-loss로 오판→관찰로 정정 · [closure](./analysis/2026-07-13/ga-l2-closure.md)
+- [x] **#W6-2b/#GX-1/#GX-2 → GA-L2 종결** — ✅ 2026-07-13 · TB-9 실관찰로 종결 · [closure](./analysis/2026-07-13/ga-l2-closure.md)
 - [ ] **#TB-1 vitest include 확장(in-commit 해소)** — delegate가 apps/** 미커버 config 갭 발견(needs_decision)→메인 세션이 recon §0 의도로 `apps/**/*.test.{ts,tsx}` 추가. behavioral=apps 유닛이 CI 게이트 진입(의도) · risk:low · [detail](./progress-archive/phase-tb-tasks.md)
-- [x] **#TB-4 bulk DELETE 응답 fidelity → 해소(TB-6, 2026-07-13)** — 재판정=**204 no-body 정렬**(framework recon §2 충실). client `adapter.remove()` body 미파싱→호환·full Playwright 45 green(UI delete flow 포함)으로 UI 무영향 실증. backend-contract.spec가 204 fidelity lock · [detail](./progress-archive/phase-tb-tasks.md)
+- [x] **#TB-4 bulk DELETE fidelity → 해소** — ✅ 2026-07-13 · 204 no-body·Playwright 45 green · [detail](./progress-archive/phase-tb-tasks.md)
 - [ ] **#TB-7 staff.organization wire-transform 부재** — staff 라우트=generic verbatim store(major `college`식 toWire/fromWire 변환 無)→중첩 `{id,name}` 그대로 에코. **완화**: staff=폼 無(picker-only)→create/update wire 실트래픽 미발생이라 실질 무영향 · risk:low · [detail](./progress-archive/phase-tb-tasks.md)
 
 ## Progress notes
@@ -130,20 +130,20 @@
 
 ## Open Questions
 
-- [x] **OQ-TB1** 조건타입 시맨틱 → 해소(TB-0): store-표현가능 24종=의미 구현·JSON_CONTAINS/EXISTS=문서화 no-op(평면 row). [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
-- [x] **OQ-TB2** NOT/nested + bulk-delete → 해소(TB-0): NOT/subFilters 구현·bulk-select-delete UI 실재(ViewListGrid selection+adapter.remove bulk-only)→TB-4 in-scope. [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
+- [x] **OQ-TB1** 조건타입 시맨틱 → TB-0 해소 · 24종 구현·2종 문서화 no-op · [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
+- [x] **OQ-TB2** NOT/nested+bulk-delete → TB-0 해소 · TB-4 in-scope · [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
 - [x] **OQ-TB3** `backend/rest` 어댑터 → TB-8 stretch(코어 RCM 경로 후). [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
-- [x] **GA 봉인 HOLD ① R7 GJCU-shape → 해소(2026-07-13, RV-R13)** — edustack 실 대조로 manyToOne=`{id,title}` 확인·RV-R7 가드 실결함 발견→`/excel` labelField 스레드 수정. xref=실 소비자 raw 바인딩無(flat sibling)+CAP-29 descope=low-risk 한계 문서화·address=flat 무관. [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
-- [x] **publish 0.4.0-alpha.0 → 배포 완료(2026-07-13, `1ebbc4d`·tag `v0.4.0-alpha.0`)** — dist-tag `next`(opt-in). CI publish.yml green(prepublishOnly type-check+test+build+publish --provenance). **npm 확인**: `next=0.4.0-alpha.0`·`latest=0.3.26` 무변경(0.3.x 무영향). 다음=alpha 소아킹 → GA `latest`(v0.4→main 플립 후).
+- [x] **GA 봉인 HOLD ① R7 shape** — ✅ 2026-07-13 · RV-R13 manyToOne labelField 수정 · [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
+- [x] **0.4.0-alpha.0 배포** — ✅ 2026-07-13 · `1ebbc4d`·`next=0.4.0-alpha.0`·`latest=0.3.26` 유지
 - [x] **릴리스 기전 확정(2026-07-10)** — `v*` 태그 push→`publish.yml` 자동배포(dist-tag `-alpha`→next/`0.2.x`→legacy-0.2/else latest). 게이트 선행.
-- [x] **0.3.26 실배포 완료(2026-07-11)** — 소비자 무회귀 확인 → main ff-merge `853660b` → `v0.3.26` 태그 → publish.yml latest 자동배포. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md).
-- [x] **0.4.0-alpha.N → W2 착지 후 보류(모델 결정 2026-07-11)** — 현 표면은 W1이 즉시 대개명할 표면(폐기 예정 이름에 소비자 통합 방지). W2 완료 시 자동 재개.
+- [x] **0.3.26 실배포** — ✅ 2026-07-11 · `853660b`·`v0.3.26`·latest · [detail](./progress-archive/needs-review-dispositions-2026-07-11.md)
+- [x] **0.4.0-alpha.N 보류 결정** — ✅ 2026-07-11 · W1 대개명 표면 보호·W2 후 재개
 - [x] apps/sample 실백엔드 연결 → **fixture 단독 유지(모델 결정 2026-07-11)** — GA 데모 요구 시 재검토(§Backlog).
 - [x] **0.2.x 백포트 → No (2026-07-10)** — `release/0.2` 프로덕션 핸즈오프(§Do-NOT). 에러 리포트 시만 대응.
-- [x] **다음 방향 = 하드닝 + 점진 확장 (사용자 확정 2026-07-11)** — 실 worklist는 §Tasks(하드닝/확장 트랙)로 승격됨. **하드닝 H 트랙 완료**(게이트·CI·SubColl·H1 캐시·H2 a11y). 남음 = 확장 E 트랙(E1/E2).
-- [x] **E-트랙 우선순위 → 전부 (사용자 확정 2026-07-11)** — 전 필드 이식+동작 실증+Daum 주소, foundation-first(EF→EA→EB→EC) 완료로 종결. [계획](./plans/e-track-field-parity.md)
-- [x] **업로드 backend seam → 사용자 질문 아님으로 재분류(2026-07-11)** — W5/W6 착수 시 GJCU 관례 확인 후 모델 자동 결정(옵션: sample 업로드 endpoint / BackendAdapter.upload / 외부 URL만).
-- [x] **계수 ceiling 재산정 완료(2026-07-11, W4-0)** — 스펙 §10-A 최종 인벤토리 근거로 재산정: **EntityForm 45→55**(최종 53=45 소비자멤버+8 get*Handlers+getReadOnly)·**/schema 180→190**(최종 186=180+W4 2+W5 2+W6 2)·root 120 유지(최종 ~55). count-public-surface.mjs+스펙 §2/§3/§10/§10-A+waves entry-rule 반영. **범위 확장**: Open Q는 /schema만 지목했으나 EntityForm도 최종 45 초과(W4-4서 46) 발견→동반 상향. 임의완화 아님(현값 41/180은 이미 PASS·상한을 최종 설계에 맞춤). gate 재검증: 41/49/180 PASS(임계 55/120/190).
+- [x] **다음 방향=하드닝+점진 확장** — ✅ 2026-07-11 · H·E 트랙 완료 · [archive](./progress-archive/phase-e-track-tasks.md)
+- [x] **E-트랙 우선순위=전부** — ✅ 2026-07-11 · EF→EA→EB→EC 완료 · [계획](./plans/e-track-field-parity.md)
+- [x] **업로드 backend seam 재분류** — ✅ 2026-07-11 · 사용자 질문 아닌 모델 결정으로 처리
+- [x] **계수 ceiling 재산정(W4-0)** — ✅ 2026-07-11 · EntityForm 55·schema 190·root 120 · [detail](./progress-archive/phase-eg-api-redesign.md)
 
 ## 완료 기록 (페이즈 완료 시 progress-archive로 이동)
 
