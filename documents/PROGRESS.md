@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · EFSP-6 최종 적대 감사와 GA 재봉인 진행 중
-**Next up**: #EFSP-6 최종 적대 감사와 GA 재봉인
-**Last updated**: 2026-07-13 23:04
+**Status**: paused · EF-SP 완료, GA-L3/L4 사용자 go 대기
+**Next up**: OQ-GA-L — 사용자 `GA-latest go` 후 GA-L3/L4
+**Last updated**: 2026-07-13 23:12
 **Push**: auto
 **Engine**: claude/codex 중립
-**Next session policy**: EFSP-5의 182 E2E·163 anchors 기준선을 유지하며 EFSP-6 full gate와 결과 문서를 봉인한다.
+**Next session policy**: EF-SP 결과 원장을 기준선으로 유지하고 사용자 go 전 main 병합·latest 전환을 수행하지 않는다.
 
 ## Goal
 
@@ -17,7 +17,7 @@
 
 - 브랜치: `v0.4`. `main`은 0.3.x 유지보수이며 GA-L3 전까지 0.4 부분 반영 금지.
 - 현재 배포: npm `next=0.4.0-alpha.0`, `latest=0.3.26`.
-- 최신 게이트: 2515 unit, 182 E2E, Next 44 pages, coverage 45.30/39.64/48.01/44.92.
+- 최신 게이트: 2517 unit, 182 E2E, Next 44 pages, coverage 45.55/40.22/47.77/45.22.
 - 공개 표면 기준선: EntityForm 53/55, root 61/120, `/schema` 188/190.
 - proof backend는 격리 SQLite transaction을 권위 저장소로 사용하며 create/update/delete가 process restart 뒤에도 유지된다.
 - 규범: [EntityForm 스펙](./plans/entityform-public-api-spec.md),
@@ -52,15 +52,15 @@
 | EG + GX + RV | v0.4 | ✅ 완료 | [EG](./progress-archive/phase-eg-api-redesign.md) · [RV](./progress-archive/phase-rv-tasks.md) |
 | GA gate + RV-R14 | v0.4 | ✅ 완료 | [GA](./analysis/2026-07-13/ga-gate-result.md) · [R14](./progress-archive/phase-rv-r14.md) |
 | TB backend full set | v0.4 | ✅ 완료 | [archive](./progress-archive/phase-tb-tasks.md) |
-| **EF-SP sample proof** | v0.4 | **🔄 진행 중** | [plan](./plans/entityform-sample-proof-plan.md) · 이 문서 §Phase EF-SP |
-| GA-L latest seal | v0.4→main | ⏸ EF-SP + 사용자 go 대기 | [pending](./progress-archive/phase-ga-l-pending.md) |
+| **EF-SP sample proof** | v0.4 | ✅ 완료 | [result](./analysis/2026-07-13/entityform-sample-proof-result.md) |
+| GA-L latest seal | v0.4→main | ⏸ 사용자 go 대기 | [pending](./progress-archive/phase-ga-l-pending.md) |
 
 ## 세션 인계 (Handoff)
 
-- **현재 활성 task**: `[~] #EFSP-6` — 전체 계약을 적대 감사하고 GA full gate와 결과 문서를 재봉인한다.
-- **완료 기반**: EFSP-5에서 EFS-22/P-11을 실제 xlsx sheet/cell→SQLite item GET으로 증명해 182 E2E, 163 anchors, 빈 행 0을 달성했다.
-- **Do NOT**: full gate를 부분 실행으로 축약하거나 Next build/dev 명령을 같은 `.next`에서 병렬 실행하지 않는다.
-- **Do NOT**: 테스트를 맞추려고 공개 API/transfer 설정 표면을 넓히지 않는다. 결함이면 red E2E를 먼저 남긴다.
+- **현재 활성 task**: 없음 — EF-SP 0~6 완료. 다음 변경은 사용자 `GA-latest go`가 필요한 GA-L3/L4다.
+- **완료 기반**: 53/53 manifest, EFS-01~24/P-01~14 빈 행 0, 163 anchors, 182 E2E, 실제 xlsx↔SQLite, restart/prod/package full gate를 봉인했다.
+- **Do NOT**: 사용자 go 전 `main` 병합, npm `latest` dist-tag 변경, GA-L3/L4를 시작하지 않는다.
+- **Do NOT**: packaging gate를 같은 `dist`에서 병렬 실행하지 않는다. build clean과 pack이 경합한다.
 - **Hot 파일**: `packages/schema-core/src/entity-form.ts` — 현재 53-member 권위 원본; AST manifest exact gate가 봉인한다.
 - **Hot 파일**: `documents/plans/entityform-sample-proof-plan.md` — EFS-01~24/P-01~14·SQLite 실행 계약.
 - **Hot 파일**: `documents/analysis/2026-07-13/entityform-sample-proof-result.md` — EFSP-6 full gate와 SQLite 실측의 최종 결과 원장.
@@ -68,7 +68,7 @@
 - **Invariant**: manifest 행은 sample/e2e anchor와 관찰 assertion이 모두 있어야 green이다.
 - **Invariant**: `cd apps/sample && npm run dev`→`/entityform-proof`에서 모든 case/CRUD/reset을 직접 실행할 수 있다.
 - **미룬 결정**: GA-L3/L4는 EF-SP closure 후에도 사용자 `GA-latest go`가 필요하다(OQ-GA-L).
-- **첫 확인**: `git status -sb`, plan §EFSP-6 명령 전건, 결과 문서의 53/53·EFS/P 빈 행 0·SQLite 증거 대조.
+- **첫 확인**: `git status -sb`, [EF-SP 결과](./analysis/2026-07-13/entityform-sample-proof-result.md), 사용자 go 여부.
 
 ---
 
@@ -83,9 +83,7 @@
 - [x] **#EFSP-3 form lifecycle/revision 증명** ✅ 2026-07-13 · `ee4ddb7` + `051763a` · 40 lifecycle/149e2e/130 anchors green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-3)
 - [x] **#EFSP-4 capabilities/actions/list lifecycle 증명** ✅ 2026-07-13 · `db90afe`+`24da750` · 27 action/list·176 E2E green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-4)
 - [x] **#EFSP-5 data transfer와 전수 closure** ✅ 2026-07-13 · `ea7d7d9`+`3bd1bee` · 6 transfer/182 E2E/163 anchors green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-5)
-- [~] **#EFSP-6 최종 적대 감사와 GA 재봉인**
-  - Files: 결과 문서/PROGRESS; 결함 발견 시 source+red E2E 별도 commit.
-  - Verify: unit/coverage/lint/format/build/Next/E2E/surface/attw/publint/smoke/headless 전 게이트.
+- [x] **#EFSP-6 최종 적대 감사와 GA 재봉인** ✅ 2026-07-13 · `062243f`+`a00b9b2` · full gate green · [result](./analysis/2026-07-13/entityform-sample-proof-result.md)
 
 ## Needs Review
 

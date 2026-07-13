@@ -1,6 +1,7 @@
 # EntityForm 설정 전수 샘플 증명 계획 (EF-SP)
 
-**상태**: 실행 대기 · **작성**: 2026-07-13 · **상류 계약**:
+**상태**: 완료(2026-07-13) · **작성**: 2026-07-13 · **결과**:
+[최종 증명 결과](../analysis/2026-07-13/entityform-sample-proof-result.md) · **상류 계약**:
 [EntityForm 공개 API 스펙](./entityform-public-api-spec.md) §3~7,
 [sample site 명세](../prd/sample-site-spec.md), [PROGRESS](../PROGRESS.md)
 
@@ -80,10 +81,10 @@ after:  53-member exact manifest + 22-setting branch proofs + CI AST equality ga
 
 | ID | 결정 | 기각 대안·이유 | 상태 |
 |---|---|---|---|
-| D-EFSP-1 | 사용자: “샘플 코드로 모두 증명이 되어야 해.” | C1~C9 대표 E2E만으로 전수라 주장 금지. 공개 설정 누락을 검출하지 못함 | 결정=CLOSED(2026-07-13) · 구현=미착수 |
-| D-EFSP-2 | 전수 단위=스펙 원자 분기 + 영향 있는 pairwise 조합 | 전체 Cartesian product는 무한·중복이며 의미 있는 계약보다 입력 순열을 테스트함 | 결정=CLOSED(2026-07-13) · 구현=미착수 |
-| D-EFSP-3 | `npm run dev`의 모든 CRUD는 Next Node.js Route Handler→SQLite로 처리하고 재시작 뒤 유지 | proof만 메모리 mock 사용 금지. 수동 브라우저 반복 테스트와 영속성 증명이 불가능 | 결정=CLOSED(2026-07-13) · 구현=미착수 |
-| D-EFSP-4 | 개발 DB와 E2E DB를 경로로 격리하고 visible reset UI/API를 제공 | E2E가 개발 데이터를 삭제하거나 hidden test backdoor로 reset하는 방식 금지 | 결정=CLOSED(2026-07-13) · 구현=미착수 |
+| D-EFSP-1 | 사용자: “샘플 코드로 모두 증명이 되어야 해.” | C1~C9 대표 E2E만으로 전수라 주장 금지. 공개 설정 누락을 검출하지 못함 | 결정=CLOSED(2026-07-13) · 구현=완료(EFSP-0~6) |
+| D-EFSP-2 | 전수 단위=스펙 원자 분기 + 영향 있는 pairwise 조합 | 전체 Cartesian product는 무한·중복이며 의미 있는 계약보다 입력 순열을 테스트함 | 결정=CLOSED(2026-07-13) · 구현=완료(163 anchors) |
+| D-EFSP-3 | `npm run dev`의 모든 CRUD는 Next Node.js Route Handler→SQLite로 처리하고 재시작 뒤 유지 | proof만 메모리 mock 사용 금지. 수동 브라우저 반복 테스트와 영속성 증명이 불가능 | 결정=CLOSED(2026-07-13) · 구현=완료(restart PASS) |
+| D-EFSP-4 | 개발 DB와 E2E DB를 경로로 격리하고 visible reset UI/API를 제공 | E2E가 개발 데이터를 삭제하거나 hidden test backdoor로 reset하는 방식 금지 | 결정=CLOSED(2026-07-13) · 구현=완료(isolated DB/reset) |
 
 ### 알려진 expected-red 기준선
 
