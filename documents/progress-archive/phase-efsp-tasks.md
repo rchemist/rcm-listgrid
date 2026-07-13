@@ -241,3 +241,25 @@ capabilities/actions/list lifecycle 증명 — 2026-07-13
 ### Red evidence
 
 - `npx playwright test e2e/entityform-proof-actions-list.spec.ts --project=chromium` → EFS-02g에서 ADMIN 버튼은 보이나 POST가 0회라 timeout. `EntityFormProofClient`가 Auth session을 controller에 전달하지 않는 view/controller 불일치를 재현했다.
+
+### Result
+
+- **Capability/action matrix**: EFS-02의 9개 branch와 EFS-04의 10개 branch를 boolean·async pending/session·merge 및 action DOM/실행 결과에 1:1 연결했다.
+- **List lifecycle matrix**: EFS-12의 3개 branch, EFS-13의 4개 branch, P-09를 실제 `/search` request body·adapter response·최종 table row로 연결했다.
+- **Session red→green**: `db90afe`가 ADMIN view/controller 불일치를 red로 고정했고 `24da750`이 proof client의 Auth session을 `useEntityForm`에 전달해 실제 POST를 복구했다.
+- **Manifest/gate**: `actionsListProof`를 AST anchor gate에 등록해 implemented anchor가 130→157로 증가했고 53-member/P-14 exact inventory와 synthetic red 2종을 유지했다.
+
+### Verification evidence
+
+- `npm run check:entityform-sample-proof` → 53/53, P 14/14, implemented anchors 157, synthetic red 2종 PASS.
+- `npm run type-check` → green; `npm --prefix apps/sample run build` → type validation + 44/44 static pages production build green.
+- `npm test -- --reporter=dot` → 192 files, 2514 passed, 1 todo.
+- `npx playwright test e2e/entityform-proof-actions-list.spec.ts --project=chromium` → 27/27 green.
+- `npm run test:e2e` → Chromium 176/176 green.
+- `npm run lint` → 0 errors, 기존 warnings 262; `npm run format:check`와 `git diff --check` green.
+
+### Do-NOT carried forward
+
+- EFSP-5 data transfer는 버튼 존재나 mock workbook으로 끝내지 않고 실제 xlsx 셀과 import 후 SQLite row를 관찰한다.
+- action/list proof의 Auth session, request AND+OR, after-hook row threading을 transfer 편의를 위해 우회하거나 복제하지 않는다.
+- manifest 157 anchors와 176 E2E 기준선을 closure 중 회귀시키지 않는다.
