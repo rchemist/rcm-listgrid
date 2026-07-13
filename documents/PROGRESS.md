@@ -1,13 +1,13 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · Phase GX(GX-1~5) ✅ 완료. **2026-07-13 중간 점검 리뷰 완료**(7차원 팬아웃+opus 검증·CONFIRMED 8/REFUTED 0) → GA 전 개선 트랙 **Phase RV** 개설([분석](./analysis/2026-07-13/midpoint-code-review.md)). **Phase RV(R1~R12) ✅ 완료·트랙엔드 green(2394u/32e2e/full gate). Next up: GA 게이트(CAP-28)—새 세션 권장**. **G-1 GX-6=채택·재설계 구현 완료**(`9095504`·asset-URL context-스코프·전역싱글턴 폐기). §Needs Review open. P0/P1 publish=외부 승인 대기.
+**Status**: active · Phase RV(R1~R12) ✅ · **GA 게이트(CAP-28) 실행 완료 2026-07-13**: 헌장 C1~C9 전건 present·전 게이트 green([결과](./analysis/2026-07-13/ga-gate-result.md)·2394u/E2E32/surface 49·61·188). **최종 봉인=HOLD**: R7 GJCU-shape unverified + P0/P1 publish 외부승인(§Open Questions). 코드축 GA-ready·코드변경 잔여 0.
 **운영 모드**: 무인(unattended)·토큰무제한·품질최우선. 마일스톤마다 멈추지 않고 자율 진행. **중단은 ① 새 세션 필요 ② 크리티컬 패스 결정**뿐 — 비크리티컬 결정은 §Open Questions에 누적해 일괄 질의. active-session marker 등록됨.
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **새 세션은 GA 게이트(CAP-28)부터** — Phase RV(R1~R12) ✅ 완료·트랙엔드 green(2394u/E2E32/full gate). cold-start=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·순수검증) + [헌장](./prd/concept-charter.md) 단독 재개 가능. GA는 코드변경 없는 순수검증 pass. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4·GX-6이 실제 위반 사례)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·GX-6 WIP를 전역 싱글턴 기전 그대로 커밋(채택시 context 스코프 재설계).
-**Last updated**: 2026-07-13 (**Phase RV(중간점검 개선 R1~R12) ✅ 완료 + 트랙엔드 green** — R9~R12(LOW): clone():this·withId(undefined 위드닝, Law L3/L4)·reset() 타이머/touched 정리·delete() ids 조기가드 `56308d8`·`eac7c1c`·`7ffb60d`. RV 전체=CRIT reload+HIGH 고급검색+MED 6+LOW 4, 3c41ebf..7ffb60d, 4 sonnet 배치위임→메인 diff verbatim·항목별 discriminating 검증. **트랙엔드 전 게이트 green**: type-check·typecheck:packages·**test 2394**·lint(0 err)·format:check(테스트4 style 커밋)·build·check:surface(49/55·61/120·188/190 무변경)·**E2E 32**. 미해결 §Needs Review: R4 테스트동기화·R7 doc-comment(+기존 low-risk). 다음=GA 게이트(CAP-28)·새 세션 권장.)
+**Next session policy**: **GA 게이트 실행 완료** — 남은 봉인 게이트는 **소비자/외부 입력 2건**(R7 실 GJCU-shape·publish 승인)뿐, 코드 변경 없음. cold-start=[GA 결과](./analysis/2026-07-13/ga-gate-result.md) + §Open Questions HOLD 2건. **Do-NOT**: 스펙 §를 인용 못하는 설계 판단 구현(§10 게이트 4)·src/ 삭제(오라클)·dts experimentalDts 재시도·0.2(GJCU) shape를 primary로 채택(폴백만)·R7 실페이로드 확인 없이 형태 추정.
+**Last updated**: 2026-07-13 (**GA 게이트(CAP-28) 실행 완료** — 헌장 C1~C9 전건 present(빈 행 0)·요건1/2/3 충족·전 게이트 green: type-check·test 2394·lint(0err)·build·format:check·**E2E 32**·surface 49/55·61/120·188/190·attw/publint/headless(zero-React)/codemod 4/4. [결과 매트릭스](./analysis/2026-07-13/ga-gate-result.md). **최종 봉인 HOLD 2건**(코드 아님·§Open Questions): R7 GJCU-shape unverified(실 페이로드 부재·Do-NOT #5)·P0/P1 publish 외부승인. Phase RV 아카이브 이관(phase-rv-tasks.md).)
 
 ## Goal
 
@@ -45,27 +45,23 @@
 | P2 특성화 오라클 | v0.4 | ✅ 완료(내부) | — | [archive](./progress-archive/phase-foundation-P0-P2.md) |
 | **수직 슬라이스 V0~V2** | v0.4 | ✅ 완료(5 E2E green) | — | [archive](./progress-archive/vertical-slice-V0-V2.md) |
 | 형식 P3~P7 (계약골격→GA) | v0.4 | ⬜ 보류(수직 슬라이스가 앞당겨 실증) | — | [archive](./progress-archive/formal-roadmap-P3-P7.md) |
-| **하드닝/확장 트랙** | v0.4 | [~] H·EF·EA/EB/EC·EG·GX·**RV(R1~R12) ✅** · 다음=GA 게이트(CAP-28) | — | §Tasks · [중간점검 리뷰](./analysis/2026-07-13/midpoint-code-review.md) |
+| **하드닝/확장 트랙** | v0.4 | [~] H·EF·EA/EB/EC·EG·GX·RV ✅·**GA 게이트(CAP-28) 실행 완료** — 봉인 HOLD 2건(소비자/외부) | — | §Tasks · [GA 결과](./analysis/2026-07-13/ga-gate-result.md) |
 
 **타임박스**: P4 parity 6개월 초과 시 ADR-0008 §6 abort 검토 — 수직 슬라이스가 abort 판정을 **GO로 조기 실증**(2026-07-11)해 위험 완화됨.
 
-## 세션 인계 (Handoff — **Phase RV(중간점검 개선 R1~R12) ✅ 완료 2026-07-13**·트랙엔드 green. 다음: **GA 게이트(CAP-28)** — 콜드스타트 [GA 게이트 브리프](./plans/ga-gate-charter-brief.md)·**새 세션 권장**)
+## 세션 인계 (Handoff — **GA 게이트(CAP-28) 실행 완료 2026-07-13**·헌장 C1~C9 전건 present·전 게이트 green. 남은 봉인=**소비자/외부 입력 2건**)
 
-- **⚠ 다음 = GA 게이트(CAP-28)** — cold-start=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·순수검증) + [헌장](./prd/concept-charter.md). **Phase RV(R1~R12) ✅ 완료**(reload·고급검색·MED 6건·LOW 4건, `3c41ebf`..`7ffb60d`)·트랙엔드 green(2394u·E2E32·full gate·surface 무변경). GA는 순수검증 pass(코드변경 없음 원칙)—R7 folded-in. **미해결 §Needs Review**: R4 테스트 동기화·R7 doc-comment·기타 low-risk(사용자 ack 대기). Do-NOT: search-form.ts addAndFilter 시맨틱 변경·GX-6 전역싱글턴 커밋·스펙 §를 인용 못하는 발명. **각 R의 확정 설계안(before→after·증명·수용·Do-NOT)=[실행계획](./plans/rv-remediation-execution-plan.md)·분석 §4.** Do-NOT: search-form.ts addAndFilter 시맨틱 변경 금지·GX-6 전역싱글턴 기전 커밋 금지·스펙 §를 인용 못하는 발명 금지.
-- **GA 게이트(CAP-28·후순위)**: Phase GX 완료(GX-1~5·게이트 2368u/E2E32·계수 49/57/188). GA는 RV + GA-BRIEF 저작 후. cold-start: GA-BRIEF + [phase-gx archive](./progress-archive/phase-gx-tasks.md#gx-5) + 스펙 §8 CAP-28 + [헌장](./prd/concept-charter.md).
-- **dts 최종 선례(Do-NOT 재시도)**: packages/* multi-entry dts는 **`dts.compilerOptions.paths`로 @listgrid/*→packages/*/src 매핑**이 정답(tsup.config.ts). **`experimentalDts`+api-extractor 금지**(per-entry `.d.ts`를 `export {}` 빈 스텁 방출=published 타입 전무·attw/publint 거짓green). **교훈**: dts 검증은 attw/publint 불충분 — **소비자 tsc(check:headless)가 실 게이트**. [archive #W7-1~3](./progress-archive/phase-eg-api-redesign.md#w7-1-패키징-코어-2026-07-12--published-진입점-srcpackages). **W7 후 = GA 게이트**(헌장 C1~C9·CAP-28·별도 pass).
-- **재설계 governing docs(설계 pass ✅ 2026-07-11 fable)**: [waves 브리프](./plans/entityform-api-implementation-waves.md)(실행 계약 W1~W7·위임 원문)·[스펙 r2](./plans/entityform-public-api-spec.md)(규범 CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md)(결정). **W1~W3 실행 상세+W3 Handoff**=[phase-eg archive](./progress-archive/phase-eg-api-redesign.md).
-- **읽는 순서(cold-start)**: ① waves 브리프 전역 규칙+해당 W표 → ② 스펙의 **인용된 §만** → ③ 판단 필요 시 ADR-0009. 구 `src/listgrid/`·8그룹 map·감사 문서는 W5 entry pass까지 불필요 — 스펙이 이미 소화했다.
-- **실행 규율**: waves 브리프가 위임 브리핑의 원문(기본 sonnet). **스펙 §를 인용할 수 없는 설계 판단이 나오면 구현 금지** — §Open Questions에 올리고 스펙 개정 선행(스펙 §10 게이트 4). wave 종료마다 CAP-ID 대조(누락은 표 대조로 검출).
-- **이미 SOUND한 것(유지)**: store 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·FormMutator seam·EF1-7 파이프라인·필드 24+주소+Xref·권한 배선(EG1/EG2). **2131 unit/27 E2E, 전부 push.** 재설계는 공개 표면 — 엔진 재작성 아님.
-- **Do-NOT**: ① 0.3 복붙·구 버그 재현 금지(스펙 L8) ② SOUND 내부 재작성 금지 ③ store 직접 수신 금지(FormMutator 경유)·동적 mutation 후 entityForm.getFields() 직접 읽기 금지(store.fieldDefs) ④ exactOptionalPropertyTypes 조건 spread(반복 결함 1위 — waves 전역 규칙) ⑤ hot-file 3종(entity-form/form-store/ViewEntityForm) 병렬 편집 금지 ⑥ Agent 출력파일 jq 파이프 금지(JSONL — 구조화 추출→Write→Read) ⑦ **스펙 침묵 판단의 발명 금지**(위 실행 규율).
-- **작업 규율**: 완료=logic 커밋→PROGRESS 커밋→push(사용자: 전부 push). 게이트 waves §전역 규칙(full gate+E2E 16+). active-session marker=이 PROGRESS.
+- **✅ GA 게이트 실행 완료** — [결과 매트릭스](./analysis/2026-07-13/ga-gate-result.md): 헌장 C1~C9 전건 `present`(C6 일부 descoped-ok CAP-29)·빈 행 0·요건1/2/3 충족. 전 게이트 green(2394u·E2E32·surface 49/55·61/120·188/190·attw/publint/headless zero-React/codemod 4/4). cold-start=GA 결과 + [헌장](./prd/concept-charter.md) + [브리프](./plans/ga-gate-charter-brief.md).
+- **⚠ 최종 GA 봉인 = HOLD 2건(코드 아님·§Open Questions)**: ① **R7 GJCU-shape unverified** — 실 GJCU/edustack list-endpoint 페이로드 부재(리포는 mock만)·manyToOne/xref/address 컬럼 평면 vs 중첩 판정 불가·Do-NOT: 추정 금지(실페이로드 확인 시 중첩이면 `/excel` TIER2 후속·평면이면 무해). ② **P0/P1 publish 외부 승인**. → 사용자/외부 입력 대기.
+- **Do-NOT(계승)**: 스펙 §를 인용 못하는 설계 판단 발명 금지(§10 게이트 4)·구 src/ 삭제 금지(오라클)·**dts `experimentalDts`+api-extractor 재시도 금지**(빈 스텁 방출→소비자 tsc `check:headless`가 실 게이트, [선례](./progress-archive/phase-eg-api-redesign.md#w7-1))·0.2(GJCU) shape primary 채택 금지(폴백만)·`search-form.ts` addAndFilter 시맨틱 변경 금지·GX-6 전역싱글턴 기전 커밋 금지(G-1 context-스코프로 재설계 완료).
+- **이미 SOUND(유지·재작성 금지)**: store 값 모델(ADR-0002)·schema-core 순수성(ADR-0003)·FormMutator seam·EF1-7 파이프라인·필드24+주소+Xref·권한 배선. 재설계는 공개 표면 — 엔진 재작성 아님. 규범 docs: [스펙 r2](./plans/entityform-public-api-spec.md)(CAP-01~29)·[ADR-0009](./adr/ADR-0009-entityform-public-api-redesign.md).
+- **작업 규율**: 완료=logic 커밋→PROGRESS 커밋→push(전부 push). active-session marker=이 PROGRESS. 완료 페이즈 상세=[progress-archive](./progress-archive/)(RV=phase-rv-tasks.md·EG·GX·E-track).
 
 ---
 
 ## Tasks
 
-완료: H(하드닝)·E-트랙(EF 명령형 라이프사이클·EA 필드24·EB 주소·EC 실브라우저 실증·EA-D2 Xref·EG1/2 권한) — **1876 unit + 16 E2E, 전부 push**. 상세 [archive](./progress-archive/phase-e-track-tasks.md). **현 활성 = Phase EG(공개 API first-principles 재설계, fable — §세션 인계 Handoff).**
+완료: H·E-트랙·EG(공개 API 재설계 W1~W7)·GX(프레임워크 정합)·RV(중간점검 개선)·**GA 게이트(헌장 C1~C9 대조·실행 완료)**. **현 상태 = GA 실행 완료 → 최종 봉인 HOLD 2건(소비자/외부 입력·§Handoff·§Open Questions).** 페이즈 상세 → [progress-archive](./progress-archive/).
 
 ### H — 하드닝 ✅ 완료 (전 5태스크 — 게이트·CI·SubColl·H1 캐시·H2 a11y) · [archive](./progress-archive/phase-hardening-H.md)
 
@@ -99,22 +95,15 @@
 **완료 GX-1~5** (0.4 프레임워크 정합 · 상세 → [archive](./progress-archive/phase-gx-tasks.md) · 규범=[gap analysis](./analysis/2026-07-12/w7-post-seal-gap-analysis.md)):
 - wire 정합·mock 정합·`/utils` 이식·프록시 seam=[ADR-0005 부록A](./adr/ADR-0005-backend-adapter-contract.md)·문서정정+descope · 2368u·E2E32·49/57/188
 
-#### Phase RV — 중간 점검 개선 트랙 (2026-07-13 리뷰 산출 · GA 선결) · [분석](./analysis/2026-07-13/midpoint-code-review.md)
+#### Phase RV — 중간 점검 개선 트랙 ✅ 완료 (2026-07-13 · CRIT reload+HIGH 고급검색+MED 6+LOW 4 + G-1~3·GA-BRIEF) · [archive](./progress-archive/phase-rv-tasks.md)
 
-**규범(실행 계약)**: **[RV 실행 계획](./plans/rv-remediation-execution-plan.md)** — R1~R12 **무결정(zero-decision)** 스펙(항목별 exact before→after 코드 + 정확한 테스트 + 수용 + Do-NOT). 13 authoring + 13 opus cold-executor 검증(소스 패치 13/13 verbatim 정확·residue closure 반영). **후속 세션은 설계·결정 없이 매칭·치환·실행만.** why=[중간점검 리뷰 §4](./analysis/2026-07-13/midpoint-code-review.md). GA=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md)(CAP-28 순수검증). **GA 착수 = R1·R2·G-1 선결 후.**
+- [x] **RV-R1~R12 + G-1~3 + GA-BRIEF ✅** 2026-07-13 · `3c41ebf`..`7ffb60d` · 무결정 실행계획→sonnet 위임·판별검증 · 트랙엔드 green(2394u·E2E32·surface 무변경) · [archive](./progress-archive/phase-rv-tasks.md)
 
-- [x] **RV-R1 reload() write-path 고아화** 🔴CRIT ✅ 2026-07-13 · `3c41ebf` · into? 병합으로 액션 클로저 보존(reload 후 write 유실 해소)·판별테스트(구코드 FAIL 확인)+2374 green · [R1](./plans/rv-remediation-execution-plan.md)
-- [x] **RV-R2 고급검색 de-dup** 🟠HIGH ✅ 2026-07-13 · `dcd82b2` · withFilter('AND',...) name 교체(스택킹→빈결과 해소)·surface 무변경(61/120)·2375 green · [R2](./plans/rv-remediation-execution-plan.md)
-- [x] **RV-R3~R8** 🟡MED ✅ 2026-07-13 · `0d25490..cdb4aac` · R3 isBlank·R4 함수형머지·R5 allSettled·R6 storage·R7 TIER2·R8 catch · 2386(2 dev→§NR) · [R3~R8](./plans/rv-remediation-execution-plan.md)
-- [x] **RV-R9~R12** ⚪LOW ✅ 2026-07-13 · `56308d8..7ffb60d` · clone():this·withId(undefined)·reset() 타이머클린업·delete() ids guard · 2394 · [R9~R12](./plans/rv-remediation-execution-plan.md)
+#### Phase GA — 헌장 C1~C9 대조 게이트 (CAP-28) ✅ 실행 완료 (2026-07-13 · 순수검증 pass) · [결과](./analysis/2026-07-13/ga-gate-result.md)
 
-**RV track-end ✅ 2026-07-13**: 전 게이트 green — type-check·typecheck:packages·**test 2394**·lint(0 err)·format:check·build·check:surface(49/55·61/120·188/190 무변경)·**E2E 32**. 포맷 정합 `style(tests)` 커밋 포함. Phase RV(R1~R12) 완료 → 다음=GA 게이트(CAP-28).
-- [x] **G-1 GX-6 asset-URL → 채택·재설계** ✅ 2026-07-13 · `9095504` · context-스코프 3티어·전역 싱글턴 폐기·게이트 green(2373·surface 61/120·188/190) · [design](./plans/asset-url-resolution-design.md)
-- [x] **G-2 date.ts·asset-url.test.ts format 수리** ✅ 2026-07-13 · `15d708b` · GX-3 미포맷 2파일 수리·format:check green 복원
-- [x] **G-3 #W5-3 risk 등급 정정** ✅ 2026-07-13 · low-med→HIGH(아래 §Needs Review 반영)
-- [x] **GA-BRIEF CAP-28 게이트 브리프 저작** ✅ 2026-07-13 · [ga-gate-charter-brief.md](./plans/ga-gate-charter-brief.md)(per-C C1~C9 증거·매트릭스·게이트절차·순수검증)·opus 저작+앵커검증
+- [x] **GA 게이트 실행 (헌장 C1~C9·요건1/2/3)** ✅ 2026-07-13 · 전건 `present`(빈 행 0)·전 게이트 green(2394u·E2E32·49·61·188·headless zero-React)·엔진 anchor 실재 · 코드변경 0 · [결과](./analysis/2026-07-13/ga-gate-result.md)
 
-**Next up**: **GA 게이트(CAP-28 헌장 대조표)** — cold-start=[GA 게이트 브리프](./plans/ga-gate-charter-brief.md). Phase RV(R1~R12) ✅ 완료·트랙엔드 green. **새 세션 권장**(GA=별도 순수검증 pass).
+**Next up**: **최종 GA 봉인 = HOLD 2건**(§Open Questions, 코드 아님) — ① R7 GJCU-shape 실 페이로드 확인(소비자/외부) ② P0/P1 publish 외부 승인. 둘 다 사용자/외부 입력 대기 → 독립 코드 작업 없음.
 
 ---
 
@@ -159,6 +148,8 @@
 
 ## Open Questions
 
+- [ ] **GA 봉인 HOLD ① R7 GJCU-shape 실 페이로드 확인** (소비자/외부 데이터·2026-07-13 GA 게이트 산출) — 실 GJCU/edustack list-endpoint 응답에서 manyToOne/xref/address 컬럼이 **평면 스칼라 vs 중첩 관계객체**인지 확인 필요. 리포엔 mock만 존재 → 추정 금지(Do-NOT #5). 중첩이면 `/excel` TIER2(`value-transform.ts:138-163`) 후속 태스크, 평면이면 무해. [근거](./analysis/2026-07-13/ga-gate-result.md#3-요건-3--gjcu급-실-엔티티-재현--r7-gjcu-shape-34)
+- [ ] **GA 봉인 HOLD ② P0/P1 publish 외부 승인** — 0.3.26 배포됨. 0.4.0-alpha/GA publish는 외부 승인 몫(코드축은 GA-ready). 승인 시 게이트(CHANGELOG==version·full gate) 선행 후 자율 배포.
 - [x] **릴리스 기전 확정(2026-07-10)** — `v*` 태그 push→`publish.yml` 자동배포(dist-tag `-alpha`→next/`0.2.x`→legacy-0.2/else latest). 게이트 선행.
 - [x] **0.3.26 실배포 완료(2026-07-11)** — 소비자 무회귀 확인 → main ff-merge `853660b` → `v0.3.26` 태그 → publish.yml latest 자동배포. [dispositions](./progress-archive/needs-review-dispositions-2026-07-11.md).
 - [x] **0.4.0-alpha.N → W2 착지 후 보류(모델 결정 2026-07-11)** — 현 표면은 W1이 즉시 대개명할 표면(폐기 예정 이름에 소비자 통합 방지). W2 완료 시 자동 재개.
