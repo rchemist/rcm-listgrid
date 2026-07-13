@@ -6,8 +6,8 @@
 **Engine**: claude (codex eligible 태스크는 개별 표기 — 인용 기반 반복 작업만)
 **Push**: auto (사용자 확정 2026-07-11 — 커밋·push·배포까지 자율 실행 후 결과 보고. "커밋할까요/배포할까요" 금지)
 **Model policy**: 설계 pass 완료 — **구현 wave(W1~W7)는 실행급 브리프로 opus/sonnet 세션 실행 가능**. 위임 기본 sonnet(waves 브리프=브리핑 원문). **스펙이 침묵하는 판단=구현 금지**(스펙 §10 게이트 4) — 스펙 개정만 상위 티어.
-**Next session policy**: **활성=Phase TB(백엔드 테스트 full set)** — 사용자 지시(2026-07-13)로 GA-L 위에 신설. **리컨 완료·구축=다음 세션**. bare `/progress`로 재개 → **TB-0**(리컨 소화+계약 확정)→TB-1~9. cold-start=이 §Handoff + [recon](./analysis/2026-07-13/test-backend-recon.md) + §Tasks Phase TB. GA-L(latest 봉인)=downstream(GA-L2가 TB로 해소·GA-L3/L4=사용자 GA-latest go 대기). **Do-NOT**: §Handoff 계승 + [recon §6](./analysis/2026-07-13/test-backend-recon.md).
-**Last updated**: 2026-07-13 (`/progress:next` — Phase TB(백엔드 테스트 full set) 신설·재정렬. 사용자 지시로 5-병렬 리컨(listgrid API·framework 0.1.0 wire·edustack·gjcu·mock 갭·594K tok) 실행→[test-backend-recon.md](./analysis/2026-07-13/test-backend-recon.md) 규범 산출(wire 계약§2·매트릭스 TB-C1~11 §5·Do-NOT §6·OQ §7). Phase TB 태스크 TB-0~9 실행급 authoring·GA-L을 downstream 재배치(GA-L2=TB로 해소). **Next up=TB-0·구축=다음 세션.**)
+**Next session policy**: **활성=Phase TB(백엔드 테스트 full set)** — 사용자 지시(2026-07-13)로 GA-L 위에 신설. **TB-0 완료(계약 확정)·구축(TB-1~9) 진행 중**. bare `/progress`로 재개 → **TB-1**(mock 필터 엔진). cold-start=이 §Handoff + [recon](./analysis/2026-07-13/test-backend-recon.md) + [tb0-확정](./analysis/2026-07-13/tb0-contract-confirmation.md) + §Tasks Phase TB. GA-L(latest 봉인)=downstream(GA-L2가 TB로 해소·GA-L3/L4=사용자 GA-latest go 대기). **Do-NOT**: §Handoff 계승 + [recon §6](./analysis/2026-07-13/test-backend-recon.md).
+**Last updated**: 2026-07-13 (**TB-0 완료** — 리컨 인용 스팟체크 PASS·OQ-TB0(a)=고급검색 런타임 operator 선택 UI 無(config.operator 정적, ViewListGrid.tsx:278-345)·OQ-TB0(b)=R7 in-code 확정+RV-R13 수정완료→캡처 불요·OQ-TB1~3 기본값 확정·§2 계약 권위 확정→[tb0-contract-confirmation](./analysis/2026-07-13/tb0-contract-confirmation.md). **Next up=TB-1(mock 필터 엔진).**)
 
 ## Goal
 
@@ -54,7 +54,7 @@
 ## 세션 인계 (Handoff — **코드축 GA-READY + `0.4.0-alpha.0` 배포됨(next). 활성 = Phase TB(백엔드 테스트 full set) 2026-07-13**)
 
 - **현 상태**: 헌장 C1~C9 전건 `present`([GA 결과](./analysis/2026-07-13/ga-gate-result.md))·전 게이트 green(**2399u·E2E32**·surface 49/55·61/120·188/190·attw/publint/headless zero-React). R7 실결함(edustack manyToOne `{id,title}`을 raw id로 export)=수정 완료(RV-R13·`/excel` labelField 스레드). `@rchemist/listgrid@0.4.0-alpha.0` = npm dist-tag `next`(opt-in)·`latest=0.3.26` 무영향. **코드 잔여 작업 0.**
-- **다음(Phase TB — 활성)** = 백엔드 테스트 Full Set(사용자 지시 2026-07-13). **리컨 완료** = [test-backend-recon.md](./analysis/2026-07-13/test-backend-recon.md)(framework-0.1.0 wire §2·커버리지 매트릭스 §5 TB-C1~11·Do-NOT §6·OQ §7·GA-L2 해소 §8). **구축=다음 세션**: bare `/progress`→TB-0(리컨 소화+계약 확정)→TB-1~9(팬아웃 TB-1/2/3 병렬). 아키텍처=**옵션 A**(apps/sample mock을 framework 충실 백엔드로 승격). **핵심 사실**: listgrid v0.4=framework 0.1.0의 24 조건타입 정합(mock 5/24가 갭)·M2O=중첩`{id,title}`(save→`<name>Id`)·빈 AND/OR는 관용 대상·excel/upload=백엔드 API 아님(클라/host).
+- **다음(Phase TB — 활성)** = 백엔드 테스트 Full Set(사용자 지시 2026-07-13). **리컨 완료** = [test-backend-recon.md](./analysis/2026-07-13/test-backend-recon.md)(framework-0.1.0 wire §2·커버리지 매트릭스 §5 TB-C1~11·Do-NOT §6·OQ §7·GA-L2 해소 §8). **TB-0 완료(계약 확정·[tb0-confirmation](./analysis/2026-07-13/tb0-contract-confirmation.md))·구축 진행**: bare `/progress`→TB-1(mock 필터 엔진)~TB-9(팬아웃 TB-1/2/3 병렬). 아키텍처=**옵션 A**(apps/sample mock을 framework 충실 백엔드로 승격). **핵심 사실**: listgrid v0.4=framework 0.1.0의 24 조건타입 정합(mock 5/24가 갭)·M2O=중첩`{id,title}`(save→`<name>Id`)·빈 AND/OR는 관용 대상·excel/upload=백엔드 API 아님(클라/host).
 - **GA-L(downstream)**: GA-L1 ✅. **GA-L2=Phase TB로 해소**(충실 백엔드=오라클·TB-9 종결). GA-L3(v0.4→main flip)+GA-L4(0.4.0 `latest` 배포)=사용자 **GA-latest go 결정**(크리티컬 패스) 대기. 릴리스 기전=아래.
 - **GA-latest 릴리스 기전**(GA-L4): root `package.json` 0.3.26→0.4.0 + CHANGELOG `## [0.4.0]` top 섹션(`scripts/check-release-docs.mjs` 게이트=top==version) + `v0.4.0` 태그 push→`publish.yml`(Node24·prepublishOnly clean+type-check+test+build→`npm publish --provenance` dist-tag `latest`). **선결=`v0.4`→`main` 플립**(브랜치 전략: 전작업+검증 후·GA-L3).
 - **Do-NOT(계승)**: 스펙 §를 인용 못하는 설계 판단 발명 금지(§10 게이트 4)·구 src/ 삭제 금지(오라클)·**dts `experimentalDts`+api-extractor 재시도 금지**([선례](./progress-archive/phase-eg-api-redesign.md#w7-1)·소비자 tsc `check:headless`가 실 게이트)·0.2(GJCU) shape primary 채택 금지(폴백만)·R7 실페이로드 확인 없이 형태 추정 금지·**mock이 실 소비자 형태 가릴 수 있음**(R7 교훈: apps/sample `name`이 edustack `title` 결함 은폐)·`search-form.ts` addAndFilter 시맨틱 변경 금지.
@@ -77,9 +77,9 @@
 
 #### Phase TB — 백엔드 테스트 Full Set (활성 · 2026-07-13~ · 사용자 지시)
 
-**목표**: edustack/gjcu 분석 → 이 리포에 프레임워크-0.1.0 충실 테스트 백엔드 구축 → listgrid 백엔드 테스트 full set → apps/sample에서 listgrid **모든 API** 실증. 부수: GA-L2 실백엔드 gated 항목이 **구축으로 해소**. **규범 참조 = [test-backend-recon.md](./analysis/2026-07-13/test-backend-recon.md)**(§2 wire 계약·§5 커버리지 매트릭스 TB-C1~11·§6 Do-NOT·§7 OQ). 아키텍처 결정=**옵션 A**(apps/sample mock 승격·§0). **구축은 다음 세션**(리컨은 완료).
+**목표**: edustack/gjcu 분석 → 이 리포에 프레임워크-0.1.0 충실 테스트 백엔드 구축 → listgrid 백엔드 테스트 full set → apps/sample에서 listgrid **모든 API** 실증. 부수: GA-L2 실백엔드 gated 항목이 **구축으로 해소**. **규범 참조 = [test-backend-recon.md](./analysis/2026-07-13/test-backend-recon.md)**(§2 wire 계약·§5 커버리지 매트릭스 TB-C1~11·§6 Do-NOT·§7 OQ). 아키텍처 결정=**옵션 A**(apps/sample mock 승격·§0). **TB-0 완료(계약 확정 [detail](./analysis/2026-07-13/tb0-contract-confirmation.md))·구축(TB-1~9) 진행 중.**
 
-- [ ] **TB-0** 리컨 소화 + 계약 스펙 확정 (사용자 "분석" 스텝) — [recon](./analysis/2026-07-13/test-backend-recon.md) 인용 스팟체크 + OQ-TB0 해소: (a) `packages/react` ViewListGrid 고급검색이 EQUAL 외 조건타입 방출하는지 소스 확인 (b) 필요시 edustack M2O `{id,title}` Playwright network 캡처. 산출: §2 계약 확정·OQ 처분. Proof: OQ-TB0 답변 기록.
+- [x] **TB-0** 리컨 소화+계약 확정 ✅ 2026-07-13 · 인용 스팟체크 PASS·OQ-TB0(a)=고급검색 런타임 operator UI 無(config.operator 정적)·(b)=R7 in-code 확정·캡처 불요·OQ-TB1~3 기본값 확정·§2 계약 확정 · [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
 - [ ] **TB-1** [TB-C1/C2] mock 필터 엔진 완성 — 24 조건타입 시맨틱(OQ-TB1 처분)+NOT 그룹+nested subFilters+빈 AND/OR 관용. Files: `apps/sample/lib/mock-backend/store.ts`(matchesFilter/Group)·`crud-routes.ts`(readFilters). Proof: 신규 `filter-engine.test.ts`(24종 각·NOT·nested·빈그룹). Do-NOT: framework 없는 시맨틱 발명 금지(JSON_CONTAINS/EXISTS=문서화 no-op·recon §6.8).
 - [ ] **TB-2** [TB-C3/C4] 정렬 실적용+quickSearch+페이지네이션 — sorts(NORMAL·ASC/DESC·다중키) store.search 적용·quickSearchFields(LIKE-OR)·0-base 검증. Files: `store.ts`. Proof: route-level 테스트. Do-NOT: SortInfo PRIORITY 자동추론 금지(type 명시).
 - [ ] **TB-3** [TB-C5] 에러 route 방출 — 400 VALIDATION.FAILED/401 TOKEN/403 FORBIDDEN/409 DUPLICATE/422 UNPROCESSABLE/500 SYSTEM.UNEXPECTED ProblemDetail(triggerable)→adapter BackendErrorCode+fieldErrors 매핑 검증. Files: `envelope.ts`·`crud-routes.ts`. Proof: route-level+adapter round-trip. Do-NOT: §2 고정 코드셋 밖 발명 금지.
@@ -90,7 +90,7 @@
 - [ ] **TB-8** [TB-C11·stretch] `backend/rest` 레퍼런스 어댑터+제네릭 REST mock (ADR-0005 수용#3·현 빈 스캐폴드). After 코어. OQ-TB3.
 - [ ] **TB-9** [TB-C10] GA-L2 종결 — 신 테스트로 #GX-1(빈 AND/OR 관용)·#GX-2(24종)·#W6-2b(M2O passthrough·xref/address 한계 문서화) 종결·GA-L2 재판정.
 
-**Next up**: **TB-0** (리컨 소화+계약 확정). 팬아웃 가능: TB-1/TB-2/TB-3=독립 mock 모듈(병렬)·TB-6은 TB-1~5 후. 구축은 다음 세션.
+**Next up**: **TB-1** (mock 필터 엔진). TB-0 완료(계약 확정). 팬아웃 가능: TB-1/TB-2/TB-3=독립 mock 모듈(병렬)·TB-6은 TB-1~5 후.
 
 #### Phase GA-L — GA `latest` 봉인 트랙 (downstream · TB가 GA-L2 해소)
 
@@ -138,9 +138,9 @@
 
 ## Open Questions
 
-- [ ] **OQ-TB1 (Phase TB)** 조건타입 시맨틱 범위 — in-memory store서 모호한 조건타입(DATE_*/JSON_CONTAINS/EXISTS/IN_RANGE/NULL_OR_*) 실구현 vs 명시 no-op? **기본**(지시 "모든 API")=의미 있는 것(DATE_*/BETWEEN/IS_NULL/IS_BLANK/GT/LT류) 구현·JSON_CONTAINS/EXISTS=문서화 no-op(store 평면 row). TB-1 착수 전 확정. [recon §7](./analysis/2026-07-13/test-backend-recon.md)
-- [ ] **OQ-TB2 (Phase TB)** NOT-그룹+nested subFilters GA in-scope? **기본**=구현(완전성). + apps/sample **멀티행 bulk-select-delete UI 실재** 여부 확인(TB-4 선결·미실재면 per-id/bulk 불일치는 무의미).
-- [ ] **OQ-TB3 (Phase TB)** `backend/rest` 레퍼런스 어댑터(ADR-0005 수용#3·현 빈 스캐폴드) 이 페이즈 포함 vs 별도? **기본**=TB-8 stretch(코어 RCM 경로 완료 후).
+- [x] **OQ-TB1** 조건타입 시맨틱 → 해소(TB-0): store-표현가능 24종=의미 구현·JSON_CONTAINS/EXISTS=문서화 no-op(평면 row). [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
+- [x] **OQ-TB2** NOT/nested + bulk-delete → 해소(TB-0): NOT/subFilters 구현·bulk-select-delete UI 실재(ViewListGrid selection+adapter.remove bulk-only)→TB-4 in-scope. [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
+- [x] **OQ-TB3** `backend/rest` 어댑터 → TB-8 stretch(코어 RCM 경로 후). [detail](./analysis/2026-07-13/tb0-contract-confirmation.md)
 - [x] **GA 봉인 HOLD ① R7 GJCU-shape → 해소(2026-07-13, RV-R13)** — edustack 실 대조로 manyToOne=`{id,title}` 확인·RV-R7 가드 실결함 발견→`/excel` labelField 스레드 수정. xref=실 소비자 raw 바인딩無(flat sibling)+CAP-29 descope=low-risk 한계 문서화·address=flat 무관. [결과 §3](./analysis/2026-07-13/ga-gate-result.md)
 - [x] **publish 0.4.0-alpha.0 → 배포 완료(2026-07-13, `1ebbc4d`·tag `v0.4.0-alpha.0`)** — dist-tag `next`(opt-in). CI publish.yml green(prepublishOnly type-check+test+build+publish --provenance). **npm 확인**: `next=0.4.0-alpha.0`·`latest=0.3.26` 무변경(0.3.x 무영향). 다음=alpha 소아킹 → GA `latest`(v0.4→main 플립 후).
 - [x] **릴리스 기전 확정(2026-07-10)** — `v*` 태그 push→`publish.yml` 자동배포(dist-tag `-alpha`→next/`0.2.x`→legacy-0.2/else latest). 게이트 선행.
