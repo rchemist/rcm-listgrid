@@ -114,3 +114,52 @@ identity/read/meta/clone/query 증명 — 2026-07-13
 - EFSP-2 구조 branch를 diagnostics 배열만으로 증명하지 않는다. 실제 DOM 순서/가시성/저장 payload를 함께 단언한다.
 - `FieldGroupDef.open` 미소비 결함은 EFS-18 red로 먼저 재현한 뒤 최소 구현한다.
 - identity factory·SQLite route·manifest static inventory를 구조 증명 편의를 위해 복제하거나 우회하지 않는다.
+
+## EFSP-2
+
+field/tab/group/step 구조 증명 — 2026-07-13
+
+### Reuse review
+
+- **Extend**: `EntityFormProofCase`와 기존 dynamic proof page에 구조 case만 추가한다.
+- **Reuse**: `ViewEntityForm`의 tab/group/step 렌더 및 EFSP-0 SQLite CRUD/reset 경로를 그대로 관찰한다.
+- **Extend**: `ViewEntityForm`의 기존 group fieldset 렌더에 `FieldGroupDef.open`의 초기 disclosure 상태만 최소 배선한다.
+
+### Term binding / readback
+
+| 토큰 | 결박 | 이 task의 관찰 |
+|---|---|---|
+| EFS-14~18 | `spec:entityform-sample-proof-plan.md §4` | add/remove/patch 구조를 tab·legend·field DOM 순서와 POST payload로 대조한다. |
+| EFS-19 | `disk:packages/schema-core/src/entity-form.ts#getSteps` · `disk:packages/react/src/components/ViewEntityForm.tsx` | replace/order/description/hidden/value 유지와 전부 hidden fallback을 wizard DOM으로 관찰한다. |
+| P-05 | `spec:entityform-sample-proof-plan.md §4 필수 pairwise` | hidden/permission tab·group이 patch 뒤 다시 나타나지 않는지 고정 ADMIN session에서 확인한다. |
+| P-06 | `disk:packages/react/src/components/ViewEntityForm.tsx#jumpToInvalidStep` | 마지막 step 저장 시 첫 invalid field 소유 step으로 이동하고 오류·focus를 관찰한다. |
+
+### Do-NOT
+
+- known gap인 `FieldGroupDef.open`은 red E2E 관찰 전 renderer를 수정하지 않는다.
+- 구조 결과를 getter JSON만으로 완료 처리하거나 테스트 전용 renderer/API를 만들지 않는다.
+- hidden과 requiredPermissions를 field 제거로 흉내 내지 않고 각각 실제 공개 설정을 사용한다.
+
+### Result
+
+- **Structure matrix**: EFS-14~19의 29개 원자 branch와 P-05/06을 case 규칙·독립 E2E 제목·manifest anchor에 1:1 연결했다.
+- **DOM/payload proof**: tab/group label·order·hidden·권한·patch, field/tab 제거 POST payload, wizard replace/hidden/value/focus를 Chromium에서 관찰했다.
+- **EFS-18 red→green**: `4f0927d`가 `open:false` 미소비를 red로 고정하고 `258becd`가 기존 fieldset을 보존한 disclosure 배선으로 수정했다.
+- **P-06 red→green**: `2a6089c`가 step 이동 뒤 focus 누락을 red로 드러내고 `19b4a9e`가 mount 다음 frame에 focus를 복원했다.
+- **Manifest/gate**: 구현 anchor가 59→90으로 늘었고 static 53-member inventory와 synthetic discriminator는 유지됐다.
+
+### Verification evidence
+
+- `npm run type-check` → green.
+- `npm test -- --reporter=dot` → 192 files, 2514 passed, 1 todo.
+- `npm run check:entityform-sample-proof` → 53/53, P 14/14, implemented anchors 90, synthetic red 2종 PASS.
+- `npx playwright test e2e/entityform-proof-structure.spec.ts --project=chromium` → 31/31 green.
+- `npm run test:e2e` → Chromium 109/109 green.
+- `npm --prefix apps/sample run build` → 44 pages production build green.
+- `npm run lint` → 0 errors, 기존 warnings 262; `npm run format:check`와 `git diff --check` green.
+
+### Do-NOT carried forward
+
+- EFSP-3 lifecycle은 diagnostics count나 mock spy로 끝내지 않고 실제 HTTP body/미호출/message/화면을 함께 관찰한다.
+- lifecycle 결함은 red E2E 커밋 전 controller/renderer를 수정하지 않는다.
+- 구조 proof case·group disclosure·wizard focus 회귀를 lifecycle 편의를 위해 우회하지 않는다.

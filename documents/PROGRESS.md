@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · EFSP-2 field/tab/group/step 구조 증명 중
-**Next up**: #EFSP-2 field/tab/group/step 구조 증명
-**Last updated**: 2026-07-13 21:46
+**Status**: active · EFSP-3 form lifecycle/revision 증명 중
+**Next up**: #EFSP-3 form lifecycle/revision 증명
+**Last updated**: 2026-07-13 22:02
 **Push**: auto
 **Engine**: claude/codex 중립
-**Next session policy**: 현재 세션 계속. EFSP-1 identity 증명을 회귀 유지하며 EFSP-2 구조 branch를 채운다.
+**Next session policy**: 현재 세션 계속. EFSP-2 구조 증명을 회귀 유지하며 EFSP-3 lifecycle branch를 채운다.
 
 ## Goal
 
@@ -58,13 +58,13 @@
 
 ## 세션 인계 (Handoff)
 
-- **현재 활성 task**: `[~] #EFSP-2` — field/tab/group/step의 제거·patch·정렬·hidden·권한 branch를 증명한다.
-- **완료 기반**: EFSP-1에서 EFS-01/03/05/20/23/24와 P-01/02/03/12를 DOM·HTTP·diagnostics로 봉인했다.
-- **Do NOT**: 구조 계약을 diagnostics 배열만으로 완료 처리하지 말고 DOM과 저장 payload를 함께 관찰한다.
-- **Do NOT**: EFS-18 expected-red를 건너뛰거나 테스트 편의를 위해 ViewEntityForm 구조 규칙을 재설계하지 않는다.
+- **현재 활성 task**: `[~] #EFSP-3` — create/update/delete lifecycle과 revision·plural validation을 실제 요청으로 증명한다.
+- **완료 기반**: EFSP-2에서 EFS-14~19와 P-05/06을 31개 DOM/payload 시나리오로 봉인했다.
+- **Do NOT**: hook 호출 횟수 mock으로 완료 처리하지 말고 실제 adapter 요청·message·후속 화면을 관찰한다.
+- **Do NOT**: cancel/throw/order branch를 합치거나 backend field/global 복수 오류 채널을 섞지 않는다.
 - **Hot 파일**: `packages/schema-core/src/entity-form.ts` — 현재 53-member 권위 원본; AST manifest exact gate가 봉인한다.
 - **Hot 파일**: `documents/plans/entityform-sample-proof-plan.md` — EFS-01~24/P-01~14·SQLite 실행 계약.
-- **Hot 파일**: `apps/sample/lib/entities/entityform-proof.ts` — 단일 factory를 확장하며 별도 구조 엔진을 만들지 않는다.
+- **Hot 파일**: `packages/state/src/form-controller.ts` — lifecycle 실행 순서의 권위 구현; 결함이면 red E2E 뒤 최소 수정한다.
 - **Invariant**: id가 있을 때만 update, readOnly와 capability는 다른 계약, hook은 등록 순서대로 엔진이 실행한다.
 - **Invariant**: manifest 행은 sample/e2e anchor와 관찰 assertion이 모두 있어야 green이다.
 - **Invariant**: `cd apps/sample && npm run dev`→`/entityform-proof`에서 모든 case/CRUD/reset을 직접 실행할 수 있다.
@@ -80,10 +80,8 @@
 
 - [x] **#EFSP-0 query+SQLite proof** ✅ 2026-07-13 · commit `4c5de9a` · 2512u/72e2e/restart/prod green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-0)
 - [x] **#EFSP-1 identity/read/meta/clone/query 증명** ✅ 2026-07-13 · commit `1c7f6b9` · 59 anchors/78e2e/44 pages green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-1)
-- [~] **#EFSP-2 field/tab/group/step 구조 증명**
-  - Files: proof entity/pages, `e2e/entityform-proof-structure.spec.ts`, manifest.
-  - Verify: structure spec + request payload assertions. IDs EFS-14~19, P-05/06.
-- [ ] **#EFSP-3 form lifecycle/revision 증명**
+- [x] **#EFSP-2 field/tab/group/step 구조 증명** ✅ 2026-07-13 · `2a6089c` · 31 structure/109e2e + 2 fixes green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-2)
+- [~] **#EFSP-3 form lifecycle/revision 증명**
   - Files: proof entity/pages, `e2e/entityform-proof-lifecycle.spec.ts`, manifest.
   - Verify: lifecycle CRUD/hook order + field/global plural validation. IDs EFS-06~11/21, P-04/07/08/10/14.
 - [ ] **#EFSP-4 capabilities/actions/list lifecycle 증명**
