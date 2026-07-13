@@ -261,7 +261,9 @@ function OnInitLifecycleForm(): EntityForm {
         items: [new StringField('initAdded', 50).withLabel('Init added field')],
       });
     })
-    .onInit(() => trace.push('init:second'));
+    .onInit(() => {
+      trace.push('init:second');
+    });
 }
 
 function BeforeSaveLifecycleForm(mode: 'transform' | 'cancel-reason' | 'cancel-empty' | 'throw') {
@@ -312,7 +314,9 @@ function AfterSaveLifecycleForm(): EntityForm {
       trace.push('after:throw');
       throw new Error('after-save proof throw');
     })
-    .onAfterSave((ctx) => trace.push(`after:last:${String(ctx.mutator.getValue('note'))}`));
+    .onAfterSave((ctx) => {
+      trace.push(`after:last:${String(ctx.mutator.getValue('note'))}`);
+    });
 }
 
 function SavePairLifecycleForm(): EntityForm {
@@ -322,7 +326,9 @@ function SavePairLifecycleForm(): EntityForm {
       trace.push('pair:before');
       ctx.setData({ ...ctx.data, note: 'pair transformed' });
     })
-    .onAfterSave((ctx) => trace.push(`pair:after:${String(ctx.data.note)}`));
+    .onAfterSave((ctx) => {
+      trace.push(`pair:after:${String(ctx.data.note)}`);
+    });
 }
 
 function BeforeDeleteLifecycleForm(mode: 'observe' | 'cancel-reason' | 'cancel-empty' | 'throw') {
@@ -345,29 +351,43 @@ function BeforeDeleteLifecycleForm(mode: 'observe' | 'cancel-reason' | 'cancel-e
         trace.push('delete:throw');
         throw new Error('before-delete proof throw');
       })
-      .onBeforeDelete((ctx) => trace.push(`delete:after-throw:${ctx.ids.join(',')}`));
+      .onBeforeDelete((ctx) => {
+        trace.push(`delete:after-throw:${ctx.ids.join(',')}`);
+      });
   }
   return form
-    .onBeforeDelete((ctx) => trace.push(`delete:first:${ctx.ids.join(',')}`))
-    .onBeforeDelete(() => trace.push('delete:second'));
+    .onBeforeDelete((ctx) => {
+      trace.push(`delete:first:${ctx.ids.join(',')}`);
+    })
+    .onBeforeDelete(() => {
+      trace.push('delete:second');
+    });
 }
 
 function AfterDeleteLifecycleForm(): EntityForm {
   const { form, trace } = TracedLifecycleForm('onAfterDelete lifecycle proof');
   return form
-    .onAfterDelete((ctx) => trace.push(`deleted:first:${ctx.ids.join(',')}`))
+    .onAfterDelete((ctx) => {
+      trace.push(`deleted:first:${ctx.ids.join(',')}`);
+    })
     .onAfterDelete(() => {
       trace.push('deleted:throw');
       throw new Error('after-delete proof throw');
     })
-    .onAfterDelete(() => trace.push('deleted:last'));
+    .onAfterDelete(() => {
+      trace.push('deleted:last');
+    });
 }
 
 function DeletePairLifecycleForm(): EntityForm {
   const { form, trace } = TracedLifecycleForm('delete pairwise lifecycle proof');
   return form
-    .onBeforeDelete((ctx) => trace.push(`pair:before-delete:${ctx.ids.join(',')}`))
-    .onAfterDelete((ctx) => trace.push(`pair:after-delete:${ctx.ids.join(',')}`));
+    .onBeforeDelete((ctx) => {
+      trace.push(`pair:before-delete:${ctx.ids.join(',')}`);
+    })
+    .onAfterDelete((ctx) => {
+      trace.push(`pair:after-delete:${ctx.ids.join(',')}`);
+    });
 }
 
 function RevisionLifecycleForm(enabled: boolean): EntityForm {
