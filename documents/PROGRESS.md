@@ -90,7 +90,7 @@
 - [ ] **TB-8** [TB-C11·stretch] `backend/rest` 레퍼런스 어댑터+제네릭 REST mock (ADR-0005 수용#3·현 빈 스캐폴드). After 코어. OQ-TB3.
 - [ ] **TB-9** [TB-C10] GA-L2 종결 — 신 테스트로 #GX-1(빈 AND/OR 관용)·#GX-2(24종)·#W6-2b(M2O passthrough·xref/address 한계 문서화) 종결·GA-L2 재판정.
 
-**Next up**: **TB-8** [TB-C11·stretch] `backend/rest` 레퍼런스 어댑터+제네릭 REST mock (ADR-0005 수용#3·현 빈 스캐폴드). After 코어(=TB-0~7 완료). OQ-TB3=TB-8 stretch 확정. **먼저 현 `backend/rest` 스캐폴드 상태 확인**(빈 파일 vs 부분 구현)→스코프 결정. Proof=REST 어댑터 라운드트립 테스트. TB-9(GA-L2 종결)=최종.
+**Next up**: **TB-8** [TB-C11·stretch] `backend/rest` 레퍼런스 어댑터+제네릭 REST mock. **스캐폴드 확인 완료(2026-07-13)**: `packages/backend-rest/src/index.ts`=**빈 스캐폴드**(`export {};`). 계약=[ADR-0005 §5](./adr/ADR-0005-backend-adapter-contract.md)(Decision5) = **최소** generic REST 어댑터(`GET /?page=&size=`·JSON 배열+`totalCount` 헤더·표준 CRUD GET/{id}·POST·PUT/{id}·DELETE/{id})·"문서 예제용"·stretch(GA 무관). **구현 전 결정 필요(design)**: SearchForm 필터모델→REST 쿼리파라미터 매핑 범위(ADR="최소"만 명시)=page/size+단순 필드필터만 vs 그 이상 — 착수 시 모델 결정+기록. 참조=`backend-rcm/src/adapter.ts`(BackendAdapter 인터페이스 구현체·같은 인터페이스 구현). Proof=REST 어댑터 라운드트립 테스트(injected fetch seam·adapter.test.ts 패턴). TB-9(GA-L2 종결)=최종.
 
 #### Phase GA-L — GA `latest` 봉인 트랙 (downstream · TB가 GA-L2 해소)
 
@@ -132,6 +132,7 @@
 - W5-3 실행 상세(setSearchForm 배선·operator 캐스트·deriveFilterFields·deviation 5)는 [phase-eg archive #W5-3](./progress-archive/phase-eg-api-redesign.md#w5-3-advanced-search-cap-20)로 이월(2026-07-12 post-completion slim).
 - RV-R2 검증: 실행계획 R2 수용기준의 root surface baseline "57/120"은 G-1(asset-URL·`9095504`) 이전 수치 — 실제 현재 **61/120**. R2는 surface-neutral(before==after=61). RV track-end check:surface·GA 게이트는 61 기준.
 - **Phase TB 실행 정정(2026-07-13)**: recon이 "TB-1/2/3=독립 mock 모듈(병렬)"이라 했으나 실제 파일 겹침(`store.ts`=TB-1 필터+TB-2 정렬, `crud-routes.ts`=TB-1 readFilters+TB-3 에러) → **순차 위임**(병렬 worktree 머지 충돌 회피). TB-1은 delegate(sonnet)로 완료. 값비교 타입인지·JSON_CONTAINS/EXISTS no-op는 framework 데이터모델 한계로 확정(발명 아님·인용).
+- **TB-7 스코핑 결정(2026-07-13·model-decidable)**: TB-7 원문="professor/university/employee/org/staff list/create/edit/delete e2e"이나 employee/org/staff/university=**무 UI 페이지**(picker/xref-only 설계·recon §4), professor=페이지有 SubColl e2e만 → 페이지 신축=out-of-scope invention. **route-level 계약 e2e**로 폐쇄(전 엔티티 /api 라우트 완비·entity-contract.spec.ts). 발명 회피가 강제한 유일 해석.
 
 ## Backlog (헌장 밖 아이디어 — v0.4 편입 금지, 기록만)
 
