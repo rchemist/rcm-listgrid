@@ -28,7 +28,7 @@ try {
   const created = await withBrowser(server.baseURL, async (page) => {
     const row = await createProofRow(page, 'Production Chromium Row', 'production-create');
     await page.goto('/entityform-proof/list');
-    await page.getByText('Production Chromium Row').waitFor();
+    await page.locator('td', { hasText: 'Production Chromium Row' }).waitFor();
     await updateProofRow(page, row.id, 'production-update');
     await page.goto(`/entityform-proof/baseline/${row.id}`);
     if ((await page.getByLabel('Note').inputValue()) !== 'production-update') {
