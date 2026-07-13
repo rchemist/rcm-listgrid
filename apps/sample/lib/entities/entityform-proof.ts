@@ -397,6 +397,160 @@ function RevisionLifecycleForm(enabled: boolean): EntityForm {
     : form.withRevision('stale-revision').withRevision(undefined);
 }
 
+function CapabilityProofForm(caseId: string): EntityForm {
+  const form = BaseProofForm().withTitle('capability proof');
+  switch (caseId) {
+    case 'with-capabilities--efs-02a':
+      return form.withCapabilities({ create: true });
+    case 'with-capabilities--efs-02b':
+      return form.withCapabilities({ create: false });
+    case 'with-capabilities--efs-02c':
+      return form.withCapabilities({ update: true });
+    case 'with-capabilities--efs-02d':
+      return form.withCapabilities({ update: false });
+    case 'with-capabilities--efs-02e':
+      return form.withCapabilities({ delete: true });
+    case 'with-capabilities--efs-02f':
+      return form.withCapabilities({ delete: false });
+    case 'with-capabilities--efs-02g':
+      return form.withCapabilities({
+        create: async (ctx) =>
+          ctx.renderType === 'create' && (ctx.session?.roles?.includes('ADMIN') ?? false),
+      });
+    case 'with-capabilities--efs-02h':
+      return form.withCapabilities({
+        create: async () => {
+          await new Promise((resolve) => setTimeout(resolve, 2_000));
+          return false;
+        },
+      });
+    case 'with-capabilities--efs-02i':
+      return form
+        .withCapabilities({ create: false })
+        .withCapabilities({ update: true, delete: false });
+    default:
+      return form;
+  }
+}
+
+function ActionProofForm(caseId: string): EntityForm {
+  const form = BaseProofForm().withTitle('action proof');
+  switch (caseId) {
+    case 'add-action--efs-04a':
+      return form
+        .addAction({ id: 'late', label: 'Action late', order: 20 })
+        .addAction({ id: 'early', label: 'Action early', order: 10 });
+    case 'add-action--efs-04b':
+      return form
+        .addAction({ id: 'hidden', label: 'Hidden action', visible: false })
+        .addAction({ id: 'visible', label: 'Visible action', visible: true });
+    case 'add-action--efs-04c':
+      return form
+        .addAction({ id: 'disabled', label: 'Disabled action', enabled: false })
+        .addAction({ id: 'enabled', label: 'Enabled action', enabled: true });
+    case 'add-action--efs-04d':
+      return form.addAction({
+        id: 'run',
+        label: 'Run action',
+        run: (ctx) => {
+          ctx.mutator.setValue('note', 'action run');
+        },
+      });
+    case 'add-action--efs-04e':
+      return form.addAction({ id: 'render', render: () => 'Custom rendered action' });
+    case 'add-action--efs-04f':
+      return form.addAction({
+        id: 'class',
+        label: 'Class action',
+        className: 'proof-action-class',
+      });
+    case 'add-action--efs-04g':
+      return form.addAction({ id: 'variant', label: 'Danger action', variant: 'danger' });
+    case 'add-action--efs-04h':
+      return form.addAction({
+        id: 'replacement-save',
+        label: 'Replacement Save',
+        replaces: 'save',
+        run: (ctx) => {
+          ctx.mutator.setValue('note', 'replacement save');
+        },
+      });
+    case 'add-action--efs-04i':
+      return form.addAction({
+        id: 'replacement-delete',
+        label: 'Replacement Delete',
+        replaces: 'delete',
+      });
+    case 'add-action--efs-04j':
+      return form.addAction({
+        id: 'save',
+        label: 'Collision Save',
+        run: (ctx) => {
+          ctx.mutator.setValue('note', 'collision save');
+        },
+      });
+    default:
+      return form;
+  }
+}
+
+function ListLifecycleProofForm(): EntityForm {
+  const { form, trace } = TracedLifecycleForm('list lifecycle proof');
+  return form
+    .onBeforeListFetch((ctx) => {
+      trace.length = 0;
+      const search = ctx.searchForm.toJSON();
+      trace.push(
+        `before:first:${search.filters.AND?.length ?? 0}:${search.filters.OR?.length ?? 0}`,
+      );
+      ctx.setSearchForm(
+        ctx.searchForm.addAndFilter({
+          name: 'status',
+          value: 'ACTIVE',
+          queryConditionType: 'EQUAL',
+        }),
+      );
+    })
+    .onBeforeListFetch((ctx) => {
+      trace.push(
+        `before:second:${ctx.searchForm.toJSON().filters.AND?.length ?? 0}:${ctx.session?.roles?.join(',') ?? 'none'}`,
+      );
+    })
+    .onBeforeListFetch(() => {
+      trace.push('before:throw');
+      throw new Error('before-list proof throw');
+    })
+    .onBeforeListFetch((ctx) => {
+      trace.push(`before:after-throw:${ctx.searchForm.toJSON().filters.AND?.length ?? 0}`);
+    })
+    .onAfterListFetch((ctx) => {
+      trace.push(`after:first:${ctx.rows.length}:${ctx.totalElements}`);
+      ctx.setRows(
+        ctx.rows.map((row) => {
+          const item = row as Record<string, unknown>;
+          return { ...item, note: `${String(item.note)}|after:first` };
+        }),
+      );
+    })
+    .onAfterListFetch((ctx) => {
+      const first = ctx.rows[0] as Record<string, unknown> | undefined;
+      trace.push(`after:second:${String(first?.note)}`);
+      ctx.setRows(
+        ctx.rows.map((row) => {
+          const item = row as Record<string, unknown>;
+          return { ...item, note: `${String(item.note)}|after:second` };
+        }),
+      );
+    })
+    .onAfterListFetch(() => {
+      trace.push('after:throw');
+      throw new Error('after-list proof throw');
+    })
+    .onAfterListFetch((ctx) => {
+      trace.push(`after:after-throw:${ctx.rows.length}`);
+    });
+}
+
 export function EntityFormProofCase(caseId: string, id?: string): EntityForm {
   const form = BaseProofForm().withId(id);
   switch (caseId) {
@@ -557,6 +711,18 @@ export function EntityFormProofCase(caseId: string, id?: string): EntityForm {
     case 'validation--p-14':
       return BaseProofForm().withTitle('plural validation proof').withId(id);
     default:
+      if (caseId.startsWith('with-capabilities--')) {
+        return CapabilityProofForm(caseId).withId(id);
+      }
+      if (caseId.startsWith('add-action--')) {
+        return ActionProofForm(caseId).withId(id);
+      }
+      if (
+        caseId.startsWith('on-before-list-fetch--') ||
+        caseId.startsWith('on-after-list-fetch--')
+      ) {
+        return ListLifecycleProofForm().withId(id);
+      }
       return form.withTitle(`EntityForm proof — ${caseId}`);
   }
 }

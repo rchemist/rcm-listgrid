@@ -158,16 +158,20 @@ function verifyImplementedAnchors() {
       (node.expression.text === 'proof' ||
         node.expression.text === 'diagnosticProof' ||
         node.expression.text === 'structureProof' ||
-        node.expression.text === 'lifecycleProof')
+        node.expression.text === 'lifecycleProof' ||
+        node.expression.text === 'actionsListProof')
     ) {
       const structure = node.expression.text === 'structureProof';
       const lifecycle = node.expression.text === 'lifecycleProof';
+      const actionsList = node.expression.text === 'actionsListProof';
       verify(
-        lifecycle
-          ? 'e2e/entityform-proof-lifecycle.spec.ts'
-          : structure
-            ? 'e2e/entityform-proof-structure.spec.ts'
-            : 'e2e/entityform-proof-identity.spec.ts',
+        actionsList
+          ? 'e2e/entityform-proof-actions-list.spec.ts'
+          : lifecycle
+            ? 'e2e/entityform-proof-lifecycle.spec.ts'
+            : structure
+              ? 'e2e/entityform-proof-structure.spec.ts'
+              : 'e2e/entityform-proof-identity.spec.ts',
         resolveString(node.arguments[2]),
         node.expression.text === 'diagnosticProof'
           ? 'apps/sample/lib/entities/entityform-proof.ts#EntityFormIdentityDiagnostics'

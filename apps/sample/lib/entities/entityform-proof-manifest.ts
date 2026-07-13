@@ -40,6 +40,7 @@ const plannedIntegration = (id: `P-${string}`): EntityFormIntegrationProof => ({
 const identityTestFile = 'e2e/entityform-proof-identity.spec.ts' as const;
 const structureTestFile = 'e2e/entityform-proof-structure.spec.ts' as const;
 const lifecycleTestFile = 'e2e/entityform-proof-lifecycle.spec.ts' as const;
+const actionsListTestFile = 'e2e/entityform-proof-actions-list.spec.ts' as const;
 const identityAnchor = 'apps/sample/lib/entities/entityform-proof.ts#EntityFormProofCase';
 const diagnosticsAnchor =
   'apps/sample/lib/entities/entityform-proof.ts#EntityFormIdentityDiagnostics';
@@ -104,6 +105,21 @@ const lifecycleProof = (
   assertion,
 });
 
+const actionsListProof = (
+  id: `EFS-${string}`,
+  memberKebab: string,
+  testTitle: string,
+  assertion: string,
+): EntityFormProofBranch => ({
+  id,
+  status: 'implemented',
+  sampleCase: `${memberKebab}--${id.toLowerCase()}`,
+  sampleAnchor: identityAnchor,
+  e2eFile: actionsListTestFile,
+  testTitle,
+  assertion,
+});
+
 const titleTest =
   '[EFS-01] withTitle resolves every fallback and replace branch in the rendered h2';
 const readOnlyTest = '[EFS-03][P-02] readOnly hides Save slots but keeps Delete and normal actions';
@@ -147,7 +163,66 @@ export const entityFormProofManifest = {
         proof('EFS-01g', 'title-replace', titleTest, 'second withTitle replaces h2'),
       ],
     },
-    { member: 'withCapabilities', kind: 'setting', branches: [] },
+    {
+      member: 'withCapabilities',
+      kind: 'setting',
+      branches: [
+        actionsListProof(
+          'EFS-02a',
+          'with-capabilities',
+          '[EFS-02a] withCapabilities — create true renders Save',
+          'create Save button visible',
+        ),
+        actionsListProof(
+          'EFS-02b',
+          'with-capabilities',
+          '[EFS-02b] withCapabilities — create false removes Save',
+          'create Save button absent',
+        ),
+        actionsListProof(
+          'EFS-02c',
+          'with-capabilities',
+          '[EFS-02c] withCapabilities — update true renders Save',
+          'update Save button visible',
+        ),
+        actionsListProof(
+          'EFS-02d',
+          'with-capabilities',
+          '[EFS-02d] withCapabilities — update false removes Save',
+          'update Save button absent',
+        ),
+        actionsListProof(
+          'EFS-02e',
+          'with-capabilities',
+          '[EFS-02e] withCapabilities — delete true renders Delete',
+          'update Delete button visible',
+        ),
+        actionsListProof(
+          'EFS-02f',
+          'with-capabilities',
+          '[EFS-02f] withCapabilities — delete false removes Delete',
+          'update Delete button absent',
+        ),
+        actionsListProof(
+          'EFS-02g',
+          'with-capabilities',
+          '[EFS-02g] withCapabilities — async predicate receives create context and ADMIN session',
+          'async capability permits real POST for ADMIN create context',
+        ),
+        actionsListProof(
+          'EFS-02h',
+          'with-capabilities',
+          '[EFS-02h] withCapabilities — async pending defaults true then resolves false',
+          'Save visible while pending then absent after resolution',
+        ),
+        actionsListProof(
+          'EFS-02i',
+          'with-capabilities',
+          '[EFS-02i] withCapabilities — repeated calls shallow merge sibling keys',
+          'merged create/update/delete buttons and diagnostics',
+        ),
+      ],
+    },
     {
       member: 'withReadOnly',
       kind: 'setting',
@@ -158,7 +233,72 @@ export const entityFormProofManifest = {
         proof('EFS-03d', 'readonly-all', readOnlyTest, 'Save slots hidden; Delete/action remain'),
       ],
     },
-    { member: 'addAction', kind: 'setting', branches: [] },
+    {
+      member: 'addAction',
+      kind: 'setting',
+      branches: [
+        actionsListProof(
+          'EFS-04a',
+          'add-action',
+          '[EFS-04a] addAction — order controls action DOM order',
+          'ordered action bar buttons',
+        ),
+        actionsListProof(
+          'EFS-04b',
+          'add-action',
+          '[EFS-04b] addAction — visible gates custom actions',
+          'visible and absent action buttons',
+        ),
+        actionsListProof(
+          'EFS-04c',
+          'add-action',
+          '[EFS-04c] addAction — enabled controls disabled state',
+          'enabled and disabled action buttons',
+        ),
+        actionsListProof(
+          'EFS-04d',
+          'add-action',
+          '[EFS-04d] addAction — run receives a live mutator',
+          'click mutates the rendered Note field',
+        ),
+        actionsListProof(
+          'EFS-04e',
+          'add-action',
+          '[EFS-04e] addAction — render supplies the custom node',
+          'custom non-button render node visible',
+        ),
+        actionsListProof(
+          'EFS-04f',
+          'add-action',
+          '[EFS-04f] addAction — className reaches the action wrapper',
+          'wrapper class visible in DOM',
+        ),
+        actionsListProof(
+          'EFS-04g',
+          'add-action',
+          '[EFS-04g] addAction — variant reaches the host Button',
+          'host button data-variant is danger',
+        ),
+        actionsListProof(
+          'EFS-04h',
+          'add-action',
+          '[EFS-04h] addAction — replaces save removes the builtin and runs the custom slot',
+          'custom save slot runs with builtin absent',
+        ),
+        actionsListProof(
+          'EFS-04i',
+          'add-action',
+          '[EFS-04i] addAction — replaces delete removes the builtin in update mode',
+          'custom delete slot visible with builtin absent',
+        ),
+        actionsListProof(
+          'EFS-04j',
+          'add-action',
+          '[EFS-04j] addAction — id collision keeps the custom action and drops the builtin',
+          'same-id custom action runs with builtin absent',
+        ),
+      ],
+    },
     {
       member: 'withId',
       kind: 'setting',
@@ -384,8 +524,60 @@ export const entityFormProofManifest = {
         ),
       ],
     },
-    { member: 'onBeforeListFetch', kind: 'setting', branches: [] },
-    { member: 'onAfterListFetch', kind: 'setting', branches: [] },
+    {
+      member: 'onBeforeListFetch',
+      kind: 'setting',
+      branches: [
+        actionsListProof(
+          'EFS-12a',
+          'on-before-list-fetch',
+          '[EFS-12a] onBeforeListFetch — setSearchForm threads into the search request',
+          'status AND in real search request body',
+        ),
+        actionsListProof(
+          'EFS-12b',
+          'on-before-list-fetch',
+          '[EFS-12b] onBeforeListFetch — handlers run in registration order',
+          'ordered list diagnostics trace',
+        ),
+        actionsListProof(
+          'EFS-12c',
+          'on-before-list-fetch',
+          '[EFS-12c] onBeforeListFetch — thrown handler is skipped',
+          'post-throw handler and search still complete',
+        ),
+      ],
+    },
+    {
+      member: 'onAfterListFetch',
+      kind: 'setting',
+      branches: [
+        actionsListProof(
+          'EFS-13a',
+          'on-after-list-fetch',
+          '[EFS-13a] onAfterListFetch — rows and totalElements expose the adapter page',
+          'adapter row count and total in diagnostics',
+        ),
+        actionsListProof(
+          'EFS-13b',
+          'on-after-list-fetch',
+          '[EFS-13b] onAfterListFetch — setRows threads into the rendered list',
+          'threaded note appears in actual table row',
+        ),
+        actionsListProof(
+          'EFS-13c',
+          'on-after-list-fetch',
+          '[EFS-13c] onAfterListFetch — handlers run in registration order',
+          'ordered after-fetch trace',
+        ),
+        actionsListProof(
+          'EFS-13d',
+          'on-after-list-fetch',
+          '[EFS-13d] onAfterListFetch — thrown handler is skipped',
+          'post-throw handler and table render complete',
+        ),
+      ],
+    },
     {
       member: 'addFields',
       kind: 'setting',
@@ -882,7 +1074,17 @@ export const entityFormProofManifest = {
         '[P-08] before/after delete × confirm/cancel/throw — dismiss skips hooks and request',
       assertion: 'confirm dismiss는 무실행, accept는 before→DELETE→after',
     },
-    plannedIntegration('P-09'),
+    {
+      id: 'P-09',
+      members: ['onBeforeListFetch', 'onAfterListFetch'],
+      status: 'implemented',
+      sampleCase: 'on-before-list-fetch--p-09',
+      sampleAnchor: identityAnchor,
+      e2eFile: actionsListTestFile,
+      testTitle:
+        '[P-09] before/after list × search mutation preserves host search and renders hooked rows',
+      assertion: 'host quick-search OR와 hook status AND가 같은 request를 거쳐 hooked rows로 렌더',
+    },
     {
       id: 'P-10',
       members: ['withRevision'],

@@ -211,3 +211,33 @@ form lifecycle/revision 증명 — 2026-07-13
 - EFSP-4 capability/action은 diagnostics나 callback mock으로 끝내지 않고 실제 버튼 상태·실행 결과·권한 분기를 관찰한다.
 - list lifecycle은 form lifecycle과 혼합하지 않고 실제 search request body와 응답 rows의 전후 관계를 단언한다.
 - lifecycle proof route·validation seam·SQLite 경로를 action/list 편의를 위해 복제하거나 우회하지 않는다.
+
+## EFSP-4
+
+capabilities/actions/list lifecycle 증명 — 2026-07-13
+
+### Reuse review
+
+- **Extend**: `apps/sample/lib/entities/entityform-proof.ts`의 단일 proof factory에 capability/action/list-hook case를 추가한다.
+- **Extend**: `apps/sample/app/entityform-proof/EntityFormProofList.tsx`가 기존 generic `createListStore`와 `ViewListGrid`를 유지한 채 case와 diagnostics를 받는다.
+- **Reuse**: lifecycle E2E의 실제 request 감시·화면 trace 패턴과 `/api/entityform-proof/search` generic SQLite route를 그대로 사용한다.
+
+### Term binding / concrete readback
+
+| 토큰 | 결박 | 이 task의 구체 계약 |
+|---|---|---|
+| EFS-02 / `Capabilities` | `spec:entityform-sample-proof-plan.md §4` · `disk:packages/schema-core/src/entity-form.ts:337` · `disk:packages/react/src/components/ViewEntityForm.tsx:616` | create/update/delete boolean과 async `(FieldEvalContext) => boolean`을 id 기반 action bar에 선언하고 pending은 visible, resolve 뒤 최종 버튼 상태를 관찰한다. |
+| EFS-04 / `FormAction` | `spec:entityform-sample-proof-plan.md §4` · `disk:packages/schema-core/src/entity-form.ts:353` · `disk:packages/react/src/components/ViewEntityForm.tsx:649` | order/visible/enabled/run/render/className/variant/replaces/id collision을 실제 action DOM과 `FormMutator` 결과로 관찰한다. |
+| EFS-12 / `BeforeListFetchContext` | `spec:entityform-sample-proof-plan.md §4` · `disk:packages/schema-core/src/entity-form.ts:191` · `disk:packages/state/src/list-store.ts:80` | 등록 순서대로 `setSearchForm(next)`를 thread하고 마지막 SearchForm이 실제 `POST /api/entityform-proof/search` body가 되며 throw 뒤 handler가 계속된다. |
+| EFS-13 / `AfterListFetchContext` | `spec:entityform-sample-proof-plan.md §4` · `disk:packages/schema-core/src/entity-form.ts:220` · `disk:packages/state/src/list-store.ts:116` | adapter 응답의 rows/totalElements를 읽고 `setRows(rows)` 결과가 다음 handler와 최종 table rows에 전달되며 throw 뒤 handler가 계속된다. |
+| P-09 | `spec:entityform-sample-proof-plan.md §4 필수 pairwise` · `disk:packages/schema-core/src/search/search-form.ts:177` · `disk:packages/schema-core/src/search/search-form.ts:201` | host quick-search의 OR/quickSearchFields와 before-hook의 status AND가 같은 request body에 공존하고 그 응답 rows가 after-hook을 거쳐 렌더된다. |
+
+### Do-NOT
+
+- function conditional의 pending 기본 true를 최종값으로 오인하지 않고 resolve 전후를 따로 관찰한다.
+- `SearchForm.addAndFilter`의 append 의미나 generic route의 검색 의미를 바꾸지 않는다.
+- capability/action을 diagnostics 또는 callback count만으로 완료 처리하지 않고 버튼·disabled·실행 결과·미요청을 관찰한다.
+
+### Red evidence
+
+- `npx playwright test e2e/entityform-proof-actions-list.spec.ts --project=chromium` → EFS-02g에서 ADMIN 버튼은 보이나 POST가 0회라 timeout. `EntityFormProofClient`가 Auth session을 controller에 전달하지 않는 view/controller 불일치를 재현했다.
