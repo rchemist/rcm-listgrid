@@ -135,3 +135,21 @@
 **Authoritative verify (메인·전량)**: **full Playwright 70 passed**(기존 45 + TB-7 25·무간섭)·`tsc -p apps/sample`·eslint·prettier clean·vitest 2478 무영향(e2e는 vitest 미포함).
 
 **커버 매트릭스**: TB-C9(전용 e2e 갭 폐쇄 professor/university/employee/org/staff) 충족.
+
+## TB-8 backend/rest 레퍼런스 어댑터 + 제네릭 REST mock — ✅ 2026-07-13
+
+**Spec**: [ADR-0005 §Decision-5](../adr/ADR-0005-backend-adapter-contract.md) — generic REST 레퍼런스 어댑터(`GET /?page=&size=`·JSON 배열 바디+`totalCount` 헤더·표준 CRUD GET/{id}·POST·PUT/{id}·DELETE/{id}). "최소·계약 실용성 증명·문서 예제용·stretch(GA 무관)". **Reuse**: `packages/backend-rcm/src/adapter.ts` 구조 미러(createRcmAdapter factory·request 헬퍼·coerceRow·BackendAdapterError·RcmAdapterOptions). 계약=`packages/schema-core/src/backend/adapter.ts` BackendAdapter.
+
+**모델 결정 2건 (ADR-anchored·발명 없음)**:
+1. **filter→query-param 매핑 범위 = page/size ONLY**. ADR §5가 `GET /?page=&size=`만 명시 → search의 filters/sorts/quickSearch를 쿼리파라미터로 매핑하면 ADR 밖 REST 관례 발명(발명게이트). `list`에 DECIDED 주석(§Decision-5 인용) 명기.
+2. **미출판(published-surface 무배선)**. `tsup.config.ts` entry·root `package.json` exports/typesVersions **무변경** — backend-rest는 `private:true` 워크스페이스 패키지 유지. TB-8=stretch·GA 무관이라 GA 표면(attw/publint/surface-count 게이트) 확장은 out-of-scope. 라운드트립 테스트(vitest·packages/** 포함)가 계약 실증. 실제 출판은 full ADR-0005 롤아웃(§구현계획 5·P6)·GA-L downstream.
+
+**구현 (changed files·source+test)**:
+- `packages/backend-rest/src/index.ts` (187 lines) — `createRestAdapter(opts: RestAdapterOptions = {}): BackendAdapter`. list=GET `{url}?page=&size=`(search.page/pageSize 공개필드·totalCount 헤더→totalElements·`pageSize>0` 가드 `Math.ceil`→totalPages·coerceRow String id)·getOne=GET `/{id}`(coerceRow)·create=POST·update=PUT `/{id}`·remove=per-id `Promise.all` DELETE `/{id}`(bulk 엔드포인트 無·revision 무시)·parseError 상태→코드(401 TOKEN_EXPIRED/403 FORBIDDEN/400·422 VALIDATION/else UNKNOWN·ProblemDetail 바디 미파싱=REST 관례 미발명)·assetBaseUrl 조건부 스프레드(exactOptionalPropertyTypes). `RestAdapterOptions`={baseUrl,fetch,headers(obj|thunk),assetBaseUrl}=RcmAdapterOptions 서브셋.
+- `packages/backend-rest/src/__tests__/adapter.test.ts` (222 lines·17 tests) — injected fetch(mockResponse=.ok/.status/.json/.headers.get). 커버: list(쿼리빌드·totalCount→totalPages math·id 강제·헤더부재→0)·getOne(String id)·create·update·remove(per-id fan-out·revision 무시=1 DELETE no-body)·baseUrl/headers 포워딩·assetBaseUrl 유무·에러 5매핑(401/403/400/422/500).
+
+**비-deviation(정보·§Needs Review 미등재)**: ① getOne이 반환 엔티티 id를 String 강제 — 브리프 명시 지시(rcm getOne은 raw 반환·DB가 이미 stringify 가정). REST 레퍼런스=명시적 parity 지시 준수. ② `remove` 공개 시그니처가 `revision?` 파라미터 **생략**(accept-and-ignore 대신)=TS 구조적 유효(적은 파라미터 함수는 optional-param 인터페이스에 assignable)·"ignore it" 준수·테스트가 3-arg 호출 시 1 DELETE no-body 확인. → 실질 deviation 아님.
+
+**Authoritative verify (메인·전량)**: type-check clean(`tsc --noEmit`)·vitest **2495 passed**(2478+17·무회귀·1 todo)·lint **0 errors**(262 pre-existing warnings·backend-rest 무관)·prettier clean(test 파일 `--write` 1회 후 재검 green)·build green(backend-rest는 tsup entry 미포함=published bundle 무영향=의도). 어댑터 CRUD 라운드트립 실증(injected fetch seam·17 assert).
+
+**커버 매트릭스**: TB-C11(stretch·`backend/rest` 레퍼런스 어댑터+제네릭 REST mock·ADR-0005 §Decision-5) 충족.
