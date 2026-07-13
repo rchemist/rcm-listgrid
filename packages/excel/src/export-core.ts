@@ -149,11 +149,18 @@ export function buildExportWorksheet(
 /**
  * Write the worksheet to an xlsx `Blob` and trigger the browser download via
  * `file-saver` (`ExcelProvider.ts:182,213`). `fileName` may or may not carry
- * the `.xlsx` extension already — it is appended when missing.
+ * the `.xlsx` extension already — it is appended when missing. The workbook
+ * sheet uses the same name after removing the extension and normalizing
+ * Excel's forbidden characters/31-character limit.
  */
 export function downloadExportWorkbook(ws: XLSX.WorkSheet, fileName: string): void {
   const wb: XLSX.WorkBook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+  const sheetName = fileName
+    .replace(/\.xlsx$/i, '')
+    .replace(/[\\/?*[\]:]/g, '_')
+    .slice(0, 31)
+    .trim();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName || 'Sheet1');
   const xlsx = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
   const blob = new Blob([xlsx], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

@@ -214,6 +214,8 @@ describe('downloadExportWorkbook', () => {
     const [blob, fileName] = vi.mocked(saveAs).mock.calls[0]!;
     expect(blob).toBeInstanceOf(Blob);
     expect(fileName).toBe('my-export.xlsx');
+    const workbook = XLSX.read(await blob.arrayBuffer(), { type: 'array' });
+    expect(workbook.SheetNames).toEqual(['my-export']);
   });
 
   it('does not double-append .xlsx when the file name already carries it', async () => {
@@ -225,5 +227,17 @@ describe('downloadExportWorkbook', () => {
 
     const [, fileName] = vi.mocked(saveAs).mock.calls[0]!;
     expect(fileName).toBe('already-named.xlsx');
+  });
+
+  it('normalizes invalid and overlong file names into a valid Excel sheet name', async () => {
+    const { saveAs } = await import('file-saver');
+    vi.mocked(saveAs).mockClear();
+    const ws = XLSX.utils.aoa_to_sheet([['a']]);
+
+    downloadExportWorkbook(ws, 'invalid/name:that-is-longer-than-thirty-one-characters.xlsx');
+
+    const [blob] = vi.mocked(saveAs).mock.calls[0]!;
+    const workbook = XLSX.read(await blob.arrayBuffer(), { type: 'array' });
+    expect(workbook.SheetNames).toEqual(['invalid_name_that-is-longer-tha']);
   });
 });
