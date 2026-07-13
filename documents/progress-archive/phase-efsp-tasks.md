@@ -66,3 +66,51 @@
 - manifest는 계속 정적 원장으로 유지하며 class reflection으로 생성하지 않는다.
 - EFSP-1은 getter diagnostics만 채워 완료 처리하지 않고 동일 branch의 DOM/request/response를 함께 관찰한다.
 - SQLite/reset/persistence runner를 identity branch 편의를 위해 우회하거나 개발 DB에 연결하지 않는다.
+
+## EFSP-1
+
+identity/read/meta/clone/query 증명 — 2026-07-13
+
+### Reuse review
+
+- **Extend**: `apps/sample/lib/entities/entityform-proof.ts`의 단일 factory와 diagnostics projection에 case별 선언만 추가한다.
+- **Extend**: `e2e/entityform-proof-identity.spec.ts`에서 실제 DOM과 POST/PUT/DELETE request를 관찰한다.
+- **Reuse**: EFSP-0의 hub/dynamic pages/SQLite routes/AST gate; 별도 identity 전용 상태 엔진이나 API를 만들지 않는다.
+
+### Term binding / readback
+
+| 토큰 | 결박 | 이 task의 관찰 |
+|---|---|---|
+| EFS-01/03/05/20/23/24 | `spec:entityform-sample-proof-plan.md §4` | title/readOnly/id/meta/clone/query의 원자 branch를 case 선언과 h2/input/action/HTTP/diagnostics로 대조한다. |
+| P-01/02/03/12 | `spec:entityform-sample-proof-plan.md §4 필수 pairwise` | id×capability, readOnly×replace-save, onInit×fetched clone, clone reference isolation을 실제 form 흐름에서 묶어 본다. |
+| clone/meta 권위 | `disk:packages/schema-core/src/entity-form.ts:1130` · `spec:entityform-public-api-spec.md §3.2` | top-level containers는 독립이고 nested meta만 immutable-by-convention 공유한다. |
+| form render/transport | `disk:apps/sample/app/entityform-proof/EntityFormProofClient.tsx` | 모든 case가 `useEntityForm`→`ViewEntityForm`과 EFSP-0 generic SQLite route를 그대로 쓴다. |
+
+### Do-NOT
+
+- getter JSON만으로 title/readOnly/id 동작을 완료 처리하지 않는다. h2/input/action/request method를 함께 단언한다.
+- branch를 설명하기 위해 공개 EntityForm API를 더 추가하거나 별도 mock transport를 만들지 않는다.
+- clone의 nested meta 공유를 deep clone으로 바꾸지 않고, 원본/clone을 E2E 편의상 같은 인스턴스로 만들지 않는다.
+
+### Result
+
+- **Implementation**: `EntityFormProofCase`에 title/readOnly/id/meta/query/fetched-init case를 추가하고, clone 격리 진단을 별도 공개 sample 함수로 고정했다.
+- **DOM/HTTP proof**: 7개 Chromium 시나리오가 title fallback, readonly/action 슬롯, capability, POST/PUT, fetched init, meta/clone/query 계약을 관찰한다.
+- **Manifest**: EFS-01/03/05/20/23/24 전 branch와 P-01/02/03/12를 `implemented`로 전환하고 실제 factory/diagnostics anchor에 연결했다.
+- **Gate hardening**: AST 스크립트가 helper 호출의 상수 제목과 sample symbol까지 검사하며 구현 anchor 59개를 확인한다.
+
+### Verification evidence
+
+- `npm run type-check` → green.
+- `npm run check:entityform-sample-proof` → 53/53, P 14/14, implemented anchors 59, synthetic deletion/API-add red PASS.
+- `npx playwright test e2e/entityform-proof-identity.spec.ts --project=chromium` → 7/7 green.
+- `npm run test:e2e` → Chromium 78/78 green.
+- `npm --prefix apps/sample run build` → 44 pages production build green.
+- `npm run lint` → 0 errors, 기존 warnings 262; 변경 파일 신규 warning 없음.
+- targeted Prettier check와 `git diff --check` → green.
+
+### Do-NOT carried forward
+
+- EFSP-2 구조 branch를 diagnostics 배열만으로 증명하지 않는다. 실제 DOM 순서/가시성/저장 payload를 함께 단언한다.
+- `FieldGroupDef.open` 미소비 결함은 EFS-18 red로 먼저 재현한 뒤 최소 구현한다.
+- identity factory·SQLite route·manifest static inventory를 구조 증명 편의를 위해 복제하거나 우회하지 않는다.

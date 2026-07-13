@@ -1,12 +1,12 @@
 # PROGRESS — 0.4 재기초(re-foundation) 실행
 
 **Created**: 2026-07-10
-**Status**: active · EFSP-1 identity/read/meta/clone/query 증명 대기
-**Next up**: #EFSP-1 identity/read/meta/clone/query 증명
-**Last updated**: 2026-07-13 21:32
+**Status**: active · EFSP-2 field/tab/group/step 구조 증명 중
+**Next up**: #EFSP-2 field/tab/group/step 구조 증명
+**Last updated**: 2026-07-13 21:46
 **Push**: auto
 **Engine**: claude/codex 중립
-**Next session policy**: 현재 세션 계속. EFSP-0 proof 기반을 재사용해 EFSP-1 branch를 채운다.
+**Next session policy**: 현재 세션 계속. EFSP-1 identity 증명을 회귀 유지하며 EFSP-2 구조 branch를 채운다.
 
 ## Goal
 
@@ -53,18 +53,18 @@
 | EG + GX + RV | v0.4 | ✅ 완료 | [EG](./progress-archive/phase-eg-api-redesign.md) · [RV](./progress-archive/phase-rv-tasks.md) |
 | GA gate + RV-R14 | v0.4 | ✅ 완료 | [GA](./analysis/2026-07-13/ga-gate-result.md) · [R14](./progress-archive/phase-rv-r14.md) |
 | TB backend full set | v0.4 | ✅ 완료 | [archive](./progress-archive/phase-tb-tasks.md) |
-| **EF-SP sample proof** | v0.4 | **⬜ Next** | [plan](./plans/entityform-sample-proof-plan.md) · 이 문서 §Phase EF-SP |
+| **EF-SP sample proof** | v0.4 | **🔄 진행 중** | [plan](./plans/entityform-sample-proof-plan.md) · 이 문서 §Phase EF-SP |
 | GA-L latest seal | v0.4→main | ⏸ EF-SP + 사용자 go 대기 | [pending](./progress-archive/phase-ga-l-pending.md) |
 
 ## 세션 인계 (Handoff)
 
-- **현재 활성 task**: `[ ] #EFSP-1` — identity/read/meta/clone/query의 EFS/P branch를 sample+E2E로 증명한다.
-- **완료 기반**: EFSP-0에서 query 4개, 53-member gate, SQLite proof hub와 restart/production Chromium CRUD를 봉인했다.
-- **Do NOT**: 기존 E2E 이름만 manifest에 연결하지 말고 해당 assertion이 같은 원자 동작을 실제 관찰하는지 확인한다.
-- **Do NOT**: getter diagnostics만으로 설정 동작을 증명하지 않는다. 설정은 DOM·request·response까지 단언한다.
+- **현재 활성 task**: `[~] #EFSP-2` — field/tab/group/step의 제거·patch·정렬·hidden·권한 branch를 증명한다.
+- **완료 기반**: EFSP-1에서 EFS-01/03/05/20/23/24와 P-01/02/03/12를 DOM·HTTP·diagnostics로 봉인했다.
+- **Do NOT**: 구조 계약을 diagnostics 배열만으로 완료 처리하지 말고 DOM과 저장 payload를 함께 관찰한다.
+- **Do NOT**: EFS-18 expected-red를 건너뛰거나 테스트 편의를 위해 ViewEntityForm 구조 규칙을 재설계하지 않는다.
 - **Hot 파일**: `packages/schema-core/src/entity-form.ts` — 현재 53-member 권위 원본; AST manifest exact gate가 봉인한다.
 - **Hot 파일**: `documents/plans/entityform-sample-proof-plan.md` — EFS-01~24/P-01~14·SQLite 실행 계약.
-- **Hot 파일**: `apps/sample/lib/mock-backend/store.ts` — API를 유지하고 공용 SQLite backing으로 확장할 대상.
+- **Hot 파일**: `apps/sample/lib/entities/entityform-proof.ts` — 단일 factory를 확장하며 별도 구조 엔진을 만들지 않는다.
 - **Invariant**: id가 있을 때만 update, readOnly와 capability는 다른 계약, hook은 등록 순서대로 엔진이 실행한다.
 - **Invariant**: manifest 행은 sample/e2e anchor와 관찰 assertion이 모두 있어야 green이다.
 - **Invariant**: `cd apps/sample && npm run dev`→`/entityform-proof`에서 모든 case/CRUD/reset을 직접 실행할 수 있다.
@@ -79,10 +79,8 @@
 **완료 판정**: EntityForm 53/53 manifest + EFS-01~24 + P-01~14 빈 행 0 + restart SQLite CRUD + full gate green.
 
 - [x] **#EFSP-0 query+SQLite proof** ✅ 2026-07-13 · commit `4c5de9a` · 2512u/72e2e/restart/prod green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-0)
-- [ ] **#EFSP-1 identity/read/meta/clone/query 증명**
-  - Files: proof entity/pages, `e2e/entityform-proof-identity.spec.ts`, manifest.
-  - Verify: identity spec + AST gate. IDs EFS-01/03/05/20/23/24, P-01/02/03/12.
-- [ ] **#EFSP-2 field/tab/group/step 구조 증명**
+- [x] **#EFSP-1 identity/read/meta/clone/query 증명** ✅ 2026-07-13 · commit `1c7f6b9` · 59 anchors/78e2e/44 pages green · [detail](./progress-archive/phase-efsp-tasks.md#efsp-1)
+- [~] **#EFSP-2 field/tab/group/step 구조 증명**
   - Files: proof entity/pages, `e2e/entityform-proof-structure.spec.ts`, manifest.
   - Verify: structure spec + request payload assertions. IDs EFS-14~19, P-05/06.
 - [ ] **#EFSP-3 form lifecycle/revision 증명**
