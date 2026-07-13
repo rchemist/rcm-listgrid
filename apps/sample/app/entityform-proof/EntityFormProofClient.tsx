@@ -3,7 +3,10 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEntityForm, ViewEntityForm } from '@listgrid/react';
-import { EntityFormProofCase } from '../../lib/entities/entityform-proof';
+import {
+  EntityFormIdentityDiagnostics,
+  EntityFormProofCase,
+} from '../../lib/entities/entityform-proof';
 import { rcmAdapter } from '../../lib/adapter';
 
 export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: string }) {
@@ -28,9 +31,14 @@ export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: str
   const diagnostics = {
     caseId,
     member: 'baseline',
+    name: entityForm.name,
+    url: entityForm.url,
     renderType: entityForm.getRenderType(),
     title: entityForm.getTitle(),
     id: entityForm.getId(),
+    capabilities: entityForm.getCapabilities(),
+    readOnly: entityForm.getReadOnly(),
+    actions: entityForm.getActions().map((action) => action.id),
     fields: entityForm.getFields().map((field) => field.getName()),
     tabs: entityForm.getTabs().map((tab) => tab.id),
     groups: entityForm.getFieldGroups().map((group) => group.id),
@@ -39,8 +47,26 @@ export function EntityFormProofClient({ caseId, id }: { caseId: string; id?: str
     hooks: {
       init: entityForm.getInitHandlers().length,
       change: entityForm.getChangeHandlers().length,
+      beforeSave: entityForm.getBeforeSaveHandlers().length,
+      afterSave: entityForm.getAfterSaveHandlers().length,
+      beforeDelete: entityForm.getBeforeDeleteHandlers().length,
+      afterDelete: entityForm.getAfterDeleteHandlers().length,
+      beforeListFetch: entityForm.getBeforeListFetchHandlers().length,
+      afterListFetch: entityForm.getAfterListFetchHandlers().length,
     },
     transfer: entityForm.getDataTransfer(),
+    queries: {
+      field: entityForm.getField('name')?.getName(),
+      hasField: [entityForm.hasField('name'), entityForm.hasField('missing')],
+      tab: entityForm.getTab('default')?.id,
+      hasTab: [entityForm.hasTab('default'), entityForm.hasTab('missing')],
+      groupFields: entityForm.getGroupFields('default', 'default').map((field) => field.getName()),
+      tabFields: entityForm.getTabFields('default').map((field) => field.getName()),
+      revision: entityForm.getRevisionEntityName(),
+      cloneClass: entityForm.clone() instanceof entityForm.constructor,
+    },
+    dirty: store.getState().isDirty(),
+    clone: EntityFormIdentityDiagnostics(),
   };
 
   return (

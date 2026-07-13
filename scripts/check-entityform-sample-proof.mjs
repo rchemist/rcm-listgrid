@@ -108,31 +108,73 @@ function stringProperty(object, source, name) {
 
 function verifyImplementedAnchors() {
   const source = parse('apps/sample/lib/entities/entityform-proof-manifest.ts');
+  const constants = new Map();
+  for (const statement of source.statements) {
+    if (!ts.isVariableStatement(statement)) continue;
+    for (const declaration of statement.declarationList.declarations) {
+      const value = declaration.initializer && unwrap(declaration.initializer);
+      if (ts.isIdentifier(declaration.name) && value && ts.isStringLiteral(value)) {
+        constants.set(declaration.name.text, value.text);
+      }
+    }
+  }
+  const resolveString = (node) =>
+    ts.isStringLiteral(node)
+      ? node.text
+      : ts.isIdentifier(node)
+        ? constants.get(node.text)
+        : undefined;
+  const resolvedProperty = (object, name) => {
+    const property = object.properties.find(
+      (candidate) => ts.isPropertyAssignment(candidate) && candidate.name.getText(source) === name,
+    );
+    return property && ts.isPropertyAssignment(property)
+      ? resolveString(property.initializer)
+      : undefined;
+  };
   let count = 0;
+  function verify(e2eFile, testTitle, sampleAnchor) {
+    if (!e2eFile || !testTitle || !sampleAnchor)
+      throw new Error('implemented proof has a non-static anchor');
+    const e2ePath = join(root, e2eFile);
+    if (!existsSync(e2ePath) || !readFileSync(e2ePath, 'utf8').includes(testTitle)) {
+      throw new Error(`implemented proof test anchor missing: ${e2eFile}#${testTitle}`);
+    }
+    const [sampleFile, symbol] = sampleAnchor.split('#');
+    const samplePath = join(root, sampleFile);
+    if (
+      !existsSync(samplePath) ||
+      !symbol ||
+      !readFileSync(samplePath, 'utf8').includes(`export function ${symbol}`)
+    ) {
+      throw new Error(`implemented proof sample anchor missing: ${sampleAnchor}`);
+    }
+    count += 1;
+  }
   function visit(node) {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      (node.expression.text === 'proof' || node.expression.text === 'diagnosticProof')
+    ) {
+      verify(
+        'e2e/entityform-proof-identity.spec.ts',
+        resolveString(node.arguments[2]),
+        node.expression.text === 'diagnosticProof'
+          ? 'apps/sample/lib/entities/entityform-proof.ts#EntityFormIdentityDiagnostics'
+          : 'apps/sample/lib/entities/entityform-proof.ts#EntityFormProofCase',
+      );
+    }
     if (
       ts.isObjectLiteralExpression(node) &&
       stringProperty(node, source, 'status') === 'implemented'
     ) {
-      const e2eFile = stringProperty(node, source, 'e2eFile');
-      const testTitle = stringProperty(node, source, 'testTitle');
-      const sampleAnchor = stringProperty(node, source, 'sampleAnchor');
-      if (!e2eFile || !testTitle || !sampleAnchor)
-        throw new Error('implemented proof has a non-static anchor');
-      const e2ePath = join(root, e2eFile);
-      if (!existsSync(e2ePath) || !readFileSync(e2ePath, 'utf8').includes(testTitle)) {
-        throw new Error(`implemented proof test anchor missing: ${e2eFile}#${testTitle}`);
-      }
-      const [sampleFile, symbol] = sampleAnchor.split('#');
-      const samplePath = join(root, sampleFile);
-      if (
-        !existsSync(samplePath) ||
-        !symbol ||
-        !readFileSync(samplePath, 'utf8').includes(`export function ${symbol}`)
-      ) {
-        throw new Error(`implemented proof sample anchor missing: ${sampleAnchor}`);
-      }
-      count += 1;
+      const e2eFile = resolvedProperty(node, 'e2eFile');
+      const testTitle = resolvedProperty(node, 'testTitle');
+      const sampleAnchor = resolvedProperty(node, 'sampleAnchor');
+      // The generic proof() helper body is parameterized; its static calls
+      // are verified above. Direct integration objects are verified here.
+      if (e2eFile && testTitle && sampleAnchor) verify(e2eFile, testTitle, sampleAnchor);
     }
     ts.forEachChild(node, visit);
   }
