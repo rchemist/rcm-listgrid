@@ -127,6 +127,25 @@ describe('createFormController.save (spec §6.2)', () => {
     expect(create).toHaveBeenCalledTimes(1);
   });
 
+  it('uses create when id is absent even if fetchedData makes the store render as update', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm, { fetchedData: { name: 'Prefilled' } });
+    store.getState().setValue('name', 'Prefilled');
+    const create = vi.fn(async () => ({ id: 'new-id', name: 'Prefilled' }));
+    const update = vi.fn();
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create, update }),
+    });
+
+    expect(store.getState().renderType).toBe('update');
+    expect(entityForm.getId()).toBeUndefined();
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it('validation-fail: skips the adapter call entirely and returns { ok: false }', async () => {
     const entityForm = WidgetForm(); // 'name' required, left blank
     const store = createFormStore(entityForm);

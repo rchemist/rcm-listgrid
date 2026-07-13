@@ -31,8 +31,8 @@ export default defineConfig({
         'apps/*/lib/**/*.{ts,tsx}',
       ],
       exclude: ['**/*.test.{ts,tsx}', '**/__tests__/**', 'src/_stubs/**'],
-      // Baseline (v0.4 post-review hardening, 2508 tests): 45.27% statements /
-      // 39.60% branches / 48.01% funcs / 44.89% lines. Floors sit just below
+      // Baseline (v0.4 post-review hardening, 2509 tests): 45.30% statements /
+      // 39.64% branches / 48.01% funcs / 44.92% lines. Floors sit just below
       // baseline so CI catches regressions across every package source tree.
       thresholds: {
         statements: 45,

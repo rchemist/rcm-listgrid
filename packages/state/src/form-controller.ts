@@ -215,7 +215,11 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
   let activeSave: Promise<SaveOutcome> | undefined;
 
   async function performSave(saveOpts?: { skipValidation?: boolean }): Promise<SaveOutcome> {
-    const renderType = entityForm.getRenderType();
+    // Update is possible iff the form has an id. Derive both the mode and
+    // adapter branch from the same value so an id-less form can never reach
+    // adapter.update through a non-null assertion.
+    const entityId = entityForm.getId();
+    const renderType: RenderType = entityId === undefined ? 'create' : 'update';
 
     // spec §6.2 step 1 (CAP-06; W3-2) — capability-denied is a SILENT block:
     // no adapter call, no message (the view already hides the affordance;
@@ -286,8 +290,8 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
 
     let result: unknown;
     try {
-      if (renderType === 'update') {
-        result = await adapter.update(entityForm.url, entityForm.getId()!, data);
+      if (entityId !== undefined) {
+        result = await adapter.update(entityForm.url, entityId, data);
       } else {
         result = await adapter.create(entityForm.url, data);
       }
