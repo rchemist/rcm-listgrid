@@ -13,11 +13,13 @@ export interface DatetimeFilterProps extends FilterRenderParameters {
 }
 
 export const DatetimeFilter = (props: DatetimeFilterProps) => {
-  // value is either a Promise<any> from filter framework or Date[] from handleValueChange
+  // value is either a Promise<any> from filter framework or string[] from handleValueChange
   const [value, setValue] = useState<unknown>();
 
   function handleValueChange(type: DefinedDateType) {
-    const values = getDefinedDates(type);
+    // Serialize to 'yyyy-MM-dd' like the calendar path — raw Date objects would be
+    // stringified as Date.prototype.toString() downstream, which the backend cannot parse.
+    const values = getDefinedDates(type).map((date) => fDate(date, `yyyy-MM-dd`));
     props.onChange(values, 'BETWEEN');
     setValue(values);
   }
