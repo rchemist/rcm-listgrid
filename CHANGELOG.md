@@ -2,6 +2,25 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.30] - 2026-07-29
+
+### Fixed
+
+- `DatetimeFilter` 의 기간 프리셋(오늘/1주일/1개월/3개월/6개월/1년)이 `Date` 객체를
+  그대로 `onChange` 에 넘겨, `SearchForm` 이 `String(v)` 로 직렬화하면서
+  `'Wed Jul 29 2026 00:00:00 GMT+0900 (…)'` 형태가 백엔드로 전송되던 문제를 수정
+  (gjcu-academic-backend #1716). 백엔드는 이 문자열을 `Instant` 로 파싱하지 못해
+  조회가 실패했고, 같은 값이 화면으로 되돌아오면 flatpickr 가 `Y-m-d` 포맷으로
+  재파싱하면서 시각(`00:00:00` / `23:59:59`)을 월·일로 오독해 어떤 프리셋을 눌러도
+  `2025-11-30 ~ 2027-12-29` 처럼 고정된 엉뚱한 범위가 입력창에 표시됐다. 이제 달력
+  경로와 동일하게 `'yyyy-MM-dd'` 로 직렬화한다 (백엔드가 시작/종료일의 00:00~23:59:59
+  보정을 수행하므로 범위 의미는 유지).
+- `urlStateParsers` 가 파이프(`|`) 분해를 `IN`/`NOT_IN` 에만 적용해
+  `BETWEEN`/`NOT_BETWEEN` 이 새로고침·링크 공유 시 `'start|end'` 통짜 문자열로
+  붕괴하던 것을 `values` 배열로 복원하도록 수정.
+
+(backport of 245d44e — `fix/datetime-between-filter-serialization`, main 0.3.26 기준. 0.3.x 릴리스는 별도)
+
 ## [0.2.24] - 2026-05-29
 
 ### Fixed

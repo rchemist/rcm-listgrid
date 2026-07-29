@@ -151,9 +151,14 @@ function parseFilterSegment(segment: string): FilterItem | null {
     if (queryConditionType) {
       // Join remaining parts in case value contains ':'
       const rawValue = parts.slice(2).join(':');
-      // For IN/NOT_IN operators, split by pipe to get array and use 'values' field
+      // For multi-value operators, split by pipe to get array and use 'values' field.
+      // BETWEEN/NOT_BETWEEN must round-trip as two values — restoring them as a single
+      // "start|end" string breaks the backend range conversion.
       if (
-        (queryConditionType === 'IN' || queryConditionType === 'NOT_IN') &&
+        (queryConditionType === 'IN' ||
+          queryConditionType === 'NOT_IN' ||
+          queryConditionType === 'BETWEEN' ||
+          queryConditionType === 'NOT_BETWEEN') &&
         rawValue.includes('|')
       ) {
         return { name, values: rawValue.split('|'), queryConditionType };
