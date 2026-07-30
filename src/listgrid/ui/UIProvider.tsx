@@ -40,6 +40,13 @@ export interface UIComponents {
   Modal: ComponentType<any>;
   MultiSelectBox: ComponentType<any>;
   NumberInput: ComponentType<any>;
+  /**
+   * Optional — asset open handler. When provided, asset download links delegate
+   * clicks to it instead of navigating. Hosts that gate sensitive assets (direct
+   * URL blocked, authenticated read path elsewhere) inject their own opener here.
+   * Omitted by default, which keeps the plain new-tab link behaviour.
+   */
+  openAsset?: (assetUrl: string) => void | Promise<void>;
   Pagination: ComponentType<any>;
   Paper: ComponentType<any>;
   /** Optional — the host kit exposes only PasswordStrengthView; type alias below. */
@@ -117,7 +124,16 @@ const REACT_INTROSPECTION_PROPS = new Set<string | symbol>([
   'toString',
 ]);
 
-function makeWrapper<K extends keyof UIComponents>(name: K): any {
+// Slot names whose value is a component. UIComponents also carries non-component
+// slots (e.g. the `openAsset` handler), which must not be routed through the
+// wrapper factory — they are read directly via useUI().
+type ComponentSlotName = {
+  [K in keyof UIComponents]-?: NonNullable<UIComponents[K]> extends ComponentType<any>
+    ? K
+    : never;
+}[keyof UIComponents];
+
+function makeWrapper<K extends ComponentSlotName>(name: K): any {
   const Wrapper: any = (props: any) => {
     const comps = useUI();
     const Component = comps[name];

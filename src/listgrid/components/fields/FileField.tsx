@@ -9,6 +9,7 @@ import { IAssetConfig, RenderType } from '../../config/Config';
 import { FieldRenderParameters, FilterRenderParameters } from '../../config/EntityField';
 import { FileFieldValue } from '../../ui';
 import { LazyFileUploadInput as FileUploadInput } from '../../ui';
+import { AssetLink } from './AssetLink';
 import { getInputRendererParameters } from '../helper/FieldRendererHelper';
 import { isEmpty } from '../../utils';
 import { getAccessableAssetUrl, isExternalUrl } from '../../misc';
@@ -186,15 +187,14 @@ export class FileField extends ListableFormField<FileField> {
             result: (
               <div className="rcm-file-field-cell">
                 <div className="rcm-file-field-inner">
-                  <a
+                  <AssetLink
                     href={fileDownloadUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                    assetUrl={file.existFiles[0]!.url}
                     className="rcm-file-field-link"
                   >
                     <IconDeviceFloppy className="rcm-file-field-icon" />
                     <span className="rcm-file-field-name">{file.existFiles[0]!.url}</span>
-                  </a>
+                  </AssetLink>
                 </div>
               </div>
             ),
