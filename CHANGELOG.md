@@ -2,6 +2,17 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.4.1] - 2026-07-30
+
+### Fixed
+
+- 0.4 마이그레이션 계약에서 무변경으로 명시한 0.3.x 필드 빌더
+  (`withAddOnly`, `withModifyOnly`, `withViewHidden`, `withListOnly`,
+  숫자 필드 `withMin`/`withMax`/`withLimit`, textarea `withLimit`)를 복원했다.
+- 공식 코드모드의 `useListFields(...)` 출력이 실제 0.4 API로 동작하도록, 전달한 필드만
+  목록 열로 명시 선택하는 `EntityForm.withList(...fieldNames)` 호환 표면을 추가했다.
+- 호환 빌더와 폼 단위 목록 선언, 코드모드 fixture 회귀 테스트를 추가했다.
+
 ## [0.4.0] - 2026-07-30
 
 **0.4 재기초의 첫 stable 릴리스.** `0.4.0-alpha.0` 이후 EntityForm 공개 계약·상태 엔진·

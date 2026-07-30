@@ -71,6 +71,35 @@ export class NumberField extends FormField<number> {
     if (props?.double !== undefined) this.double = props.double;
     if (props?.limit !== undefined) this.limit = props.limit;
   }
+  withMin(min?: number): this {
+    this.limit = {
+      ...(min !== undefined ? { min } : {}),
+      ...(this.limit?.max !== undefined ? { max: this.limit.max } : {}),
+    };
+    return this;
+  }
+  withMax(max?: number): this {
+    this.limit = {
+      ...(this.limit?.min !== undefined ? { min: this.limit.min } : {}),
+      ...(max !== undefined ? { max } : {}),
+    };
+    return this;
+  }
+  withLimit(limit?: MinMaxLimit): this {
+    if (limit !== undefined) this.limit = { ...limit };
+    else delete this.limit;
+    return this;
+  }
+  withCurrency(currency?: string): this {
+    if (currency !== undefined) this.currency = currency;
+    else delete this.currency;
+    return this;
+  }
+  withDouble(double?: boolean): this {
+    if (double !== undefined) this.double = double;
+    else delete this.double;
+    return this;
+  }
 }
 
 /** Multi-line text (0.3.x TextareaField, type 'textarea', rows default 10). */
@@ -81,6 +110,11 @@ export class TextareaField extends FormField<string> {
     super(name, order, 'textarea');
     this.rows = rows;
     if (limit !== undefined) this.limit = limit;
+  }
+  withLimit(limit?: MinMaxLimit): this {
+    if (limit !== undefined) this.limit = { ...limit };
+    else delete this.limit;
+    return this;
   }
 }
 

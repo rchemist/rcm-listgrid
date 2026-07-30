@@ -8,6 +8,7 @@ import type {
 } from './conditional';
 import type { FieldEvalContext } from './eval-context';
 import type { FieldMetaOverride } from './field-meta';
+import type { FieldListConfig } from './list-config';
 import type { FieldType, FieldValue } from './types';
 import type { ViewPreset } from './view-preset';
 import type { Validation, ValidateResult } from '../validation';
@@ -144,4 +145,5 @@ export interface EntityField<TValue = unknown> extends EntityItem {
   withValidations(...validations: Validation[]): this;
   withPlaceholder(placeholder?: PlaceholderType): this;
   withValue(value: TValue): this;
+  withList(config?: FieldListConfig | false): this;
 }

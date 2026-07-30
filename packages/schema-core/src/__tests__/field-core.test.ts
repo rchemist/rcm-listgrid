@@ -391,3 +391,22 @@ describe('FormField.withList/getListConfig, withFilter/getFilterConfig (spec §5
     expect(clonedUndeclared.getFilterConfig()).toBeUndefined();
   });
 });
+
+describe('FormField 0.3 view-preset compatibility sugars', () => {
+  it('preserves add/modify/view-hidden/list-only semantics promised by MIGRATION §1', async () => {
+    const addOnly = new StringField('add', 1).withAddOnly();
+    expect(await addOnly.isReadOnly({ renderType: 'create' })).toBe(false);
+    expect(await addOnly.isReadOnly({ renderType: 'update' })).toBe(true);
+
+    const modifyOnly = new StringField('modify', 2).withModifyOnly();
+    expect(await modifyOnly.isHidden({ renderType: 'create' })).toBe(true);
+    expect(await modifyOnly.isHidden({ renderType: 'update' })).toBe(false);
+
+    const viewHidden = new StringField('viewHidden', 3).withViewHidden();
+    expect(await viewHidden.isReadOnly({ renderType: 'update' })).toBe(true);
+
+    const listOnly = new StringField('listOnly', 4).withListOnly();
+    expect(await listOnly.isHidden({ renderType: 'create' })).toBe(true);
+    expect(await listOnly.isHidden({ renderType: 'update' })).toBe(true);
+  });
+});

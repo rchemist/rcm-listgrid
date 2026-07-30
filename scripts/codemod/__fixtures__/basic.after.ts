@@ -4,7 +4,7 @@ declare const field: any;
 // rule 1: useListField/withListConfig/useListFields -> withList
 field.withList();
 field.withList({ order: 1 });
-field.withList();
+ef.withList('name', 'status');
 
 // rule 2: withPlaceHolder -> withPlaceholder
 field.withPlaceholder('type here');

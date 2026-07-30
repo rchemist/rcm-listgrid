@@ -725,6 +725,18 @@ export class EntityForm {
   }
 
   /**
+   * Opt named fields into list-column rendering. This compatibility seam is
+   * the valid 0.4 target for the 0.3.x `useListFields(...names)` codemod and
+   * remains explicit: only the supplied field names are opted in.
+   */
+  withList(...fieldNames: string[]): this {
+    for (const fieldName of fieldNames) {
+      this.getField(fieldName)?.withList();
+    }
+    return this;
+  }
+
+  /**
    * Declaration-time structural removal of field `name` (spec §3.2 — successor
    * to the 0.3.x `removeField`). Shared-abstract-form variation: a caller
    * clones a base EntityForm and drops fields the variant doesn't want. No-op

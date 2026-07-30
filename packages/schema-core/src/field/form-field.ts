@@ -22,7 +22,13 @@ import type { FieldMetaOverride } from './field-meta';
 import type { FieldFilterConfig, FieldListConfig } from './list-config';
 import type { FieldType, FieldValue } from './types';
 import { isBlank } from './value';
-import type { ViewPreset } from './view-preset';
+import {
+  ADD_ONLY,
+  LIST_ONLY,
+  MODIFY_ONLY,
+  VIEW_HIDDEN,
+  type ViewPreset,
+} from './view-preset';
 
 /**
  * Abstract base for every concrete field class (charter C1/C4). The React-free
@@ -228,6 +234,22 @@ export abstract class FormField<TValue = unknown> implements EntityField<TValue>
     if (preset.readOnly !== undefined) this.readOnly = preset.readOnly;
     if (preset.hidden !== undefined) this.hidden = preset.hidden;
     return this;
+  }
+  /** 0.3.x compatibility sugar retained by the 0.4 migration contract. */
+  withAddOnly(): this {
+    return this.withViewPreset(ADD_ONLY);
+  }
+  /** 0.3.x compatibility sugar retained by the 0.4 migration contract. */
+  withModifyOnly(): this {
+    return this.withViewPreset(MODIFY_ONLY);
+  }
+  /** 0.3.x compatibility sugar retained by the 0.4 migration contract. */
+  withViewHidden(): this {
+    return this.withViewPreset(VIEW_HIDDEN);
+  }
+  /** 0.3.x compatibility sugar retained by the 0.4 migration contract. */
+  withListOnly(): this {
+    return this.withViewPreset(LIST_ONLY);
   }
   withForm(form: { tabId: string; fieldGroupId: string }): this {
     this.form = form;
