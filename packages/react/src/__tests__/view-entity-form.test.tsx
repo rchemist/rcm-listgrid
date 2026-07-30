@@ -5,11 +5,21 @@
 // the renderer layer (registry dispatch, store subscription, validate-then-
 // save) end to end without any host app.
 
+import { useEffect, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { BooleanField, EntityForm, StringField } from '@listgrid/schema-core';
+import {
+  BooleanField,
+  EntityForm,
+  StringField,
+  type FormRuntime,
+} from '@listgrid/schema-core';
 import { createFormStore } from '@listgrid/state';
-import { defaultUIComponents } from '@listgrid/ui-default';
+import {
+  defaultUIComponents,
+  type TextInputProps,
+  type UIComponents,
+} from '@listgrid/ui-default';
 import { AuthProvider } from '../providers/auth';
 import { UIProvider } from '../providers/ui';
 import { FormStoreProvider } from '../providers/form-store';
@@ -17,6 +27,47 @@ import { registerDefaultRenderers } from '../registry/default-renderers';
 import { ViewEntityForm } from '../components/ViewEntityForm';
 
 registerDefaultRenderers();
+
+// egov-cms deliberately commits string drafts on blur. Keep that host
+// contract in the release audit instead of weakening the regression test to
+// ui-default's per-keystroke primitive.
+function BlurCommitTextInput({
+  value,
+  onChange,
+  placeholder,
+  type,
+  readOnly,
+  disabled,
+  id,
+  ariaLabel,
+  required,
+  invalid,
+  describedBy,
+}: TextInputProps) {
+  const [draft, setDraft] = useState(value ?? '');
+  useEffect(() => setDraft(value ?? ''), [value]);
+  return (
+    <input
+      type={type ?? 'text'}
+      id={id}
+      value={draft}
+      placeholder={placeholder}
+      readOnly={readOnly}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      aria-required={required || undefined}
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={() => onChange?.(draft)}
+    />
+  );
+}
+
+const blurCommitUI: UIComponents = {
+  ...defaultUIComponents,
+  TextInput: BlurCommitTextInput,
+};
 
 function collegeForm(): EntityForm {
   return new EntityForm('CollegeEntityForm', '/college').addFields({
@@ -109,6 +160,140 @@ describe('ViewEntityForm (JSDOM render)', () => {
 
     fireEvent.change(dateInput, { target: { value: '2026-07-10' } });
     expect(store.getState().getValue('foundedDate')).toBe('2026-07-10');
+  });
+});
+
+// egov-cms #70 release audit. The 0.3.x engine cloned a whole EntityForm
+// asynchronously for every blur commit, then rebuilt fields/actions around
+// those snapshots. The 0.4 engine writes the zustand store synchronously and
+// derives structure only from structureVersion. These tests pin all five old
+// failure modes while preserving egov-cms's host-owned blur-commit primitive.
+describe('ViewEntityForm egov-cms #70 regressions on the 0.4 store architecture', () => {
+  function renderBlurCommitForm(
+    entityForm: EntityForm,
+    onSave = vi.fn(),
+    controller?: FormRuntime,
+  ) {
+    const store = createFormStore(entityForm);
+    render(
+      <UIProvider components={blurCommitUI}>
+        <AuthProvider session={undefined}>
+          <FormStoreProvider store={store}>
+            <ViewEntityForm
+              entityForm={entityForm}
+              store={store}
+              onSave={onSave}
+              {...(controller !== undefined ? { controller } : {})}
+            />
+          </FormStoreProvider>
+        </AuthProvider>
+      </UIProvider>,
+    );
+    return { store, onSave };
+  }
+
+  it('#70-1: a blur immediately followed by Save submits the committed draft', async () => {
+    const entityForm = new EntityForm('TenantEntityForm', '/tenants').addFields({
+      items: [new StringField('name', 1).withRequired(true).withLabel('Name')],
+    });
+    const { store, onSave } = renderBlurCommitForm(entityForm);
+    const input = await screen.findByLabelText(/^Name/);
+
+    fireEvent.change(input, { target: { value: 'Tenant Alpha' } });
+    expect(store.getState().getValue('name')).toBeUndefined();
+    fireEvent.blur(input);
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(expect.objectContaining({ name: 'Tenant Alpha' }));
+  });
+
+  it('#70-2/#70-5: consecutive blur commits preserve both fields without an async commit queue', async () => {
+    const entityForm = new EntityForm('TenantEntityForm', '/tenants').addFields({
+      items: [
+        new StringField('name', 1).withRequired(true).withLabel('Name'),
+        new StringField('code', 2).withRequired(true).withLabel('Code'),
+      ],
+    });
+    const { store, onSave } = renderBlurCommitForm(entityForm);
+    const name = await screen.findByLabelText(/^Name/);
+    const code = await screen.findByLabelText(/^Code/);
+
+    fireEvent.change(name, { target: { value: 'Tenant Alpha' } });
+    fireEvent.blur(name);
+    fireEvent.change(code, { target: { value: 'TENANT_ALPHA' } });
+    fireEvent.blur(code);
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    expect(store.getState().getValue('name')).toBe('Tenant Alpha');
+    expect(store.getState().getValue('code')).toBe('TENANT_ALPHA');
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Tenant Alpha', code: 'TENANT_ALPHA' }),
+    );
+  });
+
+  it('#70-3: action order and button node identity stay stable across rapid value commits', async () => {
+    const entityForm = new EntityForm('TenantEntityForm', '/tenants')
+      .addFields({ items: [new StringField('name', 1).withLabel('Name')] })
+      .addAction({ id: 'first', label: 'First action', order: 10, run: vi.fn() })
+      .addAction({ id: 'second', label: 'Second action', order: 20, run: vi.fn() });
+    const controller: FormRuntime = {
+      save: vi.fn(async () => ({ ok: true, result: {} })),
+      delete: vi.fn(async () => ({ ok: true, result: undefined })),
+      reload: vi.fn(async () => {}),
+      validate: vi.fn(async () => true),
+    };
+    const { store } = renderBlurCommitForm(entityForm, vi.fn(), controller);
+    await screen.findByLabelText(/^Name/);
+    const first = screen.getByRole('button', { name: 'First action' });
+    const second = screen.getByRole('button', { name: 'Second action' });
+
+    store.getState().setValue('name', 'one');
+    store.getState().setValue('name', 'two');
+    store.getState().setValue('name', 'three');
+
+    expect(screen.getByRole('button', { name: 'First action' })).toBe(first);
+    expect(screen.getByRole('button', { name: 'Second action' })).toBe(second);
+    expect(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
+  });
+
+  it('#70-4: a value commit does not remount the focused field subtree', async () => {
+    const entityForm = new EntityForm('TenantEntityForm', '/tenants').addFields({
+      items: [
+        new StringField('name', 1).withLabel('Name'),
+        new StringField('code', 2).withLabel('Code'),
+      ],
+    });
+    const { store } = renderBlurCommitForm(entityForm);
+    const code = await screen.findByLabelText(/^Code/);
+    code.focus();
+    expect(code).toHaveFocus();
+
+    store.getState().setValue('name', 'Tenant Alpha');
+
+    expect(screen.getByLabelText(/^Code/)).toBe(code);
+    expect(code).toHaveFocus();
+  });
+
+  it('#70-5 validation path: failed Save preserves the committed input value', async () => {
+    const entityForm = new EntityForm('TenantEntityForm', '/tenants').addFields({
+      items: [
+        new StringField('name', 1).withRequired(true).withLabel('Name'),
+        new StringField('code', 2).withRequired(true).withLabel('Code'),
+      ],
+    });
+    const { store, onSave } = renderBlurCommitForm(entityForm);
+    const name = await screen.findByLabelText(/^Name/);
+
+    fireEvent.change(name, { target: { value: 'Tenant Alpha' } });
+    fireEvent.blur(name);
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+    expect(await screen.findByText(/필수 값입니다/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Name/)).toHaveValue('Tenant Alpha');
+    expect(store.getState().getValue('name')).toBe('Tenant Alpha');
+    expect(onSave).not.toHaveBeenCalled();
   });
 });
 
