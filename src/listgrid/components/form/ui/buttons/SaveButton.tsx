@@ -3,6 +3,7 @@ import { isEmpty } from '../../../../utils';
 import { ButtonProps } from '../../types/ViewEntityFormButtons.types';
 import { openToast } from '../../../../message';
 import { useEntityFormTheme } from '../../context/EntityFormThemeContext';
+import { flushCommits } from '../../pending-commits';
 
 export const SaveButton = ({
   entityForm,
@@ -38,7 +39,10 @@ export const SaveButton = ({
           props.setNotifications([]);
 
           try {
-            const saveResult = await entityForm.save(session);
+            await flushCommits(entityForm?.id);
+            await new Promise<void>((resolve) => setTimeout(resolve, 0));
+            const latestEntityForm = props.latestEntityFormRef?.current ?? entityForm;
+            const saveResult = await latestEntityForm.save(session);
 
             setEntityForm?.(saveResult.entityForm);
 

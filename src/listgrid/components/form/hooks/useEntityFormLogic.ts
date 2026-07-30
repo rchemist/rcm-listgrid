@@ -33,6 +33,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
   useEffect(() => {
     entityFormRef.current = entityForm;
   }, [entityForm]);
+  const buttonsEpochRef = useRef(0);
   const [tabIndex, setTabIndex] = useState<string>();
   const [cacheKey, setCacheKey] = useState<string>();
   const [loadingError, setLoadingError] = useState<boolean>(false);
@@ -382,6 +383,8 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
 
   // 버튼 영역 비동기 업데이트 - Dynamic import for better performance
   useEffect(() => {
+    const epoch = ++buttonsEpochRef.current;
+
     // entityForm이 없거나 hideAllButtons가 true이면 빈 배열로 설정
     if (!entityForm || props.hideAllButtons) {
       setButtons([]);
@@ -396,6 +399,7 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
         const newButtons = await getEntityFormButtons({
           readonly: readonly,
           entityForm: entityForm,
+          latestEntityFormRef: entityFormRef,
           postSave: postSave,
           postDelete: postDelete,
           ...(props.buttonLinks !== undefined ? { buttonLinks: props.buttonLinks } : {}),
@@ -421,10 +425,14 @@ export function useEntityFormLogic(props: ViewEntityFormProps) {
           // 새창(팝업) 모드
           popupMode: popupMode,
         });
-        setButtons(newButtons);
+        if (epoch === buttonsEpochRef.current) {
+          setButtons(newButtons);
+        }
       } catch (error) {
         console.error('Error updating buttons:', error);
-        setButtons([]);
+        if (epoch === buttonsEpochRef.current) {
+          setButtons([]);
+        }
       }
     };
 

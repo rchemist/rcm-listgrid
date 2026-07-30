@@ -35,7 +35,6 @@ export const ViewTabPanel = ({
   const [groups, setGroups] = useState<string[]>([]);
 
   useEffect(() => {
-    setGroups([]);
     (async () => {
       const viewableFieldGroups = await entityForm.getViewableFieldGroups({
         tabId: id,

@@ -10,6 +10,7 @@ import { ViewEntityFormClassNames } from './ViewEntityFormTheme.types';
 export interface ButtonProps extends AbstractButtonProps {}
 
 export interface AbstractButtonProps extends EntityFormManageable {
+  latestEntityFormRef?: { current: EntityForm | null | undefined };
   postSave?: (entityForm: EntityForm) => Promise<EntityForm | void>;
   postDelete?: (entityForm: EntityForm) => Promise<EntityForm | void>;
   pathname: string;

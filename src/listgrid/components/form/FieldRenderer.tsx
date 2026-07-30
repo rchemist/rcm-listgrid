@@ -21,6 +21,7 @@ import { useLoadingStore } from '../../loading';
 import { getTranslation } from '../../utils/i18n';
 import { getManyToOneLink } from '../helper/FieldRendererHelper';
 import { useEntityFormTheme } from './context/EntityFormThemeContext';
+import { enqueueCommit } from './pending-commits';
 
 /**
  * FieldRenderer component
@@ -45,6 +46,8 @@ export const FieldRenderer = (props: FieldRendererProps) => {
   const { t } = getTranslation();
   const { classNames, cn, getFieldRenderer } = useEntityFormTheme();
   const entityForm = props.entityForm;
+  const latestFormRef = React.useRef(entityForm);
+  latestFormRef.current = entityForm;
   const setEntityForm = props.setEntityForm;
   const field = props.field;
   const subCollectionEntity = isTrue(props.subCollectionEntity, false);
@@ -76,74 +79,75 @@ export const FieldRenderer = (props: FieldRendererProps) => {
   // 보장하도록 한다. (기존에는 두 곳 모두 .catch 가 없어 validate()/getManyToOneLink() 가 던지면
   // unhandled rejection 이 되어 에러가 조용히 사라졌음 — P0-3)
   const applyFieldChange = useCallback(
-    async (value: any, propagation: boolean | undefined, updateCurrentValue: boolean) => {
-      const fieldName = field.getName();
-      const currentScroll = window.scrollY;
+    (value: any, propagation: boolean | undefined, updateCurrentValue: boolean) =>
+      enqueueCommit(entityForm?.id, async () => {
+        const fieldName = field.getName();
+        const currentScroll = window.scrollY;
 
-      setErrors([]);
-      if (updateCurrentValue) {
-        setCurrentValue(value);
-      }
+        setErrors([]);
+        if (updateCurrentValue) {
+          setCurrentValue(value);
+        }
 
-      const isPropagation = isTrue(propagation, true);
+        const isPropagation = isTrue(propagation, true);
 
-      let cloned: EntityForm = entityForm.clone(true);
-      cloned.setValue(fieldName, value);
-      cloned.clearAlertMessages(false);
+        let cloned: EntityForm = (latestFormRef.current ?? entityForm).clone(true);
+        cloned.setValue(fieldName, value);
+        cloned.clearAlertMessages(false);
 
-      const updatedField = cloned.fields.get(fieldName);
-      setDirty(updatedField?.isDirty() ?? false);
+        const updatedField = cloned.fields.get(fieldName);
+        setDirty(updatedField?.isDirty() ?? false);
 
-      const validationErrors: FieldError[] = await cloned.validate({
-        fieldNames: [fieldName],
-        ...(props.session !== undefined ? { session: props.session } : {}),
-      });
-      cloned.mergeError(fieldName, validationErrors);
+        const validationErrors: FieldError[] = await cloned.validate({
+          fieldNames: [fieldName],
+          ...(props.session !== undefined ? { session: props.session } : {}),
+        });
+        cloned.mergeError(fieldName, validationErrors);
 
-      let changed = false;
+        let changed = false;
 
-      if (isPropagation) {
-        if (cloned.onChanges && cloned.onChanges.length > 0) {
-          for (const onChange of cloned.onChanges!) {
-            try {
-              cloned = await onChange(cloned, fieldName);
-              if (isTrue(cloned.shouldReload)) {
-                changed = true;
+        if (isPropagation) {
+          if (cloned.onChanges && cloned.onChanges.length > 0) {
+            for (const onChange of cloned.onChanges!) {
+              try {
+                cloned = await onChange(cloned, fieldName);
+                if (isTrue(cloned.shouldReload)) {
+                  changed = true;
+                }
+              } catch (e) {
+                console.error(e);
               }
-            } catch (e) {
-              console.error(e);
             }
           }
         }
-      }
 
-      const manyToOneField = cloned.getField(fieldName);
-      setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
+        const manyToOneField = cloned.getField(fieldName);
+        setManyToOneLink(await getManyToOneLink(cloned.getRenderType(), manyToOneField));
 
-      if (changed || manyToOneField instanceof AbstractManyToOneField) {
-        setEntityForm?.(cloned);
-      } else {
-        // Sprint 31c W.6 — React 19 setState 는 same reference 시 skip 함.
-        // 기존 `entityForm.merge(cloned); setEntityForm(entityForm)` 는 같은
-        // ref 를 setState 로 보내 re-render 가 생기지 않아 controlled input
-        // 의 value 가 EntityForm 갱신 후에도 update 안 됨. cloned (새 ref)
-        // 를 passing 하여 reconciliation 강제 + 값 동기화 보장.
-        setEntityForm?.(cloned);
-      }
-
-      requestAnimationFrame(() => {
-        if (Math.abs(window.scrollY - currentScroll) > 0) {
-          setOpenBaseLoading(true);
-          window.scrollTo({
-            top: currentScroll,
-            behavior: 'instant',
-          });
-          setTimeout(() => {
-            setOpenBaseLoading(false);
-          }, 50);
+        if (changed || manyToOneField instanceof AbstractManyToOneField) {
+          setEntityForm?.(cloned);
+        } else {
+          // Sprint 31c W.6 — React 19 setState 는 same reference 시 skip 함.
+          // 기존 `entityForm.merge(cloned); setEntityForm(entityForm)` 는 같은
+          // ref 를 setState 로 보내 re-render 가 생기지 않아 controlled input
+          // 의 value 가 EntityForm 갱신 후에도 update 안 됨. cloned (새 ref)
+          // 를 passing 하여 reconciliation 강제 + 값 동기화 보장.
+          setEntityForm?.(cloned);
         }
-      });
-    },
+
+        requestAnimationFrame(() => {
+          if (Math.abs(window.scrollY - currentScroll) > 0) {
+            setOpenBaseLoading(true);
+            window.scrollTo({
+              top: currentScroll,
+              behavior: 'instant',
+            });
+            setTimeout(() => {
+              setOpenBaseLoading(false);
+            }, 50);
+          }
+        });
+      }),
     [entityForm, setEntityForm, field, props.session, setOpenBaseLoading],
   );
 
