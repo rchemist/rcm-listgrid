@@ -2,6 +2,34 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.4.0] - 2026-07-30
+
+**0.4 재기초의 첫 stable 릴리스.** `0.4.0-alpha.0` 이후 EntityForm 공개 계약·상태 엔진·
+호스트 UI 주입·RCM backend adapter·Excel/data-transfer 표면을 실소비자 시나리오로 완결하고
+`latest` 승격 게이트를 통과했다.
+
+### Breaking
+
+- root import는 React 공개 표면이며, 선언/필드는 `/schema`, store/controller는 `/state`,
+  기본 프리미티브는 `/ui-default`, RCM 전송은 `/backend-rcm`에서 가져온다.
+- `ListGrid` 클래스는 `createListStore`, 폼 저장 런타임은 `createFormController`로 교체됐다.
+- `ViewEntityFormWrapper`/`ViewListGridWrapper`는 제거됐다. 페이지 chrome은 호스트가 소유하고
+  `ViewEntityForm`/`ViewListGrid`를 조립한다.
+- 제거 subpath 9종과 빌더/라이프사이클 before→after 전체표는
+  [`docs/MIGRATION.md`](docs/MIGRATION.md)를 따른다.
+
+### Added
+
+- zustand 기반 폼 store 직접 갱신과 `structureVersion` 기반 구조 파생으로 값 커밋과 구조 변경을
+  분리했다.
+- egov-cms #70의 blur→즉시 저장, 연속 blur, 액션 순서, 포커스/DOM identity, 검증 실패 입력 보존
+  회귀 테스트를 stable 게이트에 추가했다.
+
+### Verification
+
+- `npm run type-check`, `npm test`(195 files, 2,533 pass, 1 todo), `npm run build`.
+- production `packages/*` TODO/미구현 0건, 제거 subpath 실소비 감사 완료.
+
 ## [0.4.0-alpha.0] - 2026-07-13
 
 **0.4 재기초(re-foundation) 첫 프리릴리스** — dist-tag `next` (opt-in). `npm i @rchemist/listgrid@next`.
