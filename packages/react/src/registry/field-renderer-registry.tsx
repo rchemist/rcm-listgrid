@@ -17,6 +17,11 @@ import type { EntityField, FieldType } from '@listgrid/schema-core';
 export interface FieldRendererComponentProps {
   field: EntityField;
   name: string;
+  /**
+   * Identity declared on the owning EntityForm. It is not part of the form's
+   * field values and therefore does not require an `id` field declaration.
+   */
+  entityId?: string | undefined;
   readOnly?: boolean;
   required?: boolean;
   invalid?: boolean;

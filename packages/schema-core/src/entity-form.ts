@@ -394,6 +394,11 @@ export interface FormAction {
  * never imports `@listgrid/state`, verified feasibility-1).
  */
 export interface ActionContext {
+  /**
+   * Identity declared on the EntityForm. Actions must use this instead of
+   * requiring an `id` EntityField solely to transport record identity.
+   */
+  entityId?: string | undefined;
   controller: FormRuntime;
   mutator: FormMutator;
   values: Readonly<Record<string, unknown>>;

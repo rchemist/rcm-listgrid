@@ -21,6 +21,11 @@ import type { FieldValue, RenderType } from './types';
  * the EntityForm-carrying `ConditionalValue`. MIGRATION carries the 1:1 map.
  */
 export interface FieldEvalContext<TValues = Record<string, unknown>> {
+  /**
+   * Identity declared on the owning EntityForm. This is deliberately separate
+   * from `values`: record identity must never require a synthetic `id` field.
+   */
+  entityId?: string | undefined;
   /** create vs update — the primary conditional discriminant. */
   renderType?: RenderType;
   /** host-injected session; permission/role reads go through ./permission. */

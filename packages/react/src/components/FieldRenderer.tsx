@@ -29,9 +29,11 @@ export interface FieldRendererProps {
   field: EntityField;
   /** override the store-slice key; defaults to `field.getName()`. */
   name?: string;
+  /** identity declared on the owning EntityForm (not a field value). */
+  entityId?: string | undefined;
 }
 
-export function FieldRenderer({ field, name }: FieldRendererProps) {
+export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
   const fieldName = name ?? field.getName();
   const store = useFormStore();
   const session = useSession();
@@ -65,6 +67,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
       const state = store.getState();
       const ownSlice = state.fields[fieldName];
       const ctx: FieldEvalContext = {
+        ...(entityId !== undefined ? { entityId } : {}),
         renderType: state.renderType,
         values: snapshotFieldValues(state),
         ...(ownSlice !== undefined ? { value: ownSlice } : {}),
@@ -124,7 +127,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
     // Re-resolve on: own slice edits (`slice`) AND declared cross-field
     // dependency changes (`depSignal`). Subscribing to `depSignal` (not the
     // whole store) keeps D4 — only fields that DECLARE a dependency pay for it.
-  }, [store, session, field, fieldName, slice, depSignal]);
+  }, [store, session, field, fieldName, entityId, slice, depSignal]);
 
   // EG2 — security hard-gate: permission is resolved synchronously (no
   // predicate/async involved) straight from the field's declared
@@ -174,6 +177,7 @@ export function FieldRenderer({ field, name }: FieldRendererProps) {
         <Renderer
           field={field}
           name={fieldName}
+          {...(entityId !== undefined ? { entityId } : {})}
           readOnly={effReadOnly}
           required={effRequired}
           invalid={hasErrors}

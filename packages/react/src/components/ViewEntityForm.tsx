@@ -194,10 +194,12 @@ function FieldGroupPanel({
   group,
   fields,
   saving,
+  entityId,
 }: {
   group: FieldGroupDef;
   fields: EntityField[];
   saving: boolean;
+  entityId?: string | undefined;
 }) {
   const collapsible = group.open !== undefined;
   const [open, setOpen] = useState(group.open ?? true);
@@ -222,7 +224,7 @@ function FieldGroupPanel({
       )}
       <div id={`field-group-${group.id}`} hidden={collapsible && !open}>
         {fields.map((field) => (
-          <FieldRenderer key={field.getName()} field={field} />
+          <FieldRenderer key={field.getName()} field={field} entityId={entityId} />
         ))}
       </div>
     </fieldset>
@@ -340,6 +342,7 @@ function buildActionCtx(
     },
   };
   return {
+    ...(entityForm.getId() !== undefined ? { entityId: entityForm.getId() } : {}),
     controller,
     mutator,
     values: snapshotValues(),
@@ -686,6 +689,7 @@ function ViewEntityFormInner({
     void (async () => {
       const s = store.getState();
       const evalCtx: FieldEvalContext = {
+        ...(entityForm.getId() !== undefined ? { entityId: entityForm.getId() } : {}),
         renderType: actionRenderType, // id-based — matches controller (Fix#3)
         values: snapshotFieldValues(s),
         ...(session !== undefined ? { session } : {}),
@@ -732,6 +736,7 @@ function ViewEntityFormInner({
     void (async () => {
       const s = store.getState();
       const evalCtx: FieldEvalContext = {
+        ...(entityForm.getId() !== undefined ? { entityId: entityForm.getId() } : {}),
         renderType: actionRenderType, // id-based — matches the action bar (Fix#3)
         values: snapshotFieldValues(s),
         ...(session !== undefined ? { session } : {}),
@@ -900,6 +905,7 @@ function ViewEntityFormInner({
           group={group}
           fields={deriveGroupFields(fields, activeTabId, group.id)}
           saving={saving}
+          entityId={entityForm.getId()}
         />
       ))}
 
@@ -926,7 +932,7 @@ function ViewEntityFormInner({
           <legend>{currentStep.label}</legend>
           {currentStep.description && <p>{currentStep.description}</p>}
           {stepFields.map((field) => (
-            <FieldRenderer key={field.getName()} field={field} />
+            <FieldRenderer key={field.getName()} field={field} entityId={entityForm.getId()} />
           ))}
         </fieldset>
       )}

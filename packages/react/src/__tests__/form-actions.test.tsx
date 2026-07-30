@@ -302,6 +302,21 @@ describe('ViewEntityForm action bar — controller-absent (spec §3.4 §설계 �
 // red→green lock for exactly one of the 4 findings.
 
 describe('ViewEntityForm action bar — function-conditional visible/enabled resolve async (W3-6 Fix#1)', () => {
+  it('passes EntityForm identity to action predicates without declaring an id field', async () => {
+    const visible = vi.fn((ctx: FieldEvalContext) => ctx.entityId === 'widget-42');
+    const entityForm = WidgetForm().withId('widget-42').addAction({
+      id: 'identity',
+      label: 'Identity action',
+      visible,
+    });
+
+    renderForm(entityForm, { controller: fakeController() });
+
+    expect(await screen.findByRole('button', { name: 'Identity action' })).toBeInTheDocument();
+    expect(visible).toHaveBeenCalledWith(expect.objectContaining({ entityId: 'widget-42' }));
+    expect(entityForm.getFields().some((field) => field.getName() === 'id')).toBe(false);
+  });
+
   it('a function-typed Delete capability renders Delete for an ADMIN session (was ALWAYS hidden — the sync getStaticConditionalBoolean fallback resolves any function to false)', async () => {
     const entityForm = WidgetForm().withId('7').withCapabilities({ delete: isAdmin });
     renderForm(entityForm, { controller: fakeController(), session: { roles: ['ADMIN'] } });
@@ -353,6 +368,26 @@ describe('ViewEntityForm action bar — function-conditional visible/enabled res
 });
 
 describe('ViewEntityForm action bar — fresh ActionContext at click time (W3-6 Fix#2)', () => {
+  it('passes EntityForm identity separately from values without declaring an id field', async () => {
+    let captured: ActionContext | undefined;
+    const entityForm = WidgetForm()
+      .withId('widget-42')
+      .addAction({
+        id: 'identity',
+        label: 'Identity action',
+        run: (ctx) => {
+          captured = ctx;
+        },
+      });
+
+    renderForm(entityForm, { controller: fakeController() });
+    fireEvent.click(await screen.findByRole('button', { name: 'Identity action' }));
+
+    await waitFor(() => expect(captured?.entityId).toBe('widget-42'));
+    expect(captured?.values).not.toHaveProperty('id');
+    expect(entityForm.getFields().some((field) => field.getName() === 'id')).toBe(false);
+  });
+
   it("a custom action's run receives the value typed AFTER the last render — not a stale render-time snapshot (D4: a keystroke doesn't re-render ViewEntityFormInner)", async () => {
     let captured: unknown;
     const entityForm = WidgetForm().addAction({
