@@ -24,6 +24,7 @@ import type { FieldRendererComponentProps } from './field-renderer-registry';
 export function MessageViewFieldRenderer({
   field,
   name,
+  entityId,
   required,
   invalid,
   describedBy,
@@ -39,6 +40,7 @@ export function MessageViewFieldRenderer({
       const state = store.getState();
       const ownSlice = state.fields[name];
       const ctx: FieldEvalContext = {
+        ...(entityId !== undefined ? { entityId } : {}),
         renderType: state.renderType,
         values: snapshotFieldValues(state),
         ...(ownSlice !== undefined ? { value: ownSlice } : {}),
@@ -50,7 +52,7 @@ export function MessageViewFieldRenderer({
     return () => {
       cancelled = true;
     };
-  }, [store, session, messageField, name]);
+  }, [store, session, messageField, name, entityId]);
 
   return (
     <div

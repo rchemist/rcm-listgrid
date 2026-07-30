@@ -127,6 +127,28 @@ describe('createFormStore (ADR-0002 value-slice store)', () => {
       expect(save.nickname).toBe('KIM');
     });
 
+    it('passes EntityForm identity to custom field serialization without an id field', () => {
+      class EntityAwareField extends FormField<string> {
+        constructor() {
+          super('nickname', 1, 'custom');
+        }
+        override serializeValue(value: string, ctx: FieldEvalContext): Record<string, unknown> {
+          return { nickname: value, ownerId: ctx.entityId };
+        }
+      }
+      const form = new EntityForm('EntityAwareForm', '/entity-aware')
+        .withId('entity-42')
+        .addFields({ items: [new EntityAwareField()] });
+      const store = createFormStore(form);
+      store.getState().setValue('nickname', 'kim');
+
+      expect(store.getState().toSaveData()).toEqual({
+        nickname: 'kim',
+        ownerId: 'entity-42',
+      });
+      expect(form.getFields().some((field) => field.getName() === 'id')).toBe(false);
+    });
+
     // Do-NOT (waves §W2-4): an object-valued field that is NOT manyToOne
     // (InlineMapField's value is itself a Record<string,string>) must serialize
     // under ITS OWN name, never mistaken for the M2O `<name>Id` flattening —

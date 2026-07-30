@@ -444,7 +444,12 @@ export function createFormStore(
     for (const [n, slice] of Object.entries(state.fields)) {
       values[n] = getCurrentValue(slice, state.renderType);
     }
-    const ctx: FieldEvalContext = { renderType: state.renderType, values };
+    const entityId = entityForm.getId();
+    const ctx: FieldEvalContext = {
+      ...(entityId !== undefined ? { entityId } : {}),
+      renderType: state.renderType,
+      values,
+    };
     const slice = state.fields[name];
     if (slice !== undefined) ctx.value = slice;
     if (session !== undefined) ctx.session = session;

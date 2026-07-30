@@ -135,7 +135,12 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     return cap === undefined ? true : getConditionalBoolean(ctx, cap);
   }
   function capCtx(renderType: RenderType): FieldEvalContext {
-    const ctx: FieldEvalContext = { renderType, values: snapshotValues() };
+    const entityId = entityForm.getId();
+    const ctx: FieldEvalContext = {
+      ...(entityId !== undefined ? { entityId } : {}),
+      renderType,
+      values: snapshotValues(),
+    };
     if (session !== undefined) ctx.session = session;
     return ctx;
   }

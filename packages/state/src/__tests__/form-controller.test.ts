@@ -662,6 +662,28 @@ describe('createFormController capability gate (spec §3.4/§6.2, CAP-06; W3-2)'
     expect(update).not.toHaveBeenCalled();
   });
 
+  it('passes EntityForm identity to update capability predicates without an id field', async () => {
+    const updateAllowed = vi.fn(async (ctx: FieldEvalContext) => ctx.entityId === 'entity-42');
+    const entityForm = WidgetForm().withId('entity-42').withCapabilities({ update: updateAllowed });
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const update = vi.fn(async () => ({ id: 'entity-42' }));
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toEqual({
+      ok: true,
+      result: { id: 'entity-42' },
+    });
+    expect(updateAllowed).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: 'entity-42', renderType: 'update' }),
+    );
+    expect(entityForm.getFields().some((field) => field.getName() === 'id')).toBe(false);
+  });
+
   it('capabilities.delete conditional: unauthorized session -> del() returns { ok: false }, adapter.remove NOT called; authorized session -> passes through', async () => {
     const entityForm = WidgetForm().withId('42').withCapabilities({ delete: isAdmin });
     const remove = vi.fn(async () => undefined);

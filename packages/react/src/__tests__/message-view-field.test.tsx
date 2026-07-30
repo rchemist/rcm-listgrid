@@ -90,6 +90,16 @@ describe('MessageViewFieldRenderer', () => {
     await screen.findByText('현재 렌더타입: update');
   });
 
+  it('passes EntityForm identity to a function-valued message without an id field', async () => {
+    const message = async (ctx: { entityId?: string }) => `현재 엔티티: ${ctx.entityId}`;
+    const form = noticeForm(message).withId('notice-42');
+
+    renderForm(form, 'update');
+
+    await screen.findByText('현재 엔티티: notice-42');
+    expect(form.getFields().some((field) => field.getName() === 'id')).toBe(false);
+  });
+
   it('a falsy message resolves to empty (getConditionalReactNode transplant — Config.ts branch order)', async () => {
     renderForm(noticeForm(undefined));
     const wrapper = document.querySelector('[data-field="messageView"]');

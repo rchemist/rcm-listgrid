@@ -145,17 +145,22 @@ describe("form-store AsyncValidation (W4-3) — 'button' trigger tri-state", () 
     ]);
   });
 
-  it('passes the CURRENT value + a FieldEvalContext (renderType) to check', async () => {
+  it('passes the CURRENT value + EntityForm identity in FieldEvalContext to check', async () => {
     const check = vi.fn(async () => ValidateResult.success());
-    const store = createFormStore(ButtonForm(check));
+    const form = ButtonForm(check).withId('entity-42');
+    const store = createFormStore(form);
     store.getState().setValue('alias', 'probe-value');
 
     await store.getState().runAsyncValidation('alias');
 
     expect(check).toHaveBeenCalledTimes(1);
-    const [value, ctx] = check.mock.calls[0] as [unknown, { renderType?: string }];
+    const [value, ctx] = check.mock.calls[0] as [
+      unknown,
+      { entityId?: string; renderType?: string },
+    ];
     expect(value).toBe('probe-value');
-    expect(ctx.renderType).toBe('create');
+    expect(ctx).toEqual(expect.objectContaining({ entityId: 'entity-42', renderType: 'update' }));
+    expect(form.getFields().some((field) => field.getName() === 'id')).toBe(false);
   });
 
   it('a field with no declared AsyncValidation is a silent no-op (no state change, check never invoked)', async () => {

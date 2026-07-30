@@ -2,6 +2,16 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.4.3] - 2026-07-30
+
+### Fixed
+
+- `FieldEvalContext.entityId`를 필드 검증·비동기 검증·저장 직렬화와
+  create/update/delete capability 조건식에도 일관되게 전달한다.
+- `MessageViewField` 함수형 메시지에도 사용자 필드와 분리된 EntityForm 식별자를 전달한다.
+- 모든 경로에서 ID 필드를 선언하지 않고도 EntityForm 식별자를 사용할 수 있음을 회귀 테스트로
+  고정한다.
+
 ## [0.4.2] - 2026-07-30
 
 ### Fixed
