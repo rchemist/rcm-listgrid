@@ -2,24 +2,6 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
-## [0.2.31] - 2026-07-31
-
-### Added
-
-- `UIProvider` 에 `openAsset?: (assetUrl: string) => void | Promise<void>` 슬롯 추가.
-  `FileField` 가 렌더하는 첨부 링크의 클릭을 호스트 핸들러로 위임한다. 자산 URL 직접
-  접근이 게이트되고 인증 경로로만 열람이 허용되는 배포(gjcu-academic-backend #1716
-  민감 증빙 `static-resource` 403 게이트)를 위한 확장점이다.
-- `AssetLink` 컴포넌트 — `href` 는 그대로 두어 가운데 클릭·링크 복사는 유지하고,
-  `openAsset` 이 주입된 경우에만 클릭을 가로채 원본 자산 URL 을 핸들러에 넘긴다.
-
-### Fixed
-
-- `FileField` 의 목록·상세 셀 첨부가 항상 `getAccessableAssetUrl()` 직접 링크를
-  새 탭으로 열어, 민감 증빙(통장사본 등)을 클릭하면 백엔드 게이트의 403 Whitelabel
-  화면이 그대로 노출되던 문제. 이제 호스트가 `openAsset` 을 주입하면 인증 열람
-  경로로 우회한다. 슬롯을 주입하지 않은 기존 소비자는 종전과 동일하게 동작한다.
-
 ## [0.2.30] - 2026-07-30
 
 ### Fixed
