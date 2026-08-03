@@ -102,6 +102,8 @@ function fieldValuesEqual(
   seen = new WeakMap<object, WeakSet<object>>(),
 ): boolean {
   if (left == null && right == null) return true;
+  // typeof null === 'object', so guard one-sided empty values before object handling.
+  if (left == null || right == null) return false;
   if (Object.is(left, right)) return true;
   if (typeof left !== 'object' || typeof right !== 'object') return false;
 

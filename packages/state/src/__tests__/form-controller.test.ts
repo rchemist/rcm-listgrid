@@ -501,6 +501,122 @@ describe('createFormController modifiedFields update contract', () => {
     await expect(controller.save()).resolves.toMatchObject({ ok: true });
   });
 
+  it('lists a cleared ManyToOne relation by its declared name without throwing', async () => {
+    const RelatedForm = () => new EntityForm('SiteEntityForm', '/site');
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new ManyToOneField('site', 1, { entityForm: RelatedForm })],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ site: { id: 'S1', name: 'X' } });
+    store.getState().setValue('site', null);
+    const update = vi.fn(async (_url: string, _id: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        site: null,
+        modifiedFields: ['site'],
+      });
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('lists a ManyToOne relation selected from a null baseline without throwing', async () => {
+    const RelatedForm = () => new EntityForm('SiteEntityForm', '/site');
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new ManyToOneField('site', 1, { entityForm: RelatedForm })],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ site: null });
+    store.getState().setValue('site', { id: 'S1' });
+    const update = vi.fn(async (_url: string, _id: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        siteId: 'S1',
+        modifiedFields: ['site'],
+      });
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('lists both directions of undefined-to-object relation changes without throwing', async () => {
+    const RelatedForm = () => new EntityForm('SiteEntityForm', '/site');
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [
+          new ManyToOneField('selectedSite', 1, { entityForm: RelatedForm }),
+          new ManyToOneField('clearedSite', 2, { entityForm: RelatedForm }),
+        ],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({
+      selectedSite: undefined,
+      clearedSite: { id: 'S2', name: 'Y' },
+    });
+    store.getState().setValue('selectedSite', { id: 'S1' });
+    store.getState().setValue('clearedSite', undefined);
+    const update = vi.fn(async (_url: string, _id: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        selectedSiteId: 'S1',
+        clearedSite: undefined,
+        modifiedFields: ['selectedSite', 'clearedSite'],
+      });
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats null and undefined relation values as equal', async () => {
+    const RelatedForm = () => new EntityForm('SiteEntityForm', '/site');
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new ManyToOneField('site', 1, { entityForm: RelatedForm })],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ site: null });
+    store.getState().setValue('site', undefined);
+    const update = vi.fn(async (_url: string, _id: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        site: undefined,
+        modifiedFields: [],
+      });
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
   it('does not add modifiedFields to create payloads', async () => {
     const entityForm = WidgetForm();
     const store = createFormStore(entityForm);
