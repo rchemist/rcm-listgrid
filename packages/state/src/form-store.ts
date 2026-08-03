@@ -215,6 +215,8 @@ export interface FormStoreState {
   getValue(name: string): unknown;
   /** fill fetched values from a server entity (create → update). */
   hydrate(data: Record<string, unknown>): void;
+  /** promote current values to the fetched baseline after a successful save. */
+  commitBaseline(): void;
   /**
    * Imperative reactivity entry point (EF1): shallow-merge `partial` into
    * field `name`'s meta override. Renderers subscribed via useFieldMeta
@@ -731,6 +733,20 @@ export function createFormStore(
             renderType: 'update' as RenderType,
             initialized: true,
           };
+        });
+      },
+
+      commitBaseline() {
+        set((s) => {
+          const fields = { ...s.fields };
+          for (const [name, slice] of Object.entries(fields)) {
+            fields[name] = {
+              ...slice,
+              fetched: slice.current,
+              dirty: false,
+            };
+          }
+          return { fields };
         });
       },
 

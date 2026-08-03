@@ -412,6 +412,92 @@ describe('createFormController.save (spec §6.2)', () => {
 });
 
 describe('createFormController modifiedFields update contract', () => {
+  it('consecutive updates report only newly changed fields', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new StringField('name', 1), new StringField('description', 2)],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ name: 'Old name', description: 'Old description' });
+    const update = vi.fn(async (_url: string, _id: string, _data: Record<string, unknown>) => ({
+      id: '42',
+    }));
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    store.getState().setValue('name', 'New name');
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update.mock.calls[0]?.[2].modifiedFields).toEqual(['name']);
+
+    store.getState().setValue('description', 'New description');
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update.mock.calls[1]?.[2].modifiedFields).toEqual(['description']);
+  });
+
+  it('a cleared field is not re-reported after a successful save', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new StringField('name', 1), new StringField('description', 2)],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ name: 'Widget', description: 'Remove me' });
+    const update = vi.fn(async (_url: string, _id: string, _data: Record<string, unknown>) => ({
+      id: '42',
+    }));
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    store.getState().setValue('description', null);
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update.mock.calls[0]?.[2]).toMatchObject({
+      description: null,
+    });
+    expect(update.mock.calls[0]?.[2].modifiedFields).toEqual(['description']);
+
+    store.getState().setValue('name', 'Renamed widget');
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update.mock.calls[1]?.[2]).toMatchObject({
+      name: 'Renamed widget',
+      description: null,
+    });
+    expect(update.mock.calls[1]?.[2].modifiedFields).toEqual(['name']);
+  });
+
+  it('a failed save does not commit the baseline', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({ items: [new StringField('name', 1)] })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ name: 'Old name' });
+    store.getState().setValue('name', 'New name');
+    const error: BackendError = { code: 'UNKNOWN', message: 'network down' };
+    let shouldReject = true;
+    const update = vi.fn(async (_url: string, _id: string, _data: Record<string, unknown>) => {
+      if (shouldReject) {
+        shouldReject = false;
+        throw error;
+      }
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toEqual({ ok: false, reason: 'error', error });
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update.mock.calls[1]?.[2].modifiedFields).toEqual(['name']);
+  });
+
   it('sends only changed declared field names and preserves revisionEntityName', async () => {
     const entityForm = new EntityForm('WidgetEntityForm', '/widget')
       .addFields({
@@ -617,7 +703,7 @@ describe('createFormController modifiedFields update contract', () => {
     expect(update).toHaveBeenCalledTimes(1);
   });
 
-  it('does not add modifiedFields to create payloads', async () => {
+  it('create does not commit a baseline or add modifiedFields to payloads', async () => {
     const entityForm = WidgetForm();
     const store = createFormStore(entityForm);
     store.getState().setValue('name', 'Widget A');
@@ -633,6 +719,9 @@ describe('createFormController modifiedFields update contract', () => {
     });
 
     await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(store.getState().fields.name?.current).toBe('Widget A');
+    expect(store.getState().fields.name?.fetched).toBeUndefined();
+    expect(store.getState().fields.name?.dirty).toBe(true);
   });
 });
 

@@ -70,8 +70,9 @@ import {
 //      generic error.message; non-validation failures use messages — return
 //      { ok: false, reason: 'error', error }. (onBeforeSave cancel =>
 //      { ok: false, reason: 'cancelled', cancelled? } — step 4.)
-//   8. success => clearMessages()/clearGlobalErrors() -> onAfterSave handlers,
-//      sequential, same per-handler try/catch -> { ok: true, result }.
+//   8. success => clearMessages()/clearGlobalErrors(); update commits the saved
+//      values as its baseline -> onAfterSave handlers, sequential, same
+//      per-handler try/catch -> { ok: true, result }.
 //      Every exit path settles through finally and restores saving=false;
 //      overlapping save() calls share the same in-flight promise.
 //
@@ -432,6 +433,10 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
 
     store.getState().clearMessages();
     store.getState().clearGlobalErrors();
+    if (entityId !== undefined) {
+      // The saved values are the new baseline, so the next save reports only new edits.
+      store.getState().commitBaseline();
+    }
 
     const bufferedCount = Object.values(store.getState().fieldDefs).reduce((count, field) => {
       if (!(field instanceof SubCollectionField) || field.getPersistence() !== 'child-resource') {
