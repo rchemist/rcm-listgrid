@@ -8,18 +8,9 @@
 import { useEffect, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import {
-  BooleanField,
-  EntityForm,
-  StringField,
-  type FormRuntime,
-} from '@listgrid/schema-core';
+import { BooleanField, EntityForm, StringField, type FormRuntime } from '@listgrid/schema-core';
 import { createFormStore } from '@listgrid/state';
-import {
-  defaultUIComponents,
-  type TextInputProps,
-  type UIComponents,
-} from '@listgrid/ui-default';
+import { defaultUIComponents, type TextInputProps, type UIComponents } from '@listgrid/ui-default';
 import { AuthProvider } from '../providers/auth';
 import { UIProvider } from '../providers/ui';
 import { FormStoreProvider } from '../providers/form-store';

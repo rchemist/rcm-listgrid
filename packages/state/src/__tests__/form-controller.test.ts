@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   CustomValidation,
   EntityForm,
+  ManyToOneField,
   StringField,
   ValidateResult,
   type BackendAdapter,
@@ -407,6 +408,115 @@ describe('createFormController.save (spec §6.2)', () => {
     expect(outcome.ok).toBe(true); // NOT cancelled/failed — the throw did not propagate
     expect(consoleError).toHaveBeenCalled();
     consoleError.mockRestore();
+  });
+});
+
+describe('createFormController modifiedFields update contract', () => {
+  it('sends only changed declared field names and preserves revisionEntityName', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new StringField('name', 1), new StringField('description', 2)],
+      })
+      .withId('42')
+      .withRevision('widget-revision');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ name: 'Old name', description: 'Untouched' });
+    store.getState().setValue('name', 'New name');
+    const update = vi.fn(async (_url: string, _id: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        name: 'New name',
+        description: 'Untouched',
+        revisionEntityName: 'widget-revision',
+        modifiedFields: ['name'],
+      });
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+    expect(update).toHaveBeenCalledTimes(1);
+  });
+
+  it('lists an explicitly cleared field so nullable values can be applied', async () => {
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [new StringField('name', 1), new StringField('description', 2)],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({ name: 'Widget', description: 'Remove me' });
+    store.getState().setValue('description', null);
+    const update = vi.fn(async (_url: string, _id: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        name: 'Widget',
+        description: null,
+        modifiedFields: ['description'],
+      });
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+  });
+
+  it('uses a ManyToOne declared name while its payload is flattened to the id key', async () => {
+    const RelatedForm = () => new EntityForm('SiteEntityForm', '/site');
+    const entityForm = new EntityForm('WidgetEntityForm', '/widget')
+      .addFields({
+        items: [
+          new ManyToOneField('site', 1, { entityForm: RelatedForm }),
+          new ManyToOneField('owner', 2, { entityForm: RelatedForm }),
+        ],
+      })
+      .withId('42');
+    const store = createFormStore(entityForm);
+    store.getState().hydrate({
+      site: { id: 'site-1', name: 'Old site' },
+      owner: { id: 'owner-1', name: 'Old owner label' },
+    });
+    store.getState().setValue('site', { id: 'site-2', name: 'New site' });
+    store.getState().setValue('owner', { id: 'owner-1', name: 'Updated owner label' });
+    const update = vi.fn(async (_url: string, _id: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({
+        siteId: 'site-2',
+        ownerId: 'owner-1',
+        modifiedFields: ['site'],
+      });
+      return { id: '42' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ update }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
+  });
+
+  it('does not add modifiedFields to create payloads', async () => {
+    const entityForm = WidgetForm();
+    const store = createFormStore(entityForm);
+    store.getState().setValue('name', 'Widget A');
+    const create = vi.fn(async (_url: string, data: Record<string, unknown>) => {
+      expect(data).toEqual({ name: 'Widget A' });
+      expect(data).not.toHaveProperty('modifiedFields');
+      return { id: '1' };
+    });
+    const controller = createFormController({
+      entityForm,
+      store,
+      adapter: fakeAdapter({ create }),
+    });
+
+    await expect(controller.save()).resolves.toMatchObject({ ok: true });
   });
 });
 

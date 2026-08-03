@@ -96,6 +96,63 @@ export interface CreateFormControllerOptions {
   session?: Session;
 }
 
+function fieldValuesEqual(
+  left: unknown,
+  right: unknown,
+  seen = new WeakMap<object, WeakSet<object>>(),
+): boolean {
+  if (left == null && right == null) return true;
+  if (Object.is(left, right)) return true;
+  if (typeof left !== 'object' || typeof right !== 'object') return false;
+
+  let matches = seen.get(left);
+  if (matches?.has(right)) return true;
+  if (matches === undefined) {
+    matches = new WeakSet<object>();
+    seen.set(left, matches);
+  }
+  matches.add(right);
+
+  if (Array.isArray(left) || Array.isArray(right)) {
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
+    return left.every((value, index) => fieldValuesEqual(value, right[index], seen));
+  }
+
+  const leftRecord = left as Record<string, unknown>;
+  const rightRecord = right as Record<string, unknown>;
+  const hasLeftId = Object.prototype.hasOwnProperty.call(leftRecord, 'id');
+  const hasRightId = Object.prototype.hasOwnProperty.call(rightRecord, 'id');
+  if (hasLeftId && hasRightId && leftRecord.id != null && rightRecord.id != null) {
+    return fieldValuesEqual(leftRecord.id, rightRecord.id, seen);
+  }
+
+  if (left instanceof Date || right instanceof Date) {
+    return left instanceof Date && right instanceof Date && left.getTime() === right.getTime();
+  }
+
+  const leftPrototype = Object.getPrototypeOf(left);
+  const rightPrototype = Object.getPrototypeOf(right);
+  if (leftPrototype !== rightPrototype) return false;
+  if (leftPrototype !== Object.prototype && leftPrototype !== null) return false;
+
+  const leftKeys = Object.keys(leftRecord);
+  const rightKeys = Object.keys(rightRecord);
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every(
+      (key) =>
+        Object.prototype.hasOwnProperty.call(rightRecord, key) &&
+        fieldValuesEqual(leftRecord[key], rightRecord[key], seen),
+    )
+  );
+}
+
+function computeModifiedFields(store: StoreApi<FormStoreState>): string[] {
+  return Object.entries(store.getState().fields)
+    .filter(([, slice]) => !fieldValuesEqual(slice.current, slice.fetched))
+    .map(([name]) => name);
+}
+
 export function createFormController(opts: CreateFormControllerOptions): FormRuntime {
   const { entityForm, store, adapter } = opts;
   const session = opts.session;
@@ -351,6 +408,11 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
     const revisionEntityName = entityForm.getRevisionEntityName();
     if (revisionEntityName !== undefined) {
       data = { ...data, revisionEntityName };
+    }
+    // 0.3.22 update contract: declared field names identify applied values,
+    // including explicit clears; create payloads must remain unchanged.
+    if (entityId !== undefined) {
+      data = { ...data, modifiedFields: computeModifiedFields(store) };
     }
 
     let result: unknown;

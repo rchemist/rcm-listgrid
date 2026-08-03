@@ -3,10 +3,7 @@ import { NumberField, TextareaField } from '../index';
 
 describe('NumberField 0.3 builder compatibility', () => {
   it('composes min/max without dropping the opposite bound', () => {
-    const field = new NumberField('count', 1)
-      .withLimit({ min: 1, max: 10 })
-      .withMin(2)
-      .withMax(9);
+    const field = new NumberField('count', 1).withLimit({ min: 1, max: 10 }).withMin(2).withMax(9);
 
     expect(field.limit).toEqual({ min: 2, max: 9 });
   });

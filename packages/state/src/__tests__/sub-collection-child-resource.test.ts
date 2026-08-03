@@ -166,7 +166,11 @@ describe('SubCollectionField child-resource persistence', () => {
       result: { id: 'p1', name: 'Kim' },
     });
     expect(create.mock.calls.filter(([url]) => url === '/professor')).toHaveLength(1);
-    expect(update).toHaveBeenCalledWith('/professor', 'p1', { name: 'Kim' });
+    // 0.3.22 update contract: modifiedFields lists only genuinely changed fields.
+    expect(update).toHaveBeenCalledWith('/professor', 'p1', {
+      modifiedFields: ['degrees'],
+      name: 'Kim',
+    });
     expect(getBufferedSubCollectionRows(store, 'degrees')).toEqual([]);
   });
 });

@@ -22,13 +22,7 @@ import type { FieldMetaOverride } from './field-meta';
 import type { FieldFilterConfig, FieldListConfig } from './list-config';
 import type { FieldType, FieldValue } from './types';
 import { isBlank } from './value';
-import {
-  ADD_ONLY,
-  LIST_ONLY,
-  MODIFY_ONLY,
-  VIEW_HIDDEN,
-  type ViewPreset,
-} from './view-preset';
+import { ADD_ONLY, LIST_ONLY, MODIFY_ONLY, VIEW_HIDDEN, type ViewPreset } from './view-preset';
 
 /**
  * Abstract base for every concrete field class (charter C1/C4). The React-free
