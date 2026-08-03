@@ -2,6 +2,17 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.1] - 2026-08-03
+
+### Fixed
+
+- EntityForm update payload 최상단의 `modifiedFields` 배열을 복원했다. 각 필드의 current와
+  fetched를 비교해 실제로 바뀐 선언 필드명만 담으므로, `ManyToOneField`의 `site` 값이
+  `siteId`로 평탄화돼도 `site`로 등재된다. 소비 백엔드는 다시 명시적으로 비운 값과 건드리지
+  않은 값을 구분할 수 있으며, create payload는 변경되지 않는다.
+- 변경 필드 비교 중 한쪽만 null/undefined이고 다른 쪽이 객체일 때 null을 WeakMap/WeakSet 키로
+  사용해 `TypeError`가 발생하던 문제를 고쳐 관계를 비우는 update가 정상 저장되도록 했다.
+
 ## [0.5.0] - 2026-08-03
 
 ### Added
