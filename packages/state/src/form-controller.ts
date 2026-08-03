@@ -18,12 +18,18 @@ import {
   type SaveOutcome,
   type Session,
 } from '@listgrid/schema-core';
+import { SubCollectionField } from '@listgrid/schema-core';
 import {
   initializeFormStore,
   toBackendError,
   type InitializeFormStoreOptions,
 } from './initialize-form-store';
 import type { FormStoreState } from './form-store';
+import {
+  getBufferedSubCollectionRows,
+  setBufferedSubCollectionRows,
+  type BufferedSubCollectionRow,
+} from './sub-collection-buffer';
 
 // createFormController (spec §6.2; W2-5) — the sole IMPLEMENTATION of
 // FormRuntime (@listgrid/schema-core/form-runtime.ts). Lives in @listgrid/
@@ -149,7 +155,7 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
   // store's own internal mutator (form-store.ts) is a closure-private const,
   // not part of FormStoreState, so this rebuilds an equivalent adapter from
   // the store's PUBLIC actions only (no new store accessor needed).
-  function buildMutator(): FormMutator {
+  function buildMutator(renderTypeOverride?: RenderType): FormMutator {
     return {
       getValue(name) {
         return store.getState().getValue(name);
@@ -173,7 +179,7 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
         store.getState().setTabHidden(tabId, hidden);
       },
       getRenderType() {
-        return entityForm.getRenderType();
+        return renderTypeOverride ?? entityForm.getRenderType();
       },
       getSession() {
         return session;
@@ -218,6 +224,60 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
   }
 
   let activeSave: Promise<SaveOutcome> | undefined;
+
+  function resultRecord(value: unknown): Record<string, unknown> | undefined {
+    return value !== null && typeof value === 'object'
+      ? (value as Record<string, unknown>)
+      : undefined;
+  }
+
+  function resultId(value: unknown): string | undefined {
+    const id = resultRecord(value)?.['id'];
+    return typeof id === 'string' || typeof id === 'number' ? String(id) : undefined;
+  }
+
+  async function flushBufferedChildren(
+    parentId: string,
+  ): Promise<{ failed: number; errors: BackendError[] }> {
+    let failed = 0;
+    const errors: BackendError[] = [];
+
+    for (const field of Object.values(store.getState().fieldDefs)) {
+      if (!(field instanceof SubCollectionField) || field.getPersistence() !== 'child-resource') {
+        continue;
+      }
+      const buffered = getBufferedSubCollectionRows(store, field.getName());
+      if (buffered.length === 0) continue;
+
+      const mappedBy = field.getMappedBy();
+      if (mappedBy === undefined) continue; // constructor guards child-resource mode
+      const displayed = (store.getState().getValue(field.getName()) ??
+        []) as BufferedSubCollectionRow[];
+      const nextDisplayed = [...displayed];
+      const remaining: BufferedSubCollectionRow[] = [];
+
+      for (const row of buffered) {
+        try {
+          const created = await adapter.create(field.getChildEntityForm().url, {
+            ...row,
+            [mappedBy]: parentId,
+          });
+          const createdRow = resultRecord(created) ?? row;
+          const index = nextDisplayed.indexOf(row);
+          if (index !== -1) nextDisplayed[index] = createdRow;
+        } catch (e) {
+          failed += 1;
+          errors.push(toBackendError(e));
+          remaining.push(row);
+        }
+      }
+
+      setBufferedSubCollectionRows(store, field.getName(), remaining);
+      store.getState().setValue(field.getName(), nextDisplayed, { cascade: false });
+    }
+
+    return { failed, errors };
+  }
 
   async function performSave(saveOpts?: { skipValidation?: boolean }): Promise<SaveOutcome> {
     // Update is possible iff the form has an id. Derive both the mode and
@@ -308,8 +368,75 @@ export function createFormController(opts: CreateFormControllerOptions): FormRun
 
     store.getState().clearMessages();
     store.getState().clearGlobalErrors();
+
+    const bufferedCount = Object.values(store.getState().fieldDefs).reduce((count, field) => {
+      if (!(field instanceof SubCollectionField) || field.getPersistence() !== 'child-resource') {
+        return count;
+      }
+      return count + getBufferedSubCollectionRows(store, field.getName()).length;
+    }, 0);
+
+    if (bufferedCount > 0) {
+      const parentId = entityId ?? resultId(result);
+      if (parentId === undefined) {
+        const error: BackendError = {
+          code: 'UNKNOWN',
+          message:
+            `부모 저장은 성공했지만 응답에 id가 없어 버퍼된 자식 ${bufferedCount}건을 ` +
+            '저장하지 못했습니다. 자식 데이터는 화면에 유지됩니다.',
+        };
+        store.getState().addMessage({
+          key: 'subcollection-partial-save',
+          severity: 'error',
+          text: error.message,
+          persistent: true,
+        });
+        return { ok: false, reason: 'error', error };
+      }
+
+      // Once the parent exists, keep the controller/store in update mode so a
+      // retry updates that parent instead of creating a duplicate. Merge the
+      // displayed child arrays because the parent response correctly omits
+      // child-resource fields.
+      if (entityId === undefined) {
+        const displayedChildren: Record<string, unknown> = {};
+        for (const field of Object.values(store.getState().fieldDefs)) {
+          if (field instanceof SubCollectionField && field.getPersistence() === 'child-resource') {
+            displayedChildren[field.getName()] = store.getState().getValue(field.getName());
+          }
+        }
+        entityForm.withId(parentId);
+        store.getState().hydrate({ ...(resultRecord(result) ?? {}), ...displayedChildren });
+      }
+
+      const flushed = await flushBufferedChildren(parentId);
+      if (flushed.failed > 0) {
+        const details = flushed.errors.map((error) => error.message).join('; ');
+        const error: BackendError = {
+          code: 'UNKNOWN',
+          message:
+            `부모(id=${parentId}) 저장은 성공했지만 자식 ${flushed.failed}/${bufferedCount}건 ` +
+            `저장에 실패했습니다. 실패한 자식은 화면에 유지됩니다.${details ? ` (${details})` : ''}`,
+        };
+        store.getState().addMessage({
+          key: 'subcollection-partial-save',
+          severity: 'error',
+          text: error.message,
+          persistent: true,
+        });
+        return { ok: false, reason: 'error', error };
+      }
+      store.getState().removeMessage('subcollection-partial-save');
+    }
+
     for (const handler of entityForm.getAfterSaveHandlers()) {
-      const ctx: AfterSaveContext = { result, data, renderType, session, mutator: buildMutator() };
+      const ctx: AfterSaveContext = {
+        result,
+        data,
+        renderType,
+        session,
+        mutator: buildMutator(renderType),
+      };
       try {
         await handler(ctx);
       } catch (e) {

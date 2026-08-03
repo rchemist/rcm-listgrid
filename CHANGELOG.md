@@ -2,6 +2,22 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.0] - 2026-08-03
+
+### Added
+
+- `SubCollectionField`에 opt-in `persistence: 'child-resource'` 모드를 추가했다. 기본값
+  `'embedded'`는 기존처럼 부모 payload에 배열을 포함하며 동작이 바뀌지 않는다.
+- child-resource 모드는 `mappedBy` 관계 필터로 자식 목록을 초기화하고, 기존 부모 화면의
+  자식 추가·수정·삭제를 `BackendAdapter`의 child endpoint CRUD로 영속화한다.
+- 부모 id가 없는 create 화면에서는 자식 행을 클라이언트에 버퍼링하고 부모 저장 성공 뒤
+  flush한다. 일부 자식 저장이 실패하면 성공한 부모 id와 실패 건수를 persistent 오류로
+  표시하고 실패 행만 재시도 버퍼에 유지한다.
+
+### Changed
+
+- child-resource 모드의 sub-collection 배열은 부모 create/update payload에서 제외된다.
+
 ## [0.4.3] - 2026-07-30
 
 ### Fixed

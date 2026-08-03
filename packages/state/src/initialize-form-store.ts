@@ -9,6 +9,7 @@ import type {
   RenderType,
   Session,
 } from '@listgrid/schema-core';
+import { SearchForm, SubCollectionField } from '@listgrid/schema-core';
 import {
   createFormStore,
   resolveFetchedValue,
@@ -78,8 +79,9 @@ export interface InitializeFormStoreResult {
   /** the initialized EntityForm (post onInit) — may carry fields the
    *  declared entityForm did not have; use this, not the input entityForm, to render. */
   entityForm: EntityForm;
-  /** set only on a fetch failure (0.3.x EntityForm.tsx:198-203 parity) — BIND/hooks/
-   *  REBIND were all skipped, but `store` is still a valid, usable (empty/default) store. */
+  /** set on a parent fetch or opt-in child-resource list failure. Parent-fetch
+   *  failure skips BIND/hooks/REBIND; a child-list failure retains the loaded
+   *  parent data and returns a valid store so the error can be surfaced. */
   error?: BackendError;
 }
 
@@ -133,6 +135,51 @@ function rebindLateAddedFields(ef: EntityForm, data: Record<string, unknown>): v
     if (value === undefined) continue;
     field.value = { ...field.value, fetched: value, current: value };
   }
+}
+
+async function loadChildResourceCollections(
+  ef: EntityForm,
+  adapter: BackendAdapter,
+  parentId: string,
+  data: Record<string, unknown>,
+): Promise<{ data: Record<string, unknown>; error?: BackendError }> {
+  const merged = { ...data };
+  let firstError: BackendError | undefined;
+
+  for (const field of ef.getFields()) {
+    if (!(field instanceof SubCollectionField) || field.getPersistence() !== 'child-resource') {
+      continue;
+    }
+    const filterName = field.getMappedByFilterName();
+    if (filterName === undefined) continue; // constructor already guards this mode
+
+    try {
+      const rows: Record<string, unknown>[] = [];
+      let search = SearchForm.create({ pageSize: 1000 }).addAndFilter({
+        name: filterName,
+        value: parentId,
+      });
+      let page = await adapter.list<Record<string, unknown>>(
+        field.getChildEntityForm().url,
+        search,
+      );
+      rows.push(...page.content);
+      for (let pageIndex = 1; pageIndex < page.totalPages; pageIndex += 1) {
+        search = search.withPage(pageIndex);
+        page = await adapter.list<Record<string, unknown>>(field.getChildEntityForm().url, search);
+        rows.push(...page.content);
+      }
+      merged[field.getName()] = rows;
+    } catch (e) {
+      firstError ??= toBackendError(e);
+      // Never fall back to an embedded parent array in child-resource mode:
+      // that value is not authoritative. An empty collection plus the
+      // returned error makes the failed read explicit to the host.
+      merged[field.getName()] = [];
+    }
+  }
+
+  return firstError === undefined ? { data: merged } : { data: merged, error: firstError };
 }
 
 // buildInitContext — composes the InitContext (spec §4.1) shared across every
@@ -208,6 +255,7 @@ export async function initializeFormStore(
 
   // b. resolve the fetched data (initialData bypasses the adapter entirely).
   let data: Record<string, unknown> | undefined = initialData;
+  let childResourceError: BackendError | undefined;
   if (data === undefined && id != null && adapter) {
     try {
       data = (await adapter.getOne(ef.url, id)) as Record<string, unknown>;
@@ -221,6 +269,17 @@ export async function initializeFormStore(
       if (options.into !== undefined) return { store: options.into, entityForm: ef, error };
       return { store: createFormStore(ef, storeOpts), entityForm: ef, error };
     }
+  }
+
+  // b.2. Opt-in SubCollection read side. The parent id is the relation value;
+  // create-mode forms have no id and therefore intentionally do no child IO.
+  // This also runs when `initialData` supplied the parent record: initialData
+  // bypasses the parent GET, while child-resource remains authoritative for
+  // the opted-in collection.
+  if (data !== undefined && id != null && adapter) {
+    const loaded = await loadChildResourceCollections(ef, adapter, id, data);
+    data = loaded.data;
+    childResourceError = loaded.error;
   }
 
   // d. BIND — see bindFetchedData doc above. Runs BEFORE onInit so a
@@ -284,9 +343,13 @@ export async function initializeFormStore(
     }
     dataState.structureVersion = into.getState().structureVersion + 1;
     into.setState(dataState as Partial<FormStoreState>, false);
-    return { store: into, entityForm: ef };
+    return childResourceError === undefined
+      ? { store: into, entityForm: ef }
+      : { store: into, entityForm: ef, error: childResourceError };
   }
 
   const store = createFormStore(ef, storeOpts);
-  return { store, entityForm: ef };
+  return childResourceError === undefined
+    ? { store, entityForm: ef }
+    : { store, entityForm: ef, error: childResourceError };
 }

@@ -20,3 +20,10 @@ export type {
 // over a form store + BackendAdapter ---
 export { createFormController } from './form-controller';
 export type { CreateFormControllerOptions } from './form-controller';
+
+// --- SubCollectionField create-screen transport buffer (F-2) ---
+export {
+  getBufferedSubCollectionRows,
+  setBufferedSubCollectionRows,
+} from './sub-collection-buffer';
+export type { BufferedSubCollectionRow } from './sub-collection-buffer';
