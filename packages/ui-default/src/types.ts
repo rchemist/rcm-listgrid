@@ -245,6 +245,8 @@ export interface PaginationProps {
   page: number;
   totalPages: number;
   onChange?: (page: number) => void;
+  prevLabel?: string;
+  nextLabel?: string;
 }
 
 export interface StackProps {

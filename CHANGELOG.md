@@ -2,6 +2,15 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.4] - 2026-08-05
+
+### Added
+
+- `ViewListGrid`에 호스트가 컬럼 표시 설정을 저장할 수 있는 controlled
+  `hiddenColumns`/`onHiddenColumnsChange` props를 추가했다.
+- 페이지네이션 이전/다음 문구를 `configureLabels`의 `paginationPrev`/`paginationNext`로
+  재정의할 수 있고, 기본 `Pagination`에도 `prevLabel`/`nextLabel` props를 추가했다.
+
 ## [0.5.3] - 2026-08-05
 
 ### Added

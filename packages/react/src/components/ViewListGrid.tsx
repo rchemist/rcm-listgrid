@@ -73,9 +73,15 @@ export interface ViewListGridProps {
   store: StoreApi<ListStoreState>;
   onRowClick?: (row: Record<string, unknown>) => void;
   columns?: ViewListGridColumn[];
-  /** Opt-in local column-visibility dialog. Visibility is component-local and
-   * is not persisted; omitted/false preserves the existing list chrome. */
+  /** Opt-in column-visibility dialog. Visibility is component-local unless
+   * `hiddenColumns` is controlled by the host; omitted/false preserves the
+   * existing list chrome. */
   columnSettings?: boolean;
+  /** Controlled hidden column names. When provided, these column `name`
+   * values are the source of truth; persistence remains the host's concern. */
+  hiddenColumns?: readonly string[];
+  /** Receives the next controlled array of hidden column names. */
+  onHiddenColumnsChange?: (names: string[]) => void;
   /** Row checkboxes + a confirm button. Checking a row's box does NOT
    * trigger `onRowClick` (the checkbox cell stops click propagation before
    * it reaches the row). */
@@ -210,12 +216,26 @@ function nextSortDirection(current: Direction | undefined): Direction {
   return current === 'ASC' ? 'DESC' : 'ASC';
 }
 
+function normalizeHiddenColumnNames(
+  names: Iterable<string>,
+  resolvedColumns: readonly ResolvedColumn[],
+): Set<string> {
+  const resolvedNames = new Set(resolvedColumns.map((column) => column.name));
+  const next = new Set([...names].filter((name) => resolvedNames.has(name)));
+  if (resolvedColumns.length > 0 && next.size >= resolvedColumns.length) {
+    next.delete(resolvedColumns[0]!.name);
+  }
+  return next;
+}
+
 export function ViewListGrid({
   entityForm,
   store,
   onRowClick,
   columns,
   columnSettings = false,
+  hiddenColumns,
+  onHiddenColumnsChange,
   selection,
   toolbar,
 }: ViewListGridProps) {
@@ -235,8 +255,14 @@ export function ViewListGrid({
   }, [store]);
 
   const resolvedColumns = useMemo(() => resolveColumns(entityForm, columns), [entityForm, columns]);
-  const [hiddenColumnNames, setHiddenColumnNames] = useState<Set<string>>(() => new Set());
+  const [localHiddenColumnNames, setLocalHiddenColumnNames] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [columnSettingsOpen, setColumnSettingsOpen] = useState(false);
+  const hiddenColumnNames = useMemo(
+    () => normalizeHiddenColumnNames(hiddenColumns ?? localHiddenColumnNames, resolvedColumns),
+    [hiddenColumns, localHiddenColumnNames, resolvedColumns],
+  );
   const visibleColumns = useMemo(
     () => resolvedColumns.filter((column) => !hiddenColumnNames.has(column.name)),
     [resolvedColumns, hiddenColumnNames],
@@ -245,27 +271,27 @@ export function ViewListGrid({
   // A changing `columns`/`entityForm` prop cannot strand the grid with every
   // newly-resolved column hidden. Stale names are also discarded locally.
   useEffect(() => {
-    setHiddenColumnNames((previous) => {
-      const names = new Set(resolvedColumns.map((column) => column.name));
-      const next = new Set([...previous].filter((name) => names.has(name)));
-      if (resolvedColumns.length > 0 && next.size >= resolvedColumns.length) {
-        next.delete(resolvedColumns[0]!.name);
-      }
+    if (hiddenColumns !== undefined) return;
+    setLocalHiddenColumnNames((previous) => {
+      const next = normalizeHiddenColumnNames(previous, resolvedColumns);
       if (next.size === previous.size && [...next].every((name) => previous.has(name))) {
         return previous;
       }
       return next;
     });
-  }, [resolvedColumns]);
+  }, [hiddenColumns, resolvedColumns]);
 
   function toggleColumnVisibility(name: string, visible: boolean): void {
-    setHiddenColumnNames((previous) => {
-      if (!visible && resolvedColumns.length - previous.size <= 1) return previous;
-      const next = new Set(previous);
-      if (visible) next.delete(name);
-      else next.add(name);
-      return next;
-    });
+    const next = new Set(hiddenColumnNames);
+    if (visible) next.delete(name);
+    else next.add(name);
+    const clamped = normalizeHiddenColumnNames(next, resolvedColumns);
+
+    if (hiddenColumns !== undefined) {
+      onHiddenColumnsChange?.([...clamped]);
+      return;
+    }
+    setLocalHiddenColumnNames(clamped);
   }
 
   const quickSearchField = useMemo(() => {
@@ -640,6 +666,8 @@ export function ViewListGrid({
           page={searchForm.page}
           totalPages={totalPages}
           onChange={(p) => void store.getState().setPage(p)}
+          prevLabel={labels.paginationPrev}
+          nextLabel={labels.paginationNext}
         />
       </div>
     </div>

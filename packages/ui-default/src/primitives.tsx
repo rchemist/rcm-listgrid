@@ -693,17 +693,17 @@ function Td({ children, colSpan }: TableCellProps) {
 
 export const Table: TableComponent = Object.assign(TableBase, { Thead, Tbody, Tr, Th, Td });
 
-export function Pagination({ page, totalPages, onChange }: PaginationProps) {
+export function Pagination({ page, totalPages, onChange, prevLabel, nextLabel }: PaginationProps) {
   return (
     <nav aria-label="Pagination">
       <button type="button" disabled={page <= 1} onClick={() => onChange?.(page - 1)}>
-        Prev
+        {prevLabel ?? 'Prev'}
       </button>
       <span>
         {page} / {totalPages}
       </span>
       <button type="button" disabled={page >= totalPages} onClick={() => onChange?.(page + 1)}>
-        Next
+        {nextLabel ?? 'Next'}
       </button>
     </nav>
   );

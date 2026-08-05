@@ -8,7 +8,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { BackendAdapter, FieldType, PageResult, SearchForm } from '@listgrid/schema-core';
 import { EntityForm, StringField } from '@listgrid/schema-core';
 import { createListStore } from '@listgrid/state';
-import { defaultUIComponents } from '@listgrid/ui-default';
+import { defaultUIComponents, type CheckBoxProps, type UIComponents } from '@listgrid/ui-default';
 import { UIProvider } from '../providers/ui';
 import { ViewListGrid } from '../components/ViewListGrid';
 import { registerListCellRenderer } from '../registry/list-cell-renderer-registry';
@@ -16,7 +16,11 @@ import { registerFilterRenderer } from '../registry/filter-renderer-registry';
 import { configureLabels } from '../labels';
 
 afterEach(() => {
-  configureLabels({ quickSearchPlaceholder: '검색' });
+  configureLabels({
+    quickSearchPlaceholder: '검색',
+    paginationPrev: 'Prev',
+    paginationNext: 'Next',
+  });
 });
 
 // withList() (spec §5.1; W5-2) — the magic "first ~4 non-hidden fields"
@@ -153,6 +157,21 @@ describe('ViewListGrid (JSDOM render)', () => {
     );
 
     expect(await screen.findByPlaceholderText('찾기')).toBeInTheDocument();
+  });
+
+  it('passes configured pagination labels to the default Pagination component', async () => {
+    configureLabels({ paginationPrev: '이전', paginationNext: '다음' });
+    const entityForm = collegeForm();
+    const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    expect(await screen.findByRole('button', { name: '이전' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '다음' })).toBeInTheDocument();
   });
 
   it('fetches on mount and renders the 3 rows with their names', async () => {
@@ -710,5 +729,92 @@ describe('ViewListGrid column settings (v0.5.3)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '적용' }));
     expect(screen.queryByRole('dialog', { name: '목록 설정' })).not.toBeInTheDocument();
+  });
+});
+
+describe('ViewListGrid controlled column settings (v0.5.4)', () => {
+  it('emits changes without diverging from hiddenColumns and follows the next prop value', async () => {
+    const entityForm = derivationForm();
+    const store = createListStore({
+      url: entityForm.url,
+      adapter: rowsAdapter([{ id: '1', late: 'L1', early: 'E1' }]),
+    });
+    const onHiddenColumnsChange = vi.fn();
+
+    const { rerender } = render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          columnSettings
+          hiddenColumns={['early', 'stale-column']}
+          onHiddenColumnsChange={onHiddenColumnsChange}
+        />
+      </UIProvider>,
+    );
+
+    await screen.findByText('L1');
+    expect(screen.queryByRole('columnheader', { name: 'Early Field' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '목록 설정' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'early — Early Field' }));
+    expect(onHiddenColumnsChange).toHaveBeenCalledWith([]);
+    expect(screen.queryByRole('columnheader', { name: 'Early Field' })).not.toBeInTheDocument();
+
+    rerender(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          columnSettings
+          hiddenColumns={[]}
+          onHiddenColumnsChange={onHiddenColumnsChange}
+        />
+      </UIProvider>,
+    );
+    expect(screen.getByRole('columnheader', { name: 'Early Field' })).toBeInTheDocument();
+  });
+
+  it('clamps a controlled attempt to hide every resolved column before emitting', async () => {
+    function DisabledIgnoringCheckBox({ checked, onChange, ariaLabel }: CheckBoxProps) {
+      return (
+        <input
+          type="checkbox"
+          aria-label={ariaLabel}
+          checked={checked ?? false}
+          onChange={(event) => onChange?.(event.target.checked)}
+        />
+      );
+    }
+
+    const components: UIComponents = {
+      ...defaultUIComponents,
+      CheckBox: DisabledIgnoringCheckBox,
+    };
+    const entityForm = derivationForm();
+    const store = createListStore({
+      url: entityForm.url,
+      adapter: rowsAdapter([{ id: '1', late: 'L1', early: 'E1' }]),
+    });
+    const onHiddenColumnsChange = vi.fn();
+
+    render(
+      <UIProvider components={components}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          columnSettings
+          hiddenColumns={['early']}
+          onHiddenColumnsChange={onHiddenColumnsChange}
+        />
+      </UIProvider>,
+    );
+
+    await screen.findByText('L1');
+    fireEvent.click(screen.getByRole('button', { name: '목록 설정' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'late — Late Header' }));
+
+    expect(onHiddenColumnsChange).toHaveBeenCalledWith(['early']);
+    expect(onHiddenColumnsChange).not.toHaveBeenCalledWith(['late', 'early']);
   });
 });

@@ -14,6 +14,8 @@ export interface Labels {
   columnSettings: string;
   columnSettingsApply: string;
   columnFilterAria: (name: string) => string;
+  paginationPrev: string;
+  paginationNext: string;
 }
 
 const defaults: Labels = {
@@ -28,6 +30,8 @@ const defaults: Labels = {
   columnSettings: '목록 설정',
   columnSettingsApply: '적용',
   columnFilterAria: (name) => `${name} 필터`,
+  paginationPrev: 'Prev',
+  paginationNext: 'Next',
 };
 
 let registry: Labels = { ...defaults };

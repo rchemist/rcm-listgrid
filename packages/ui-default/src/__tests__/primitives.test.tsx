@@ -7,7 +7,21 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { FileInput, InlineMap, TagsInput, TextInput, UserView } from '../primitives';
+import { FileInput, InlineMap, Pagination, TagsInput, TextInput, UserView } from '../primitives';
+
+describe('Pagination labels (v0.5.4)', () => {
+  it('keeps the current literals as fallbacks and accepts host-provided labels', () => {
+    const { rerender } = render(<Pagination page={1} totalPages={2} />);
+    expect(screen.getByRole('button', { name: 'Prev' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument();
+
+    rerender(
+      <Pagination page={1} totalPages={2} prevLabel="Previous page" nextLabel="Following page" />,
+    );
+    expect(screen.getByRole('button', { name: 'Previous page' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Following page' })).toBeInTheDocument();
+  });
+});
 
 describe('TextInput type prop (backward compatible — default stays "text")', () => {
   it('defaults to type="text" when omitted', () => {
