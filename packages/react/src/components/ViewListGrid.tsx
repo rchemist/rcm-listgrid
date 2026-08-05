@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
 import type {
@@ -12,7 +12,13 @@ import type { ListStoreState } from '@listgrid/state';
 import { useUI } from '../providers/ui';
 import { getListCellRenderer } from '../registry/list-cell-renderer-registry';
 import { getFilterRenderer } from '../registry/filter-renderer-registry';
-import { deriveFilterFields, deriveListFields, getFieldDisplayValue } from './list-columns';
+import { getLabels } from '../labels';
+import {
+  deriveFilterFields,
+  deriveListFields,
+  getFieldDisplayValue,
+  type DerivedFilterField,
+} from './list-columns';
 
 // ViewListGrid — the list screen (charter C9): fetches on mount, subscribes to
 // the injected ListStoreState, and renders rows/pagination/loading through the
@@ -67,6 +73,9 @@ export interface ViewListGridProps {
   store: StoreApi<ListStoreState>;
   onRowClick?: (row: Record<string, unknown>) => void;
   columns?: ViewListGridColumn[];
+  /** Opt-in local column-visibility dialog. Visibility is component-local and
+   * is not persisted; omitted/false preserves the existing list chrome. */
+  columnSettings?: boolean;
   /** Row checkboxes + a confirm button. Checking a row's box does NOT
    * trigger `onRowClick` (the checkbox cell stops click propagation before
    * it reaches the row). */
@@ -106,15 +115,20 @@ interface ResolvedColumn {
   align?: 'left' | 'center' | 'right' | undefined;
   width?: number | string | undefined;
   sortable?: boolean | undefined;
+  /** Present only for declarations derived from `withList()`. */
+  field?: EntityField | undefined;
 }
 
-/** Cell resolution order for a DERIVED column (spec §5.2): a registered
- * `getListCellRenderer(field.type)` component, else `field.getDisplayValue`
- * if the field defines one (no field does yet — a later wave's seam;
- * `getFieldDisplayValue` degrades gracefully), else the pre-W5-2 bare
- * `String(value ?? '')`. */
-function renderDerivedCell(field: EntityField, row: Record<string, unknown>): ReactNode {
+/** Cell resolution order for a DERIVED column (spec §5.1/§5.2): the optional
+ * React-free `FieldListConfig.format`, then a registered list-cell renderer,
+ * `field.getDisplayValue`, and finally the raw string fallback. */
+function renderDerivedCell(
+  field: EntityField,
+  format: ((value: unknown, row: Record<string, unknown>) => string) | undefined,
+  row: Record<string, unknown>,
+): ReactNode {
   const value = row[field.getName()];
+  if (format) return format(value, row);
   const CellRenderer = getListCellRenderer(field.type);
   if (CellRenderer) return <CellRenderer value={value} row={row} field={field} />;
   const displayValue = getFieldDisplayValue(field, value);
@@ -147,7 +161,8 @@ function deriveColumns(entityForm: EntityForm): ResolvedColumn[] {
       align: config.align,
       width: config.width,
       sortable: config.sortable === true,
-      cell: (row: Record<string, unknown>) => renderDerivedCell(field, row),
+      field,
+      cell: (row: Record<string, unknown>) => renderDerivedCell(field, config.format, row),
     };
   });
 }
@@ -200,10 +215,12 @@ export function ViewListGrid({
   store,
   onRowClick,
   columns,
+  columnSettings = false,
   selection,
   toolbar,
 }: ViewListGridProps) {
-  const { Table, Pagination, LoadingOverlay, TextInput, CheckBox, Button } = useUI();
+  const { Table, Pagination, LoadingOverlay, TextInput, CheckBox, Button, Modal } = useUI();
+  const labels = getLabels();
 
   const rows = useStore(store, (s) => s.rows);
   const totalElements = useStore(store, (s) => s.totalElements);
@@ -218,11 +235,43 @@ export function ViewListGrid({
   }, [store]);
 
   const resolvedColumns = useMemo(() => resolveColumns(entityForm, columns), [entityForm, columns]);
+  const [hiddenColumnNames, setHiddenColumnNames] = useState<Set<string>>(() => new Set());
+  const [columnSettingsOpen, setColumnSettingsOpen] = useState(false);
+  const visibleColumns = useMemo(
+    () => resolvedColumns.filter((column) => !hiddenColumnNames.has(column.name)),
+    [resolvedColumns, hiddenColumnNames],
+  );
+
+  // A changing `columns`/`entityForm` prop cannot strand the grid with every
+  // newly-resolved column hidden. Stale names are also discarded locally.
+  useEffect(() => {
+    setHiddenColumnNames((previous) => {
+      const names = new Set(resolvedColumns.map((column) => column.name));
+      const next = new Set([...previous].filter((name) => names.has(name)));
+      if (resolvedColumns.length > 0 && next.size >= resolvedColumns.length) {
+        next.delete(resolvedColumns[0]!.name);
+      }
+      if (next.size === previous.size && [...next].every((name) => previous.has(name))) {
+        return previous;
+      }
+      return next;
+    });
+  }, [resolvedColumns]);
+
+  function toggleColumnVisibility(name: string, visible: boolean): void {
+    setHiddenColumnNames((previous) => {
+      if (!visible && resolvedColumns.length - previous.size <= 1) return previous;
+      const next = new Set(previous);
+      if (visible) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  }
 
   const quickSearchField = useMemo(() => {
-    const firstText = resolvedColumns.find((c) => entityForm.getField(c.name)?.type === 'text');
-    return (firstText ?? resolvedColumns[0])?.name;
-  }, [resolvedColumns, entityForm]);
+    const firstText = visibleColumns.find((c) => entityForm.getField(c.name)?.type === 'text');
+    return (firstText ?? visibleColumns[0])?.name;
+  }, [visibleColumns, entityForm]);
 
   const [quickSearchValue, setQuickSearchValue] = useState('');
 
@@ -249,8 +298,25 @@ export function ViewListGrid({
   // derivation above. Empty derivation => no toggle, no panel (nothing to
   // search on).
   const filterFields = useMemo(() => deriveFilterFields(entityForm), [entityForm]);
+  const filterFieldByName = useMemo(
+    () => new Map(filterFields.map((derived) => [derived.field.getName(), derived])),
+    [filterFields],
+  );
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+  const [openColumnFilter, setOpenColumnFilter] = useState<string | undefined>(undefined);
+  const openColumnFilterHeaderRef = useRef<HTMLTableCellElement | null>(null);
   const [filterValues, setFilterValues] = useState<Record<string, unknown>>({});
+
+  useEffect(() => {
+    if (openColumnFilter === undefined) return;
+    function closeOnOutsideMouseDown(event: MouseEvent): void {
+      if (!openColumnFilterHeaderRef.current?.contains(event.target as Node)) {
+        setOpenColumnFilter(undefined);
+      }
+    }
+    document.addEventListener('mousedown', closeOnOutsideMouseDown);
+    return () => document.removeEventListener('mousedown', closeOnOutsideMouseDown);
+  }, [openColumnFilter]);
 
   function setFilterValue(name: string, value: unknown): void {
     setFilterValues((prev) => ({ ...prev, [name]: value }));
@@ -275,9 +341,9 @@ export function ViewListGrid({
   // between applies is not removed (withFilter has no remove path) — out of
   // R2's scope; a `removeAndFilter*` primitive would be a separate
   // public-surface decision.
-  function applyAdvancedSearch(): void {
+  function applyFilterValues(fields: DerivedFilterField[] = filterFields): void {
     const items: FilterItem[] = [];
-    for (const { field, config } of filterFields) {
+    for (const { field, config } of fields) {
       const value = filterValues[field.getName()];
       if (value === undefined || value === null || value === '') continue;
       items.push({
@@ -296,9 +362,9 @@ export function ViewListGrid({
 
       {quickSearchField !== undefined && (
         <TextInput
-          ariaLabel="Quick search"
+          ariaLabel={labels.quickSearchAria}
           value={quickSearchValue}
-          placeholder="검색"
+          placeholder={labels.quickSearchPlaceholder}
           onChange={(value) => {
             setQuickSearchValue(value);
             void store.getState().quickSearch([quickSearchField], value);
@@ -309,8 +375,15 @@ export function ViewListGrid({
       {filterFields.length > 0 && (
         <div data-advanced-search={entityForm.name}>
           <Button type="button" onClick={() => setAdvancedSearchOpen((open) => !open)}>
-            고급검색
+            {labels.advancedSearchToggle}
           </Button>
+          {columnSettings && (
+            <div data-column-settings-toggle>
+              <Button type="button" onClick={() => setColumnSettingsOpen(true)}>
+                {labels.columnSettings}
+              </Button>
+            </div>
+          )}
           {advancedSearchOpen && (
             <div data-advanced-search-panel>
               {filterFields.map(({ field, config }) => {
@@ -338,20 +411,121 @@ export function ViewListGrid({
                   </div>
                 );
               })}
-              <Button type="button" onClick={applyAdvancedSearch}>
-                검색
+              <Button type="button" onClick={() => applyFilterValues()}>
+                {labels.advancedSearchApply}
               </Button>
             </div>
           )}
         </div>
       )}
 
+      {columnSettings && filterFields.length === 0 && (
+        <div data-column-settings-toggle>
+          <Button type="button" onClick={() => setColumnSettingsOpen(true)}>
+            {labels.columnSettings}
+          </Button>
+        </div>
+      )}
+
+      {columnSettings && (
+        <Modal
+          open={columnSettingsOpen}
+          onClose={() => setColumnSettingsOpen(false)}
+          title={labels.columnSettings}
+        >
+          <div data-column-settings>
+            {resolvedColumns.map((column) => {
+              const visible = !hiddenColumnNames.has(column.name);
+              return (
+                <label key={column.name}>
+                  <CheckBox
+                    ariaLabel={`${column.name} — ${column.header}`}
+                    checked={visible}
+                    disabled={visible && visibleColumns.length === 1}
+                    onChange={(checked) => toggleColumnVisibility(column.name, checked)}
+                  />
+                  <span>
+                    {column.name} — {column.header}
+                  </span>
+                </label>
+              );
+            })}
+            <Button type="button" onClick={() => setColumnSettingsOpen(false)}>
+              {labels.columnSettingsApply}
+            </Button>
+          </div>
+        </Modal>
+      )}
+
       <Table>
         <Table.Thead>
           <Table.Tr>
             {selection?.enabled && <Table.Th />}
-            {resolvedColumns.map((c) => {
+            {visibleColumns.map((c) => {
               const style = cellStyle(c);
+              const filterField = c.field ? filterFieldByName.get(c.name) : undefined;
+              const columnFilterOpen = openColumnFilter === c.name;
+              const headerStyle = filterField ? { ...style, position: 'relative' as const } : style;
+              const headerContent = (
+                <>
+                  {c.header}
+                  {filterField && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label={labels.columnFilterAria(c.header)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setOpenColumnFilter((open) => (open === c.name ? undefined : c.name));
+                        }}
+                      >
+                        ▽
+                      </button>
+                      {columnFilterOpen && (
+                        <div
+                          data-column-filter={c.name}
+                          onClick={(event) => event.stopPropagation()}
+                          style={{ position: 'absolute' }}
+                        >
+                          {(() => {
+                            const { field } = filterField;
+                            const filterId = `column-filter-${field.getName()}`;
+                            const value = filterValues[field.getName()];
+                            const FilterInput = getFilterRenderer(field.type);
+                            return (
+                              <>
+                                <label htmlFor={filterId}>{c.header}</label>
+                                {FilterInput ? (
+                                  <FilterInput
+                                    field={field}
+                                    value={value}
+                                    onChange={(next) => setFilterValue(field.getName(), next)}
+                                  />
+                                ) : (
+                                  <TextInput
+                                    id={filterId}
+                                    value={typeof value === 'string' ? value : ''}
+                                    onChange={(next) => setFilterValue(field.getName(), next)}
+                                  />
+                                )}
+                                <Button
+                                  type="button"
+                                  onClick={() => {
+                                    applyFilterValues();
+                                    setOpenColumnFilter(undefined);
+                                  }}
+                                >
+                                  {labels.advancedSearchApply}
+                                </Button>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              );
               // sortable headers need an onClick, and a styled (align/width)
               // header needs a `style` — `Table.Th` (ui-default) only
               // forwards `children`/`colSpan` (the identical prop-dropping
@@ -367,12 +541,25 @@ export function ViewListGrid({
                     key={c.name}
                     role="columnheader"
                     aria-sort={ariaSortFor(currentDirection)}
+                    ref={columnFilterOpen ? openColumnFilterHeaderRef : undefined}
                     onClick={() =>
                       void store.getState().setSort(c.name, nextSortDirection(currentDirection))
                     }
-                    style={style}
+                    style={headerStyle}
                   >
-                    {c.header}
+                    {headerContent}
+                  </th>
+                );
+              }
+              if (filterField) {
+                return (
+                  <th
+                    key={c.name}
+                    role="columnheader"
+                    ref={columnFilterOpen ? openColumnFilterHeaderRef : undefined}
+                    style={headerStyle}
+                  >
+                    {headerContent}
                   </th>
                 );
               }
@@ -418,7 +605,7 @@ export function ViewListGrid({
                     </span>
                   </Table.Td>
                 )}
-                {resolvedColumns.map((c) => {
+                {visibleColumns.map((c) => {
                   const style = cellStyle(c);
                   return style !== undefined ? (
                     <td key={c.name} style={style}>
@@ -441,7 +628,7 @@ export function ViewListGrid({
             onClick={() => selection.onConfirm(checkedIds)}
             disabled={checkedIds.length === 0}
           >
-            {selection.confirmLabel ?? '확인'}
+            {selection.confirmLabel ?? labels.selectionConfirm}
           </Button>
         </div>
       )}

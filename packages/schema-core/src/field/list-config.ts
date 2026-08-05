@@ -19,6 +19,8 @@ export interface FieldListConfig {
   width?: number | string | undefined;
   /** Whether the list column header can trigger a sort. */
   sortable?: boolean | undefined;
+  /** React-free, per-cell string formatter. Receives the raw value and full row. */
+  format?: ((value: unknown, row: Record<string, unknown>) => string) | undefined;
 }
 
 /**

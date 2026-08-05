@@ -29,6 +29,7 @@ import { useUI } from '../providers/ui';
 import { FormStoreProvider, snapshotFieldValues } from '../providers/form-store';
 import { FieldRenderer } from './FieldRenderer';
 import { getMessages } from '../messages';
+import { getLabels } from '../labels';
 
 // ViewEntityForm — the top-level form screen (task item 5): title, a simple
 // tab bar (only rendered when there's more than one tab — single/no-tab forms
@@ -82,7 +83,6 @@ const DEFAULT_GROUP_ID = 'default';
 // not a bespoke modal (Do-NOT). A host that never calls configureMessages()
 // gets the messages.ts console-fallback (returns false) — delete is a no-op
 // until the host wires showConfirm, by design (fail-closed, not fail-open).
-const DELETE_CONFIRM_MESSAGE = '정말 삭제하시겠습니까?';
 
 // EF4 — tabs/groups/field-list are re-derived from the store's LIVE field
 // registry (state.fieldDefs), not entityForm.getFields()/getTabs()/
@@ -378,6 +378,7 @@ function ViewEntityFormInner({
   slots,
 }: ViewEntityFormProps) {
   const { Button } = useUI();
+  const labels = getLabels();
   const tabIndex = useStore(store, (s) => s.tabIndex);
   const messages = useStore(store, (s) => s.messages);
   const globalErrors = useStore(store, (s) => s.globalErrors);
@@ -611,7 +612,7 @@ function ViewEntityFormInner({
   // registry (showConfirm) — cancel is a no-op (controller.delete is never
   // called, no message emitted); confirm proceeds to controller.delete().
   async function runBuiltinDelete(ctrl: FormRuntime): Promise<void> {
-    const confirmed = await getMessages().showConfirm(DELETE_CONFIRM_MESSAGE);
+    const confirmed = await getMessages().showConfirm(labels.deleteConfirm);
     if (!confirmed) return;
     await ctrl.delete();
   }
@@ -623,7 +624,7 @@ function ViewEntityFormInner({
   const saveCap = actionRenderType === 'create' ? caps.create : caps.update;
   const saveBuiltin: FormAction = {
     id: 'save',
-    label: 'Save',
+    label: labels.save,
     variant: 'primary',
     order: 1000,
     ...(saveCap !== undefined ? { visible: saveCap } : {}),
@@ -641,7 +642,7 @@ function ViewEntityFormInner({
     const ctrl = controller;
     builtins.push({
       id: 'delete',
-      label: 'Delete',
+      label: labels.delete,
       variant: 'danger',
       order: 1010,
       ...(caps.delete !== undefined ? { visible: caps.delete } : {}),

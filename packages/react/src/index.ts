@@ -30,6 +30,9 @@ export type {
 export { configureMessages, getMessages, resetMessages } from './messages';
 export type { MessagesRegistry, ToastKind } from './messages';
 
+export { configureLabels, getLabels } from './labels';
+export type { Labels } from './labels';
+
 export {
   FormStoreProvider,
   useFormStore,

@@ -2,6 +2,14 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.3] - 2026-08-05
+
+### Added
+
+- React 내장 UI 문구를 앱 부트스트랩에서 재정의하는 `configureLabels` 카탈로그를 추가했다.
+- `FieldListConfig.format` 문자열 포맷터, 필터 선언 컬럼의 헤더 필터, opt-in
+  `ViewListGrid.columnSettings` 로컬 컬럼 표시 설정을 추가했다.
+
 ## [0.5.2] - 2026-08-03
 
 ### Fixed

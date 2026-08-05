@@ -3,7 +3,7 @@
 // and the row-click affordance end to end with @listgrid/ui-default's
 // unstyled primitives — no host app.
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { BackendAdapter, FieldType, PageResult, SearchForm } from '@listgrid/schema-core';
 import { EntityForm, StringField } from '@listgrid/schema-core';
@@ -13,6 +13,11 @@ import { UIProvider } from '../providers/ui';
 import { ViewListGrid } from '../components/ViewListGrid';
 import { registerListCellRenderer } from '../registry/list-cell-renderer-registry';
 import { registerFilterRenderer } from '../registry/filter-renderer-registry';
+import { configureLabels } from '../labels';
+
+afterEach(() => {
+  configureLabels({ quickSearchPlaceholder: '검색' });
+});
 
 // withList() (spec §5.1; W5-2) — the magic "first ~4 non-hidden fields"
 // fallback this test file exercised pre-W5-2 is abolished; `name` needs an
@@ -136,6 +141,20 @@ function derivationForm(): EntityForm {
 }
 
 describe('ViewListGrid (JSDOM render)', () => {
+  it('reads the configured quick-search placeholder at render time', async () => {
+    configureLabels({ quickSearchPlaceholder: '찾기' });
+    const entityForm = collegeForm();
+    const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    expect(await screen.findByPlaceholderText('찾기')).toBeInTheDocument();
+  });
+
   it('fetches on mount and renders the 3 rows with their names', async () => {
     const entityForm = collegeForm();
     const adapter = mockAdapter();
@@ -441,11 +460,72 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
 
     expect(await screen.findByTestId('marker-cell')).toHaveTextContent('SHOUT!');
   });
+
+  it('FieldListConfig.format takes priority over a registered list-cell renderer', async () => {
+    const fictionalType = 'v053-format-priority-field';
+    registerListCellRenderer(fictionalType, () => <strong>renderer lost</strong>);
+    const field = new StringField('marker', 100).withLabel('Marker').withList({
+      format: (value, row) => `${String(value).toUpperCase()}-${String(row['suffix'])}`,
+    });
+    field.type = fictionalType as FieldType;
+    const entityForm = new EntityForm('FormatEntityForm', '/format').addFields({ items: [field] });
+    const store = createListStore({
+      url: entityForm.url,
+      adapter: rowsAdapter([{ id: '1', marker: 'formatted', suffix: 'row' }]),
+    });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    expect(await screen.findByText('FORMATTED-row')).toBeInTheDocument();
+    expect(screen.queryByText('renderer lost')).not.toBeInTheDocument();
+  });
 });
 
 // Advanced-search panel (spec §7 CAP-20; W5-3) — embedded in ViewListGrid (no
 // separate exported component), derived from withFilter()-truthy fields.
 describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
+  it('adds header filters only to filter-declared derived columns and applies without sorting', async () => {
+    const entityForm = new EntityForm('HeaderFilterEntityForm', '/header-filter').addFields({
+      items: [
+        new StringField('name', 100)
+          .withLabel('Name')
+          .withList({ sortable: true })
+          .withFilter({ operator: 'LIKE' }),
+        new StringField('code', 200).withLabel('Code').withList(),
+      ],
+    });
+    const { adapter, listCalls } = rowsAdapterWithCalls([{ id: '1', name: 'Alpha', code: 'A' }]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole('button', { name: 'Name 필터' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Code 필터' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Name 필터' }));
+    expect(store.getState().searchForm.sorts).toEqual([]);
+    const popover = document.querySelector('[data-column-filter="name"]');
+    expect(popover).not.toBeNull();
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Al' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'name', value: 'Al', queryConditionType: 'LIKE' },
+    ]);
+    expect(store.getState().searchForm.sorts).toEqual([]);
+    expect(document.querySelector('[data-column-filter="name"]')).toBeNull();
+  });
+
   it('0 withFilter()-truthy fields renders no toggle and no panel', async () => {
     const entityForm = collegeForm(); // no field declares withFilter()
     const adapter = mockAdapter();
@@ -600,5 +680,35 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
 
     expect(screen.getByTestId('marker-filter-input')).toBeInTheDocument();
+  });
+});
+
+describe('ViewListGrid column settings (v0.5.3)', () => {
+  it('hides resolved columns and disables hiding the final visible column', async () => {
+    const entityForm = derivationForm();
+    const store = createListStore({
+      url: entityForm.url,
+      adapter: rowsAdapter([{ id: '1', late: 'L1', early: 'E1' }]),
+    });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} columnSettings />
+      </UIProvider>,
+    );
+
+    await screen.findByText('L1');
+    fireEvent.click(screen.getByRole('button', { name: '목록 설정' }));
+    const early = screen.getByRole('checkbox', { name: 'early — Early Field' });
+    fireEvent.click(early);
+    expect(screen.queryByRole('columnheader', { name: 'Early Field' })).not.toBeInTheDocument();
+
+    const lastVisible = screen.getByRole('checkbox', { name: 'late — Late Header' });
+    expect(lastVisible).toBeDisabled();
+    fireEvent.click(lastVisible);
+    expect(screen.getByRole('columnheader', { name: 'Late Header' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '적용' }));
+    expect(screen.queryByRole('dialog', { name: '목록 설정' })).not.toBeInTheDocument();
   });
 });

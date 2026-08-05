@@ -252,6 +252,17 @@ Components accept a `classNames` prop with a slot map. See `ViewListGridClassNam
 />
 ```
 
+### React list/form opt-ins
+
+- `configureLabels(partial)` configures built-in form/list copy at app bootstrap. The default
+  catalog preserves the existing Save/Delete, search, selection, and settings strings.
+- `FieldListConfig.format(value, row)` is an optional React-free string formatter for a derived
+  list cell. It takes precedence over registered list-cell renderers and display fallbacks.
+- Every derived list column whose field declares `withFilter()` exposes a `▽` header filter.
+  Its input and values are shared with the advanced-search panel.
+- `<ViewListGrid columnSettings />` adds a column-visibility dialog. Visibility is component-local
+  and is not persisted; at least one resolved column always remains visible.
+
 ---
 
 ## Browser support

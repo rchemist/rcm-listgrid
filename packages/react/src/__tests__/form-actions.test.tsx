@@ -25,6 +25,7 @@ import { UIProvider } from '../providers/ui';
 import { registerDefaultRenderers } from '../registry/default-renderers';
 import { ViewEntityForm } from '../components/ViewEntityForm';
 import { configureMessages, resetMessages } from '../messages';
+import { configureLabels } from '../labels';
 
 registerDefaultRenderers();
 
@@ -33,6 +34,11 @@ registerDefaultRenderers();
 // (messages.ts) unconditionally after each test (no-op if unused).
 afterEach(() => {
   resetMessages();
+  configureLabels({
+    save: 'Save',
+    delete: 'Delete',
+    deleteConfirm: '정말 삭제하시겠습니까?',
+  });
 });
 
 /** Minimal FormRuntime double — every method is a vi.fn(); tests override only what they exercise. */
@@ -169,6 +175,18 @@ describe('ViewEntityForm action bar — render custom node (spec §3.4; W3-3)', 
 });
 
 describe('ViewEntityForm built-in Delete — update-mode-only (spec §3.4 §설계 결정 1; W3-3)', () => {
+  it('reads configured built-in Save/Delete labels and delete confirmation at render/click time', async () => {
+    const showConfirm = vi.fn(async () => false);
+    configureLabels({ save: '저장하기', delete: '지우기', deleteConfirm: '지울까요?' });
+    configureMessages({ showConfirm });
+    renderForm(WidgetForm().withId('7'), { controller: fakeController() });
+
+    await screen.findByLabelText(/^Name/);
+    expect(screen.getByRole('button', { name: '저장하기' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '지우기' }));
+    await waitFor(() => expect(showConfirm).toHaveBeenCalledWith('지울까요?'));
+  });
+
   it('update mode + capability delete (default) + controller: the Delete button renders', async () => {
     const entityForm = WidgetForm().withId('7');
     renderForm(entityForm, { controller: fakeController() });

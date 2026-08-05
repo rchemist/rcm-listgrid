@@ -210,7 +210,7 @@ interface AfterListFetchContext { rows: unknown[]; totalElements: number; setRow
 신설:
 | 멤버 | 시그니처 | 비고 |
 |---|---|---|
-| `withList` | `(config?: FieldListConfig \| false): this` | 리스트 참여 선언(opt-in). `FieldListConfig {order?, label?, align?, width?, sortable?}`. `false`=명시 제외. 구 useListField/withListConfig/useListFields/withExcludeListFields 대체. **마법 폴백 없음**: withList 0건이면 빈 컬럼+dev 경고(구 "첫 Listable 필드 자동 채택" 폐기) |
+| `withList` | `(config?: FieldListConfig \| false): this` | 리스트 참여 선언(opt-in). `FieldListConfig {order?, label?, align?, width?, sortable?, format?}`. `format?: (value: unknown, row: Record<string, unknown>) => string`은 등록 list-cell renderer보다 먼저 적용되는 React-free 문자열 포맷터(**additive v0.5.3**). `false`=명시 제외. 구 useListField/withListConfig/useListFields/withExcludeListFields 대체. **마법 폴백 없음**: withList 0건이면 빈 컬럼+dev 경고(구 "첫 Listable 필드 자동 채택" 폐기) |
 | `withFilter` | `(config?: FieldFilterConfig \| false): this` | 고급검색 참여. `FieldFilterConfig {operator?, order?, label?}` |
 
 ### 5.2 확장 seam (커스텀 필드 계약 — §감사 6-5 해소)
