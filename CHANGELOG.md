@@ -2,6 +2,13 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.8] - 2026-08-06
+
+### Fixed
+
+- Quick search 필드 유도를 LIKE 매핑과 같은 text/string/email/phone/textarea family로 넓혀 email 등이 placeholder와 `통합검색 사용` 대상에서 누락되던 문제를 고쳤다.
+- 검색 바 action 버튼의 두 단어 label이 두 줄로 줄바꿈되지 않도록 했다.
+
 ## [0.5.7] - 2026-08-06
 
 ### Added

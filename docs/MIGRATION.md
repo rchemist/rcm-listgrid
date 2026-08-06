@@ -19,7 +19,7 @@
   customOption fields use `IN`; text/email/phone/textarea/string fields use `LIKE`; scalar select
   and other types use `EQUAL`. Backends or mocks that relied on condition-less filter items must
   verify their search schema.
-- All `withList()` + `withFilter()` built-in text fields feed quick search (first main, rest OR).
+- All `withList()` + `withFilter()` text-family fields (`text`/`string`/`email`/`phone`/`textarea`) feed quick search (first main, rest OR).
   Typing stays local; Enter/icon/clear run search. Two or more fields enable unified OR mode.
 - The injected `Pagination` boundary remains 0-based; remove any host `+1/-1` conversion.
 

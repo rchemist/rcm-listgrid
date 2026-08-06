@@ -14,7 +14,7 @@ import { useUI } from '../providers/ui';
 import { getListCellRenderer } from '../registry/list-cell-renderer-registry';
 import { getFilterRenderer } from '../registry/filter-renderer-registry';
 import { getLabels } from '../labels';
-import { searchConditionFor } from '../search-condition';
+import { LIKE_FIELD_TYPES, searchConditionFor } from '../search-condition';
 import {
   deriveFilterFields,
   deriveListFields,
@@ -407,14 +407,16 @@ export function ViewListGrid({
   );
   // Reuse: the existing withList()/withFilter() declarations are the source
   // of truth. schema-core has no quickSearch opt-in/out flag, so the 0.2.x
-  // fallback is restored: every filterable `text` list field participates.
+  // fallback is restored: every filterable text-family list field participates.
   const quickSearchFields = useMemo(
     () =>
       resolvedColumns
         .map((column) => ({ column, field: entityForm.getField(column.name) }))
         .filter(
           (entry): entry is { column: ResolvedColumn; field: EntityField } =>
-            entry.field?.type === 'text' && filterFieldByName.has(entry.column.name),
+            entry.field !== undefined &&
+            LIKE_FIELD_TYPES.has(entry.field.type) &&
+            filterFieldByName.has(entry.column.name),
         )
         .map(({ column }) => ({ name: column.name, label: column.header })),
     [entityForm, filterFieldByName, resolvedColumns],

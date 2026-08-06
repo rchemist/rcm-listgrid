@@ -345,7 +345,7 @@ falls through to the value/type mapping above. `searchConditionFor(field, value?
 is exported from the root entry for render-free inspection/reuse. This is the current engine's
 mapping, not a claim of exact 0.2.x operator parity.
 Quick search is narrower by design: because `FieldListConfig` has no quick-search flag, it derives
-all fields that are simultaneously `withList()`, `withFilter()`, and built-in `type === 'text'`;
+all fields that are simultaneously `withList()`, `withFilter()`, and text-family (`text`, `string`, `email`, `phone`, `textarea`);
 the first is main and the remainder are OR fields. It pre-expands those clauses directly into the
 wire's top-level `filters.OR` bucket; unlike 0.2.x, it does not build a nested quick-search envelope.
 

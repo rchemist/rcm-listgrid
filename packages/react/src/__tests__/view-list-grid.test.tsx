@@ -9,6 +9,7 @@ import type { BackendAdapter, FieldType, PageResult } from '@listgrid/schema-cor
 import {
   BooleanField,
   DateField,
+  EmailField,
   EntityForm,
   MultiSelectField,
   NumberField,
@@ -293,6 +294,35 @@ describe('ViewListGrid (JSDOM render)', () => {
     fireEvent.keyUp(input, { key: 'Enter' });
     await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(5));
     expect(listCalls[4]?.toJSON().filters.OR).toEqual([]);
+  });
+
+  it('includes filterable email fields in quick search and enables unified search', async () => {
+    const entityForm = new EntityForm(
+      'EmailQuickSearchEntityForm',
+      '/email-quick-search',
+    ).addFields({
+      items: [
+        new StringField('name', 100).withLabel('Name').withList().withFilter(),
+        new EmailField('email', 110).withLabel('Email').withList().withFilter(),
+      ],
+    });
+    const adapter = rowsAdapter([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    expect(screen.getByLabelText('Quick search')).toHaveAttribute(
+      'placeholder',
+      'Search Name, Email...',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    expect(screen.getByRole('checkbox', { name: '통합검색 사용' })).toBeInTheDocument();
   });
 
   it('shows a dismissible fetch error and clears it after the next successful fetch', async () => {

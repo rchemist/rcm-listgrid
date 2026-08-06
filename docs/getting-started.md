@@ -379,7 +379,7 @@ export function UserListPage() {
 ```
 
 `withList()` declares columns and `withFilter()` declares header/advanced filters. Every field that
-is both and has built-in type `text` participates in quick search; two or more produce OR clauses
+is both and has a text-family type (`text`, `string`, `email`, `phone`, or `textarea`) participates in quick search; two or more produce OR clauses
 and enable unified search. The top searchbar holds the local quick input and the toolbar/settings/
 advanced actions; it is followed by the advanced panel, inline fetch error, table, and 0-based
 pagination. Column settings is an instant popover, not a modal.

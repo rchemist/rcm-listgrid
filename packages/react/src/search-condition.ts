@@ -5,7 +5,7 @@ import type { EntityField, FormField, QueryConditionType } from '@listgrid/schem
  * accepted for compatibility with hosts that use that legacy/custom type
  * name even though schema-core's built-in string field is named `text`.
  */
-const LIKE_FIELD_TYPES = new Set(['text', 'email', 'phone', 'textarea', 'string']);
+export const LIKE_FIELD_TYPES = new Set(['text', 'email', 'phone', 'textarea', 'string']);
 
 const SELECT_FIELD_TYPES = new Set(['select', 'multiselect', 'checkbox', 'tag', 'customOption']);
 

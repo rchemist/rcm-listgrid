@@ -1843,6 +1843,11 @@
   flex-shrink: 0;
 }
 
+.rcm-search-bar-actions button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 @media (min-width: 768px) {
   .rcm-search-bar-actions {
     margin-top: 0;
