@@ -257,6 +257,13 @@ For multi-tenant apps, scope tokens to a class or data-attr on a specific ancest
   `onHiddenColumnsChange?: (names: string[]) => void` to control it with column names and persist
   it in the host. Stale names are ignored for rendering and the last visible column cannot be
   hidden in either mode (**additive v0.5.4**).
+- `ViewListGrid.selection` renders its built-in confirm action only while at least one row is
+  checked. `showConfirm?: boolean` defaults to `true`; pass `false` when the host renders its own
+  action through `toolbar` or elsewhere. `onCheckedChange?: (checkedIds: string[]) => void`
+  receives every checked-set update, including `[]` when a rows change resets selection.
+- When `selection` and `showRowNumbers` are both enabled, the merged
+  `.rcm-skeleton-td-checkbox` cell keeps its checkbox and number in one non-wrapping horizontal
+  label.
 
 ---
 

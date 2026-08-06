@@ -49,13 +49,18 @@ import {
 // each cell still renders through `Table.Td`.
 
 /** EA-D2-0: bulk-select surface (replaces the 0.3.x `SelectionOptions`
- * 29-consumer surface — the briefing's decision ① minimal-4 shape). `enabled`
+ * 29-consumer surface — the briefing's decision ① minimal shape). `enabled`
  * gates the checkbox COLUMN's existence (see `toolbar` doc below for the
  * strict contract); `onConfirm` receives the current checked-id list;
- * `confirmLabel` overrides the default confirm button text. */
+ * `showConfirm` can suppress the built-in action; `onCheckedChange` observes
+ * every checked-id change; `confirmLabel` overrides the default button text. */
 export interface ViewListGridSelection {
   enabled: boolean;
   onConfirm: (checkedIds: string[]) => void;
+  /** Render the built-in confirm action when at least one row is checked. @default true */
+  showConfirm?: boolean;
+  /** Called after the checked-id list changes, including a rows-change reset to `[]`. */
+  onCheckedChange?: (checkedIds: string[]) => void;
   confirmLabel?: string;
 }
 
@@ -366,9 +371,19 @@ export function ViewListGrid({
   // carry over). The checkbox COLUMN only exists when `selection.enabled` —
   // see the `toolbar` prop doc for the strict contract.
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
+  const onCheckedChangeRef = useRef(selection?.onCheckedChange);
+  onCheckedChangeRef.current = selection?.onCheckedChange;
+  const checkedIdsInitializedRef = useRef(false);
   useEffect(() => {
-    setCheckedIds([]);
+    setCheckedIds((previous) => (previous.length === 0 ? previous : []));
   }, [rows]);
+  useEffect(() => {
+    if (!checkedIdsInitializedRef.current) {
+      checkedIdsInitializedRef.current = true;
+      return;
+    }
+    onCheckedChangeRef.current?.(checkedIds);
+  }, [checkedIds]);
 
   function toggleChecked(id: string, checked: boolean): void {
     setCheckedIds((prev) => {
@@ -1234,13 +1249,9 @@ export function ViewListGrid({
         </Table>
       </div>
 
-      {selection?.enabled && (
+      {selection?.enabled && selection.showConfirm !== false && checkedIds.length > 0 && (
         <div data-selection-actions>
-          <Button
-            type="button"
-            onClick={() => selection.onConfirm(checkedIds)}
-            disabled={checkedIds.length === 0}
-          >
+          <Button type="button" onClick={() => selection.onConfirm(checkedIds)}>
             {selection.confirmLabel ?? labels.selectionConfirm}
           </Button>
         </div>

@@ -253,7 +253,7 @@ export default function CollegeListPage() {
 
 - **명시 컬럼**: `columns` prop(§3.3). 파생 대신 고정 컬럼 세트가 필요할 때.
 - **행 네비게이션**: `onRowClick={(row) => router.push(...)}`. 라우팅은 호스트 라우터(예: `NextRouterProvider`) 몫.
-- **툴바/선택**: `toolbar`·`selection` prop(체크박스 선택 등). toolbar 출력은 표 뒤가 아닌 상단 searchbar actions에 렌더된다. data-transfer(엑셀 등)가 툴바 opt-in을 확장한다(§4 참조).
+- **툴바/선택**: `toolbar`·`selection` prop(체크박스 선택 등). toolbar 출력은 표 뒤가 아닌 상단 searchbar actions에 렌더된다. 기본 selection 확인 버튼은 선택된 행이 있을 때만 렌더된다. 호스트가 자체 action을 렌더하면 `selection.showConfirm: false`로 기본 버튼을 끄고, `selection.onCheckedChange(checkedIds)`로 행/전체 선택과 rows 변경 초기화(`[]`)를 관찰한다. data-transfer(엑셀 등)가 툴바 opt-in을 확장한다(§4 참조).
 - **폼 페이지**: 같은 `EntityForm()` 선언을 `/new`·`/[id]` 페이지에서 `useEntityForm`+`ViewEntityForm`으로 조립(C1 — 리스트와 폼이 한 선언 공유). 이 절 범위 밖(폼 컴포지션은 별도).
 
 #### 3.5. list-track(W5) 커버리지 대조 — CAP-18/19/20

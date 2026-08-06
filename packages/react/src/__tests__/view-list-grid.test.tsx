@@ -686,7 +686,7 @@ describe('ViewListGrid (JSDOM render)', () => {
       expect(onRowClick).not.toHaveBeenCalled();
     });
 
-    it('checking rows and confirming calls onConfirm with the checked ids', async () => {
+    it('hides confirm with no checks, then shows it and confirms the checked ids', async () => {
       const entityForm = collegeForm();
       const adapter = mockAdapter();
       const store = createListStore({ url: entityForm.url, adapter });
@@ -705,13 +705,12 @@ describe('ViewListGrid (JSDOM render)', () => {
       );
 
       await screen.findByText('Engineering');
-
-      const confirmButton = screen.getByRole('button', { name: '선택 완료' });
-      expect(confirmButton).toBeDisabled(); // 0 checked
+      expect(screen.queryByRole('button', { name: '선택 완료' })).toBeNull();
 
       fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
       fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 3' }));
 
+      const confirmButton = screen.getByRole('button', { name: '선택 완료' });
       expect(confirmButton).not.toBeDisabled();
       // the checkbox click must NOT also fire the row's onRowClick.
       expect(onRowClick).not.toHaveBeenCalled();
@@ -719,6 +718,68 @@ describe('ViewListGrid (JSDOM render)', () => {
       fireEvent.click(confirmButton);
       expect(onConfirm).toHaveBeenCalledTimes(1);
       expect(onConfirm).toHaveBeenCalledWith(['1', '3']);
+    });
+
+    it('never renders the built-in confirm when showConfirm is false', async () => {
+      const entityForm = collegeForm();
+      const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid
+            entityForm={entityForm}
+            store={store}
+            selection={{
+              enabled: true,
+              onConfirm: vi.fn(),
+              showConfirm: false,
+              confirmLabel: '외부 확인',
+            }}
+          />
+        </UIProvider>,
+      );
+
+      await screen.findByText('Engineering');
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
+
+      expect(screen.queryByRole('button', { name: '외부 확인' })).toBeNull();
+    });
+
+    it('reports row, master, and rows-change reset updates through onCheckedChange', async () => {
+      const entityForm = collegeForm();
+      const adapter = mockAdapter();
+      vi.mocked(adapter.list)
+        .mockResolvedValueOnce({ content: COLLEGES, totalElements: 3, totalPages: 2 })
+        .mockResolvedValueOnce({ content: [COLLEGES[1]!], totalElements: 3, totalPages: 2 });
+      const store = createListStore({ url: entityForm.url, adapter });
+      const onCheckedChange = vi.fn();
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid
+            entityForm={entityForm}
+            store={store}
+            selection={{ enabled: true, onConfirm: vi.fn(), onCheckedChange }}
+          />
+        </UIProvider>,
+      );
+
+      await screen.findByText('Engineering');
+      expect(onCheckedChange).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
+      expect(onCheckedChange).toHaveBeenLastCalledWith(['1']);
+
+      fireEvent.click(screen.getByRole('checkbox', { name: '전체 선택' }));
+      expect(onCheckedChange).toHaveBeenLastCalledWith([]);
+
+      fireEvent.click(screen.getByRole('checkbox', { name: '전체 선택' }));
+      expect(onCheckedChange).toHaveBeenLastCalledWith(['1', '2', '3']);
+
+      await act(async () => {
+        await store.getState().setPage(1);
+      });
+      await waitFor(() => expect(onCheckedChange).toHaveBeenLastCalledWith([]));
     });
 
     it('row click still fires normally when a DIFFERENT part of the row is clicked', async () => {

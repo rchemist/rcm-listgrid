@@ -58,7 +58,9 @@ describe('FieldRenderer a11y wiring', () => {
     const wrapper = nameInput.closest('[data-field-name="name"]');
     expect(wrapper).toHaveClass('rcm-field-root');
     expect(wrapper?.querySelector('.rcm-field-label-row > label')).toHaveClass('rcm-field-label');
-    expect(wrapper?.querySelector('.rcm-field-icon-required')).toHaveTextContent('*');
+    const requiredMark = wrapper?.querySelector('.rcm-field-icon-required');
+    expect(requiredMark).toHaveClass('rcm-field-icon', 'rcm-field-icon-required');
+    expect(requiredMark).toHaveTextContent('*');
     expect(wrapper?.closest('[data-field-group]')).toHaveClass('rcm-fieldgroup');
     expect(wrapper?.parentElement).toHaveClass('rcm-field-grid');
   });

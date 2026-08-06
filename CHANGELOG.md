@@ -2,6 +2,20 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.9] - 2026-08-06
+
+### Added
+
+- `ViewListGrid.selection`에 기본 확인 action을 끄는 `showConfirm`(기본값 `true`)과 선택
+  변경 및 rows 변경 초기화를 알리는 `onCheckedChange`를 추가했다.
+
+### Fixed
+
+- 필수 표시와 ManyToOne 값 글자 크기를 기존 입력 스타일에 맞추고 빈 ManyToOne 값을 흐리게 표시했다.
+- 선택된 행이 없을 때 비활성 기본 확인 버튼이 노출되던 문제를 고쳤다.
+- selection+showRowNumbers 병합 셀의 체크박스와 행 번호가 넓은 host 체크박스에서도 한 줄
+  가로 배치를 유지하도록 했다.
+
 ## [0.5.8] - 2026-08-06
 
 ### Fixed

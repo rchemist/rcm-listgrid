@@ -121,7 +121,9 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
 
   return (
     <span data-field="manyToOne">
-      <span data-m2o-value={name}>{display || '(선택 안 됨)'}</span>{' '}
+      <span className="rcm-m2o-value" data-m2o-value={name} data-empty={display ? undefined : ''}>
+        {display || '(선택 안 됨)'}
+      </span>{' '}
       {!readOnly && (
         <Button type="button" onClick={() => setOpen(true)}>
           찾기

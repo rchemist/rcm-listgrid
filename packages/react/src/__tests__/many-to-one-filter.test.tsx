@@ -86,6 +86,7 @@ describe('ManyToOneRenderer — config.filter channel (EA-D2-0)', () => {
       </UIProvider>,
     );
 
+    expect(screen.getByText('(선택 안 됨)')).toHaveClass('rcm-m2o-value');
     fireEvent.click(screen.getByRole('button', { name: '찾기' }));
 
     await waitFor(() => expect(filter).toHaveBeenCalledTimes(1));

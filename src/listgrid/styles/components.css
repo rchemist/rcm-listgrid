@@ -43,6 +43,14 @@
 /* ------------------------------------------------------------------ *
      * ManyToOne / Link addon buttons (input group 우측 관리 / 찾기 / 외부 링크)
      * ------------------------------------------------------------------ */
+.rcm-m2o-value {
+  font-size: var(--rcm-font-size-sm);
+}
+
+.rcm-m2o-value[data-empty] {
+  color: var(--rcm-color-text-muted);
+}
+
 .rcm-m2o-action-btn {
   display: inline-flex;
   align-items: center;
@@ -1656,6 +1664,13 @@
 .rcm-skeleton-td-checkbox {
   width: 50px;
   padding: var(--rcm-space-sm);
+  vertical-align: middle;
+}
+.rcm-skeleton-td-checkbox > label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+  white-space: nowrap;
 }
 .rcm-skeleton-td {
   padding: var(--rcm-space-sm);
