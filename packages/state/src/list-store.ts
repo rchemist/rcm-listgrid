@@ -27,11 +27,12 @@ export interface ListStoreState<T = Record<string, unknown>> {
   setPageSize(pageSize: number): Promise<void>;
   setSort(field: string, direction: Direction): Promise<void>;
   quickSearch(fields: string[], value: string): Promise<void>;
+  /** Dismiss the last list-fetch failure without changing rows/search state. */
+  clearError(): void;
   /**
    * Replace the store's `searchForm` wholesale (spec §7 CAP-20; W5-3) — the
-   * advanced-search panel's apply action: it folds the panel's field values
-   * into a NEW `SearchForm` via `.addAndFilter()` (schema-core, unchanged)
-   * and hands the result here. Resets to page 0 (same page-reset precedent
+   * advanced-search panel's apply action hands the fully composed AND/OR
+   * `SearchForm` here. Resets to page 0 (same page-reset precedent
    * as `quickSearch`/`withPageSize` — a changed filter set invalidates
    * whatever page the user was on) then refetches through the same pipe.
    */
@@ -57,11 +58,10 @@ export interface CreateListStoreOptions {
    * refetches, not just the initial load (the briefing's Priority-view
    * reordering needs the store's `rows` itself to stay consistent across
    * pages). Must be pure — receives/returns a rows array, does not touch
-   * `searchForm`. A throwing `postFetch` propagates out of `fetch()`
-   * uncaught by this try/catch (by design — it runs after the adapter call
-   * succeeds, so a bug here should surface, not be swallowed as a fetch
-   * error). Runs AFTER the onAfterListFetch hooks (spec §4.2) — it is a
-   * store-level final pass over whatever the hooks produced.
+   * `searchForm`. A throwing `postFetch` is recorded in the store's error
+   * state and always clears loading, just like an adapter failure. Runs AFTER
+   * the onAfterListFetch hooks (spec §4.2) — it is a store-level final pass
+   * over whatever the hooks produced.
    */
   postFetch?: (rows: Record<string, unknown>[]) => Record<string, unknown>[];
 }
@@ -136,13 +136,15 @@ export function createListStore<T = Record<string, unknown>>(
       // EA-D2-0 postFetch: applied on EVERY fetch (initial + pagination/sort/
       // quick-search), right before set(), AFTER the onAfterListFetch hooks
       // (a store-level final pass over whatever the hooks produced).
-      // Deliberately OUTSIDE both hook try/catches above — a throwing
-      // postFetch must propagate out of fetch() (a bug in caller-supplied
-      // logic), not be swallowed into the store's `error` state like an
-      // adapter failure, and not logged+skipped like a list-fetch hook.
-      const rows = opts.postFetch
-        ? (opts.postFetch(effectiveRows) as unknown as T[])
-        : (effectiveRows as unknown as T[]);
+      let rows: T[];
+      try {
+        rows = opts.postFetch
+          ? (opts.postFetch(effectiveRows) as unknown as T[])
+          : (effectiveRows as unknown as T[]);
+      } catch (e) {
+        set({ loading: false, error: e instanceof Error ? e.message : String(e) });
+        return;
+      }
       set({
         rows,
         totalElements: page.totalElements,
@@ -166,6 +168,9 @@ export function createListStore<T = Record<string, unknown>>(
     async quickSearch(fields, value) {
       set({ searchForm: get().searchForm.quickSearch(fields, value) });
       await get().fetch();
+    },
+    clearError() {
+      set({ error: undefined });
     },
     async setSearchForm(next) {
       set({ searchForm: next.withPage(0) });

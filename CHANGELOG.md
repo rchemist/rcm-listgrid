@@ -2,6 +2,45 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.7] - 2026-08-06
+
+### Added
+
+- 필드 선언과 값 모양을 해석하는 공개
+  `searchConditionFor(field, value?, rendererOperator?)` helper를 추가했다. 유효한 renderer
+  operator가 최우선이고, 검증된 `withFilter({operator})`, 값/타입 mapping 순으로 해석한다.
+  select 계열의 배열 값은 `IN`, text/email/phone/textarea/string은 `LIKE`, 나머지는
+  `EQUAL`을 사용한다.
+- 마지막 목록 조회 실패를 표시하고 dismiss할 수 있는 `ListStoreState.clearError()`와
+  `data-list-error` 인라인 오류 배너를 추가했다. 다음 성공 조회 시 자동으로 사라진다.
+- 필터 가능한 text 목록 필드 전체를 main+OR로 쓰는 quick search와, 2개 이상일 때 고급검색
+  패널에서 쓰는 `통합검색 사용` 모드를 복원했다.
+- `ViewListGrid.openInNewWindow`를 추가했다. host `getUrl(row)`, row별 `showFilter`, tooltip,
+  width/height를 지원하며 기본 1280×860 중앙 popup을 연다.
+- quick/unified/error/popup 문구와 고급검색 `초기화`/`닫기`를 `configureLabels` 카탈로그에
+  추가했다.
+
+### Fixed
+
+- 고급검색과 컬럼 필터가 `queryConditionType` 없는 FilterItem을 전송해 RCM 검색 백엔드가
+  `SEARCH.UNSUPPORTED_CONDITION` 400을 반환하던 문제를 고쳤다.
+- 고급검색 draft를 비운 뒤 적용해도 기존 같은 이름의 AND 절이 남던 문제를 고쳤다.
+- 고급검색 panel의 `rcm-adv-search-inner`/`rcm-adv-search-inner-panel`을 한 요소에 결합해
+  header/grid/footer flex gap 계약을 복원했다.
+
+### Changed
+
+- quick search는 기존 키 입력마다 조회하던 방식에서 Enter 중심으로 바뀌어 타이핑 중 조회하지
+  않는다. Enter는 빈 값도 조회하고, 돋보기는 non-empty,
+  clear X는 값을 비운 뒤 즉시 재조회하며, 로딩 중 input/action은 disabled다.
+- 컬럼 설정을 Modal+적용 버튼에서 2열/640px 이상 3열 instant-apply popover로 교체했다.
+  마지막 표시 열은 끌 수 없고 controlled hidden-columns API는 유지된다.
+- quick search와 host toolbar/목록 설정/고급검색 action을 하나의 상단
+  `rcm-listgrid-searchbar` 행으로 옮겼다. 호스트는 0.5.6용 flex-order/표 뒤 toolbar CSS를
+  제거해야 한다.
+- 고급검색 footer는 `닫기 → 초기화 → 검색` 순서이며 reset은 AND draft와 unified OR를 한
+  번에 지운다.
+
 ## [0.5.6] - 2026-08-06
 
 ### Upgrade notes

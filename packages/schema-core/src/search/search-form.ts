@@ -199,12 +199,10 @@ export class SearchForm {
   }
 
   /**
-   * AND-filter sugar — plain append, no de-dup by name. Kept as its own
-   * (simpler) primitive: ViewListGrid's advanced-search panel deliberately
-   * relies on repeated `addAndFilter` calls STACKING same-named clauses
-   * rather than replacing them (see ViewListGrid.tsx:254-272's documented
-   * W5-3 decision) — do not reroute this through `withFilter`'s replace-by-
-   * name semantics without re-checking that call site.
+   * AND-filter sugar — plain append, no de-dup by name. Kept as an additive
+   * primitive for callers that intentionally need multiple same-named
+   * clauses. Replacement semantics remain available through `withFilter`;
+   * do not change this method's append contract without auditing callers.
    */
   addAndFilter(item: FilterItem): SearchForm {
     const c = this.clone();

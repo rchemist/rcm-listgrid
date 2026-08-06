@@ -565,6 +565,108 @@
   border-top: var(--rcm-border-width) solid var(--rcm-color-border);
 }
 
+/* ListGrid column visibility — an instant-apply popover anchored in the
+   stock searchbar actions row. */
+.rcm-column-settings-anchor {
+  position: relative;
+}
+
+.rcm-column-settings {
+  position: absolute;
+  top: calc(100% + var(--rcm-space-sm));
+  right: 0;
+  z-index: var(--rcm-z-dropdown);
+  width: max-content;
+  max-width: min(90vw, 480px);
+  padding: var(--rcm-space-lg);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+  box-shadow: var(--rcm-shadow-lg);
+}
+
+.rcm-column-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-column-settings-item {
+  display: flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+  min-width: 0;
+  font-size: var(--rcm-font-size-sm);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+@media (min-width: 640px) {
+  .rcm-column-settings-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.rcm-listgrid-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rcm-space-md);
+  margin-bottom: var(--rcm-space-sm);
+  padding: var(--rcm-space-sm) var(--rcm-space-md);
+  color: var(--rcm-color-error);
+  font-size: var(--rcm-font-size-sm);
+  background: var(--rcm-color-error-surface);
+  border: var(--rcm-border-width) solid color-mix(in srgb, var(--rcm-color-error) 30%, transparent);
+  border-radius: var(--rcm-radius-md);
+}
+
+.rcm-listgrid-error button {
+  flex: 0 0 auto;
+  padding: 0 var(--rcm-space-xs);
+  color: inherit;
+  font: inherit;
+  font-size: var(--rcm-font-size-lg);
+  line-height: 1;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.rcm-skeleton-td-newwin {
+  width: 44px;
+  text-align: center;
+}
+
+.rcm-newwin-btn {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--rcm-color-primary);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid
+    color-mix(in srgb, var(--rcm-color-primary) 45%, transparent);
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition:
+    color var(--rcm-transition-fast),
+    background var(--rcm-transition-fast),
+    border-color var(--rcm-transition-fast);
+}
+
+.rcm-newwin-btn:hover {
+  background: color-mix(in srgb, var(--rcm-color-primary) 10%, var(--rcm-color-surface));
+  border-color: var(--rcm-color-primary);
+}
+
+.rcm-newwin-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
 /* ViewEntityForm error summary — the tokenized equivalent of the 0.2.x
    danger banner and expandable detail panel. */
 .rcm-error-summary {

@@ -277,6 +277,23 @@ describe('createListStore (charter C9)', () => {
     await store.getState().fetch();
     expect(store.getState().error).toBe('boom');
     expect(store.getState().loading).toBe(false);
+    store.getState().clearError();
+    expect(store.getState().error).toBeUndefined();
+  });
+
+  it('clears a previous error when the next fetch succeeds', async () => {
+    const adapter = mockAdapter(rows);
+    adapter.list = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('first failure'))
+      .mockResolvedValueOnce({ content: rows, totalElements: rows.length, totalPages: 1 });
+    const store = createListStore({ url: '/college', adapter });
+
+    await store.getState().fetch();
+    expect(store.getState().error).toBe('first failure');
+    await store.getState().fetch();
+    expect(store.getState().error).toBeUndefined();
+    expect(store.getState().rows).toHaveLength(rows.length);
   });
 
   // EA-D2-0 postFetch (decision ①, §3) — the Priority-view reordering hook:
@@ -317,7 +334,7 @@ describe('createListStore (charter C9)', () => {
       expect(got.every((r) => r['annotated'] === true)).toBe(true);
     });
 
-    it('a throwing postFetch propagates — not swallowed as an adapter error', async () => {
+    it('a throwing postFetch records the error and always clears loading', async () => {
       const store = createListStore({
         url: '/college',
         adapter: mockAdapter(rows),
@@ -325,10 +342,9 @@ describe('createListStore (charter C9)', () => {
           throw new Error('postFetch boom');
         },
       });
-      await expect(store.getState().fetch()).rejects.toThrow('postFetch boom');
-      // NOT surfaced as the adapter-failure `error` state (that catch block
-      // only wraps the adapter call, not postFetch).
-      expect(store.getState().error).toBeUndefined();
+      await store.getState().fetch();
+      expect(store.getState().loading).toBe(false);
+      expect(store.getState().error).toBe('postFetch boom');
     });
   });
 

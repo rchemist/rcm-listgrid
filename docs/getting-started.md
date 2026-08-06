@@ -61,7 +61,7 @@ The library is **framework-free by design**. It does not know how you do HTTP, r
 | Contract | Form | Purpose |
 |---|---|---|
 | `AuthProvider` | React component | Session + role checks |
-| `UIProvider` | React component | 49 visual primitives — 47 required + 2 optional (Table, Modal, Tooltip, …) |
+| `UIProvider` | React component | 16 visual primitives (`TextInput` through `LoadingOverlay`; see `PRIMITIVES.md`) |
 | `RouterProvider` | React component | Framework router hooks (Next, React Router, …) |
 | `UrlStateProvider` | React component | Query-string state sync (nuqs-compatible) |
 | `configureApiClient` | Module-level function | HTTP transport + auth headers + CSRF |
@@ -346,32 +346,50 @@ Default is `any` — existing code compiles without change. Opt in entity-by-ent
 
 ## 7. Rendering the list and form
 
-With an entity form in hand, the renderers are two one-liners:
+The 0.5.x list renderer receives an `EntityForm` and a `ListStoreState` store directly:
 
 ```tsx
-import { ViewListGrid, ViewEntityForm, ListGrid } from '@rchemist/listgrid';
-import { createUserForm } from './userForm';
+import { UIProvider, ViewListGrid } from '@rchemist/listgrid';
+import { EntityForm, StringField, type BackendAdapter } from '@rchemist/listgrid/schema';
+import { createListStore } from '@rchemist/listgrid/state';
+import { defaultUIComponents } from '@rchemist/listgrid/ui-default';
+
+const form = new EntityForm('UserEntityForm', '/api/users').addFields({
+  items: [
+    new StringField('name', 10).withLabel('이름').withList().withFilter(),
+    new StringField('email', 20).withLabel('이메일').withList().withFilter(),
+  ],
+});
+const adapter: BackendAdapter = /* host adapter */;
+const store = createListStore({ url: form.url, adapter, entityForm: form });
 
 export function UserListPage() {
- const form = createUserForm;
- return <ViewListGrid listGrid={new ListGrid(form)} />;
-}
-
-export function UserDetailPage({ id }: { id: string }) {
- const form = createUserForm.withId(id);
- return <ViewEntityForm entityForm={form} />;
+  return (
+    <UIProvider components={defaultUIComponents}>
+      <ViewListGrid
+        entityForm={form}
+        store={store}
+        columnSettings
+        showRowNumbers
+        openInNewWindow={{ enabled: true, getUrl: (row) => `/users/${String(row.id)}` }}
+      />
+    </UIProvider>
+  );
 }
 ```
 
-`ListGrid` is a thin wrapper around an `EntityForm` that holds list-only state (`SearchForm`, sort/filter overrides). Always pass a fresh `new ListGrid(form)` so each page instance gets its own state.
-
-Out of the box you get: pagination, column selection, quick search, advanced search (AND/OR filter builder), sort, bulk row actions, per-row actions, inline sub-collections, revision history, advanced column visibility, Excel export (if the peer deps are installed), and per-row edit modals.
+`withList()` declares columns and `withFilter()` declares header/advanced filters. Every field that
+is both and has built-in type `text` participates in quick search; two or more produce OR clauses
+and enable unified search. The top searchbar holds the local quick input and the toolbar/settings/
+advanced actions; it is followed by the advanced panel, inline fetch error, table, and 0-based
+pagination. Column settings is an instant popover, not a modal.
 
 ### Customising appearance without forking
 
 - **Tokens**: override CSS custom properties in your own stylesheet loaded **after** `@rchemist/listgrid/styles.css`. See [`src/listgrid/styles/tokens.css`](../src/listgrid/styles/tokens.css) for the full ~50-token list.
 - **Primitives**: every rendered element uses `rcm-{name}` classes with `data-*` variants (`data-variant`, `data-color`, `data-size`). See [`docs/PRIMITIVES.md`](./PRIMITIVES.md).
-- **Per-instance slots**: pass a `classNames={{ table: { container: 'my-custom' }, ... }}` prop to `<ViewListGrid />` / `<ViewEntityForm />` to splat extra classes onto specific slots.
+- **Injected primitives**: replace individual `UIComponents` slots; use their documented
+  `className` props where available. Override stable list-level `rcm-*` classes for outer layout.
 
 ---
 

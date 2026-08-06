@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { EntityField } from '@listgrid/schema-core';
+import type { EntityField, QueryConditionType } from '@listgrid/schema-core';
 
 // FilterRenderer registry — the type→component dispatch table for the
 // ADVANCED-SEARCH panel embedded in ViewListGrid (spec §7 EG24, CAP-20; W5-3),
@@ -21,7 +21,7 @@ import type { EntityField } from '@listgrid/schema-core';
 export interface FilterRendererComponentProps {
   field: EntityField;
   value: unknown;
-  onChange: (value: unknown) => void;
+  onChange: (value: unknown, operator?: QueryConditionType) => void;
 }
 
 export type FilterRendererComponent = ComponentType<FilterRendererComponentProps>;

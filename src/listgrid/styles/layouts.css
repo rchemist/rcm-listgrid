@@ -1766,8 +1766,19 @@
 }
 
 .rcm-listgrid-searchbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rcm-space-md);
   width: 100%;
   padding: 0 var(--rcm-space-lg);
+}
+
+@media (max-width: 767px) {
+  .rcm-listgrid-searchbar-inner {
+    flex-wrap: wrap;
+    padding: 0;
+  }
 }
 
 .rcm-listgrid-search-input {
@@ -1826,8 +1837,8 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--rcm-space-sm);
-  margin-top: var(--rcm-space-lg);
-  margin-bottom: var(--rcm-space-sm);
+  margin-top: 0;
+  margin-bottom: 0;
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -1841,8 +1852,8 @@
 
 @media (min-width: 1024px) {
   .rcm-search-bar-actions {
-    margin-top: var(--rcm-space-sm);
-    margin-bottom: var(--rcm-space-sm);
+    margin-top: 0;
+    margin-bottom: 0;
   }
 }
 

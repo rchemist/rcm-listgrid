@@ -10,13 +10,15 @@
 
 If you've ever built a CRUD admin UI, you know the pattern:
 
-- **List view**: paginated table + search + filters + sort + column picker + bulk actions
+- **List view**: 0-based pagination, multi-field quick/unified search, typed filters, sort,
+  instant column picker, selection, row numbers, inline fetch errors, and optional popup actions
 - **Form view**: field renderer + validation + revision history + file upload + inline sub-collections
 
 Each app reimplements this with its own UI kit + backend conventions. `@rchemist/listgrid` extracts it into a reusable engine:
 
 - **You provide**: entity metadata, field definitions, HTTP fetch
-- **It renders**: full list/form UI, deeply customizable via CSS custom properties + per-instance `classNames` slots + UI primitive replacement
+- **It renders**: full list/form UI with a stock stylesheet, CSS custom properties and `data-*`
+  hooks for theming, plus app-wide UI primitive replacement through `UIProvider`
 
 ---
 
@@ -39,150 +41,66 @@ these and the package builds. Heavier, feature-specific peers are isolated behin
 **opt-in subpaths**: a consumer that imports only the main entry never has to install
 them, so `next build` no longer fails on uninstalled optional peers.
 
-**Required** (used by the core list/form renderer — the main barrel imports these):
-
-`react >= 18`, `react-dom >= 18`, `@headlessui/react`, `@tabler/icons-react`,
-`@iconify/react`, `react-select`, `react-sortablejs`, `sortablejs`, `date-fns`
+**Required**: `react >= 18` and `react-dom >= 18`. `next`, `react-daum-postcode`,
+`xlsx-js-style`, and `file-saver` are optional peers used only by their matching features/subpaths.
 
 **Opt-in subpaths** (install the peer only if you import that subpath):
 
 | Import from | Provides | Required peer |
 |---|---|---|
-| `@rchemist/listgrid/next` | Next.js app-router adapter | `next`, `nuqs` |
-| `@rchemist/listgrid/qr` | `QrField` | `qrcode.react@^3` |
-| `@rchemist/listgrid/address` | `AddressFieldView`, `AddressMapField`, `KakaoMap`, `PostCodeSelector`, `ApplyFullAddressFields` | `react-kakao-maps-sdk`, `react-daum-postcode` |
-| `@rchemist/listgrid/api-spec` | `ViewApiSpecification`, `ApiSpecificationButton` | `sweetalert2`, `sweetalert2-react-content` |
-| `@rchemist/listgrid/xref-price` | `XrefPriceMappingField` | `sweetalert2`, `sweetalert2-react-content` |
+| `@rchemist/listgrid/next` | Next.js app-router adapter | `next >= 14` |
 | `@rchemist/listgrid/excel` | Excel export/import + `registerExcelDataTransfer()` | `xlsx-js-style`, `file-saver` |
-
-```ts
-// opt into the QR field — requires qrcode.react@^3
-import { QrField } from '@rchemist/listgrid/qr';
-```
-
-> **qrcode.react**: only v3 is supported. `QrField` uses the default export, which v4 removed.
-
-#### Enabling list export / import
-
-The list header's export/import actions are **injected**, so the core bundle never forces
-`xlsx-js-style` / `file-saver` on consumers that don't use them. Register the Excel
-implementation once at app bootstrap (otherwise the export/import modals simply don't render):
-
-```ts
-import { registerExcelDataTransfer } from '@rchemist/listgrid/excel';
-registerExcelDataTransfer(); // requires xlsx-js-style + file-saver
-// or wire your own: configureDataTransfer({ Exporter, Importer })
-```
 
 ---
 
 ## Quick start
 
-### 1. Wrap your app with the providers
-
 ```tsx
-import {
- AuthProvider,
- UIProvider,
- ResponseData,
- configureApiClient,
- configureMessages,
- configureRuntime,
-} from '@rchemist/listgrid';
-import { RouterProvider, UrlStateProvider } from '@rchemist/listgrid/next'; // Next adapter
+import '@rchemist/listgrid/styles.css';
+import { UIProvider, ViewListGrid, configureLabels } from '@rchemist/listgrid';
+import { EntityForm, StringField, BooleanField, type BackendAdapter } from '@rchemist/listgrid/schema';
+import { createListStore } from '@rchemist/listgrid/state';
+import { defaultUIComponents } from '@rchemist/listgrid/ui-default';
 
-// One-time config at module load
-configureRuntime({
- isDevelopment: process.env.NODE_ENV === 'development',
- cryptKey: 'your-client-side-crypto-salt',
+const userForm = new EntityForm('UserEntityForm', '/api/users').addFields({
+  items: [
+    new StringField('name', 10).withLabel('이름').withList().withFilter(),
+    new StringField('email', 20).withLabel('이메일').withList().withFilter(),
+    new BooleanField('active', 30).withLabel('사용').withList().withFilter(),
+  ],
 });
 
-// ⚠️ Envelope contract: every adapter method MUST return a `ResponseData` whose `.data`
-// holds the backend payload. listgrid reads `response.data.list` / `.content` /
-// `.searchForm` and calls `response.isError()`. Returning bare `r.json()` (raw JSON)
-// makes `response.data` absent → the grid silently shows "데이터가 없습니다".
-configureApiClient({
- callExternalHttpRequest: async (options) => {
- const r = await fetch(options.url, options);
- return new ResponseData({ data: await r.json(), status: r.status });
- },
- getExternalApiData: async (url) => {
- const r = await fetch(url);
- return new ResponseData({ data: await r.json(), status: r.status });
- },
- getExternalApiDataWithError: async (url) => {
- const r = await fetch(url);
- if (!r.ok) return new ResponseData({ error: 'request failed', status: r.status });
- return new ResponseData({ data: await r.json(), status: r.status });
- },
-});
+const adapter: BackendAdapter = /* host HTTP adapter */;
+const store = createListStore({ url: userForm.url, adapter, entityForm: userForm });
 
-configureMessages({
- showAlert: ({ title, text }) => alert(`${title}\n${text}`),
- showConfirm: async ({ text }) => confirm(text),
- showToast: ({ text }) => console.log(text),
- showError: (err) => console.error(err),
-});
+configureLabels({ searchError: '검색 요청을 처리하지 못했습니다.' });
 
-function Root({ children }) {
- return (
- <AuthProvider session={currentSession}>
- <UIProvider components={/* map of UI primitives */}>
- <RouterProvider value={/* Next router hooks */}>
- <UrlStateProvider value={/* nuqs hooks */}>
- {children}
- </UrlStateProvider>
- </RouterProvider>
- </UIProvider>
- </AuthProvider>
- );
+export function UserList() {
+  return (
+    <UIProvider components={defaultUIComponents}>
+      <ViewListGrid
+        entityForm={userForm}
+        store={store}
+        selection={{ enabled: true, onConfirm: (ids) => console.log(ids) }}
+        showRowNumbers
+        columnSettings
+        openInNewWindow={{
+          enabled: true,
+          getUrl: (row) => `/users/${String(row.id)}?popup=true`,
+          showFilter: (row) => row.active !== false,
+        }}
+        toolbar={({ checkedIds }) => <span>{checkedIds.length} selected</span>}
+      />
+    </UIProvider>
+  );
 }
 ```
 
-`<UIProvider components={...}>` expects the full primitive surface. Instead of hand-writing
-~47 stubs, start from the zero-styling baseline and override only what you need:
-
-```tsx
-import { headlessUIComponents } from '@rchemist/listgrid/headless';
-
-<UIProvider components={{ ...headlessUIComponents, ...myOverrides }}>{children}</UIProvider>
-```
-
-The headless set is unstyled on purpose — pair it with `@rchemist/listgrid/styles.css` for the
-`rcm-*` look, or swap individual primitives for your own design system.
-
-### 2. Define an entity
-
-```tsx
-import { EntityForm, StringField, NumberField, BooleanField } from '@rchemist/listgrid';
-
-const userForm = new EntityForm('user', '/api/users').addFields({
- items: [
- new StringField('name', 1).withRequired(true),
- new StringField('email', 2).withRequired(true),
- new NumberField('age', 3),
- new BooleanField('active', 4),
- ],
-});
-```
-
-> Fields are constructed with `(name, order)`. `addFields` expects `{ items: [...] }` (an object, not a bare array) — you can also pass `tab` / `fieldGroup` / `overwrite` options in the same call.
-
-### 3. Render the list / form
-
-```tsx
-import { ViewListGrid, ViewEntityForm, ListGrid } from '@rchemist/listgrid';
-
-function UserListPage() {
- return <ViewListGrid listGrid={new ListGrid(userForm)} />;
-}
-
-function UserDetailPage({ id }) {
- return <ViewEntityForm entityForm={userForm.clone().withId(id)} />;
-}
-```
-
-That's it. The library handles search/filter/pagination/sort/row-actions/column-selection/advanced-search/revision-history/inline-subcollections/etc.
+`withList()` opts a field into the table; `withFilter()` opts it into advanced/header filtering.
+All filterable `text` list fields become quick-search fields (first main, remaining OR). Two or
+more also enable the advanced panel's unified OR mode. Search failures render a dismissible
+inline banner and clear on the next successful fetch. The stock stylesheet owns the searchbar,
+popover, filter panel, table, popup button, and pagination layout.
 
 ---
 
@@ -220,16 +138,9 @@ Two activation paths — no code needed:
 <html data-theme="light">
 ```
 
-### Per-instance classNames slot
-
-```tsx
-<ViewListGrid
- classNames={{
- table: { container: 'my-custom-table-scroll' },
- header: { buttonGroup: 'my-button-row' },
- }}
-/>
-```
+Individual injected UI primitives accept `className` where their contract declares it. For
+list-level layout, override the stable `rcm-listgrid-*`, `rcm-quick-search-*`,
+`rcm-column-settings-*`, and `rcm-adv-search-*` classes after the stock stylesheet.
 
 ### Full primitive reference
 
@@ -339,7 +250,7 @@ Detailed product/architecture planning lives in [`documents/`](./documents/READM
 
 ## Status
 
-**`v0.3.x` — current release line (latest: see CHANGELOG.md).** The surface is stable enough for external adoption. Opt-in generics (`EntityForm<T>`, `FormField<TSelf, TValue, TForm>`, `FieldRenderParameters<T, TValue>`, `parse<T>`) give per-entity key narrowing where you use them.
+**`v0.5.x` — current release line (latest: see CHANGELOG.md).** The surface is stable enough for external adoption. Opt-in generics (`EntityForm<T>`, `FormField<TSelf, TValue, TForm>`, `FieldRenderParameters<T, TValue>`, `parse<T>`) give per-entity key narrowing where you use them.
 
 **New to the library?** Start with [`docs/getting-started.md`](./docs/getting-started.md) — it walks through each provider contract and the most common adoption traps.
 

@@ -33,6 +33,8 @@ export type { MessagesRegistry, ToastKind } from './messages';
 export { configureLabels, getLabels } from './labels';
 export type { Labels } from './labels';
 
+export { searchConditionFor } from './search-condition';
+
 export {
   FormStoreProvider,
   useFormStore,
@@ -89,7 +91,12 @@ export { ViewEntityForm } from './components/ViewEntityForm';
 export type { ViewEntityFormProps } from './components/ViewEntityForm';
 
 export { ViewListGrid } from './components/ViewListGrid';
-export type { ViewListGridProps } from './components/ViewListGrid';
+export type {
+  ViewListGridProps,
+  ViewListGridSelection,
+  ViewListGridColumn,
+  ViewListGridOpenInNewWindow,
+} from './components/ViewListGrid';
 
 // --- conditional resolvers that need value-level React (ADR-0003 §Decision 5;
 // schema-core ships only the React-free getConditionalBoolean/String) ---

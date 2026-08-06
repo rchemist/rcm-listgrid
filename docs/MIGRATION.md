@@ -1,5 +1,28 @@
 # Migration guide
 
+## 0.5.7 list-surface upgrade notes
+
+- Quick search and `data-list-grid-toolbar` now share the top
+  `.rcm-listgrid-searchbar > .rcm-listgrid-searchbar-inner` row. Remove 0.5.6 host flex-order,
+  negative-margin, and after-table toolbar workarounds.
+- Column settings is an anchored, outside-click-closing, instant-apply checkbox popover. It no
+  longer uses the injected `Modal`; controlled `hiddenColumns`/`onHiddenColumnsChange` is
+  unchanged and the final visible column remains guarded.
+- `openInNewWindow={{enabled,getUrl,tooltip?,showFilter?,windowFeatures?}}` adds a dedicated row
+  action column. `getUrl(row)` is host-owned and its button does not trigger `onRowClick`.
+- A rejected list fetch renders a dismissible `data-list-error` banner; the next successful
+  fetch clears it automatically.
+- Header/advanced filter apply always emits `queryConditionType`. The public helper signature is
+  `searchConditionFor(field, value?, rendererOperator?)`: a valid operator supplied by a filter
+  renderer's `onChange(value, operator?)` has highest precedence, followed by a validated
+  `withFilter({operator})`, then value/type mapping. Array-valued select/multiselect/checkbox/tag/
+  customOption fields use `IN`; text/email/phone/textarea/string fields use `LIKE`; scalar select
+  and other types use `EQUAL`. Backends or mocks that relied on condition-less filter items must
+  verify their search schema.
+- All `withList()` + `withFilter()` built-in text fields feed quick search (first main, rest OR).
+  Typing stays local; Enter/icon/clear run search. Two or more fields enable unified OR mode.
+- The injected `Pagination` boundary remains 0-based; remove any host `+1/-1` conversion.
+
 This document has two parts. [**§ v0.2.x → v0.3.x**](#v02x--v03x) covers the breaking changes
 between the `0.2.x` and current `0.3.x` line. [**§ v0.2.0 — summary**](#v020--summary) below it
 walks you from any `0.1.0-alpha.x` release to `v0.2.0`. Both expand the entries in
@@ -216,21 +239,21 @@ export default function CollegeListPage() {
 
 #### 3.3. ViewListGrid 표면 요약 (컴포지션 관점)
 
-`<ViewListGrid {entityForm, store, onRowClick?, selection?, toolbar?, columns?}>`(스펙 §7):
+`<ViewListGrid {entityForm, store, onRowClick?, selection?, toolbar?, columns?, showRowNumbers?, columnSettings?, hiddenColumns?, onHiddenColumnsChange?, openInNewWindow?}>`(스펙 §7):
 
 - **컬럼(CAP-19)**: 기본은 필드 `withList({order?, label?, align?, width?, sortable?})` 선언에서 파생된다. **마법 폴백 없음** — `withList` 선언이 0건이면 빈 컬럼 + dev 경고(구 "첫 ~4개 비숨김 필드 자동채택" 폐기).
 - **`columns` escape hatch**: `columns={['name','type','majorCode']}`처럼 명시하면 파생을 건너뛰고 그 순서/필드로 렌더한다(`apps/sample/app/major/page.tsx` 예시). 파생 오버라이드가 필요한 페이지에서만.
 - **정렬**: `sortable: true`인 컬럼 헤더 클릭 → `store.setSort` → refetch(`aria-sort` 반영).
 - **셀 렌더링**: `getListCellRenderer(field.type)` 조회 → 없으면 `field.getDisplayValue` → `String`. 커스텀 셀은 루트에서 `registerListCellRenderer(type, comp)`.
-- **고급검색(CAP-20)**: 필드 `withFilter({operator?, order?, label?})` 선언이 하나라도 있으면 그리드가 "고급검색" 토글 + 패널을 **내장**해 자동 노출한다(별도 컴포넌트 조립 불요). 입력은 `getFilterRenderer(field.type)` 조회 → 없으면 기본 텍스트 입력(useUI). "검색" 클릭 시 비어있지 않은 값이 `SearchForm.addAndFilter`로 AND 필터가 되어 refetch된다. `operator`는 열린 문자열이며 값이 있으면 `queryConditionType`으로 전달, 없으면 백엔드 기본값(엔진이 기본 operator를 발명하지 않는다).
-  - **커스텀 필터 입력**: `registerFilterRenderer(type, comp)`(props `{field, value, onChange}`)를 루트에서 등록하면 해당 타입 필터가 그 입력으로 렌더된다.
+- **고급검색(CAP-20)**: 필드 `withFilter({operator?, order?, label?})` 선언이 하나라도 있으면 그리드가 "고급검색" 토글 + 패널을 **내장**해 자동 노출한다(별도 컴포넌트 조립 불요). 입력은 `getFilterRenderer(field.type)` 조회 → 없으면 기본 텍스트 입력(useUI). "검색"은 비어있지 않은 값을 AND로 적용하고 draft를 비운 필드의 기존 AND 절을 제거한다. 오퍼레이터 우선순위는 renderer의 `onChange(value, operator?)` → 유효한 `withFilter({operator})` → 값/타입 매핑(text/email/phone/textarea/string `LIKE`, 그 외 `EQUAL`)이다. filterable text list field가 2개 이상이면 통합검색 OR 모드도 노출된다.
+  - **커스텀 필터 입력**: `registerFilterRenderer(type, comp)`(props `{field, value, onChange(value, operator?)}`)를 루트에서 등록하면 해당 타입 필터가 그 입력으로 렌더된다.
   - **주의(발명 금지, waves 결정 2)**: 구 엔진의 ManyToOne 합성 필터 자동주입(`<field>.name` 등)은 이식되지 않았다. 관계 필드를 고급검색에 노출하려면 소비자가 명시적으로 `withFilter`를 선언한다.
 
 #### 3.4. 컴포지션 변형 레시피
 
 - **명시 컬럼**: `columns` prop(§3.3). 파생 대신 고정 컬럼 세트가 필요할 때.
 - **행 네비게이션**: `onRowClick={(row) => router.push(...)}`. 라우팅은 호스트 라우터(예: `NextRouterProvider`) 몫.
-- **툴바/선택**: `toolbar`·`selection` prop(체크박스 선택 등). data-transfer(엑셀 등)가 툴바 opt-in을 확장한다(§4 참조).
+- **툴바/선택**: `toolbar`·`selection` prop(체크박스 선택 등). toolbar 출력은 표 뒤가 아닌 상단 searchbar actions에 렌더된다. data-transfer(엑셀 등)가 툴바 opt-in을 확장한다(§4 참조).
 - **폼 페이지**: 같은 `EntityForm()` 선언을 `/new`·`/[id]` 페이지에서 `useEntityForm`+`ViewEntityForm`으로 조립(C1 — 리스트와 폼이 한 선언 공유). 이 절 범위 밖(폼 컴포지션은 별도).
 
 #### 3.5. list-track(W5) 커버리지 대조 — CAP-18/19/20
@@ -245,7 +268,7 @@ export default function CollegeListPage() {
 
 #### 3.6. 알려진 한계 (§Needs Review 연동)
 
-- **고급검색 재적용 de-dup**: 같은 필드에 대해 값을 바꿔 "검색"을 두 번 누르면 AND 절이 누적된다(단일 apply는 정확). SearchForm에 "이름별 제거" 프리미티브가 아직 없다(W5-3 스코프 밖). 소비자가 반복 필터링 UX가 필요하면 현재는 페이지 리로드/스토어 재생성으로 우회한다. 후속 개선 후보(§Needs Review #W5-3).
+- **고급검색 재적용/clear**: 0.5.7은 같은 이름의 AND 절을 교체하고, draft를 비운 필드의 기존 절을 제거한다. 페이지 리로드/스토어 재생성 우회는 더 이상 필요하지 않다.
 
 ### 4. data-transfer 미이관 목록
 

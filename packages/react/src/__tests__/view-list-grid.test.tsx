@@ -6,7 +6,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { BackendAdapter, FieldType, PageResult } from '@listgrid/schema-core';
-import { EntityForm, SearchForm, StringField } from '@listgrid/schema-core';
+import {
+  BooleanField,
+  DateField,
+  EntityForm,
+  MultiSelectField,
+  NumberField,
+  SearchForm,
+  SelectField,
+  StringField,
+} from '@listgrid/schema-core';
 import { createListStore } from '@listgrid/state';
 import { defaultUIComponents, type CheckBoxProps, type UIComponents } from '@listgrid/ui-default';
 import { UIProvider } from '../providers/ui';
@@ -18,6 +27,7 @@ import { configureLabels } from '../labels';
 afterEach(() => {
   configureLabels({
     quickSearchPlaceholder: '검색',
+    quickSearchPlaceholderFor: (labels) => `Search ${labels.join(', ')}...`,
     paginationPrev: 'Prev',
     paginationNext: 'Next',
     emptyState: '데이터가 없습니다.',
@@ -34,6 +44,15 @@ function collegeForm(): EntityForm {
     items: [
       new StringField('name', 100).withRequired(true).withLabel('Name').withList(),
       new StringField('englishName', 110).withLabel('English Name'),
+    ],
+  });
+}
+
+function searchableCollegeForm(): EntityForm {
+  return new EntityForm('SearchableCollegeEntityForm', '/college').addFields({
+    items: [
+      new StringField('name', 100).withLabel('Name').withList().withFilter(),
+      new StringField('englishName', 110).withLabel('English Name').withList().withFilter(),
     ],
   });
 }
@@ -111,8 +130,8 @@ function rowsAdapterWithCalls(rows: Record<string, unknown>[]): {
 /** `name` opts into BOTH the list column AND the advanced-search panel, with
  * a filter label override + a LIKE operator (exercises
  * FieldFilterConfig.operator passthrough); `code` opts into the panel only,
- * plain (`withFilter()`, no config — no queryConditionType should ever be
- * sent for it). The panel derivation (`deriveFilterFields`) is independent of
+ * plain (`withFilter()`, no config — its text mapping emits LIKE). The panel
+ * derivation (`deriveFilterFields`) is independent of
  * the column derivation (`deriveListFields`) — `code` proves a filter-only
  * field never becomes a column. */
 function filterForm(): EntityForm {
@@ -148,8 +167,8 @@ function derivationForm(): EntityForm {
 
 describe('ViewListGrid (JSDOM render)', () => {
   it('reads the configured quick-search placeholder at render time', async () => {
-    configureLabels({ quickSearchPlaceholder: '찾기' });
-    const entityForm = collegeForm();
+    configureLabels({ quickSearchPlaceholderFor: () => '찾기' });
+    const entityForm = searchableCollegeForm();
     const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
 
     render(
@@ -195,7 +214,7 @@ describe('ViewListGrid (JSDOM render)', () => {
   });
 
   it('attaches the stock panel, quick-search, table, row, empty, and pagination classes', async () => {
-    const entityForm = collegeForm();
+    const entityForm = searchableCollegeForm();
     const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
 
     render(
@@ -205,7 +224,7 @@ describe('ViewListGrid (JSDOM render)', () => {
     );
 
     await screen.findByText('Engineering');
-    const root = document.querySelector('[data-list-grid="CollegeEntityForm"]');
+    const root = document.querySelector('[data-list-grid="SearchableCollegeEntityForm"]');
     expect(root).toHaveClass('rcm-listgrid-panel', 'rcm-listgrid-panel-main');
     expect(screen.getByLabelText('Quick search')).toHaveClass(
       'rcm-input',
@@ -227,6 +246,187 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(screen.getByRole('button', { name: 'Clear quick search' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Clear quick search' }));
     expect(screen.getByLabelText('Quick search')).toHaveValue('');
+  });
+
+  it('quick-searches all filterable text list fields only on Enter/icon/clear, never per keystroke', async () => {
+    const entityForm = searchableCollegeForm();
+    const { adapter, listCalls } = rowsAdapterWithCalls(COLLEGES);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    const input = screen.getByLabelText('Quick search');
+    expect(input).toHaveAttribute('placeholder', 'Search Name, English Name...');
+
+    fireEvent.change(input, { target: { value: 'Eng' } });
+    expect(adapter.list).toHaveBeenCalledTimes(1);
+    fireEvent.keyUp(input, { key: 'Enter' });
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON()).toMatchObject({
+      quickSearchFields: ['name', 'englishName'],
+      filters: {
+        OR: [
+          { name: 'name', value: 'Eng', queryConditionType: 'LIKE' },
+          { name: 'englishName', value: 'Eng', queryConditionType: 'LIKE' },
+        ],
+      },
+    });
+
+    fireEvent.change(input, { target: { value: 'Law' } });
+    fireEvent.click(screen.getByRole('button', { name: '빠른 검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters.OR).toEqual([
+      { name: 'name', value: 'Law', queryConditionType: 'LIKE' },
+      { name: 'englishName', value: 'Law', queryConditionType: 'LIKE' },
+    ]);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear quick search' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(4));
+    expect(input).toHaveValue('');
+    expect(listCalls[3]?.toJSON().filters.OR).toEqual([]);
+
+    fireEvent.keyUp(input, { key: 'Enter' });
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(5));
+    expect(listCalls[4]?.toJSON().filters.OR).toEqual([]);
+  });
+
+  it('shows a dismissible fetch error and clears it after the next successful fetch', async () => {
+    const entityForm = collegeForm();
+    const adapter = rowsAdapter(COLLEGES);
+    adapter.list = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('SEARCH.UNSUPPORTED_CONDITION'))
+      .mockRejectedValueOnce(new Error('SEARCH.UNSUPPORTED_CONDITION'))
+      .mockResolvedValue({ content: COLLEGES, totalElements: 3, totalPages: 1 });
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    expect(await screen.findByRole('alert')).toHaveAttribute('data-list-error');
+    fireEvent.click(screen.getByRole('button', { name: '검색 오류 닫기' }));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+
+    await act(async () => store.getState().fetch());
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
+    await act(async () => store.getState().fetch());
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByText('Engineering')).toBeInTheDocument();
+  });
+
+  it('shows the error banner and clears loading when postFetch throws', async () => {
+    const entityForm = collegeForm();
+    const store = createListStore({
+      url: entityForm.url,
+      adapter: mockAdapter(),
+      postFetch: () => {
+        throw new Error('postFetch boom');
+      },
+    });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    expect(await screen.findByRole('alert')).toHaveAttribute('data-list-error');
+    expect(store.getState().error).toBe('postFetch boom');
+    expect(store.getState().loading).toBe(false);
+  });
+
+  it('orders searchbar, advanced panel, error, table, and pagination in the stock flow', async () => {
+    const entityForm = filterForm();
+    const adapter = rowsAdapter([]);
+    adapter.list = vi.fn(async () => {
+      throw new Error('bad condition');
+    });
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await screen.findByRole('alert');
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    const root = document.querySelector('[data-list-grid]')!;
+    const children = [...root.children];
+    expect(
+      children.findIndex((element) => element.classList.contains('rcm-listgrid-searchbar')),
+    ).toBeLessThan(children.findIndex((element) => element.hasAttribute('data-advanced-search')));
+    expect(
+      children.findIndex((element) => element.hasAttribute('data-advanced-search')),
+    ).toBeLessThan(children.findIndex((element) => element.hasAttribute('data-list-error')));
+    expect(children.findIndex((element) => element.hasAttribute('data-list-error'))).toBeLessThan(
+      children.findIndex((element) => element.classList.contains('rcm-skeleton-table-wrapper')),
+    );
+    expect(
+      children.findIndex((element) => element.classList.contains('rcm-skeleton-table-wrapper')),
+    ).toBeLessThan(
+      children.findIndex((element) => element.classList.contains('rcm-listgrid-pagination')),
+    );
+  });
+
+  it('opens the row URL in a centered named popup without firing the row click', async () => {
+    const entityForm = collegeForm();
+    const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+    const onRowClick = vi.fn();
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          onRowClick={onRowClick}
+          openInNewWindow={{
+            enabled: true,
+            getUrl: (row) => `/college/${String(row['id'])}?popup=true`,
+          }}
+        />
+      </UIProvider>,
+    );
+
+    await screen.findByText('Engineering');
+    expect(document.querySelector('thead .rcm-skeleton-td-newwin')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: '새 창에서 보기' })[0]!);
+    expect(open).toHaveBeenCalledWith(
+      '/college/1?popup=true',
+      'entity_1',
+      expect.stringMatching(
+        /^width=1280,height=860,left=\d+,top=\d+,scrollbars=yes,resizable=yes$/,
+      ),
+    );
+    expect(onRowClick).not.toHaveBeenCalled();
+    open.mockRestore();
+  });
+
+  it('counts the new-window action column in the empty-row colSpan', async () => {
+    const entityForm = collegeForm();
+    const store = createListStore({ url: entityForm.url, adapter: rowsAdapter([]) });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          openInNewWindow={{ enabled: true, getUrl: () => '/popup' }}
+        />
+      </UIProvider>,
+    );
+
+    const emptyState = await screen.findByText('데이터가 없습니다.');
+    expect(emptyState.closest('td')).toHaveAttribute('colspan', '2');
   });
 
   it('renders a configured empty-state row with a colSpan for data, selection, and row-number columns', async () => {
@@ -788,6 +988,8 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     expect(screen.queryByRole('button', { name: 'Code 필터' })).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('Quick search'), { target: { value: 'Alpha' } });
+    expect(adapter.list).toHaveBeenCalledTimes(1);
+    fireEvent.keyUp(screen.getByLabelText('Quick search'), { key: 'Enter' });
     await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
     expect(listCalls[1]?.toJSON().filters.OR).toEqual([
       { name: 'name', value: 'Alpha', queryConditionType: 'LIKE' },
@@ -872,18 +1074,51 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     expect(screen.queryByLabelText('Name Filter')).not.toBeInTheDocument(); // panel closed
     fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
 
+    expect(screen.queryByLabelText('Quick search')).not.toBeInTheDocument();
     expect(screen.getByLabelText('Name Filter')).toBeInTheDocument(); // config.label override
     expect(screen.getByLabelText('Code')).toBeInTheDocument(); // falls back to field.getLabel()
     const panel = document.querySelector('[data-advanced-search-panel]');
     expect(document.querySelector('[data-advanced-search]')).toHaveClass('rcm-adv-search-outer');
-    expect(panel?.parentElement).toHaveClass('rcm-adv-search-inner');
-    expect(panel).toHaveClass('rcm-adv-search-inner-panel');
+    expect(panel).toHaveClass('rcm-adv-search-inner', 'rcm-adv-search-inner-panel');
     expect(panel?.querySelector('.rcm-adv-search-header-left .rcm-badge')).toHaveTextContent('2');
     expect(panel?.querySelector('.rcm-adv-search-grid')).toBeInTheDocument();
     expect(panel?.querySelector('[data-advanced-search-apply]')).toHaveClass(
       'rcm-button',
       'rcm-adv-search-btn-submit',
     );
+  });
+
+  it.each([
+    {
+      label: 'zero',
+      form: () =>
+        new EntityForm('NoQuickFieldEntityForm', '/no-quick-field').addFields({
+          items: [new SelectField('status', 100).withLabel('Status').withList().withFilter()],
+        }),
+    },
+    {
+      label: 'one',
+      form: () =>
+        new EntityForm('OneQuickFieldEntityForm', '/one-quick-field').addFields({
+          items: [new StringField('name', 100).withLabel('Name').withList().withFilter()],
+        }),
+    },
+  ])('opens safely with $label quick-search fields and no unified toggle', async ({ form }) => {
+    const entityForm = form();
+    const adapter = rowsAdapter([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+
+    expect(document.querySelector('[data-advanced-search-panel]')).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: '통합검색 사용' })).not.toBeInTheDocument();
   });
 
   it('applying a non-empty value AND-filters via addAndFilter with the configured operator, and refetches', async () => {
@@ -912,6 +1147,502 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     ]);
     // page-reset precedent (same as quickSearch/withPageSize).
     expect(listCalls[1]?.page).toBe(0);
+  });
+
+  it('emits a field-derived queryConditionType for text and exact type families', async () => {
+    const entityForm = new EntityForm('ConditionEntityForm', '/condition').addFields({
+      items: [
+        new StringField('title', 100).withLabel('Title').withFilter(),
+        new NumberField('count', 200).withLabel('Count').withFilter({ operator: 'GREATER_THAN' }),
+        new NumberField('limit', 250).withLabel('Limit').withFilter(),
+        new SelectField('status', 300).withLabel('Status').withFilter(),
+        new BooleanField('active', 400).withLabel('Active').withFilter(),
+        new DateField('createdAt', 500).withLabel('Created At').withFilter(),
+      ],
+    });
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    for (const [label, value] of [
+      ['Title', 'alpha'],
+      ['Count', '3'],
+      ['Limit', '10'],
+      ['Status', 'OPEN'],
+      ['Active', 'true'],
+      ['Created At', '2026-08-06'],
+    ]) {
+      fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    }
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'title', value: 'alpha', queryConditionType: 'LIKE' },
+      { name: 'count', value: '3', queryConditionType: 'GREATER_THAN' },
+      { name: 'limit', value: '10', queryConditionType: 'EQUAL' },
+      { name: 'status', value: 'OPEN', queryConditionType: 'EQUAL' },
+      { name: 'active', value: 'true', queryConditionType: 'EQUAL' },
+      { name: 'createdAt', value: '2026-08-06', queryConditionType: 'EQUAL' },
+    ]);
+  });
+
+  it('uses IN for a multi-select array and falls back from an invalid explicit operator', async () => {
+    registerFilterRenderer('multiselect', ({ value, onChange }) => (
+      <button type="button" onClick={() => onChange(['OPEN', 'CLOSED'])}>
+        {Array.isArray(value) ? value.join(',') : 'Choose statuses'}
+      </button>
+    ));
+    const entityForm = new EntityForm('OperatorFallbackEntityForm', '/operator-fallback').addFields(
+      {
+        items: [
+          new MultiSelectField('statuses', 100).withLabel('Statuses').withFilter(),
+          new StringField('title', 200)
+            .withLabel('Title')
+            .withFilter({ operator: 'NOT_A_REAL_OPERATOR' }),
+        ],
+      },
+    );
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose statuses' }));
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'alpha' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'statuses', value: ['OPEN', 'CLOSED'], queryConditionType: 'IN' },
+      { name: 'title', value: 'alpha', queryConditionType: 'LIKE' },
+    ]);
+  });
+
+  it('prefers a renderer-supplied operator over the field mapping in both filter apply paths', async () => {
+    const fictionalType = 'operator-spi-filter-field';
+    registerFilterRenderer(fictionalType, ({ value, onChange }) => (
+      <input
+        aria-label="Operator SPI"
+        value={typeof value === 'string' ? value : ''}
+        onChange={(event) => onChange(event.target.value, 'NOT_EQUAL')}
+      />
+    ));
+    const field = new StringField('marker', 100)
+      .withLabel('Marker')
+      .withList()
+      .withFilter({ operator: 'LIKE' });
+    field.type = fictionalType as FieldType;
+    const entityForm = new EntityForm('OperatorSpiEntityForm', '/operator-spi').addFields({
+      items: [field],
+    });
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    fireEvent.change(screen.getByLabelText('Operator SPI'), { target: { value: 'advanced' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'marker', value: 'advanced', queryConditionType: 'NOT_EQUAL' },
+    ]);
+
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Marker 필터' }));
+    fireEvent.change(screen.getByLabelText('Operator SPI'), { target: { value: 'column' } });
+    fireEvent.click(document.querySelector('[data-column-filter-apply]')!);
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters.AND).toEqual([
+      { name: 'marker', value: 'column', queryConditionType: 'NOT_EQUAL' },
+    ]);
+  });
+
+  it('drops a renderer operator when its value is cleared before a new operator-less value', async () => {
+    const fictionalType = 'cleared-operator-spi-filter-field';
+    registerFilterRenderer(fictionalType, ({ value, onChange }) => (
+      <input
+        aria-label="Clearable Operator SPI"
+        value={typeof value === 'string' ? value : ''}
+        onChange={(event) => {
+          const next = event.target.value;
+          onChange(next, next === '5' ? 'GREATER_THAN' : undefined);
+        }}
+      />
+    ));
+    const field = new StringField('marker', 100)
+      .withLabel('Marker')
+      .withFilter({ operator: 'LIKE' });
+    field.type = fictionalType as FieldType;
+    const entityForm = new EntityForm('ClearedOperatorEntityForm', '/cleared-operator').addFields({
+      items: [field],
+    });
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    const input = screen.getByLabelText('Clearable Operator SPI');
+    fireEvent.change(input, { target: { value: '5' } });
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.change(input, { target: { value: '7' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'marker', value: '7', queryConditionType: 'LIKE' },
+    ]);
+  });
+
+  it('hydrates applied panel values and preserves host-seeded AND clauses outside the panel', async () => {
+    const entityForm = filterForm();
+    const initialSearch = SearchForm.create().withFilter(
+      'AND',
+      { name: 'tenantId', value: 'tenant-7', queryConditionType: 'EQUAL' },
+      { name: 'name', value: 'Applied', queryConditionType: 'LIKE' },
+    );
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter, initialSearch });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    expect(screen.getByLabelText('Name Filter')).toHaveValue('Applied');
+    fireEvent.change(screen.getByLabelText('Name Filter'), { target: { value: 'Edited' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'tenantId', value: 'tenant-7', queryConditionType: 'EQUAL' },
+      { name: 'name', value: 'Edited', queryConditionType: 'LIKE' },
+    ]);
+  });
+
+  it('hydrates only a seeded value and re-applies the field-declared operator', async () => {
+    const entityForm = new EntityForm('HydratedOperatorEntityForm', '/hydrated-operator').addFields(
+      {
+        items: [
+          new NumberField('count', 100).withLabel('Count').withFilter({ operator: 'GREATER_THAN' }),
+        ],
+      },
+    );
+    const initialSearch = SearchForm.create().withFilter('AND', {
+      name: 'count',
+      value: '5',
+      queryConditionType: 'EQUAL',
+    });
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter, initialSearch });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    expect(screen.getByLabelText('Count')).toHaveValue('5');
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'count', value: '5', queryConditionType: 'GREATER_THAN' },
+    ]);
+  });
+
+  it('removes a stale AND clause when a panel draft is cleared and applied', async () => {
+    const entityForm = filterForm();
+    const sourceRows = [
+      { id: '1', name: 'Alpha', code: 'A' },
+      { id: '2', name: 'Beta', code: 'B' },
+    ];
+    const listCalls: SearchForm[] = [];
+    const adapter = rowsAdapter(sourceRows);
+    adapter.list = vi.fn(async (_url: string, search: SearchForm) => {
+      listCalls.push(search);
+      const nameFilter = search.filters.AND.find((item) => item.name === 'name');
+      const content = nameFilter
+        ? sourceRows.filter((row) => row.name.includes(String(nameFilter.value)))
+        : sourceRows;
+      return { content, totalElements: content.length, totalPages: 1 };
+    });
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    const input = screen.getByLabelText('Name Filter');
+    fireEvent.change(input, { target: { value: 'Alpha' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(screen.queryByText('Beta')).not.toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters.AND).toEqual([]);
+    expect(await screen.findByText('Beta')).toBeInTheDocument();
+  });
+
+  it('merges unified OR search with AND filters, resets both, and closes from the footer', async () => {
+    const entityForm = new EntityForm('UnifiedEntityForm', '/unified').addFields({
+      items: [
+        new StringField('name', 100).withLabel('이름').withList().withFilter(),
+        new StringField('code', 200).withLabel('코드').withList().withFilter(),
+        new SelectField('status', 300).withLabel('상태').withList().withFilter(),
+      ],
+    });
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    expect(screen.queryByLabelText('Quick search')).not.toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: '통합검색 사용' })).toBeChecked();
+    fireEvent.change(screen.getByLabelText('이름, 코드 검색'), {
+      target: { value: 'kim' },
+    });
+    fireEvent.change(screen.getByLabelText('상태'), { target: { value: 'ACTIVE' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON()).toMatchObject({
+      quickSearchFields: ['name', 'code'],
+      filters: {
+        AND: [{ name: 'status', value: 'ACTIVE', queryConditionType: 'EQUAL' }],
+        OR: [
+          { name: 'name', value: 'kim', queryConditionType: 'LIKE' },
+          { name: 'code', value: 'kim', queryConditionType: 'LIKE' },
+        ],
+      },
+    });
+
+    expect(screen.queryByLabelText('Quick search')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    expect(screen.getByLabelText('Quick search')).toHaveValue('kim');
+
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+
+    fireEvent.click(screen.getByRole('button', { name: '초기화' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters).toMatchObject({ AND: [], OR: [] });
+    expect(listCalls[2]?.toJSON().quickSearchFields).toEqual(['name', 'code']);
+    expect(screen.queryByLabelText('Quick search')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    expect(document.querySelector('[data-advanced-search-panel]')).toBeNull();
+    expect(screen.getByLabelText('Quick search')).toHaveValue('');
+  });
+
+  it('reopens unified search unchecked after the panel adds an individual quick-field AND clause', async () => {
+    const entityForm = searchableCollegeForm();
+    const { adapter } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '통합검색 사용' }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'exact-name' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+
+    expect(screen.getByRole('checkbox', { name: '통합검색 사용' })).not.toBeChecked();
+    expect(screen.getByLabelText('Name')).toHaveValue('exact-name');
+  });
+
+  it('syncs the toolbar quick-search value when advanced apply and reset rewrite quick OR clauses', async () => {
+    const entityForm = new EntityForm('SingleQuickEntityForm', '/single-quick').addFields({
+      items: [new StringField('name', 100).withLabel('Name').withList().withFilter()],
+    });
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    const quickInput = screen.getByLabelText('Quick search');
+    fireEvent.change(quickInput, { target: { value: 'stale-term' } });
+    fireEvent.keyUp(quickInput, { key: 'Enter' });
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    expect(screen.queryByRole('checkbox', { name: '통합검색 사용' })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Quick search')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters.OR).toEqual([
+      { name: 'name', value: 'stale-term', queryConditionType: 'LIKE' },
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    expect(screen.getByLabelText('Quick search')).toHaveValue('stale-term');
+
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    fireEvent.click(screen.getByRole('button', { name: '초기화' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(4));
+    expect(listCalls[3]?.toJSON().filters.OR).toEqual([]);
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    expect(screen.getByLabelText('Quick search')).toHaveValue('');
+  });
+
+  it('clears the toolbar quick-search value after unified-off applies two quick fields', async () => {
+    const entityForm = searchableCollegeForm();
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    const quickInput = screen.getByLabelText('Quick search');
+    fireEvent.change(quickInput, { target: { value: 'old quick value' } });
+    fireEvent.keyUp(quickInput, { key: 'Enter' });
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: '통합검색 사용' }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alpha' } });
+    fireEvent.change(screen.getByLabelText('English Name'), { target: { value: 'Beta' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters).toMatchObject({
+      AND: [
+        { name: 'name', value: 'Alpha', queryConditionType: 'LIKE' },
+        { name: 'englishName', value: 'Beta', queryConditionType: 'LIKE' },
+      ],
+      OR: [],
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+    expect(screen.getByLabelText('Quick search')).toHaveValue('');
+  });
+
+  it('preserves quick-field AND clauses while unified search manages only OR clauses', async () => {
+    const entityForm = new EntityForm('UnifiedAndEntityForm', '/unified-and').addFields({
+      items: [
+        new StringField('name', 100).withLabel('이름').withList().withFilter(),
+        new StringField('code', 200).withLabel('코드').withList().withFilter(),
+        new SelectField('status', 300).withLabel('상태').withList().withFilter(),
+      ],
+    });
+    const initialSearch = SearchForm.create()
+      .withFilter('AND', {
+        name: 'name',
+        value: 'exact-name',
+        queryConditionType: 'EQUAL',
+      })
+      .quickSearch(['name', 'code'], 'kim');
+    const { adapter, listCalls } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter, initialSearch });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    expect(screen.getByRole('checkbox', { name: '통합검색 사용' })).toBeChecked();
+    expect(screen.getByLabelText('이름, 코드 검색')).toHaveValue('kim');
+    fireEvent.change(screen.getByLabelText('상태'), { target: { value: 'ACTIVE' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+      { name: 'name', value: 'exact-name', queryConditionType: 'EQUAL' },
+      { name: 'status', value: 'ACTIVE', queryConditionType: 'EQUAL' },
+    ]);
+
+    fireEvent.click(screen.getByRole('button', { name: '초기화' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters).toMatchObject({
+      AND: [{ name: 'name', value: 'exact-name', queryConditionType: 'EQUAL' }],
+      OR: [],
+    });
+  });
+
+  it('re-derives unified mode and value from the current SearchForm whenever the panel reopens', async () => {
+    const entityForm = searchableCollegeForm();
+    const { adapter } = rowsAdapterWithCalls([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+    expect(screen.getByRole('checkbox', { name: '통합검색 사용' })).toBeChecked();
+    fireEvent.click(screen.getByRole('button', { name: '닫기' }));
+
+    await act(async () => {
+      await store
+        .getState()
+        .setSearchForm(SearchForm.create().quickSearch(['name', 'englishName'], 'current-value'));
+    });
+    fireEvent.click(screen.getByRole('button', { name: '고급검색' }));
+
+    expect(screen.getByRole('checkbox', { name: '통합검색 사용' })).toBeChecked();
+    expect(screen.getByLabelText('Name, English Name 검색')).toHaveValue('current-value');
   });
 
   it('re-applying with an edited value REPLACES the prior same-field AND clause instead of stacking (R2)', async () => {
@@ -953,7 +1684,7 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     ]);
   });
 
-  it("omits queryConditionType entirely for a withFilter() field with no configured operator (never 'queryConditionType: undefined')", async () => {
+  it('derives LIKE for a text field with no configured operator', async () => {
     const entityForm = filterForm();
     const { adapter, listCalls } = rowsAdapterWithCalls([
       { id: '1', name: 'Engineering', code: 'ENG' },
@@ -974,8 +1705,7 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
 
     await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
     const sentFilter = listCalls[1]?.toJSON().filters.AND[0];
-    expect(sentFilter).toEqual({ name: 'code', value: 'ENG' });
-    expect(sentFilter && 'queryConditionType' in sentFilter).toBe(false);
+    expect(sentFilter).toEqual({ name: 'code', value: 'ENG', queryConditionType: 'LIKE' });
   });
 
   it('a registered getFilterRenderer(field.type) component takes priority over the TextInput fallback', async () => {
@@ -1024,17 +1754,17 @@ describe('ViewListGrid column settings (v0.5.3)', () => {
 
     await screen.findByText('L1');
     fireEvent.click(screen.getByRole('button', { name: '목록 설정' }));
-    const early = screen.getByRole('checkbox', { name: 'early — Early Field' });
+    const early = screen.getByRole('checkbox', { name: 'Early Field' });
     fireEvent.click(early);
     expect(screen.queryByRole('columnheader', { name: 'Early Field' })).not.toBeInTheDocument();
 
-    const lastVisible = screen.getByRole('checkbox', { name: 'late — Late Header' });
+    const lastVisible = screen.getByRole('checkbox', { name: 'Late Header' });
     expect(lastVisible).toBeDisabled();
     fireEvent.click(lastVisible);
     expect(screen.getByRole('columnheader', { name: 'Late Header' })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: '적용' }));
-    expect(screen.queryByRole('dialog', { name: '목록 설정' })).not.toBeInTheDocument();
+    fireEvent.mouseDown(document.body);
+    expect(document.querySelector('[data-column-settings]')).not.toBeInTheDocument();
   });
 });
 
@@ -1063,7 +1793,7 @@ describe('ViewListGrid controlled column settings (v0.5.4)', () => {
     expect(screen.queryByRole('columnheader', { name: 'Early Field' })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '목록 설정' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'early — Early Field' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Early Field' }));
     expect(onHiddenColumnsChange).toHaveBeenCalledWith([]);
     expect(screen.queryByRole('columnheader', { name: 'Early Field' })).not.toBeInTheDocument();
 
@@ -1118,7 +1848,7 @@ describe('ViewListGrid controlled column settings (v0.5.4)', () => {
 
     await screen.findByText('L1');
     fireEvent.click(screen.getByRole('button', { name: '목록 설정' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: 'late — Late Header' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Late Header' }));
 
     expect(onHiddenColumnsChange).toHaveBeenCalledWith(['early']);
     expect(onHiddenColumnsChange).not.toHaveBeenCalledWith(['late', 'early']);

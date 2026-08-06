@@ -240,18 +240,6 @@ For multi-tenant apps, scope tokens to a class or data-attr on a specific ancest
 </div>
 ```
 
-### Per-instance override via `classNames` prop
-Components accept a `classNames` prop with a slot map. See `ViewListGridClassNames` / `ViewEntityFormClassNames` types.
-
-```tsx
-<ViewListGrid
-  classNames={{
-    table: { container: 'my-custom-table' },
-    header: { buttonGroup: 'my-header-buttons' },
-  }}
-/>
-```
-
 ### React list/form opt-ins
 
 - `configureLabels(partial)` configures built-in form/list copy at app bootstrap. The default
@@ -262,12 +250,110 @@ Components accept a `classNames` prop with a slot map. See `ViewListGridClassNam
   list cell. It takes precedence over registered list-cell renderers and display fallbacks.
 - Every derived list column whose field declares `withFilter()` exposes a `▽` header filter.
   Its input and values are shared with the advanced-search panel.
-- `<ViewListGrid columnSettings />` adds a column-visibility dialog. By default visibility is
-  component-local and is not persisted; at least one resolved column always remains visible.
+- `<ViewListGrid columnSettings />` adds an instant-apply column-visibility popover in the top
+  searchbar. By default visibility is component-local and is not persisted; at least one
+  resolved column always remains visible. The popover no longer consumes the `Modal` primitive.
   Pass `hiddenColumns?: readonly string[]` and
   `onHiddenColumnsChange?: (names: string[]) => void` to control it with column names and persist
   it in the host. Stale names are ignored for rendering and the last visible column cannot be
   hidden in either mode (**additive v0.5.4**).
+
+---
+
+## `UIComponents` contract (v0.5.7)
+
+`UIProvider` requires the complete registry below. A host override must normalize change events
+to the plain value shown here. `className` is forwarded only by slots whose prop list includes it;
+do not assume every slot accepts arbitrary DOM props.
+
+| Slot | Complete prop surface |
+|---|---|
+| `TextInput` | `value?`, `onChange?(string)`, `placeholder?`, `type?: text\|password\|month\|time\|datetime-local\|color`, `readOnly?`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?`, `className?` |
+| `Textarea` | `value?`, `onChange?(string)`, `rows?`, `readOnly?`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?`, `className?` |
+| `NumberInput` | `value?`, `onChange?(number)`, `readOnly?`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?` |
+| `DateInput` | `value?`, `onChange?(string)`, `readOnly?`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?` |
+| `CheckBox` | `checked?`, `indeterminate?`, `onChange?(boolean)`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?`, `className?`. The default primitive writes both the DOM `indeterminate` property and `aria-checked="mixed"`. |
+| `SelectBox` | `value?`, `onChange?(string\|number\|boolean)`, `options?: {value,label}[]`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?`, `className?` |
+| `TagsInput` | `value?: string[]`, `onChange?(string[])`, `data?`, `onValidateTag?`, `minTags?`, `maxTags?`, `placeholder?`, `readOnly?`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?` |
+| `FileInput` | `id?`, `value?`, `onChange?(string\|undefined)`, `onUpload?(File) -> Promise<{url}>`, `accept?`, `readOnly?`, `disabled?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?` |
+| `InlineMap` | `value?`, `onChange?(Record<string,string>)`, `keys?`, `minRows?`, `maxRows?`, `keyLabel?`, `valueLabel?`, `readOnly?`, `disabled?`, `id?`, `ariaLabel?`, `required?`, `invalid?`, `describedBy?` |
+| `UserView` | `value?`, `id?`, `ariaLabel?`, `describedBy?` |
+| `Button` | `onClick?()`, `children?`, `type?: button\|submit\|reset`, `disabled?`, `variant?: primary\|secondary\|danger\|ghost`, `className?` |
+| `Modal` | `open?`, `onClose?()`, `title?`, `children?` |
+| `Table` | Root: `children?`, `className?`; compound `Thead`/`Tbody`/`Tr`: `children?`, `className?`; `Th`/`Td`: `children?`, `colSpan?`, `className?` |
+| `Pagination` | `page`, `totalPages`, `onChange?(page)`, `prevLabel?`, `nextLabel?`, `className?` |
+| `Stack` | `children?`, `gap?: number\|string` |
+| `LoadingOverlay` | `visible?` |
+
+`Pagination.page` and `onChange(page)` are **0-based**. Upgrade note: hosts that implemented
+this slot as 1-based before 0.5.6 must remove their `+1/-1` adapter. Only the visible page labels
+are 1-based.
+
+## Labels catalog
+
+`configureLabels(partial)` is additive and preserves every omitted key.
+
+| Key | Default |
+|---|---|
+| `save` / `delete` | `Save` / `Delete` |
+| `deleteConfirm` | `정말 삭제하시겠습니까?` |
+| `quickSearchPlaceholder` | `검색` (fallback when no derived field labels exist) |
+| `quickSearchPlaceholderFor(labels)` | `Search ${labels.join(', ')}...` |
+| `quickSearchAria` | `Quick search` |
+| `quickSearchSubmitAria` / `quickSearchClearAria` | `빠른 검색` / `Clear quick search` |
+| `advancedSearchToggle` / `advancedSearchApply` | `고급검색` / `검색` |
+| `advancedSearchReset` / `advancedSearchClose` | `초기화` / `닫기` |
+| `unifiedSearchToggle` | `통합검색 사용` |
+| `unifiedSearchHint(labels)` | `${labels.join(', ')} 필드를 하나의 검색어로 검색합니다` |
+| `unifiedSearchInputLabel(labels)` | `${labels.join(', ')} 검색` |
+| `unifiedSearchPlaceholder(labels)` | `${labels.join(', ')} 중 아무거나 입력...` |
+| `unifiedSearchDescription(labels)` | `입력한 검색어가 ${labels.join(', ')} 중 하나라도 포함되면 검색됩니다 (OR 조건)` |
+| `selectionConfirm` | `확인` |
+| `columnSettings` / `columnSettingsApply` | `목록 설정` / `적용` (`columnSettingsApply` is retained for compatibility; the v0.5.7 popover has no apply button) |
+| `columnFilterAria(name)` | `${name} 필터` |
+| `filterReset` / `selectAllAria` | `초기화` / `전체 선택` |
+| `emptyState` | `데이터가 없습니다.` |
+| `searchError` | `검색 중 오류가 발생했습니다. 검색 조건을 확인해 주세요.` |
+| `searchErrorDismiss` | `검색 오류 닫기` |
+| `openInNewWindowTooltip` | `새 창에서 보기` |
+| `errorSummaryCollapsedTitle` | `작성하신 정보에 누락 또는 오류가 있습니다.` |
+| `errorSummaryExpandedTitle` | `누락(오류) 정보 목록을 확인해 주세요.` |
+| `errorSummaryCount(n)` | `${n}개 오류` |
+| `rowNumberHeader` | `No.` |
+| `paginationPrev` / `paginationNext` | `Prev` / `Next` |
+
+## Filter and list-cell renderer contracts
+
+`registerFilterRenderer(type, Component)` receives
+`{ field: EntityField, value: unknown, onChange(value: unknown, operator?: QueryConditionType): void }`.
+It is controlled: render `value` and send the plain next value, never a DOM/MUI event. The optional
+operator is an additive SPI for renderers whose value shape determines the condition; old renderers
+that call `onChange(value)` remain valid. The advanced panel and column-filter popover share value
+and operator drafts. Apply removes a cleared rendered field's prior AND clause, preserves clauses
+outside that rendered field set, and always emits `queryConditionType`.
+
+| Field condition source | Wire condition |
+|---|---|
+| renderer `onChange(value, operator)` with a valid `QueryConditionType` | renderer operator (highest priority) |
+| explicit `withFilter({ operator })` with a valid `QueryConditionType` | configured operator |
+| array-valued `select`, `multiselect`, `checkbox`, `tag`, `customOption` | `IN` |
+| `text`, `email`, `phone`, `textarea`, legacy/custom `string` | `LIKE` |
+| scalar `select` and every other type | `EQUAL` |
+
+An invalid open-string `withFilter({ operator })` value is never cast onto the wire; resolution
+falls through to the value/type mapping above. `searchConditionFor(field, value?, rendererOperator?)`
+is exported from the root entry for render-free inspection/reuse. This is the current engine's
+mapping, not a claim of exact 0.2.x operator parity.
+Quick search is narrower by design: because `FieldListConfig` has no quick-search flag, it derives
+all fields that are simultaneously `withList()`, `withFilter()`, and built-in `type === 'text'`;
+the first is main and the remainder are OR fields. It pre-expands those clauses directly into the
+wire's top-level `filters.OR` bucket; unlike 0.2.x, it does not build a nested quick-search envelope.
+
+`registerListCellRenderer(type, Component)` receives
+`{ value: unknown, row: Record<string, unknown>, field?: EntityField }`. Derived-cell resolution
+is: `FieldListConfig.format(value,row)` → registered renderer → optional
+`field.getDisplayValue(value)` → `String(value ?? '')`. An explicit object column
+`{name,label,render(row)}` bypasses that chain and owns its cell output.
 
 ---
 

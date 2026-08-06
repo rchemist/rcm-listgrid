@@ -7,12 +7,14 @@ import type {
   EntityForm,
   FilterItem,
   QueryConditionType,
+  SearchForm,
 } from '@listgrid/schema-core';
 import type { ListStoreState } from '@listgrid/state';
 import { useUI } from '../providers/ui';
 import { getListCellRenderer } from '../registry/list-cell-renderer-registry';
 import { getFilterRenderer } from '../registry/filter-renderer-registry';
 import { getLabels } from '../labels';
+import { searchConditionFor } from '../search-condition';
 import {
   deriveFilterFields,
   deriveListFields,
@@ -57,6 +59,14 @@ export interface ViewListGridSelection {
   confirmLabel?: string;
 }
 
+export interface ViewListGridOpenInNewWindow {
+  enabled: boolean;
+  getUrl: (row: Record<string, unknown>) => string;
+  tooltip?: string;
+  showFilter?: (row: Record<string, unknown>) => boolean;
+  windowFeatures?: { width?: number; height?: number };
+}
+
 /** `columns` union member: a bare field name renders as it always has
  * (label from the field's own `getLabel()`, cell = `String(row[name])`); the
  * object form renders a SYNTHETIC column with no backing field — `label` is
@@ -72,7 +82,7 @@ export interface ViewListGridProps {
   store: StoreApi<ListStoreState>;
   onRowClick?: (row: Record<string, unknown>) => void;
   columns?: ViewListGridColumn[];
-  /** Opt-in column-visibility dialog. Visibility is component-local unless
+  /** Opt-in instant-apply column-visibility popover. Visibility is component-local unless
    * `hiddenColumns` is controlled by the host; omitted/false preserves the
    * existing list chrome. */
   columnSettings?: boolean;
@@ -86,7 +96,7 @@ export interface ViewListGridProps {
    * it reaches the row). */
   selection?: ViewListGridSelection;
   /**
-   * Rendered below the grid; receives the LIVE checked-id list so a host can
+   * Rendered in the top searchbar actions row; receives the LIVE checked-id list so a host can
    * assemble add/delete/custom buttons around it (0.3.x `subCollection`
    * absorbed here — decision ③).
    *
@@ -102,6 +112,26 @@ export interface ViewListGridProps {
   toolbar?: (ctx: { checkedIds: string[] }) => ReactNode;
   /** Show a leading descending row number after the optional selection column. */
   showRowNumbers?: boolean;
+  /** Optional row action that opens a host-provided URL in a centered popup. */
+  openInNewWindow?: ViewListGridOpenInNewWindow;
+}
+
+function isEmptyFilterValue(value: unknown): boolean {
+  return (
+    value === undefined ||
+    value === null ||
+    value === '' ||
+    (Array.isArray(value) && value.length === 0) ||
+    (typeof value === 'number' && Number.isNaN(value))
+  );
+}
+
+function openWindowFeatures(width: number, height: number): string {
+  const availableWidth = window.screen.availWidth || width;
+  const availableHeight = window.screen.availHeight || height;
+  const left = Math.max(0, Math.round(window.screenX + (availableWidth - width) / 2));
+  const top = Math.max(0, Math.round(window.screenY + (availableHeight - height) / 2));
+  return `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`;
 }
 
 function resolveHeader(entityForm: EntityForm, name: string): string {
@@ -271,14 +301,16 @@ export function ViewListGrid({
   selection,
   toolbar,
   showRowNumbers = false,
+  openInNewWindow,
 }: ViewListGridProps) {
-  const { Table, Pagination, LoadingOverlay, TextInput, CheckBox, Button, Modal } = useUI();
+  const { Table, Pagination, LoadingOverlay, TextInput, CheckBox, Button } = useUI();
   const labels = getLabels();
 
   const rows = useStore(store, (s) => s.rows);
   const totalElements = useStore(store, (s) => s.totalElements);
   const totalPages = useStore(store, (s) => s.totalPages);
   const loading = useStore(store, (s) => s.loading);
+  const error = useStore(store, (s) => s.error);
   const searchForm = useStore(store, (s) => s.searchForm);
 
   useEffect(() => {
@@ -327,11 +359,6 @@ export function ViewListGrid({
     setLocalHiddenColumnNames(clamped);
   }
 
-  const quickSearchField = useMemo(() => {
-    const firstText = visibleColumns.find((c) => entityForm.getField(c.name)?.type === 'text');
-    return (firstText ?? visibleColumns[0])?.name;
-  }, [visibleColumns, entityForm]);
-
   const [quickSearchValue, setQuickSearchValue] = useState('');
 
   // EA-D2-0 selection: local checked-ids state, reset whenever `rows`'
@@ -378,10 +405,52 @@ export function ViewListGrid({
     () => new Map(filterFields.map((derived) => [derived.field.getName(), derived])),
     [filterFields],
   );
+  // Reuse: the existing withList()/withFilter() declarations are the source
+  // of truth. schema-core has no quickSearch opt-in/out flag, so the 0.2.x
+  // fallback is restored: every filterable `text` list field participates.
+  const quickSearchFields = useMemo(
+    () =>
+      resolvedColumns
+        .map((column) => ({ column, field: entityForm.getField(column.name) }))
+        .filter(
+          (entry): entry is { column: ResolvedColumn; field: EntityField } =>
+            entry.field?.type === 'text' && filterFieldByName.has(entry.column.name),
+        )
+        .map(({ column }) => ({ name: column.name, label: column.header })),
+    [entityForm, filterFieldByName, resolvedColumns],
+  );
+  const quickSearchFieldNames = useMemo(
+    () => quickSearchFields.map((field) => field.name),
+    [quickSearchFields],
+  );
+  const quickSearchFieldLabels = useMemo(
+    () => quickSearchFields.map((field) => field.label),
+    [quickSearchFields],
+  );
+  const quickSearchPlaceholder =
+    quickSearchFields.length > 0
+      ? labels.quickSearchPlaceholderFor(quickSearchFieldLabels)
+      : labels.quickSearchPlaceholder;
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
+  const [useUnifiedSearch, setUseUnifiedSearch] = useState(true);
+  const [unifiedSearchValue, setUnifiedSearchValue] = useState('');
+  const visibleAdvancedFilterFields = useMemo(
+    () =>
+      filterFields.filter(
+        ({ field }) =>
+          !useUnifiedSearch ||
+          quickSearchFields.length < 2 ||
+          !quickSearchFieldNames.includes(field.getName()),
+      ),
+    [filterFields, quickSearchFieldNames, quickSearchFields.length, useUnifiedSearch],
+  );
   const [openColumnFilter, setOpenColumnFilter] = useState<string | undefined>(undefined);
   const openColumnFilterHeaderRef = useRef<HTMLTableCellElement | null>(null);
+  const columnSettingsRef = useRef<HTMLDivElement | null>(null);
   const [filterValues, setFilterValues] = useState<Record<string, unknown>>({});
+  const [filterOperators, setFilterOperators] = useState<
+    Record<string, QueryConditionType | undefined>
+  >({});
 
   useEffect(() => {
     if (openColumnFilter === undefined) return;
@@ -394,51 +463,171 @@ export function ViewListGrid({
     return () => document.removeEventListener('mousedown', closeOnOutsideMouseDown);
   }, [openColumnFilter]);
 
-  function setFilterValue(name: string, value: unknown): void {
+  useEffect(() => {
+    if (!columnSettingsOpen) return;
+    function closeColumnSettings(event: MouseEvent): void {
+      if (!columnSettingsRef.current?.contains(event.target as Node)) {
+        setColumnSettingsOpen(false);
+      }
+    }
+    function closeColumnSettingsOnEscape(event: KeyboardEvent): void {
+      if (event.key === 'Escape') setColumnSettingsOpen(false);
+    }
+    document.addEventListener('mousedown', closeColumnSettings);
+    document.addEventListener('keydown', closeColumnSettingsOnEscape);
+    return () => {
+      document.removeEventListener('mousedown', closeColumnSettings);
+      document.removeEventListener('keydown', closeColumnSettingsOnEscape);
+    };
+  }, [columnSettingsOpen]);
+
+  function setFilterValue(name: string, value: unknown, operator?: QueryConditionType): void {
     setFilterValues((prev) => ({ ...prev, [name]: value }));
+    setFilterOperators((previous) => {
+      if (isEmptyFilterValue(value)) {
+        const next = { ...previous };
+        delete next[name];
+        return next;
+      }
+      return operator === undefined ? previous : { ...previous, [name]: operator };
+    });
+  }
+
+  function appliedQuickSearchValue(current: SearchForm): string {
+    const currentQuickNames = new Set(current.quickSearchFields);
+    const appliedQuickItem = current.filters.OR.find(
+      (item) =>
+        quickSearchFieldNames.includes(item.name) &&
+        currentQuickNames.has(item.name) &&
+        typeof item.value === 'string' &&
+        !isEmptyFilterValue(item.value),
+    );
+    return typeof appliedQuickItem?.value === 'string' ? appliedQuickItem.value : '';
+  }
+
+  function openAdvancedSearch(): void {
+    const current = store.getState().searchForm;
+    const panelNames = new Set(filterFields.map(({ field }) => field.getName()));
+    const values: Record<string, unknown> = {};
+    for (const name of panelNames) values[name] = '';
+    for (const item of current.filters.AND) {
+      if (!panelNames.has(item.name)) continue;
+      values[item.name] = item.value;
+    }
+
+    const appliedQuickValue = appliedQuickSearchValue(current);
+    const hasAppliedQuickSearch = appliedQuickValue !== '';
+    const hasQuickFieldAndClause = current.filters.AND.some((item) =>
+      quickSearchFieldNames.includes(item.name),
+    );
+    const defaultToUnifiedSearch =
+      hasAppliedQuickSearch || (quickSearchFieldNames.length >= 2 && !hasQuickFieldAndClause);
+
+    setFilterValues(values);
+    setFilterOperators((previous) => {
+      const next: Record<string, QueryConditionType | undefined> = {};
+      for (const [name, operator] of Object.entries(previous)) {
+        if (!isEmptyFilterValue(values[name])) next[name] = operator;
+      }
+      return next;
+    });
+    setUseUnifiedSearch(defaultToUnifiedSearch);
+    setUnifiedSearchValue(appliedQuickValue);
+    setAdvancedSearchOpen(true);
+  }
+
+  function closeAdvancedSearch(): void {
+    setQuickSearchValue(appliedQuickSearchValue(store.getState().searchForm));
+    setAdvancedSearchOpen(false);
   }
 
   function resetColumnFilter(name: string): void {
     setFilterValues((prev) => ({ ...prev, [name]: '' }));
+    setFilterOperators((previous) => {
+      const next = { ...previous };
+      delete next[name];
+      return next;
+    });
     const next = store.getState().searchForm.clone();
     next.filters.AND = next.filters.AND.filter((item) => item.name !== name);
     next.page = 0;
     void store.getState().setSearchForm(next);
   }
 
-  // Apply: collect every NON-EMPTY filter value into a FilterItem[] and fold
-  // them into the store's current SearchForm via the existing `withFilter`
-  // (no schema-core API change), then hand the result to `setSearchForm`
-  // (page-reset + refetch, same pipe quickSearch/setSort already use).
-  // `config.operator` (spec §5.1's open `string`) is cast to
-  // `QueryConditionType` ONLY when present — omitted entirely otherwise
-  // (exactOptionalPropertyTypes forbids `queryConditionType: undefined`; no
-  // default operator is invented).
-  //
-  // R2 fix (advanced-search re-apply): `withFilter('AND', ...)` REPLACES an
-  // existing same-`name` AND clause in place (0.3.x replace-by-name semantics,
-  // search-form.ts:229-245) instead of the previous `addAndFilter` STACKING —
-  // so editing a field and re-applying yields a single `{name: current}`
-  // clause, not the unsatisfiable `AND(name=old, name=new)` that returned 0
-  // rows. Non-panel AND clauses (host/hook-seeded) are preserved: `withFilter`
-  // only touches the names it is handed. A clause for a field the user CLEARS
-  // between applies is not removed (withFilter has no remove path) — out of
-  // R2's scope; a `removeAndFilter*` primitive would be a separate
-  // public-surface decision.
-  function applyFilterValues(fields: DerivedFilterField[] = filterFields): void {
+  function applyFilterValues(
+    fields: DerivedFilterField[] = filterFields,
+    includeUnifiedSearch = false,
+  ): void {
     const items: FilterItem[] = [];
-    for (const { field, config } of fields) {
+    for (const { field } of fields) {
+      if (
+        includeUnifiedSearch &&
+        useUnifiedSearch &&
+        quickSearchFieldNames.length >= 2 &&
+        quickSearchFieldNames.includes(field.getName())
+      ) {
+        continue;
+      }
       const value = filterValues[field.getName()];
-      if (value === undefined || value === null || value === '') continue;
+      if (isEmptyFilterValue(value)) continue;
       items.push({
         name: field.getName(),
         value,
-        ...(config.operator ? { queryConditionType: config.operator as QueryConditionType } : {}),
+        queryConditionType: searchConditionFor(field, value, filterOperators[field.getName()]),
       });
     }
-    const next = store.getState().searchForm.withFilter('AND', ...items);
-    void store.getState().setSearchForm(next);
+    const fieldNames = new Set(fields.map(({ field }) => field.getName()));
+    const next = store.getState().searchForm.clone();
+    next.filters.AND = next.filters.AND.filter((item) => !fieldNames.has(item.name));
+    const withAndFilters = next.withFilter('AND', ...items);
+    const finalSearch = includeUnifiedSearch
+      ? withAndFilters.quickSearch(
+          quickSearchFieldNames,
+          useUnifiedSearch ? unifiedSearchValue : '',
+        )
+      : withAndFilters;
+    if (includeUnifiedSearch) {
+      setQuickSearchValue(useUnifiedSearch ? unifiedSearchValue : '');
+    }
+    void store.getState().setSearchForm(finalSearch);
   }
+
+  function resetAdvancedSearch(): void {
+    setFilterValues((previous) => {
+      const next = { ...previous };
+      for (const { field } of visibleAdvancedFilterFields) next[field.getName()] = '';
+      return next;
+    });
+    setFilterOperators((previous) => {
+      const next = { ...previous };
+      for (const { field } of visibleAdvancedFilterFields) delete next[field.getName()];
+      return next;
+    });
+    setUnifiedSearchValue('');
+    setUseUnifiedSearch(false);
+    setQuickSearchValue('');
+    const fieldNames = new Set(visibleAdvancedFilterFields.map(({ field }) => field.getName()));
+    const next = store.getState().searchForm.clone();
+    next.filters.AND = next.filters.AND.filter((item) => !fieldNames.has(item.name));
+    void store.getState().setSearchForm(next.quickSearch(quickSearchFieldNames, ''));
+  }
+
+  function runQuickSearch(value: string): void {
+    void store.getState().quickSearch(quickSearchFieldNames, value);
+  }
+
+  function openRowInNewWindow(row: Record<string, unknown>, rowKey: string): void {
+    if (!openInNewWindow?.enabled) return;
+    const width = openInNewWindow.windowFeatures?.width ?? 1280;
+    const height = openInNewWindow.windowFeatures?.height ?? 860;
+    window.open(openInNewWindow.getUrl(row), `entity_${rowKey}`, openWindowFeatures(width, height));
+  }
+
+  const showSearchbar =
+    quickSearchFields.length > 0 ||
+    filterFields.length > 0 ||
+    toolbar !== undefined ||
+    (columnSettings && resolvedColumns.length >= 2);
 
   return (
     <div
@@ -448,184 +637,267 @@ export function ViewListGrid({
     >
       <LoadingOverlay visible={loading} />
 
-      {quickSearchField !== undefined && (
-        <div className="rcm-quick-search-wrap">
-          <TextInput
-            className="rcm-input rcm-quick-search-input"
-            ariaLabel={labels.quickSearchAria}
-            value={quickSearchValue}
-            placeholder={labels.quickSearchPlaceholder}
-            onChange={(value) => {
-              setQuickSearchValue(value);
-              void store.getState().quickSearch([quickSearchField], value);
-            }}
-          />
-          <span className="rcm-quick-search-addon rcm-quick-search-addon-search">
-            <svg
-              className="rcm-quick-search-icon"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <path d="m20 20-4-4" />
-            </svg>
-          </span>
-          {quickSearchValue !== '' && (
-            <span className="rcm-quick-search-addon rcm-quick-search-addon-clear">
-              <button
-                type="button"
-                className="rcm-quick-search-btn"
-                aria-label="Clear quick search"
-                onClick={() => {
-                  setQuickSearchValue('');
-                  void store.getState().quickSearch([quickSearchField], '');
+      {showSearchbar && (
+        <div className="rcm-listgrid-searchbar">
+          <div className="rcm-listgrid-searchbar-inner">
+            {quickSearchFields.length > 0 && !advancedSearchOpen && (
+              <div
+                className="rcm-quick-search-wrap"
+                onKeyUp={(event) => {
+                  if (event.key === 'Enter') runQuickSearch(quickSearchValue);
                 }}
               >
-                <svg
-                  className="rcm-quick-search-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="m9 9 6 6M15 9l-6 6" />
-                </svg>
-              </button>
-            </span>
-          )}
-        </div>
-      )}
-
-      {filterFields.length > 0 && (
-        <div className="rcm-adv-search-outer" data-advanced-search={entityForm.name}>
-          <Button type="button" onClick={() => setAdvancedSearchOpen((open) => !open)}>
-            {labels.advancedSearchToggle}
-          </Button>
-          {columnSettings && (
-            <div data-column-settings-toggle>
-              <Button type="button" onClick={() => setColumnSettingsOpen(true)}>
-                {labels.columnSettings}
-              </Button>
-            </div>
-          )}
-          {advancedSearchOpen && (
-            <div className="rcm-adv-search-inner">
-              <div className="rcm-adv-search-inner-panel" data-advanced-search-panel>
-                <div className="rcm-adv-search-header">
-                  <div className="rcm-adv-search-header-left">
-                    <span className="rcm-adv-search-header-icon">
+                <TextInput
+                  className="rcm-input rcm-quick-search-input"
+                  ariaLabel={labels.quickSearchAria}
+                  value={quickSearchValue}
+                  placeholder={quickSearchPlaceholder}
+                  disabled={loading}
+                  onChange={setQuickSearchValue}
+                />
+                <span className="rcm-quick-search-addon rcm-quick-search-addon-search">
+                  <button
+                    type="button"
+                    className="rcm-quick-search-btn"
+                    aria-label={labels.quickSearchSubmitAria}
+                    disabled={loading}
+                    onClick={() => {
+                      if (quickSearchValue !== '') runQuickSearch(quickSearchValue);
+                    }}
+                  >
+                    <svg
+                      className="rcm-quick-search-icon"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      aria-hidden="true"
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <path d="m20 20-4-4" />
+                    </svg>
+                  </button>
+                </span>
+                {quickSearchValue !== '' && (
+                  <span className="rcm-quick-search-addon rcm-quick-search-addon-clear">
+                    <button
+                      type="button"
+                      className="rcm-quick-search-btn"
+                      aria-label={labels.quickSearchClearAria}
+                      disabled={loading}
+                      onClick={() => {
+                        setQuickSearchValue('');
+                        runQuickSearch('');
+                      }}
+                    >
                       <svg
+                        className="rcm-quick-search-icon"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
                         aria-hidden="true"
                       >
-                        <circle cx="11" cy="11" r="7" />
-                        <path d="m20 20-4-4" />
+                        <circle cx="12" cy="12" r="9" />
+                        <path d="m9 9 6 6M15 9l-6 6" />
                       </svg>
-                    </span>
-                    <span className="rcm-text" data-weight="semibold">
-                      {labels.advancedSearchToggle}
-                    </span>
-                    <span className="rcm-adv-search-count">
-                      <span className="rcm-badge" data-color="primary" data-size="sm">
-                        {filterFields.length}
-                      </span>
-                    </span>
-                  </div>
-                </div>
-                <div className="rcm-adv-search-grid">
-                  {filterFields.map(({ field, config }) => {
-                    const label = config.label ?? field.getLabel();
-                    const headerText = typeof label === 'string' ? label : field.getName();
-                    const filterId = `filter-${field.getName()}`;
-                    const value = filterValues[field.getName()];
-                    const FilterInput = getFilterRenderer(field.type);
-                    return (
-                      <div
-                        key={field.getName()}
-                        data-filter-field={field.getName()}
-                        data-advanced-search-field
-                      >
-                        <label htmlFor={filterId}>{headerText}</label>
-                        {FilterInput ? (
-                          <FilterInput
-                            field={field}
-                            value={value}
-                            onChange={(v) => setFilterValue(field.getName(), v)}
-                          />
-                        ) : (
-                          <TextInput
-                            className="rcm-input"
-                            id={filterId}
-                            value={typeof value === 'string' ? value : ''}
-                            onChange={(v) => setFilterValue(field.getName(), v)}
-                          />
-                        )}
+                    </button>
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="rcm-search-bar-actions" data-list-grid-toolbar>
+              {toolbar?.({ checkedIds: effectiveCheckedIds })}
+              {columnSettings && resolvedColumns.length >= 2 && (
+                <div
+                  className="rcm-column-settings-anchor"
+                  data-column-settings-toggle
+                  ref={columnSettingsRef}
+                >
+                  <Button type="button" onClick={() => setColumnSettingsOpen((open) => !open)}>
+                    {labels.columnSettings}
+                  </Button>
+                  {columnSettingsOpen && (
+                    <div className="rcm-column-settings" data-column-settings>
+                      <div className="rcm-column-settings-grid">
+                        {resolvedColumns.map((column) => {
+                          const visible = !hiddenColumnNames.has(column.name);
+                          return (
+                            <label className="rcm-column-settings-item" key={column.name}>
+                              <CheckBox
+                                ariaLabel={column.header}
+                                checked={visible}
+                                disabled={visible && visibleColumns.length === 1}
+                                onChange={(checked) => toggleColumnVisibility(column.name, checked)}
+                              />
+                              <span>{column.header}</span>
+                            </label>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
                 </div>
-                <div className="rcm-adv-search-footer">
-                  <button
-                    type="button"
-                    className="rcm-button rcm-adv-search-btn rcm-adv-search-btn-submit"
-                    data-variant="primary"
-                    data-size="sm"
-                    data-advanced-search-apply
-                    onClick={() => applyFilterValues()}
+              )}
+              {filterFields.length > 0 && (
+                <Button type="button" onClick={openAdvancedSearch}>
+                  {labels.advancedSearchToggle}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {filterFields.length > 0 && advancedSearchOpen && (
+        <div className="rcm-adv-search-outer" data-advanced-search={entityForm.name}>
+          <div
+            className="rcm-adv-search-inner rcm-adv-search-inner-panel"
+            data-advanced-search-panel
+          >
+            <div className="rcm-adv-search-header">
+              <div className="rcm-adv-search-header-left">
+                <span className="rcm-adv-search-header-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
                   >
-                    {labels.advancedSearchApply}
-                  </button>
-                </div>
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-4-4" />
+                  </svg>
+                </span>
+                <span className="rcm-text" data-weight="semibold">
+                  {labels.advancedSearchToggle}
+                </span>
+                <span className="rcm-adv-search-count">
+                  <span className="rcm-badge" data-color="primary" data-size="sm">
+                    {visibleAdvancedFilterFields.length}
+                  </span>
+                </span>
               </div>
             </div>
-          )}
-        </div>
-      )}
 
-      {columnSettings && filterFields.length === 0 && (
-        <div data-column-settings-toggle>
-          <Button type="button" onClick={() => setColumnSettingsOpen(true)}>
-            {labels.columnSettings}
-          </Button>
-        </div>
-      )}
-
-      {columnSettings && (
-        <Modal
-          open={columnSettingsOpen}
-          onClose={() => setColumnSettingsOpen(false)}
-          title={labels.columnSettings}
-        >
-          <div data-column-settings>
-            {resolvedColumns.map((column) => {
-              const visible = !hiddenColumnNames.has(column.name);
-              return (
-                <label key={column.name}>
-                  <CheckBox
-                    ariaLabel={`${column.name} — ${column.header}`}
-                    checked={visible}
-                    disabled={visible && visibleColumns.length === 1}
-                    onChange={(checked) => toggleColumnVisibility(column.name, checked)}
-                  />
-                  <span>
-                    {column.name} — {column.header}
+            {quickSearchFields.length >= 2 && (
+              <>
+                <div className="rcm-adv-search-qs-toggle">
+                  <label className="rcm-adv-search-qs-label">
+                    <CheckBox
+                      className="rcm-adv-search-qs-checkbox"
+                      ariaLabel={labels.unifiedSearchToggle}
+                      checked={useUnifiedSearch}
+                      onChange={setUseUnifiedSearch}
+                    />
+                    <span className="rcm-adv-search-qs-title">{labels.unifiedSearchToggle}</span>
+                  </label>
+                  <span className="rcm-adv-search-qs-hint">
+                    {labels.unifiedSearchHint(quickSearchFieldLabels)}
                   </span>
-                </label>
-              );
-            })}
-            <Button type="button" onClick={() => setColumnSettingsOpen(false)}>
-              {labels.columnSettingsApply}
-            </Button>
+                </div>
+                {useUnifiedSearch && (
+                  <div className="rcm-adv-search-qs-input-panel">
+                    <label className="rcm-adv-search-qs-input-label" htmlFor="unified-search">
+                      {labels.unifiedSearchInputLabel(quickSearchFieldLabels)}
+                    </label>
+                    <TextInput
+                      className="rcm-input"
+                      id="unified-search"
+                      value={unifiedSearchValue}
+                      placeholder={labels.unifiedSearchPlaceholder(quickSearchFieldLabels)}
+                      onChange={setUnifiedSearchValue}
+                    />
+                    <div className="rcm-adv-search-qs-description">
+                      {labels.unifiedSearchDescription(quickSearchFieldLabels)}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="rcm-adv-search-grid">
+              {visibleAdvancedFilterFields.map(({ field, config }) => {
+                const label = config.label ?? field.getLabel();
+                const headerText = typeof label === 'string' ? label : field.getName();
+                const filterId = `filter-${field.getName()}`;
+                const value = filterValues[field.getName()];
+                const FilterInput = getFilterRenderer(field.type);
+                return (
+                  <div
+                    key={field.getName()}
+                    data-filter-field={field.getName()}
+                    data-advanced-search-field
+                  >
+                    <label htmlFor={filterId}>{headerText}</label>
+                    {FilterInput ? (
+                      <FilterInput
+                        field={field}
+                        value={value}
+                        onChange={(v, operator) => setFilterValue(field.getName(), v, operator)}
+                      />
+                    ) : (
+                      <TextInput
+                        className="rcm-input"
+                        id={filterId}
+                        value={typeof value === 'string' ? value : ''}
+                        onChange={(v) => setFilterValue(field.getName(), v)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            <div className="rcm-adv-search-footer">
+              <button
+                type="button"
+                className="rcm-button rcm-adv-search-btn"
+                data-variant="outline"
+                data-size="sm"
+                data-advanced-search-close
+                onClick={closeAdvancedSearch}
+              >
+                {labels.advancedSearchClose}
+              </button>
+              <button
+                type="button"
+                className="rcm-button rcm-adv-search-btn"
+                data-variant="outline"
+                data-color="error"
+                data-size="sm"
+                data-advanced-search-reset
+                onClick={resetAdvancedSearch}
+              >
+                {labels.advancedSearchReset}
+              </button>
+              <button
+                type="button"
+                className="rcm-button rcm-adv-search-btn rcm-adv-search-btn-submit"
+                data-variant="primary"
+                data-size="sm"
+                data-advanced-search-apply
+                onClick={() => applyFilterValues(visibleAdvancedFilterFields, true)}
+              >
+                {labels.advancedSearchApply}
+              </button>
+            </div>
           </div>
-        </Modal>
+        </div>
+      )}
+
+      {error !== undefined && (
+        <div data-list-error className="rcm-listgrid-error" role="alert">
+          <span>{labels.searchError}</span>
+          <button
+            type="button"
+            data-list-error-dismiss
+            aria-label={labels.searchErrorDismiss}
+            onClick={() => store.getState().clearError()}
+          >
+            ×
+          </button>
+        </div>
       )}
 
       <div className="rcm-skeleton-table-wrapper">
@@ -647,6 +919,9 @@ export function ViewListGrid({
                     labels.rowNumberHeader
                   )}
                 </Table.Th>
+              )}
+              {openInNewWindow?.enabled && (
+                <Table.Th className="rcm-skeleton-td-newwin">{null}</Table.Th>
               )}
               {visibleColumns.map((c) => {
                 const style = cellStyle(c);
@@ -736,7 +1011,9 @@ export function ViewListGrid({
                                       <FilterInput
                                         field={field}
                                         value={value}
-                                        onChange={(next) => setFilterValue(field.getName(), next)}
+                                        onChange={(next, operator) =>
+                                          setFilterValue(field.getName(), next, operator)
+                                        }
                                       />
                                     ) : (
                                       <TextInput
@@ -765,7 +1042,7 @@ export function ViewListGrid({
                                       data-size="sm"
                                       data-column-filter-apply
                                       onClick={() => {
-                                        applyFilterValues();
+                                        applyFilterValues([filterField]);
                                         setOpenColumnFilter(undefined);
                                       }}
                                     >
@@ -837,7 +1114,9 @@ export function ViewListGrid({
                 <td
                   colSpan={Math.max(
                     1,
-                    visibleColumns.length + (selection?.enabled || showRowNumbers ? 1 : 0),
+                    visibleColumns.length +
+                      (selection?.enabled || showRowNumbers ? 1 : 0) +
+                      (openInNewWindow?.enabled ? 1 : 0),
                   )}
                 >
                   <div className="rcm-listgrid-empty" data-empty-state>
@@ -906,6 +1185,36 @@ export function ViewListGrid({
                       </span>
                     </td>
                   ) : null}
+                  {openInNewWindow?.enabled && (
+                    <td className="rcm-skeleton-td-newwin">
+                      {(openInNewWindow.showFilter?.(row) ?? true) && (
+                        <button
+                          type="button"
+                          className="rcm-newwin-btn"
+                          data-row-new-window
+                          title={openInNewWindow.tooltip ?? labels.openInNewWindowTooltip}
+                          aria-label={openInNewWindow.tooltip ?? labels.openInNewWindowTooltip}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openRowInNewWindow(row, selectionId);
+                          }}
+                          onKeyDown={(event) => event.stopPropagation()}
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            aria-hidden="true"
+                          >
+                            <path d="M14 3h7v7" />
+                            <path d="m10 14 11-11" />
+                            <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+                          </svg>
+                        </button>
+                      )}
+                    </td>
+                  )}
                   {visibleColumns.map((c) => {
                     const style = cellStyle(c);
                     return style !== undefined ? (
@@ -932,12 +1241,6 @@ export function ViewListGrid({
           >
             {selection.confirmLabel ?? labels.selectionConfirm}
           </Button>
-        </div>
-      )}
-
-      {toolbar && (
-        <div className="rcm-search-bar-actions" data-list-grid-toolbar>
-          {toolbar({ checkedIds: effectiveCheckedIds })}
         </div>
       )}
 
