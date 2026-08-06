@@ -1908,6 +1908,17 @@
   background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
 }
 
+.rcm-listgrid-rownum {
+  color: var(--rcm-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rcm-entire-checker-placeholder {
+  display: block;
+  color: var(--rcm-color-text-muted);
+  text-align: center;
+}
+
 .rcm-listgrid-row-dragging {
   opacity: 0.5;
 }
@@ -2321,6 +2332,10 @@
 }
 
 .rcm-fieldgroup-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: var(--rcm-space-sm);
 }
 

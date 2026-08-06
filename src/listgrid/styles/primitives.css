@@ -384,13 +384,15 @@
   border-color: var(--rcm-color-primary-hover);
 }
 
-.rcm-button[data-variant='outline'] {
+.rcm-button[data-variant='outline'],
+.rcm-button[data-variant='secondary'] {
   color: var(--rcm-color-primary);
   background: transparent;
   border-color: var(--rcm-color-primary);
 }
 
-.rcm-button[data-variant='outline']:hover {
+.rcm-button[data-variant='outline']:hover,
+.rcm-button[data-variant='secondary']:hover {
   background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
   border-color: var(--rcm-color-primary);
 }
@@ -433,13 +435,15 @@
   border-color: color-mix(in srgb, var(--rcm-color-error) 85%, black);
 }
 
-.rcm-button[data-variant='outline'][data-color='error'] {
+.rcm-button[data-variant='outline'][data-color='error'],
+.rcm-button[data-variant='danger'][data-color='error'] {
   color: var(--rcm-color-error);
   background: transparent;
   border-color: var(--rcm-color-error);
 }
 
-.rcm-button[data-variant='outline'][data-color='error']:hover {
+.rcm-button[data-variant='outline'][data-color='error']:hover,
+.rcm-button[data-variant='danger'][data-color='error']:hover {
   color: var(--rcm-color-error);
   background: var(--rcm-color-error-surface);
   border-color: var(--rcm-color-error);
@@ -486,6 +490,66 @@
 
 .rcm-button[data-full-width] {
   width: 100%;
+}
+
+/* Pagination — ui-default keeps its public page wire zero-based while the
+   numbered controls expose one-based labels to people. */
+.rcm-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rcm-space-xs);
+}
+
+.rcm-pagination > span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-xs);
+}
+
+.rcm-pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 var(--rcm-space-sm);
+  font: inherit;
+  font-size: var(--rcm-font-size-sm);
+  color: var(--rcm-color-text);
+  background: var(--rcm-color-surface);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border-radius: var(--rcm-radius-md);
+  cursor: pointer;
+  transition:
+    color var(--rcm-transition-fast),
+    background var(--rcm-transition-fast),
+    border-color var(--rcm-transition-fast);
+}
+
+.rcm-pagination-btn:hover:not(:disabled) {
+  background: var(--rcm-color-surface-hover);
+  border-color: var(--rcm-color-border-hover);
+}
+
+.rcm-pagination-btn[data-active] {
+  color: var(--rcm-color-primary-text);
+  background: var(--rcm-color-primary);
+  border-color: var(--rcm-color-primary);
+}
+
+.rcm-pagination-btn:disabled {
+  color: var(--rcm-color-text-disabled);
+  background: var(--rcm-color-surface-disabled);
+  cursor: not-allowed;
+}
+
+.rcm-pagination-ellipsis {
+  display: inline-flex;
+  min-width: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  color: var(--rcm-color-text-muted);
 }
 
 /* Icon-only button — square. Inherits variant + color + state from .rcm-button. */

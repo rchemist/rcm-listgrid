@@ -461,6 +461,57 @@
 /* ------------------------------------------------------------------ *
      * Filter dropdown (column header filter popover)
      * ------------------------------------------------------------------ */
+.rcm-filter-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  color: var(--rcm-color-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--rcm-radius-sm);
+  cursor: pointer;
+  transition:
+    color var(--rcm-transition-fast),
+    background var(--rcm-transition-fast);
+}
+
+.rcm-filter-button svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.rcm-filter-button:hover {
+  color: var(--rcm-color-primary);
+  background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
+}
+
+.rcm-filter-button[data-active] {
+  color: var(--rcm-color-primary);
+}
+
+.rcm-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.rcm-sort-indicator {
+  display: inline-flex;
+  margin-left: 2px;
+  color: var(--rcm-color-text-muted);
+  vertical-align: middle;
+}
+
+.rcm-sort-indicator svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.rcm-sort-indicator[data-direction='ascending'],
+.rcm-sort-indicator[data-direction='descending'] {
+  color: var(--rcm-color-primary);
+}
+
 .rcm-filter-dropdown {
   margin-top: var(--rcm-space-sm);
   background: var(--rcm-color-surface);
@@ -512,6 +563,83 @@
   gap: var(--rcm-space-sm);
   padding-top: var(--rcm-space-md);
   border-top: var(--rcm-border-width) solid var(--rcm-color-border);
+}
+
+/* ViewEntityForm error summary — the tokenized equivalent of the 0.2.x
+   danger banner and expandable detail panel. */
+.rcm-error-summary {
+  width: 100%;
+  margin-bottom: var(--rcm-space-sm);
+  overflow: hidden;
+  border-radius: var(--rcm-radius-lg);
+}
+
+.rcm-error-summary-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rcm-space-md);
+  padding: 0.625rem var(--rcm-space-lg);
+  color: var(--rcm-color-primary-text);
+  font: inherit;
+  font-weight: var(--rcm-font-weight-semibold);
+  text-align: left;
+  background: var(--rcm-color-error);
+  border: 0;
+  cursor: pointer;
+  transition: background var(--rcm-transition-fast);
+}
+
+.rcm-error-summary-toggle:hover {
+  background: color-mix(in srgb, var(--rcm-color-error) 88%, black);
+}
+
+.rcm-error-summary-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rcm-space-sm);
+}
+
+.rcm-error-summary-title svg {
+  width: var(--rcm-size-icon-md);
+  height: var(--rcm-size-icon-md);
+  flex-shrink: 0;
+}
+
+.rcm-error-summary-count {
+  flex-shrink: 0;
+  padding: 0.2rem var(--rcm-space-sm);
+  font-size: var(--rcm-font-size-xs);
+  background: color-mix(in srgb, var(--rcm-color-primary-text) 20%, transparent);
+  border-radius: var(--rcm-radius-full);
+}
+
+.rcm-error-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rcm-space-xs);
+  margin: 0;
+  padding: var(--rcm-space-md) var(--rcm-space-lg);
+  color: var(--rcm-color-error);
+  list-style: none;
+  background: var(--rcm-color-error-surface);
+}
+
+.rcm-error-summary-item {
+  width: 100%;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  font-size: 0.84rem;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.rcm-error-summary-item:hover {
+  text-decoration: underline;
 }
 
 /* ------------------------------------------------------------------ *

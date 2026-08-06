@@ -208,6 +208,16 @@ describe('ViewEntityForm (JSDOM render)', () => {
         return element as HTMLElement;
       });
       expect(summary).not.toHaveAttribute('data-expanded');
+      expect(summary).toHaveClass('rcm-error-summary');
+      expect(summary.querySelector('[data-error-summary-toggle]')).toHaveClass(
+        'rcm-error-summary-toggle',
+      );
+      expect(summary.querySelector('[data-error-summary-title]')).toHaveClass(
+        'rcm-error-summary-title',
+      );
+      expect(summary.querySelector('[data-error-summary-count]')).toHaveClass(
+        'rcm-error-summary-count',
+      );
       expect(summary.querySelector('[data-error-summary-title]')).toHaveTextContent(
         '작성하신 정보에 누락 또는 오류가 있습니다.',
       );
@@ -220,6 +230,12 @@ describe('ViewEntityForm (JSDOM render)', () => {
         '누락(오류) 정보 목록을 확인해 주세요.',
       );
       expect(summary.querySelectorAll('[data-error-summary-item]')).toHaveLength(2);
+      expect(summary.querySelector('[data-error-summary-list]')).toHaveClass(
+        'rcm-error-summary-list',
+      );
+      expect(summary.querySelector('[data-error-summary-item]')).toHaveClass(
+        'rcm-error-summary-item',
+      );
 
       const englishItem = summary.querySelector(
         '[data-error-summary-item][data-field="englishName"]',

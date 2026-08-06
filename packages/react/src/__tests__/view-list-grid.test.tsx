@@ -194,6 +194,41 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(screen.getByText('Law')).toBeInTheDocument();
   });
 
+  it('attaches the stock panel, quick-search, table, row, empty, and pagination classes', async () => {
+    const entityForm = collegeForm();
+    const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} toolbar={() => <span>Actions</span>} />
+      </UIProvider>,
+    );
+
+    await screen.findByText('Engineering');
+    const root = document.querySelector('[data-list-grid="CollegeEntityForm"]');
+    expect(root).toHaveClass('rcm-listgrid-panel', 'rcm-listgrid-panel-main');
+    expect(screen.getByLabelText('Quick search')).toHaveClass(
+      'rcm-input',
+      'rcm-quick-search-input',
+    );
+    expect(document.querySelector('.rcm-quick-search-wrap')).toContainElement(
+      document.querySelector('.rcm-quick-search-addon-search'),
+    );
+    expect(document.querySelector('table')).toHaveClass('rcm-table');
+    expect(document.querySelector('thead')).toHaveClass('rcm-listgrid-thead');
+    expect(document.querySelector('tbody')).toHaveClass('rcm-listgrid-tbody');
+    expect(screen.getByText('Engineering').closest('tr')).toHaveClass('rcm-listgrid-row-hover');
+    expect(document.querySelector('[data-list-grid-toolbar]')).toHaveClass(
+      'rcm-search-bar-actions',
+    );
+    expect(document.querySelector('[data-total-elements]')).toHaveClass('rcm-listgrid-pagination');
+
+    fireEvent.change(screen.getByLabelText('Quick search'), { target: { value: 'Eng' } });
+    expect(screen.getByRole('button', { name: 'Clear quick search' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Clear quick search' }));
+    expect(screen.getByLabelText('Quick search')).toHaveValue('');
+  });
+
   it('renders a configured empty-state row with a colSpan for data, selection, and row-number columns', async () => {
     configureLabels({ emptyState: '표시할 항목이 없습니다.' });
     const entityForm = collegeForm();
@@ -215,7 +250,8 @@ describe('ViewListGrid (JSDOM render)', () => {
     const emptyState = screen.getByText('표시할 항목이 없습니다.');
     expect(emptyState).toHaveAttribute('data-empty-state');
     expect(emptyState.closest('tr')).toHaveAttribute('data-empty-row');
-    expect(emptyState.closest('td')).toHaveAttribute('colspan', '3');
+    expect(emptyState).toHaveClass('rcm-listgrid-empty');
+    expect(emptyState.closest('td')).toHaveAttribute('colspan', '2');
     expect(emptyState.closest('tbody')?.querySelector(':scope > tr > td')).toBe(
       emptyState.closest('td'),
     );
@@ -348,6 +384,78 @@ describe('ViewListGrid (JSDOM render)', () => {
 
   // EA-D2-0 selection — decision ① minimal-4 shape (§3).
   describe('selection', () => {
+    it('shows partial selection and preserves 0.2.x master toggle semantics', async () => {
+      const entityForm = collegeForm();
+      const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid
+            entityForm={entityForm}
+            store={store}
+            selection={{ enabled: true, onConfirm: vi.fn() }}
+          />
+        </UIProvider>,
+      );
+
+      await screen.findByText('Engineering');
+      const master = screen.getByRole('checkbox', { name: '전체 선택' }) as HTMLInputElement;
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
+      expect(master).not.toBeChecked();
+      expect(master.indeterminate).toBe(true);
+      expect(master).toHaveAttribute('aria-checked', 'mixed');
+
+      // EntireChecker in 0.2.x clears an existing partial selection.
+      fireEvent.click(master);
+      expect(screen.getByRole('checkbox', { name: 'Select row 1' })).not.toBeChecked();
+      expect(master.indeterminate).toBe(false);
+
+      fireEvent.click(master);
+      expect(screen.getByRole('checkbox', { name: 'Select row 1' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select row 2' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'Select row 3' })).toBeChecked();
+      expect(master).toBeChecked();
+      expect(master.indeterminate).toBe(false);
+      expect(screen.getByText('Engineering').closest('tr')).toHaveClass(
+        'rcm-listgrid-row-selected',
+      );
+
+      fireEvent.click(master);
+      expect(screen.getByRole('checkbox', { name: 'Select row 1' })).not.toBeChecked();
+      expect(screen.getByText('Engineering').closest('tr')).not.toHaveClass(
+        'rcm-listgrid-row-selected',
+      );
+    });
+
+    it('merges selection and row number into one labeled cell without firing row click', async () => {
+      const entityForm = collegeForm();
+      const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+      const onRowClick = vi.fn();
+
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid
+            entityForm={entityForm}
+            store={store}
+            onRowClick={onRowClick}
+            selection={{ enabled: true, onConfirm: vi.fn() }}
+            showRowNumbers
+          />
+        </UIProvider>,
+      );
+
+      const row = (await screen.findByText('Engineering')).closest('tr') as HTMLElement;
+      const mergedCell = row.querySelector('[data-row-number]') as HTMLElement;
+      expect(mergedCell).toHaveClass('rcm-skeleton-td-checkbox');
+      expect(mergedCell.querySelectorAll('td')).toHaveLength(0);
+      expect(mergedCell.querySelector('label > input.rcm-checkbox')).toBeInTheDocument();
+      expect(mergedCell.querySelector('label > span.rcm-listgrid-rownum')).toHaveTextContent('3');
+
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Select row 1' }));
+      expect(onRowClick).not.toHaveBeenCalled();
+    });
+
     it('checking rows and confirming calls onConfirm with the checked ids', async () => {
       const entityForm = collegeForm();
       const adapter = mockAdapter();
@@ -566,7 +674,9 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
 
     await screen.findByText('L1');
     const header = screen.getByRole('columnheader', { name: 'Late Header' });
+    expect(header).toHaveClass('rcm-sortable');
     expect(header).toHaveAttribute('aria-sort', 'none');
+    expect(header.querySelector('[data-sort-indicator]')).toHaveClass('rcm-sort-indicator');
     expect(header.querySelector('[data-sort-indicator]')).toHaveAttribute('data-direction', 'none');
     expect(header.querySelector('[data-sort-indicator] svg')).toBeInTheDocument();
     // 'early' has no sortable override — plain header, no click affordance.
@@ -671,6 +781,7 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
 
     await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
     const filterTrigger = screen.getByRole('button', { name: 'Name 필터' });
+    expect(filterTrigger).toHaveClass('rcm-filter-button');
     expect(filterTrigger).toHaveAttribute('data-column-filter-trigger');
     expect(filterTrigger.querySelector('svg')).toBeInTheDocument();
     expect(filterTrigger).not.toHaveAttribute('data-active');
@@ -687,6 +798,13 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     expect(store.getState().searchForm.sorts).toEqual([]);
     const popover = document.querySelector('[data-column-filter="name"]');
     expect(popover).not.toBeNull();
+    expect(popover).toHaveClass('rcm-filter-dropdown', 'rcm-filter-dropdown-md');
+    expect(popover?.querySelector('.rcm-filter-dropdown-inner')).toBeInTheDocument();
+    expect(popover?.querySelector('.rcm-filter-dropdown-header .rcm-text')).toHaveTextContent(
+      'Name',
+    );
+    expect(popover?.querySelector('.rcm-filter-dropdown-body')).toBeInTheDocument();
+    expect(popover?.querySelector('.rcm-filter-dropdown-footer')).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Al' } });
     fireEvent.click(screen.getByRole('button', { name: '검색' }));
 
@@ -697,6 +815,30 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     expect(store.getState().searchForm.sorts).toEqual([]);
     expect(screen.getByRole('button', { name: 'Name 필터' })).toHaveAttribute('data-active', '');
     expect(document.querySelector('[data-column-filter="name"]')).toBeNull();
+  });
+
+  it('resets this column draft and applied filter from the dropdown footer', async () => {
+    const entityForm = filterForm();
+    const { adapter, listCalls } = rowsAdapterWithCalls([{ id: '1', name: 'Alpha', code: 'A' }]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole('button', { name: 'Name 필터' }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Alpha' } });
+    fireEvent.click(screen.getByRole('button', { name: '검색' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Name 필터' }));
+    fireEvent.click(screen.getByRole('button', { name: '초기화' }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters.AND).toEqual([]);
+    expect(screen.getByLabelText('Name')).toHaveValue('');
   });
 
   it('0 withFilter()-truthy fields renders no toggle and no panel', async () => {
@@ -732,6 +874,16 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
 
     expect(screen.getByLabelText('Name Filter')).toBeInTheDocument(); // config.label override
     expect(screen.getByLabelText('Code')).toBeInTheDocument(); // falls back to field.getLabel()
+    const panel = document.querySelector('[data-advanced-search-panel]');
+    expect(document.querySelector('[data-advanced-search]')).toHaveClass('rcm-adv-search-outer');
+    expect(panel?.parentElement).toHaveClass('rcm-adv-search-inner');
+    expect(panel).toHaveClass('rcm-adv-search-inner-panel');
+    expect(panel?.querySelector('.rcm-adv-search-header-left .rcm-badge')).toHaveTextContent('2');
+    expect(panel?.querySelector('.rcm-adv-search-grid')).toBeInTheDocument();
+    expect(panel?.querySelector('[data-advanced-search-apply]')).toHaveClass(
+      'rcm-button',
+      'rcm-adv-search-btn-submit',
+    );
   });
 
   it('applying a non-empty value AND-filters via addAndFilter with the configured operator, and refetches', async () => {

@@ -38,6 +38,7 @@ export function TextInput({
   required,
   invalid,
   describedBy,
+  className,
 }: TextInputProps) {
   return (
     <input
@@ -51,6 +52,7 @@ export function TextInput({
       aria-required={required || undefined}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
+      className={['rcm-input', className].filter(Boolean).join(' ')}
       onChange={(e) => onChange?.(e.target.value)}
     />
   );
@@ -67,6 +69,7 @@ export function Textarea({
   required,
   invalid,
   describedBy,
+  className,
 }: TextareaProps) {
   return (
     <textarea
@@ -79,6 +82,7 @@ export function Textarea({
       aria-required={required || undefined}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
+      className={['rcm-textarea', className].filter(Boolean).join(' ')}
       onChange={(e) => onChange?.(e.target.value)}
     />
   );
@@ -143,6 +147,7 @@ export function DateInput({
 
 export function CheckBox({
   checked,
+  indeterminate,
   onChange,
   disabled,
   id,
@@ -150,17 +155,28 @@ export function CheckBox({
   required,
   invalid,
   describedBy,
+  className,
 }: CheckBoxProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mixed = Boolean(indeterminate && !checked);
+
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.indeterminate = mixed;
+  }, [mixed]);
+
   return (
     <input
+      ref={inputRef}
       type="checkbox"
       id={id}
       checked={checked ?? false}
       disabled={disabled}
       aria-label={ariaLabel}
+      aria-checked={mixed ? 'mixed' : undefined}
       aria-required={required || undefined}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
+      className={['rcm-checkbox', className].filter(Boolean).join(' ')}
       onChange={(e) => onChange?.(e.target.checked)}
     />
   );
@@ -176,6 +192,7 @@ export function SelectBox({
   required,
   invalid,
   describedBy,
+  className,
 }: SelectBoxProps) {
   const opts = options ?? [];
   return (
@@ -187,6 +204,7 @@ export function SelectBox({
       aria-required={required || undefined}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
+      className={['rcm-select', className].filter(Boolean).join(' ')}
       onChange={(e) => {
         const raw = e.target.value;
         const matched = opts.find((o) => String(o.value) === raw);
@@ -630,9 +648,16 @@ export function UserView({ value, id, ariaLabel, describedBy }: UserViewProps) {
   );
 }
 
-export function Button({ onClick, children, type, disabled, variant }: ButtonProps) {
+export function Button({ onClick, children, type, disabled, variant, className }: ButtonProps) {
   return (
-    <button type={type ?? 'button'} onClick={onClick} disabled={disabled} data-variant={variant}>
+    <button
+      type={type ?? 'button'}
+      onClick={onClick}
+      disabled={disabled}
+      data-variant={variant}
+      {...(variant === 'danger' ? { 'data-color': 'error' } : {})}
+      className={['rcm-button', className].filter(Boolean).join(' ')}
+    >
       {children}
     </button>
   );
@@ -672,37 +697,91 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
   );
 }
 
-function TableBase({ children }: TableProps) {
-  return <table>{children}</table>;
+function TableBase({ children, className }: TableProps) {
+  return <table className={className}>{children}</table>;
 }
-function Thead({ children }: TableRowProps) {
-  return <thead>{children}</thead>;
+function Thead({ children, className }: TableRowProps) {
+  return <thead className={className}>{children}</thead>;
 }
-function Tbody({ children }: TableRowProps) {
-  return <tbody>{children}</tbody>;
+function Tbody({ children, className }: TableRowProps) {
+  return <tbody className={className}>{children}</tbody>;
 }
-function Tr({ children }: TableRowProps) {
-  return <tr>{children}</tr>;
+function Tr({ children, className }: TableRowProps) {
+  return <tr className={className}>{children}</tr>;
 }
-function Th({ children, colSpan }: TableCellProps) {
-  return <th colSpan={colSpan}>{children}</th>;
+function Th({ children, colSpan, className }: TableCellProps) {
+  return (
+    <th colSpan={colSpan} className={className}>
+      {children}
+    </th>
+  );
 }
-function Td({ children, colSpan }: TableCellProps) {
-  return <td colSpan={colSpan}>{children}</td>;
+function Td({ children, colSpan, className }: TableCellProps) {
+  return (
+    <td colSpan={colSpan} className={className}>
+      {children}
+    </td>
+  );
 }
 
 export const Table: TableComponent = Object.assign(TableBase, { Thead, Tbody, Tr, Th, Td });
 
-export function Pagination({ page, totalPages, onChange, prevLabel, nextLabel }: PaginationProps) {
+export function Pagination({
+  page,
+  totalPages,
+  onChange,
+  prevLabel,
+  nextLabel,
+  className,
+}: PaginationProps) {
+  const pages = new Set<number>();
+  if (totalPages > 0) {
+    pages.add(0);
+    pages.add(totalPages - 1);
+    for (let candidate = page - 1; candidate <= page + 1; candidate += 1) {
+      if (candidate >= 0 && candidate < totalPages) pages.add(candidate);
+    }
+  }
+  const visiblePages = [...pages].sort((a, b) => a - b);
+
   return (
-    <nav aria-label="Pagination">
-      <button type="button" disabled={page <= 1} onClick={() => onChange?.(page - 1)}>
+    <nav
+      aria-label="Pagination"
+      className={['rcm-pagination', className].filter(Boolean).join(' ')}
+    >
+      <button
+        type="button"
+        className="rcm-pagination-btn rcm-pagination-prev"
+        disabled={totalPages <= 0 || page <= 0}
+        onClick={() => onChange?.(page - 1)}
+      >
         {prevLabel ?? 'Prev'}
       </button>
-      <span>
-        {page} / {totalPages}
-      </span>
-      <button type="button" disabled={page >= totalPages} onClick={() => onChange?.(page + 1)}>
+      {visiblePages.map((visiblePage, index) => (
+        <span key={visiblePage}>
+          {index > 0 && visiblePage - visiblePages[index - 1]! > 1 && (
+            <span className="rcm-pagination-ellipsis" aria-hidden="true">
+              …
+            </span>
+          )}
+          <button
+            type="button"
+            className="rcm-pagination-btn"
+            {...(visiblePage === page ? { 'data-active': '' } : {})}
+            aria-current={visiblePage === page ? 'page' : undefined}
+            aria-label={`Page ${visiblePage + 1}`}
+            onClick={() => onChange?.(visiblePage)}
+          >
+            {visiblePage + 1}
+          </button>
+        </span>
+      ))}
+      <button
+        type="button"
+        className="rcm-pagination-btn rcm-pagination-next"
+        disabled={totalPages <= 0 || page >= totalPages - 1}
+        onClick={() => onChange?.(page + 1)}
+      >
         {nextLabel ?? 'Next'}
       </button>
     </nav>

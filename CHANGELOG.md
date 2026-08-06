@@ -2,6 +2,33 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.6] - 2026-08-06
+
+### Upgrade notes
+
+- `Pagination`(ui-default) `page` prop 은 이제 **0-기반**입니다 (ViewListGrid 배선과 일치). 이 프리미티브를 직접 1-기반으로 렌더하던 호스트는 조정이 필요합니다.
+- selection+showRowNumbers 동시 사용 시 `[data-row-number]` 셀은 체크박스를 함께 담는 병합 셀입니다.
+
+### Added
+
+- shipped 목록·검색·필터·고급검색·폼·오류 요약·페이지네이션 컴포넌트에 0.2.x
+  `rcm-*` 시각 클래스 계약을 복원하고, 누락됐던 필터/정렬/오류 요약/페이지네이션 규칙을
+  토큰 기반 light/dark 스타일로 추가했다.
+- `filterReset`(기본값 `초기화`)과 `selectAllAria`(기본값 `전체 선택`) 라벨을 추가했다.
+- 선택 목록 헤더에 현재 화면 전체 선택/해제 체크박스를 추가하고, 행 번호와 선택을 함께
+  사용할 때 하나의 셀에 체크박스와 번호가 같이 표시되도록 복원했다.
+
+### Fixed
+
+- 기본 페이지네이션이 0-based `SearchForm.page` wire 값을 올바르게 해석하면서 화면에는
+  1-based 번호, sibling window와 처음/끝 페이지 및 생략 부호를 표시하도록 수정했다.
+
+### Changed
+
+- 기본 `Button`은 기존 `data-variant` 값을 보존한다. `primary`/`ghost`는 동일 이름의
+  stylesheet variant를 사용하고, `secondary`는 outline 호환 규칙으로, `danger`는
+  `data-color="error"`를 추가한 error-outline 호환 규칙으로 표시된다.
+
 ## [0.5.5] - 2026-08-06
 
 ### Added

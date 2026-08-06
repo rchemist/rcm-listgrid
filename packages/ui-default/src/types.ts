@@ -25,6 +25,7 @@ export interface TextInputProps {
   required?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  className?: string;
 }
 
 export interface TextareaProps {
@@ -38,6 +39,7 @@ export interface TextareaProps {
   required?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  className?: string;
 }
 
 export interface NumberInputProps {
@@ -66,6 +68,7 @@ export interface DateInputProps {
 
 export interface CheckBoxProps {
   checked?: boolean;
+  indeterminate?: boolean;
   onChange?: (checked: boolean) => void;
   disabled?: boolean;
   id?: string;
@@ -73,6 +76,7 @@ export interface CheckBoxProps {
   required?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  className?: string;
 }
 
 export interface SelectBoxProps {
@@ -85,6 +89,7 @@ export interface SelectBoxProps {
   required?: boolean;
   invalid?: boolean;
   describedBy?: string;
+  className?: string;
 }
 
 /** Outcome of a per-tag validation check (0.3.x `form/TagsInput/types.ts`
@@ -211,6 +216,7 @@ export interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   variant?: ButtonVariant;
+  className?: string;
 }
 
 export interface ModalProps {
@@ -222,15 +228,18 @@ export interface ModalProps {
 
 export interface TableProps {
   children?: ReactNode;
+  className?: string;
 }
 
 export interface TableRowProps {
   children?: ReactNode;
+  className?: string;
 }
 
 export interface TableCellProps {
   children?: ReactNode;
   colSpan?: number;
+  className?: string;
 }
 
 export type TableComponent = ComponentType<TableProps> & {
@@ -247,6 +256,7 @@ export interface PaginationProps {
   onChange?: (page: number) => void;
   prevLabel?: string;
   nextLabel?: string;
+  className?: string;
 }
 
 export interface StackProps {

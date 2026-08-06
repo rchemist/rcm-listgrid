@@ -206,24 +206,35 @@ function FieldGroupPanel({
   const [open, setOpen] = useState(group.open ?? true);
 
   return (
-    <fieldset data-field-group={group.id} disabled={saving}>
+    <fieldset className="rcm-fieldgroup" data-field-group={group.id} disabled={saving}>
       {(group.label || collapsible) && (
-        <legend>
+        <legend className="rcm-fieldgroup-header">
+          <span className="rcm-fieldgroup-title">{group.label ?? group.id}</span>
           {collapsible ? (
             <button
               type="button"
+              className={`rcm-fieldgroup-collapse${!open ? ' rcm-rotate-180' : ''}`}
               aria-expanded={open}
               aria-controls={`field-group-${group.id}`}
+              aria-label={group.label ?? group.id}
               onClick={() => setOpen((value) => !value)}
             >
-              {group.label ?? group.id}
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
             </button>
-          ) : (
-            group.label
-          )}
+          ) : null}
         </legend>
       )}
-      <div id={`field-group-${group.id}`} hidden={collapsible && !open}>
+      <div className="rcm-field-grid" id={`field-group-${group.id}`} hidden={collapsible && !open}>
         {fields.map((field) => (
           <FieldRenderer key={field.getName()} field={field} entityId={entityId} />
         ))}
@@ -946,28 +957,44 @@ function ViewEntityFormInner({
       {slots?.header !== undefined && resolveSlot(slots.header, actionCtx)}
 
       {errorSummaryItems.length > 0 && (
-        <div data-error-summary data-expanded={errorSummaryExpanded ? '' : undefined}>
+        <div
+          className="rcm-error-summary"
+          data-error-summary
+          data-expanded={errorSummaryExpanded ? '' : undefined}
+        >
           <button
             type="button"
+            className="rcm-error-summary-toggle"
             data-error-summary-toggle
             aria-expanded={errorSummaryExpanded}
             onClick={() => setErrorSummaryExpanded((expanded) => !expanded)}
           >
-            <span data-error-summary-title>
+            <span className="rcm-error-summary-title" data-error-summary-title>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path d="M12 3 2.5 20h19L12 3Z" />
+                <path d="M12 9v5m0 3h.01" />
+              </svg>
               {errorSummaryExpanded
                 ? labels.errorSummaryExpandedTitle
                 : labels.errorSummaryCollapsedTitle}
             </span>
-            <span data-error-summary-count>
+            <span className="rcm-error-summary-count" data-error-summary-count>
               {labels.errorSummaryCount(errorSummaryItems.length)}
             </span>
           </button>
           {errorSummaryExpanded && (
-            <ul data-error-summary-list>
+            <ul className="rcm-error-summary-list" data-error-summary-list>
               {errorSummaryItems.map((item) => (
                 <li key={item.key}>
                   <button
                     type="button"
+                    className="rcm-error-summary-item"
                     data-error-summary-item
                     data-field={item.fieldName}
                     onClick={() => moveToErrorField(item.fieldName)}

@@ -7,7 +7,19 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { FileInput, InlineMap, Pagination, TagsInput, TextInput, UserView } from '../primitives';
+import {
+  Button,
+  CheckBox,
+  FileInput,
+  InlineMap,
+  Pagination,
+  SelectBox,
+  Table,
+  TagsInput,
+  Textarea,
+  TextInput,
+  UserView,
+} from '../primitives';
 
 describe('Pagination labels (v0.5.4)', () => {
   it('keeps the current literals as fallbacks and accepts host-provided labels', () => {
@@ -20,6 +32,97 @@ describe('Pagination labels (v0.5.4)', () => {
     );
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Following page' })).toBeInTheDocument();
+  });
+
+  it('treats page as zero-based while rendering one-based active page labels', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<Pagination page={0} totalPages={3} onChange={onChange} />);
+    expect(screen.getByRole('navigation', { name: 'Pagination' })).toHaveClass('rcm-pagination');
+    expect(screen.getByRole('button', { name: 'Prev' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Page 1' })).toHaveAttribute('data-active', '');
+    expect(screen.getByRole('button', { name: 'Page 1' })).toHaveTextContent('1');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Page 2' }));
+    expect(onChange).toHaveBeenCalledWith(1);
+
+    rerender(<Pagination page={2} totalPages={3} onChange={onChange} />);
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Page 3' })).toHaveAttribute('data-active', '');
+  });
+
+  it('renders first/last pages, a sibling window, and ellipses for long ranges', () => {
+    render(<Pagination page={5} totalPages={12} />);
+    expect(screen.getByRole('button', { name: 'Page 1' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Page 5' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Page 6' })).toHaveAttribute('data-active', '');
+    expect(screen.getByRole('button', { name: 'Page 7' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Page 12' })).toBeInTheDocument();
+    expect(document.querySelectorAll('.rcm-pagination-ellipsis')).toHaveLength(2);
+  });
+
+  it('disables both controls and omits page buttons when there are no pages', () => {
+    render(<Pagination page={1} totalPages={0} />);
+    expect(screen.getByRole('button', { name: 'Prev' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /^Page / })).not.toBeInTheDocument();
+  });
+});
+
+describe('0.2.x visual class contract', () => {
+  it('attaches primitive classes and preserves Button data-variant compatibility', () => {
+    render(
+      <>
+        <TextInput ariaLabel="text" />
+        <Textarea ariaLabel="textarea" />
+        <CheckBox ariaLabel="checkbox" />
+        <SelectBox ariaLabel="select" />
+        <Button variant="primary">Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="danger">Danger</Button>
+      </>,
+    );
+
+    expect(screen.getByLabelText('text')).toHaveClass('rcm-input');
+    expect(screen.getByLabelText('textarea')).toHaveClass('rcm-textarea');
+    expect(screen.getByLabelText('checkbox')).toHaveClass('rcm-checkbox');
+    expect(screen.getByLabelText('select')).toHaveClass('rcm-select');
+    expect(screen.getByRole('button', { name: 'Primary' })).toHaveClass('rcm-button');
+    expect(screen.getByRole('button', { name: 'Primary' })).toHaveAttribute(
+      'data-variant',
+      'primary',
+    );
+    expect(screen.getByRole('button', { name: 'Secondary' })).toHaveAttribute(
+      'data-variant',
+      'secondary',
+    );
+    expect(screen.getByRole('button', { name: 'Danger' })).toHaveAttribute(
+      'data-variant',
+      'danger',
+    );
+    expect(screen.getByRole('button', { name: 'Danger' })).toHaveAttribute('data-color', 'error');
+  });
+
+  it('passes className through every table element', () => {
+    render(
+      <Table className="table-class">
+        <Table.Thead className="head-class">
+          <Table.Tr className="row-class">
+            <Table.Th className="header-class">Header</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody className="body-class">
+          <Table.Tr>
+            <Table.Td className="cell-class">Cell</Table.Td>
+          </Table.Tr>
+        </Table.Tbody>
+      </Table>,
+    );
+    expect(document.querySelector('table')).toHaveClass('table-class');
+    expect(document.querySelector('thead')).toHaveClass('head-class');
+    expect(document.querySelector('tbody')).toHaveClass('body-class');
+    expect(document.querySelector('thead tr')).toHaveClass('row-class');
+    expect(document.querySelector('th')).toHaveClass('header-class');
+    expect(document.querySelector('td')).toHaveClass('cell-class');
   });
 });
 

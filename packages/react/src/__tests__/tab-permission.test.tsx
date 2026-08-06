@@ -109,10 +109,20 @@ describe('FieldGroupDef.open controls the initial collapsible group state', () =
     renderForm(CollapsibleGroupForm(false));
     const toggle = await screen.findByRole('button', { name: 'Collapsible' });
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveClass('rcm-fieldgroup-collapse', 'rcm-rotate-180');
+    expect(toggle.closest('[data-field-group]')).toHaveClass('rcm-fieldgroup');
+    expect(toggle.closest('legend')).toHaveClass('rcm-fieldgroup-header');
+    expect(toggle.closest('legend')?.querySelector('.rcm-fieldgroup-title')).toHaveTextContent(
+      'Collapsible',
+    );
+    expect(toggle.closest('fieldset')?.querySelector('#field-group-collapsible')).toHaveClass(
+      'rcm-field-grid',
+    );
     expect(screen.getByLabelText(/^Name/)).not.toBeVisible();
 
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(toggle).not.toHaveClass('rcm-rotate-180');
     expect(screen.getByLabelText(/^Name/)).toBeVisible();
   });
 

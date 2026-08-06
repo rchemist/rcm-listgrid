@@ -166,12 +166,18 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
   );
 
   return (
-    <div data-field-name={fieldName}>
+    <div className="rcm-field-root" data-field-name={fieldName}>
       {!field.hideLabel && label !== false && (
-        <label htmlFor={fieldName}>
-          {label}
-          {effRequired ? <span aria-hidden="true"> *</span> : null}
-        </label>
+        <div className="rcm-field-label-row">
+          <label className="rcm-field-label" htmlFor={fieldName}>
+            {label}
+          </label>
+          {effRequired ? (
+            <span className="rcm-field-icon rcm-field-icon-required" aria-hidden="true">
+              {' *'}
+            </span>
+          ) : null}
+        </div>
       )}
       {Renderer ? (
         <Renderer
@@ -200,7 +206,7 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
         </span>
       )}
       {hasErrors && (
-        <ul id={errorId} role="alert">
+        <ul className="rcm-field-error" id={errorId} role="alert">
           {errors.map((err, i) => (
             <li key={i}>{err.message}</li>
           ))}

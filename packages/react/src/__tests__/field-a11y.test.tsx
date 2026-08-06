@@ -55,6 +55,12 @@ describe('FieldRenderer a11y wiring', () => {
     // required is resolved asynchronously (field.isRequired -> Promise<boolean>)
     await waitFor(() => expect(nameInput).toHaveAttribute('aria-required', 'true'));
     expect(englishNameInput).not.toHaveAttribute('aria-required');
+    const wrapper = nameInput.closest('[data-field-name="name"]');
+    expect(wrapper).toHaveClass('rcm-field-root');
+    expect(wrapper?.querySelector('.rcm-field-label-row > label')).toHaveClass('rcm-field-label');
+    expect(wrapper?.querySelector('.rcm-field-icon-required')).toHaveTextContent('*');
+    expect(wrapper?.closest('[data-field-group]')).toHaveClass('rcm-fieldgroup');
+    expect(wrapper?.parentElement).toHaveClass('rcm-field-grid');
   });
 
   it('marks an errored field aria-invalid + aria-describedby, pointing at an existing role=alert error list', async () => {
@@ -71,6 +77,7 @@ describe('FieldRenderer a11y wiring', () => {
     const errorList = document.getElementById(describedBy as string);
     expect(errorList).not.toBeNull();
     expect(errorList).toHaveAttribute('role', 'alert');
+    expect(errorList).toHaveClass('rcm-field-error');
     expect(errorList).toHaveTextContent(/필수 값입니다/);
   });
 

@@ -36,9 +36,8 @@ import {
 // change to the list-fetch contract.
 //
 // NOTE (body-row interactivity vs. registry Table.Tr): @listgrid/ui-default's
-// TableRowProps is `{ children?: ReactNode }` only — it does not type or
-// forward onClick/role/data-row-id, and its Tr implementation literally drops
-// any prop but `children`. Routing the E2E-required click/`data-row-id`
+// TableRowProps supports `children`/`className`, but it does not type or
+// forward onClick/role/data-row-id. Routing the E2E-required click/`data-row-id`
 // affordance through `Table.Tr` would therefore be a silent no-op at runtime
 // (and an excess-property TS error at compile time) without editing
 // ui-default, which is out of scope here. Header rows (no interactivity
@@ -220,7 +219,12 @@ function nextSortDirection(current: Direction | undefined): Direction {
 
 function SortIndicator({ direction }: { direction: 'none' | 'ascending' | 'descending' }) {
   return (
-    <span data-sort-indicator data-direction={direction} aria-hidden="true">
+    <span
+      className="rcm-sort-indicator"
+      data-sort-indicator
+      data-direction={direction}
+      aria-hidden="true"
+    >
       <svg
         viewBox="0 0 24 24"
         width="16"
@@ -347,6 +351,23 @@ export function ViewListGrid({
   }
 
   const effectiveCheckedIds = selection?.enabled ? checkedIds : [];
+  const visibleSelectionIds = rows.map((row, index) => {
+    const rawId = row['id'];
+    return rawId !== undefined && rawId !== null ? String(rawId) : String(index);
+  });
+  const allVisibleRowsChecked =
+    visibleSelectionIds.length > 0 &&
+    visibleSelectionIds.every((selectionId) => checkedIds.includes(selectionId));
+  const someVisibleRowsChecked = visibleSelectionIds.some((selectionId) =>
+    checkedIds.includes(selectionId),
+  );
+  const partiallyVisibleRowsChecked = someVisibleRowsChecked && !allVisibleRowsChecked;
+
+  function toggleAllVisibleRows(): void {
+    // Preserve the 0.2.x EntireChecker contract: any existing visible
+    // selection (including a partial one) is cleared by the master checkbox.
+    setCheckedIds(someVisibleRowsChecked ? [] : visibleSelectionIds);
+  }
 
   // Advanced-search panel (spec §7 CAP-20; W5-3) — derived from `withFilter()`
   // declarations, same tri-state (truthy/false/undeclared) as the column
@@ -375,6 +396,14 @@ export function ViewListGrid({
 
   function setFilterValue(name: string, value: unknown): void {
     setFilterValues((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function resetColumnFilter(name: string): void {
+    setFilterValues((prev) => ({ ...prev, [name]: '' }));
+    const next = store.getState().searchForm.clone();
+    next.filters.AND = next.filters.AND.filter((item) => item.name !== name);
+    next.page = 0;
+    void store.getState().setSearchForm(next);
   }
 
   // Apply: collect every NON-EMPTY filter value into a FilterItem[] and fold
@@ -412,23 +441,68 @@ export function ViewListGrid({
   }
 
   return (
-    <div data-list-grid={entityForm.name} style={{ position: 'relative' }}>
+    <div
+      className="rcm-listgrid-panel rcm-listgrid-panel-main"
+      data-list-grid={entityForm.name}
+      style={{ position: 'relative' }}
+    >
       <LoadingOverlay visible={loading} />
 
       {quickSearchField !== undefined && (
-        <TextInput
-          ariaLabel={labels.quickSearchAria}
-          value={quickSearchValue}
-          placeholder={labels.quickSearchPlaceholder}
-          onChange={(value) => {
-            setQuickSearchValue(value);
-            void store.getState().quickSearch([quickSearchField], value);
-          }}
-        />
+        <div className="rcm-quick-search-wrap">
+          <TextInput
+            className="rcm-input rcm-quick-search-input"
+            ariaLabel={labels.quickSearchAria}
+            value={quickSearchValue}
+            placeholder={labels.quickSearchPlaceholder}
+            onChange={(value) => {
+              setQuickSearchValue(value);
+              void store.getState().quickSearch([quickSearchField], value);
+            }}
+          />
+          <span className="rcm-quick-search-addon rcm-quick-search-addon-search">
+            <svg
+              className="rcm-quick-search-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-4-4" />
+            </svg>
+          </span>
+          {quickSearchValue !== '' && (
+            <span className="rcm-quick-search-addon rcm-quick-search-addon-clear">
+              <button
+                type="button"
+                className="rcm-quick-search-btn"
+                aria-label="Clear quick search"
+                onClick={() => {
+                  setQuickSearchValue('');
+                  void store.getState().quickSearch([quickSearchField], '');
+                }}
+              >
+                <svg
+                  className="rcm-quick-search-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="m9 9 6 6M15 9l-6 6" />
+                </svg>
+              </button>
+            </span>
+          )}
+        </div>
       )}
 
       {filterFields.length > 0 && (
-        <div data-advanced-search={entityForm.name}>
+        <div className="rcm-adv-search-outer" data-advanced-search={entityForm.name}>
           <Button type="button" onClick={() => setAdvancedSearchOpen((open) => !open)}>
             {labels.advancedSearchToggle}
           </Button>
@@ -440,39 +514,77 @@ export function ViewListGrid({
             </div>
           )}
           {advancedSearchOpen && (
-            <div data-advanced-search-panel>
-              {filterFields.map(({ field, config }) => {
-                const label = config.label ?? field.getLabel();
-                const headerText = typeof label === 'string' ? label : field.getName();
-                const filterId = `filter-${field.getName()}`;
-                const value = filterValues[field.getName()];
-                const FilterInput = getFilterRenderer(field.type);
-                return (
-                  <div
-                    key={field.getName()}
-                    data-filter-field={field.getName()}
-                    data-advanced-search-field
-                  >
-                    <label htmlFor={filterId}>{headerText}</label>
-                    {FilterInput ? (
-                      <FilterInput
-                        field={field}
-                        value={value}
-                        onChange={(v) => setFilterValue(field.getName(), v)}
-                      />
-                    ) : (
-                      <TextInput
-                        id={filterId}
-                        value={typeof value === 'string' ? value : ''}
-                        onChange={(v) => setFilterValue(field.getName(), v)}
-                      />
-                    )}
+            <div className="rcm-adv-search-inner">
+              <div className="rcm-adv-search-inner-panel" data-advanced-search-panel>
+                <div className="rcm-adv-search-header">
+                  <div className="rcm-adv-search-header-left">
+                    <span className="rcm-adv-search-header-icon">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        aria-hidden="true"
+                      >
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m20 20-4-4" />
+                      </svg>
+                    </span>
+                    <span className="rcm-text" data-weight="semibold">
+                      {labels.advancedSearchToggle}
+                    </span>
+                    <span className="rcm-adv-search-count">
+                      <span className="rcm-badge" data-color="primary" data-size="sm">
+                        {filterFields.length}
+                      </span>
+                    </span>
                   </div>
-                );
-              })}
-              <button type="button" data-advanced-search-apply onClick={() => applyFilterValues()}>
-                {labels.advancedSearchApply}
-              </button>
+                </div>
+                <div className="rcm-adv-search-grid">
+                  {filterFields.map(({ field, config }) => {
+                    const label = config.label ?? field.getLabel();
+                    const headerText = typeof label === 'string' ? label : field.getName();
+                    const filterId = `filter-${field.getName()}`;
+                    const value = filterValues[field.getName()];
+                    const FilterInput = getFilterRenderer(field.type);
+                    return (
+                      <div
+                        key={field.getName()}
+                        data-filter-field={field.getName()}
+                        data-advanced-search-field
+                      >
+                        <label htmlFor={filterId}>{headerText}</label>
+                        {FilterInput ? (
+                          <FilterInput
+                            field={field}
+                            value={value}
+                            onChange={(v) => setFilterValue(field.getName(), v)}
+                          />
+                        ) : (
+                          <TextInput
+                            className="rcm-input"
+                            id={filterId}
+                            value={typeof value === 'string' ? value : ''}
+                            onChange={(v) => setFilterValue(field.getName(), v)}
+                          />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="rcm-adv-search-footer">
+                  <button
+                    type="button"
+                    className="rcm-button rcm-adv-search-btn rcm-adv-search-btn-submit"
+                    data-variant="primary"
+                    data-size="sm"
+                    data-advanced-search-apply
+                    onClick={() => applyFilterValues()}
+                  >
+                    {labels.advancedSearchApply}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -516,212 +628,300 @@ export function ViewListGrid({
         </Modal>
       )}
 
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            {selection?.enabled && <Table.Th />}
-            {showRowNumbers && <Table.Th>{labels.rowNumberHeader}</Table.Th>}
-            {visibleColumns.map((c) => {
-              const style = cellStyle(c);
-              const filterField = c.field ? filterFieldByName.get(c.name) : undefined;
-              const columnFilterOpen = openColumnFilter === c.name;
-              const columnFilterActive = searchForm.filters.AND.some(
-                (item) =>
-                  item.name === c.name &&
-                  item.value !== undefined &&
-                  item.value !== null &&
-                  item.value !== '',
-              );
-              const headerStyle = filterField ? { ...style, position: 'relative' as const } : style;
-              const headerContent = (
-                <>
-                  {c.header}
-                  {filterField && (
-                    <>
-                      <button
-                        type="button"
-                        data-column-filter-trigger
-                        {...(columnFilterActive ? { 'data-active': '' } : {})}
-                        aria-label={labels.columnFilterAria(c.header)}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          setOpenColumnFilter((open) => (open === c.name ? undefined : c.name));
-                        }}
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          width="16"
-                          height="16"
-                          aria-hidden="true"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M4 5h16l-6 7v5l-4 2v-7L4 5z" />
-                        </svg>
-                      </button>
-                      {columnFilterOpen && (
-                        <div
-                          data-column-filter={c.name}
-                          onClick={(event) => event.stopPropagation()}
-                          style={{ position: 'absolute' }}
-                        >
-                          {(() => {
-                            const { field } = filterField;
-                            const filterId = `column-filter-${field.getName()}`;
-                            const value = filterValues[field.getName()];
-                            const FilterInput = getFilterRenderer(field.type);
-                            return (
-                              <>
-                                <label htmlFor={filterId} data-column-filter-label>
-                                  {c.header}
-                                </label>
-                                {FilterInput ? (
-                                  <FilterInput
-                                    field={field}
-                                    value={value}
-                                    onChange={(next) => setFilterValue(field.getName(), next)}
-                                  />
-                                ) : (
-                                  <TextInput
-                                    id={filterId}
-                                    value={typeof value === 'string' ? value : ''}
-                                    onChange={(next) => setFilterValue(field.getName(), next)}
-                                  />
-                                )}
-                                <button
-                                  type="button"
-                                  data-column-filter-apply
-                                  onClick={() => {
-                                    applyFilterValues();
-                                    setOpenColumnFilter(undefined);
-                                  }}
-                                >
-                                  {labels.advancedSearchApply}
-                                </button>
-                              </>
-                            );
-                          })()}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </>
-              );
-              // sortable headers need an onClick, and a styled (align/width)
-              // header needs a `style` — `Table.Th` (ui-default) only
-              // forwards `children`/`colSpan` (the identical prop-dropping
-              // trap the file-header comment documents for `Table.Tr`), so
-              // either case renders a raw `<th>` (byte-identical markup to
-              // what `Table.Th` itself emits) to actually reach the DOM.
-              if (c.sortable) {
-                const currentDirection = searchForm.sorts.find(
-                  (s) => s.field === c.name,
-                )?.direction;
-                return (
-                  <th
-                    key={c.name}
-                    role="columnheader"
-                    aria-sort={ariaSortFor(currentDirection)}
-                    ref={columnFilterOpen ? openColumnFilterHeaderRef : undefined}
-                    onClick={() =>
-                      void store.getState().setSort(c.name, nextSortDirection(currentDirection))
-                    }
-                    style={headerStyle}
-                  >
-                    {headerContent}
-                    <SortIndicator direction={ariaSortFor(currentDirection)} />
-                  </th>
-                );
-              }
-              if (filterField) {
-                return (
-                  <th
-                    key={c.name}
-                    role="columnheader"
-                    ref={columnFilterOpen ? openColumnFilterHeaderRef : undefined}
-                    style={headerStyle}
-                  >
-                    {headerContent}
-                  </th>
-                );
-              }
-              if (style !== undefined) {
-                return (
-                  <th key={c.name} style={style}>
-                    {c.header}
-                  </th>
-                );
-              }
-              return <Table.Th key={c.name}>{c.header}</Table.Th>;
-            })}
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {!loading && rows.length === 0 && (
-            <tr data-empty-row>
-              <td
-                colSpan={Math.max(
-                  1,
-                  visibleColumns.length + (selection?.enabled ? 1 : 0) + (showRowNumbers ? 1 : 0),
-                )}
-              >
-                <div data-empty-state>{labels.emptyState}</div>
-              </td>
-            </tr>
-          )}
-          {rows.map((row, i) => {
-            const rawId = row['id'];
-            const rowId = rawId !== undefined && rawId !== null ? String(rawId) : undefined;
-            const selectionId = rowId ?? String(i);
-            return (
-              <tr
-                key={rowId ?? i}
-                role="button"
-                tabIndex={0}
-                {...(rowId !== undefined ? { 'data-row-id': rowId } : {})}
-                onClick={() => onRowClick?.(row)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') onRowClick?.(row);
-                }}
-              >
-                {selection?.enabled && (
-                  <Table.Td>
-                    {/* The wrapping <span> intercepts the click during bubble
-                        (stopPropagation) before it reaches the <tr>'s
-                        onClick — CheckBoxProps.onChange carries no DOM
-                        event, so this is the only place to stop it. */}
-                    <span onClick={(e) => e.stopPropagation()}>
-                      <CheckBox
-                        ariaLabel={`Select row ${selectionId}`}
-                        checked={checkedIds.includes(selectionId)}
-                        onChange={(checked) => toggleChecked(selectionId, checked)}
-                      />
-                    </span>
-                  </Table.Td>
-                )}
-                {showRowNumbers && (
-                  <td data-row-number>
-                    {totalElements > 0
-                      ? totalElements - Math.max(searchForm.page, 0) * searchForm.pageSize - i
-                      : ''}
-                  </td>
-                )}
-                {visibleColumns.map((c) => {
-                  const style = cellStyle(c);
-                  return style !== undefined ? (
-                    <td key={c.name} style={style}>
-                      {c.cell(row)}
-                    </td>
+      <div className="rcm-skeleton-table-wrapper">
+        <Table className="rcm-table">
+          <Table.Thead className="rcm-listgrid-thead">
+            <Table.Tr>
+              {(selection?.enabled || showRowNumbers) && (
+                <Table.Th className="rcm-skeleton-td-checkbox">
+                  {selection?.enabled ? (
+                    <CheckBox
+                      className="rcm-checkbox"
+                      ariaLabel={labels.selectAllAria}
+                      checked={allVisibleRowsChecked}
+                      indeterminate={partiallyVisibleRowsChecked}
+                      disabled={rows.length === 0}
+                      onChange={toggleAllVisibleRows}
+                    />
                   ) : (
-                    <Table.Td key={c.name}>{c.cell(row)}</Table.Td>
+                    labels.rowNumberHeader
+                  )}
+                </Table.Th>
+              )}
+              {visibleColumns.map((c) => {
+                const style = cellStyle(c);
+                const filterField = c.field ? filterFieldByName.get(c.name) : undefined;
+                const columnFilterOpen = openColumnFilter === c.name;
+                const columnFilterActive = searchForm.filters.AND.some(
+                  (item) =>
+                    item.name === c.name &&
+                    item.value !== undefined &&
+                    item.value !== null &&
+                    item.value !== '',
+                );
+                const headerStyle = filterField
+                  ? { ...style, position: 'relative' as const }
+                  : style;
+                const headerContent = (
+                  <>
+                    {c.header}
+                    {filterField && (
+                      <>
+                        <button
+                          type="button"
+                          className="rcm-filter-button"
+                          data-column-filter-trigger
+                          {...(columnFilterActive ? { 'data-active': '' } : {})}
+                          aria-label={labels.columnFilterAria(c.header)}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setOpenColumnFilter((open) => (open === c.name ? undefined : c.name));
+                          }}
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="16"
+                            height="16"
+                            aria-hidden="true"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                          >
+                            <path d="M4 5h16l-6 7v5l-4 2v-7L4 5z" />
+                          </svg>
+                        </button>
+                        {columnFilterOpen && (
+                          <div
+                            className="rcm-filter-dropdown rcm-filter-dropdown-md"
+                            data-column-filter={c.name}
+                            onClick={(event) => event.stopPropagation()}
+                            style={{ position: 'absolute' }}
+                          >
+                            {(() => {
+                              const { field } = filterField;
+                              const filterId = `column-filter-${field.getName()}`;
+                              const value = filterValues[field.getName()];
+                              const FilterInput = getFilterRenderer(field.type);
+                              return (
+                                <div className="rcm-filter-dropdown-inner">
+                                  <div className="rcm-filter-dropdown-header">
+                                    <label
+                                      className="rcm-text"
+                                      data-size="sm"
+                                      data-weight="semibold"
+                                      htmlFor={filterId}
+                                      data-column-filter-label
+                                    >
+                                      {c.header}
+                                    </label>
+                                    <button
+                                      type="button"
+                                      className="rcm-icon-btn"
+                                      aria-label={`${c.header} 필터 닫기`}
+                                      onClick={() => setOpenColumnFilter(undefined)}
+                                    >
+                                      <svg
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        aria-hidden="true"
+                                      >
+                                        <path d="m6 6 12 12M18 6 6 18" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                  <div className="rcm-filter-dropdown-body">
+                                    {FilterInput ? (
+                                      <FilterInput
+                                        field={field}
+                                        value={value}
+                                        onChange={(next) => setFilterValue(field.getName(), next)}
+                                      />
+                                    ) : (
+                                      <TextInput
+                                        className="rcm-input"
+                                        id={filterId}
+                                        value={typeof value === 'string' ? value : ''}
+                                        onChange={(next) => setFilterValue(field.getName(), next)}
+                                      />
+                                    )}
+                                  </div>
+                                  <div className="rcm-filter-dropdown-footer">
+                                    <button
+                                      type="button"
+                                      className="rcm-button"
+                                      data-variant="outline"
+                                      data-color="error"
+                                      data-size="sm"
+                                      onClick={() => resetColumnFilter(field.getName())}
+                                    >
+                                      {labels.filterReset}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="rcm-button"
+                                      data-variant="primary"
+                                      data-size="sm"
+                                      data-column-filter-apply
+                                      onClick={() => {
+                                        applyFilterValues();
+                                        setOpenColumnFilter(undefined);
+                                      }}
+                                    >
+                                      {labels.advancedSearchApply}
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </>
+                );
+                // sortable headers need an onClick, and a styled (align/width)
+                // header needs a `style` — `Table.Th` (ui-default) only
+                // forwards `children`/`colSpan`/`className` (the prop-dropping
+                // trap the file-header comment documents for `Table.Tr`), so
+                // either case renders a raw `<th>` (byte-identical markup to
+                // what `Table.Th` itself emits) to actually reach the DOM.
+                if (c.sortable) {
+                  const currentDirection = searchForm.sorts.find(
+                    (s) => s.field === c.name,
+                  )?.direction;
+                  return (
+                    <th
+                      key={c.name}
+                      className="rcm-sortable"
+                      role="columnheader"
+                      aria-sort={ariaSortFor(currentDirection)}
+                      ref={columnFilterOpen ? openColumnFilterHeaderRef : undefined}
+                      onClick={() =>
+                        void store.getState().setSort(c.name, nextSortDirection(currentDirection))
+                      }
+                      style={headerStyle}
+                    >
+                      {headerContent}
+                      <SortIndicator direction={ariaSortFor(currentDirection)} />
+                    </th>
                   );
-                })}
+                }
+                if (filterField) {
+                  return (
+                    <th
+                      key={c.name}
+                      role="columnheader"
+                      ref={columnFilterOpen ? openColumnFilterHeaderRef : undefined}
+                      style={headerStyle}
+                    >
+                      {headerContent}
+                    </th>
+                  );
+                }
+                if (style !== undefined) {
+                  return (
+                    <th key={c.name} style={style}>
+                      {c.header}
+                    </th>
+                  );
+                }
+                return <Table.Th key={c.name}>{c.header}</Table.Th>;
+              })}
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody className="rcm-listgrid-tbody">
+            {!loading && rows.length === 0 && (
+              <tr data-empty-row>
+                <td
+                  colSpan={Math.max(
+                    1,
+                    visibleColumns.length + (selection?.enabled || showRowNumbers ? 1 : 0),
+                  )}
+                >
+                  <div className="rcm-listgrid-empty" data-empty-state>
+                    {labels.emptyState}
+                  </div>
+                </td>
               </tr>
-            );
-          })}
-        </Table.Tbody>
-      </Table>
+            )}
+            {rows.map((row, i) => {
+              const rawId = row['id'];
+              const rowId = rawId !== undefined && rawId !== null ? String(rawId) : undefined;
+              const selectionId = rowId ?? String(i);
+              return (
+                <tr
+                  className={[
+                    'rcm-listgrid-row-hover',
+                    checkedIds.includes(selectionId) ? 'rcm-listgrid-row-selected' : undefined,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  key={rowId ?? i}
+                  role="button"
+                  tabIndex={0}
+                  {...(rowId !== undefined ? { 'data-row-id': rowId } : {})}
+                  onClick={() => onRowClick?.(row)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') onRowClick?.(row);
+                  }}
+                >
+                  {selection?.enabled && showRowNumbers ? (
+                    <td className="rcm-skeleton-td-checkbox" data-row-number>
+                      <label
+                        onClick={(event) => event.stopPropagation()}
+                        onKeyDown={(event) => event.stopPropagation()}
+                      >
+                        <CheckBox
+                          className="rcm-checkbox"
+                          ariaLabel={`Select row ${selectionId}`}
+                          checked={checkedIds.includes(selectionId)}
+                          onChange={(checked) => toggleChecked(selectionId, checked)}
+                        />
+                        <span className="rcm-listgrid-rownum">
+                          {totalElements > 0
+                            ? totalElements - Math.max(searchForm.page, 0) * searchForm.pageSize - i
+                            : ''}
+                        </span>
+                      </label>
+                    </td>
+                  ) : selection?.enabled ? (
+                    <Table.Td className="rcm-skeleton-td-checkbox">
+                      <span onClick={(event) => event.stopPropagation()}>
+                        <CheckBox
+                          className="rcm-checkbox"
+                          ariaLabel={`Select row ${selectionId}`}
+                          checked={checkedIds.includes(selectionId)}
+                          onChange={(checked) => toggleChecked(selectionId, checked)}
+                        />
+                      </span>
+                    </Table.Td>
+                  ) : showRowNumbers ? (
+                    <td data-row-number>
+                      <span className="rcm-listgrid-rownum">
+                        {totalElements > 0
+                          ? totalElements - Math.max(searchForm.page, 0) * searchForm.pageSize - i
+                          : ''}
+                      </span>
+                    </td>
+                  ) : null}
+                  {visibleColumns.map((c) => {
+                    const style = cellStyle(c);
+                    return style !== undefined ? (
+                      <td key={c.name} style={style}>
+                        {c.cell(row)}
+                      </td>
+                    ) : (
+                      <Table.Td key={c.name}>{c.cell(row)}</Table.Td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </Table.Tbody>
+        </Table>
+      </div>
 
       {selection?.enabled && (
         <div data-selection-actions>
@@ -735,9 +935,13 @@ export function ViewListGrid({
         </div>
       )}
 
-      {toolbar && <div data-list-grid-toolbar>{toolbar({ checkedIds: effectiveCheckedIds })}</div>}
+      {toolbar && (
+        <div className="rcm-search-bar-actions" data-list-grid-toolbar>
+          {toolbar({ checkedIds: effectiveCheckedIds })}
+        </div>
+      )}
 
-      <div data-total-elements={totalElements}>
+      <div className="rcm-listgrid-pagination" data-total-elements={totalElements}>
         <Pagination
           page={searchForm.page}
           totalPages={totalPages}
