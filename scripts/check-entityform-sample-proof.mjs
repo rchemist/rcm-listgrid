@@ -218,7 +218,7 @@ function assertExact(actual, manifest, label) {
 const actual = entityFormMembers();
 const manifest = manifestMembers();
 assertExact(actual, manifest, 'EntityForm ↔ proof manifest mismatch');
-if (actual.length !== 53) throw new Error(`expected 53 EntityForm members, found ${actual.length}`);
+if (actual.length !== 54) throw new Error(`expected 54 EntityForm members, found ${actual.length}`);
 const manifestSource = readFileSync(
   join(root, 'apps/sample/lib/entities/entityform-proof-manifest.ts'),
   'utf8',

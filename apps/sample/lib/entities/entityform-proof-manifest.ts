@@ -626,6 +626,18 @@ export const entityFormProofManifest = {
       ],
     },
     {
+      member: 'withList',
+      kind: 'setting',
+      branches: [
+        proof(
+          'EFS-14g',
+          'query-wizard',
+          queryTest,
+          'named fields remain explicitly opted into list rendering',
+        ),
+      ],
+    },
+    {
       member: 'withoutField',
       kind: 'setting',
       branches: [

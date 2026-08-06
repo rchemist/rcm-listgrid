@@ -2,6 +2,7 @@ import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react
 import type { ReactElement, ReactNode } from 'react';
 import type { StoreApi } from 'zustand';
 import { useStore } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import type {
   ActionContext,
   EntityField,
@@ -382,7 +383,14 @@ function ViewEntityFormInner({
   const tabIndex = useStore(store, (s) => s.tabIndex);
   const messages = useStore(store, (s) => s.messages);
   const globalErrors = useStore(store, (s) => s.globalErrors);
+  const fieldErrors = useStore(
+    store,
+    useShallow((s) =>
+      Object.fromEntries(Object.entries(s.fields).map(([name, field]) => [name, field.errors])),
+    ),
+  );
   const saving = useStore(store, (s) => s.saving);
+  const [errorSummaryExpanded, setErrorSummaryExpanded] = useState(false);
   // action-in-flight marker covers non-save custom/delete actions. Save also
   // drives the shared store.saving flag from FormController so every field
   // renderer is locked for the full validation + request lifecycle.
@@ -483,6 +491,60 @@ function ViewEntityFormInner({
   }
 
   const fields = liveFields(store.getState().fieldDefs);
+  const errorSummaryItems = Object.values(store.getState().fieldDefs)
+    .sort((a, b) => a.getOrder() - b.getOrder())
+    .flatMap((field) => {
+      const fieldName = field.getName();
+      const definitionLabel = field.getLabel();
+      const fieldLabel = typeof definitionLabel === 'string' ? definitionLabel : fieldName;
+      return (fieldErrors[fieldName] ?? []).map((error, index) => ({
+        key: `${fieldName}:${index}:${error.message}`,
+        fieldName,
+        fieldLabel,
+        message: error.message,
+      }));
+    });
+
+  function scrollAndFocusErrorField(fieldName: string): boolean {
+    if (typeof document === 'undefined') return false;
+    const escapedFieldName = fieldName.replace(/["\\]/g, '\\$&');
+    const fieldElement = document.querySelector<HTMLElement>(
+      `[data-field-name="${escapedFieldName}"]`,
+    );
+    if (!fieldElement) return false;
+    fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    fieldElement
+      .querySelector<HTMLElement>(
+        'input, select, textarea, button, a[href], [tabindex]:not([tabindex="-1"]), [contenteditable="true"]',
+      )
+      ?.focus();
+    return true;
+  }
+
+  function retryScrollAndFocusErrorField(fieldName: string, remainingFrames: number): void {
+    if (scrollAndFocusErrorField(fieldName) || remainingFrames <= 0) return;
+    requestAnimationFrame(() => retryScrollAndFocusErrorField(fieldName, remainingFrames - 1));
+  }
+
+  function moveToErrorField(fieldName: string): void {
+    if (scrollAndFocusErrorField(fieldName)) return;
+
+    if (wizardActive) {
+      const targetStepIndex = visibleSteps.findIndex((step) => step.fields.includes(fieldName));
+      if (targetStepIndex === -1 || targetStepIndex === clampedStepIndex) return;
+      setStepIndex(targetStepIndex);
+      requestAnimationFrame(() => retryScrollAndFocusErrorField(fieldName, 3));
+      return;
+    }
+
+    const targetField = fields.find((field) => field.getName() === fieldName);
+    if (!targetField) return;
+    const targetTabId = targetField.getTabId() || DEFAULT_TAB_ID;
+    const targetTab = tabs.find((tab) => tab.id === targetTabId);
+    if (!targetTab || targetTab.id === activeTabId) return;
+    store.getState().setTabIndex(targetTab.id);
+    requestAnimationFrame(() => retryScrollAndFocusErrorField(fieldName, 3));
+  }
   // the current step's fields ONLY (spec §3.2 — "각 step은 step.fields에
   // 나열된 필드만 표시"), in the same declaration/order-sorted sequence
   // `fields` already carries (deriveGroupFields precedent below — step.fields
@@ -882,6 +944,42 @@ function ViewEntityFormInner({
       {slots?.title !== undefined ? resolveSlot(slots.title, actionCtx) : title && <h2>{title}</h2>}
 
       {slots?.header !== undefined && resolveSlot(slots.header, actionCtx)}
+
+      {errorSummaryItems.length > 0 && (
+        <div data-error-summary data-expanded={errorSummaryExpanded ? '' : undefined}>
+          <button
+            type="button"
+            data-error-summary-toggle
+            aria-expanded={errorSummaryExpanded}
+            onClick={() => setErrorSummaryExpanded((expanded) => !expanded)}
+          >
+            <span data-error-summary-title>
+              {errorSummaryExpanded
+                ? labels.errorSummaryExpandedTitle
+                : labels.errorSummaryCollapsedTitle}
+            </span>
+            <span data-error-summary-count>
+              {labels.errorSummaryCount(errorSummaryItems.length)}
+            </span>
+          </button>
+          {errorSummaryExpanded && (
+            <ul data-error-summary-list>
+              {errorSummaryItems.map((item) => (
+                <li key={item.key}>
+                  <button
+                    type="button"
+                    data-error-summary-item
+                    data-field={item.fieldName}
+                    onClick={() => moveToErrorField(item.fieldName)}
+                  >
+                    {item.fieldLabel}: {item.message}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {tabs.length > 1 && (
         <div role="tablist">

@@ -14,6 +14,11 @@ export interface Labels {
   columnSettings: string;
   columnSettingsApply: string;
   columnFilterAria: (name: string) => string;
+  emptyState: string;
+  errorSummaryCollapsedTitle: string;
+  errorSummaryExpandedTitle: string;
+  errorSummaryCount: (n: number) => string;
+  rowNumberHeader: string;
   paginationPrev: string;
   paginationNext: string;
 }
@@ -30,6 +35,11 @@ const defaults: Labels = {
   columnSettings: '목록 설정',
   columnSettingsApply: '적용',
   columnFilterAria: (name) => `${name} 필터`,
+  emptyState: '데이터가 없습니다.',
+  errorSummaryCollapsedTitle: '작성하신 정보에 누락 또는 오류가 있습니다.',
+  errorSummaryExpandedTitle: '누락(오류) 정보 목록을 확인해 주세요.',
+  errorSummaryCount: (n) => `${n}개 오류`,
+  rowNumberHeader: 'No.',
   paginationPrev: 'Prev',
   paginationNext: 'Next',
 };

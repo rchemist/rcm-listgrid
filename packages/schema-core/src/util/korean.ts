@@ -9,7 +9,15 @@ export function koreanObjectParticle(word: string): string {
   return (last - 0xac00) % 28 !== 0 ? '을' : '를';
 }
 
-/** The required-blank message, matching 0.3.x FormField.validate:803. */
+/** Korean topic-particle (은/는) selector. */
+export function koreanTopicParticle(word: string): string {
+  if (!word) return '는';
+  const last = word.charCodeAt(word.length - 1);
+  if (last < 0xac00 || last > 0xd7a3) return '는';
+  return (last - 0xac00) % 28 !== 0 ? '은' : '는';
+}
+
+/** The required-blank message. */
 export function requiredMessage(label: string): string {
-  return `${label}${koreanObjectParticle(label)}  필수 값입니다.`;
+  return `${label}${koreanTopicParticle(label)} 필수 값입니다.`;
 }

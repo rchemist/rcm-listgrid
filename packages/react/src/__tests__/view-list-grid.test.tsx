@@ -4,9 +4,9 @@
 // unstyled primitives — no host app.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import type { BackendAdapter, FieldType, PageResult, SearchForm } from '@listgrid/schema-core';
-import { EntityForm, StringField } from '@listgrid/schema-core';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { BackendAdapter, FieldType, PageResult } from '@listgrid/schema-core';
+import { EntityForm, SearchForm, StringField } from '@listgrid/schema-core';
 import { createListStore } from '@listgrid/state';
 import { defaultUIComponents, type CheckBoxProps, type UIComponents } from '@listgrid/ui-default';
 import { UIProvider } from '../providers/ui';
@@ -20,6 +20,8 @@ afterEach(() => {
     quickSearchPlaceholder: '검색',
     paginationPrev: 'Prev',
     paginationNext: 'Next',
+    emptyState: '데이터가 없습니다.',
+    rowNumberHeader: 'No.',
   });
 });
 
@@ -190,6 +192,135 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(await screen.findByText('Engineering')).toBeInTheDocument();
     expect(screen.getByText('Medicine')).toBeInTheDocument();
     expect(screen.getByText('Law')).toBeInTheDocument();
+  });
+
+  it('renders a configured empty-state row with a colSpan for data, selection, and row-number columns', async () => {
+    configureLabels({ emptyState: '표시할 항목이 없습니다.' });
+    const entityForm = collegeForm();
+    const adapter = rowsAdapter([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          selection={{ enabled: true, onConfirm: vi.fn() }}
+          showRowNumbers
+        />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(store.getState().loading).toBe(false));
+    const emptyState = screen.getByText('표시할 항목이 없습니다.');
+    expect(emptyState).toHaveAttribute('data-empty-state');
+    expect(emptyState.closest('tr')).toHaveAttribute('data-empty-row');
+    expect(emptyState.closest('td')).toHaveAttribute('colspan', '3');
+    expect(emptyState.closest('tbody')?.querySelector(':scope > tr > td')).toBe(
+      emptyState.closest('td'),
+    );
+  });
+
+  it('clamps the empty-state colSpan to 1 when no columns are visible', async () => {
+    const entityForm = new EntityForm('BareEntityForm', '/bare').addFields({
+      items: [new StringField('name', 100).withLabel('Name')],
+    });
+    const adapter = rowsAdapter([]);
+    const store = createListStore({ url: entityForm.url, adapter });
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    try {
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <ViewListGrid entityForm={entityForm} store={store} />
+        </UIProvider>,
+      );
+
+      await waitFor(() => expect(store.getState().loading).toBe(false));
+      const emptyState = screen.getByText('데이터가 없습니다.');
+      expect(screen.queryAllByRole('columnheader')).toHaveLength(0);
+      expect(emptyState.closest('td')).toHaveAttribute('colspan', '1');
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+
+  it('renders descending row numbers when enabled', async () => {
+    const entityForm = collegeForm();
+    const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} showRowNumbers />
+      </UIProvider>,
+    );
+
+    await screen.findByText('Engineering');
+    expect(screen.getByRole('columnheader', { name: 'No.' })).toBeInTheDocument();
+    expect(
+      [...document.querySelectorAll('[data-row-number]')].map((cell) => cell.textContent),
+    ).toEqual(['3', '2', '1']);
+  });
+
+  it('renders descending row numbers for a zero-based later page', async () => {
+    const entityForm = collegeForm();
+    const pageRows = COLLEGES.concat([
+      { id: '4', name: 'Nursing', englishName: 'College of Nursing' },
+      { id: '5', name: 'Pharmacy', englishName: 'College of Pharmacy' },
+    ]);
+    const adapter = rowsAdapter(pageRows);
+    adapter.list = vi.fn(async () => ({
+      content: pageRows,
+      totalElements: 25,
+      totalPages: 3,
+    }));
+    const store = createListStore({
+      url: entityForm.url,
+      adapter,
+      initialSearch: SearchForm.create({ page: 2, pageSize: 10 }),
+    });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} showRowNumbers />
+      </UIProvider>,
+    );
+
+    await screen.findByText('Engineering');
+    expect(
+      [...document.querySelectorAll('[data-row-number]')].map((cell) => cell.textContent),
+    ).toEqual(['5', '4', '3', '2', '1']);
+  });
+
+  it('does not render the empty-state row while the initial fetch is loading', async () => {
+    const entityForm = collegeForm();
+    let resolveList: ((page: PageResult<Record<string, unknown>>) => void) | undefined;
+    const adapter = rowsAdapter([]);
+    adapter.list = vi.fn(
+      () =>
+        new Promise<PageResult<Record<string, unknown>>>((resolve) => {
+          resolveList = resolve;
+        }),
+    );
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    expect(store.getState().loading).toBe(true);
+    expect(screen.queryByText('데이터가 없습니다.')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-empty-row]')).toBeNull();
+
+    await act(async () => {
+      resolveList?.({ content: [], totalElements: 0, totalPages: 0 });
+    });
+
+    await waitFor(() => expect(store.getState().loading).toBe(false));
+    expect(screen.getByText('데이터가 없습니다.')).toBeInTheDocument();
   });
 
   it('calls onRowClick with the clicked row', async () => {
@@ -436,6 +567,8 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
     await screen.findByText('L1');
     const header = screen.getByRole('columnheader', { name: 'Late Header' });
     expect(header).toHaveAttribute('aria-sort', 'none');
+    expect(header.querySelector('[data-sort-indicator]')).toHaveAttribute('data-direction', 'none');
+    expect(header.querySelector('[data-sort-indicator] svg')).toBeInTheDocument();
     // 'early' has no sortable override — plain header, no click affordance.
     expect(screen.getByRole('columnheader', { name: 'Early Field' })).not.toHaveAttribute(
       'aria-sort',
@@ -448,10 +581,20 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
       'aria-sort',
       'ascending',
     );
+    expect(
+      screen
+        .getByRole('columnheader', { name: 'Late Header' })
+        .querySelector('[data-sort-indicator]'),
+    ).toHaveAttribute('data-direction', 'ascending');
 
     fireEvent.click(screen.getByRole('columnheader', { name: 'Late Header' }));
     await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
     expect(store.getState().searchForm.sorts).toEqual([{ field: 'late', direction: 'DESC' }]);
+    expect(
+      screen
+        .getByRole('columnheader', { name: 'Late Header' })
+        .querySelector('[data-sort-indicator]'),
+    ).toHaveAttribute('data-direction', 'descending');
   });
 
   it('a registered getListCellRenderer(field.type) component takes priority over the raw-value fallback', async () => {
@@ -527,8 +670,18 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     );
 
     await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
-    expect(screen.getByRole('button', { name: 'Name 필터' })).toBeInTheDocument();
+    const filterTrigger = screen.getByRole('button', { name: 'Name 필터' });
+    expect(filterTrigger).toHaveAttribute('data-column-filter-trigger');
+    expect(filterTrigger.querySelector('svg')).toBeInTheDocument();
+    expect(filterTrigger).not.toHaveAttribute('data-active');
     expect(screen.queryByRole('button', { name: 'Code 필터' })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Quick search'), { target: { value: 'Alpha' } });
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
+    expect(listCalls[1]?.toJSON().filters.OR).toEqual([
+      { name: 'name', value: 'Alpha', queryConditionType: 'LIKE' },
+    ]);
+    expect(screen.getByRole('button', { name: 'Name 필터' })).not.toHaveAttribute('data-active');
 
     fireEvent.click(screen.getByRole('button', { name: 'Name 필터' }));
     expect(store.getState().searchForm.sorts).toEqual([]);
@@ -537,11 +690,12 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Al' } });
     fireEvent.click(screen.getByRole('button', { name: '검색' }));
 
-    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
-    expect(listCalls[1]?.toJSON().filters.AND).toEqual([
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
+    expect(listCalls[2]?.toJSON().filters.AND).toEqual([
       { name: 'name', value: 'Al', queryConditionType: 'LIKE' },
     ]);
     expect(store.getState().searchForm.sorts).toEqual([]);
+    expect(screen.getByRole('button', { name: 'Name 필터' })).toHaveAttribute('data-active', '');
     expect(document.querySelector('[data-column-filter="name"]')).toBeNull();
   });
 

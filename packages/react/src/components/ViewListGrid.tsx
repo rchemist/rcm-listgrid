@@ -101,6 +101,8 @@ export interface ViewListGridProps {
    * not want the separate confirm button's behavior).
    */
   toolbar?: (ctx: { checkedIds: string[] }) => ReactNode;
+  /** Show a leading descending row number after the optional selection column. */
+  showRowNumbers?: boolean;
 }
 
 function resolveHeader(entityForm: EntityForm, name: string): string {
@@ -216,6 +218,32 @@ function nextSortDirection(current: Direction | undefined): Direction {
   return current === 'ASC' ? 'DESC' : 'ASC';
 }
 
+function SortIndicator({ direction }: { direction: 'none' | 'ascending' | 'descending' }) {
+  return (
+    <span data-sort-indicator data-direction={direction} aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      >
+        {direction === 'none' ? (
+          <>
+            <path d="m8 10 4-4 4 4" />
+            <path d="m8 14 4 4 4-4" />
+          </>
+        ) : direction === 'ascending' ? (
+          <path d="m7 15 5-5 5 5" />
+        ) : (
+          <path d="m7 9 5 5 5-5" />
+        )}
+      </svg>
+    </span>
+  );
+}
+
 function normalizeHiddenColumnNames(
   names: Iterable<string>,
   resolvedColumns: readonly ResolvedColumn[],
@@ -238,6 +266,7 @@ export function ViewListGrid({
   onHiddenColumnsChange,
   selection,
   toolbar,
+  showRowNumbers = false,
 }: ViewListGridProps) {
   const { Table, Pagination, LoadingOverlay, TextInput, CheckBox, Button, Modal } = useUI();
   const labels = getLabels();
@@ -419,7 +448,11 @@ export function ViewListGrid({
                 const value = filterValues[field.getName()];
                 const FilterInput = getFilterRenderer(field.type);
                 return (
-                  <div key={field.getName()} data-filter-field={field.getName()}>
+                  <div
+                    key={field.getName()}
+                    data-filter-field={field.getName()}
+                    data-advanced-search-field
+                  >
                     <label htmlFor={filterId}>{headerText}</label>
                     {FilterInput ? (
                       <FilterInput
@@ -437,9 +470,9 @@ export function ViewListGrid({
                   </div>
                 );
               })}
-              <Button type="button" onClick={() => applyFilterValues()}>
+              <button type="button" data-advanced-search-apply onClick={() => applyFilterValues()}>
                 {labels.advancedSearchApply}
-              </Button>
+              </button>
             </div>
           )}
         </div>
@@ -487,10 +520,18 @@ export function ViewListGrid({
         <Table.Thead>
           <Table.Tr>
             {selection?.enabled && <Table.Th />}
+            {showRowNumbers && <Table.Th>{labels.rowNumberHeader}</Table.Th>}
             {visibleColumns.map((c) => {
               const style = cellStyle(c);
               const filterField = c.field ? filterFieldByName.get(c.name) : undefined;
               const columnFilterOpen = openColumnFilter === c.name;
+              const columnFilterActive = searchForm.filters.AND.some(
+                (item) =>
+                  item.name === c.name &&
+                  item.value !== undefined &&
+                  item.value !== null &&
+                  item.value !== '',
+              );
               const headerStyle = filterField ? { ...style, position: 'relative' as const } : style;
               const headerContent = (
                 <>
@@ -499,13 +540,25 @@ export function ViewListGrid({
                     <>
                       <button
                         type="button"
+                        data-column-filter-trigger
+                        {...(columnFilterActive ? { 'data-active': '' } : {})}
                         aria-label={labels.columnFilterAria(c.header)}
                         onClick={(event) => {
                           event.stopPropagation();
                           setOpenColumnFilter((open) => (open === c.name ? undefined : c.name));
                         }}
                       >
-                        ▽
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="16"
+                          height="16"
+                          aria-hidden="true"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M4 5h16l-6 7v5l-4 2v-7L4 5z" />
+                        </svg>
                       </button>
                       {columnFilterOpen && (
                         <div
@@ -520,7 +573,9 @@ export function ViewListGrid({
                             const FilterInput = getFilterRenderer(field.type);
                             return (
                               <>
-                                <label htmlFor={filterId}>{c.header}</label>
+                                <label htmlFor={filterId} data-column-filter-label>
+                                  {c.header}
+                                </label>
                                 {FilterInput ? (
                                   <FilterInput
                                     field={field}
@@ -534,15 +589,16 @@ export function ViewListGrid({
                                     onChange={(next) => setFilterValue(field.getName(), next)}
                                   />
                                 )}
-                                <Button
+                                <button
                                   type="button"
+                                  data-column-filter-apply
                                   onClick={() => {
                                     applyFilterValues();
                                     setOpenColumnFilter(undefined);
                                   }}
                                 >
                                   {labels.advancedSearchApply}
-                                </Button>
+                                </button>
                               </>
                             );
                           })()}
@@ -574,6 +630,7 @@ export function ViewListGrid({
                     style={headerStyle}
                   >
                     {headerContent}
+                    <SortIndicator direction={ariaSortFor(currentDirection)} />
                   </th>
                 );
               }
@@ -601,6 +658,18 @@ export function ViewListGrid({
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
+          {!loading && rows.length === 0 && (
+            <tr data-empty-row>
+              <td
+                colSpan={Math.max(
+                  1,
+                  visibleColumns.length + (selection?.enabled ? 1 : 0) + (showRowNumbers ? 1 : 0),
+                )}
+              >
+                <div data-empty-state>{labels.emptyState}</div>
+              </td>
+            </tr>
+          )}
           {rows.map((row, i) => {
             const rawId = row['id'];
             const rowId = rawId !== undefined && rawId !== null ? String(rawId) : undefined;
@@ -630,6 +699,13 @@ export function ViewListGrid({
                       />
                     </span>
                   </Table.Td>
+                )}
+                {showRowNumbers && (
+                  <td data-row-number>
+                    {totalElements > 0
+                      ? totalElements - Math.max(searchForm.page, 0) * searchForm.pageSize - i
+                      : ''}
+                  </td>
                 )}
                 {visibleColumns.map((c) => {
                   const style = cellStyle(c);

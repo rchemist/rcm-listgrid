@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BooleanField, EntityForm, StringField, type FormRuntime } from '@listgrid/schema-core';
 import { createFormStore } from '@listgrid/state';
 import { defaultUIComponents, type TextInputProps, type UIComponents } from '@listgrid/ui-default';
@@ -83,6 +83,32 @@ function collegeFormWithFoundedDate(): EntityForm {
   });
 }
 
+function twoTabForm(): EntityForm {
+  return new EntityForm('TwoTabEntityForm', '/two-tab')
+    .addFields({
+      items: [new StringField('name', 100).withLabel('Name')],
+      tab: { id: 'main', label: 'Main', order: 0 },
+    })
+    .addFields({
+      items: [new StringField('englishName', 110).withRequired(true).withLabel('English Name')],
+      tab: { id: 'details', label: 'Details', order: 1 },
+    });
+}
+
+function twoStepWizardForm(): EntityForm {
+  return new EntityForm('TwoStepWizardForm', '/two-step-wizard')
+    .addFields({
+      items: [
+        new StringField('name', 100).withRequired(true).withLabel('Name'),
+        new StringField('englishName', 110).withRequired(true).withLabel('English Name'),
+      ],
+    })
+    .withSteps([
+      { id: 'identity', label: 'Identity', order: 0, fields: ['name'] },
+      { id: 'details', label: 'Details', order: 1, fields: ['englishName'] },
+    ]);
+}
+
 describe('ViewEntityForm (JSDOM render)', () => {
   it('renders inputs with labels, writes keystrokes to the store, validates required fields, and saves', async () => {
     const entityForm = collegeForm();
@@ -151,6 +177,224 @@ describe('ViewEntityForm (JSDOM render)', () => {
 
     fireEvent.change(dateInput, { target: { value: '2026-07-10' } });
     expect(store.getState().getValue('foundedDate')).toBe('2026-07-10');
+  });
+
+  it('renders a live collapsible error summary and scrolls/focuses the selected field', async () => {
+    const entityForm = collegeForm();
+    const store = createFormStore(entityForm);
+    const scrollIntoView = vi.fn();
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    });
+
+    try {
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <AuthProvider session={undefined}>
+            <FormStoreProvider store={store}>
+              <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+            </FormStoreProvider>
+          </AuthProvider>
+        </UIProvider>,
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+      const summary = await waitFor(() => {
+        const element = document.querySelector('[data-error-summary]');
+        expect(element).not.toBeNull();
+        return element as HTMLElement;
+      });
+      expect(summary).not.toHaveAttribute('data-expanded');
+      expect(summary.querySelector('[data-error-summary-title]')).toHaveTextContent(
+        '작성하신 정보에 누락 또는 오류가 있습니다.',
+      );
+      expect(summary.querySelector('[data-error-summary-count]')).toHaveTextContent('2개 오류');
+      expect(summary.querySelector('[data-error-summary-list]')).toBeNull();
+
+      fireEvent.click(summary.querySelector('[data-error-summary-toggle]') as HTMLElement);
+      expect(summary).toHaveAttribute('data-expanded', '');
+      expect(summary.querySelector('[data-error-summary-title]')).toHaveTextContent(
+        '누락(오류) 정보 목록을 확인해 주세요.',
+      );
+      expect(summary.querySelectorAll('[data-error-summary-item]')).toHaveLength(2);
+
+      const englishItem = summary.querySelector(
+        '[data-error-summary-item][data-field="englishName"]',
+      ) as HTMLElement;
+      expect(englishItem).toHaveTextContent('English Name: English Name는 필수 값입니다.');
+      fireEvent.click(englishItem);
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' });
+      expect(screen.getByLabelText(/^English Name/)).toHaveFocus();
+
+      fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: 'Engineering' } });
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      await waitFor(() =>
+        expect(summary.querySelector('[data-error-summary-count]')).toHaveTextContent('1개 오류'),
+      );
+      expect(
+        summary.querySelector('[data-error-summary-item][data-field="name"]'),
+      ).not.toBeInTheDocument();
+
+      fireEvent.change(screen.getByLabelText(/^English Name/), {
+        target: { value: 'College of Engineering' },
+      });
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      await waitFor(() =>
+        expect(document.querySelector('[data-error-summary]')).not.toBeInTheDocument(),
+      );
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+        configurable: true,
+        value: originalScrollIntoView,
+      });
+    }
+  });
+
+  it('live-decrements the error summary when a field is corrected through the store', async () => {
+    const entityForm = collegeForm();
+    const store = createFormStore(entityForm, { validateOnChange: { debounceMs: 0 } });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <AuthProvider session={undefined}>
+          <FormStoreProvider store={store}>
+            <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+          </FormStoreProvider>
+        </AuthProvider>
+      </UIProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /save/i }));
+    const summary = await waitFor(() => {
+      const element = document.querySelector('[data-error-summary]');
+      expect(element).not.toBeNull();
+      return element as HTMLElement;
+    });
+    fireEvent.click(summary.querySelector('[data-error-summary-toggle]') as HTMLElement);
+    expect(summary.querySelector('[data-error-summary-count]')).toHaveTextContent('2개 오류');
+
+    act(() => store.getState().setValue('name', 'Engineering'));
+
+    await waitFor(() =>
+      expect(summary.querySelector('[data-error-summary-count]')).toHaveTextContent('1개 오류'),
+    );
+    expect(
+      summary.querySelector('[data-error-summary-item][data-field="name"]'),
+    ).not.toBeInTheDocument();
+    expect(
+      summary.querySelector('[data-error-summary-item][data-field="englishName"]'),
+    ).toBeInTheDocument();
+  });
+
+  it('switches to an inactive tab before scrolling to an error-summary field', async () => {
+    const entityForm = twoTabForm();
+    const store = createFormStore(entityForm);
+    const scrollIntoView = vi.fn();
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    });
+
+    try {
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <AuthProvider session={undefined}>
+            <FormStoreProvider store={store}>
+              <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+            </FormStoreProvider>
+          </AuthProvider>
+        </UIProvider>,
+      );
+
+      expect(await screen.findByRole('tab', { name: 'Main' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.queryByLabelText(/^English Name/)).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+      const summary = await waitFor(() => {
+        const element = document.querySelector('[data-error-summary]');
+        expect(element).not.toBeNull();
+        return element as HTMLElement;
+      });
+      fireEvent.click(summary.querySelector('[data-error-summary-toggle]') as HTMLElement);
+      fireEvent.click(
+        summary.querySelector('[data-error-summary-item][data-field="englishName"]') as HTMLElement,
+      );
+
+      await waitFor(() =>
+        expect(screen.getByRole('tab', { name: 'Details' })).toHaveAttribute(
+          'aria-selected',
+          'true',
+        ),
+      );
+      await waitFor(() =>
+        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' }),
+      );
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+        configurable: true,
+        value: originalScrollIntoView,
+      });
+    }
+  });
+
+  it('switches wizard steps before scrolling to an error-summary field', async () => {
+    const entityForm = twoStepWizardForm();
+    const store = createFormStore(entityForm);
+    const scrollIntoView = vi.fn();
+    const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+      configurable: true,
+      value: scrollIntoView,
+    });
+
+    try {
+      render(
+        <UIProvider components={defaultUIComponents}>
+          <AuthProvider session={undefined}>
+            <FormStoreProvider store={store}>
+              <ViewEntityForm entityForm={entityForm} store={store} onSave={vi.fn()} />
+            </FormStoreProvider>
+          </AuthProvider>
+        </UIProvider>,
+      );
+
+      await screen.findByLabelText(/^Name/);
+      fireEvent.click(screen.getByRole('button', { name: '다음' }));
+      await screen.findByLabelText(/^English Name/);
+      fireEvent.click(screen.getByRole('button', { name: /save/i }));
+
+      await waitFor(() =>
+        expect(document.querySelector('[data-step="identity"]')).toBeInTheDocument(),
+      );
+      expect(screen.queryByLabelText(/^English Name/)).not.toBeInTheDocument();
+
+      const summary = document.querySelector('[data-error-summary]') as HTMLElement;
+      expect(summary).not.toBeNull();
+      fireEvent.click(summary.querySelector('[data-error-summary-toggle]') as HTMLElement);
+      fireEvent.click(
+        summary.querySelector('[data-error-summary-item][data-field="englishName"]') as HTMLElement,
+      );
+
+      await waitFor(() =>
+        expect(document.querySelector('[data-step="details"]')).toBeInTheDocument(),
+      );
+      await waitFor(() =>
+        expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'center' }),
+      );
+      expect(screen.getByLabelText(/^English Name/)).toHaveFocus();
+    } finally {
+      Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+        configurable: true,
+        value: originalScrollIntoView,
+      });
+    }
   });
 });
 
