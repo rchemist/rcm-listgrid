@@ -15,6 +15,7 @@ export const NumberFilter = (props: NumberFilterProps) => {
   const [type, setType] = useState<QueryConditionType>('BETWEEN');
   const [start, setStart] = useState<number>();
   const [end, setEnd] = useState<number>();
+  const [message, setMessage] = useState<string>();
 
   const filterType = getNumberFilterType(type);
 
@@ -34,12 +35,18 @@ export const NumberFilter = (props: NumberFilterProps) => {
 
     if (filterType.showEnd) {
       if (startValue !== undefined && endValue !== undefined) {
+        setMessage(undefined);
         props.onChange(type, [startValue, endValue]);
         return;
       } else {
+        // Only one side filled means the range cannot be applied. Say so instead of
+        // dropping the condition silently — an empty pair is simply "no filter".
+        const halfFilled = (startValue !== undefined) !== (endValue !== undefined);
+        setMessage(halfFilled ? RANGE_INCOMPLETE_MESSAGE : undefined);
         props.onRemove();
       }
     } else {
+      setMessage(undefined);
       if (startValue !== undefined) {
         props.onChange(type, startValue);
       } else {
@@ -52,57 +59,63 @@ export const NumberFilter = (props: NumberFilterProps) => {
     setType(type);
     setStart(undefined);
     setEnd(undefined);
+    setMessage(undefined);
     props.onRemove();
   }
 
   return (
-    <div className={'flex w-full space-x-2 items-center'}>
-      <div className={'flex items-center space-x-1 shrink-0'}>
-        <span className={'text-xs text-gray-500 whitespace-nowrap'}>조건</span>
-        <div className={'w-[90px]'}>
-          <SelectBox
-            value={type}
-            required={true}
-            name={'type'}
-            options={[...NumberFilterTypes]}
-            onChange={(value: QueryConditionType) => {
-              changeType(value);
+    <div className={'w-full'}>
+      <div className={'flex w-full space-x-2 items-center'}>
+        <div className={'flex items-center space-x-1 shrink-0'}>
+          <span className={'text-xs text-gray-500 whitespace-nowrap'}>조건</span>
+          <div className={'w-[90px]'}>
+            <SelectBox
+              value={type}
+              required={true}
+              name={'type'}
+              options={[...NumberFilterTypes]}
+              onChange={(value: QueryConditionType) => {
+                changeType(value);
+              }}
+            ></SelectBox>
+          </div>
+        </div>
+        <div className={'flex-1 flex space-x-2 items-center'}>
+          <TextInput
+            name={'start'}
+            type={'number'}
+            value={start ?? ''}
+            onChange={(value: string) => {
+              if (!isBlank(value) && isNaN(Number(value))) {
+                return;
+              }
+              setValue('start', value);
             }}
-          ></SelectBox>
+          ></TextInput>
+          {filterType.showEnd && (
+            <React.Fragment>
+              <span>~</span>
+              <TextInput
+                name={'end'}
+                type={'number'}
+                value={end ?? ''}
+                onChange={(value: string) => {
+                  if (!isBlank(value) && isNaN(Number(value))) {
+                    return;
+                  }
+                  setValue('end', value);
+                }}
+              ></TextInput>
+            </React.Fragment>
+          )}
         </div>
       </div>
-      <div className={'flex-1 flex space-x-2 items-center'}>
-        <TextInput
-          name={'start'}
-          type={'number'}
-          value={start ?? ''}
-          onChange={(value: string) => {
-            if (!isBlank(value) && isNaN(Number(value))) {
-              return;
-            }
-            setValue('start', value);
-          }}
-        ></TextInput>
-        {filterType.showEnd && (
-          <React.Fragment>
-            <span>~</span>
-            <TextInput
-              name={'end'}
-              type={'number'}
-              value={end ?? ''}
-              onChange={(value: string) => {
-                if (!isBlank(value) && isNaN(Number(value))) {
-                  return;
-                }
-                setValue('end', value);
-              }}
-            ></TextInput>
-          </React.Fragment>
-        )}
-      </div>
+      {message && <div className={'text-danger text-xs pt-1'}>{message}</div>}
     </div>
   );
 };
+
+const RANGE_INCOMPLETE_MESSAGE = '시작·끝 값을 모두 입력하세요.';
 
 interface NumberFilterType {
   value: QueryConditionType;
