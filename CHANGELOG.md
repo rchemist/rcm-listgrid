@@ -2,6 +2,15 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.10] - 2026-08-10
+
+### Fixed
+
+- 행 새 창 버튼(`.rcm-newwin-btn`)의 파란 크롬을 중립 톤(회색 보더·muted 아이콘·surface-hover)으로
+  되돌려 0.2.x의 절제된 스타일을 복원했다 (egov-cms#84 V2).
+- 헤더 필터/정렬 글리프의 비활성 색을 text-muted에서 text-disabled(#9ca3af)로 연화해
+  0.2.x 헤더의 차분한 톤을 복원했다 (egov-cms#84 V4). active/hover primary 상태는 그대로다.
+
 ## [0.5.9] - 2026-08-06
 
 ### Added
