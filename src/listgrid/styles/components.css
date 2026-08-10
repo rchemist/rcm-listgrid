@@ -474,7 +474,7 @@
   align-items: center;
   justify-content: center;
   padding: 2px;
-  color: var(--rcm-color-text-muted);
+  color: var(--rcm-color-text-disabled);
   background: transparent;
   border: 0;
   border-radius: var(--rcm-radius-sm);
@@ -506,7 +506,7 @@
 .rcm-sort-indicator {
   display: inline-flex;
   margin-left: 2px;
-  color: var(--rcm-color-text-muted);
+  color: var(--rcm-color-text-disabled);
   vertical-align: middle;
 }
 
@@ -653,10 +653,9 @@
   align-items: center;
   justify-content: center;
   padding: 0;
-  color: var(--rcm-color-primary);
+  color: var(--rcm-color-text-muted);
   background: var(--rcm-color-surface);
-  border: var(--rcm-border-width) solid
-    color-mix(in srgb, var(--rcm-color-primary) 45%, transparent);
+  border: var(--rcm-border-width) solid var(--rcm-color-border);
   border-radius: var(--rcm-radius-md);
   cursor: pointer;
   transition:
@@ -666,8 +665,9 @@
 }
 
 .rcm-newwin-btn:hover {
-  background: color-mix(in srgb, var(--rcm-color-primary) 10%, var(--rcm-color-surface));
-  border-color: var(--rcm-color-primary);
+  background: var(--rcm-color-surface-hover);
+  border-color: var(--rcm-color-border-hover);
+  color: var(--rcm-color-text-muted);
 }
 
 .rcm-newwin-btn svg {
