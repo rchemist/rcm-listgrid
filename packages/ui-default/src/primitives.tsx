@@ -61,6 +61,7 @@ export function TextInput({
 export function Textarea({
   value,
   onChange,
+  placeholder,
   rows,
   readOnly,
   disabled,
@@ -75,6 +76,7 @@ export function Textarea({
     <textarea
       id={id}
       value={value ?? ''}
+      placeholder={placeholder}
       rows={rows}
       readOnly={readOnly}
       disabled={disabled}

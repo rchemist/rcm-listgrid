@@ -144,8 +144,11 @@ describe('BirthdayFieldRenderer (JSDOM render)', () => {
 
     await waitFor(() => expect(input).toHaveAttribute('aria-invalid', 'true'));
     const describedBy = input.getAttribute('aria-describedby');
-    expect(describedBy).toBe('birthDate-error');
-    expect(document.getElementById(describedBy as string)).toHaveTextContent('필수 값입니다');
+    expect(describedBy).toBe('birthDate-help birthDate-error');
+    expect(document.getElementById('birthDate-help')).toHaveTextContent(
+      '생년월일 8자리를 입력해 주세요 (예: 19900101)',
+    );
+    expect(document.getElementById('birthDate-error')).toHaveTextContent('필수 값입니다');
     expect(onSave).not.toHaveBeenCalled();
   });
 

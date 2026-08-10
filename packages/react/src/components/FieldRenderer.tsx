@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useStore } from 'zustand';
 import {
   AsyncValidation,
@@ -15,6 +15,7 @@ import {
   snapshotFieldValues,
 } from '../providers/form-store';
 import { getFieldRenderer } from '../registry/field-renderer-registry';
+import { getConditionalReactNode } from '../util/conditional-react-node';
 
 // FieldRenderer — the per-field wrapper (task item 4): label + required
 // asterisk + the type-dispatched input + error list. Subscribes to exactly
@@ -60,6 +61,7 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
   const [hidden, setHidden] = useState(false);
   const [required, setRequired] = useState(false);
   const [readOnly, setReadOnly] = useState(false);
+  const [helpText, setHelpText] = useState<ReactNode>('');
 
   useEffect(() => {
     let cancelled = false;
@@ -85,11 +87,13 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
       // and the required-validation gate. Sibling posture: many-to-one-
       // renderer.tsx / custom-option-renderer.tsx both `.catch` their async
       // resolves rather than let them reject.
-      const [hiddenResult, requiredResult, readOnlyResult] = await Promise.allSettled([
-        field.isHidden(ctx),
-        field.isRequired(ctx),
-        field.isReadOnly(ctx),
-      ]);
+      const [hiddenResult, requiredResult, readOnlyResult, helpTextResult] =
+        await Promise.allSettled([
+          field.isHidden(ctx),
+          field.isRequired(ctx),
+          field.isReadOnly(ctx),
+          getConditionalReactNode(ctx, field.helpText),
+        ]);
 
       if (!cancelled) {
         if (hiddenResult.status === 'fulfilled') setHidden(hiddenResult.value);
@@ -119,6 +123,14 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
             requiredResult.reason,
           );
         }
+
+        if (helpTextResult.status === 'fulfilled') setHelpText(helpTextResult.value);
+        else
+          console.error(
+            '[@listgrid/react] FieldRenderer helpText conditional threw',
+            fieldName,
+            helpTextResult.reason,
+          );
       }
     })();
     return () => {
@@ -152,6 +164,16 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
   const errors = slice.errors ?? [];
   const hasErrors = errors.length > 0;
   const errorId = `${fieldName}-error`;
+  const helpId = `${fieldName}-help`;
+  const hasHelpText =
+    helpText !== '' &&
+    helpText !== null &&
+    helpText !== undefined &&
+    helpText !== false &&
+    helpText !== true;
+  const describedBy = [hasHelpText ? helpId : undefined, hasErrors ? errorId : undefined]
+    .filter((id): id is string => id !== undefined)
+    .join(' ');
 
   // W4-3 (spec §5.3, CAP-05) — a `trigger:'button'` AsyncValidation gets a
   // confirm-button affordance next to the field; `trigger:'change'` (the
@@ -187,7 +209,7 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
           readOnly={effReadOnly}
           required={effRequired}
           invalid={hasErrors}
-          {...(hasErrors ? { describedBy: errorId } : {})}
+          {...(describedBy ? { describedBy } : {})}
         />
       ) : (
         <span role="alert">Unsupported field type: {field.type}</span>
@@ -204,6 +226,11 @@ export function FieldRenderer({ field, name, entityId }: FieldRendererProps) {
           {slice.asyncState === 'checking' && <span role="status">확인 중…</span>}
           {slice.asyncState === 'valid' && <span role="status">사용 가능</span>}
         </span>
+      )}
+      {hasHelpText && (
+        <div className="rcm-field-help" id={helpId}>
+          {helpText}
+        </div>
       )}
       {hasErrors && (
         <ul className="rcm-field-error" id={errorId} role="alert">

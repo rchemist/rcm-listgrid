@@ -31,6 +31,7 @@ export interface TextInputProps {
 export interface TextareaProps {
   value?: string;
   onChange?: (value: string) => void;
+  placeholder?: string;
   rows?: number;
   readOnly?: boolean;
   disabled?: boolean;

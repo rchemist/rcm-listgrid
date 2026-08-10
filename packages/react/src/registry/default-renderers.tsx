@@ -1,6 +1,21 @@
-import type { SelectField, TextareaField } from '@listgrid/schema-core';
+import { useEffect, useState } from 'react';
+import { useStore } from 'zustand';
+import {
+  getConditionalString,
+  getCurrentValue,
+  type FieldEvalContext,
+  type SelectField,
+  type TextareaField,
+} from '@listgrid/schema-core';
+import { useSession } from '../providers/auth';
 import { useUI } from '../providers/ui';
-import { useFieldMeta, useFieldValue, useFormStore } from '../providers/form-store';
+import {
+  snapshotFieldValues,
+  useFieldMeta,
+  useFieldValue,
+  useFormField,
+  useFormStore,
+} from '../providers/form-store';
 import { registerFieldRenderer, type FieldRendererComponentProps } from './field-renderer-registry';
 import { ManyToOneRenderer } from './many-to-one-renderer';
 import { SubCollectionRenderer } from './sub-collection-renderer';
@@ -42,8 +57,56 @@ import { XrefPreferMappingRenderer } from './xref-prefer-mapping-renderer';
 // tsconfig's `exactOptionalPropertyTypes` treats an explicit `undefined` on
 // an optional prop as a type error, distinct from omitting the prop.
 
-function TextRenderer({
+function useResolvedPlaceholder({
+  field,
   name,
+  entityId,
+}: Pick<FieldRendererComponentProps, 'field' | 'name' | 'entityId'>): string | undefined {
+  const store = useFormStore();
+  const session = useSession();
+  const slice = useFormField(name);
+  const dependsOn = field.dependsOn ?? [];
+  const depSignal = useStore(store, (state) =>
+    dependsOn
+      .map((dependencyName) =>
+        JSON.stringify(getCurrentValue(state.fields[dependencyName], state.renderType) ?? null),
+      )
+      .join('|'),
+  );
+  const [placeholder, setPlaceholder] = useState<string>();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const state = store.getState();
+      const ownSlice = state.fields[name];
+      const ctx: FieldEvalContext = {
+        ...(entityId !== undefined ? { entityId } : {}),
+        renderType: state.renderType,
+        values: snapshotFieldValues(state),
+        ...(ownSlice !== undefined ? { value: ownSlice } : {}),
+        ...(session !== undefined ? { session } : {}),
+      };
+
+      try {
+        const resolved = await getConditionalString(ctx, field.placeholder);
+        if (!cancelled) setPlaceholder(resolved || undefined);
+      } catch (error) {
+        console.error('[@listgrid/react] field placeholder conditional threw', name, error);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [store, session, field, name, entityId, slice, depSignal]);
+
+  return placeholder;
+}
+
+function TextRenderer({
+  field,
+  name,
+  entityId,
   readOnly,
   required,
   invalid,
@@ -52,11 +115,13 @@ function TextRenderer({
   const { TextInput } = useUI();
   const store = useFormStore();
   const value = useFieldValue<string>(name);
+  const placeholder = useResolvedPlaceholder({ field, name, entityId });
   return (
     <TextInput
       id={name}
       value={value ?? ''}
       onChange={(v) => store.getState().setValue(name, v)}
+      {...(placeholder !== undefined ? { placeholder } : {})}
       {...(readOnly !== undefined ? { readOnly } : {})}
       {...(required ? { required: true } : {})}
       {...(invalid ? { invalid: true } : {})}
@@ -68,6 +133,7 @@ function TextRenderer({
 function TextareaRenderer({
   field,
   name,
+  entityId,
   readOnly,
   required,
   invalid,
@@ -77,12 +143,14 @@ function TextareaRenderer({
   const store = useFormStore();
   const value = useFieldValue<string>(name);
   const rows = (field as TextareaField).rows;
+  const placeholder = useResolvedPlaceholder({ field, name, entityId });
   return (
     <Textarea
       id={name}
       value={value ?? ''}
       rows={rows}
       onChange={(v) => store.getState().setValue(name, v)}
+      {...(placeholder !== undefined ? { placeholder } : {})}
       {...(readOnly !== undefined ? { readOnly } : {})}
       {...(required ? { required: true } : {})}
       {...(invalid ? { invalid: true } : {})}

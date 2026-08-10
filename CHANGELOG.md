@@ -2,6 +2,14 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.12] - 2026-08-10
+
+### Fixed
+
+- 폼 필드의 조건부 `helpText`를 입력 아래에 표시하고 `aria-describedby`로 도움말과 오류를
+  함께 연결했다 (egov-cms#88).
+- text/textarea 필드의 조건부 `placeholder`를 기본 입력 프리미티브에 전달하도록 했다.
+
 ## [0.5.11] - 2026-08-10
 
 ### Added
