@@ -253,6 +253,23 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
                 errors: result.errors!,
               });
               setSearchForm(finalSearchForm);
+
+              // Persist the requested form even though the request failed.
+              // Otherwise URL/sessionStorage keep the previous (successful) filters
+              // and a reload silently restores the search the user just cleared.
+              if (urlStateHook.isEnabled) {
+                urlStateHook.syncToUrl(finalSearchForm);
+              } else if (isMainEntity) {
+                setSessionStorageItem(hashKey, stringify(finalSearchForm));
+              }
+
+              // Drop the previous result set: keeping it would show rows that do not
+              // match the search form now displayed in the UI.
+              setRows([]);
+              setTotalPage(0);
+              setTotalCount(0);
+              setCheckedItems([]);
+
               showMessages(true, result.errors!);
             } else {
               let processedResult = result;
