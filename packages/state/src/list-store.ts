@@ -69,6 +69,10 @@ export interface CreateListStoreOptions {
 export function createListStore<T = Record<string, unknown>>(
   opts: CreateListStoreOptions,
 ): StoreApi<ListStoreState<T>> {
+  // Latest fetch wins: awaited work from superseded calls is discarded and
+  // never writes stale results or errors into this store instance.
+  let fetchSeq = 0;
+
   return createStore<ListStoreState<T>>((set, get) => ({
     rows: [],
     totalElements: 0,
@@ -78,6 +82,7 @@ export function createListStore<T = Record<string, unknown>>(
     searchForm: opts.initialSearch ?? SearchForm.create(),
 
     async fetch() {
+      const seq = ++fetchSeq;
       set({ loading: true, error: undefined });
       const session = opts.session;
 
@@ -109,6 +114,7 @@ export function createListStore<T = Record<string, unknown>>(
       try {
         page = await opts.adapter.list<T>(opts.url, effectiveSearch);
       } catch (e) {
+        if (seq !== fetchSeq) return;
         set({ loading: false, error: e instanceof Error ? e.message : String(e) });
         return;
       }
@@ -142,14 +148,17 @@ export function createListStore<T = Record<string, unknown>>(
           ? (opts.postFetch(effectiveRows) as unknown as T[])
           : (effectiveRows as unknown as T[]);
       } catch (e) {
+        if (seq !== fetchSeq) return;
         set({ loading: false, error: e instanceof Error ? e.message : String(e) });
         return;
       }
+      if (seq !== fetchSeq) return;
       set({
         rows,
         totalElements: page.totalElements,
         totalPages: page.totalPages,
         loading: false,
+        error: undefined,
       });
     },
 
