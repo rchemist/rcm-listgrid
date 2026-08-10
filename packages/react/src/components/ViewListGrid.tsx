@@ -135,10 +135,8 @@ function isEmptyFilterValue(value: unknown): boolean {
 }
 
 function openWindowFeatures(width: number, height: number): string {
-  const availableWidth = window.screen.availWidth || width;
-  const availableHeight = window.screen.availHeight || height;
-  const left = Math.max(0, Math.round(window.screenX + (availableWidth - width) / 2));
-  const top = Math.max(0, Math.round(window.screenY + (availableHeight - height) / 2));
+  const left = Math.max(0, (window.screen.availWidth - width) / 2);
+  const top = Math.max(0, (window.screen.availHeight - height) / 2);
   return `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`;
 }
 
@@ -528,6 +526,18 @@ export function ViewListGrid({
     void store.getState().fetch();
   }, [store, autoFetch]);
 
+  useEffect(() => {
+    function refreshAfterEntityChange(event: MessageEvent): void {
+      const { type } = event.data ?? {};
+      if (type === 'ENTITY_DELETED' || type === 'ENTITY_SAVED') {
+        void store.getState().fetch();
+      }
+    }
+
+    window.addEventListener('message', refreshAfterEntityChange);
+    return () => window.removeEventListener('message', refreshAfterEntityChange);
+  }, [store]);
+
   const resolvedColumns = useMemo(() => resolveColumns(entityForm, columns), [entityForm, columns]);
   const [localHiddenColumnNames, setLocalHiddenColumnNames] = useState<Set<string>>(
     () => new Set(),
@@ -869,9 +879,58 @@ export function ViewListGrid({
 
   function openRowInNewWindow(row: Record<string, unknown>, rowKey: string): void {
     if (!openInNewWindow?.enabled) return;
-    const width = openInNewWindow.windowFeatures?.width ?? 1280;
-    const height = openInNewWindow.windowFeatures?.height ?? 860;
-    window.open(openInNewWindow.getUrl(row), `entity_${rowKey}`, openWindowFeatures(width, height));
+    const storageKey = `popup_size:${window.location.pathname}`;
+    let width: number;
+    let height: number;
+
+    try {
+      const savedSize = window.localStorage.getItem(storageKey);
+      if (savedSize) {
+        const parsed = JSON.parse(savedSize) as { width?: number; height?: number };
+        width = Math.min(parsed.width || 1200, window.screen.availWidth);
+        height = Math.min(parsed.height || 800, window.screen.availHeight);
+      } else {
+        width = Math.min(openInNewWindow.windowFeatures?.width || 1200, window.screen.availWidth);
+        height = Math.min(openInNewWindow.windowFeatures?.height || 800, window.screen.availHeight);
+      }
+    } catch {
+      width = Math.min(openInNewWindow.windowFeatures?.width || 1200, window.screen.availWidth);
+      height = Math.min(openInNewWindow.windowFeatures?.height || 800, window.screen.availHeight);
+    }
+
+    const popup = window.open(
+      openInNewWindow.getUrl(row),
+      `entity_${rowKey}`,
+      openWindowFeatures(width, height),
+    );
+    if (!popup) return;
+
+    let lastWidth = width;
+    let lastHeight = height;
+    const sizeTracker = window.setInterval(() => {
+      try {
+        if (popup.closed) {
+          window.clearInterval(sizeTracker);
+          return;
+        }
+        const popupWidth = popup.outerWidth;
+        const popupHeight = popup.outerHeight;
+        if (
+          popupWidth > 0 &&
+          popupHeight > 0 &&
+          (popupWidth !== lastWidth || popupHeight !== lastHeight)
+        ) {
+          lastWidth = popupWidth;
+          lastHeight = popupHeight;
+          window.localStorage.setItem(
+            storageKey,
+            JSON.stringify({ width: popupWidth, height: popupHeight }),
+          );
+        }
+      } catch {
+        window.clearInterval(sizeTracker);
+      }
+    }, 1000);
   }
 
   const showSearchbar =

@@ -26,6 +26,9 @@ import { registerFilterRenderer } from '../registry/filter-renderer-registry';
 import { configureLabels } from '../labels';
 
 afterEach(() => {
+  vi.restoreAllMocks();
+  window.localStorage.clear();
+  window.history.replaceState({}, '', '/');
   configureLabels({
     quickSearchPlaceholder: '검색',
     quickSearchPlaceholderFor: (labels) => `Search ${labels.join(', ')}...`,
@@ -433,11 +436,13 @@ describe('ViewListGrid (JSDOM render)', () => {
     );
   });
 
-  it('opens the row URL in a centered named popup without firing the row click', async () => {
+  it('opens the row URL with 1200x800 defaults and the exact centered popup features', async () => {
     const entityForm = collegeForm();
     const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
     const onRowClick = vi.fn();
     const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const availableWidth = vi.spyOn(window.screen, 'availWidth', 'get').mockReturnValue(1920);
+    const availableHeight = vi.spyOn(window.screen, 'availHeight', 'get').mockReturnValue(1080);
 
     render(
       <UIProvider components={defaultUIComponents}>
@@ -467,12 +472,63 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(open).toHaveBeenCalledWith(
       '/college/1?popup=true',
       'entity_1',
-      expect.stringMatching(
-        /^width=1280,height=860,left=\d+,top=\d+,scrollbars=yes,resizable=yes$/,
-      ),
+      'width=1200,height=800,left=360,top=140,scrollbars=yes,resizable=yes',
     );
     expect(onRowClick).not.toHaveBeenCalled();
     open.mockRestore();
+    availableWidth.mockRestore();
+    availableHeight.mockRestore();
+  });
+
+  it('prefers the pathname-scoped saved popup size', async () => {
+    window.history.replaceState({}, '', '/college');
+    window.localStorage.setItem('popup_size:/college', JSON.stringify({ width: 900, height: 700 }));
+    const entityForm = collegeForm();
+    const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+    const availableWidth = vi.spyOn(window.screen, 'availWidth', 'get').mockReturnValue(1600);
+    const availableHeight = vi.spyOn(window.screen, 'availHeight', 'get').mockReturnValue(1000);
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid
+          entityForm={entityForm}
+          store={store}
+          openInNewWindow={{
+            enabled: true,
+            getUrl: (row) => `/college/${String(row['id'])}?popup=true`,
+            windowFeatures: { width: 1400, height: 900 },
+          }}
+        />
+      </UIProvider>,
+    );
+
+    await screen.findByText('Engineering');
+    fireEvent.click(screen.getAllByRole('button', { name: '새 창에서 보기' })[0]!);
+    expect(open).toHaveBeenCalledWith(
+      '/college/1?popup=true',
+      'entity_1',
+      'width=900,height=700,left=350,top=150,scrollbars=yes,resizable=yes',
+    );
+    open.mockRestore();
+    availableWidth.mockRestore();
+    availableHeight.mockRestore();
+  });
+
+  it('refetches when an ENTITY_DELETED message is received', async () => {
+    const entityForm = collegeForm();
+    const adapter = mockAdapter();
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} />
+      </UIProvider>,
+    );
+
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(1));
+    fireEvent(window, new MessageEvent('message', { data: { type: 'ENTITY_DELETED' } }));
+    await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(2));
   });
 
   it('counts the new-window action column in the empty-row colSpan', async () => {
