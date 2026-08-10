@@ -2,6 +2,19 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.13] - 2026-08-10
+
+### Fixed
+
+- 목록 fetch에 per-store latest-wins 시퀀스 가드를 추가했다 — 뒤늦게 도착한 이전 요청의
+  응답/실패가 최신 결과나 오류 상태를 덮어쓰지 않고 폐기된다 (egov-cms#89).
+- 성공한 fetch가 이전 동시 요청의 실패로 남은 오류 배너를 함께 지우도록 했다.
+
+### Added
+
+- `ViewListGrid`에 `autoFetch` prop(기본 `true`)을 추가했다 — 호스트가 초기 fetch를
+  소유할 때 `false`로 라이브러리 mount fetch를 끄면 이중 조회가 발생하지 않는다 (egov-cms#89).
+
 ## [0.5.12] - 2026-08-10
 
 ### Fixed
