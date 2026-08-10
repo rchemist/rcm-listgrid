@@ -474,7 +474,9 @@
   align-items: center;
   justify-content: center;
   padding: 2px;
-  color: var(--rcm-color-text-disabled);
+  margin-top: 2px;
+  /* gjcu 0.2.29 effective values */
+  color: #9ca3af;
   background: transparent;
   border: 0;
   border-radius: var(--rcm-radius-sm);
@@ -490,12 +492,12 @@
 }
 
 .rcm-filter-button:hover {
-  color: var(--rcm-color-primary);
+  color: #4680ff;
   background: color-mix(in srgb, var(--rcm-color-primary) 10%, transparent);
 }
 
 .rcm-filter-button[data-active] {
-  color: var(--rcm-color-primary);
+  color: #4680ff;
 }
 
 .rcm-sortable {
@@ -506,18 +508,20 @@
 .rcm-sort-indicator {
   display: inline-flex;
   margin-left: 2px;
-  color: var(--rcm-color-text-disabled);
+  /* gjcu 0.2.29 effective values */
+  color: inherit;
   vertical-align: middle;
 }
 
 .rcm-sort-indicator svg {
+  /* gjcu 실효값: CSS width 14px + height 속성 24 → 14x24 콘텐츠 박스(글리프는 중앙 14px, recon E2) */
   width: 0.875rem;
-  height: 0.875rem;
+  height: 1.5rem;
 }
 
 .rcm-sort-indicator[data-direction='ascending'],
 .rcm-sort-indicator[data-direction='descending'] {
-  color: var(--rcm-color-primary);
+  color: #4680ff;
 }
 
 .rcm-filter-dropdown {
@@ -648,14 +652,15 @@
 
 .rcm-newwin-btn {
   display: inline-flex;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  /* gjcu 실효값: .btn min-height 36px !important 가 min-h-[32px] 를 이겨 32x36 (recon E6) */
+  height: 36px;
   align-items: center;
   justify-content: center;
   padding: 0;
-  color: var(--rcm-color-text-muted);
+  color: var(--rcm-color-secondary);
   background: var(--rcm-color-surface);
-  border: var(--rcm-border-width) solid var(--rcm-color-border);
+  border: var(--rcm-border-width) solid var(--rcm-color-secondary);
   border-radius: var(--rcm-radius-md);
   cursor: pointer;
   transition:
@@ -665,14 +670,12 @@
 }
 
 .rcm-newwin-btn:hover {
-  background: var(--rcm-color-surface-hover);
-  border-color: var(--rcm-color-border-hover);
-  color: var(--rcm-color-text-muted);
+  background: color-mix(in srgb, var(--rcm-color-secondary) 15%, transparent);
 }
 
 .rcm-newwin-btn svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
 }
 
 /* ViewEntityForm error summary — the tokenized equivalent of the 0.2.x

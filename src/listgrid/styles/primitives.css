@@ -963,6 +963,60 @@
      * 5. Display primitives
      * ================================================================== */
 
+.rcm-list-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rcm-list-badge[data-color='primary'] {
+  color: #4680ff;
+  border-color: #4680ff;
+  background: #eaf1ff;
+}
+
+.rcm-list-badge[data-color='secondary'] {
+  color: #805dca;
+  border-color: #805dca;
+  background: #ebe4f7;
+}
+
+.rcm-list-badge[data-color='success'] {
+  color: #00ab55;
+  border-color: #00ab55;
+  background: #ddf5f0;
+}
+
+.rcm-list-badge[data-color='error'] {
+  color: #e7515a;
+  border-color: #e7515a;
+  background: #fff5f5;
+}
+
+.rcm-list-badge[data-color='warning'] {
+  color: #e2a03f;
+  border-color: #e2a03f;
+  background: #fff9ed;
+}
+
+.rcm-list-badge[data-color='info'] {
+  color: #2196f3;
+  border-color: #2196f3;
+  background: #e7f7ff;
+}
+
+.rcm-list-badge[data-color='neutral'] {
+  color: #3b3f5c;
+  border-color: #3b3f5c;
+  background: #eaeaec;
+}
+
 .rcm-badge {
   display: inline-flex;
   align-items: center;

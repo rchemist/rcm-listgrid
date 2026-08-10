@@ -234,6 +234,12 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(document.querySelector('.rcm-quick-search-wrap')).toContainElement(
       document.querySelector('.rcm-quick-search-addon-search'),
     );
+    const searchSvg = screen.getByRole('button', { name: '빠른 검색' }).querySelector('svg')!;
+    expect(searchSvg).toHaveAttribute('stroke-width', '1');
+    expect([...searchSvg.querySelectorAll('path')].map((path) => path.getAttribute('d'))).toEqual([
+      'M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0',
+      'M21 21l-6 -6',
+    ]);
     expect(document.querySelector('table')).toHaveClass('rcm-table');
     expect(document.querySelector('thead')).toHaveClass('rcm-listgrid-thead');
     expect(document.querySelector('tbody')).toHaveClass('rcm-listgrid-tbody');
@@ -244,8 +250,14 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(document.querySelector('[data-total-elements]')).toHaveClass('rcm-listgrid-pagination');
 
     fireEvent.change(screen.getByLabelText('Quick search'), { target: { value: 'Eng' } });
-    expect(screen.getByRole('button', { name: 'Clear quick search' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Clear quick search' }));
+    const clearButton = screen.getByRole('button', { name: 'Clear quick search' });
+    const clearSvg = clearButton.querySelector('svg')!;
+    expect(clearSvg).toHaveAttribute('stroke-width', '1');
+    expect([...clearSvg.querySelectorAll('path')].map((path) => path.getAttribute('d'))).toEqual([
+      'M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0',
+      'M10 10l4 4m0 -4l-4 4',
+    ]);
+    fireEvent.click(clearButton);
     expect(screen.getByLabelText('Quick search')).toHaveValue('');
   });
 
@@ -429,7 +441,15 @@ describe('ViewListGrid (JSDOM render)', () => {
 
     await screen.findByText('Engineering');
     expect(document.querySelector('thead .rcm-skeleton-td-newwin')).toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole('button', { name: '새 창에서 보기' })[0]!);
+    const newWindowButton = screen.getAllByRole('button', { name: '새 창에서 보기' })[0]!;
+    expect(
+      [...newWindowButton.querySelectorAll('path')].map((path) => path.getAttribute('d')),
+    ).toEqual([
+      'M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6',
+      'M11 13l9 -9',
+      'M15 4h5v5',
+    ]);
+    fireEvent.click(newWindowButton);
     expect(open).toHaveBeenCalledWith(
       '/college/1?popup=true',
       'entity_1',
@@ -969,7 +989,11 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
     expect(header).toHaveAttribute('aria-sort', 'none');
     expect(header.querySelector('[data-sort-indicator]')).toHaveClass('rcm-sort-indicator');
     expect(header.querySelector('[data-sort-indicator]')).toHaveAttribute('data-direction', 'none');
-    expect(header.querySelector('[data-sort-indicator] svg')).toBeInTheDocument();
+    expect(
+      [...header.querySelectorAll('[data-sort-indicator] path')].map((path) =>
+        path.getAttribute('d'),
+      ),
+    ).toEqual(['M4 6l9 0', 'M4 12l7 0', 'M4 18l7 0', 'M15 15l3 3l3 -3', 'M18 6l0 12']);
     // 'early' has no sortable override — plain header, no click affordance.
     expect(screen.getByRole('columnheader', { name: 'Early Field' })).not.toHaveAttribute(
       'aria-sort',
@@ -987,6 +1011,18 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
         .getByRole('columnheader', { name: 'Late Header' })
         .querySelector('[data-sort-indicator]'),
     ).toHaveAttribute('data-direction', 'ascending');
+    expect(
+      [
+        ...screen
+          .getByRole('columnheader', { name: 'Late Header' })
+          .querySelectorAll('[data-sort-indicator] path'),
+      ].map((path) => path.getAttribute('d')),
+    ).toEqual([
+      'M15 21v-5c0 -1.38 .62 -2 2 -2s2 .62 2 2v5m0 -3h-4',
+      'M19 10h-4l4 -7h-4',
+      'M4 15l3 3l3 -3',
+      'M7 6v12',
+    ]);
 
     fireEvent.click(screen.getByRole('columnheader', { name: 'Late Header' }));
     await waitFor(() => expect(adapter.list).toHaveBeenCalledTimes(3));
@@ -996,6 +1032,18 @@ describe('ViewListGrid column derivation (spec §5.1/§7; W5-2)', () => {
         .getByRole('columnheader', { name: 'Late Header' })
         .querySelector('[data-sort-indicator]'),
     ).toHaveAttribute('data-direction', 'descending');
+    expect(
+      [
+        ...screen
+          .getByRole('columnheader', { name: 'Late Header' })
+          .querySelectorAll('[data-sort-indicator] path'),
+      ].map((path) => path.getAttribute('d')),
+    ).toEqual([
+      'M15 10v-5c0 -1.38 .62 -2 2 -2s2 .62 2 2v5m0 -3h-4',
+      'M19 21h-4l4 -7h-4',
+      'M4 15l3 3l3 -3',
+      'M7 6v12',
+    ]);
   });
 
   it('a registered getListCellRenderer(field.type) component takes priority over the raw-value fallback', async () => {
@@ -1075,8 +1123,16 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     expect(filterTrigger).toHaveClass('rcm-filter-button');
     expect(filterTrigger).toHaveAttribute('data-column-filter-trigger');
     expect(filterTrigger.querySelector('svg')).toBeInTheDocument();
+    expect(filterTrigger.querySelector('path')).toHaveAttribute(
+      'd',
+      'M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z',
+    );
     expect(filterTrigger).not.toHaveAttribute('data-active');
     expect(screen.queryByRole('button', { name: 'Code 필터' })).not.toBeInTheDocument();
+    const nameHeader = filterTrigger.closest('th')!;
+    expect([
+      ...nameHeader.querySelectorAll('[data-sort-indicator], [data-column-filter-trigger]'),
+    ]).toEqual([nameHeader.querySelector('[data-sort-indicator]'), filterTrigger]);
 
     fireEvent.change(screen.getByLabelText('Quick search'), { target: { value: 'Alpha' } });
     expect(adapter.list).toHaveBeenCalledTimes(1);
@@ -1171,11 +1227,35 @@ describe('ViewListGrid advanced-search panel (spec §7 CAP-20; W5-3)', () => {
     const panel = document.querySelector('[data-advanced-search-panel]');
     expect(document.querySelector('[data-advanced-search]')).toHaveClass('rcm-adv-search-outer');
     expect(panel).toHaveClass('rcm-adv-search-inner', 'rcm-adv-search-inner-panel');
-    expect(panel?.querySelector('.rcm-adv-search-header-left .rcm-badge')).toHaveTextContent('2');
+    expect(panel?.querySelector('.rcm-adv-search-count')).toHaveTextContent('2개 필드');
+    expect(panel?.querySelector('.rcm-adv-search-header-left .rcm-badge')).not.toBeInTheDocument();
     expect(panel?.querySelector('.rcm-adv-search-grid')).toBeInTheDocument();
+    expect(screen.getByTitle('리스트 뷰')).toHaveClass('rcm-adv-search-view-toggle');
+    expect(screen.getByText('검색 필드 선택')).toBeInTheDocument();
+    expect(screen.getByText('2/2')).toHaveClass('rcm-badge');
+    expect(screen.getByText('2개 선택됨')).toBeInTheDocument();
+    fireEvent.click(screen.getByTitle('리스트 뷰'));
+    expect(panel?.querySelector('.rcm-adv-search-list')).toBeInTheDocument();
+    expect(screen.getByTitle('그리드 뷰')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '펼치기' }));
+    expect(screen.getByPlaceholderText('필드 검색...')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '전체 선택' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '전체 해제' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Code' }));
+    expect(screen.queryByLabelText('Code')).not.toBeInTheDocument();
+    expect(panel?.querySelector('.rcm-adv-search-count')).toHaveTextContent('1개 필드');
     expect(panel?.querySelector('[data-advanced-search-apply]')).toHaveClass(
       'rcm-button',
       'rcm-adv-search-btn-submit',
+    );
+    expect(panel?.querySelector('[data-advanced-search-close] svg')).toHaveClass(
+      'rcm-m2o-action-icon',
+    );
+    expect(panel?.querySelector('[data-advanced-search-reset] svg')).toHaveClass(
+      'rcm-m2o-action-icon',
+    );
+    expect(panel?.querySelector('[data-advanced-search-apply] svg')).toHaveClass(
+      'rcm-m2o-action-icon',
     );
   });
 

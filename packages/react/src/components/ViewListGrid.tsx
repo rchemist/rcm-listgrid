@@ -267,19 +267,218 @@ function SortIndicator({ direction }: { direction: 'none' | 'ascending' | 'desce
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       >
         {direction === 'none' ? (
           <>
-            <path d="m8 10 4-4 4 4" />
-            <path d="m8 14 4 4 4-4" />
+            <path d="M4 6l9 0" />
+            <path d="M4 12l7 0" />
+            <path d="M4 18l7 0" />
+            <path d="M15 15l3 3l3 -3" />
+            <path d="M18 6l0 12" />
           </>
         ) : direction === 'ascending' ? (
-          <path d="m7 15 5-5 5 5" />
+          <>
+            <path d="M15 21v-5c0 -1.38 .62 -2 2 -2s2 .62 2 2v5m0 -3h-4" />
+            <path d="M19 10h-4l4 -7h-4" />
+            <path d="M4 15l3 3l3 -3" />
+            <path d="M7 6v12" />
+          </>
         ) : (
-          <path d="m7 9 5 5 5-5" />
+          <>
+            <path d="M15 10v-5c0 -1.38 .62 -2 2 -2s2 .62 2 2v5m0 -3h-4" />
+            <path d="M19 21h-4l4 -7h-4" />
+            <path d="M4 15l3 3l3 -3" />
+            <path d="M7 6v12" />
+          </>
         )}
       </svg>
     </span>
+  );
+}
+
+/*! gjcu 0.2.29 advanced-search count format: {n}개 필드 */
+function advancedFilterFieldLabel({ field, config }: DerivedFilterField): string {
+  const label = config.label ?? field.getLabel();
+  return typeof label === 'string' ? label : field.getName();
+}
+
+interface AdvancedFieldSelectorProps {
+  availableFields: DerivedFilterField[];
+  selectedFieldNames: Set<string>;
+  onToggleField: (fieldName: string) => void;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
+}
+
+/** Port of the gjcu 0.2.x advanced-search FieldSelector markup. */
+function AdvancedFieldSelector({
+  availableFields,
+  selectedFieldNames,
+  onToggleField,
+  onSelectAll,
+  onDeselectAll,
+}: AdvancedFieldSelectorProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+  const filteredFields = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (query === '') return availableFields;
+    return availableFields.filter(({ field, config }) => {
+      const label = config.label ?? field.getLabel();
+      return (
+        (typeof label === 'string' && label.toLowerCase().includes(query)) ||
+        field.getName().toLowerCase().includes(query)
+      );
+    });
+  }, [availableFields, searchQuery]);
+  const selectedCount = availableFields.filter(({ field }) =>
+    selectedFieldNames.has(field.getName()),
+  ).length;
+
+  return (
+    <div className="rcm-field-selector">
+      <div
+        className="rcm-field-selector-header"
+        onClick={() => setIsExpanded((expanded) => !expanded)}
+      >
+        <div className="rcm-field-selector-header-left">
+          <span className="rcm-text" data-weight="medium">
+            검색 필드 선택
+          </span>
+          <span className="rcm-badge" data-color="primary" data-size="sm">
+            {selectedCount}/{availableFields.length}
+          </span>
+        </div>
+        <div className="rcm-field-selector-header-right">
+          {!isExpanded && selectedCount > 0 && (
+            <span className="rcm-text" data-size="xs" data-tone="muted">
+              {selectedCount}개 선택됨
+            </span>
+          )}
+          <button
+            type="button"
+            className="rcm-icon-btn"
+            data-size="sm"
+            aria-label={isExpanded ? '접기' : '펼치기'}
+          >
+            <svg
+              className={`rcm-icon ${isExpanded ? 'rcm-rotate-180' : ''}`}
+              data-size="sm"
+              data-tone="muted"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="rcm-field-selector-body">
+          <div className="rcm-field-selector-search-row">
+            <div className="rcm-field-selector-search-input-wrap">
+              <svg
+                className="rcm-icon rcm-field-selector-search-icon"
+                data-size="sm"
+                data-tone="muted"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                <path d="M21 21l-6 -6" />
+              </svg>
+              <input
+                type="text"
+                placeholder="필드 검색..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="rcm-input"
+                data-size="sm"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onSelectAll}
+              className="rcm-button"
+              data-variant="ghost"
+              data-size="sm"
+            >
+              전체 선택
+            </button>
+            <button
+              type="button"
+              onClick={onDeselectAll}
+              className="rcm-button"
+              data-variant="ghost"
+              data-size="sm"
+            >
+              전체 해제
+            </button>
+          </div>
+
+          <div className="rcm-field-selector-list">
+            <div className="rcm-field-selector-grid">
+              {filteredFields.map((derivedField) => {
+                const fieldName = derivedField.field.getName();
+                const isSelected = selectedFieldNames.has(fieldName);
+                return (
+                  <button
+                    key={fieldName}
+                    type="button"
+                    onClick={() => onToggleField(fieldName)}
+                    className="rcm-chip"
+                    data-interactive
+                    data-state={isSelected ? 'selected' : undefined}
+                  >
+                    <span
+                      className={`rcm-field-selector-chip-check ${isSelected ? 'rcm-field-selector-chip-check-selected' : ''}`}
+                    >
+                      {isSelected && (
+                        <svg
+                          className="rcm-icon rcm-field-selector-chip-check-icon"
+                          data-size="xs"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M5 12l5 5l10 -10" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="rcm-truncate">{advancedFilterFieldLabel(derivedField)}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {filteredFields.length === 0 && (
+              <span className="rcm-text rcm-field-selector-empty" data-tone="muted">
+                검색 결과가 없습니다
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -451,6 +650,10 @@ export function ViewListGrid({
   const [advancedSearchOpen, setAdvancedSearchOpen] = useState(false);
   const [useUnifiedSearch, setUseUnifiedSearch] = useState(true);
   const [unifiedSearchValue, setUnifiedSearchValue] = useState('');
+  const [advancedSearchGridView, setAdvancedSearchGridView] = useState(true);
+  const [selectedAdvancedFilterFieldNames, setSelectedAdvancedFilterFieldNames] = useState<
+    Set<string>
+  >(() => new Set(filterFields.map(({ field }) => field.getName())));
   const visibleAdvancedFilterFields = useMemo(
     () =>
       filterFields.filter(
@@ -461,6 +664,13 @@ export function ViewListGrid({
       ),
     [filterFields, quickSearchFieldNames, quickSearchFields.length, useUnifiedSearch],
   );
+  const displayedAdvancedFilterFields = useMemo(
+    () =>
+      visibleAdvancedFilterFields.filter(({ field }) =>
+        selectedAdvancedFilterFieldNames.has(field.getName()),
+      ),
+    [selectedAdvancedFilterFieldNames, visibleAdvancedFilterFields],
+  );
   const [openColumnFilter, setOpenColumnFilter] = useState<string | undefined>(undefined);
   const openColumnFilterHeaderRef = useRef<HTMLTableCellElement | null>(null);
   const columnSettingsRef = useRef<HTMLDivElement | null>(null);
@@ -468,6 +678,25 @@ export function ViewListGrid({
   const [filterOperators, setFilterOperators] = useState<
     Record<string, QueryConditionType | undefined>
   >({});
+
+  useEffect(() => {
+    setSelectedAdvancedFilterFieldNames(new Set(filterFields.map(({ field }) => field.getName())));
+  }, [filterFields]);
+
+  function toggleAdvancedFilterField(fieldName: string): void {
+    setSelectedAdvancedFilterFieldNames((previous) => {
+      const next = new Set(previous);
+      if (next.has(fieldName)) next.delete(fieldName);
+      else next.add(fieldName);
+      return next;
+    });
+  }
+
+  function selectAllAdvancedFilterFields(): void {
+    setSelectedAdvancedFilterFieldNames(
+      new Set(visibleAdvancedFilterFields.map(({ field }) => field.getName())),
+    );
+  }
 
   useEffect(() => {
     if (openColumnFilter === undefined) return;
@@ -687,11 +916,13 @@ export function ViewListGrid({
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      strokeWidth="2"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                       aria-hidden="true"
                     >
-                      <circle cx="11" cy="11" r="7" />
-                      <path d="m20 20-4-4" />
+                      <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                      <path d="M21 21l-6 -6" />
                     </svg>
                   </button>
                 </span>
@@ -712,11 +943,13 @@ export function ViewListGrid({
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2"
+                        strokeWidth="1"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         aria-hidden="true"
                       >
-                        <circle cx="12" cy="12" r="9" />
-                        <path d="m9 9 6 6M15 9l-6 6" />
+                        <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+                        <path d="M10 10l4 4m0 -4l-4 4" />
                       </svg>
                     </button>
                   </span>
@@ -775,26 +1008,58 @@ export function ViewListGrid({
           >
             <div className="rcm-adv-search-header">
               <div className="rcm-adv-search-header-left">
-                <span className="rcm-adv-search-header-icon">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    aria-hidden="true"
-                  >
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="m20 20-4-4" />
-                  </svg>
-                </span>
+                <svg
+                  className="rcm-adv-search-header-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                  <path d="M21 21l-6 -6" />
+                </svg>
                 <span className="rcm-text" data-weight="semibold">
                   {labels.advancedSearchToggle}
                 </span>
                 <span className="rcm-adv-search-count">
-                  <span className="rcm-badge" data-color="primary" data-size="sm">
-                    {visibleAdvancedFilterFields.length}
-                  </span>
+                  {displayedAdvancedFilterFields.length}개 필드
                 </span>
+              </div>
+              <div className="rcm-adv-search-header-right">
+                <button
+                  type="button"
+                  className="rcm-adv-search-view-toggle"
+                  title={advancedSearchGridView ? '리스트 뷰' : '그리드 뷰'}
+                  onClick={() => setAdvancedSearchGridView((gridView) => !gridView)}
+                >
+                  <svg
+                    className="rcm-adv-search-view-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    {advancedSearchGridView ? (
+                      <>
+                        <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                        <path d="M4 14m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v2a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
+                      </>
+                    ) : (
+                      <>
+                        <path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                        <path d="M14 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                        <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                        <path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                      </>
+                    )}
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -834,38 +1099,61 @@ export function ViewListGrid({
               </>
             )}
 
-            <div className="rcm-adv-search-grid">
-              {visibleAdvancedFilterFields.map(({ field, config }) => {
-                const label = config.label ?? field.getLabel();
-                const headerText = typeof label === 'string' ? label : field.getName();
-                const filterId = `filter-${field.getName()}`;
-                const value = filterValues[field.getName()];
-                const FilterInput = getFilterRenderer(field.type);
-                return (
-                  <div
-                    key={field.getName()}
-                    data-filter-field={field.getName()}
-                    data-advanced-search-field
-                  >
-                    <label htmlFor={filterId}>{headerText}</label>
-                    {FilterInput ? (
-                      <FilterInput
-                        field={field}
-                        value={value}
-                        onChange={(v, operator) => setFilterValue(field.getName(), v, operator)}
-                      />
-                    ) : (
-                      <TextInput
-                        className="rcm-input"
-                        id={filterId}
-                        value={typeof value === 'string' ? value : ''}
-                        onChange={(v) => setFilterValue(field.getName(), v)}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+            <AdvancedFieldSelector
+              availableFields={visibleAdvancedFilterFields}
+              selectedFieldNames={selectedAdvancedFilterFieldNames}
+              onToggleField={toggleAdvancedFilterField}
+              onSelectAll={selectAllAdvancedFilterFields}
+              onDeselectAll={() => setSelectedAdvancedFilterFieldNames(new Set())}
+            />
+
+            {displayedAdvancedFilterFields.length > 0 ? (
+              <div
+                className={advancedSearchGridView ? 'rcm-adv-search-grid' : 'rcm-adv-search-list'}
+              >
+                {displayedAdvancedFilterFields.map(({ field, config }) => {
+                  const label = config.label ?? field.getLabel();
+                  const headerText = typeof label === 'string' ? label : field.getName();
+                  const filterId = `filter-${field.getName()}`;
+                  const value = filterValues[field.getName()];
+                  const FilterInput = getFilterRenderer(field.type);
+                  return (
+                    <div
+                      key={field.getName()}
+                      data-filter-field={field.getName()}
+                      data-advanced-search-field
+                    >
+                      <label htmlFor={filterId}>{headerText}</label>
+                      {FilterInput ? (
+                        <FilterInput
+                          field={field}
+                          value={value}
+                          onChange={(v, operator) => setFilterValue(field.getName(), v, operator)}
+                        />
+                      ) : (
+                        <TextInput
+                          className="rcm-input"
+                          id={filterId}
+                          value={typeof value === 'string' ? value : ''}
+                          onChange={(v) => setFilterValue(field.getName(), v)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rcm-adv-search-empty">
+                <p className="rcm-adv-search-empty-text">검색할 필드를 선택해주세요</p>
+                <button
+                  type="button"
+                  onClick={selectAllAdvancedFilterFields}
+                  className="rcm-adv-search-empty-action"
+                >
+                  전체 필드 선택
+                </button>
+              </div>
+            )}
             <div className="rcm-adv-search-footer">
               <button
                 type="button"
@@ -875,6 +1163,19 @@ export function ViewListGrid({
                 data-advanced-search-close
                 onClick={closeAdvancedSearch}
               >
+                <svg
+                  className="rcm-m2o-action-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 6l-12 12" />
+                  <path d="M6 6l12 12" />
+                </svg>
                 {labels.advancedSearchClose}
               </button>
               <button
@@ -886,6 +1187,19 @@ export function ViewListGrid({
                 data-advanced-search-reset
                 onClick={resetAdvancedSearch}
               >
+                <svg
+                  className="rcm-m2o-action-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4" />
+                  <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" />
+                </svg>
                 {labels.advancedSearchReset}
               </button>
               <button
@@ -896,6 +1210,19 @@ export function ViewListGrid({
                 data-advanced-search-apply
                 onClick={() => applyFilterValues(visibleAdvancedFilterFields, true)}
               >
+                <svg
+                  className="rcm-m2o-action-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
+                  <path d="M21 21l-6 -6" />
+                </svg>
                 {labels.advancedSearchApply}
               </button>
             </div>
@@ -954,9 +1281,8 @@ export function ViewListGrid({
                 const headerStyle = filterField
                   ? { ...style, position: 'relative' as const }
                   : style;
-                const headerContent = (
+                const filterContent = (
                   <>
-                    {c.header}
                     {filterField && (
                       <>
                         <button
@@ -978,8 +1304,10 @@ export function ViewListGrid({
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                           >
-                            <path d="M4 5h16l-6 7v5l-4 2v-7L4 5z" />
+                            <path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.414 4.414v7l-6 2v-8.5l-4.48 -4.928a2 2 0 0 1 -.52 -1.345v-2.227z" />
                           </svg>
                         </button>
                         {columnFilterOpen && (
@@ -1097,8 +1425,9 @@ export function ViewListGrid({
                       }
                       style={headerStyle}
                     >
-                      {headerContent}
+                      {c.header}
                       <SortIndicator direction={ariaSortFor(currentDirection)} />
+                      {filterContent}
                     </th>
                   );
                 }
@@ -1110,7 +1439,8 @@ export function ViewListGrid({
                       ref={columnFilterOpen ? openColumnFilterHeaderRef : undefined}
                       style={headerStyle}
                     >
-                      {headerContent}
+                      {c.header}
+                      {filterContent}
                     </th>
                   );
                 }
@@ -1222,11 +1552,13 @@ export function ViewListGrid({
                             fill="none"
                             stroke="currentColor"
                             strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                             aria-hidden="true"
                           >
-                            <path d="M14 3h7v7" />
-                            <path d="m10 14 11-11" />
-                            <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+                            <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6" />
+                            <path d="M11 13l9 -9" />
+                            <path d="M15 4h5v5" />
                           </svg>
                         </button>
                       )}
