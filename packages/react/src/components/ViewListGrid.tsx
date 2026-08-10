@@ -85,6 +85,9 @@ export type ViewListGridColumn =
 export interface ViewListGridProps {
   entityForm: EntityForm;
   store: StoreApi<ListStoreState>;
+  /** When false, the grid does not fetch on mount/store change; the host owns
+   * the initial fetch. @default true */
+  autoFetch?: boolean;
   onRowClick?: (row: Record<string, unknown>) => void;
   columns?: ViewListGridColumn[];
   /** Opt-in instant-apply column-visibility popover. Visibility is component-local unless
@@ -497,6 +500,7 @@ function normalizeHiddenColumnNames(
 export function ViewListGrid({
   entityForm,
   store,
+  autoFetch = true,
   onRowClick,
   columns,
   columnSettings = false,
@@ -518,10 +522,11 @@ export function ViewListGrid({
   const searchForm = useStore(store, (s) => s.searchForm);
 
   useEffect(() => {
+    if (autoFetch === false) return;
     // Run once per store (mount) — the store owns refetching on
     // page/sort/quickSearch changes via its own actions.
     void store.getState().fetch();
-  }, [store]);
+  }, [store, autoFetch]);
 
   const resolvedColumns = useMemo(() => resolveColumns(entityForm, columns), [entityForm, columns]);
   const [localHiddenColumnNames, setLocalHiddenColumnNames] = useState<Set<string>>(

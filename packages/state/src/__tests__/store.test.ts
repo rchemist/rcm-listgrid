@@ -296,6 +296,63 @@ describe('createListStore (charter C9)', () => {
     expect(store.getState().rows).toHaveLength(rows.length);
   });
 
+  it('discards a superseded fetch error after the latest fetch succeeds', async () => {
+    let rejectSlow!: (reason?: unknown) => void;
+    const adapter = mockAdapter([]);
+    adapter.list = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<PageResult>((_resolve, reject) => {
+            rejectSlow = reject;
+          }),
+      )
+      .mockResolvedValueOnce({
+        content: [{ id: 'fast', name: 'fast' }],
+        totalElements: 1,
+        totalPages: 1,
+      });
+    const store = createListStore({ url: '/college', adapter });
+
+    const slowFetch = store.getState().fetch();
+    await store.getState().fetch();
+    rejectSlow(new Error('slow failure'));
+    await slowFetch;
+
+    expect(store.getState().error).toBeUndefined();
+    expect(store.getState().rows).toEqual([{ id: 'fast', name: 'fast' }]);
+  });
+
+  it('discards superseded rows when an older fetch resolves last', async () => {
+    let resolveSlow!: (page: PageResult) => void;
+    const adapter = mockAdapter([]);
+    adapter.list = vi
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<PageResult>((resolve) => {
+            resolveSlow = resolve;
+          }),
+      )
+      .mockResolvedValueOnce({
+        content: [{ id: 'fast', name: 'fast' }],
+        totalElements: 1,
+        totalPages: 1,
+      });
+    const store = createListStore({ url: '/college', adapter });
+
+    const slowFetch = store.getState().fetch();
+    await store.getState().fetch();
+    resolveSlow({
+      content: [{ id: 'slow', name: 'slow' }],
+      totalElements: 1,
+      totalPages: 1,
+    });
+    await slowFetch;
+
+    expect(store.getState().rows).toEqual([{ id: 'fast', name: 'fast' }]);
+  });
+
   // EA-D2-0 postFetch (decision ①, §3) — the Priority-view reordering hook:
   // applied to page.content right before set(), on EVERY fetch.
   describe('postFetch (EA-D2-0)', () => {

@@ -214,6 +214,20 @@ describe('ViewListGrid (JSDOM render)', () => {
     expect(screen.getByText('Law')).toBeInTheDocument();
   });
 
+  it('does not fetch on mount when autoFetch is false', () => {
+    const entityForm = collegeForm();
+    const adapter = mockAdapter();
+    const store = createListStore({ url: entityForm.url, adapter });
+
+    render(
+      <UIProvider components={defaultUIComponents}>
+        <ViewListGrid entityForm={entityForm} store={store} autoFetch={false} />
+      </UIProvider>,
+    );
+
+    expect(adapter.list).not.toHaveBeenCalled();
+  });
+
   it('attaches the stock panel, quick-search, table, row, empty, and pagination classes', async () => {
     const entityForm = searchableCollegeForm();
     const store = createListStore({ url: entityForm.url, adapter: mockAdapter() });
