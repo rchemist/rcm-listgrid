@@ -4,11 +4,10 @@ import { QueryConditionType, SearchForm } from '../../form/SearchForm';
 import {
   AbstractManyToOneField,
   ListableFormField,
-  MultipleOptionalField,
-  OptionalField,
 } from '../fields/abstract';
 import { EntityForm } from '../../config/EntityForm';
 import { QuickSearchProps } from '../../config/ListGrid';
+import { resolveFilterOperator } from './utils/filterOperator';
 import React, { Fragment, useEffect, useState } from 'react';
 import { getTranslation } from '../../utils/i18n';
 import { Transition } from '@headlessui/react';
@@ -154,16 +153,7 @@ export const AdvancedSearchForm = ({
                             return newSearchForm;
                           }
 
-                          if (field instanceof OptionalField && field.singleFilter) {
-                            op = 'EQUAL';
-                          } else if (field instanceof MultipleOptionalField) {
-                            op = 'IN';
-                          } else if (
-                            field instanceof OptionalField &&
-                            (field.options?.length ?? 0) > 2
-                          ) {
-                            op = 'IN';
-                          }
+                          op = resolveFilterOperator(field, value, op);
 
                           if (isBlank(value) && op !== 'NULL' && op !== 'NOT_NULL') {
                             newSearchForm.removeFilter(name);
