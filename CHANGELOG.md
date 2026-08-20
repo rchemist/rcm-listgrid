@@ -2,6 +2,26 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.2.32] - 2026-08-20
+
+### Fixed
+
+- 선택지가 1~2개인 셀렉트 목록 필터에서 **2개 이상을 고르면 첫 번째 값만 적용되던** 문제를 수정
+  (gjcu-academic-backend #1941, 해당 필터 32곳). 필터 연산자를 옵션 개수로 판단하던
+  로직(`options.length > 2` 일 때만 `IN`)이 렌더링 임계값(`SelectField` 의
+  `CHECKBOX_THRESHOLD = 10`)과 어긋나 있었다. 옵션이 1~2개인 필터도 체크박스로
+  렌더되어 **배열** 값을 만드는데, 직렬화는 `EQUAL` 로 나갔고 백엔드
+  `EqualQueryProvider` 가 `values[0]` 으로 폴백하는 탓에 오류 없이 첫 값만 적용됐다.
+
+  실제 증상: 관리자 재학생 목록에서 성별 "남"과 "여"를 **둘 다** 체크해도 남자만
+  조회됐다(1427건이어야 할 결과가 590건). 1개만 고르면 우연히 정상 동작해 발견이 늦었다.
+
+  이제 `AdvancedSearchForm` / `AdvancedSearchFormV2` / `HeaderFieldFilter` 세 곳이
+  공통 헬퍼 `resolveFilterOperator` 를 쓰며, 연산자를 **값이 배열인지**로 결정한다 —
+  `singleFilter` 지정 필드는 `EQUAL`, `MultipleOptionalField` 는 항상 `IN`,
+  그 외 `OptionalField` 는 배열이면 `IN`. `OptionalField.singleFilter` 의 기존 계약
+  (`true: EQUAL, false/undefined: IN`)과 일치하며, 옵션 3개 이상 필터의 동작은 바뀌지 않는다.
+
 ## [0.2.31] - 2026-08-10
 
 ### Fixed
