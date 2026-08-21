@@ -6,9 +6,10 @@ import { FilterDropdown, FilterDropdownPlacement, FilterDropdownSize } from './F
 import { FilterView } from './FilterView';
 import { QueryConditionType, SearchForm } from '../../../form/SearchForm';
 import { EntityForm } from '../../../config/EntityForm';
-import { AbstractManyToOneField, ListableFormField, OptionalField } from '../../fields/abstract';
+import { AbstractManyToOneField, ListableFormField } from '../../fields/abstract';
 import { isBlank } from '../../../utils/StringUtil';
 import { useHeaderFilterStore } from './headerFilterStore';
+import { resolveFilterOperator } from '../utils/filterOperator';
 import { isTrue } from '../../../utils/BooleanUtil';
 
 interface HeaderFieldFilterProps {
@@ -116,10 +117,8 @@ export const HeaderFieldFilter = ({
         }
       }
 
-      // OptionalField에서 다중 선택인 경우
-      if (targetField instanceof OptionalField && (targetField.options?.length ?? 0) > 2) {
-        op = 'IN';
-      }
+      // OptionalField 는 값이 배열(다중 선택)이면 IN, singleFilter 면 EQUAL
+      op = resolveFilterOperator(targetField, value, op);
 
       // 필터 추가/수정/삭제
       const isEmpty = Array.isArray(value) ? value.length === 0 : isBlank(value);

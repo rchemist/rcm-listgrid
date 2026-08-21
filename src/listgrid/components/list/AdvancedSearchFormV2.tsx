@@ -4,8 +4,6 @@ import { QueryConditionType, SearchForm } from '../../form/SearchForm';
 import {
   AbstractManyToOneField,
   ListableFormField,
-  MultipleOptionalField,
-  OptionalField,
 } from '../fields/abstract';
 import { EntityForm } from '../../config/EntityForm';
 import React, { Fragment, useCallback, useEffect, useMemo, useReducer } from 'react';
@@ -22,6 +20,7 @@ import {
   IconX,
 } from '@tabler/icons-react';
 import { QuickSearchProps } from '../../config/ListGrid';
+import { resolveFilterOperator } from './utils/filterOperator';
 
 // NOT condition check utility
 const isNotCondition = (queryConditionType?: QueryConditionType): boolean => {
@@ -336,13 +335,7 @@ export const AdvancedSearchFormV2 = ({
         }
       }
 
-      if (field instanceof OptionalField && field.singleFilter) {
-        op = 'EQUAL';
-      } else if (field instanceof MultipleOptionalField) {
-        op = 'IN';
-      } else if (field instanceof OptionalField && (field.options?.length ?? 0) > 2) {
-        op = 'IN';
-      }
+      op = resolveFilterOperator(field, value, op);
 
       dispatch({ type: 'UPDATE_FILTER', payload: { name, value, op } });
     },

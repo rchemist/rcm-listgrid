@@ -610,3 +610,35 @@ describe('SearchForm.clone', () => {
     expect(copy.getCacheKey()).not.toBe(original.getCacheKey());
   });
 });
+
+describe('SearchForm wire payload for multi-select filters (#1941)', () => {
+  it('serializes an array value into `values` with no `value` key', () => {
+    const form = SearchForm.create();
+    form.handleAndFilter('admissionType', ['FRESHMAN', 'TRANSFER'], 'IN');
+
+    const wire = JSON.parse(JSON.stringify(form)) as {
+      filters: { AND: Record<string, unknown>[] };
+    };
+
+    expect(wire.filters.AND[0]).toEqual({
+      name: 'admissionType',
+      values: ['FRESHMAN', 'TRANSFER'],
+      queryConditionType: 'IN',
+    });
+  });
+
+  it('keeps EQUAL + scalar `value` for a single non-array selection', () => {
+    const form = SearchForm.create();
+    form.handleAndFilter('admissionType', 'FRESHMAN', 'EQUAL');
+
+    const wire = JSON.parse(JSON.stringify(form)) as {
+      filters: { AND: Record<string, unknown>[] };
+    };
+
+    expect(wire.filters.AND[0]).toEqual({
+      name: 'admissionType',
+      value: 'FRESHMAN',
+      queryConditionType: 'EQUAL',
+    });
+  });
+});
