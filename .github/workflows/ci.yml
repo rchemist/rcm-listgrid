@@ -8,7 +8,7 @@ on:
 
 jobs:
   quality:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, ARM64, s2]
     strategy:
       fail-fast: false
       matrix:
@@ -75,7 +75,7 @@ jobs:
     # v0.4 vertical-slice acceptance — drives apps/sample (new @listgrid/*
     # engine + mock RCM backend) in a real browser (documents/plans/
     # e2e-parity-vertical-slice.md). Runs once (not per node matrix).
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, ARM64, s2]
     steps:
       - uses: actions/checkout@v4
 
