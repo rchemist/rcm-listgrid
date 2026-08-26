@@ -89,7 +89,7 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Install Playwright browser (chromium)
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: E2E (Playwright — College / Subject / Professor)
         run: npm run test:e2e
