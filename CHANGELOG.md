@@ -2,6 +2,18 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [Unreleased]
+
+### Fixed
+
+- 검색 모드 / 모바일 인라인의 quick-view 모달(`ViewRows.handleViewEntity`,
+  `toggleInlineExpansion`)이 `entityForm.clone(true).withId(item.id).withTitle('상세 정보')`
+  로 앱이 지정한 `title.view`/`title.field` 를 통째로 덮어써, `useEntityFormTitle` 의
+  fallback 경로가 `'정보 조회 > <uuid>'` 형태로 원본 UUID 를 그대로 노출하던 문제를
+  고쳤다 (project-manager PM-4). 이제 `title` 객체의 `view`/`field` 는 보존하고 문자열
+  `title` 만 기본값(`'상세 정보'`)으로 채우며, `title.view` 가 있으면 이를 resolve 해
+  모달 제목으로 사용한다(실패 시 기존 `'${title} 조회'` 로 폴백).
+
 ## [0.5.14] - 2026-08-10
 
 ### Added
