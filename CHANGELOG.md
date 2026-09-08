@@ -2,6 +2,23 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [Unreleased]
+
+### Fixed
+
+- 정렬 가능한 목록 헤더에서 라벨 텍스트를 클릭해도 정렬이 토글되지 않던 문제를 고쳤다 —
+  아이콘 `<button>`만 클릭 핸들러를 가지고 있었고 라벨 `<span>`은 클릭에 반응하지 않았다.
+  이제 라벨도 `<button type="button">`으로 렌더링되어 헤더 셀 전체가 클릭 타깃이 되며,
+  기존 아이콘 버튼(및 키보드 Enter/Space 접근성)은 그대로 유지된다. 정렬 불가 컬럼은
+  변경 없음(project-manager PM-15).
+- 헤더 정렬 클릭 시 동일한 검색 요청이 두 번 전송되던 문제를 고쳤다 — 정렬 토글이
+  URL 동기화(`syncToUrl`)를 트리거하면, 그 자기 자신이 만든 URL 변경을 "외부 네비게이션"
+  으로 오인한 URL 상태 리스너가 동일 payload로 재조회를 한 번 더 발생시키고 있었다
+  (React StrictMode 이중 호출이 아니라 실제 로직 버그). `useListGridUrlState`에
+  self-initiated sync 플래그(`consumeSelfInitiatedSync`)를 추가해 자기 발신 URL 변경은
+  건너뛰고, 브라우저 뒤로/앞으로 가기 같은 진짜 외부 URL 변경에만 반응하도록 했다
+  (project-manager PM-15).
+
 ## [0.5.14] - 2026-08-10
 
 ### Added
