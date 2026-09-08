@@ -20,6 +20,41 @@ import { ViewEntityForm } from '../../form/ViewEntityForm';
 import { useListGridTheme } from '../context/ListGridThemeContext';
 import { SubCollectionInlineView } from './SubCollectionInlineView';
 
+/**
+ * Builds the EntityForm used for a quick-view (search-mode / mobile inline)
+ * modal and resolves the modal chrome title.
+ *
+ * Preserves the app-provided `title` config (`view`/`field`) instead of
+ * clobbering it with `withTitle('상세 정보')` — otherwise
+ * `useEntityFormTitle`'s fallback path exposes the raw entity UUID in the
+ * modal title (project-manager PM-4).
+ */
+export async function buildQuickViewForm(entityForm: any, itemId: string) {
+  const baseTitle =
+    typeof entityForm.title === 'string' ? { title: entityForm.title } : { ...(entityForm.title ?? {}) };
+
+  const viewEntityForm = entityForm
+    .clone(true)
+    .withId(itemId)
+    .withTitle({ ...baseTitle, title: baseTitle.title ?? '상세 정보' });
+
+  const titleStr = baseTitle.title || '정보';
+  let modalTitle: ReactNode = `${titleStr} 조회`;
+
+  if (typeof baseTitle.view === 'function') {
+    try {
+      const resolved = await baseTitle.view(viewEntityForm);
+      if (resolved !== undefined && resolved !== null) {
+        modalTitle = resolved;
+      }
+    } catch {
+      // fall back to the default `${titleStr} 조회` title on any resolution error
+    }
+  }
+
+  return { viewEntityForm, modalTitle };
+}
+
 export interface ViewRowsProps extends ViewRowItemProps {
   // item/sortableList: generic entity payload
   item: any;
@@ -168,21 +203,18 @@ export const ViewRows = (props: ViewRowsProps) => {
   };
 
   // 검색 모드에서 엔티티 상세 보기 (모달)
-  const handleViewEntity = (e: React.MouseEvent) => {
+  const handleViewEntity = async (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
 
     if (!item.id || !entityForm) return;
 
     const modalId = `search-view-entity-${item.id}`;
-    const viewEntityForm = entityForm.clone(true).withId(item.id).withTitle('상세 정보');
-
-    const titleStr =
-      typeof entityForm.title === 'string' ? entityForm.title : entityForm.title?.title || '정보';
+    const { viewEntityForm, modalTitle } = await buildQuickViewForm(entityForm, item.id);
 
     openModal({
       modalId,
-      title: `${titleStr} 조회`,
+      title: modalTitle,
       size: '5xl',
       content: (
         <ViewEntityForm
@@ -222,20 +254,17 @@ export const ViewRows = (props: ViewRowsProps) => {
   }
 
   // Toggle inline expansion for SubCollection (모바일에서는 모달로 표시)
-  function toggleInlineExpansion() {
+  async function toggleInlineExpansion() {
     if (!inlineExpansion || !entityForm) return;
 
     // 모바일: 모달로 표시
     if (isMobile) {
       const modalId = `inline-view-entity-${item.id}`;
-      const viewEntityForm = entityForm.clone(true).withId(item.id).withTitle('상세 정보');
-
-      const mobileTitleStr =
-        typeof entityForm.title === 'string' ? entityForm.title : entityForm.title?.title || '정보';
+      const { viewEntityForm, modalTitle } = await buildQuickViewForm(entityForm, item.id);
 
       openModal({
         modalId,
-        title: `${mobileTitleStr} 조회`,
+        title: modalTitle,
         size: '5xl',
         content: (
           <ViewEntityForm
