@@ -56,6 +56,15 @@ export interface UseListGridUrlStateReturn {
   getInitialSearchForm: (baseSearchForm: SearchForm) => SearchForm;
   /** Clear all URL params */
   clearUrlParams: () => void;
+  /**
+   * Returns whether the most recent urlState change was caused by our own
+   * `syncToUrl`/`clearUrlParams` call (as opposed to an external navigation
+   * such as browser back/forward), then resets the flag. Consumers should
+   * call this once per urlState-change effect run and skip re-fetching when
+   * it returns true — otherwise a self-triggered URL sync loops back into a
+   * second, duplicate fetch with an identical payload.
+   */
+  consumeSelfInitiatedSync: () => boolean;
 }
 
 /**
@@ -105,6 +114,11 @@ export function useListGridUrlState(
   // Track last synced state to prevent unnecessary updates
   const lastSyncedStateRef = useRef<ListGridUrlState | null>(null);
 
+  // Set right before we push our own URL change (syncToUrl/clearUrlParams) so the
+  // urlState-change listener can tell "we wrote this" apart from an external
+  // navigation (browser back/forward) and avoid firing a duplicate fetch.
+  const selfInitiatedSyncRef = useRef(false);
+
   // Use nuqs for URL state management
   const [urlState, setUrlState] = useQueryStates(
     {
@@ -152,6 +166,7 @@ export function useListGridUrlState(
       }
 
       lastSyncedStateRef.current = filteredState;
+      selfInitiatedSyncRef.current = true;
 
       // Update URL
       setUrlState({
@@ -164,6 +179,16 @@ export function useListGridUrlState(
     },
     [isEnabled, quickSearchPropertyName, orFields, resolvedOptions, setUrlState],
   );
+
+  /**
+   * Consume (read + reset) the self-initiated-sync flag. See
+   * `consumeSelfInitiatedSync` on the return type for the intended usage.
+   */
+  const consumeSelfInitiatedSync = useCallback((): boolean => {
+    const was = selfInitiatedSyncRef.current;
+    selfInitiatedSyncRef.current = false;
+    return was;
+  }, []);
 
   /**
    * Get initial SearchForm from URL or session storage
@@ -205,6 +230,7 @@ export function useListGridUrlState(
     if (!isEnabled) return;
 
     lastSyncedStateRef.current = null;
+    selfInitiatedSyncRef.current = true;
     setUrlState({
       page: null,
       pageSize: null,
@@ -221,6 +247,7 @@ export function useListGridUrlState(
     syncToUrl,
     getInitialSearchForm,
     clearUrlParams,
+    consumeSelfInitiatedSync,
   };
 }
 

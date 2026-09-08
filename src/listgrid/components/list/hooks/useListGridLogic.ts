@@ -643,6 +643,14 @@ export const useListGridLogic = (props: ViewListGridProps): any => {
     // Skip if URL sync is disabled or searchForm not ready
     if (!urlStateHook.isEnabled || !searchForm) return;
 
+    // Skip when this urlState change is the one *we* just wrote via
+    // onChangeSearchForm -> fetchData -> urlStateHook.syncToUrl (e.g. a header
+    // sort click). Without this guard, that self-triggered URL update looped
+    // back into this effect and fired a second, duplicate fetchData call with
+    // an identical payload — this branch only exists for genuinely external
+    // URL changes (browser back/forward, or a deep link on first mount).
+    if (urlStateHook.consumeSelfInitiatedSync()) return;
+
     // Check if URL has params
     if (urlStateHook.hasUrlParams) {
       const originalSearchForm = listGrid.getSearchForm();

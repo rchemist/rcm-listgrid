@@ -3,7 +3,7 @@ import React from 'react';
 import { ListableFormField } from '../../fields/abstract';
 import { getTranslation } from '../../../utils/i18n';
 import { isTrue } from '../../../utils/BooleanUtil';
-import { SortField } from './SortField';
+import { getSortToggle, SortField } from './SortField';
 import { SearchForm } from '../../../form/SearchForm';
 import { ViewFieldManageable } from '../types/ViewListGrid.types';
 import { EntityForm } from '../../../config/EntityForm';
@@ -55,10 +55,29 @@ export const HeaderField = ({ viewFields, ...props }: ViewHeaderFieldProps) => {
           );
           const disableHeaderFilter = isQuickSearchField && isQuickSearchActive;
 
+          const sortToggle = isTrue(sortable)
+            ? getSortToggle(field.name, props.searchForm, props.onChangeSearchForm)
+            : undefined;
+
           return (
             <th key={`th_${index}`} className={cellClass}>
-              <div className={`w-full min-w-[40px] flex items-center ${alignClassName}`}>
-                <span>{field.viewLabel(t)}</span>
+              <div
+                className={`w-full min-w-[40px] flex items-center ${alignClassName} ${
+                  isTrue(sortable) ? sortableClass : ''
+                }`}
+              >
+                {sortToggle ? (
+                  <button
+                    type="button"
+                    className="inline bg-transparent border-0 p-0 m-0 font-inherit text-inherit cursor-pointer"
+                    title={sortToggle.ariaLabel}
+                    onClick={() => sortToggle.toggle()}
+                  >
+                    {field.viewLabel(t)}
+                  </button>
+                ) : (
+                  <span>{field.viewLabel(t)}</span>
+                )}
                 {isTrue(sortable) && (
                   <span className={`inline-flex items-center ${sortIconClass}`}>
                     <SortField
