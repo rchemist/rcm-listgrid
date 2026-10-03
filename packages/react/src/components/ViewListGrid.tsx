@@ -321,6 +321,7 @@ function AdvancedFieldSelector({
   onSelectAll,
   onDeselectAll,
 }: AdvancedFieldSelectorProps) {
+  const labels = getLabels();
   const [searchQuery, setSearchQuery] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const filteredFields = useMemo(() => {
@@ -346,7 +347,7 @@ function AdvancedFieldSelector({
       >
         <div className="rcm-field-selector-header-left">
           <span className="rcm-text" data-weight="medium">
-            검색 필드 선택
+            {labels.advancedSearchFieldSelector}
           </span>
           <span className="rcm-badge" data-color="primary" data-size="sm">
             {selectedCount}/{availableFields.length}
@@ -355,14 +356,14 @@ function AdvancedFieldSelector({
         <div className="rcm-field-selector-header-right">
           {!isExpanded && selectedCount > 0 && (
             <span className="rcm-text" data-size="xs" data-tone="muted">
-              {selectedCount}개 선택됨
+              {labels.advancedSearchSelectedCount(selectedCount)}
             </span>
           )}
           <button
             type="button"
             className="rcm-icon-btn"
             data-size="sm"
-            aria-label={isExpanded ? '접기' : '펼치기'}
+            aria-label={isExpanded ? labels.advancedSearchCollapse : labels.advancedSearchExpand}
           >
             <svg
               className={`rcm-icon ${isExpanded ? 'rcm-rotate-180' : ''}`}
@@ -405,7 +406,7 @@ function AdvancedFieldSelector({
               </svg>
               <input
                 type="text"
-                placeholder="필드 검색..."
+                placeholder={labels.advancedSearchFieldSearchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 className="rcm-input"
@@ -419,7 +420,7 @@ function AdvancedFieldSelector({
               data-variant="ghost"
               data-size="sm"
             >
-              전체 선택
+              {labels.advancedSearchSelectAll}
             </button>
             <button
               type="button"
@@ -428,7 +429,7 @@ function AdvancedFieldSelector({
               data-variant="ghost"
               data-size="sm"
             >
-              전체 해제
+              {labels.advancedSearchDeselectAll}
             </button>
           </div>
 
@@ -473,7 +474,7 @@ function AdvancedFieldSelector({
 
             {filteredFields.length === 0 && (
               <span className="rcm-text rcm-field-selector-empty" data-tone="muted">
-                검색 결과가 없습니다
+                {labels.advancedSearchNoResults}
               </span>
             )}
           </div>
@@ -1089,14 +1090,18 @@ export function ViewListGrid({
                   {labels.advancedSearchToggle}
                 </span>
                 <span className="rcm-adv-search-count">
-                  {displayedAdvancedFilterFields.length}개 필드
+                  {labels.advancedSearchFieldCount(displayedAdvancedFilterFields.length)}
                 </span>
               </div>
               <div className="rcm-adv-search-header-right">
                 <button
                   type="button"
                   className="rcm-adv-search-view-toggle"
-                  title={advancedSearchGridView ? '리스트 뷰' : '그리드 뷰'}
+                  title={
+                    advancedSearchGridView
+                      ? labels.advancedSearchListView
+                      : labels.advancedSearchGridView
+                  }
                   onClick={() => setAdvancedSearchGridView((gridView) => !gridView)}
                 >
                   <svg
@@ -1208,13 +1213,13 @@ export function ViewListGrid({
               </div>
             ) : (
               <div className="rcm-adv-search-empty">
-                <p className="rcm-adv-search-empty-text">검색할 필드를 선택해주세요</p>
+                <p className="rcm-adv-search-empty-text">{labels.advancedSearchEmptyPrompt}</p>
                 <button
                   type="button"
                   onClick={selectAllAdvancedFilterFields}
                   className="rcm-adv-search-empty-action"
                 >
-                  전체 필드 선택
+                  {labels.advancedSearchSelectAllFields}
                 </button>
               </div>
             )}
@@ -1401,7 +1406,7 @@ export function ViewListGrid({
                                     <button
                                       type="button"
                                       className="rcm-icon-btn"
-                                      aria-label={`${c.header} 필터 닫기`}
+                                      aria-label={labels.columnFilterCloseAria(c.header)}
                                       onClick={() => setOpenColumnFilter(undefined)}
                                     >
                                       <svg

@@ -65,6 +65,8 @@ export { isPermitted, extractPermissions, mergeRequiredPermissions } from './per
 // --- validation contract ---
 export type { Validation } from './validation';
 export { ValidateResult, ValidationItem } from './validation';
+export { configureRequiredMessage, defaultRequiredMessage, requiredMessage } from './util/korean';
+export type { RequiredMessageFormatter } from './util/korean';
 
 // --- validations catalog (concrete validations; transplanted from
 // src/listgrid/validations/*.ts 0.3.x under the P2 characterization oracle) ---

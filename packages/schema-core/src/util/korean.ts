@@ -17,7 +17,21 @@ export function koreanTopicParticle(word: string): string {
   return (last - 0xac00) % 28 !== 0 ? '은' : '는';
 }
 
-/** The required-blank message. */
-export function requiredMessage(label: string): string {
+export type RequiredMessageFormatter = (label: string) => string;
+
+/** The default required-blank message retained for hosts that do not configure labels. */
+export function defaultRequiredMessage(label: string): string {
   return `${label}${koreanTopicParticle(label)} 필수 값입니다.`;
+}
+
+let requiredMessageFormatter: RequiredMessageFormatter = defaultRequiredMessage;
+
+/** Install the host's locale-aware required-field message formatter. */
+export function configureRequiredMessage(formatter: RequiredMessageFormatter): void {
+  requiredMessageFormatter = formatter;
+}
+
+/** The active required-blank message. */
+export function requiredMessage(label: string): string {
+  return requiredMessageFormatter(label);
 }

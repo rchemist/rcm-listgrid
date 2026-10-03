@@ -2,6 +2,8 @@
 // copy. Components read it during render so a host can configure labels once
 // at app bootstrap without taking on a provider dependency.
 
+import { configureRequiredMessage, defaultRequiredMessage } from '@listgrid/schema-core';
+
 export interface Labels {
   save: string;
   delete: string;
@@ -33,6 +35,21 @@ export interface Labels {
   errorSummaryCollapsedTitle: string;
   errorSummaryExpandedTitle: string;
   errorSummaryCount: (n: number) => string;
+  advancedSearchFieldCount: (n: number) => string;
+  advancedSearchFieldSelector: string;
+  advancedSearchSelectedCount: (n: number) => string;
+  advancedSearchCollapse: string;
+  advancedSearchExpand: string;
+  advancedSearchFieldSearchPlaceholder: string;
+  advancedSearchSelectAll: string;
+  advancedSearchDeselectAll: string;
+  advancedSearchNoResults: string;
+  advancedSearchListView: string;
+  advancedSearchGridView: string;
+  advancedSearchEmptyPrompt: string;
+  advancedSearchSelectAllFields: string;
+  columnFilterCloseAria: (name: string) => string;
+  requiredMessage: (label: string) => string;
   rowNumberHeader: string;
   paginationPrev: string;
   paginationNext: string;
@@ -70,6 +87,21 @@ const defaults: Labels = {
   errorSummaryCollapsedTitle: '작성하신 정보에 누락 또는 오류가 있습니다.',
   errorSummaryExpandedTitle: '누락(오류) 정보 목록을 확인해 주세요.',
   errorSummaryCount: (n) => `${n}개 오류`,
+  advancedSearchFieldCount: (n) => `${n}개 필드`,
+  advancedSearchFieldSelector: '검색 필드 선택',
+  advancedSearchSelectedCount: (n) => `${n}개 선택됨`,
+  advancedSearchCollapse: '접기',
+  advancedSearchExpand: '펼치기',
+  advancedSearchFieldSearchPlaceholder: '필드 검색...',
+  advancedSearchSelectAll: '전체 선택',
+  advancedSearchDeselectAll: '전체 해제',
+  advancedSearchNoResults: '검색 결과가 없습니다',
+  advancedSearchListView: '리스트 뷰',
+  advancedSearchGridView: '그리드 뷰',
+  advancedSearchEmptyPrompt: '검색할 필드를 선택해주세요',
+  advancedSearchSelectAllFields: '전체 필드 선택',
+  columnFilterCloseAria: (name) => `${name} 필터 닫기`,
+  requiredMessage: defaultRequiredMessage,
   rowNumberHeader: 'No.',
   paginationPrev: 'Prev',
   paginationNext: 'Next',
@@ -80,6 +112,9 @@ let registry: Labels = { ...defaults };
 /** Install label overrides. Merges with the current catalog. */
 export function configureLabels(config: Partial<Labels>): void {
   registry = { ...registry, ...config };
+  if (config.requiredMessage !== undefined) {
+    configureRequiredMessage(config.requiredMessage);
+  }
 }
 
 /** The active label catalog — React components read this during render. */
