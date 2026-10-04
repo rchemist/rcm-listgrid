@@ -11,7 +11,8 @@ permissions:
 
 jobs:
   publish:
-    runs-on: [self-hosted, Linux, ARM64, s2]
+    # npm --provenance requires a GitHub-hosted runner (E422 on self-hosted) — CI stays on s2.
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
