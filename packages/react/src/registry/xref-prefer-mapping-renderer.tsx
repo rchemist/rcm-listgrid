@@ -13,6 +13,7 @@ import {
   SearchForm,
 } from '@listgrid/schema-core';
 import { createFormStore, createListStore, type ListStoreState } from '@listgrid/state';
+import { getLabels } from '../labels';
 import { useUI } from '../providers/ui';
 import { useAdapter } from '../providers/adapter';
 import { useFieldValue, useFormStore } from '../providers/form-store';
@@ -250,7 +251,7 @@ export function XrefPreferMappingRenderer({ field, name, readOnly }: FieldRender
       {ids.length === 0 ? (
         <div data-xref-empty>매핑된 항목이 없습니다.</div>
       ) : displayError ? (
-        <div role="alert">목록 필터를 불러오지 못했습니다.</div>
+        <div role="alert">{getLabels().pickerFilterLoadFailed}</div>
       ) : (
         displayStore && (
           <ViewListGrid

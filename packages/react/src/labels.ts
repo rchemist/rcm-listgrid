@@ -53,6 +53,11 @@ export interface Labels {
   rowNumberHeader: string;
   paginationPrev: string;
   paginationNext: string;
+  pickerModalTitle: (label: string) => string;
+  noSelection: string;
+  pickerOpenButton: string;
+  pickerSelectButton: string;
+  pickerFilterLoadFailed: string;
 }
 
 const defaults: Labels = {
@@ -105,6 +110,11 @@ const defaults: Labels = {
   rowNumberHeader: 'No.',
   paginationPrev: 'Prev',
   paginationNext: 'Next',
+  pickerModalTitle: (label) => `${label} 선택`,
+  noSelection: '(선택 안 됨)',
+  pickerOpenButton: '찾기',
+  pickerSelectButton: '선택',
+  pickerFilterLoadFailed: '목록 필터를 불러오지 못했습니다.',
 };
 
 let registry: Labels = { ...defaults };

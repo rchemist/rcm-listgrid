@@ -3,6 +3,7 @@ import type { StoreApi } from 'zustand';
 import type { ManyToOneField } from '@listgrid/schema-core';
 import { SearchForm } from '@listgrid/schema-core';
 import { createListStore, type ListStoreState } from '@listgrid/state';
+import { getLabels } from '../labels';
 import { useUI } from '../providers/ui';
 import { useAdapter, useReferenceResolver } from '../providers/adapter';
 import { useFieldValue, useFormStore } from '../providers/form-store';
@@ -110,6 +111,7 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
     };
   }, [value, resolveReference, target, labelField]);
 
+  const pickerTitleLabel = typeof field.getLabel() === 'string' ? String(field.getLabel()) : name;
   const display = resolvedLabel ?? labelOf(value, labelField);
 
   // when config.filter exists, the picker MUST wait for the filtered store
@@ -122,15 +124,19 @@ export function ManyToOneRenderer({ field, name, readOnly }: FieldRendererCompon
   return (
     <span data-field="manyToOne">
       <span className="rcm-m2o-value" data-m2o-value={name} data-empty={display ? undefined : ''}>
-        {display || '(선택 안 됨)'}
+        {display || getLabels().noSelection}
       </span>{' '}
       {!readOnly && (
         <Button type="button" onClick={() => setOpen(true)}>
-          찾기
+          {getLabels().pickerOpenButton}
         </Button>
       )}
-      <Modal open={open} onClose={() => setOpen(false)} title={`${labelField} 선택`}>
-        {open && filterError && <div role="alert">목록 필터를 불러오지 못했습니다.</div>}
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={getLabels().pickerModalTitle(pickerTitleLabel)}
+      >
+        {open && filterError && <div role="alert">{getLabels().pickerFilterLoadFailed}</div>}
         {open && !filterError && activeStore && (
           <ViewListGrid
             entityForm={target}

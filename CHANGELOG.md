@@ -2,6 +2,18 @@
 
 이 파일은 `@rchemist/listgrid` 의 공개된 변경 이력을 기록합니다.
 
+## [0.5.16] - 2026-10-06
+
+### Added
+
+- 참조 선택(many-to-one·xref) 렌더러의 화면 문구 — 찾기 모달 제목(`pickerModalTitle(label)`), 미선택 표시
+  (`noSelection`), 찾기/선택 버튼(`pickerOpenButton`·`pickerSelectButton`), 목록 필터 로드 실패 안내
+  (`pickerFilterLoadFailed`) — 를 `configureLabels` 로 주입할 수 있게 했다 (egov-cms#532).
+
+### Fixed
+
+- many-to-one 찾기 모달 제목이 필드 라벨 대신 라벨 필드 키(예: `name 선택`)를 표시하던 결함 (egov-cms#532).
+
 ## [0.5.15] - 2026-10-04
 
 ### Added

@@ -3,6 +3,7 @@ import type { StoreApi } from 'zustand';
 import type { FilterItem, XrefMappingField, XrefMappingValue } from '@listgrid/schema-core';
 import { SearchForm } from '@listgrid/schema-core';
 import { createListStore, type ListStoreState } from '@listgrid/state';
+import { getLabels } from '../labels';
 import { useUI } from '../providers/ui';
 import { useAdapter } from '../providers/adapter';
 import { useFieldValue, useFormStore } from '../providers/form-store';
@@ -170,7 +171,7 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
       {mapped.length === 0 ? (
         <div data-xref-empty>매핑된 항목이 없습니다.</div>
       ) : displayError ? (
-        <div role="alert">목록 필터를 불러오지 못했습니다.</div>
+        <div role="alert">{getLabels().pickerFilterLoadFailed}</div>
       ) : (
         displayStore && (
           <ViewListGrid
@@ -193,11 +194,15 @@ export function XrefMappingRenderer({ field, name, readOnly }: FieldRendererComp
       )}
       {!readOnly && (
         <Button type="button" onClick={() => setPickerOpen(true)}>
-          선택
+          {getLabels().pickerSelectButton}
         </Button>
       )}
-      <Modal open={pickerOpen} onClose={() => setPickerOpen(false)} title={`${label} 선택`}>
-        {pickerOpen && pickerError && <div role="alert">목록 필터를 불러오지 못했습니다.</div>}
+      <Modal
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        title={getLabels().pickerModalTitle(label)}
+      >
+        {pickerOpen && pickerError && <div role="alert">{getLabels().pickerFilterLoadFailed}</div>}
         {pickerOpen && !pickerError && pickerStore && (
           <ViewListGrid
             entityForm={target}
