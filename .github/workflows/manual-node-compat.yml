@@ -1,0 +1,62 @@
+name: Manual — Node compatibility
+
+# Manual lane — harness docs/integrations/ci-pipeline.md §2 (workflow_dispatch only).
+# The check lane runs on Node 22 only; this reproduces the light part of the
+# former Node 20 matrix leg (engines.node >= 20) on request: typecheck, build,
+# package integrity and load smoke. Unit tests stay in the check lane
+# (impacted) and scripts/ci/unit-full.sh (local).
+
+on:
+  workflow_dispatch:
+    inputs:
+      node-version:
+        description: Node.js major version to verify
+        required: true
+        default: '20'
+        type: string
+
+concurrency:
+  group: manual-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  node-compat:
+    runs-on: [self-hosted, ci-light]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node ${{ inputs.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - name: Install
+        run: npm ci --legacy-peer-deps
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Type check (v0.4 packages — composite tsc -b)
+        run: npm run typecheck:packages
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify build output (dual ESM+CJS + styles)
+        run: |
+          test -f dist/index.js
+          test -f dist/index.cjs
+          test -f dist/index.d.ts
+          test -f dist/index.d.cts
+          test -f dist/styles.css
+
+      - name: publint (package.json / exports integrity)
+        run: npx publint
+
+      - name: Are the types wrong? (attw)
+        run: npm run check:exports
+
+      - name: Load smoke (npm pack → install → require/import published exports)
+        run: bash scripts/smoke-load.sh
