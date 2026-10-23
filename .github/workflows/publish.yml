@@ -1,9 +1,19 @@
 name: Publish
 
+# Release lane — harness docs/integrations/ci-pipeline.md §2 (tags v*).
+# No workflow_dispatch on purpose: the dist-tag is derived from the tag name,
+# so a dispatch from a branch ref would publish under the wrong tag.
+
 on:
   push:
     tags:
       - 'v*'
+    # GitHub does not evaluate path filters on tag pushes; kept for the lane shape (C9).
+    paths-ignore: ['**.md', 'docs/**', 'documents/**', '.dev/**', 'LICENSE']
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   id-token: write
@@ -11,8 +21,10 @@ permissions:
 
 jobs:
   publish:
-    # npm --provenance requires a GitHub-hosted runner (E422 on self-hosted) — CI stays on s2.
+    # npm --provenance requires a GitHub-hosted runner (E422 on self-hosted).
+    # Zero mesh dependency (public npm registry only), so ubuntu-latest is allowed (§4).
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
