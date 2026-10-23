@@ -1,25 +1,37 @@
 name: CI
 
+# Check lane — harness docs/integrations/ci-pipeline.md §2.
+# push main + pull_request, light checks on the impacted scope only, target
+# wall ≤ 10 min. Heavy runs never execute on CI (§1, 2026-10-23): the former
+# `e2e` job and the full unit suite + coverage floors live in scripts/ci/
+# (e2e.sh, unit-full.sh) and run locally by the integration-stage owner.
+
 on:
   push:
-    branches: [main, v0.4]
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'documents/**', '.dev/**', 'LICENSE']
   pull_request:
-    branches: [main, v0.4]
+    branches: [main]
+    paths-ignore: ['**.md', 'docs/**', 'documents/**', '.dev/**', 'LICENSE']
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
-    runs-on: [self-hosted, Linux, ARM64, s2]
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [20, 22]
+    runs-on: [self-hosted, ci-light]
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          # scripts/ci/test-impacted.sh diffs against the PR base / push `before`.
+          fetch-depth: 0
 
-      - name: Setup Node ${{ matrix.node-version }}
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
           cache: npm
 
       - name: Install
@@ -43,8 +55,10 @@ jobs:
       - name: Format check
         run: npm run format:check
 
-      - name: Test + coverage (enforces vitest.config.ts thresholds)
-        run: npm run test:coverage
+      - name: Unit tests (impacted scope — vitest related, ci-pipeline.md §5)
+        env:
+          IMPACT_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: bash scripts/ci/test-impacted.sh
 
       - name: Build
         run: npm run build
@@ -70,32 +84,3 @@ jobs:
 
       - name: Load smoke (npm pack → install → require/import published exports)
         run: bash scripts/smoke-load.sh
-
-  e2e:
-    # v0.4 vertical-slice acceptance — drives apps/sample (new @listgrid/*
-    # engine + mock RCM backend) in a real browser (documents/plans/
-    # e2e-parity-vertical-slice.md). Runs once (not per node matrix).
-    runs-on: [self-hosted, Linux, ARM64, s2]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install
-        run: npm ci --legacy-peer-deps
-
-      - name: Install Playwright browser (chromium)
-        run: npx playwright install chromium
-
-      - name: E2E (Playwright — College / Subject / Professor)
-        run: npm run test:e2e
-
-      - name: EntityForm proof persistence (real Next restarts)
-        run: npm run test:e2e:persistence
-
-      - name: EntityForm proof production smoke (next start + Chromium)
-        run: npm run test:sample-production-smoke
