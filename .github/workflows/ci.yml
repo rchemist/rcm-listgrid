@@ -1,4 +1,5 @@
 name: CI
+# ci-lint: allow C11 — 공개 리포라 비공개 rchemist/harness 의 ci-gate 액션을 쓸 수 없다(action not found). main push 재검증을 유지한다.
 
 # Check lane — harness docs/integrations/ci-pipeline.md §2.
 # push main + pull_request, light checks on the impacted scope only, target
@@ -19,27 +20,10 @@ concurrency:
   group: check-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  actions: read
-  checks: read
-  contents: read
-  pull-requests: read
-
 jobs:
-  gate:
-    # Draft PRs and main pushes whose tree a PR run already verified skip the heavy jobs
-    # (harness ci-pipeline §2-1, C11/C12). Anything unproven runs.
-    runs-on: [self-hosted, ci-light]
-    timeout-minutes: 5
-    outputs:
-      run: ${{ steps.gate.outputs.run }}
-    steps:
-      - id: gate
-        uses: rchemist/harness/actions/ci-gate@main
-
   quality:
-    needs: gate
-    if: needs.gate.outputs.run == 'true'
+    # 드래프트 PR 은 건너뛰고 ready_for_review 에서 돈다(C12).
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: [self-hosted, ci-light]
     timeout-minutes: 20
     steps:
