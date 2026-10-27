@@ -119,12 +119,13 @@ const rootBarrel = countBarrelSymbols('packages/react/src/index.ts');
 const schemaBarrel = countBarrelSymbols('packages/schema-core/src/index.ts');
 
 // Thresholds recomputed 2026-07-11 (pre-W4) against the final design inventory —
-// see spec §10-A for the derivation (EntityForm 53→55, /schema 186→190, root ~55→120).
+// see spec §10-A for the derivation (EntityForm 53→55, /schema 186→190, root ~55→120);
+// /schema re-derived 190→194 on 2026-10-28 (v0.5.15 required-message API, +4 symbols).
 // The counting RULE is fixed; thresholds track the final inventory + small margin.
 const surfaces = [
   { label: 'EntityForm', ...entityForm, threshold: 55 },
   { label: 'root', ...rootBarrel, threshold: 120 },
-  { label: '/schema', ...schemaBarrel, threshold: 190 },
+  { label: '/schema', ...schemaBarrel, threshold: 194 },
 ];
 
 let ok = true;

@@ -33,7 +33,7 @@
 | `/presets` `/presets/rcm` | presets-* | 제네릭/도메인 필드 프리셋(감사필드 헬퍼 등) | (없음) |
 
 - **headless 계약**: `/schema`+`/state`만 import → React/UI peer 0으로 빌드(테스트 고정). showcase 사례(§감사 6-2)의 1급화.
-- sideEffects:false·ESM-first(ADR-0001)·`import type` 강제. 공개 심볼 수 CI 계수(§10 게이트 2의 계수 규칙): 루트 ≤120, `/schema` ≤190 (임계값 도출은 §10-A).
+- sideEffects:false·ESM-first(ADR-0001)·`import type` 강제. 공개 심볼 수 CI 계수(§10 게이트 2의 계수 규칙): 루트 ≤120, `/schema` ≤194 (임계값 도출은 §10-A).
 - 멀티테넌트류 요청 컨텍스트(§감사 6-4): `RcmAdapterOptions.headers`를 `Record<string,string> | () => Record<string,string>`로 — 헤더 지연 평가가 1급.
 - **SSR 프록시 seam(GX-4)**: 브라우저→백엔드 직접 호출 차단(0.3.x `serverProxy`)의 재현점은 `RcmAdapterOptions.{baseUrl, fetch}` — `baseUrl`=same-origin 프록시 경로 또는 `fetch` 주입 URL 재작성. 프록시 route handler는 host 소유(0.3과 동일). 상세·워크드 예제=[ADR-0005 부록 A](../adr/ADR-0005-backend-adapter-contract.md).
 
@@ -378,7 +378,7 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 ## 10. 검증 게이트 (설계→구현 공통)
 
 1. **커버리지**: §8 CAP-01~29 빈 행 0 — 각 구현 태스크는 소화하는 CAP-ID를 명시하고, wave 종료 게이트에서 매트릭스 대조(전 ID 소화 or 명시 이월). 누락 검출은 기억이 아니라 표 대조.
-2. **표면 계수(규칙 고정 — 임계값은 §10-A 최종 인벤토리 기준)**: *atomic public member* = public 인스턴스 메서드·getter·public 프로퍼티 각 1(생성자 포함, 묶음 행은 전개 계수). **EntityForm ≤55 · 루트 배럴 ≤120 · `/schema` ≤190** (CI: `scripts/count-public-surface.mjs`). 계수 **규칙**은 고정 — 숫자 맞추려 규칙 완화 금지, 표면을 줄여라. **임계값**은 §10-A 최종 설계 인벤토리+소폭 마진에서 도출(원 45/180은 W2 훅·전 타입 인벤토리 설계 이전 추정이라 최종 설계에 미달했던 것을 정정 — 임의 완화 아님, 재산정 2026-07-11). **wave-entry 규칙(W5~W7)**: 각 wave 브리핑 pass는 신규 심볼을 §10-A 표에 추가하고, 합계가 임계값에 근접/초과하면 같은 entry 커밋에서 표 근거와 함께 임계값을 재산정한다.
+2. **표면 계수(규칙 고정 — 임계값은 §10-A 최종 인벤토리 기준)**: *atomic public member* = public 인스턴스 메서드·getter·public 프로퍼티 각 1(생성자 포함, 묶음 행은 전개 계수). **EntityForm ≤55 · 루트 배럴 ≤120 · `/schema` ≤194** (CI: `scripts/count-public-surface.mjs`). 계수 **규칙**은 고정 — 숫자 맞추려 규칙 완화 금지, 표면을 줄여라. **임계값**은 §10-A 최종 설계 인벤토리+소폭 마진에서 도출(원 45/180은 W2 훅·전 타입 인벤토리 설계 이전 추정이라 최종 설계에 미달했던 것을 정정 — 임의 완화 아님, 재산정 2026-07-11). **wave-entry 규칙(W5~W7)**: 각 wave 브리핑 pass는 신규 심볼을 §10-A 표에 추가하고, 합계가 임계값에 근접/초과하면 같은 entry 커밋에서 표 근거와 함께 임계값을 재산정한다.
 3. **법칙 준수**: L1~L8 — 특히 `set*` 0개+2단계 동명 0개(EntityForm), 훅 실행 뷰 코드 0(L7), camelCase(L2), 조건부 타입 단일(`ConditionalBooleanValue`, L5).
 4. **발명 금지 게이트**(harness team-conventions §설계 산출물): 구현 브리핑은 본 스펙 §번호를 인용해야 하며, 스펙이 결정하지 않은 설계 판단이 나오면 구현하지 말고 §Open Questions/needs_decision으로 — 스펙 개정이 먼저다.
 5. **headless 빌드**: `/schema`+`/state`만 import하는 fixture가 React 없이 tsc+실행 green.
@@ -394,7 +394,7 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 - + **엔진 내부 `get*Handlers` ×8**(§3.3 — 배럴 비공개이나 public 메서드라 기계 계수됨; 훅당 1 자동 파생).
 - = 53. 마진 +2 = wave 내 with*/get* 비대칭 중간상태 흡수. **W4 궤적**: 41(현재)→W4-2 steps +2→W4-4 revision +2→W4-5 meta +2 = 47, 이후 §3.2 질의(hasField/getTab/hasTab/getTabFields)+§3.5 = 53.
 
-**`/schema` 배럴 최종 = 188 → 임계값 190 (+2 마진)**
+**`/schema` 배럴 최종 = 192 → 임계값 194 (+2 마진)**
 
 | wave | 신규 배럴 타입 | Δ | 누계 |
 |---|---|---|---|
@@ -403,7 +403,8 @@ ViewEntityForm의 Save/Delete 버튼과 headless 호스트가 **같은 controlle
 | W5 | `FieldListConfig` · `FieldFilterConfig`(§5.1) | +2 | 184 |
 | W6 | `DataFieldSpec` · `DataTransferSpec`(§3.5 W6-entry 확정) | +2 | 186 |
 | W7 | 패키징 — schema 타입 0 | 0 | 186 |
-| GX-1 | `SearchForm.withFilter` · `withFilterIgnoreDuplicate` 복원(rcm-backend-framework 정합) + `FilterGroups`/`LogicalOperator` 타입 | +2 | **188** |
+| GX-1 | `SearchForm.withFilter` · `withFilterIgnoreDuplicate` 복원(rcm-backend-framework 정합) + `FilterGroups`/`LogicalOperator` 타입 | +2 | 188 |
+| v0.5.15 (egov-cms#502) | 필수값 메시지 주입 API: `configureRequiredMessage` · `defaultRequiredMessage` · `requiredMessage` · `RequiredMessageFormatter` (wave-entry 규칙에 따라 같은 변경에서 임계값 재산정 — 누락되어 main CI가 192/190으로 실패했던 것을 정정) | +4 | **192** |
 
 - 마진 +4 = W5/W6 미분해 세부 타입(필터 operator 유니온·list align/width 헬퍼·DataTransfer 하위 spec 등). W5/W6 entry pass에서 실측이 190 근접 시 위 wave-entry 규칙으로 재산정.
 
