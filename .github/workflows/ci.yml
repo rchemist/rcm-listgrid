@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths-ignore: ['**.md', 'docs/**', 'documents/**', '.dev/**', 'LICENSE']
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
     paths-ignore: ['**.md', 'docs/**', 'documents/**', '.dev/**', 'LICENSE']
 
@@ -18,8 +19,27 @@ concurrency:
   group: check-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  actions: read
+  checks: read
+  contents: read
+  pull-requests: read
+
 jobs:
+  gate:
+    # Draft PRs and main pushes whose tree a PR run already verified skip the heavy jobs
+    # (harness ci-pipeline §2-1, C11/C12). Anything unproven runs.
+    runs-on: [self-hosted, ci-light]
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+    steps:
+      - id: gate
+        uses: rchemist/harness/actions/ci-gate@main
+
   quality:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: [self-hosted, ci-light]
     timeout-minutes: 20
     steps:
