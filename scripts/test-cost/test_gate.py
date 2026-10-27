@@ -416,6 +416,11 @@ def main():
     interrupted = None
     docker = None
     start = time.monotonic()
+    # Repository lifecycle owners may need 10s to stop descendants plus 90s
+    # for verified Docker cleanup. Admission stays locked until this grace ends.
+    stop_grace = number("TEST_GATE_STOP_GRACE_SECONDS", 120, 0.05)
+    if stop_grace > 300:
+        raise GateError("TEST_GATE_STOP_GRACE_SECONDS must be <= 300")
 
     def interrupt(signum, frame):
         nonlocal interrupted
@@ -449,7 +454,7 @@ def main():
             key = hashlib.sha256(json.dumps([identity, revision, str(Path.cwd().resolve().relative_to(root)), normalized], sort_keys=True).encode()).hexdigest()
             record_path = records / (key + ".json")
             canonical_repo = str(Path(identity).parent) if Path(identity).name == ".git" else root
-            details = dict(repo=canonical_repo, worktree=root, revision=revision, command=command, full=full, full_reason=reason, rerun_reason=rerun, key=key, pid=os.getpid(), token=token)
+            details = dict(repo=canonical_repo, worktree=root, revision=revision, command=command, full=full, full_reason=reason, rerun_reason=rerun, key=key, pid=os.getpid(), token=token, stop_grace_seconds=stop_grace)
             if record_path.exists() and not rerun:
                 append_log(log, dict(details, event="denied", time=time.time(), reason="repeat requires TEST_GATE_RERUN"))
                 raise GateError("same revision and command already attempted; rerun only the failed package, or set TEST_GATE_RERUN=<reason>")
@@ -476,7 +481,7 @@ def main():
                 now = time.monotonic()
                 if interrupted:
                     signal_time = signal_time or now
-                    if now - signal_time >= 5:
+                    if now - signal_time >= stop_grace:
                         try:
                             os.killpg(child.pid, signal.SIGKILL)
                         except ProcessLookupError:
@@ -495,14 +500,16 @@ def main():
             # Background grandchildren must not keep creating resources while cleanup runs.
             try:
                 os.killpg(child.pid, signal.SIGTERM)
-                for _ in range(20):
+                group_deadline = (signal_time if signal_time is not None else time.monotonic()) + stop_grace
+                while True:
                     try:
                         os.killpg(child.pid, 0)
                     except ProcessLookupError:
                         break
+                    if time.monotonic() >= group_deadline:
+                        os.killpg(child.pid, signal.SIGKILL)
+                        break
                     time.sleep(0.05)
-                else:
-                    os.killpg(child.pid, signal.SIGKILL)
                 if rc == 0:
                     rc = 70
                 say("command left background processes; terminated owned process group")
