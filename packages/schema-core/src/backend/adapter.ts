@@ -5,11 +5,24 @@ import type { SearchForm } from '../search/search-form';
 // in @listgrid/backend-rcm; the store depends only on this interface (dependency
 // inversion — @listgrid/state never imports a transport).
 
+/** How trustworthy the page totals are (CB-05). */
+export type PageTotalRelation = 'exact' | 'unknown';
+
 /** A page of list results (dual-envelope absorbed by the adapter — decision D2). */
 export interface PageResult<T = Record<string, unknown>> {
   content: T[];
   totalElements: number;
   totalPages: number;
+  /**
+   * Cursor backends (CB-05 `@rchemist/listgrid/backend-rcmgo`) report
+   * `'unknown'` — the server returns no total, so `totalElements` carries
+   * 0 and `totalPages` grows one page ahead while `hasMore` is set.
+   * Page backends omit both fields (`'exact'` implied). Additive: readers
+   * that ignore these fields keep their current behavior.
+   */
+  totalRelation?: PageTotalRelation;
+  /** Whether another page follows (cursor backends only). */
+  hasMore?: boolean;
 }
 
 /** Structured error codes (ADR-0005) — replaces 0.3.x string-matching. */
