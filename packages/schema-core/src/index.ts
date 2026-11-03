@@ -270,4 +270,10 @@ export type {
 } from './search/search-form';
 
 // --- backend adapter contract (ADR-0005; impls in @listgrid/backend-*) ---
-export type { PageResult, BackendErrorCode, BackendError, BackendAdapter } from './backend/adapter';
+export type {
+  PageResult,
+  PageTotalRelation,
+  BackendErrorCode,
+  BackendError,
+  BackendAdapter,
+} from './backend/adapter';

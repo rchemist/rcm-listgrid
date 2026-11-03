@@ -83,6 +83,16 @@
         "default": "./dist/backend-rcm.cjs"
       }
     },
+    "./backend-rcmgo": {
+      "import": {
+        "types": "./dist/backend-rcmgo.d.ts",
+        "default": "./dist/backend-rcmgo.js"
+      },
+      "require": {
+        "types": "./dist/backend-rcmgo.d.cts",
+        "default": "./dist/backend-rcmgo.cjs"
+      }
+    },
     "./next": {
       "import": {
         "types": "./dist/next.d.ts",
@@ -133,6 +143,9 @@
       ],
       "backend-rcm": [
         "./dist/backend-rcm.d.ts"
+      ],
+      "backend-rcmgo": [
+        "./dist/backend-rcmgo.d.ts"
       ],
       "next": [
         "./dist/next.d.ts"
